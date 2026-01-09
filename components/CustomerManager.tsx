@@ -4,6 +4,7 @@ import { UserPlus, Search, Trash2, Pencil, X, Loader2, RefreshCw } from 'lucide-
 import { Customer, PersonType, ServiceOrder } from '../types';
 import { useNotify } from './ToastProvider';
 import { checkDuplicateCustomer } from '../services/validation';
+import { db } from '../services/db';
 
 interface Props {
   customers: Customer[];
@@ -98,7 +99,7 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
 
     const customerData: Customer = {
       ...(newCustomer as Customer),
-      id: editingCustomerId || `CLI-${Date.now().toString().slice(-4)}`,
+      id: editingCustomerId || `CLI-${Date.now().toString()}${Math.random().toString(36).substr(2, 4)}`.toUpperCase(),
       type: personType,
       createdAt: newCustomer.createdAt || new Date().toISOString().split('T')[0]
     };
@@ -121,7 +122,7 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
   );
 
   const inputClass = "w-full bg-slate-50 border border-slate-100 rounded-xl p-3 text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-300";
-  const labelClass = "text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1";
+  const labelClass = "text-[11px] font-bold text-blue-600 uppercase tracking-widest mb-1.5 block ml-1";
 
   return (
     <div className="space-y-6">
@@ -244,7 +245,12 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
                   <td className="px-8 py-4 text-xs text-slate-600 font-bold uppercase">{c.city} - {c.state}</td>
                   <td className="px-8 py-4 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button onClick={() => { setEditingCustomerId(c.id); setNewCustomer(c); setPersonType(c.type); setShowForm(true); }} className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg"><Pencil className="w-4 h-4" /></button>
-                    <button onClick={() => confirm("Excluir?") && setCustomers(p => p.filter(x => x.id !== c.id))} className="p-2 text-rose-400 hover:bg-rose-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
+                    <button onClick={() => {
+                      if (confirm("Deseja realmente excluir este cliente? Esta ação também removerá os dados da nuvem.")) {
+                        setCustomers(p => p.filter(x => x.id !== c.id));
+                        db.remove('customers', c.id);
+                      }
+                    }} className="p-2 text-rose-400 hover:bg-rose-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
                   </td>
                 </tr>
               ))}

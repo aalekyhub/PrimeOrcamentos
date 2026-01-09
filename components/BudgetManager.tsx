@@ -192,17 +192,19 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <div className="flex justify-between items-center mb-2">
-                        <label className="text-[8px] font-black text-slate-500 uppercase tracking-widest ml-1">CLIENTE DESTINATÁRIO</label>
-                        <button onClick={() => setShowFullClientForm(true)} className="text-blue-600 text-[8px] font-black uppercase flex items-center gap-1 hover:underline tracking-widest"><UserPlus className="w-3 h-3" /> NOVO CLIENTE</button>
+                        <label className="text-[12px] font-bold text-blue-600 uppercase">Cliente</label>
+                        <button onClick={() => setShowFullClientForm(true)} className="text-blue-600 text-[10px] font-black uppercase flex items-center gap-1 hover:underline">
+                          <UserPlus className="w-3 h-3" /> Cadastrar Cliente
+                        </button>
                       </div>
-                      <select className="w-full bg-slate-50 border border-slate-100 rounded-xl p-3 text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500" value={selectedCustomerId} onChange={e => setSelectedCustomerId(e.target.value)}>
+                      <select className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-700 outline-none" value={selectedCustomerId} onChange={e => setSelectedCustomerId(e.target.value)}>
                         <option value="">Selecione o cliente...</option>
                         {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                       </select>
                     </div>
                     <div>
-                      <label className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-2 block ml-1">TÍTULO DA PROPOSTA</label>
-                      <input type="text" placeholder="Ex: REFORMA DE PINTURA GERAL" className="w-full bg-slate-50 border border-slate-100 rounded-xl p-3 text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500" value={proposalTitle} onChange={e => setProposalTitle(e.target.value)} />
+                      <label className="text-[12px] font-bold text-blue-600 uppercase mb-2 block">Título da Proposta</label>
+                      <input type="text" placeholder="Ex: Reforma Geral de Ar-Condicionado" className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-700 outline-none" value={proposalTitle} onChange={e => setProposalTitle(e.target.value)} />
                     </div>
                   </div>
                 </div>
@@ -251,17 +253,12 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
                       <div className="md:col-span-6">
-                        <label className="text-[8px] font-black text-slate-400 uppercase mb-1.5 block ml-1">Descrição</label>
-                        <input type="text" className="w-full bg-white border-none rounded-xl p-2.5 text-[11px] font-bold outline-none" value={currentDesc} onChange={e => setCurrentDesc(e.target.value)} />
+                        <label className="text-[12px] font-bold text-blue-600 uppercase mb-2 block">Descrição</label>
+                        <input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs font-bold outline-none" value={currentDesc} onChange={e => setCurrentDesc(e.target.value)} />
                       </div>
-                      <div className="md:col-span-2">
-                        <label className="text-[8px] font-black text-slate-400 uppercase mb-1.5 block text-center">Qtd</label>
-                        <input type="number" className="w-full bg-white border-none rounded-xl p-2.5 text-[11px] font-black text-center outline-none" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} />
-                      </div>
-                      <div className="md:col-span-3">
-                        <label className="text-[8px] font-black text-slate-400 uppercase mb-1.5 block ml-1">Preço (R$)</label>
-                        <input type="number" className="w-full bg-white border-none rounded-xl p-2.5 text-[11px] font-black outline-none" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} />
-                      </div>
+                      <div className="w-24"><label className="text-[12px] font-bold text-blue-600 uppercase mb-2 block text-center">Unit</label><input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs font-black text-center outline-none uppercase" value={currentUnit} onChange={e => setCurrentUnit(e.target.value)} /></div>
+                      <div className="w-24"><label className="text-[12px] font-bold text-blue-600 uppercase mb-2 block text-center">Qtd</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs font-black text-center outline-none" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} /></div>
+                      <div className="w-32"><label className="text-[12px] font-bold text-blue-600 uppercase mb-2 block">Preço (R$)</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs font-black outline-none" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} /></div>
                       <div className="md:col-span-1">
                         <button onClick={handleAddItem} className="bg-blue-600 text-white w-full h-[38px] rounded-lg flex items-center justify-center hover:scale-105 transition-all shadow-xl"><Plus className="w-4 h-4" /></button>
                       </div>

@@ -4,8 +4,8 @@ import { createClient } from '@supabase/supabase-js';
 const SUPABASE_URL = (import.meta as any).env?.VITE_SUPABASE_URL?.trim() || '';
 const SUPABASE_ANON_KEY = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY?.trim() || '';
 
-const supabase = (SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL.startsWith('http')) 
-  ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) 
+const supabase = (SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL.startsWith('http'))
+  ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   : null;
 
 export const db = {
@@ -16,15 +16,15 @@ export const db = {
 
     if (supabase) {
       const tableName = key.replace('serviflow_', '');
-      
+
       try {
         const payload = Array.isArray(data) ? data : [data];
-        
+
         if (payload.length > 0) {
           const { error } = await supabase
             .from(tableName)
             .upsert(payload, { onConflict: 'id' });
-            
+
           if (error) {
             console.error(`[Supabase Error] Tabela: ${tableName}. Erro: ${error.message}`);
             if (error.message.includes('not found')) {
@@ -52,7 +52,7 @@ export const db = {
 
   async syncFromCloud() {
     if (!supabase) return null;
-    
+
     const tables = ['customers', 'catalog', 'orders', 'transactions'];
     const results: any = {};
 
@@ -70,6 +70,26 @@ export const db = {
     } catch (err) {
       console.error("[Cloud Sync] Erro ao baixar dados:", err);
       return null;
+    }
+  },
+
+  async remove(key: string, id: string) {
+    if (supabase) {
+      const tableName = key.replace('serviflow_', '');
+      try {
+        const { error } = await supabase
+          .from(tableName)
+          .delete()
+          .eq('id', id);
+
+        if (error) {
+          console.error(`[Supabase Delete Error] Tabela: ${tableName}. Erro: ${error.message}`);
+        } else {
+          console.log(`[Cloud Sync] Item ${id} removido de ${tableName}.`);
+        }
+      } catch (err) {
+        console.error(`[Delete Error] Falha crítica ao remover item:`, err);
+      }
     }
   }
 };

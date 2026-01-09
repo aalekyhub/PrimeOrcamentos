@@ -141,11 +141,25 @@ const AppContent: React.FC = () => {
     try {
       const cloudData = await db.syncFromCloud();
       if (cloudData) {
+        // Deduplicação de Clientes por Documento
+        if (cloudData.customers) {
+          const uniqueCustomers = Array.from(
+            new Map(cloudData.customers.map((c: Customer) => [c.document.replace(/\D/g, ''), c])).values()
+          ) as Customer[];
+          setCustomers(uniqueCustomers);
+        }
+
+        // Deduplicação de Catálogo por Nome
+        if (cloudData.catalog) {
+          const uniqueServices = Array.from(
+            new Map(cloudData.catalog.map((s: CatalogService) => [s.name.trim().toLowerCase(), s])).values()
+          ) as CatalogService[];
+          setCatalog(uniqueServices);
+        }
+
         if (cloudData.orders) setOrders(cloudData.orders);
-        if (cloudData.customers) setCustomers(cloudData.customers);
-        if (cloudData.catalog) setCatalog(cloudData.catalog);
         if (cloudData.transactions) setTransactions(cloudData.transactions);
-        notify("Sincronização com a nuvem concluída!");
+        notify("Sincronização concluída com auto-limpeza!");
       } else {
         notify("Falha ao baixar dados da nuvem.", "error");
       }

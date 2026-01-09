@@ -4,6 +4,7 @@ import { Trash2, Merge, AlertTriangle, CheckCircle, RefreshCw, Layers } from 'lu
 import { Customer, CatalogService } from '../types';
 import { cleanDocument, formatDocument } from '../services/validation';
 import { useNotify } from './ToastProvider';
+import { db } from '../services/db';
 
 interface Props {
     customers: Customer[];
@@ -50,6 +51,7 @@ const DataCleanup: React.FC<Props> = ({ customers, setCustomers, services, setSe
         const removeIds = group.slice(1).map(c => c.id);
 
         setCustomers(prev => prev.filter(c => !removeIds.includes(c.id)));
+        removeIds.forEach(id => db.remove('customers', id));
         notify(`Clientes mesclados. ${removeIds.length} registros duplicados removidos.`);
     };
 
@@ -60,6 +62,7 @@ const DataCleanup: React.FC<Props> = ({ customers, setCustomers, services, setSe
         const removeIds = group.slice(1).map(s => s.id);
 
         setServices(prev => prev.filter(s => !removeIds.includes(s.id)));
+        removeIds.forEach(id => db.remove('catalog', id));
         notify(`Serviços mesclados. ${removeIds.length} registros duplicados removidos.`);
     };
 
