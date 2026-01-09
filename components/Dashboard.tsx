@@ -2,7 +2,7 @@
 import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { TrendingUp, DollarSign, FileText, Target } from 'lucide-react';
-import { ServiceOrder, Transaction, OrderStatus, UserAccount, CompanyProfile } from '../../types';
+import { ServiceOrder, Transaction, OrderStatus, UserAccount, CompanyProfile } from '../types';
 
 interface DashboardProps {
   stats: {

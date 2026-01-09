@@ -5,7 +5,7 @@ import {
   Type, CheckCircle2, Maximize2, ShieldCheck, Plus, Ruler, X,
   MessageCircle, Download, Database, RefreshCw, AlertTriangle
 } from 'lucide-react';
-import { CompanyProfile, MeasurementUnit } from '../../types';
+import { CompanyProfile, MeasurementUnit } from '../types';
 import { useNotify } from './ToastProvider';
 
 interface Props {

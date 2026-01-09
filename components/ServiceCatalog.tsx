@@ -1,8 +1,9 @@
 
 import React, { useState } from 'react';
 import { Plus, Search, Trash2, Pencil, Briefcase, DollarSign, Tag, X, Scale } from 'lucide-react';
-import { CatalogService, CompanyProfile } from '../../types';
+import { CatalogService, CompanyProfile } from '../types';
 import { useNotify } from './ToastProvider';
+import { checkDuplicateService } from '../services/validation';
 
 interface Props {
   services: CatalogService[];
@@ -29,14 +30,11 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
     e.preventDefault();
     if (!formData.name || formData.basePrice === undefined) return;
 
-    // Verificar duplicidade de nome
-    const isDuplicate = services.some(s =>
-      s.name.trim().toLowerCase() === formData.name?.trim().toLowerCase() &&
-      s.id !== editingService?.id
-    );
+    // Check for duplicate name using centralized service (case-insensitive and trimmed)
+    const duplicate = checkDuplicateService(formData.name || '', services, editingService?.id);
 
-    if (isDuplicate) {
-      notify("Já existe um serviço cadastrado com este nome.", "error");
+    if (duplicate) {
+      notify(`Já existe um serviço cadastrado com este nome: "${duplicate.name}"`, "error");
       return;
     }
 

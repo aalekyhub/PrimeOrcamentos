@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Zap, Lock, Mail, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
-import { UserAccount, CompanyProfile } from '../../types';
+import { UserAccount, CompanyProfile } from '../types';
 
 interface Props {
   onLogin: (user: UserAccount) => void;

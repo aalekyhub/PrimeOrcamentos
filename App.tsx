@@ -2,19 +2,20 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import {
   LayoutDashboard, FileText, Wallet, Target, Search, Menu,
-  Users, Briefcase, ClipboardList, Zap, Settings, Building2, Lock, LogOut, RefreshCw, Cloud, CloudOff
+  Users, Briefcase, ClipboardList, Zap, Settings, Building2, Lock, LogOut, RefreshCw, Cloud, CloudOff, Database
 } from 'lucide-react';
-import Dashboard from './components/components/Dashboard';
-import BudgetManager from './components/components/BudgetManager';
-import ServiceOrderManager from './components/components/ServiceOrderManager';
-import FinancialControl from './components/components/FinancialControl';
-import CustomerManager from './components/components/CustomerManager';
-import ServiceCatalog from './components/components/ServiceCatalog';
-import CompanySettings from './components/components/CompanySettings';
-import BudgetSearch from './components/components/BudgetSearch';
-import UserManager from './components/components/UserManager';
-import Login from './components/components/Login';
-import { ToastProvider, useNotify } from './components/components/ToastProvider';
+import Dashboard from './components/Dashboard';
+import BudgetManager from './components/BudgetManager';
+import ServiceOrderManager from './components/ServiceOrderManager';
+import FinancialControl from './components/FinancialControl';
+import CustomerManager from './components/CustomerManager';
+import ServiceCatalog from './components/ServiceCatalog';
+import CompanySettings from './components/CompanySettings';
+import BudgetSearch from './components/BudgetSearch';
+import UserManager from './components/UserManager';
+import Login from './components/Login';
+import DataCleanup from './components/DataCleanup';
+import { ToastProvider, useNotify } from './components/ToastProvider';
 import { ServiceOrder, Transaction, OrderStatus, Customer, CatalogService, CompanyProfile, UserAccount } from './types';
 import { db } from './services/db';
 
@@ -188,6 +189,7 @@ const AppContent: React.FC = () => {
     { id: 'orders', label: 'O.S.', icon: ClipboardList },
     { id: 'financials', label: 'Financeiro', icon: Wallet },
     { id: 'search', label: 'Consultar', icon: Search },
+    { id: 'audit', label: 'Auditoria', icon: Database },
     { id: 'users', label: 'Usuários', icon: Lock },
     { id: 'settings', label: 'Empresa', icon: Settings },
   ].filter(item => currentUser.role === 'admin' || currentUser.permissions?.includes(item.id));

@@ -1,8 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { UserPlus, Search, Trash2, Pencil, X, Loader2, RefreshCw } from 'lucide-react';
-import { Customer, PersonType, ServiceOrder } from '../../types';
+import { Customer, PersonType, ServiceOrder } from '../types';
 import { useNotify } from './ToastProvider';
+import { checkDuplicateCustomer } from '../services/validation';
 
 interface Props {
   customers: Customer[];
@@ -87,13 +88,11 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
     e.preventDefault();
     if (!newCustomer.name || !newCustomer.document) return;
 
-    // Verificar duplicidade de CPF/CNPJ
-    const isDuplicate = customers.some(c =>
-      c.document === newCustomer.document && c.id !== editingCustomerId
-    );
+    // Utiliza o serviço centralizado para verificar duplicidade
+    const duplicate = checkDuplicateCustomer(newCustomer.document || '', customers, editingCustomerId);
 
-    if (isDuplicate) {
-      notify(`Já existe um cliente cadastrado com este ${personType === 'PF' ? 'CPF' : 'CNPJ'}.`, "error");
+    if (duplicate) {
+      notify(`Já existe um cliente cadastrado com este ${personType === 'PF' ? 'CPF' : 'CNPJ'}: ${duplicate.name}`, "error");
       return;
     }
 

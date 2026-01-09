@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Search, Calendar, User, FileText, ChevronRight, Trash2 } from 'lucide-react';
-import { ServiceOrder, OrderStatus, Customer, CompanyProfile, CatalogService } from '../../types';
+import { ServiceOrder, OrderStatus, Customer, CompanyProfile, CatalogService } from '../types';
 import { useNotify } from './ToastProvider';
 
 interface Props {

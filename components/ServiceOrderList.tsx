@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Plus, MoreVertical, Filter, User, Calendar, CheckCircle, X, Trash2, Package, Search, DollarSign } from 'lucide-react';
-import { ServiceOrder, OrderStatus, Transaction, Customer, ServiceItem, CatalogService } from '../../types';
+import { ServiceOrder, OrderStatus, Transaction, Customer, ServiceItem, CatalogService } from '../types';
 
 interface Props {
   orders: ServiceOrder[];

@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Target, Sparkles, Send, Loader2, DollarSign, Package, User, Users } from 'lucide-react';
-import { generateBudgetFromDescription } from '../services/geminiService';
+import { generateBudgetFromDescription } from '../PrimeOrcamentos/services/geminiService';
 import { ServiceOrder, OrderStatus, ServiceItem, Customer } from '../types';
 
 interface Props {

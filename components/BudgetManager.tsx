@@ -5,7 +5,7 @@ import {
   UserPlus, Package, Type, Image as ImageIcon, CheckCircle2,
   Layout, FileText, Upload
 } from 'lucide-react';
-import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock } from '../../types';
+import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock } from '../types';
 import { useNotify } from './ToastProvider';
 import CustomerManager from './CustomerManager';
 import ServiceCatalog from './ServiceCatalog';

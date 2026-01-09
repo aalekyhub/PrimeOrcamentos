@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Wallet, ArrowUpRight, ArrowDownLeft, Plus, Calendar, Tag, Trash2 } from 'lucide-react';
-import { Transaction, UserAccount } from '../../types';
+import { Transaction, UserAccount } from '../types';
 import { useNotify } from './ToastProvider';
 
 interface Props {

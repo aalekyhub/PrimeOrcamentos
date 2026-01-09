@@ -4,7 +4,7 @@ import {
   Plus, Search, X, Trash2, Pencil, Printer, Save,
   UserPlus, Wrench, Calendar, Gavel, Package, Eraser
 } from 'lucide-react';
-import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile } from '../../types';
+import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile } from '../types';
 import { useNotify } from './ToastProvider';
 import CustomerManager from './CustomerManager';
 
