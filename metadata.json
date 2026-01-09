@@ -1,0 +1,7 @@
+{
+  "name": "ServiFlow Pro",
+  "description": "A comprehensive service order and financial management system with AI-driven budgeting insights and performance analytics.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
