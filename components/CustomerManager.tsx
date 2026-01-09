@@ -122,7 +122,7 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
   );
 
   const inputClass = "w-full bg-slate-50 border border-slate-100 rounded-xl p-3 text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-300";
-  const labelClass = "text-[11px] font-bold text-blue-600 uppercase tracking-widest mb-1.5 block ml-1";
+  const labelClass = "text-sm font-black text-blue-700 uppercase tracking-widest mb-2 block ml-1";
 
   return (
     <div className="space-y-6">

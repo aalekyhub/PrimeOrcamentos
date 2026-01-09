@@ -94,19 +94,19 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
 
             <div className="space-y-4">
               <div>
-                <label className="block text-[12px] font-bold text-blue-600 uppercase tracking-widest mb-1">Nome do Serviço</label>
+                <label className="block text-sm font-black text-blue-700 uppercase tracking-widest mb-1.5 ml-1">Nome do Serviço</label>
                 <input
                   type="text"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-bold text-slate-700"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-bold text-slate-700"
                   value={formData.name}
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
                   required
                 />
               </div>
               <div>
-                <label className="block text-[12px] font-bold text-blue-600 uppercase tracking-widest mb-1">Descrição Detalhada</label>
+                <label className="block text-sm font-black text-blue-700 uppercase tracking-widest mb-1.5 ml-1">Descrição Detalhada</label>
                 <textarea
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none h-32 font-medium"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none h-32 font-medium"
                   value={formData.description}
                   onChange={e => setFormData({ ...formData, description: e.target.value })}
                 />
@@ -114,9 +114,9 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[12px] font-bold text-blue-600 uppercase tracking-widest mb-1">Unidade de Medida</label>
+                  <label className="block text-sm font-black text-blue-700 uppercase tracking-widest mb-1.5 ml-1">Unidade de Medida</label>
                   <select
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-bold"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-bold"
                     value={formData.unit}
                     onChange={e => setFormData({ ...formData, unit: e.target.value })}
                     required
@@ -128,11 +128,11 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[12px] font-bold text-blue-600 uppercase tracking-widest mb-1">Preço Unitário (R$)</label>
+                  <label className="block text-sm font-black text-blue-700 uppercase tracking-widest mb-1.5 ml-1">Preço Unitário (R$)</label>
                   <input
                     type="number"
                     step="0.01"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-bold"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-bold"
                     value={formData.basePrice}
                     onChange={e => setFormData({ ...formData, basePrice: Number(e.target.value) })}
                     required
