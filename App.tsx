@@ -143,18 +143,48 @@ const AppContent: React.FC = () => {
       if (cloudData) {
         // Deduplicação de Clientes por Documento
         if (cloudData.customers) {
-          const uniqueCustomers = Array.from(
-            new Map(cloudData.customers.map((c: Customer) => [c.document.replace(/\D/g, ''), c])).values()
-          ) as Customer[];
+          const customerMap = new Map();
+          const duplicatesToRemove: string[] = [];
+
+          cloudData.customers.forEach((c: Customer) => {
+            const key = c.document.replace(/\D/g, '');
+            if (customerMap.has(key)) {
+              duplicatesToRemove.push(c.id);
+            } else {
+              customerMap.set(key, c);
+            }
+          });
+
+          const uniqueCustomers = Array.from(customerMap.values()) as Customer[];
           setCustomers(uniqueCustomers);
+
+          // Remove duplicatas da nuvem
+          if (duplicatesToRemove.length > 0) {
+            duplicatesToRemove.forEach(id => db.remove('customers', id));
+          }
         }
 
         // Deduplicação de Catálogo por Nome
         if (cloudData.catalog) {
-          const uniqueServices = Array.from(
-            new Map(cloudData.catalog.map((s: CatalogService) => [s.name.trim().toLowerCase(), s])).values()
-          ) as CatalogService[];
+          const serviceMap = new Map();
+          const duplicatesToRemove: string[] = [];
+
+          cloudData.catalog.forEach((s: CatalogService) => {
+            const key = s.name.trim().toLowerCase();
+            if (serviceMap.has(key)) {
+              duplicatesToRemove.push(s.id);
+            } else {
+              serviceMap.set(key, s);
+            }
+          });
+
+          const uniqueServices = Array.from(serviceMap.values()) as CatalogService[];
           setCatalog(uniqueServices);
+
+          // Remove duplicatas da nuvem para evitar que voltem
+          if (duplicatesToRemove.length > 0) {
+            duplicatesToRemove.forEach(id => db.remove('catalog', id));
+          }
         }
 
         if (cloudData.orders) setOrders(cloudData.orders);
