@@ -32,17 +32,18 @@ export const db = {
 
           if (error) {
             console.error(`[Supabase Error] Tabela: ${tableName}. Erro: ${error.message}`);
-            if (error.message.includes('not found')) {
-              console.warn(`DICA: Você precisa criar a tabela '${tableName}' no painel do Supabase (SQL Editor).`);
-            }
-          } else {
-            console.log(`[Cloud Sync] ${tableName} sincronizada com sucesso.`);
+            return { success: false, error };
           }
+          console.log(`[Cloud Sync] ${tableName} sincronizada com sucesso.`);
+          return { success: true };
         }
+        return { success: true };
       } catch (err) {
         console.error(`[Sync Error] Falha crítica:`, err);
+        return { success: false, error: err };
       }
     }
+    return { success: true };
   },
 
   load(key: string, defaultValue: any) {
@@ -66,7 +67,8 @@ export const db = {
         const { data, error } = await supabase.from(table).select('*');
         if (!error && data) {
           results[table] = data;
-          localStorage.setItem(`serviflow_${table}`, JSON.stringify(data));
+          // Não gravamos no localStorage aqui para não apagar dados locais ainda não sincronizados.
+          // App.tsx cuidará da mesclagem (Merge).
         } else if (error) {
           console.error(`Erro ao baixar ${table}:`, error.message);
         }
@@ -81,8 +83,6 @@ export const db = {
   async remove(key: string, id: string) {
     if (supabase) {
       const tableName = key.replace('serviflow_', '');
-      console.log(`[Cloud Sync] Tentando remover item ${id} da tabela ${tableName}...`);
-
       try {
         const { error } = await supabase
           .from(tableName)
@@ -100,8 +100,7 @@ export const db = {
         console.error(`[Delete Error] Falha crítica ao remover item:`, err);
         return { success: false, error: err };
       }
-    } else {
-      console.warn("[Cloud Sync] Supabase não conectado. Remoção apenas local.");
     }
+    return { success: true };
   }
 };

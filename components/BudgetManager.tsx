@@ -284,7 +284,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     printWindow.document.close();
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const customer = customers.find(c => c.id === selectedCustomerId);
     if (!customer) { notify("Selecione um cliente", "error"); return; }
     if (items.length === 0) { notify("Adicione itens ao orçamento", "error"); return; }
@@ -303,12 +303,19 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       dueDate: existingBudget?.dueDate || new Date(Date.now() + (company.defaultProposalValidity || 15) * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
     };
 
-    setOrders(prev => editingBudgetId ? prev.map(o => o.id === editingBudgetId ? data : o) : [data, ...prev]);
-    // Salva imediatamente para evitar perda em caso de F5 rápido
-    db.save('serviflow_orders', editingBudgetId ? orders.map(o => o.id === editingBudgetId ? data : o) : [data, ...orders]);
+    const newList = editingBudgetId ? orders.map(o => o.id === editingBudgetId ? data : o) : [data, ...orders];
+    setOrders(newList);
 
-    setShowForm(false);
-    notify("Proposta Comercial registrada com sucesso!");
+    // Salva imediatamente e aguarda a nuvem
+    const result = await db.save('serviflow_orders', newList);
+
+    if (result?.success) {
+      notify("Orçamento salvo e sincronizado!");
+      setShowForm(false);
+    } else {
+      notify("Salvo localmente. Erro ao sincronizar (veja o console)", "warning");
+      setShowForm(false);
+    }
   };
 
   return (
