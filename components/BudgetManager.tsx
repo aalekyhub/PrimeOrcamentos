@@ -110,7 +110,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
         <style>
           body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
-          @page { size: A4; margin: 0 !important; }
+          @page { size: A4; margin: 15mm; }
           .a4-container { width: 100%; margin: 0; background: white; }
           .logo-box { width: 64px; height: 64px; background: #2563eb; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; }
           .avoid-break { break-inside: avoid; page-break-inside: avoid; }
@@ -121,9 +121,10 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           }
           
           @media print {
-            body { background: white; }
-            .a4-container { box-shadow: none !important; padding: 15mm !important; }
+            body { background: white !important; }
+            .a4-container { box-shadow: none !important; border: none !important; padding: 0 !important; }
             .no-print { display: none !important; }
+            * { box-shadow: none !important; }
           }
         </style>
       </head>
@@ -306,7 +307,16 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
             <div className="mt-auto pt-4 border-t flex justify-between items-center">
               <span className="font-black text-slate-900 text-base">R$ {budget.totalAmount.toLocaleString('pt-BR')}</span>
               <div className="flex gap-1">
-                <button onClick={() => { setEditingBudgetId(budget.id); setSelectedCustomerId(budget.customerId); setItems(budget.items); setProposalTitle(budget.description); setDescriptionBlocks(budget.descriptionBlocks || []); setPaymentTerms(budget.paymentTerms || ''); setDeliveryTime(budget.deliveryTime || ''); setShowForm(true); }} className="p-2 text-slate-300 hover:text-blue-600 transition-colors bg-slate-50 rounded-xl"><Pencil className="w-4 h-4" /></button>
+                <button onClick={() => {
+                  setEditingBudgetId(budget.id);
+                  setSelectedCustomerId(budget.customerId);
+                  setItems(budget.items);
+                  setProposalTitle(budget.description);
+                  setDescriptionBlocks(budget.descriptionBlocks && budget.descriptionBlocks.length > 0 ? budget.descriptionBlocks : []);
+                  if (budget.paymentTerms) setPaymentTerms(budget.paymentTerms);
+                  if (budget.deliveryTime) setDeliveryTime(budget.deliveryTime);
+                  setShowForm(true);
+                }} className="p-2 text-slate-300 hover:text-blue-600 transition-colors bg-slate-50 rounded-xl"><Pencil className="w-4 h-4" /></button>
                 <button onClick={() => handlePrintPDF(budget)} className="p-2 text-slate-300 hover:text-slate-900 transition-colors bg-slate-50 rounded-xl"><Printer className="w-4 h-4" /></button>
                 <button onClick={() => {
                   if (confirm("Deseja excluir este orçamento? Esta ação também removerá os dados da nuvem.")) {

@@ -113,7 +113,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
         <style>
           body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
-          @page { size: A4; margin: 0 !important; }
+          @page { size: A4; margin: 15mm; }
           .a4-container { width: 100%; margin: 0; background: white; }
           .avoid-break { break-inside: avoid; page-break-inside: avoid; }
           
@@ -123,9 +123,10 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
           }
           
           @media print {
-            body { background: white; }
-            .a4-container { box-shadow: none !important; padding: 15mm !important; }
+            body { background: white !important; }
+            .a4-container { box-shadow: none !important; border: none !important; padding: 0 !important; }
             .no-print { display: none !important; }
+            * { box-shadow: none !important; }
           }
         </style>
       </head>
