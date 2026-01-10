@@ -61,6 +61,8 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
 
     const signatureData = canvasRef.current?.toDataURL();
 
+    const existingOrder = editingOrderId ? orders.find(o => o.id === editingOrderId) : null;
+
     const data: ServiceOrder = {
       id: editingOrderId || `OS-${Math.floor(1000 + Math.random() * 9000)}`,
       customerId: customer.id,
@@ -75,7 +77,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
       items: items,
       totalAmount: totalAmount,
       signature: signatureData,
-      createdAt: new Date().toISOString().split('T')[0],
+      createdAt: existingOrder?.createdAt || new Date().toISOString().split('T')[0],
       dueDate: deliveryDate
     };
 
@@ -112,7 +114,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
         <style>
           body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           @page { size: A4; margin: 0; }
-          .a4-container { width: 210mm; min-height: 297mm; padding: 15mm; margin: auto; background: white; }
+          .a4-container { width: 210mm; padding: 15mm; margin: auto; background: white; }
           .avoid-break { break-inside: avoid; page-break-inside: avoid; }
         </style>
       </head>
@@ -138,7 +140,16 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
               <div class="bg-slate-900 text-white px-4 py-1 rounded text-[8px] font-black uppercase tracking-widest mb-1 inline-block">ORDEM DE SERVIÇO</div>
               <h2 class="text-3xl font-black text-slate-900 tracking-tighter">${order.id}</h2>
               <div class="mt-2 space-y-0.5">
-                <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest text-right">ABERTURA: ${new Date(order.createdAt).toLocaleDateString('pt-BR')}</p>
+                <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest text-right">
+                  ABERTURA: ${(() => {
+        try {
+          const d = new Date(order.createdAt);
+          return isNaN(d.getTime()) ? new Date().toLocaleDateString('pt-BR') : d.toLocaleDateString('pt-BR');
+        } catch {
+          return new Date().toLocaleDateString('pt-BR');
+        }
+      })()}
+                </p>
               </div>
             </div>
           </div>

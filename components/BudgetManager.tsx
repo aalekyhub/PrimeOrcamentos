@@ -79,8 +79,17 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    const emissionDate = new Date(budget.createdAt).toLocaleDateString('pt-BR');
-    const validityDate = budget.dueDate ? new Date(budget.dueDate).toLocaleDateString('pt-BR') : new Date(new Date(budget.createdAt).getTime() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR');
+    const formatDate = (dateStr: string) => {
+      try {
+        const d = new Date(dateStr);
+        return isNaN(d.getTime()) ? new Date().toLocaleDateString('pt-BR') : d.toLocaleDateString('pt-BR');
+      } catch {
+        return new Date().toLocaleDateString('pt-BR');
+      }
+    };
+
+    const emissionDate = formatDate(budget.createdAt);
+    const validityDate = budget.dueDate ? formatDate(budget.dueDate) : formatDate(new Date(new Date(budget.createdAt || Date.now()).getTime() + 30 * 24 * 60 * 60 * 1000).toISOString());
 
     const itemsHtml = budget.items.map((item: any) => `
       <tr style="border-bottom: 1px solid #f1f5f9;">
@@ -101,7 +110,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         <style>
           body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           @page { size: A4; margin: 0; }
-          .a4-container { width: 210mm; min-height: 297mm; padding: 15mm; margin: auto; background: white; }
+          .a4-container { width: 210mm; padding: 15mm; margin: auto; background: white; }
           .logo-box { width: 64px; height: 64px; background: #2563eb; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; }
           .avoid-break { break-inside: avoid; page-break-inside: avoid; }
         </style>
@@ -214,11 +223,11 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           </div>
 
           <!-- FOOTER / SIGNATURE SECTION -->
-          <div class="avoid-break mt-12">
-            <div class="border-b border-slate-200 mb-12"></div>
+          <div class="avoid-break mt-6">
+            <div class="border-b border-slate-200 mb-8"></div>
 
             <!-- ASSINATURA -->
-            <div class="max-w-[300px] border-t border-slate-400 pt-2 mb-20">
+            <div class="max-w-[300px] border-t border-slate-400 pt-2 mb-12">
               <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Assinatura do Cliente / Aceite</p>
             </div>
 
@@ -248,6 +257,8 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     if (!customer) { notify("Selecione um cliente", "error"); return; }
     if (items.length === 0) { notify("Adicione itens ao orçamento", "error"); return; }
 
+    const existingBudget = editingBudgetId ? orders.find(o => o.id === editingBudgetId) : null;
+
     const data: ServiceOrder = {
       id: editingBudgetId || `ORC-${Math.floor(1000 + Math.random() * 9000)}`,
       customerId: customer.id,
@@ -256,8 +267,8 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       description: proposalTitle || 'REFORMA DE PINTURA',
       status: OrderStatus.PENDING,
       items, descriptionBlocks, totalAmount, paymentTerms, deliveryTime,
-      createdAt: new Date().toISOString().split('T')[0],
-      dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      createdAt: existingBudget?.createdAt || new Date().toISOString().split('T')[0],
+      dueDate: existingBudget?.dueDate || new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
     };
 
     setOrders(prev => editingBudgetId ? prev.map(o => o.id === editingBudgetId ? data : o) : [data, ...prev]);
