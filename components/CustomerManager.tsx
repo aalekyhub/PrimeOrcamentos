@@ -254,10 +254,12 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
                   <td className="px-8 py-4 text-xs text-slate-600 font-bold uppercase">{c.city} - {c.state}</td>
                   <td className="px-8 py-4 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button onClick={() => { setEditingCustomerId(c.id); setNewCustomer(c); setPersonType(c.type); setShowForm(true); }} className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg"><Pencil className="w-4 h-4" /></button>
-                    <button onClick={() => {
+                    <button onClick={async () => {
                       if (confirm("Deseja realmente excluir este cliente? Esta ação também removerá os dados da nuvem.")) {
                         setCustomers(p => p.filter(x => x.id !== c.id));
-                        db.remove('customers', c.id);
+                        const result = await db.remove('customers', c.id);
+                        if (result?.success) notify("Cliente removido da nuvem.");
+                        else notify("Removido localmente. Erro na nuvem.", "warning");
                       }
                     }} className="p-2 text-rose-400 hover:bg-rose-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
                   </td>

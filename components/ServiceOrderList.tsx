@@ -127,25 +127,38 @@ const ServiceOrderList: React.FC<Props> = ({ orders, setOrders, setTransactions,
     setSelectedCustomerId('');
   };
 
-  const updateStatus = (id: string, newStatus: OrderStatus) => {
-    setOrders(prev => prev.map(o => {
-      if (o.id === id) {
-        if (newStatus === OrderStatus.PAID && o.status !== OrderStatus.PAID) {
-          const newTransaction: Transaction = {
-            id: `T-${Math.random().toString(36).substr(2, 9)}`,
-            date: new Date().toISOString().split('T')[0],
-            amount: o.totalAmount,
-            type: 'RECEITA',
-            category: 'Pagamento de O.S.',
-            description: `Recebimento da Ordem ${o.id}`,
-            relatedOrderId: o.id
-          };
-          setTransactions(prevT => [...prevT, newTransaction]);
+  const updateStatus = async (id: string, newStatus: OrderStatus) => {
+    let updatedOrders: ServiceOrder[] = [];
+
+    setOrders(prev => {
+      updatedOrders = prev.map(o => {
+        if (o.id === id) {
+          if (newStatus === OrderStatus.PAID && o.status !== OrderStatus.PAID) {
+            const newTransaction: Transaction = {
+              id: `T-${Math.random().toString(36).substr(2, 9)}`,
+              date: new Date().toISOString().split('T')[0],
+              amount: o.totalAmount,
+              type: 'RECEITA',
+              category: 'Pagamento de O.S.',
+              description: `Recebimento da Ordem ${o.id}`,
+              relatedOrderId: o.id
+            };
+            setTransactions(prevT => [...prevT, newTransaction]);
+          }
+          return { ...o, status: newStatus };
         }
-        return { ...o, status: newStatus };
-      }
-      return o;
-    }));
+        return o;
+      });
+      return updatedOrders;
+    });
+
+    // Sincroniza e avisa
+    const result = await db.save('serviflow_orders', updatedOrders);
+    if (result?.success) {
+      notify(`Status atualizado para ${newStatus} e sincronizado!`);
+    } else {
+      notify("Status atualizado localmente. Erro na nuvem.", "warning");
+    }
   };
 
   const getStatusColor = (status: OrderStatus) => {

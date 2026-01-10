@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Wallet, ArrowUpRight, ArrowDownLeft, Plus, Calendar, Tag, Trash2 } from 'lucide-react';
 import { Transaction, UserAccount } from '../types';
 import { useNotify } from './ToastProvider';
+import { db } from '../services/db';
 
 interface Props {
   transactions: Transaction[];
@@ -22,7 +23,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, curr
   const totalIncome = transactions.filter(t => t.type === 'RECEITA').reduce((s, t) => s + t.amount, 0);
   const totalExpense = transactions.filter(t => t.type === 'DESPESA').reduce((s, t) => s + t.amount, 0);
 
-  const handleAdd = (e: React.FormEvent) => {
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.amount || !formData.category) return;
 
@@ -35,21 +36,33 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, curr
       description: formData.description || ''
     };
 
-    setTransactions(prev => [newT, ...prev]);
+    const newList = [newT, ...transactions];
+    setTransactions(newList);
     setShowForm(false);
     setFormData({ type: 'RECEITA', date: new Date().toISOString().split('T')[0] });
-    notify("Transação lançada com sucesso!");
+
+    // Sincroniza e avisa
+    const result = await db.save('serviflow_transactions', newList);
+    if (result?.success) {
+      notify("Transação lançada e sincronizada!");
+    } else {
+      notify("Lançada localmente. Erro na nuvem.", "warning");
+    }
   };
 
-  const removeTransaction = (id: string) => {
+  const removeTransaction = async (id: string) => {
     if (!isAdmin) {
       notify("Você não tem permissão para excluir lançamentos.", "error");
       return;
     }
     if (confirm("Deseja realmente excluir este lançamento financeiro? Esta ação também removerá os dados da nuvem.")) {
       setTransactions(prev => prev.filter(t => t.id !== id));
-      db.remove('transactions', id);
-      notify("Lançamento removido.");
+      const result = await db.remove('transactions', id);
+      if (result?.success) {
+        notify("Lançamento removido da nuvem.");
+      } else {
+        notify("Removido localmente. Erro na nuvem.", "warning");
+      }
     }
   };
 

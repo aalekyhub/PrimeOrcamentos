@@ -202,10 +202,12 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
                     <Pencil className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       if (confirm("Deseja excluir este serviço do catálogo? Esta ação também removerá os dados da nuvem.")) {
                         setServices(prev => prev.filter(s => s.id !== service.id));
-                        db.remove('catalog', service.id);
+                        const result = await db.remove('catalog', service.id);
+                        if (result?.success) notify("Serviço removido da nuvem.");
+                        else notify("Removido localmente. Erro na nuvem.", "warning");
                       }
                     }}
                     className="p-2 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-100"
