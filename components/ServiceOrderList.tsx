@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { Plus, MoreVertical, Filter, User, Calendar, CheckCircle, X, Trash2, Package, Search, DollarSign } from 'lucide-react';
 import { ServiceOrder, OrderStatus, Transaction, Customer, ServiceItem, CatalogService } from '../types';
+import { db } from '../services/db';
 
 interface Props {
   orders: ServiceOrder[];
@@ -21,6 +22,9 @@ const ServiceOrderList: React.FC<Props> = ({ orders, setOrders, setTransactions,
     items: [],
     createdAt: new Date().toISOString().split('T')[0],
     dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    descriptionBlocks: [],
+    paymentTerms: '',
+    deliveryTime: ''
   });
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
   const [itemDescription, setItemDescription] = useState('');
@@ -73,6 +77,9 @@ const ServiceOrderList: React.FC<Props> = ({ orders, setOrders, setTransactions,
       items: newOrder.items as ServiceItem[],
       createdAt: newOrder.createdAt || '',
       dueDate: newOrder.dueDate || '',
+      descriptionBlocks: newOrder.descriptionBlocks || [],
+      paymentTerms: newOrder.paymentTerms || '',
+      deliveryTime: newOrder.deliveryTime || '',
       totalAmount: totalAmount
     };
 
@@ -82,8 +89,9 @@ const ServiceOrderList: React.FC<Props> = ({ orders, setOrders, setTransactions,
   };
 
   const handleDelete = (id: string) => {
-    if (confirm("Tem certeza que deseja excluir este registro permanentemente?")) {
+    if (confirm("Tem certeza que deseja excluir este registro permanentemente? Esta ação também removerá os dados da nuvem.")) {
       setOrders(prev => prev.filter(o => o.id !== id));
+      db.remove('orders', id);
     }
   };
 
@@ -93,6 +101,9 @@ const ServiceOrderList: React.FC<Props> = ({ orders, setOrders, setTransactions,
       items: [],
       createdAt: new Date().toISOString().split('T')[0],
       dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      descriptionBlocks: [],
+      paymentTerms: '',
+      deliveryTime: ''
     });
     setSelectedCustomerId('');
   };

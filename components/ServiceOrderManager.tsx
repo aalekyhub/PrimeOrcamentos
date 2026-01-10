@@ -4,7 +4,7 @@ import {
   Plus, Search, X, Trash2, Pencil, Printer, Save,
   UserPlus, Wrench, Calendar, Gavel, Package, Eraser
 } from 'lucide-react';
-import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile } from '../types';
+import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock } from '../types';
 import { useNotify } from './ToastProvider';
 import CustomerManager from './CustomerManager';
 import { db } from '../services/db';
@@ -32,6 +32,9 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
   const [model, setModel] = useState('');
   const [serial, setSerial] = useState('');
   const [diagnosis, setDiagnosis] = useState('');
+  const [descriptionBlocks, setDescriptionBlocks] = useState<DescriptionBlock[]>([]);
+  const [paymentTerms, setPaymentTerms] = useState('');
+  const [deliveryTime, setDeliveryTime] = useState('');
   const [deliveryDate, setDeliveryDate] = useState(new Date().toISOString().split('T')[0]);
   const [items, setItems] = useState<ServiceItem[]>([]);
 
@@ -77,6 +80,9 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
       items: items,
       totalAmount: totalAmount,
       signature: signatureData,
+      descriptionBlocks,
+      paymentTerms,
+      deliveryTime,
       createdAt: existingOrder?.createdAt || new Date().toISOString().split('T')[0],
       dueDate: deliveryDate
     };
@@ -317,7 +323,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
           <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Ordens de Serviço</h2>
           <p className="text-slate-500 text-sm">Painel de execução técnica e laudos.</p>
         </div>
-        <button onClick={() => { setShowForm(true); setEditingOrderId(null); setSelectedCustomerId(''); setItems([]); setOsTitle('Execução de Serviço'); setDiagnosis(''); setBrand(''); setModel(''); setSerial(''); }} className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold shadow-2xl shadow-blue-100 hover:bg-blue-700 transition-all flex items-center gap-2">
+        <button onClick={() => { setShowForm(true); setEditingOrderId(null); setSelectedCustomerId(''); setItems([]); setOsTitle('Execução de Serviço'); setDiagnosis(''); setBrand(''); setModel(''); setSerial(''); setDescriptionBlocks([]); setPaymentTerms(''); setDeliveryTime(''); }} className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold shadow-2xl shadow-blue-100 hover:bg-blue-700 transition-all flex items-center gap-2">
           <Plus className="w-5 h-5" /> Nova O.S.
         </button>
       </div>
@@ -342,7 +348,21 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                 <td className="px-8 py-5 text-xs font-bold text-slate-400 uppercase">{order.equipmentBrand || 'N/A'} {order.equipmentModel}</td>
                 <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button onClick={() => handlePrintOS(order)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors"><Printer className="w-4 h-4" /></button>
-                  <button onClick={() => { setEditingOrderId(order.id); setSelectedCustomerId(order.customerId); setItems(order.items); setOsTitle(order.description); setDiagnosis(order.serviceDescription || ''); setBrand(order.equipmentBrand || ''); setModel(order.equipmentModel || ''); setSerial(order.equipmentSerialNumber || ''); setDeliveryDate(order.dueDate); setShowForm(true); }} className="p-2 text-slate-400 hover:text-blue-600 transition-colors"><Pencil className="w-4 h-4" /></button>
+                  <button onClick={() => {
+                    setEditingOrderId(order.id);
+                    setSelectedCustomerId(order.customerId);
+                    setItems(order.items);
+                    setOsTitle(order.description);
+                    setDiagnosis(order.serviceDescription || '');
+                    setBrand(order.equipmentBrand || '');
+                    setModel(order.equipmentModel || '');
+                    setSerial(order.equipmentSerialNumber || '');
+                    setDeliveryDate(order.dueDate);
+                    setDescriptionBlocks(order.descriptionBlocks || []);
+                    setPaymentTerms(order.paymentTerms || '');
+                    setDeliveryTime(order.deliveryTime || '');
+                    setShowForm(true);
+                  }} className="p-2 text-slate-400 hover:text-blue-600 transition-colors"><Pencil className="w-4 h-4" /></button>
                   <button onClick={() => {
                     if (confirm("Excluir esta O.S.? Esta ação também removerá os dados da nuvem.")) {
                       setOrders(p => p.filter(x => x.id !== order.id));

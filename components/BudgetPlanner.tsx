@@ -48,7 +48,10 @@ const BudgetPlanner: React.FC<Props> = ({ setOrders, customers }) => {
       createdAt: new Date().toISOString().split('T')[0],
       dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       totalAmount: generatedBudget.totalAmount || 0,
-      items: (generatedBudget.items || []) as ServiceItem[]
+      items: (generatedBudget.items || []) as ServiceItem[],
+      descriptionBlocks: [],
+      paymentTerms: '',
+      deliveryTime: ''
     };
 
     setOrders(prev => [newOrder, ...prev]);

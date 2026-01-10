@@ -3,6 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { Search, Calendar, User, FileText, ChevronRight, Trash2 } from 'lucide-react';
 import { ServiceOrder, OrderStatus, Customer, CompanyProfile, CatalogService } from '../types';
 import { useNotify } from './ToastProvider';
+import { db } from '../services/db';
 
 interface Props {
   orders: ServiceOrder[];
@@ -38,8 +39,9 @@ const BudgetSearch: React.FC<Props> = ({ orders, setOrders, customers, company, 
   }, [orders, searchBy, clientTerm, startDate, endDate]);
 
   const handleDelete = (id: string) => {
-    if (confirm("Deseja realmente excluir este orçamento definitivamente?")) {
+    if (confirm("Deseja realmente excluir este orçamento definitivamente? Esta ação também removerá os dados da nuvem.")) {
       setOrders(prev => prev.filter(o => o.id !== id));
+      db.remove('orders', id);
       notify("Orçamento removido com sucesso.");
     }
   };
