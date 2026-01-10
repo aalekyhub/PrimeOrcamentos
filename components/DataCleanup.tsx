@@ -2,9 +2,9 @@
 import React, { useState, useMemo } from 'react';
 import { Trash2, Merge, AlertTriangle, CheckCircle, RefreshCw, Layers } from 'lucide-react';
 import { Customer, CatalogService } from '../types';
+import { db } from '../services/db';
 import { cleanDocument, formatDocument } from '../services/validation';
 import { useNotify } from './ToastProvider';
-import { db } from '../services/db';
 
 interface Props {
     customers: Customer[];
@@ -112,7 +112,12 @@ const DataCleanup: React.FC<Props> = ({ customers, setCustomers, services, setSe
                                                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">{customer.email || 'Sem e-mail'} • ID: {customer.id}</p>
                                             </div>
                                             <button
-                                                onClick={() => confirm("Excluir este registro?") && setCustomers(prev => prev.filter(c => c.id !== customer.id))}
+                                                onClick={() => {
+                                                    if (confirm("Excluir este registro?")) {
+                                                        setCustomers(prev => prev.filter(c => c.id !== customer.id));
+                                                        db.remove('customers', customer.id);
+                                                    }
+                                                }}
                                                 className="p-2 text-rose-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
                                             >
                                                 <Trash2 className="w-4 h-4" />
@@ -156,7 +161,12 @@ const DataCleanup: React.FC<Props> = ({ customers, setCustomers, services, setSe
                                                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">R$ {service.basePrice.toLocaleString()} • ID: {service.id}</p>
                                             </div>
                                             <button
-                                                onClick={() => confirm("Excluir este serviço?") && setServices(prev => prev.filter(s => s.id !== service.id))}
+                                                onClick={() => {
+                                                    if (confirm("Excluir este serviço?")) {
+                                                        setServices(prev => prev.filter(s => s.id !== service.id));
+                                                        db.remove('catalog', service.id);
+                                                    }
+                                                }}
                                                 className="p-2 text-rose-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
                                             >
                                                 <Trash2 className="w-4 h-4" />

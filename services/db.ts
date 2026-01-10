@@ -76,6 +76,8 @@ export const db = {
   async remove(key: string, id: string) {
     if (supabase) {
       const tableName = key.replace('serviflow_', '');
+      console.log(`[Cloud Sync] Tentando remover item ${id} da tabela ${tableName}...`);
+
       try {
         const { error } = await supabase
           .from(tableName)
@@ -83,13 +85,18 @@ export const db = {
           .eq('id', id);
 
         if (error) {
-          console.error(`[Supabase Delete Error] Tabela: ${tableName}. Erro: ${error.message}`);
+          console.error(`[Supabase Delete Error] Tabela: ${tableName}. Erro: ${error.message}`, error);
+          return { success: false, error };
         } else {
-          console.log(`[Cloud Sync] Item ${id} removido de ${tableName}.`);
+          console.log(`[Cloud Sync] Item ${id} removido com sucesso de ${tableName}.`);
+          return { success: true };
         }
       } catch (err) {
         console.error(`[Delete Error] Falha crítica ao remover item:`, err);
+        return { success: false, error: err };
       }
+    } else {
+      console.warn("[Cloud Sync] Supabase não conectado. Remoção apenas local.");
     }
   }
 };

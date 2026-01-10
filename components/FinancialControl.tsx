@@ -46,8 +46,9 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, curr
       notify("Você não tem permissão para excluir lançamentos.", "error");
       return;
     }
-    if (confirm("Deseja realmente excluir este lançamento financeiro?")) {
+    if (confirm("Deseja realmente excluir este lançamento financeiro? Esta ação também removerá os dados da nuvem.")) {
       setTransactions(prev => prev.filter(t => t.id !== id));
+      db.remove('transactions', id);
       notify("Lançamento removido.");
     }
   };
