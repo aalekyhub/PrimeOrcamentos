@@ -68,7 +68,7 @@ const ServiceOrderList: React.FC<Props> = ({ orders, setOrders, setTransactions,
     }
 
     const order: ServiceOrder = {
-      id: `OS-${Date.now().toString().slice(-4)}`,
+      id: db.generateId(newOrder.status === OrderStatus.PENDING ? 'ORC' : 'OS'),
       customerId: customer.id,
       customerName: customer.name,
       customerEmail: customer.email,
@@ -84,6 +84,7 @@ const ServiceOrderList: React.FC<Props> = ({ orders, setOrders, setTransactions,
     };
 
     setOrders(prev => [order, ...prev]);
+    db.save('serviflow_orders', [order, ...orders]);
     setShowForm(false);
     resetForm();
   };

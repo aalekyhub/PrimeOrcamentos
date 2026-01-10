@@ -178,9 +178,30 @@ const AppContent: React.FC = () => {
           }
         }
 
-        if (cloudData.orders) setOrders(cloudData.orders);
-        if (cloudData.transactions) setTransactions(cloudData.transactions);
-        notify("Sincronização concluída com auto-limpeza!");
+        if (cloudData.orders) {
+          setOrders(prev => {
+            const localMap = new Map<string, ServiceOrder>(prev.map(o => [o.id, o]));
+            (cloudData.orders as ServiceOrder[]).forEach((o: ServiceOrder) => {
+              localMap.set(o.id, o);
+            });
+            return Array.from(localMap.values()).sort((a, b) =>
+              new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+            );
+          });
+        }
+
+        if (cloudData.transactions) {
+          setTransactions(prev => {
+            const localMap = new Map<string, Transaction>(prev.map(t => [t.id, t]));
+            (cloudData.transactions as Transaction[]).forEach((t: Transaction) => {
+              localMap.set(t.id, t);
+            });
+            return Array.from(localMap.values()).sort((a, b) =>
+              new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()
+            );
+          });
+        }
+        notify("Sincronização concluída (Dados mesclados)");
       } else {
         notify("Falha ao baixar dados da nuvem.", "error");
       }

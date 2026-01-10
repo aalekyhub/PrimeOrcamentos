@@ -292,7 +292,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     const existingBudget = editingBudgetId ? orders.find(o => o.id === editingBudgetId) : null;
 
     const data: ServiceOrder = {
-      id: editingBudgetId || `ORC-${Math.floor(1000 + Math.random() * 9000)}`,
+      id: editingBudgetId || db.generateId('ORC'),
       customerId: customer.id,
       customerName: customer.name,
       customerEmail: customer.email,
@@ -304,6 +304,9 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     };
 
     setOrders(prev => editingBudgetId ? prev.map(o => o.id === editingBudgetId ? data : o) : [data, ...prev]);
+    // Salva imediatamente para evitar perda em caso de F5 rápido
+    db.save('serviflow_orders', editingBudgetId ? orders.map(o => o.id === editingBudgetId ? data : o) : [data, ...orders]);
+
     setShowForm(false);
     notify("Proposta Comercial registrada com sucesso!");
   };

@@ -67,7 +67,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
     const existingOrder = editingOrderId ? orders.find(o => o.id === editingOrderId) : null;
 
     const data: ServiceOrder = {
-      id: editingOrderId || `OS-${Math.floor(1000 + Math.random() * 9000)}`,
+      id: editingOrderId || db.generateId('OS'),
       customerId: customer.id,
       customerName: customer.name,
       customerEmail: customer.email,
@@ -87,13 +87,16 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
       dueDate: deliveryDate
     };
 
-    if (editingOrderId) {
-      setOrders(prev => prev.map(o => o.id === editingOrderId ? data : o));
-    } else {
-      setOrders(prev => [data, ...prev]);
-    }
+    setOrders(prev => {
+      const newList = editingOrderId ? prev.map(o => o.id === editingOrderId ? data : o) : [data, ...prev];
+      // Salva imediatamente para evitar perda em caso de F5 rápido
+      db.save('serviflow_orders', newList);
+      return newList;
+    });
+
+    setEditingOrderId(null);
     setShowForm(false);
-    notify("O.S. salva com sucesso!");
+    notify(editingOrderId ? "O.S. atualizada com sucesso!" : "Ordem de Serviço registrada!");
   };
 
   const handlePrintOS = (order: ServiceOrder) => {

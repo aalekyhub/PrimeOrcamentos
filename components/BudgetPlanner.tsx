@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Target, Sparkles, Send, Loader2, DollarSign, Package, User, Users } from 'lucide-react';
 import { generateBudgetFromDescription } from '../PrimeOrcamentos/services/geminiService';
 import { ServiceOrder, OrderStatus, ServiceItem, Customer } from '../types';
+import { db } from '../services/db';
 
 interface Props {
   setOrders: React.Dispatch<React.SetStateAction<ServiceOrder[]>>;
@@ -39,7 +40,7 @@ const BudgetPlanner: React.FC<Props> = ({ setOrders, customers }) => {
     }
 
     const newOrder: ServiceOrder = {
-      id: `OS-IA-${Date.now().toString().slice(-4)}`,
+      id: db.generateId('ORC-IA'),
       customerId: customer.id,
       customerName: customer.name,
       customerEmail: customer.email,
@@ -54,7 +55,11 @@ const BudgetPlanner: React.FC<Props> = ({ setOrders, customers }) => {
       deliveryTime: ''
     };
 
-    setOrders(prev => [newOrder, ...prev]);
+    setOrders(prev => {
+      const newList = [newOrder, ...prev];
+      db.save('serviflow_orders', newList);
+      return newList;
+    });
     alert("Ordem de Serviço criada com sucesso!");
     setGeneratedBudget(null);
     setDescription('');

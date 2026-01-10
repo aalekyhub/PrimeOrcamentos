@@ -12,9 +12,8 @@ export const db = {
   isConnected: () => !!supabase,
 
   generateId(prefix: string) {
-    const timestamp = Date.now().toString().slice(-6);
-    const random = Math.random().toString(36).substring(2, 6).toUpperCase();
-    return `${prefix}-${timestamp}-${random}`;
+    const random = Math.floor(1000 + Math.random() * 9000);
+    return `${prefix}-${random}`;
   },
 
   async save(key: string, data: any) {
