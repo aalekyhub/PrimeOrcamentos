@@ -155,8 +155,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
               </div>
             </div>
           </div>
-
-
+          <div class="border-b-2 border-slate-900 mb-6"></div>
 
           <!-- CLIENTE -->
           <div class="mb-6 grid grid-cols-2 gap-4">
