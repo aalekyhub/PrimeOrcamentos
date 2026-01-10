@@ -78,14 +78,16 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
+    const emissionDate = new Date(budget.createdAt).toLocaleDateString('pt-BR');
+    const validityDate = budget.dueDate ? new Date(budget.dueDate).toLocaleDateString('pt-BR') : new Date(new Date(budget.createdAt).getTime() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR');
+
     const itemsHtml = budget.items.map((item: any) => `
       <tr style="border-bottom: 1px solid #f1f5f9;">
-        <td style="padding: 10px 0; font-weight: 800; text-transform: uppercase; font-size: 11px; color: #1e293b;">${item.description}</td>
-        <td style="padding: 10px 0; text-align: center; color: #94a3b8; font-size: 9px; font-weight: bold; text-transform: uppercase;">SERVIÇO</td>
-        <td style="padding: 10px 0; text-align: center; font-weight: 800; color: #1e293b; font-size: 11px;">${item.unit || 'un'}</td>
-        <td style="padding: 10px 0; text-align: center; font-weight: 800; color: #1e293b; font-size: 11px;">${item.quantity}</td>
-        <td style="padding: 10px 0; text-align: right; color: #64748b; font-size: 11px;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-        <td style="padding: 10px 0; text-align: right; font-weight: 900; font-size: 12px; color: #1e293b;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        <td style="padding: 12px 0; font-weight: 800; text-transform: uppercase; font-size: 11px; color: #0f172a;">${item.description}</td>
+        <td style="padding: 12px 0; text-align: center; color: #94a3b8; font-size: 9px; font-weight: bold; text-transform: uppercase;">SERVIÇO</td>
+        <td style="padding: 12px 0; text-align: center; font-weight: 800; color: #0f172a; font-size: 11px;">${item.quantity}</td>
+        <td style="padding: 12px 0; text-align: right; color: #64748b; font-size: 11px;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        <td style="padding: 12px 0; text-align: right; font-weight: 900; font-size: 12px; color: #0f172a;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
       </tr>`).join('');
 
     const html = `
@@ -95,24 +97,140 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         <title>Proposta Comercial ${budget.id}</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+        <style>
+          body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          @page { size: A4; margin: 0; }
+          .a4-container { width: 210mm; min-height: 297mm; padding: 15mm; margin: auto; background: white; }
+          .logo-box { width: 64px; height: 64px; background: #2563eb; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; }
+        </style>
       </head>
-      <body class="p-10 font-sans">
-        <h1 class="text-2xl font-black mb-4 uppercase tracking-tighter">${company.name}</h1>
-        <div class="border-b-2 border-slate-900 mb-6"></div>
-        <div class="mb-6 flex justify-between">
-            <div><p class="text-[10px] font-black uppercase text-slate-400">Cliente</p><p class="font-bold text-lg">${budget.customerName}</p></div>
-            <div class="text-right"><p class="text-[10px] font-black uppercase text-slate-400">Orçamento</p><p class="font-bold text-blue-600">${budget.id}</p></div>
-        </div>
-        <table class="w-full mb-8">
-          <thead class="bg-slate-900 text-white text-[10px] uppercase">
-            <tr><th class="p-2 text-left">Item</th><th class="p-2 text-center">Un</th><th class="p-2 text-center">Qtd</th><th class="p-2 text-right">Unitário</th><th class="p-2 text-right">Subtotal</th></tr>
-          </thead>
-          <tbody>${itemsHtml}</tbody>
-        </table>
-        <div class="bg-slate-900 text-white p-6 rounded-xl flex justify-between items-center">
+      <body class="bg-gray-100 pb-10">
+        <div class="a4-container shadow-2xl">
+          <!-- HEADER -->
+          <div class="flex justify-between items-start mb-8">
+            <div class="flex gap-4">
+              <div class="w-16 h-16 shrink-0 flex items-center justify-center overflow-hidden">
+                ${company.logo ? `<img src="${company.logo}" style="height: 100%; object-fit: contain;">` : `
+                  <div class="logo-box">
+                    <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                  </div>
+                `}
+              </div>
+              <div>
+                <h1 class="text-xl font-black text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
+                <p class="text-[9px] font-black text-blue-600 uppercase tracking-widest">${company.tagline || 'Soluções em Gestão e Manutenção Profissional'}</p>
+                <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tight mt-1">${company.cnpj || ''} | ${company.phone || ''}</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <h2 class="text-xl font-black text-slate-900 leading-tight uppercase">Proposta<br>Comercial</h2>
+              <p class="text-blue-600 font-black text-lg mt-1">${budget.id}</p>
+              <div class="mt-2 space-y-0.5">
+                <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest">EMISSÃO: ${emissionDate}</p>
+                <p class="text-[8px] font-black text-blue-600 uppercase tracking-widest">VALIDADE: ${validityDate}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="border-b-2 border-slate-900 mb-8"></div>
+
+          <!-- CLIENTE -->
+          <div class="mb-8 grid grid-cols-2 gap-4">
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+              <h3 class="text-[9px] font-black text-blue-700 uppercase tracking-widest mb-1.5 ml-1">Cliente / Destinatário</h3>
+              <p class="text-xs font-black text-slate-900 uppercase">${budget.customerName}</p>
+              <p class="text-[9px] text-slate-500 font-bold mt-1 uppercase">${customer.document || ''}</p>
+            </div>
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+              <h3 class="text-[9px] font-black text-blue-700 uppercase tracking-widest mb-1.5 ml-1">Referência do Orçamento</h3>
+              <p class="text-xs font-black text-slate-900 uppercase">${budget.description || 'Execução de Serviços'}</p>
+            </div>
+          </div>
+
+          <!-- DESCRIÇÃO TÉCNICA -->
+          ${budget.descriptionBlocks && budget.descriptionBlocks.length > 0 ? `
+            <div class="mb-8">
+              <h3 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4 border-b pb-1">Descrição Técnica / Escopo</h3>
+              <div class="space-y-4">
+                ${budget.descriptionBlocks.map((block: any) => block.type === 'text' ? `
+                  <p class="text-[10px] text-slate-700 leading-relaxed italic">${block.content}</p>
+                ` : `
+                  <div class="py-2 flex justify-center"><img src="${block.content}" class="max-w-[80%] h-auto rounded-xl shadow-sm border border-slate-100"></div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+
+          <!-- TABELA DE ITENS -->
+          <div class="mb-6">
+            <h3 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4 border-b pb-1">Detalhamento Financeiro</h3>
+            <table class="w-full text-left">
+              <thead>
+                <tr class="text-[9px] font-black text-slate-400 uppercase tracking-widest border-b-[2px] border-slate-900">
+                  <th class="pb-2">Item / Descrição</th>
+                  <th class="pb-2 text-center">Tipo</th>
+                  <th class="pb-2 text-center">Qtd</th>
+                  <th class="pb-2 text-right">Unitário</th>
+                  <th class="pb-2 text-right">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>${itemsHtml}</tbody>
+            </table>
+          </div>
+
+          <!-- TOTAL BAR -->
+          <div class="bg-slate-900 text-white p-6 rounded-xl flex justify-between items-center mb-8">
             <span class="font-black text-xs tracking-widest uppercase">Investimento Total:</span>
-            <span class="text-3xl font-black tracking-tighter">R$ ${budget.totalAmount.toLocaleString('pt-BR')}</span>
+            <span class="text-3xl font-black tracking-tighter text-blue-400">R$ ${budget.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+          </div>
+
+          <!-- FORMA PGTO / PRAZO -->
+          <div class="grid grid-cols-2 gap-4 mb-8">
+            <div class="space-y-4">
+              <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 h-full">
+                <h3 class="text-[9px] font-black text-blue-700 uppercase tracking-widest mb-3 border-b border-slate-200 pb-1">Forma de Pagamento</h3>
+                <p class="text-[11px] font-bold text-slate-700 leading-relaxed">${budget.paymentTerms || 'A combinar'}</p>
+              </div>
+            </div>
+            <div class="space-y-4">
+              <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 h-full">
+                <h3 class="text-[9px] font-black text-blue-700 uppercase tracking-widest mb-3 border-b border-slate-200 pb-1">Prazo de Entrega / Execução</h3>
+                <p class="text-[11px] font-bold text-slate-700 leading-relaxed">${budget.deliveryTime || 'A combinar'}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- TERMOS LEGAIS -->
+          <div class="bg-blue-50/50 border border-blue-100 p-8 rounded-3xl mb-12 relative overflow-hidden">
+            <div class="flex items-center gap-2 mb-4">
+              <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <h3 class="text-[10px] font-black text-blue-600 uppercase tracking-widest">Termo de Aceite e Autorização Profissional</h3>
+            </div>
+            <p class="text-[10px] text-slate-600 leading-relaxed italic pr-12">
+              "Este documento constitui uma proposta comercial formal. Ao assinar abaixo, o cliente declara estar ciente e de pleno acordo com os valores, prazos e especificações técnicas descritas. Esta aceitação autoriza o início imediato dos trabalhos sob as condições estabelecidas. A contratada reserva-se o direito de renegociar valores caso a aprovação ocorra após o prazo de validade de 30 dias. Eventuais alterações de escopo solicitadas após o aceite estarão sujeitas a nova análise de custos."
+            </p>
+          </div>
+
+          <div class="border-b border-slate-200 mb-12"></div>
+
+          <!-- ASSINATURA -->
+          <div class="max-w-[300px] border-t border-slate-400 pt-2 mb-20">
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Assinatura do Cliente / Aceite</p>
+          </div>
+
+          <!-- FOOTER -->
+          <div class="flex justify-between items-end border-t-4 border-slate-900 pt-4">
+            <div>
+              <p class="text-xs font-black text-slate-900 uppercase leading-none">${company.name}</p>
+              <div class="mt-2 flex gap-1">
+                <span class="text-[8px] font-black text-slate-400 uppercase">DATA DO ACEITE:</span>
+                <span class="text-[8px] font-black text-slate-300 uppercase underline decoration-slate-200 decoration-2 underline-offset-4">____/____/________</span>
+              </div>
+            </div>
+            <p class="text-[8px] font-bold text-slate-300 uppercase italic">Documento gerado eletronicamente por ${company.name}</p>
+          </div>
         </div>
+
         <script>window.onload=()=>{setTimeout(()=>{window.print();window.close();},500);}</script>
       </body>
       </html>`;

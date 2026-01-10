@@ -116,24 +116,31 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
       </head>
       <body>
         <div class="a4-container">
-          <div class="flex justify-between items-start mb-6">
+          <!-- HEADER -->
+          <div class="flex justify-between items-start mb-8">
             <div class="flex gap-4">
               <div class="w-16 h-16 shrink-0 flex items-center justify-center overflow-hidden">
-                ${company.logo ? `<img src="${company.logo}" style="height: 100%; object-fit: contain;">` : `<div class="bg-blue-600 w-full h-full flex items-center justify-center text-white font-black text-2xl rounded-lg">P</div>`}
+                ${company.logo ? `<img src="${company.logo}" style="height: 100%; object-fit: contain;">` : `
+                  <div style="width: 64px; height: 64px; background: #2563eb; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white;">
+                    <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                  </div>
+                `}
               </div>
               <div>
-                <h1 class="text-xl font-black text-slate-900 leading-none mb-1">${company.name}</h1>
-                <p class="text-[9px] font-black text-blue-600 uppercase tracking-widest">${company.tagline}</p>
-                <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tight">${company.cnpj} | ${company.phone}</p>
+                <h1 class="text-xl font-black text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
+                <p class="text-[9px] font-black text-blue-600 uppercase tracking-widest">${company.tagline || 'Soluções em Gestão e Manutenção Profissional'}</p>
+                <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tight mt-1">${company.cnpj || ''} | ${company.phone || ''}</p>
               </div>
             </div>
             <div class="text-right">
               <div class="bg-slate-900 text-white px-4 py-1 rounded text-[8px] font-black uppercase tracking-widest mb-1 inline-block">ORDEM DE SERVIÇO</div>
               <h2 class="text-3xl font-black text-slate-900 tracking-tighter">${order.id}</h2>
-              <p class="text-[8px] text-slate-400 font-black">ABERTURA: ${new Date(order.createdAt).toLocaleDateString('pt-BR')}</p>
+              <div class="mt-2 space-y-0.5">
+                <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest text-right">ABERTURA: ${new Date(order.createdAt).toLocaleDateString('pt-BR')}</p>
+              </div>
             </div>
           </div>
-          <div class="border-t-[1.5px] border-slate-900 mb-6"></div>
+          <div class="border-t-[2px] border-slate-900 mb-6"></div>
           <div class="grid grid-cols-2 gap-4 mb-6">
             <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
               <h4 class="text-[7px] font-black text-slate-400 uppercase tracking-widest mb-1">CLIENTE / DESTINATÁRIO</h4>
@@ -171,12 +178,25 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
             <p class="text-[9px] text-slate-700 leading-tight"><b>• GARANTIA:</b> Conforme Art. 26 do CDC, este serviço possui garantia técnica de 90 dias.</p>
             <p class="text-[9px] text-rose-600 font-bold mt-1 uppercase leading-tight"><b>• ADVERTÊNCIA:</b> Equipamentos não retirados em até 30 dias serão considerados abandonados.</p>
           </div>
-          <div class="grid grid-cols-2 gap-16 px-10">
-            <div class="text-center border-t border-slate-300 pt-3"><p class="text-[8px] font-black uppercase">${company.name}</p></div>
+          <!-- SIGNATURE -->
+          <div class="grid grid-cols-2 gap-16 px-10 mb-12">
             <div class="text-center border-t border-slate-300 pt-3">
-               ${order.signature ? `<img src="${order.signature}" style="max-height: 40px; display: block; margin: -40px auto 5px auto;">` : ''}
-               <p class="text-[8px] font-black uppercase">ASSINATURA DO CLIENTE</p>
+              <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Responsável Técnico</p>
+              <p class="text-[10px] font-black uppercase text-slate-900">${company.name}</p>
             </div>
+            <div class="text-center border-t border-slate-300 pt-3 relative">
+               ${order.signature ? `<img src="${order.signature}" style="max-height: 50px; position: absolute; top: -45px; left: 50%; transform: translateX(-50%);">` : ''}
+               <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Assinatura do Cliente</p>
+               <p class="text-[10px] font-black uppercase text-slate-900">${order.customerName}</p>
+            </div>
+          </div>
+
+          <!-- FOOTER -->
+          <div class="flex justify-between items-end border-t-4 border-slate-900 pt-4">
+            <div>
+              <p class="text-xs font-black text-slate-900 uppercase leading-none">${company.name}</p>
+            </div>
+            <p class="text-[8px] font-bold text-slate-300 uppercase italic text-right">Documento técnico gerado eletronicamente</p>
           </div>
         </div>
         <script>window.onload=()=>{setTimeout(()=>{window.print();window.close();},500);}</script>
