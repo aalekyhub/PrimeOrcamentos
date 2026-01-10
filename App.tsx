@@ -323,8 +323,14 @@ const AppContent: React.FC = () => {
             {activeTab === 'search' && <BudgetSearch orders={orders} setOrders={setOrders} customers={customers} company={company} catalogServices={catalog} setCatalogServices={setCatalog} />}
             {activeTab === 'orders' && <ServiceOrderManager orders={orders} setOrders={setOrders} setTransactions={setTransactions} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} />}
             {activeTab === 'financials' && <FinancialControl transactions={transactions} setTransactions={setTransactions} currentUser={currentUser} />}
-            {activeTab === 'settings' && <CompanySettings company={company} setCompany={setCompany} />}
             {activeTab === 'users' && <UserManager users={users} setUsers={setUsers} />}
+            {activeTab === 'audit' && <DataCleanup
+              customers={customers}
+              setCustomers={setCustomers}
+              services={catalog}
+              setServices={setCatalog}
+            />}
+            {activeTab === 'settings' && <CompanySettings company={company} setCompany={setCompany} />}
           </div>
         </div>
       </main>

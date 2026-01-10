@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { UserPlus, Shield, Mail, Key, Trash2, ShieldCheck, X, User, Pencil, CheckCircle2 } from 'lucide-react';
 import { UserAccount } from '../types';
+import { db } from '../services/db';
 
 interface Props {
   users: UserAccount[];
@@ -101,13 +102,17 @@ const UserManager: React.FC<Props> = ({ users, setUsers }) => {
     setEditingUser(null);
   };
 
-  const removeUser = (id: string) => {
+  const removeUser = async (id: string) => {
     if (users.length === 1) {
       alert("Deve haver pelo menos um administrador no sistema.");
       return;
     }
-    if (confirm("Deseja realmente remover o acesso deste usuário?")) {
+    if (confirm("Deseja realmente remover o acesso deste usuário? Esta ação também removerá os dados da nuvem.")) {
       setUsers(prev => prev.filter(u => u.id !== id));
+      const result = await db.remove('users', id);
+      if (!result?.success) {
+        alert("Removido localmente, mas houve um erro ao sincronizar com a nuvem.");
+      }
     }
   };
 

@@ -38,11 +38,15 @@ const BudgetSearch: React.FC<Props> = ({ orders, setOrders, customers, company, 
     });
   }, [orders, searchBy, clientTerm, startDate, endDate]);
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Deseja realmente excluir este orçamento definitivamente? Esta ação também removerá os dados da nuvem.")) {
       setOrders(prev => prev.filter(o => o.id !== id));
-      db.remove('orders', id);
-      notify("Orçamento removido com sucesso.");
+      const result = await db.remove('orders', id);
+      if (result?.success) {
+        notify("Orçamento removido da nuvem com sucesso.");
+      } else {
+        notify("Removido localmente, mas houve um erro ao sincronizar com a nuvem.", "error");
+      }
     }
   };
 

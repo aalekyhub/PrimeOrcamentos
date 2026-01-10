@@ -340,10 +340,16 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                   setShowForm(true);
                 }} className="p-2 text-slate-300 hover:text-blue-600 transition-colors bg-slate-50 rounded-xl"><Pencil className="w-4 h-4" /></button>
                 <button onClick={() => handlePrintPDF(budget)} className="p-2 text-slate-300 hover:text-slate-900 transition-colors bg-slate-50 rounded-xl"><Printer className="w-4 h-4" /></button>
-                <button onClick={() => {
+                <button onClick={async () => {
                   if (confirm("Deseja excluir este orçamento? Esta ação também removerá os dados da nuvem.")) {
-                    setOrders(prev => prev.filter(o => o.id !== budget.id));
-                    db.remove('orders', budget.id);
+                    const idToDelete = budget.id;
+                    setOrders(prev => prev.filter(o => o.id !== idToDelete));
+                    const result = await db.remove('orders', idToDelete);
+                    if (result?.success) {
+                      notify("Orçamento removido da nuvem com sucesso.");
+                    } else {
+                      notify("Removido localmente, mas houve um erro ao sincronizar com a nuvem.", "error");
+                    }
                   }
                 }} className="p-2 text-slate-300 hover:text-rose-600 transition-colors bg-slate-50 rounded-xl"><Trash2 className="w-4 h-4" /></button>
               </div>

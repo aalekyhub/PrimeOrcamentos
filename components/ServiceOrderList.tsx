@@ -88,10 +88,15 @@ const ServiceOrderList: React.FC<Props> = ({ orders, setOrders, setTransactions,
     resetForm();
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Tem certeza que deseja excluir este registro permanentemente? Esta ação também removerá os dados da nuvem.")) {
       setOrders(prev => prev.filter(o => o.id !== id));
-      db.remove('orders', id);
+      const result = await db.remove('orders', id);
+      if (result?.success) {
+        // notify("Registro removido da nuvem com sucesso."); // Opcional, já temos o feedback visual do sumiço
+      } else {
+        alert("Removido localmente, mas houve um erro ao sincronizar com a nuvem. Verifique o console.");
+      }
     }
   };
 

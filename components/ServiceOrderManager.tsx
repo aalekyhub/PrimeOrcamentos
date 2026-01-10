@@ -363,10 +363,16 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                     setDeliveryTime(order.deliveryTime || '');
                     setShowForm(true);
                   }} className="p-2 text-slate-400 hover:text-blue-600 transition-colors"><Pencil className="w-4 h-4" /></button>
-                  <button onClick={() => {
+                  <button onClick={async () => {
                     if (confirm("Excluir esta O.S.? Esta ação também removerá os dados da nuvem.")) {
-                      setOrders(p => p.filter(x => x.id !== order.id));
-                      db.remove('orders', order.id);
+                      const idToDelete = order.id;
+                      setOrders(p => p.filter(x => x.id !== idToDelete));
+                      const result = await db.remove('orders', idToDelete);
+                      if (result?.success) {
+                        notify("O.S. removida da nuvem com sucesso.");
+                      } else {
+                        notify("Removido localmente, mas houve um erro ao sincronizar com a nuvem.", "error");
+                      }
                     }
                   }} className="p-2 text-rose-300 hover:text-rose-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
                 </td>
