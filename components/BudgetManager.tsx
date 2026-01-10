@@ -122,9 +122,10 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           
           @media print {
             body { background: white !important; }
-            .a4-container { box-shadow: none !important; border: none !important; padding: 0 !important; }
+            .a4-container { box-shadow: none !important; border: none !important; padding: 0 !important; min-height: 297mm; position: relative; }
             .no-print { display: none !important; }
             * { box-shadow: none !important; }
+            .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 10mm; text-align: center; font-size: 8px; font-weight: bold; color: #94a3b8; text-transform: uppercase; }
           }
         </style>
       </head>
