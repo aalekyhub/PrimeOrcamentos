@@ -4,6 +4,7 @@ import { Plus, Search, Trash2, Pencil, Briefcase, DollarSign, Tag, X, Scale } fr
 import { CatalogService, CompanyProfile } from '../types';
 import { useNotify } from './ToastProvider';
 import { checkDuplicateService } from '../services/validation';
+import { db } from '../services/db';
 
 interface Props {
   services: CatalogService[];
@@ -187,7 +188,12 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
                     <Pencil className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={() => setServices(prev => prev.filter(s => s.id !== service.id))}
+                    onClick={() => {
+                      if (confirm("Deseja excluir este serviço do catálogo? Esta ação também removerá os dados da nuvem.")) {
+                        setServices(prev => prev.filter(s => s.id !== service.id));
+                        db.remove('catalog', service.id);
+                      }
+                    }}
                     className="p-2 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-100"
                   >
                     <Trash2 className="w-4 h-4" />

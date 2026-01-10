@@ -9,6 +9,7 @@ import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, Compa
 import { useNotify } from './ToastProvider';
 import CustomerManager from './CustomerManager';
 import ServiceCatalog from './ServiceCatalog';
+import { db } from '../services/db';
 
 interface Props {
   orders: ServiceOrder[];
@@ -283,6 +284,12 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
               <div className="flex gap-1">
                 <button onClick={() => { setEditingBudgetId(budget.id); setSelectedCustomerId(budget.customerId); setItems(budget.items); setProposalTitle(budget.description); setDescriptionBlocks(budget.descriptionBlocks || []); setPaymentTerms(budget.paymentTerms || ''); setDeliveryTime(budget.deliveryTime || ''); setShowForm(true); }} className="p-2 text-slate-300 hover:text-blue-600 transition-colors bg-slate-50 rounded-xl"><Pencil className="w-4 h-4" /></button>
                 <button onClick={() => handlePrintPDF(budget)} className="p-2 text-slate-300 hover:text-slate-900 transition-colors bg-slate-50 rounded-xl"><Printer className="w-4 h-4" /></button>
+                <button onClick={() => {
+                  if (confirm("Deseja excluir este orçamento? Esta ação também removerá os dados da nuvem.")) {
+                    setOrders(prev => prev.filter(o => o.id !== budget.id));
+                    db.remove('orders', budget.id);
+                  }
+                }} className="p-2 text-slate-300 hover:text-rose-600 transition-colors bg-slate-50 rounded-xl"><Trash2 className="w-4 h-4" /></button>
               </div>
             </div>
           </div>

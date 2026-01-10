@@ -116,19 +116,10 @@ const AppContent: React.FC = () => {
 
   const [currentUser, setCurrentUser] = useState<UserAccount | null>(() => db.load(STORAGE_KEYS.SESSION, null));
   const [users, setUsers] = useState<UserAccount[]>(() => db.load(STORAGE_KEYS.USERS, INITIAL_USERS));
-  const [orders, setOrders] = useState<ServiceOrder[]>(() => {
-    const data = db.load(STORAGE_KEYS.ORDERS, []);
-    return data.length === 0 ? [SAMPLE_ORDER] : data;
-  });
+  const [orders, setOrders] = useState<ServiceOrder[]>(() => db.load(STORAGE_KEYS.ORDERS, []));
   const [transactions, setTransactions] = useState<Transaction[]>(() => db.load(STORAGE_KEYS.TRANSACTIONS, []));
-  const [customers, setCustomers] = useState<Customer[]>(() => {
-    const data = db.load(STORAGE_KEYS.CUSTOMERS, []);
-    return data.length === 0 ? [SAMPLE_CUSTOMER] : data;
-  });
-  const [catalog, setCatalog] = useState<CatalogService[]>(() => {
-    const data = db.load(STORAGE_KEYS.CATALOG, []);
-    return data.length === 0 ? [SAMPLE_SERVICE] : data;
-  });
+  const [customers, setCustomers] = useState<Customer[]>(() => db.load(STORAGE_KEYS.CUSTOMERS, []));
+  const [catalog, setCatalog] = useState<CatalogService[]>(() => db.load(STORAGE_KEYS.CATALOG, []));
   const [company, setCompany] = useState<CompanyProfile>(() => db.load(STORAGE_KEYS.COMPANY, INITIAL_COMPANY));
 
   const handleManualSync = async () => {

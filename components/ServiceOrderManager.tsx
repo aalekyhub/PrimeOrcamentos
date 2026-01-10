@@ -7,6 +7,7 @@ import {
 import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile } from '../types';
 import { useNotify } from './ToastProvider';
 import CustomerManager from './CustomerManager';
+import { db } from '../services/db';
 
 interface Props {
   orders: ServiceOrder[];
@@ -290,7 +291,12 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                 <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button onClick={() => handlePrintOS(order)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors"><Printer className="w-4 h-4" /></button>
                   <button onClick={() => { setEditingOrderId(order.id); setSelectedCustomerId(order.customerId); setItems(order.items); setOsTitle(order.description); setDiagnosis(order.serviceDescription || ''); setBrand(order.equipmentBrand || ''); setModel(order.equipmentModel || ''); setSerial(order.equipmentSerialNumber || ''); setDeliveryDate(order.dueDate); setShowForm(true); }} className="p-2 text-slate-400 hover:text-blue-600 transition-colors"><Pencil className="w-4 h-4" /></button>
-                  <button onClick={() => confirm("Excluir esta O.S.?") && setOrders(p => p.filter(x => x.id !== order.id))} className="p-2 text-rose-300 hover:text-rose-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                  <button onClick={() => {
+                    if (confirm("Excluir esta O.S.? Esta ação também removerá os dados da nuvem.")) {
+                      setOrders(p => p.filter(x => x.id !== order.id));
+                      db.remove('orders', order.id);
+                    }
+                  }} className="p-2 text-rose-300 hover:text-rose-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
                 </td>
               </tr>
             ))}
