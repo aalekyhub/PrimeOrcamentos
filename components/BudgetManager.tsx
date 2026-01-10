@@ -130,6 +130,12 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       </head>
       <body class="no-scrollbar">
         <div class="a4-container">
+          <!-- CUSTOM TOP HEADER (REPLACING BROWSER HEADER) -->
+          <div class="flex justify-between items-end mb-4 border-b-2 border-slate-900 pb-2">
+            <span class="text-[8px] font-bold text-slate-400 uppercase tracking-widest">${new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+            <span class="text-[8px] font-bold text-slate-900 uppercase tracking-widest">Proposta Comercial ${budget.id}</span>
+          </div>
+
           <!-- HEADER -->
           <div class="flex justify-between items-start mb-6">
             <div class="flex gap-4">
@@ -156,7 +162,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
             </div>
           </div>
 
-          <div class="border-b-2 border-slate-900 mb-6"></div>
+
 
           <!-- CLIENTE -->
           <div class="mb-6 grid grid-cols-2 gap-4">
