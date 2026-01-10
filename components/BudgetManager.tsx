@@ -105,7 +105,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Proposta Comercial ${budget.id}</title>
+        <title>Páginas</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
         <style>
@@ -131,6 +131,12 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       </head>
       <body class="no-scrollbar">
         <div class="a4-container">
+          <!-- CABEÇALHO ESCURO (LETRAS BRANCAS) -->
+          <div class="bg-slate-900 text-white px-4 py-1.5 flex justify-between items-center mb-6">
+            <span class="text-[8px] font-bold uppercase tracking-widest opacity-80">${new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+            <span class="text-[8px] font-bold uppercase tracking-widest">Proposta Comercial ${budget.id}</span>
+          </div>
+
           <!-- HEADER -->
           <div class="flex justify-between items-start mb-6">
             <div class="flex gap-4">
@@ -252,6 +258,9 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
               </div>
             </div>
             <p class="text-[8px] font-bold text-slate-300 uppercase italic text-right">Documento comercial gerado eletronicamente por ${company.name}</p>
+          <!-- RODAPÉ DE PÁGINA -->
+          <div class="print-footer no-screen">
+            <span>Página 1 de 1</span>
           </div>
         </div>
 

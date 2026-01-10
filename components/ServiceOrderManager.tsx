@@ -108,7 +108,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
       <!DOCTYPE html>
       <html>
       <head>
-        <title>O.S. ${order.id}</title>
+        <title>Páginas</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
         <style>
@@ -124,14 +124,21 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
           
           @media print {
             body { background: white !important; }
-            .a4-container { box-shadow: none !important; border: none !important; padding: 0 !important; }
+            .a4-container { box-shadow: none !important; border: none !important; padding: 0 !important; min-height: 297mm; position: relative; }
             .no-print { display: none !important; }
             * { box-shadow: none !important; }
+            .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 10mm; text-align: center; font-size: 8px; font-weight: bold; color: #94a3b8; text-transform: uppercase; }
           }
         </style>
       </head>
       <body class="no-scrollbar">
         <div class="a4-container">
+          <!-- CABEÇALHO ESCURO (LETRAS BRANCAS) -->
+          <div class="bg-slate-900 text-white px-4 py-1.5 flex justify-between items-center mb-6">
+            <span class="text-[8px] font-bold uppercase tracking-widest opacity-80">${new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+            <span class="text-[8px] font-bold uppercase tracking-widest">Ordem de Serviço ${order.id}</span>
+          </div>
+
           <!-- HEADER -->
           <div class="flex justify-between items-start mb-8">
             <div class="flex gap-4">
@@ -225,6 +232,10 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
               </div>
               <p class="text-[8px] font-bold text-slate-300 uppercase italic text-right">Documento técnico gerado eletronicamente</p>
             </div>
+          </div>
+          <!-- RODAPÉ DE PÁGINA -->
+          <div class="print-footer no-screen">
+            <span>Página 1 de 1</span>
           </div>
         </div>
         <script>window.onload=()=>{setTimeout(()=>{window.print();window.close();},500);}</script>
