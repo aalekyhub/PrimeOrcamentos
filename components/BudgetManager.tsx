@@ -110,7 +110,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
         <style>
           body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
-          @page { size: A4; margin: 0; }
+          @page { size: A4; margin: 0 !important; }
           .a4-container { width: 100%; margin: 0; background: white; }
           .logo-box { width: 64px; height: 64px; background: #2563eb; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; }
           .avoid-break { break-inside: avoid; page-break-inside: avoid; }

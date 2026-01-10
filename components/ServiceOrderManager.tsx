@@ -113,7 +113,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
         <style>
           body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
-          @page { size: A4; margin: 0; }
+          @page { size: A4; margin: 0 !important; }
           .a4-container { width: 100%; margin: 0; background: white; }
           .avoid-break { break-inside: avoid; page-break-inside: avoid; }
           
