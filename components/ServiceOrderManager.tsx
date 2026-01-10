@@ -133,12 +133,6 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
       </head>
       <body class="no-scrollbar">
         <div class="a4-container">
-          <!-- CABEÇALHO ESCURO (LETRAS BRANCAS) -->
-          <div class="bg-slate-900 text-white px-4 py-1.5 flex justify-between items-center mb-6">
-            <span class="text-[8px] font-bold uppercase tracking-widest opacity-80">${new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
-            <span class="text-[8px] font-bold uppercase tracking-widest">Ordem de Serviço ${order.id}</span>
-          </div>
-
           <!-- HEADER -->
           <div class="flex justify-between items-start mb-8">
             <div class="flex gap-4">
