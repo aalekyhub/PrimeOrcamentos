@@ -205,9 +205,17 @@ const CompanySettings: React.FC<Props> = ({ company, setCompany }) => {
                   <button onClick={openWhatsApp} className="absolute right-3 top-3 text-emerald-500"><MessageCircle className="w-5 h-5" /></button>
                 </div>
               </div>
-              <div class="md:col-span-1">
-                <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-tighter">Validade Padrão da Proposta (Dias)</label>
+              <div className="md:col-span-1">
+                <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-tighter">Validade da Proposta (Dias)</label>
                 <input type="number" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-bold text-slate-900" value={company.defaultProposalValidity || 15} onChange={e => setCompany({ ...company, defaultProposalValidity: Number(e.target.value) })} />
+              </div>
+              <div className="md:col-span-1">
+                <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-tighter">Margem Superior PDF (mm)</label>
+                <input type="number" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-bold text-slate-900" value={company.printMarginTop || 15} onChange={e => setCompany({ ...company, printMarginTop: Number(e.target.value) })} />
+              </div>
+              <div className="md:col-span-1">
+                <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-tighter">Margem Inferior PDF (mm)</label>
+                <input type="number" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-bold text-slate-900" value={company.printMarginBottom || 15} onChange={e => setCompany({ ...company, printMarginBottom: Number(e.target.value) })} />
               </div>
               <div class="md:col-span-2">
                 <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-tighter">Endereço</label>
