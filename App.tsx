@@ -182,11 +182,9 @@ const AppContent: React.FC = () => {
           setOrders(prev => {
             const localMap = new Map<string, ServiceOrder>(prev.map(o => [o.id, o]));
             (cloudData.orders as ServiceOrder[]).forEach((o: ServiceOrder) => {
-              // PRIORIZA LOCAL: Se o ID já existir no computador, não sobrescritve com o da nuvem
-              // Isso resolve o sumiço no F5 se a nuvem ainda tiver o dado antigo.
-              if (!localMap.has(o.id)) {
-                localMap.set(o.id, o);
-              }
+              // UNIFICAÇÃO (Sugestão do Usuário): Nuvem tem prioridade para IDs existentes.
+              // Novos itens locais (ainda não na nuvem) são preservados na inicialização do Map.
+              localMap.set(o.id, o);
             });
             return Array.from(localMap.values()).sort((a, b) =>
               new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
@@ -198,9 +196,7 @@ const AppContent: React.FC = () => {
           setTransactions(prev => {
             const localMap = new Map<string, Transaction>(prev.map(t => [t.id, t]));
             (cloudData.transactions as Transaction[]).forEach((t: Transaction) => {
-              if (!localMap.has(t.id)) {
-                localMap.set(t.id, t);
-              }
+              localMap.set(t.id, t);
             });
             return Array.from(localMap.values()).sort((a, b) =>
               new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()
