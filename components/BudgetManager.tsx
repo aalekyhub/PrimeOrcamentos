@@ -89,7 +89,8 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     };
 
     const emissionDate = formatDate(budget.createdAt);
-    const validityDate = budget.dueDate ? formatDate(budget.dueDate) : formatDate(new Date(new Date(budget.createdAt || Date.now()).getTime() + 30 * 24 * 60 * 60 * 1000).toISOString());
+    const validityDays = company.defaultProposalValidity || 15;
+    const validityDate = budget.dueDate ? formatDate(budget.dueDate) : formatDate(new Date(new Date(budget.createdAt || Date.now()).getTime() + validityDays * 24 * 60 * 60 * 1000).toISOString());
 
     const itemsHtml = budget.items.map((item: any) => `
       <tr style="border-bottom: 1px solid #f1f5f9;">
@@ -108,15 +109,26 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
         <style>
-          body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-          @page { size: A4; margin: 0; }
-          .a4-container { width: 210mm; padding: 10mm; margin: auto; background: white; }
+          body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
+          @page { size: A4; margin: 15mm; }
+          .a4-container { width: 100%; margin: 0; background: white; }
           .logo-box { width: 64px; height: 64px; background: #2563eb; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; }
           .avoid-break { break-inside: avoid; page-break-inside: avoid; }
+          
+          @media screen {
+            body { background: #f1f5f9; padding: 40px 0; }
+            .a4-container { width: 210mm; margin: auto; padding: 15mm; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; }
+          }
+          
+          @media print {
+            body { background: white; }
+            .a4-container { box-shadow: none !important; padding: 0 !important; }
+            .no-print { display: none !important; }
+          }
         </style>
       </head>
-      <body class="bg-gray-100 pb-10">
-        <div class="a4-container shadow-2xl">
+      <body class="no-scrollbar">
+        <div class="a4-container">
           <!-- HEADER -->
           <div class="flex justify-between items-start mb-6">
             <div class="flex gap-4">
@@ -265,7 +277,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       status: OrderStatus.PENDING,
       items, descriptionBlocks, totalAmount, paymentTerms, deliveryTime,
       createdAt: existingBudget?.createdAt || new Date().toISOString().split('T')[0],
-      dueDate: existingBudget?.dueDate || new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      dueDate: existingBudget?.dueDate || new Date(Date.now() + (company.defaultProposalValidity || 15) * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
     };
 
     setOrders(prev => editingBudgetId ? prev.map(o => o.id === editingBudgetId ? data : o) : [data, ...prev]);

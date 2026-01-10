@@ -36,6 +36,7 @@ export interface CompanyProfile {
   nameFontSize: number; // Font size in pixels
   logoSize: number; // Logo height in pixels
   customUnits: MeasurementUnit[];
+  defaultProposalValidity?: number; // Days
 }
 
 export interface Customer {
@@ -62,7 +63,7 @@ export interface CatalogService {
   name: string;
   description: string;
   basePrice: number;
-  unit: string; 
+  unit: string;
   category: string;
 }
 
@@ -71,7 +72,7 @@ export interface ServiceItem {
   description: string;
   quantity: number;
   unitPrice: number;
-  unit?: string; 
+  unit?: string;
   type: 'Serviço' | 'Material';
 }
 
@@ -86,14 +87,14 @@ export interface ServiceOrder {
   customerId: string;
   customerName: string;
   customerEmail: string;
-  description: string; 
-  serviceDescription?: string; 
+  description: string;
+  serviceDescription?: string;
   descriptionBlocks?: DescriptionBlock[]; // Novo campo para descrição rica
   paymentTerms?: string;
   deliveryTime?: string;
   status: OrderStatus;
   items: ServiceItem[];
-  images?: string[]; 
+  images?: string[];
   signature?: string; // Base64 signature image
   createdAt: string;
   dueDate: string;
