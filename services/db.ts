@@ -11,6 +11,12 @@ const supabase = (SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL.startsWith('
 export const db = {
   isConnected: () => !!supabase,
 
+  generateId(prefix: string) {
+    const timestamp = Date.now().toString().slice(-6);
+    const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+    return `${prefix}-${timestamp}-${random}`;
+  },
+
   async save(key: string, data: any) {
     localStorage.setItem(key, JSON.stringify(data));
 
