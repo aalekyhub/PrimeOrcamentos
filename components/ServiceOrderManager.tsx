@@ -108,26 +108,34 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Páginas</title>
+        <title> </title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
         <style>
           body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
-          @page { size: A4; margin: 15mm; }
-          .a4-container { width: 100%; margin: 0; background: white; }
+          @page { size: A4; margin: 0 !important; }
+          .a4-container { 
+            width: 100%; 
+            margin: 0; 
+            background: white; 
+            padding-top: ${company.printMarginTop || 15}mm !important;
+            padding-bottom: ${company.printMarginBottom || 15}mm !important;
+            padding-left: 15mm !important;
+            padding-right: 15mm !important;
+          }
           .avoid-break { break-inside: avoid; page-break-inside: avoid; }
           
           @media screen {
             body { background: #f1f5f9; padding: 40px 0; }
-            .a4-container { width: 210mm; margin: auto; padding: 15mm; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; }
+            .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; }
           }
           
           @media print {
             body { background: white !important; }
-            .a4-container { box-shadow: none !important; border: none !important; padding: 0 !important; min-height: 297mm; position: relative; }
+            .a4-container { box-shadow: none !important; border: none !important; min-height: 297mm; position: relative; }
             .no-print { display: none !important; }
             * { box-shadow: none !important; }
-            .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 10mm; text-align: center; font-size: 8px; font-weight: bold; color: #94a3b8; text-transform: uppercase; }
+            .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: #94a3b8; text-transform: uppercase; }
           }
         </style>
       </head>
