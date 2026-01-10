@@ -113,6 +113,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
           body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           @page { size: A4; margin: 0; }
           .a4-container { width: 210mm; min-height: 297mm; padding: 15mm; margin: auto; background: white; }
+          .avoid-break { break-inside: avoid; page-break-inside: avoid; }
         </style>
       </head>
       <body>
@@ -179,25 +180,28 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
             <p class="text-[9px] text-slate-700 leading-tight"><b>• GARANTIA:</b> Conforme Art. 26 do CDC, este serviço possui garantia técnica de 90 dias.</p>
             <p class="text-[9px] text-rose-600 font-bold mt-1 uppercase leading-tight"><b>• ADVERTÊNCIA:</b> Equipamentos não retirados em até 30 dias serão considerados abandonados.</p>
           </div>
-          <!-- SIGNATURE -->
-          <div class="grid grid-cols-2 gap-16 px-10 mb-12">
-            <div class="text-center border-t border-slate-300 pt-3">
-              <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Responsável Técnico</p>
-              <p class="text-[10px] font-black uppercase text-slate-900">${company.name}</p>
+          <!-- SIGNATURE AND FOOTER -->
+          <div class="avoid-break mt-12">
+            <!-- SIGNATURE -->
+            <div class="grid grid-cols-2 gap-16 px-10 mb-12">
+              <div class="text-center border-t border-slate-300 pt-3">
+                <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Responsável Técnico</p>
+                <p class="text-[10px] font-black uppercase text-slate-900">${company.name}</p>
+              </div>
+              <div class="text-center border-t border-slate-300 pt-3 relative">
+                 ${order.signature ? `<img src="${order.signature}" style="max-height: 50px; position: absolute; top: -45px; left: 50%; transform: translateX(-50%);">` : ''}
+                 <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Assinatura do Cliente</p>
+                 <p class="text-[10px] font-black uppercase text-slate-900">${order.customerName}</p>
+              </div>
             </div>
-            <div class="text-center border-t border-slate-300 pt-3 relative">
-               ${order.signature ? `<img src="${order.signature}" style="max-height: 50px; position: absolute; top: -45px; left: 50%; transform: translateX(-50%);">` : ''}
-               <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Assinatura do Cliente</p>
-               <p class="text-[10px] font-black uppercase text-slate-900">${order.customerName}</p>
-            </div>
-          </div>
 
-          <!-- FOOTER -->
-          <div class="flex justify-between items-end border-t-4 border-slate-900 pt-4">
-            <div>
-              <p class="text-xs font-black text-slate-900 uppercase leading-none">${company.name}</p>
+            <!-- FOOTER -->
+            <div class="flex justify-between items-end border-t-4 border-slate-900 pt-4">
+              <div>
+                <p class="text-xs font-black text-slate-900 uppercase leading-none">${company.name}</p>
+              </div>
+              <p class="text-[8px] font-bold text-slate-300 uppercase italic text-right">Documento técnico gerado eletronicamente</p>
             </div>
-            <p class="text-[8px] font-bold text-slate-300 uppercase italic text-right">Documento técnico gerado eletronicamente</p>
           </div>
         </div>
         <script>window.onload=()=>{setTimeout(()=>{window.print();window.close();},500);}</script>

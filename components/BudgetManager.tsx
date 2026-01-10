@@ -103,6 +103,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           @page { size: A4; margin: 0; }
           .a4-container { width: 210mm; min-height: 297mm; padding: 15mm; margin: auto; background: white; }
           .logo-box { width: 64px; height: 64px; background: #2563eb; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; }
+          .avoid-break { break-inside: avoid; page-break-inside: avoid; }
         </style>
       </head>
       <body class="bg-gray-100 pb-10">
@@ -154,9 +155,9 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
               <h3 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4 border-b pb-1">Descrição Técnica / Escopo</h3>
               <div class="space-y-4">
                 ${budget.descriptionBlocks.map((block: any) => block.type === 'text' ? `
-                  <p class="text-[10px] text-slate-700 leading-relaxed italic">${block.content}</p>
+                  <p class="text-[10px] text-slate-700 leading-relaxed italic avoid-break">${block.content}</p>
                 ` : `
-                  <div class="py-2 flex justify-center"><img src="${block.content}" class="max-w-[80%] h-auto rounded-xl shadow-sm border border-slate-100"></div>
+                  <div class="py-2 flex justify-center avoid-break"><img src="${block.content}" class="max-w-[80%] h-auto rounded-xl shadow-sm border border-slate-100"></div>
                 `).join('')}
               </div>
             </div>
@@ -202,7 +203,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           </div>
 
           <!-- TERMOS LEGAIS -->
-          <div class="bg-blue-50/50 border border-blue-100 p-8 rounded-3xl mb-12 relative overflow-hidden">
+          <div class="bg-blue-50/50 border border-blue-100 p-8 rounded-3xl mb-12 relative overflow-hidden avoid-break">
             <div class="flex items-center gap-2 mb-4">
               <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               <h3 class="text-[10px] font-black text-blue-600 uppercase tracking-widest">Termo de Aceite e Autorização Profissional</h3>
@@ -212,23 +213,26 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
             </p>
           </div>
 
-          <div class="border-b border-slate-200 mb-12"></div>
+          <!-- FOOTER / SIGNATURE SECTION -->
+          <div class="avoid-break mt-12">
+            <div class="border-b border-slate-200 mb-12"></div>
 
-          <!-- ASSINATURA -->
-          <div class="max-w-[300px] border-t border-slate-400 pt-2 mb-20">
-            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Assinatura do Cliente / Aceite</p>
-          </div>
-
-          <!-- FOOTER -->
-          <div class="flex justify-between items-end border-t-4 border-slate-900 pt-4">
-            <div>
-              <p class="text-xs font-black text-slate-900 uppercase leading-none">${company.name}</p>
-              <div class="mt-2 flex gap-1">
-                <span class="text-[8px] font-black text-slate-400 uppercase">DATA DO ACEITE:</span>
-                <span class="text-[8px] font-black text-slate-300 uppercase underline decoration-slate-200 decoration-2 underline-offset-4">____/____/________</span>
-              </div>
+            <!-- ASSINATURA -->
+            <div class="max-w-[300px] border-t border-slate-400 pt-2 mb-20">
+              <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Assinatura do Cliente / Aceite</p>
             </div>
-            <p class="text-[8px] font-bold text-slate-300 uppercase italic">Documento gerado eletronicamente por ${company.name}</p>
+
+            <!-- FOOTER -->
+            <div class="flex justify-between items-end border-t-4 border-slate-900 pt-4">
+              <div>
+                <p class="text-xs font-black text-slate-900 uppercase leading-none">${company.name}</p>
+                <div class="mt-2 flex gap-1">
+                  <span class="text-[8px] font-black text-slate-400 uppercase">DATA DO ACEITE:</span>
+                  <span class="text-[8px] font-black text-slate-300 uppercase underline decoration-slate-200 decoration-2 underline-offset-4">____/____/________</span>
+                </div>
+              </div>
+              <p class="text-[8px] font-bold text-slate-300 uppercase italic text-right">Documento comercial gerado eletronicamente por ${company.name}</p>
+            </div>
           </div>
         </div>
 
