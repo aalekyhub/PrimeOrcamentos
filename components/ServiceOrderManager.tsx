@@ -114,7 +114,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
         <style>
           body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           @page { size: A4; margin: 0; }
-          .a4-container { width: 210mm; padding: 15mm; margin: auto; background: white; }
+          .a4-container { width: 210mm; padding: 10mm; margin: auto; background: white; }
           .avoid-break { break-inside: avoid; page-break-inside: avoid; }
         </style>
       </head>
@@ -153,8 +153,8 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
               </div>
             </div>
           </div>
-          <div class="border-t-[2px] border-slate-900 mb-6"></div>
-          <div class="grid grid-cols-2 gap-4 mb-6">
+          <div class="border-t-[2px] border-slate-900 mb-4"></div>
+          <div class="grid grid-cols-2 gap-4 mb-4">
             <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
               <h4 class="text-[7px] font-black text-slate-400 uppercase tracking-widest mb-1">CLIENTE / DESTINATÁRIO</h4>
               <p class="text-[11px] font-black text-slate-900 uppercase">${order.customerName}</p>
@@ -192,9 +192,9 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
             <p class="text-[9px] text-rose-600 font-bold mt-1 uppercase leading-tight"><b>• ADVERTÊNCIA:</b> Equipamentos não retirados em até 30 dias serão considerados abandonados.</p>
           </div>
           <!-- SIGNATURE AND FOOTER -->
-          <div class="avoid-break mt-12">
+          <div class="mt-8">
             <!-- SIGNATURE -->
-            <div class="grid grid-cols-2 gap-16 px-10 mb-12">
+            <div class="grid grid-cols-2 gap-16 px-10 mb-8 avoid-break">
               <div class="text-center border-t border-slate-300 pt-3">
                 <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Responsável Técnico</p>
                 <p class="text-[10px] font-black uppercase text-slate-900">${company.name}</p>
@@ -207,7 +207,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
             </div>
 
             <!-- FOOTER -->
-            <div class="flex justify-between items-end border-t-4 border-slate-900 pt-4">
+            <div class="flex justify-between items-end border-t-4 border-slate-900 pt-4 avoid-break">
               <div>
                 <p class="text-xs font-black text-slate-900 uppercase leading-none">${company.name}</p>
               </div>

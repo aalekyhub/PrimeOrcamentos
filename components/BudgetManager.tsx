@@ -110,7 +110,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         <style>
           body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           @page { size: A4; margin: 0; }
-          .a4-container { width: 210mm; padding: 15mm; margin: auto; background: white; }
+          .a4-container { width: 210mm; padding: 10mm; margin: auto; background: white; }
           .logo-box { width: 64px; height: 64px; background: #2563eb; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; }
           .avoid-break { break-inside: avoid; page-break-inside: avoid; }
         </style>
@@ -118,7 +118,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       <body class="bg-gray-100 pb-10">
         <div class="a4-container shadow-2xl">
           <!-- HEADER -->
-          <div class="flex justify-between items-start mb-8">
+          <div class="flex justify-between items-start mb-6">
             <div class="flex gap-4">
               <div class="w-16 h-16 shrink-0 flex items-center justify-center overflow-hidden">
                 ${company.logo ? `<img src="${company.logo}" style="height: 100%; object-fit: contain;">` : `
@@ -143,10 +143,10 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
             </div>
           </div>
 
-          <div class="border-b-2 border-slate-900 mb-8"></div>
+          <div class="border-b-2 border-slate-900 mb-6"></div>
 
           <!-- CLIENTE -->
-          <div class="mb-8 grid grid-cols-2 gap-4">
+          <div class="mb-6 grid grid-cols-2 gap-4">
             <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
               <h3 class="text-[9px] font-black text-blue-700 uppercase tracking-widest mb-1.5 ml-1">Cliente / Destinatário</h3>
               <p class="text-xs font-black text-slate-900 uppercase">${budget.customerName}</p>
@@ -190,13 +190,13 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           </div>
 
           <!-- TOTAL BAR -->
-          <div class="bg-slate-900 text-white p-6 rounded-xl flex justify-between items-center mb-8">
+          <div class="bg-slate-900 text-white p-6 rounded-xl flex justify-between items-center mb-6">
             <span class="font-black text-xs tracking-widest uppercase">Investimento Total:</span>
             <span class="text-3xl font-black tracking-tighter text-blue-400">R$ ${budget.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
           </div>
 
           <!-- FORMA PGTO / PRAZO -->
-          <div class="grid grid-cols-2 gap-4 mb-8">
+          <div class="grid grid-cols-2 gap-4 mb-6">
             <div class="space-y-4">
               <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 h-full">
                 <h3 class="text-[9px] font-black text-blue-700 uppercase tracking-widest mb-3 border-b border-slate-200 pb-1">Forma de Pagamento</h3>
@@ -212,7 +212,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           </div>
 
           <!-- TERMOS LEGAIS -->
-          <div class="bg-blue-50/50 border border-blue-100 p-8 rounded-3xl mb-12 relative overflow-hidden avoid-break">
+          <div class="bg-blue-50/50 border border-blue-100 p-8 rounded-3xl mb-6 relative overflow-hidden avoid-break">
             <div class="flex items-center gap-2 mb-4">
               <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               <h3 class="text-[10px] font-black text-blue-600 uppercase tracking-widest">Termo de Aceite e Autorização Profissional</h3>
@@ -222,26 +222,23 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
             </p>
           </div>
 
-          <!-- FOOTER / SIGNATURE SECTION -->
-          <div class="avoid-break mt-6">
-            <div class="border-b border-slate-200 mb-8"></div>
+          <div class="border-b border-slate-200 mb-6"></div>
 
-            <!-- ASSINATURA -->
-            <div class="max-w-[300px] border-t border-slate-400 pt-2 mb-12">
-              <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Assinatura do Cliente / Aceite</p>
-            </div>
+          <!-- ASSINATURA -->
+          <div class="max-w-[300px] border-t border-slate-400 pt-2 mb-10 avoid-break">
+            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Assinatura do Cliente / Aceite</p>
+          </div>
 
-            <!-- FOOTER -->
-            <div class="flex justify-between items-end border-t-4 border-slate-900 pt-4">
-              <div>
-                <p class="text-xs font-black text-slate-900 uppercase leading-none">${company.name}</p>
-                <div class="mt-2 flex gap-1">
-                  <span class="text-[8px] font-black text-slate-400 uppercase">DATA DO ACEITE:</span>
-                  <span class="text-[8px] font-black text-slate-300 uppercase underline decoration-slate-200 decoration-2 underline-offset-4">____/____/________</span>
-                </div>
+          <!-- FOOTER -->
+          <div class="flex justify-between items-end border-t-4 border-slate-900 pt-4 avoid-break">
+            <div>
+              <p class="text-xs font-black text-slate-900 uppercase leading-none">${company.name}</p>
+              <div class="mt-2 flex gap-1">
+                <span class="text-[8px] font-black text-slate-400 uppercase">DATA DO ACEITE:</span>
+                <span class="text-[8px] font-black text-slate-300 uppercase underline decoration-slate-200 decoration-2 underline-offset-4">____/____/________</span>
               </div>
-              <p class="text-[8px] font-bold text-slate-300 uppercase italic text-right">Documento comercial gerado eletronicamente por ${company.name}</p>
             </div>
+            <p class="text-[8px] font-bold text-slate-300 uppercase italic text-right">Documento comercial gerado eletronicamente por ${company.name}</p>
           </div>
         </div>
 
