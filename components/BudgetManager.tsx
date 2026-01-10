@@ -75,7 +75,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     }
   };
 
-  const handlePrintPDF = (budget: any) => {
+  const handlePrintPDF = (budget: any, mode: 'print' | 'pdf' = 'print') => {
     const customer = customers.find(c => c.id === budget.customerId) || { name: budget.customerName, address: 'Não informado', document: 'Documento não informado' };
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
@@ -278,11 +278,27 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
             </tfoot>
           </table>
 
-          <script>window.onload=()=>{setTimeout(()=>{window.print();window.close();},500);}</script>
-        </body>
-      </html>`;
     printWindow.document.write(html);
     printWindow.document.close();
+
+    if (mode === 'print') {
+      printWindow.onload = () => {
+        setTimeout(() => {
+          printWindow.print();
+          printWindow.close();
+        }, 500);
+      };
+    } else {
+      // Modo PDF: Traz a tela de impressão que permite salvar como PDF nativamente
+      // ou podemos usar html2pdf se preferir download direto. 
+      // Para manter a fidelidade do layout CSS (Tailwind/Inter), o window.print() é mais robusto.
+      printWindow.onload = () => {
+        setTimeout(() => {
+          printWindow.print();
+          printWindow.close();
+        }, 500);
+      };
+    }
   };
 
   const handleSave = async () => {
@@ -527,16 +543,21 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                     })} className="bg-slate-800 hover:bg-slate-700 text-white p-4 rounded-xl font-black uppercase text-[8px] flex flex-col items-center gap-1 transition-all border border-slate-700 group">
                       <Printer className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" /> IMPRIMIR
                     </button>
-                    <button onClick={() => notify("PDF Gerado!", "info")} className="bg-slate-800 hover:bg-slate-700 text-white p-4 rounded-xl font-black uppercase text-[8px] flex flex-col items-center gap-1 transition-all border border-slate-700 group">
+                    <button onClick={() => handlePrintPDF({
+                      customerId: selectedCustomerId,
+                      customerName: customers.find(c => c.id === selectedCustomerId)?.name || 'N/A',
+                      items, totalAmount, description: proposalTitle, descriptionBlocks, paymentTerms, deliveryTime,
+                      id: editingBudgetId || 'ORC-XXXX'
+                    }, 'pdf')} className="bg-slate-800 hover:bg-slate-700 text-white p-4 rounded-xl font-black uppercase text-[8px] flex flex-col items-center gap-1 transition-all border border-slate-700 group">
                       <FileText className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" /> PDF
                     </button>
                   </div>
                   <button
                     onClick={handleSave}
                     disabled={isSaving}
-                    className={`w-full ${isSaving ? 'bg-slate-600 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500'} text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[9px] shadow-xl transition-all flex items-center justify-center gap-2`}
+                    className={`w-full ${ isSaving ? 'bg-slate-600 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500' } text - white py - 4 rounded - xl font - black uppercase tracking - [0.15em] text - [11px] shadow - xl transition - all flex items - center justify - center gap - 2`}
                   >
-                    <Save className={`w-5 h-5 ${isSaving ? 'animate-pulse' : ''}`} />
+                    <Save className={`w - 5 h - 5 ${ isSaving ? 'animate-pulse' : '' } `} />
                     {isSaving ? 'SALVANDO...' : 'REGISTRAR ORÇAMENTO'}
                   </button>
                 </div>

@@ -111,7 +111,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
     }
   };
 
-  const handlePrintOS = (order: ServiceOrder) => {
+  const handlePrintOS = (order: ServiceOrder, mode: 'print' | 'pdf' = 'print') => {
     const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, address: 'Não informado', document: 'N/A' };
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
@@ -273,12 +273,25 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
             <tr><td><div style="height: ${company.printMarginBottom || 15}mm;"></div></td></tr>
           </tfoot>
         </table>
-        <script>window.onload=()=>{setTimeout(()=>{window.print();window.close();},500);}</script>
-      </body>
-      </html>
-    `;
     printWindow.document.write(html);
     printWindow.document.close();
+
+    if (mode === 'print') {
+      printWindow.onload = () => {
+        setTimeout(() => {
+          printWindow.print();
+          printWindow.close();
+        }, 500);
+      };
+    } else {
+      // Modo PDF: Traz a tela de impressão que permite salvar como PDF nativamente
+      printWindow.onload = () => {
+        setTimeout(() => {
+          printWindow.print();
+          printWindow.close();
+        }, 500);
+      };
+    }
   };
 
   const initCanvas = () => {
@@ -563,9 +576,9 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                     <button
                       onClick={handleSaveOS}
                       disabled={isSaving}
-                      className={`w-full ${isSaving ? 'bg-slate-600 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500'} text-white py-4 rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] shadow-[0_15px_30px_rgba(37,99,235,0.25)] transition-all flex items-center justify-center gap-3 active:scale-95 group`}
+                      className={`w-full ${ isSaving ? 'bg-slate-600 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500' } text - white py - 4 rounded - 2xl font - black uppercase text - [11px] tracking - [0.2em] shadow - [0_15px_30px_rgba(37, 99, 235, 0.25)] transition - all flex items - center justify - center gap - 3 active: scale - 95 group`}
                     >
-                      <Save className={`w-5 h-5 ${isSaving ? 'animate-pulse' : ''} group-hover:scale-110 transition-transform`} />
+                      <Save className={`w - 5 h - 5 ${ isSaving ? 'animate-pulse' : '' } group - hover: scale - 110 transition - transform`} />
                       {isSaving ? 'SALVANDO...' : 'SALVAR'}
                     </button>
                     <button onClick={() => {
@@ -576,7 +589,19 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                         items, totalAmount, equipmentBrand: brand, equipmentModel: model, equipmentSerialNumber: serial,
                         serviceDescription: diagnosis, createdAt: new Date().toISOString()
                       } as ServiceOrder;
-                      handlePrintOS(orderData);
+                      handlePrintOS(orderData, 'pdf');
+                    }} className="w-full bg-slate-800 hover:bg-slate-700 py-3.5 rounded-xl font-black uppercase text-[9px] flex items-center justify-center gap-2.5 transition-all border border-slate-700 active:scale-95 group">
+                      <FileText className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" /> PDF
+                    </button>
+                    <button onClick={() => {
+                      const orderData = {
+                        id: editingOrderId || 'ORC-TEMP',
+                        customerName: customers.find(c => c.id === selectedCustomerId)?.name || 'N/A',
+                        customerId: selectedCustomerId,
+                        items, totalAmount, equipmentBrand: brand, equipmentModel: model, equipmentSerialNumber: serial,
+                        serviceDescription: diagnosis, createdAt: new Date().toISOString()
+                      } as ServiceOrder;
+                      handlePrintOS(orderData, 'print');
                     }} className="w-full bg-slate-800 hover:bg-slate-700 py-3.5 rounded-xl font-black uppercase text-[9px] flex items-center justify-center gap-2.5 transition-all border border-slate-700 active:scale-95 group">
                       <Printer className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" /> IMPRIMIR
                     </button>
