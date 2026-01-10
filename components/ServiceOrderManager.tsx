@@ -24,6 +24,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
   const [showForm, setShowForm] = useState(false);
   const [showFullClientForm, setShowFullClientForm] = useState(false);
   const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const { notify } = useNotify();
 
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
@@ -59,6 +60,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
   };
 
   const handleSaveOS = async () => {
+    if (isSaving) return;
     const customer = customers.find(c => c.id === selectedCustomerId);
     if (!customer) { notify("Selecione um cliente", "error"); return; }
 
@@ -90,17 +92,22 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
     const newList = editingOrderId ? orders.map(o => o.id === editingOrderId ? data : o) : [data, ...orders];
     setOrders(newList);
 
-    // Salva imediatamente e aguarda a nuvem
-    const result = await db.save('serviflow_orders', newList);
+    setIsSaving(true);
+    try {
+      // Salva imediatamente e aguarda a nuvem
+      const result = await db.save('serviflow_orders', newList);
 
-    if (result?.success) {
-      notify(editingOrderId ? "O.S. atualizada e sincronizada!" : "Ordem de Serviço registrada e sincronizada!");
-      setEditingOrderId(null);
-      setShowForm(false);
-    } else {
-      notify("Salvo localmente. Erro ao sincronizar (veja o console)", "warning");
-      setEditingOrderId(null);
-      setShowForm(false);
+      if (result?.success) {
+        notify(editingOrderId ? "O.S. atualizada e sincronizada!" : "Ordem de Serviço registrada e sincronizada!");
+        setEditingOrderId(null);
+        setShowForm(false);
+      } else {
+        notify("Salvo localmente. Erro ao sincronizar (veja o console)", "warning");
+        setEditingOrderId(null);
+        setShowForm(false);
+      }
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -553,8 +560,13 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                   </div>
 
                   <div className="space-y-2">
-                    <button onClick={handleSaveOS} className="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] shadow-[0_15px_30px_rgba(37,99,235,0.25)] hover:bg-blue-500 transition-all flex items-center justify-center gap-3 active:scale-95 group">
-                      <Save className="w-5 h-5 group-hover:scale-110 transition-transform" /> SALVAR
+                    <button
+                      onClick={handleSaveOS}
+                      disabled={isSaving}
+                      className={`w-full ${isSaving ? 'bg-slate-600 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500'} text-white py-4 rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] shadow-[0_15px_30px_rgba(37,99,235,0.25)] transition-all flex items-center justify-center gap-3 active:scale-95 group`}
+                    >
+                      <Save className={`w-5 h-5 ${isSaving ? 'animate-pulse' : ''} group-hover:scale-110 transition-transform`} />
+                      {isSaving ? 'SALVANDO...' : 'SALVAR'}
                     </button>
                     <button onClick={() => {
                       const orderData = {

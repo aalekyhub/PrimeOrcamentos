@@ -2,7 +2,7 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
 import { CheckCircle2, AlertCircle, X, Info } from 'lucide-react';
 
-type ToastType = 'success' | 'error' | 'info';
+type ToastType = 'success' | 'error' | 'info' | 'warning';
 
 interface Toast {
   id: number;
@@ -38,18 +38,20 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       {children}
       <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none">
         {toasts.map(toast => (
-          <div 
-            key={toast.id} 
+          <div
+            key={toast.id}
             className={`
               pointer-events-auto flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border animate-in slide-in-from-right-10 fade-in duration-300
               ${toast.type === 'success' ? 'bg-emerald-600 border-emerald-500 text-white' : ''}
               ${toast.type === 'error' ? 'bg-rose-600 border-rose-500 text-white' : ''}
               ${toast.type === 'info' ? 'bg-blue-600 border-blue-500 text-white' : ''}
+              ${toast.type === 'warning' ? 'bg-amber-500 border-amber-400 text-white' : ''}
             `}
           >
             {toast.type === 'success' && <CheckCircle2 className="w-5 h-5" />}
             {toast.type === 'error' && <AlertCircle className="w-5 h-5" />}
             {toast.type === 'info' && <Info className="w-5 h-5" />}
+            {toast.type === 'warning' && <AlertCircle className="w-5 h-5" />}
             <span className="text-sm font-bold">{toast.message}</span>
             <button onClick={() => setToasts(prev => prev.filter(t => t.id !== toast.id))} className="ml-2 opacity-50 hover:opacity-100">
               <X className="w-4 h-4" />

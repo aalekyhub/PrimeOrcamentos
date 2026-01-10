@@ -17,7 +17,11 @@ export const db = {
   },
 
   async save(key: string, data: any) {
-    localStorage.setItem(key, JSON.stringify(data));
+    try {
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch (e) {
+      console.warn(`[LocalStorage] Erro ao salvar ${key}: Limite de 5MB possivelmente excedido.`, e);
+    }
 
     if (supabase) {
       const tableName = key.replace('serviflow_', '');

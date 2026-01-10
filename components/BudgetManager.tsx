@@ -27,6 +27,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
   const [showFullServiceForm, setShowFullServiceForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingBudgetId, setEditingBudgetId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const { notify } = useNotify();
 
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
@@ -285,6 +286,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
   };
 
   const handleSave = async () => {
+    if (isSaving) return;
     const customer = customers.find(c => c.id === selectedCustomerId);
     if (!customer) { notify("Selecione um cliente", "error"); return; }
     if (items.length === 0) { notify("Adicione itens ao orçamento", "error"); return; }
@@ -306,15 +308,20 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     const newList = editingBudgetId ? orders.map(o => o.id === editingBudgetId ? data : o) : [data, ...orders];
     setOrders(newList);
 
-    // Salva imediatamente e aguarda a nuvem
-    const result = await db.save('serviflow_orders', newList);
+    setIsSaving(true);
+    try {
+      // Salva imediatamente e aguarda a nuvem
+      const result = await db.save('serviflow_orders', newList);
 
-    if (result?.success) {
-      notify("Orçamento salvo e sincronizado!");
-      setShowForm(false);
-    } else {
-      notify("Salvo localmente. Erro ao sincronizar (veja o console)", "warning");
-      setShowForm(false);
+      if (result?.success) {
+        notify("Orçamento salvo e sincronizado!");
+        setShowForm(false);
+      } else {
+        notify("Salvo localmente. Erro ao sincronizar (veja o console)", "warning");
+        setShowForm(false);
+      }
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -524,8 +531,13 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                       <FileText className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" /> PDF
                     </button>
                   </div>
-                  <button onClick={handleSave} className="w-full bg-blue-600 text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[9px] shadow-xl hover:bg-blue-500 transition-all flex items-center justify-center gap-2">
-                    <Save className="w-5 h-5" /> REGISTRAR ORÇAMENTO
+                  <button
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className={`w-full ${isSaving ? 'bg-slate-600 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500'} text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[9px] shadow-xl transition-all flex items-center justify-center gap-2`}
+                  >
+                    <Save className={`w-5 h-5 ${isSaving ? 'animate-pulse' : ''}`} />
+                    {isSaving ? 'SALVANDO...' : 'REGISTRAR ORÇAMENTO'}
                   </button>
                 </div>
               </div>
