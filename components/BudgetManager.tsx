@@ -130,9 +130,6 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       </head>
       <body class="no-scrollbar">
         <div class="a4-container">
-          <!-- TOP DIVIDER -->
-          <div class="border-b-2 border-slate-900 mb-8"></div>
-
           <!-- HEADER -->
           <div class="flex justify-between items-start mb-6">
             <div class="flex gap-4">
