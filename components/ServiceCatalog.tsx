@@ -27,39 +27,53 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
     category: 'Geral'
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || formData.basePrice === undefined) return;
 
     // Check for duplicate name using centralized service (case-insensitive and trimmed)
     const duplicate = checkDuplicateService(formData.name || '', services, editingService?.id);
-
     if (duplicate) {
       notify(`Já existe um serviço cadastrado com este nome: "${duplicate.name}"`, "error");
       return;
     }
 
     let serviceResult: CatalogService;
+    let newList: CatalogService[];
 
     if (editingService) {
       serviceResult = { ...editingService, ...formData as CatalogService };
-      setServices(prev => prev.map(s => s.id === editingService.id ? serviceResult : s));
+      newList = services.map(s => s.id === editingService.id ? serviceResult : s);
     } else {
       serviceResult = {
-        id: `SRV-${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
+        id: db.generateId('SER'),
         name: formData.name || '',
         description: formData.description || '',
         basePrice: formData.basePrice || 0,
         unit: formData.unit || 'un',
         category: formData.category || 'Geral',
       };
-      setServices(prev => [serviceResult, ...prev]);
+      newList = [serviceResult, ...services];
     }
 
-    if (onSuccess) onSuccess(serviceResult);
-    setShowForm(false);
-    setEditingService(null);
-    setFormData({ name: '', description: '', basePrice: 0, unit: 'un', category: 'Geral' });
+    setServices(newList);
+
+    // Salva e aguarda nuvem
+    const result = await db.save('serviflow_catalog', newList);
+
+    if (result?.success) {
+      notify(editingService ? "Serviço atualizado e sincronizado!" : "Serviço adicionado!");
+      if (onSuccess) onSuccess(serviceResult);
+      setShowForm(false);
+      setEditingService(null);
+      setFormData({ name: '', description: '', basePrice: 0, unit: 'un', category: 'Geral' });
+    } else {
+      notify("Salvo localmente. Erro ao sincronizar (veja o console)", "warning");
+      if (onSuccess) onSuccess(serviceResult);
+      setShowForm(false);
+      setEditingService(null);
+      setFormData({ name: '', description: '', basePrice: 0, unit: 'un', category: 'Geral' });
+    }
   };
 
   const filtered = services.filter(s => s.name.toLowerCase().includes(searchTerm.toLowerCase()));

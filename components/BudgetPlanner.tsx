@@ -4,6 +4,7 @@ import { Target, Sparkles, Send, Loader2, DollarSign, Package, User, Users } fro
 import { generateBudgetFromDescription } from '../PrimeOrcamentos/services/geminiService';
 import { ServiceOrder, OrderStatus, ServiceItem, Customer } from '../types';
 import { db } from '../services/db';
+import { useNotify } from './ToastProvider';
 
 interface Props {
   setOrders: React.Dispatch<React.SetStateAction<ServiceOrder[]>>;
@@ -11,6 +12,7 @@ interface Props {
 }
 
 const BudgetPlanner: React.FC<Props> = ({ setOrders, customers }) => {
+  const notify = useNotify();
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [generatedBudget, setGeneratedBudget] = useState<Partial<ServiceOrder> | null>(null);
@@ -55,12 +57,16 @@ const BudgetPlanner: React.FC<Props> = ({ setOrders, customers }) => {
       deliveryTime: ''
     };
 
+
     setOrders(prev => {
-      const newList = [newOrder, ...prev];
-      db.save('serviflow_orders', newList);
-      return newList;
+      const updatedList = [newOrder, ...prev];
+      db.save('serviflow_orders', updatedList).then(res => {
+        if (res?.success) notify("Ordem de Serviço criada e sincronizada!");
+        else notify("Criada localmente. Erro na nuvem.", "warning");
+      });
+      return updatedList;
     });
-    alert("Ordem de Serviço criada com sucesso!");
+
     setGeneratedBudget(null);
     setDescription('');
     setSelectedCustomerId('');

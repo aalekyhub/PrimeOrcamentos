@@ -58,7 +58,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
     notify("Item adicionado");
   };
 
-  const handleSaveOS = () => {
+  const handleSaveOS = async () => {
     const customer = customers.find(c => c.id === selectedCustomerId);
     if (!customer) { notify("Selecione um cliente", "error"); return; }
 
@@ -87,16 +87,21 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
       dueDate: deliveryDate
     };
 
-    setOrders(prev => {
-      const newList = editingOrderId ? prev.map(o => o.id === editingOrderId ? data : o) : [data, ...prev];
-      // Salva imediatamente para evitar perda em caso de F5 rápido
-      db.save('serviflow_orders', newList);
-      return newList;
-    });
+    const newList = editingOrderId ? orders.map(o => o.id === editingOrderId ? data : o) : [data, ...orders];
+    setOrders(newList);
 
-    setEditingOrderId(null);
-    setShowForm(false);
-    notify(editingOrderId ? "O.S. atualizada com sucesso!" : "Ordem de Serviço registrada!");
+    // Salva imediatamente e aguarda a nuvem
+    const result = await db.save('serviflow_orders', newList);
+
+    if (result?.success) {
+      notify(editingOrderId ? "O.S. atualizada e sincronizada!" : "Ordem de Serviço registrada e sincronizada!");
+      setEditingOrderId(null);
+      setShowForm(false);
+    } else {
+      notify("Salvo localmente. Erro ao sincronizar (veja o console)", "warning");
+      setEditingOrderId(null);
+      setShowForm(false);
+    }
   };
 
   const handlePrintOS = (order: ServiceOrder) => {

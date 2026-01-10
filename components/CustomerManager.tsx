@@ -85,7 +85,7 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCustomer.name || !newCustomer.document) return;
 
@@ -99,21 +99,30 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
 
     const customerData: Customer = {
       ...(newCustomer as Customer),
-      id: editingCustomerId || `CLI-${Date.now().toString()}${Math.random().toString(36).substr(2, 4)}`.toUpperCase(),
+      id: editingCustomerId || db.generateId('CLI'),
       type: personType,
       createdAt: newCustomer.createdAt || new Date().toISOString().split('T')[0]
     };
 
-    if (editingCustomerId) {
-      setCustomers(prev => prev.map(c => c.id === editingCustomerId ? customerData : c));
-    } else {
-      setCustomers(prev => [customerData, ...prev]);
-    }
+    const newList = editingCustomerId ? customers.map(c => c.id === editingCustomerId ? customerData : c) : [customerData, ...customers];
+    setCustomers(newList);
 
-    if (onSuccess) onSuccess(customerData);
-    if (!defaultOpenForm) setShowForm(false);
-    setNewCustomer(initialFormState);
-    setEditingCustomerId(null);
+    // Salva e aguarda nuvem
+    const result = await db.save('serviflow_customers', newList);
+
+    if (result?.success) {
+      notify(editingCustomerId ? "Cliente atualizado e sincronizado!" : "Cliente cadastrado!");
+      if (onSuccess) onSuccess(customerData);
+      if (!defaultOpenForm) setShowForm(false);
+      setNewCustomer(initialFormState);
+      setEditingCustomerId(null);
+    } else {
+      notify("Salvo localmente. Erro ao sincronizar (veja o console)", "warning");
+      if (onSuccess) onSuccess(customerData);
+      if (!defaultOpenForm) setShowForm(false);
+      setNewCustomer(initialFormState);
+      setEditingCustomerId(null);
+    }
   };
 
   const filtered = customers.filter(c =>

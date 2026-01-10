@@ -3,6 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { Plus, MoreVertical, Filter, User, Calendar, CheckCircle, X, Trash2, Package, Search, DollarSign } from 'lucide-react';
 import { ServiceOrder, OrderStatus, Transaction, Customer, ServiceItem, CatalogService } from '../types';
 import { db } from '../services/db';
+import { useNotify } from './ToastProvider';
 
 interface Props {
   orders: ServiceOrder[];
@@ -13,6 +14,7 @@ interface Props {
 }
 
 const ServiceOrderList: React.FC<Props> = ({ orders, setOrders, setTransactions, customers, catalogServices }) => {
+  const notify = useNotify();
   const [filterStatus, setFilterStatus] = useState<string>('Todos');
   const [showForm, setShowForm] = useState(false);
 
@@ -59,11 +61,11 @@ const ServiceOrderList: React.FC<Props> = ({ orders, setOrders, setTransactions,
     setItemPrice(service.basePrice);
   };
 
-  const handleCreateOrder = (e: React.FormEvent) => {
+  const handleCreateOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     const customer = customers.find(c => c.id === selectedCustomerId);
     if (!customer || (newOrder.items || []).length === 0) {
-      alert("Selecione um cliente e adicione pelo menos um item.");
+      notify("Selecione um cliente e adicione itens.", "error");
       return;
     }
 
@@ -72,10 +74,10 @@ const ServiceOrderList: React.FC<Props> = ({ orders, setOrders, setTransactions,
       customerId: customer.id,
       customerName: customer.name,
       customerEmail: customer.email,
-      description: newOrder.description || 'Novo Orçamento',
+      description: newOrder.description || 'Novo Registro',
       status: newOrder.status as OrderStatus,
       items: newOrder.items as ServiceItem[],
-      createdAt: newOrder.createdAt || '',
+      createdAt: newOrder.createdAt || new Date().toISOString().split('T')[0],
       dueDate: newOrder.dueDate || '',
       descriptionBlocks: newOrder.descriptionBlocks || [],
       paymentTerms: newOrder.paymentTerms || '',
@@ -83,10 +85,21 @@ const ServiceOrderList: React.FC<Props> = ({ orders, setOrders, setTransactions,
       totalAmount: totalAmount
     };
 
-    setOrders(prev => [order, ...prev]);
-    db.save('serviflow_orders', [order, ...orders]);
-    setShowForm(false);
-    resetForm();
+    const newList = [order, ...orders];
+    setOrders(newList);
+
+    // Salva e aguarda nuvem
+    const result = await db.save('serviflow_orders', newList);
+
+    if (result?.success) {
+      notify("Registro salvo e sincronizado!");
+      setShowForm(false);
+      resetForm();
+    } else {
+      notify("Salvo localmente. Erro ao sincronizar (veja o console)", "warning");
+      setShowForm(false);
+      resetForm();
+    }
   };
 
   const handleDelete = async (id: string) => {
