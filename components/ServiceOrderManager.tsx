@@ -118,8 +118,6 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
             width: 100%; 
             margin: 0; 
             background: white; 
-            padding-top: ${company.printMarginTop || 15}mm !important;
-            padding-bottom: ${company.printMarginBottom || 15}mm !important;
             padding-left: 15mm !important;
             padding-right: 15mm !important;
           }
@@ -127,7 +125,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
           
           @media screen {
             body { background: #f1f5f9; padding: 40px 0; }
-            .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; }
+            .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; }
           }
           
           @media print {
@@ -140,8 +138,15 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
         </style>
       </head>
       <body class="no-scrollbar">
-        <div class="a4-container">
-          <!-- HEADER -->
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr><td><div style="height: ${company.printMarginTop || 15}mm;"></div></td></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="a4-container">
+                  <!-- HEADER -->
           <div class="flex justify-between items-start mb-8">
             <div class="flex gap-4">
               <div class="w-16 h-16 shrink-0 flex items-center justify-center overflow-hidden">
@@ -239,7 +244,14 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
           <div class="print-footer no-screen">
             <span>Página 1 de 1</span>
           </div>
-        </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr><td><div style="height: ${company.printMarginBottom || 15}mm;"></div></td></tr>
+          </tfoot>
+        </table>
         <script>window.onload=()=>{setTimeout(()=>{window.print();window.close();},500);}</script>
       </body>
       </html>
