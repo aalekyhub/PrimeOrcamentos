@@ -11,6 +11,7 @@ import { useNotify } from './ToastProvider';
 import CustomerManager from './CustomerManager';
 import ServiceCatalog from './ServiceCatalog';
 import { db } from '../services/db';
+import { compressImage } from '../services/imageUtils';
 
 interface Props {
   orders: ServiceOrder[];
@@ -68,12 +69,16 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
   const addImageBlock = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'image', content: '' }]);
   const updateBlockContent = (id: string, content: string) => setDescriptionBlocks(prev => prev.map(b => b.id === id ? { ...b, content } : b));
 
-  const handleImageUpload = (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => updateBlockContent(id, reader.result as string);
-      reader.readAsDataURL(file);
+      try {
+        const compressedBase64 = await compressImage(file);
+        updateBlockContent(id, compressedBase64);
+      } catch (error) {
+        console.error("Erro ao comprimir imagem:", error);
+        notify("Erro ao processar imagem. Tente uma menor.", "error");
+      }
     }
   };
 
