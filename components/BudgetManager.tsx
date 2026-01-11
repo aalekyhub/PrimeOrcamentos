@@ -166,7 +166,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           </div>
           ${budget.descriptionBlocks && budget.descriptionBlocks.length > 0 ? `
             <div class="mb-8">
-              <h3 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4 border-b pb-1">Descrição Técnica / Escopo</h3>
+              <h3 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4 border-b pb-1">Descrição Técnica</h3>
               <div class="space-y-4">
                 ${budget.descriptionBlocks.map((block: any) => block.type === 'text' ? `<p class="text-[10px] text-slate-700 leading-relaxed italic avoid-break">${block.content}</p>` : `<div class="py-2 w-full flex justify-center items-center avoid-break"><img src="${block.content}" class="max-w-[80%] h-auto rounded-xl shadow-sm border border-slate-100 mx-auto block"></div>`).join('')}
               </div>
