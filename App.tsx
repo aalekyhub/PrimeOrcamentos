@@ -131,6 +131,16 @@ const AppContent: React.FC = () => {
     setIsSyncing(true);
     try {
       const cloudData = await db.syncFromCloud();
+
+      if (cloudData && cloudData.error) {
+        notify(cloudData.error, "error");
+        // Em caso de erro crítico na tabela users, logar para debug
+        if (cloudData.error.includes('users')) {
+          console.error("Erro crítico ao sincronizar users:", cloudData.error);
+        }
+        return;
+      }
+
       if (cloudData) {
         // Deduplicação de Clientes por Documento
         if (cloudData.customers) {

@@ -79,6 +79,7 @@ export const db = {
           // App.tsx cuidará da mesclagem (Merge).
         } else if (error) {
           console.error(`Erro ao baixar ${table}:`, error.message);
+          return { error: `Erro na tabela ${table}: ${error.message}` };
         }
       }
       return results;
