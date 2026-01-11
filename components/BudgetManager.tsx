@@ -160,7 +160,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
               <p class="text-[9px] text-slate-500 font-bold mt-1 uppercase">${customer.document || ''}</p>
             </div>
             <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-              <h3 class="text-[9px] font-black text-blue-700 uppercase tracking-widest mb-1.5 ml-1">Referência do Orçamento</h3>
+              <h3 class="text-[9px] font-black text-blue-700 uppercase tracking-widest mb-1.5 ml-1">Proposta Comercial</h3>
               <p class="text-xs font-black text-slate-900 uppercase">${budget.description || 'Execução de Serviços'}</p>
             </div>
           </div>
