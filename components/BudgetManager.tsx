@@ -204,7 +204,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
             </div>
           </div>
 
-          <div class="max-w-[300px] border-t border-slate-400 pt-2 mb-10 mt-32 avoid-break"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Assinatura do Cliente</p></div>
+          <div class="max-w-[300px] border-t border-slate-400 pt-2 mb-10 mt-[20mm] avoid-break"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Assinatura do Cliente</p></div>
           <div class="print-footer no-screen"><span>Página 1 de 1</span></div>
           </div>
         </td></tr></tbody>
