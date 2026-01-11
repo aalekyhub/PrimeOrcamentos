@@ -124,7 +124,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           .logo-box { width: 64px; height: 64px; background: #2563eb; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; }
           .avoid-break { break-inside: avoid; page-break-inside: avoid; }
           @media screen { body { background: #f1f5f9; padding: 40px 0; } .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; } }
-          @media print { body { background: white !important; margin: 0 !important; } .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; } .no-print { display: none !important; } * { box-shadow: none !important; } .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: #94a3b8; text-transform: uppercase; } .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; } }
+          @media print { html, body { height: auto !important; overflow: visible !important; } body { background: white !important; margin: 0 !important; } .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; } .no-print { display: none !important; } * { box-shadow: none !important; } .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: #94a3b8; text-transform: uppercase; } .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; } }
         </style>
     </head>
       <body class="no-scrollbar">
@@ -204,7 +204,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
             </div>
           </div>
 
-          <div class="max-w-[300px] border-t border-slate-400 pt-2 mb-10 mt-[20mm] avoid-break"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Assinatura do Cliente</p></div>
+          <div class="max-w-[300px] border-t border-slate-400 pt-2 mt-[20mm] avoid-break"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Assinatura do Cliente</p></div>
           <div class="print-footer no-screen"><span>Página 1 de 1</span></div>
           </div>
         </td></tr></tbody>
