@@ -203,8 +203,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
               <p class="text-[10px] text-slate-600 leading-relaxed italic pr-12 text-justify">"Este documento constitui uma proposta comercial formal. Ao assinar abaixo, o cliente declara estar ciente e de pleno acordo com os valores, prazos e especificações técnicas descritas. Esta aceitação autoriza o início imediato dos trabalhos sob as condições estabelecidas. A contratada reserva-se o direito de renegociar valores caso a aprovação ocorra após o prazo de validade de 30 dias. Eventuais alterações de escopo solicitadas após o aceite estarão sujeitas a nova análise de custos."</p>
             </div>
           </div>
-          <div class="border-b border-slate-200 mb-6"></div>
-          <div class="border-b border-slate-200 mb-6"></div>
+
           <div class="max-w-[300px] border-t border-slate-400 pt-2 mb-10 mt-32 avoid-break"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Assinatura do Cliente</p></div>
           <div class="print-footer no-screen"><span>Página 1 de 1</span></div>
           </div>

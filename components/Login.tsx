@@ -111,10 +111,7 @@ const Login: React.FC<Props> = ({ onLogin, users, company }) => {
 
           <div className="mt-8 pt-8 border-t border-slate-100 text-center">
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-              Segurança Prime &copy; 2024 • v0.1.2
-              <span className="block text-[8px] mt-1 text-slate-300">
-                Banco de Dados: {users.length} usuários carregados
-              </span>
+              Segurança Prime &copy; 2024
             </p>
           </div>
         </div>

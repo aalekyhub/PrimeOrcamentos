@@ -109,7 +109,6 @@ const SAMPLE_ORDER: ServiceOrder = {
 };
 
 const AppContent: React.FC = () => {
-  // v0.1.3 - Trigger Vercel Deploy for User Sync Fix
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
