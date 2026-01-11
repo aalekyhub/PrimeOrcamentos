@@ -203,6 +203,17 @@ const AppContent: React.FC = () => {
             );
           });
         }
+
+        if (cloudData.users) {
+          setUsers(prev => {
+            const localMap = new Map<string, UserAccount>(prev.map(u => [u.id, u]));
+            (cloudData.users as UserAccount[]).forEach((u: UserAccount) => {
+              // Prioridade para Nuvem em caso de conflito
+              localMap.set(u.id, u);
+            });
+            return Array.from(localMap.values());
+          });
+        }
         notify("Sincronização concluída (Dados mesclados)");
       } else {
         notify("Falha ao baixar dados da nuvem.", "error");
