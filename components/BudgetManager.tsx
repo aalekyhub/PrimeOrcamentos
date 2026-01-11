@@ -245,7 +245,8 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       const result = await db.save('serviflow_orders', newList);
       if (result?.success) {
         notify("Orçamento salvo e sincronizado!");
-        setShowForm(false);
+        // Delay para o usuário ver a mensagem
+        setTimeout(() => setShowForm(false), 1500);
       } else if (result?.error === 'quota_exceeded') {
         notify("ERRO DE ARMAZENAMENTO: O navegador bloqueou o salvamento pois os dados (provavelmente imagens) excederam o limite de 5MB. Remova algumas imagens ou diminua a qualidade.", "error");
         // Não fechamos o formulário para dar chance de corrigir
