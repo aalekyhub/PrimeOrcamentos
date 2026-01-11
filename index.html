@@ -45,6 +45,17 @@
       // Evita erro de 'process is not defined' que causa tela branca no navegador
       window.process = { env: { API_KEY: '' } };
 
+      // FIX: Previne erro "Cannot assign to read only property 'ethereum'" causado por extesões ou scripts de terceiros
+      // Define a propriedade como configurável e gravável antes que qualquer outra coisa a toque
+      try {
+        Object.defineProperty(window, 'ethereum', {
+          value: undefined,
+          writable: true,
+          configurable: true,
+          enumerable: true
+        });
+      } catch (e) { console.warn('Falha ao aplicar shim no ethereum:', e); }
+
       window.onerror = function(msg, url, lineNo, columnNo, error) {
         console.error('Erro detectado:', msg);
         const errDiv = document.getElementById('error-boundary');

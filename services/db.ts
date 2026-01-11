@@ -19,8 +19,12 @@ export const db = {
   async save(key: string, data: any) {
     try {
       localStorage.setItem(key, JSON.stringify(data));
-    } catch (e) {
+    } catch (e: any) {
       console.warn(`[LocalStorage] Erro ao salvar ${key}: Limite de 5MB possivelmente excedido.`, e);
+      // Se estourou o limite local E não tem supabase, é crítico.
+      if (!supabase) {
+        return { success: false, error: 'quota_exceeded' };
+      }
     }
 
     if (supabase) {

@@ -1,9 +1,10 @@
 
+
 import React, { useState, useMemo } from 'react';
 import {
   Plus, Search, X, Trash2, Pencil, Printer, Save,
-  UserPlus, Package, Type, Image as ImageIcon, CheckCircle2,
-  Layout, FileText, Upload
+  UserPlus, Package, Type, Image as ImageIcon,
+  FileText, Upload
 } from 'lucide-react';
 import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock } from '../types';
 import { useNotify } from './ToastProvider';
@@ -32,7 +33,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
   const [proposalTitle, setProposalTitle] = useState('');
-  const [paymentTerms, setPaymentTerms] = useState('50% avista, 25% com 30 dias,, 25% restante na conclusão');
+  const [paymentTerms, setPaymentTerms] = useState('50% avista, 25% com 30 dias, 25% restante na conclusão');
   const [deliveryTime, setDeliveryTime] = useState('15 dias uteis');
   const [items, setItems] = useState<ServiceItem[]>([]);
   const [descriptionBlocks, setDescriptionBlocks] = useState<DescriptionBlock[]>([]);
@@ -62,6 +63,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     setCurrentDesc(''); setCurrentPrice(0); setCurrentQty(1);
   };
 
+  // NEXT_Methods
   const addTextBlock = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'text', content: '' }]);
   const addImageBlock = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'image', content: '' }]);
   const updateBlockContent = (id: string, content: string) => setDescriptionBlocks(prev => prev.map(b => b.id === id ? { ...b, content } : b));
@@ -75,7 +77,8 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     }
   };
 
-  const handlePrintPDF = (budget: any, mode: 'print' | 'pdf' = 'print') => {
+  // NEXT_Print
+  const handlePrintPDF = (budget: ServiceOrder, mode: 'print' | 'pdf' = 'print') => {
     const customer = customers.find(c => c.id === budget.customerId) || { name: budget.customerName, address: 'Não informado', document: 'Documento não informado' };
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
@@ -93,7 +96,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     const validityDays = company.defaultProposalValidity || 15;
     const validityDate = budget.dueDate ? formatDate(budget.dueDate) : formatDate(new Date(new Date(budget.createdAt || Date.now()).getTime() + validityDays * 24 * 60 * 60 * 1000).toISOString());
 
-    const itemsHtml = budget.items.map((item: any) => `
+    const itemsHtml = budget.items.map((item: ServiceItem) => `
       <tr style="border-bottom: 1px solid #f1f5f9;">
         <td style="padding: 12px 0; font-weight: 800; text-transform: uppercase; font-size: 11px; color: #0f172a;">${item.description}</td>
         <td style="padding: 12px 0; text-align: center; color: #94a3b8; font-size: 9px; font-weight: bold; text-transform: uppercase;">SERVIÇO</td>
@@ -106,54 +109,28 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       <!DOCTYPE html>
       <html>
       <head>
-        <title> </title>
+        <title>Orçamento</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
         <style>
           body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
           @page { size: A4; margin: 0 !important; }
-          .a4-container { 
-            width: 100%; 
-            margin: 0; 
-            background: white;
-            padding-left: 15mm !important;
-            padding-right: 15mm !important;
-          }
+          .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
           .logo-box { width: 64px; height: 64px; background: #2563eb; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; }
           .avoid-break { break-inside: avoid; page-break-inside: avoid; }
-          
-          @media screen {
-            body { background: #f1f5f9; padding: 40px 0; }
-            .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; }
-          }
-          
-          @media print {
-            body { background: white !important; }
-            .a4-container { box-shadow: none !important; border: none !important; min-height: 297mm; position: relative; }
-            .no-print { display: none !important; }
-            * { box-shadow: none !important; }
-            .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: #94a3b8; text-transform: uppercase; }
-          }
+          @media screen { body { background: #f1f5f9; padding: 40px 0; } .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; } }
+          @media print { body { background: white !important; margin: 0 !important; } .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; } .no-print { display: none !important; } * { box-shadow: none !important; } .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: #94a3b8; text-transform: uppercase; } .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; } }
         </style>
-      </head>
+    </head>
       <body class="no-scrollbar">
-        <table style="width: 100%; border-collapse: collapse;">
-          <thead>
-            <tr><td><div style="height: ${company.printMarginTop || 15}mm;"></div></td></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>
-                <div class="a4-container">
-                  <!-- HEADER -->
-          <div class="flex justify-between items-start mb-6">
+        <table style="width: 100%;">
+          <thead><tr><td style="height: ${company.printMarginTop || 15}mm;"><div style="height: ${company.printMarginTop || 15}mm; display: block;">&nbsp;</div></td></tr></thead>
+          <tbody><tr><td>
+            <div class="a4-container">
+        <div class="flex justify-between items-start mb-6">
             <div class="flex gap-4">
               <div class="w-16 h-16 shrink-0 flex items-center justify-center overflow-hidden">
-                ${company.logo ? `<img src="${company.logo}" style="height: 100%; object-fit: contain;">` : `
-                  <div class="logo-box">
-                    <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                  </div>
-                `}
+                ${company.logo ? `<img src="${company.logo}" style="height: 100%; object-fit: contain;">` : `<div class="logo-box"><svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></div>`}
               </div>
               <div>
                 <h1 class="text-xl font-black text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
@@ -171,8 +148,6 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
             </div>
           </div>
           <div class="border-b-2 border-slate-900 mb-6"></div>
-
-          <!-- CLIENTE -->
           <div class="mb-6 grid grid-cols-2 gap-4">
             <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
               <h3 class="text-[9px] font-black text-blue-700 uppercase tracking-widest mb-1.5 ml-1">Cliente / Destinatário</h3>
@@ -184,123 +159,64 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
               <p class="text-xs font-black text-slate-900 uppercase">${budget.description || 'Execução de Serviços'}</p>
             </div>
           </div>
-
-          <!-- DESCRIÇÃO TÉCNICA -->
           ${budget.descriptionBlocks && budget.descriptionBlocks.length > 0 ? `
             <div class="mb-8">
               <h3 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4 border-b pb-1">Descrição Técnica / Escopo</h3>
               <div class="space-y-4">
-                ${budget.descriptionBlocks.map((block: any) => block.type === 'text' ? `
-                  <p class="text-[10px] text-slate-700 leading-relaxed italic avoid-break">${block.content}</p>
-                ` : `
-                  <div class="py-2 flex justify-center avoid-break"><img src="${block.content}" class="max-w-[80%] h-auto rounded-xl shadow-sm border border-slate-100"></div>
-                `).join('')}
+                ${budget.descriptionBlocks.map((block: any) => block.type === 'text' ? `<p class="text-[10px] text-slate-700 leading-relaxed italic avoid-break">${block.content}</p>` : `<div class="py-2 flex justify-center avoid-break"><img src="${block.content}" class="max-w-[80%] h-auto rounded-xl shadow-sm border border-slate-100"></div>`).join('')}
               </div>
             </div>
           ` : ''}
-
-          <!-- TABELA DE ITENS -->
           <div class="mb-6">
             <h3 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4 border-b pb-1">Detalhamento Financeiro</h3>
             <table class="w-full text-left">
-              <thead>
-                <tr class="text-[9px] font-black text-slate-400 uppercase tracking-widest border-b-[2px] border-slate-900">
-                  <th class="pb-2">Item / Descrição</th>
-                  <th class="pb-2 text-center">Tipo</th>
-                  <th class="pb-2 text-center">Qtd</th>
-                  <th class="pb-2 text-right">Unitário</th>
-                  <th class="pb-2 text-right">Subtotal</th>
-                </tr>
-              </thead>
+              <thead><tr class="text-[9px] font-black text-slate-400 uppercase tracking-widest border-b-[2px] border-slate-900"><th class="pb-2">Item / Descrição</th><th class="pb-2 text-center">Tipo</th><th class="pb-2 text-center">Qtd</th><th class="pb-2 text-right">Unitário</th><th class="pb-2 text-right">Subtotal</th></tr></thead>
               <tbody>${itemsHtml}</tbody>
             </table>
           </div>
-
-          <!-- TOTAL BAR -->
-          <div class="bg-slate-900 text-white p-6 rounded-xl flex justify-between items-center mb-6">
-            <span class="font-black text-xs tracking-widest uppercase">Investimento Total:</span>
-            <span class="text-3xl font-black tracking-tighter text-blue-400">R$ ${budget.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+          <div class="avoid-break mb-6">
+            <div class="bg-slate-900 text-white p-6 rounded-xl flex justify-between items-center">
+              <span class="font-black text-xs tracking-widest uppercase">Investimento Total:</span>
+              <span class="text-3xl font-black tracking-tighter text-blue-400">R$ ${budget.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+            </div>
           </div>
-
-          <!-- FORMA PGTO / PRAZO -->
-          <div class="grid grid-cols-2 gap-4 mb-6">
-            <div class="space-y-4">
+          <div class="avoid-break mb-6">
+            <div class="grid grid-cols-2 gap-4">
               <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 h-full">
                 <h3 class="text-[9px] font-black text-blue-700 uppercase tracking-widest mb-3 border-b border-slate-200 pb-1">Forma de Pagamento</h3>
                 <p class="text-[11px] font-bold text-slate-700 leading-relaxed">${budget.paymentTerms || 'A combinar'}</p>
               </div>
-            </div>
-            <div class="space-y-4">
               <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 h-full">
                 <h3 class="text-[9px] font-black text-blue-700 uppercase tracking-widest mb-3 border-b border-slate-200 pb-1">Prazo de Entrega / Execução</h3>
                 <p class="text-[11px] font-bold text-slate-700 leading-relaxed">${budget.deliveryTime || 'A combinar'}</p>
               </div>
             </div>
           </div>
-
-          <!-- TERMOS LEGAIS -->
-          <div class="bg-blue-50/50 border border-blue-100 p-8 rounded-3xl mb-6 relative overflow-hidden avoid-break">
-            <div class="flex items-center gap-2 mb-4">
-              <svg class="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              <h3 class="text-[10px] font-black text-blue-600 uppercase tracking-widest">Termo de Aceite e Autorização Profissional</h3>
+          <div class="avoid-break mb-6">
+            <div class="bg-blue-50/50 border border-blue-100 p-8 rounded-3xl relative overflow-hidden">
+              <h3 class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2">Termo de Aceite</h3>
+              <p class="text-[10px] text-slate-600 leading-relaxed italic pr-12 text-justify">"Este documento constitui uma proposta comercial formal. Ao assinar abaixo, o cliente declara estar ciente e de pleno acordo com os valores, prazos e especificações técnicas descritas. Esta aceitação autoriza o início imediato dos trabalhos sob as condições estabelecidas. A contratada reserva-se o direito de renegociar valores caso a aprovação ocorra após o prazo de validade de 30 dias. Eventuais alterações de escopo solicitadas após o aceite estarão sujeitas a nova análise de custos."</p>
             </div>
-            <p class="text-[10px] text-slate-600 leading-relaxed italic pr-12">
-              "Este documento constitui uma proposta comercial formal. Ao assinar abaixo, o cliente declara estar ciente e de pleno acordo com os valores, prazos e especificações técnicas descritas. Esta aceitação autoriza o início imediato dos trabalhos sob as condições estabelecidas. A contratada reserva-se o direito de renegociar valores caso a aprovação ocorra após o prazo de validade de 30 dias. Eventuais alterações de escopo solicitadas após o aceite estarão sujeitas a nova análise de custos."
-            </p>
           </div>
-
           <div class="border-b border-slate-200 mb-6"></div>
-
-          <!-- ASSINATURA -->
-          <div class="max-w-[300px] border-t border-slate-400 pt-2 mb-10 avoid-break">
-            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Assinatura do Cliente / Aceite</p>
+          <div class="border-b border-slate-200 mb-6"></div>
+          <div class="max-w-[300px] border-t border-slate-400 pt-2 mb-10 mt-32 avoid-break"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Assinatura do Cliente</p></div>
+          <div class="print-footer no-screen"><span>Página 1 de 1</span></div>
           </div>
-
-          <!-- FOOTER -->
-          <div class="flex justify-between items-end border-t-4 border-slate-900 pt-4 avoid-break">
-            <div>
-              <p class="text-xs font-black text-slate-900 uppercase leading-none">${company.name}</p>
-              <div class="mt-2 flex gap-1">
-                <span class="text-[8px] font-black text-slate-400 uppercase">DATA DO ACEITE:</span>
-                <span class="text-[8px] font-black text-slate-300 uppercase underline decoration-slate-200 decoration-2 underline-offset-4">____/____/________</span>
-              </div>
-            </div>
-            <p class="text-[8px] font-bold text-slate-300 uppercase italic text-right">Documento comercial gerado eletronicamente por ${company.name}</p>
-          <!-- RODAPÉ DE PÁGINA -->
-          <div class="print-footer no-screen">
-            <span>Página 1 de 1</span>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-            <tfoot>
-              <tr><td><div style="height: ${company.printMarginBottom || 15}mm;"></div></td></tr>
-            </tfoot>
-          </table>
+        </td></tr></tbody>
+        <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;"><div style="height: ${company.printMarginBottom || 15}mm; display: block;">&nbsp;</div></td></tr></tfoot>
+      </table>
+    </body>
+      </html>
+    `;
 
     printWindow.document.write(html);
     printWindow.document.close();
 
-    if (mode === 'print') {
-      printWindow.onload = () => {
-        setTimeout(() => {
-          printWindow.print();
-          printWindow.close();
-        }, 500);
-      };
-    } else {
-      // Modo PDF: Traz a tela de impressão que permite salvar como PDF nativamente
-      // ou podemos usar html2pdf se preferir download direto. 
-      // Para manter a fidelidade do layout CSS (Tailwind/Inter), o window.print() é mais robusto.
-      printWindow.onload = () => {
-        setTimeout(() => {
-          printWindow.print();
-          printWindow.close();
-        }, 500);
-      };
-    }
+    printWindow.onload = () => { setTimeout(() => { printWindow.print(); printWindow.close(); }, 500); };
   };
 
+  // NEXT_Save
   const handleSave = async () => {
     if (isSaving) return;
     const customer = customers.find(c => c.id === selectedCustomerId);
@@ -326,19 +242,18 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
     setIsSaving(true);
     try {
-      // Salva imediatamente e aguarda a nuvem
       const result = await db.save('serviflow_orders', newList);
-
       if (result?.success) {
         notify("Orçamento salvo e sincronizado!");
         setShowForm(false);
+      } else if (result?.error === 'quota_exceeded') {
+        notify("ERRO DE ARMAZENAMENTO: O navegador bloqueou o salvamento pois os dados (provavelmente imagens) excederam o limite de 5MB. Remova algumas imagens ou diminua a qualidade.", "error");
+        // Não fechamos o formulário para dar chance de corrigir
       } else {
         notify("Salvo localmente. Erro ao sincronizar (veja o console)", "warning");
         setShowForm(false);
       }
-    } finally {
-      setIsSaving(false);
-    }
+    } finally { setIsSaving(false); }
   };
 
   return (
@@ -351,6 +266,13 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         <button onClick={() => { setShowForm(true); setEditingBudgetId(null); setSelectedCustomerId(''); setItems([]); setProposalTitle(''); setDescriptionBlocks([]); }} className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold shadow-2xl shadow-blue-200 hover:bg-blue-700 transition-all flex items-center gap-2">
           <Plus className="w-5 h-5" /> Nova Proposta
         </button>
+      </div>
+
+      <div className="bg-white p-4 rounded-[1.5rem] border shadow-sm">
+        <div className="relative">
+          <Search className="absolute left-4 top-3 w-4 h-4 text-slate-400" />
+          <input type="text" placeholder="Buscar proposta..." className="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 transition-all" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -390,7 +312,6 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           </div>
         ))}
       </div>
-
       {showForm && (
         <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-[1240px] h-[95vh] rounded-[2rem] shadow-[0_0_100px_rgba(0,0,0,0.3)] overflow-hidden flex flex-col animate-in zoom-in-95">
@@ -404,10 +325,8 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
               </div>
               <button onClick={() => setShowForm(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X className="w-6 h-6 text-slate-300" /></button>
             </div>
-
             <div className="flex-1 flex overflow-hidden relative">
               <div className="flex-1 overflow-y-auto p-6 bg-[#f8fafc] space-y-6 no-scrollbar">
-
                 <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -500,20 +419,17 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                     </div>
                   </div>
                 </div>
-
                 {showFullClientForm && (
                   <div className="absolute inset-0 z-[60] bg-white overflow-y-auto p-6">
                     <CustomerManager customers={customers} setCustomers={setCustomers} orders={orders} defaultOpenForm={true} onSuccess={(c) => { setSelectedCustomerId(c.id); setShowFullClientForm(false); }} onCancel={() => setShowFullClientForm(false)} />
                   </div>
                 )}
-
                 {showFullServiceForm && (
                   <div className="absolute inset-0 z-[60] bg-white overflow-y-auto p-6">
                     <ServiceCatalog services={catalogServices} setServices={setCatalogServices} company={company} defaultOpenForm={true} onSuccess={(s) => { setCurrentDesc(s.name); setCurrentPrice(s.basePrice); setCurrentUnit(s.unit || 'un'); setShowFullServiceForm(false); }} />
                   </div>
                 )}
               </div>
-
               <div className="w-[340px] bg-[#0f172a] text-white p-6 flex flex-col space-y-6 shrink-0 shadow-2xl relative overflow-hidden">
                 <div className="relative z-10">
                   <h4 className="text-[8px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Investimento Total</h4>
@@ -538,16 +454,24 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                     <button onClick={() => handlePrintPDF({
                       customerId: selectedCustomerId,
                       customerName: customers.find(c => c.id === selectedCustomerId)?.name || 'N/A',
+                      customerEmail: customers.find(c => c.id === selectedCustomerId)?.email || '',
                       items, totalAmount, description: proposalTitle, descriptionBlocks, paymentTerms, deliveryTime,
-                      id: editingBudgetId || 'ORC-XXXX'
+                      id: editingBudgetId || 'ORC-XXXX',
+                      status: OrderStatus.PENDING,
+                      createdAt: new Date().toISOString(),
+                      dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
                     })} className="bg-slate-800 hover:bg-slate-700 text-white p-4 rounded-xl font-black uppercase text-[8px] flex flex-col items-center gap-1 transition-all border border-slate-700 group">
                       <Printer className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" /> IMPRIMIR
                     </button>
                     <button onClick={() => handlePrintPDF({
                       customerId: selectedCustomerId,
                       customerName: customers.find(c => c.id === selectedCustomerId)?.name || 'N/A',
+                      customerEmail: customers.find(c => c.id === selectedCustomerId)?.email || '',
                       items, totalAmount, description: proposalTitle, descriptionBlocks, paymentTerms, deliveryTime,
-                      id: editingBudgetId || 'ORC-XXXX'
+                      id: editingBudgetId || 'ORC-XXXX',
+                      status: OrderStatus.PENDING,
+                      createdAt: new Date().toISOString(),
+                      dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
                     }, 'pdf')} className="bg-slate-800 hover:bg-slate-700 text-white p-4 rounded-xl font-black uppercase text-[8px] flex flex-col items-center gap-1 transition-all border border-slate-700 group">
                       <FileText className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" /> PDF
                     </button>
@@ -555,9 +479,9 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                   <button
                     onClick={handleSave}
                     disabled={isSaving}
-                    className={`w-full ${ isSaving ? 'bg-slate-600 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500' } text - white py - 4 rounded - xl font - black uppercase tracking - [0.15em] text - [11px] shadow - xl transition - all flex items - center justify - center gap - 2`}
+                    className={`w-full ${isSaving ? 'bg-slate-600 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500'} text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[11px] shadow-xl transition-all flex items-center justify-center gap-2`}
                   >
-                    <Save className={`w - 5 h - 5 ${ isSaving ? 'animate-pulse' : '' } `} />
+                    <Save className={`w-5 h-5 ${isSaving ? 'animate-pulse' : ''}`} />
                     {isSaving ? 'SALVANDO...' : 'REGISTRAR ORÇAMENTO'}
                   </button>
                 </div>
@@ -568,6 +492,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       )}
     </div>
   );
+
 };
 
 export default BudgetManager;

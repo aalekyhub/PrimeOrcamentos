@@ -4,7 +4,7 @@ import { ServiceOrder, Transaction } from "../types";
 
 // Função para inicializar o AI de forma segura
 const getAI = () => {
-  const key = process.env.API_KEY;
+  const key = import.meta.env.VITE_API_KEY;
   if (!key || key.trim() === '') return null;
   try {
     return new GoogleGenAI({ apiKey: key });
