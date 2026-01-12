@@ -353,8 +353,9 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     // Load taxes (Handle potential casing issues from DB)
     console.log('[DEBUG] Budget object being loaded:', budget);
     const b: any = budget;
-    setTaxRate(b.taxRate ?? b.taxrate ?? 0);
-    setBdiRate(b.bdiRate ?? b.bdirate ?? 0);
+    // Check for camelCase, lowercase, and snake_case
+    setTaxRate(b.taxRate ?? b.taxrate ?? b.tax_rate ?? 0);
+    setBdiRate(b.bdiRate ?? b.bdirate ?? b.bdi_rate ?? 0);
 
     setShowForm(true);
   };
@@ -393,6 +394,14 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
             <p className="text-[11px] text-slate-400 font-bold uppercase tracking-tight mb-6 line-clamp-1">{budget.description}</p>
             <div className="mt-auto pt-4 border-t flex justify-between items-center">
               <span className="font-black text-slate-900 text-base">R$ {budget.totalAmount.toLocaleString('pt-BR')}</span>
+              <div className="text-right">
+                <span className="text-sm font-black text-slate-900 tracking-tight">R$ {budget.totalAmount.toLocaleString('pt-BR')}</span>
+                {/* DEBUG INFO: Display BDI/Tax in List to confirm data presence */}
+                <div className="text-[8px] text-xs space-x-2 text-slate-400">
+                  {(budget.bdiRate || (budget as any).bdi_rate) ? <span className="text-emerald-600">BDI: {budget.bdiRate || (budget as any).bdi_rate}%</span> : null}
+                  {(budget.taxRate || (budget as any).tax_rate) ? <span className="text-blue-600">Imp: {budget.taxRate || (budget as any).tax_rate}%</span> : null}
+                </div>
+              </div>
               <div className="flex gap-1">
                 {budget.status !== OrderStatus.APPROVED && (
                   <button onClick={async () => {
