@@ -341,7 +341,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       } else if (result?.error === 'quota_exceeded') {
         notify("ERRO DE ARMAZENAMENTO: Limite excedido.", "error");
       } else {
-        notify("Salvo localmente. Erro ao sincronizar.", "warning");
+        notify(`Salvo localmente. Erro Sync: ${result?.error?.message || JSON.stringify(result?.error)}`, "warning");
         setShowForm(false);
       }
     } finally { setIsSaving(false); }
