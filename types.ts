@@ -107,6 +107,7 @@ export interface ServiceOrder {
   equipmentBrand?: string;
   equipmentModel?: string;
   equipmentSerialNumber?: string;
+  osType?: 'EQUIPMENT' | 'WORK';
 }
 
 export interface Transaction {

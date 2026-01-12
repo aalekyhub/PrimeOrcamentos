@@ -276,24 +276,38 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
 
       {!defaultOpenForm && (
         <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden">
-          <table className="w-full text-left">
+          <div className="p-8 border-b border-slate-100 flex items-center gap-4">
+            <div className="relative w-full max-w-md">
+              <Search className="absolute left-4 top-3.5 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Buscar por nome, CPF ou CNPJ..."
+                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400"
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b">
-                <th className="px-8 py-4">Cliente</th>
-                <th className="px-8 py-4">Localização</th>
-                <th className="px-8 py-4 text-right">Ações</th>
+              <tr className="border-b border-slate-100">
+                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest pl-10">Cliente</th>
+                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Localização</th>
+                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right pr-10">Ações</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-slate-50">
               {filtered.map(c => (
-                <tr key={c.id} className="hover:bg-slate-50 group border-b last:border-0">
-                  <td className="px-8 py-4">
-                    <p className="text-sm font-black text-slate-900 uppercase">{c.name}</p>
-                    <p className="text-[10px] text-slate-400 font-bold">{c.document}</p>
+                <tr key={c.id} className="hover:bg-slate-50 group transition-colors">
+                  <td className="px-8 py-6 pl-10">
+                    <p className="text-sm font-black text-slate-900 uppercase mb-1">{c.name}</p>
+                    <p className="text-[10px] text-slate-400 font-bold tracking-wide">{c.document}</p>
                   </td>
-                  <td className="px-8 py-4 text-xs text-slate-600 font-bold uppercase">{c.city} - {c.state}</td>
-                  <td className="px-8 py-4 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => { setEditingCustomerId(c.id); setNewCustomer(c); setPersonType(c.type); setShowForm(true); }} className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg"><Pencil className="w-4 h-4" /></button>
+                  <td className="px-8 py-6 text-xs text-slate-600 font-bold uppercase tracking-wide">
+                    {c.city && c.state ? `${c.city} - ${c.state}` : <span className="text-slate-300 italic">Localização n/d</span>}
+                  </td>
+                  <td className="px-8 py-6 pr-10 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onClick={() => { setEditingCustomerId(c.id); setNewCustomer(c); setPersonType(c.type); setShowForm(true); }} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Editar"><Pencil className="w-4 h-4" /></button>
                     <button onClick={async () => {
                       if (confirm("Deseja realmente excluir este cliente? Esta ação também removerá os dados da nuvem.")) {
                         setCustomers(p => p.filter(x => x.id !== c.id));
@@ -301,7 +315,7 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
                         if (result?.success) notify("Cliente removido da nuvem.");
                         else notify("Removido localmente. Erro na nuvem.", "warning");
                       }
-                    }} className="p-2 text-rose-400 hover:bg-rose-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
+                    }} className="p-2 text-slate-400 hover:text-rose-500 transition-colors" title="Excluir"><Trash2 className="w-4 h-4" /></button>
                   </td>
                 </tr>
               ))}

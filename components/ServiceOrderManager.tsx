@@ -47,6 +47,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const activeOrders = useMemo(() => orders.filter(o => {
+    if (o.osType === 'WORK') return false; // Exclude Work Orders
     if (o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED) return false;
     return o.customerName.toLowerCase().includes(searchTerm.toLowerCase()) || o.id.includes(searchTerm);
   }), [orders, searchTerm]);
@@ -86,7 +87,8 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
       paymentTerms,
       deliveryTime,
       createdAt: existingOrder?.createdAt || new Date().toISOString().split('T')[0],
-      dueDate: deliveryDate
+      dueDate: deliveryDate,
+      osType: 'EQUIPMENT'
     };
 
     const newList = editingOrderId ? orders.map(o => o.id === editingOrderId ? data : o) : [data, ...orders];

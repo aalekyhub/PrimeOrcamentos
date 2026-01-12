@@ -177,77 +177,66 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
       )}
 
       {!defaultOpenForm && (
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-slate-100 bg-slate-50/50">
-            <div className="relative max-w-sm">
-              <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+        <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden">
+          <div className="p-8 border-b border-slate-100 flex items-center gap-4">
+            <div className="relative w-full max-w-md">
+              <Search className="absolute left-4 top-3.5 w-4 h-4 text-slate-400" />
               <input
                 type="text"
                 placeholder="Buscar serviço..."
-                className="pl-10 pr-4 py-2 w-full bg-white border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 transition-all placeholder:text-slate-400"
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-            {filtered.map(service => (
-              <div key={service.id} className="group p-6 bg-white border border-slate-200 rounded-3xl hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-50/50 transition-all relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
-                  <button
-                    onClick={() => { setEditingService(service); setFormData(service); setShowForm(true); }}
-                    className="p-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100"
-                  >
-                    <Pencil className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={async () => {
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-slate-100">
+                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest pl-10">Serviço</th>
+                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Preço</th>
+                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right pr-10">Ações</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+              {filtered.map(service => (
+                <tr key={service.id} className="hover:bg-slate-50 group transition-colors">
+                  <td className="px-8 py-6 pl-10">
+                    <div className="flex items-center gap-3 mb-1">
+                      <p className="text-sm font-black text-slate-900 uppercase">{service.name}</p>
+                      <span className="bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider">{service.category}</span>
+                    </div>
+                    <p className="text-[11px] text-slate-400 font-medium line-clamp-1 max-w-md">{service.description || 'Sem descrição.'}</p>
+                  </td>
+                  <td className="px-8 py-6 text-sm font-bold text-slate-700">
+                    R$ {service.basePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} <span className="text-[10px] text-slate-400 uppercase">/ {service.unit}</span>
+                  </td>
+                  <td className="px-8 py-6 pr-10 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onClick={() => { setEditingService(service); setFormData(service); setShowForm(true); }} className="p-2 text-slate-400 hover:text-indigo-600 transition-colors" title="Editar"><Pencil className="w-4 h-4" /></button>
+                    <button onClick={async () => {
                       if (confirm("Deseja excluir este serviço do catálogo? Esta ação também removerá os dados da nuvem.")) {
                         setServices(prev => prev.filter(s => s.id !== service.id));
                         const result = await db.remove('catalog', service.id);
                         if (result?.success) notify("Serviço removido da nuvem.");
                         else notify("Removido localmente. Erro na nuvem.", "warning");
                       }
-                    }}
-                    className="p-2 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-100"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
-                    <Briefcase className="w-6 h-6" />
-                  </div>
-                  <div className="min-w-0">
-                    <h4 className="font-bold text-slate-900 truncate">{service.name}</h4>
-                    <span className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest">{service.category}</span>
-                  </div>
-                </div>
-
-                <p className="text-sm text-slate-500 mb-6 line-clamp-2 min-h-[40px]">{service.description || 'Sem descrição.'}</p>
-
-                <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                  <div className="flex items-center gap-1.5 text-slate-900 font-bold">
-                    <span className="text-xs text-slate-400">R$</span>
-                    <span className="text-lg">{service.basePrice.toLocaleString()}</span>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">/ {service.unit}</span>
-                  </div>
-                  <span className="text-[10px] font-mono text-slate-400">{service.id}</span>
-                </div>
-              </div>
-            ))}
-
-            {filtered.length === 0 && (
-              <div className="col-span-full py-20 text-center space-y-4">
-                <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto">
-                  <Search className="w-8 h-8 text-slate-200" />
-                </div>
-                <p className="text-slate-400 font-medium">Nenhum serviço encontrado.</p>
-              </div>
-            )}
-          </div>
+                    }} className="p-2 text-slate-400 hover:text-rose-500 transition-colors" title="Excluir"><Trash2 className="w-4 h-4" /></button>
+                  </td>
+                </tr>
+              ))}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={3} className="py-20 text-center">
+                    <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Search className="w-8 h-8 text-slate-200" />
+                    </div>
+                    <p className="text-slate-400 font-medium">Nenhum serviço encontrado.</p>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

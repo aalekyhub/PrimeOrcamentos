@@ -434,7 +434,8 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                           status: OrderStatus.IN_PROGRESS,
                           createdAt: new Date().toISOString(),
                           items: budget.items.map(i => ({ ...i })),
-                          descriptionBlocks: budget.descriptionBlocks ? [...budget.descriptionBlocks] : []
+                          descriptionBlocks: budget.descriptionBlocks ? [...budget.descriptionBlocks] : [],
+                          osType: 'WORK' // Automatically create as Work Order for Construction
                         };
                         const newList = orders.map(o => o.id === budget.id ? approvedBudget : o);
                         const finalList = [...newList, newServiceOrder];

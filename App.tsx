@@ -2,11 +2,12 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import {
   LayoutDashboard, FileText, Wallet, Target, Search, Menu,
-  Users, Briefcase, ClipboardList, Zap, Settings, Building2, Lock, LogOut, RefreshCw, Cloud, CloudOff, Database
+  Users, Briefcase, ClipboardList, Zap, Settings, Building2, Lock, LogOut, RefreshCw, Cloud, CloudOff, Database, HardHat
 } from 'lucide-react';
 import Dashboard from './components/Dashboard';
 import BudgetManager from './components/BudgetManager';
 import ServiceOrderManager from './components/ServiceOrderManager';
+import WorkOrderManager from './components/WorkOrderManager';
 import FinancialControl from './components/FinancialControl';
 import CustomerManager from './components/CustomerManager';
 import ServiceCatalog from './components/ServiceCatalog';
@@ -53,61 +54,6 @@ const INITIAL_COMPANY: CompanyProfile = {
   customUnits: [{ label: 'Unidade', value: 'un' }]
 };
 
-// DADOS DE TESTE
-const SAMPLE_CUSTOMER: Customer = {
-  id: 'CLI-TESTE',
-  type: 'PF',
-  name: 'João da Silva (Exemplo)',
-  email: 'joao.exemplo@email.com',
-  phone: '(11) 98888-7777',
-  whatsapp: '(11) 98888-7777',
-  document: '123.456.789-00',
-  cep: '01001-000',
-  address: 'Praça da Sé',
-  number: '100',
-  complement: 'Apto 12',
-  neighborhood: 'Centro',
-  city: 'São Paulo',
-  state: 'SP',
-  createdAt: new Date().toISOString().split('T')[0]
-};
-
-const SAMPLE_SERVICE: CatalogService = {
-  id: 'SRV-TESTE',
-  name: 'Manutenção de Ar-Condicionado',
-  description: 'Limpeza, higienização e carga de gás em unidades split.',
-  basePrice: 350,
-  unit: 'un',
-  category: 'Climatização'
-};
-
-const SAMPLE_ORDER: ServiceOrder = {
-  id: 'ORC-1001',
-  customerId: 'CLI-TESTE',
-  customerName: 'João da Silva (Exemplo)',
-  customerEmail: 'joao.exemplo@email.com',
-  description: 'Manutenção Preventiva em 2 aparelhos',
-  status: OrderStatus.PENDING,
-  items: [
-    {
-      id: 'item-1',
-      description: 'Manutenção de Ar-Condicionado',
-      quantity: 2,
-      unitPrice: 350,
-      unit: 'un',
-      type: 'Serviço'
-    }
-  ],
-  totalAmount: 700,
-  createdAt: new Date().toISOString().split('T')[0],
-  dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-  paymentTerms: '50% entrada, saldo na conclusão',
-  deliveryTime: '2 dias úteis',
-  descriptionBlocks: [
-    { id: 'b1', type: 'text', content: 'Serviço de limpeza completa com bactericida.' }
-  ]
-};
-
 const AppContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -134,7 +80,6 @@ const AppContent: React.FC = () => {
 
       if (cloudData && cloudData.error) {
         notify(cloudData.error, "error");
-        // Em caso de erro crítico na tabela users, logar para debug
         if (cloudData.error.includes('users')) {
           console.error("Erro crítico ao sincronizar users:", cloudData.error);
         }
@@ -142,58 +87,34 @@ const AppContent: React.FC = () => {
       }
 
       if (cloudData) {
-        // Deduplicação de Clientes por Documento
         if (cloudData.customers) {
           const customerMap = new Map();
           const duplicatesToRemove: string[] = [];
-
           cloudData.customers.forEach((c: Customer) => {
             const key = c.document.replace(/\D/g, '');
-            if (customerMap.has(key)) {
-              duplicatesToRemove.push(c.id);
-            } else {
-              customerMap.set(key, c);
-            }
+            if (customerMap.has(key)) { duplicatesToRemove.push(c.id); }
+            else { customerMap.set(key, c); }
           });
-
-          const uniqueCustomers = Array.from(customerMap.values()) as Customer[];
-          setCustomers(uniqueCustomers);
-
-          // Remove duplicatas da nuvem
-          if (duplicatesToRemove.length > 0) {
-            duplicatesToRemove.forEach(id => db.remove('customers', id));
-          }
+          setCustomers(Array.from(customerMap.values()) as Customer[]);
+          if (duplicatesToRemove.length > 0) { duplicatesToRemove.forEach(id => db.remove('customers', id)); }
         }
 
-        // Deduplicação de Catálogo por Nome
         if (cloudData.catalog) {
           const serviceMap = new Map();
           const duplicatesToRemove: string[] = [];
-
           cloudData.catalog.forEach((s: CatalogService) => {
             const key = s.name.trim().toLowerCase();
-            if (serviceMap.has(key)) {
-              duplicatesToRemove.push(s.id);
-            } else {
-              serviceMap.set(key, s);
-            }
+            if (serviceMap.has(key)) { duplicatesToRemove.push(s.id); }
+            else { serviceMap.set(key, s); }
           });
-
-          const uniqueServices = Array.from(serviceMap.values()) as CatalogService[];
-          setCatalog(uniqueServices);
-
-          // Remove duplicatas da nuvem para evitar que voltem
-          if (duplicatesToRemove.length > 0) {
-            duplicatesToRemove.forEach(id => db.remove('catalog', id));
-          }
+          setCatalog(Array.from(serviceMap.values()) as CatalogService[]);
+          if (duplicatesToRemove.length > 0) { duplicatesToRemove.forEach(id => db.remove('catalog', id)); }
         }
 
         if (cloudData.orders) {
           setOrders(prev => {
             const localMap = new Map<string, ServiceOrder>(prev.map(o => [o.id, o]));
             (cloudData.orders as ServiceOrder[]).forEach((o: ServiceOrder) => {
-              // UNIFICAÇÃO (Sugestão do Usuário): Nuvem tem prioridade para IDs existentes.
-              // Novos itens locais (ainda não na nuvem) são preservados na inicialização do Map.
               localMap.set(o.id, o);
             });
             return Array.from(localMap.values()).sort((a, b) =>
@@ -218,7 +139,6 @@ const AppContent: React.FC = () => {
           setUsers(prev => {
             const localMap = new Map<string, UserAccount>(prev.map(u => [u.id, u]));
             (cloudData.users as UserAccount[]).forEach((u: UserAccount) => {
-              // Prioridade para Nuvem em caso de conflito
               localMap.set(u.id, u);
             });
             return Array.from(localMap.values());
@@ -265,7 +185,8 @@ const AppContent: React.FC = () => {
     { id: 'customers', label: 'Clientes', icon: Users },
     { id: 'catalog', label: 'Serviços', icon: Briefcase },
     { id: 'budgets', label: 'Orçamentos', icon: FileText },
-    { id: 'orders', label: 'O.S.', icon: ClipboardList },
+    { id: 'orders', label: 'O.S. (Equip)', icon: ClipboardList },
+    { id: 'works', label: 'O.S. Obra', icon: HardHat },
     { id: 'financials', label: 'Financeiro', icon: Wallet },
     { id: 'search', label: 'Consultar', icon: Search },
     { id: 'audit', label: 'Auditoria', icon: Database },
@@ -364,8 +285,9 @@ const AppContent: React.FC = () => {
             {activeTab === 'customers' && <CustomerManager customers={customers} setCustomers={setCustomers} orders={orders} />}
             {activeTab === 'catalog' && <ServiceCatalog services={catalog} setServices={setCatalog} company={company} />}
             {activeTab === 'budgets' && <BudgetManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} />}
+            {activeTab === 'orders' && <ServiceOrderManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} />}
+            {activeTab === 'works' && <WorkOrderManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} />}
             {activeTab === 'search' && <BudgetSearch orders={orders} setOrders={setOrders} customers={customers} company={company} catalogServices={catalog} setCatalogServices={setCatalog} />}
-            {activeTab === 'orders' && <ServiceOrderManager orders={orders} setOrders={setOrders} setTransactions={setTransactions} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} />}
             {activeTab === 'financials' && <FinancialControl transactions={transactions} setTransactions={setTransactions} currentUser={currentUser} />}
             {activeTab === 'users' && <UserManager users={users} setUsers={setUsers} />}
             {activeTab === 'audit' && <DataCleanup
