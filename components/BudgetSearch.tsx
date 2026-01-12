@@ -23,16 +23,18 @@ const BudgetSearch: React.FC<Props> = ({ orders, setOrders, customers, company, 
 
   const filteredOrders = useMemo(() => {
     return orders.filter(o => {
-      // Filtra apenas orçamentos (status Pendente)
-      const isBudget = o.status === OrderStatus.PENDING;
+      // Filtra apenas orçamentos (status Pendente ou Aprovado)
+      const isBudget = o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED;
       if (!isBudget) return false;
 
       if (searchBy === 'client') {
         if (!clientTerm) return true; // Mostra todos se o campo estiver vazio
         return o.customerName.toLowerCase().includes(clientTerm.toLowerCase());
       } else {
-        const matchesStart = !startDate || o.createdAt >= startDate;
-        const matchesEnd = !endDate || o.createdAt <= endDate;
+        // Normaliza a data de criação para YYYY-MM-DD para comparação correta
+        const createdDate = o.createdAt.split('T')[0];
+        const matchesStart = !startDate || createdDate >= startDate;
+        const matchesEnd = !endDate || createdDate <= endDate;
         return matchesStart && matchesEnd;
       }
     });
@@ -138,18 +140,18 @@ const BudgetSearch: React.FC<Props> = ({ orders, setOrders, customers, company, 
           {filteredOrders.map(order => (
             <div key={order.id} className="p-6 hover:bg-slate-50 transition-colors flex items-center justify-between group">
               <div className="flex items-center gap-6">
-                <div className="w-12 h-12 bg-white border border-slate-200 rounded-2xl flex items-center justify-center font-bold text-blue-600 shadow-sm">
+                <div className={`w-12 h-12 bg-white border rounded-2xl flex items-center justify-center font-bold shadow-sm ${order.status === OrderStatus.APPROVED ? 'text-emerald-600 border-emerald-200' : 'text-blue-600 border-slate-200'}`}>
                   {order.id.split('-')[1] || order.id}
                 </div>
                 <div>
                   <h5 className="font-bold text-slate-900 leading-tight">{order.customerName}</h5>
-                  <p className="text-xs text-slate-400 font-medium mt-1">{order.description} • Emissão: {order.createdAt}</p>
+                  <p className="text-xs text-slate-400 font-medium mt-1">{order.description} • Emissão: {new Date(order.createdAt).toLocaleDateString('pt-BR')}</p>
                 </div>
               </div>
               <div className="flex items-center gap-8">
                 <div className="text-right">
-                  <p className="text-sm font-black text-slate-900">R$ {order.totalAmount.toLocaleString()}</p>
-                  <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-widest">Orçamento Pendente</p>
+                  <p className="text-sm font-black text-slate-900">R$ {order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                  <p className={`text-[10px] font-bold uppercase tracking-widest ${order.status === OrderStatus.APPROVED ? 'text-emerald-600' : 'text-blue-600'}`}>{order.status === OrderStatus.APPROVED ? 'Orçamento Aprovado' : 'Orçamento Pendente'}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <button
