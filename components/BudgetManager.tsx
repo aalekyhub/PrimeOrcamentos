@@ -177,15 +177,13 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                            ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:30px; color:#2563eb;">PO</div>'}
                        </div>
                        <div>
-                           <h1 class="text-2xl font-black text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
+                           <h1 style="font-size: ${company.nameFontSize || 24}px;" class="font-black text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
                            <p class="text-[9px] font-black text-blue-600 uppercase tracking-widest leading-none">Soluções em Gestão Profissional</p>
                             <p class="text-[8px] text-slate-600 font-bold uppercase tracking-tight mt-1">${company.cnpj || ''}</p>
                             <p class="text-[8px] text-slate-600 font-bold uppercase tracking-tight">${company.phone || ''}</p>
                        </div>
                    </div>
                    <div class="text-right">
-                        <h2 class="text-sm font-black text-slate-900 tracking-tight uppercase leading-none mb-0.5">Proposta Comercial</h2>
-                        <p class="text-xl font-black text-blue-600 uppercase leading-none mb-2 tracking-tight">${budget.description}</p>
                        <p class="text-2xl font-black text-blue-600 tracking-tighter mb-1">${budget.id}</p>
                        <p class="text-[8px] font-bold text-slate-600 uppercase tracking-widest text-right">EMISSÃO: ${emissionDate} <br> VALIDADE: ${validityDate}</p>
                    </div>
@@ -205,6 +203,10 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                </div>
 
                <!-- Description Blocks (Optional) -->
+               <div class="mb-4">
+                    <h2 class="text-sm font-black text-slate-900 tracking-tight uppercase leading-none mb-0.5">Proposta Comercial</h2>
+                    <p class="text-xl font-black text-blue-600 uppercase leading-none tracking-tight">${budget.description}</p>
+               </div>
                ${budget.descriptionBlocks && budget.descriptionBlocks.length > 0 ? `
                <div class="mb-8 mt-4">
                    <div class="section-title">Descrição Técnica / Escopo</div>
@@ -218,6 +220,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
                <!-- Items Table -->
                <div class="mb-8 avoid-break">
+
                    <div class="section-title">Detalhamento Financeiro</div>
                    <table style="width: 100%; border-collapse: collapse;">
                        <thead>

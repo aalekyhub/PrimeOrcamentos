@@ -240,35 +240,80 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     };
 
     const handlePrintContract = (order: ServiceOrder) => {
-        // Reuse contract logic or duplicate if needed. For now, duplication with "OS de Obra" context.
-        // Keeping it simple for this iteration, will use simple alert if logic is too complex to duplicate blindly, 
-        // but actually I have the code from ServiceOrderManager.
-        // I'll emit a simple placeholder for now or copy the full contract logic if desired.
-        // User asked for "OS. OBRA", mostly likely for the separation. The contract is less critical to differentiate *for now* 
-        // but I should ideally enable it.
-        // I'll copy the contract logic but ensure it says "CONTRATO DE OBRA".
-
         const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', address: 'Endereço não informado', city: '', state: '', cep: '' };
         const printWindow = window.open('', '_blank');
         if (!printWindow) return;
 
         const html = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Contrato Obra - ${order.id}</title>
-         <script src="https://cdn.tailwindcss.com"></script>
-         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
-         <style>body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }</style>
-      </head>
-      <body onload="setTimeout(() => { window.print(); window.close(); }, 800)">
-        <div class="max-w-[210mm] mx-auto p-[15mm]">
-           <h1 class="text-2xl font-bold text-center mb-8">CONTRATO DE PRESTAÇÃO DE SERVIÇOS (OBRA)</h1>
-           <p class="mb-4">O presente contrato formaliza a execução dos serviços da obra ${order.description}...</p>
-           <p class="text-center text-sm text-slate-500">(Layout simplificado para demonstração - use a impressão padrão para detalhes)</p>
-        </div>
-      </body>
-      </html>`; // Placeholder for contract to save tokens/time, as user focused on OS generation logic.
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Contrato - ${order.id}</title>
+      <script src="https://cdn.tailwindcss.com"></script>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
+      <style>
+        body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; counter-reset: page 1; }
+        @page { size: A4; margin: 0 !important; }
+        .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
+        .avoid-break { break-inside: avoid; page-break-inside: avoid; }
+        @media screen { body { background: #f1f5f9; padding: 40px 0; } .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; } }
+        @media print { body { background: white !important; margin: 0 !important; } .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; } .no-print { display: none !important; } * { box-shadow: none !important; } .print-footer { position: fixed; bottom: 0; left: 0; right: 0; height: 15mm; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: bold; color: #94a3b8; text-transform: uppercase; background: white; } .print-footer::after { content: "Página " counter(page); } .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; } }
+      </style>
+    </head>
+    <body class="no-scrollbar">
+      <table style="width: 100%;">
+        <thead><tr><td style="height: ${company.printMarginTop || 15}mm;"><div style="height: ${company.printMarginTop || 15}mm; display: block;">&nbsp;</div></td></tr></thead>
+        <tbody><tr><td>
+          <div class="a4-container">
+            <div class="flex justify-between items-start mb-8">
+                <div class="flex gap-4">
+                    <div class="w-16 h-16 shrink-0 flex items-center justify-center overflow-hidden">
+                        ${company.logo ? `<img src="${company.logo}" style="height: 100%; object-fit: contain;">` : `<div style="width: 64px; height: 64px; background: #2563eb; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white;"><svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></div>`}
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-black text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
+                        <p class="text-[9px] font-black text-blue-600 uppercase tracking-widest">${company.tagline || 'Soluções em Gestão e Manutenção Profissional'}</p>
+                        <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tight mt-1">${company.cnpj || ''} | ${company.phone || ''}</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="bg-blue-600 text-white px-4 py-1 rounded text-[8px] font-black uppercase tracking-widest mb-1 inline-block">CONTRATO</div>
+                    <h2 class="text-3xl font-black text-slate-900 tracking-tighter">${order.id}</h2>
+                    <div class="mt-2 space-y-0.5"><p class="text-[8px] font-black text-slate-400 uppercase tracking-widest text-right">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-8">
+              <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 class="text-[7px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</h4><p class="text-[10px] font-black text-slate-900 uppercase">${company.name}</p><p class="text-[9px] text-slate-500 uppercase">${company.address || ''}</p><p class="text-[9px] text-slate-500 uppercase">${company.email || ''}</p></div>
+              <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 class="text-[7px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</h4><p class="text-[10px] font-black text-slate-900 uppercase">${customer.name}</p><p class="text-[9px] text-slate-500 uppercase">DOC: ${customer.document || 'N/A'}</p><p class="text-[9px] text-slate-500 uppercase">${customer.address || ''}, ${customer.number || ''} - ${customer.city || ''}</p></div>
+            </div>
+
+            <div class="mb-6"><h4 class="text-[9px] font-black text-slate-900 uppercase tracking-widest mb-2 border-b pb-1">1. OBJETO DO CONTRATO</h4><p class="text-[10px] text-slate-600 leading-relaxed text-justify">O presente contrato tem por objeto a prestação dos serviços técnicos descritos abaixo, a serem realizados pela CONTRATADA à CONTRATANTE:</p><div class="bg-blue-50/50 p-4 rounded-lg border-l-4 border-blue-500 mt-2"><p class="text-[10px] font-bold text-blue-900 uppercase">${order.description}</p><p class="text-[9px] text-blue-700 mt-1">${order.items.map(i => `${i.quantity}x ${i.description}`).join(', ')}</p></div></div>
+            
+            <div class="mb-6"><h4 class="text-[9px] font-black text-slate-900 uppercase tracking-widest mb-2 border-b pb-1">2. VALORES E PAGAMENTO</h4><p class="text-[10px] text-slate-600 leading-relaxed text-justify">Pelos serviços contratados, a CONTRATANTE pagará o valor total de <b class="text-slate-900">R$ ${order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>. Condições: ${order.paymentTerms || 'Conforme combinado'}.</p></div>
+
+            <div class="mb-6"><h4 class="text-[9px] font-black text-slate-900 uppercase tracking-widest mb-2 border-b pb-1">3. PRAZOS E GARANTIA</h4><p class="text-[10px] text-slate-600 leading-relaxed text-justify">O prazo estimado é de <b>${order.deliveryTime || 'A combinar'}</b>. A garantia dos serviços é de 90 dias (Art. 26 CDC).</p></div>
+            
+            <div class="mb-6"><h4 class="text-[9px] font-black text-slate-900 uppercase tracking-widest mb-2 border-b pb-1">4. DIREITOS E OBRIGAÇÕES</h4><p class="text-[10px] text-slate-600 leading-relaxed text-justify">4.1. A CONTRATADA compromete-se a executar os serviços com qualidade técnica, utilizando mão-de-obra qualificada.<br>4.2. A garantia dos serviços prestados é de 90 (noventa) dias, conforme Art. 26 do Código de Defesa do Consumidor.<br>4.3. A CONTRATANTE deve fornecer as condições necessárias (acesso, energia, etc.) para a execução dos trabalhos.</p></div>
+
+            <div class="mb-6"><h4 class="text-[9px] font-black text-slate-900 uppercase tracking-widest mb-2 border-b pb-1">5. FORO</h4><p class="text-[10px] text-slate-600 leading-relaxed text-justify">Fica eleito o foro da comarca de São Paulo/SP para dirimir quaisquer dúvidas oriundas deste contrato.</p></div>
+
+            <div class="avoid-break mt-12 mb-8">
+              <div class="grid grid-cols-2 gap-16 px-10">
+                <div class="text-center border-t border-slate-300 pt-3"><p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</p><p class="text-[10px] font-black uppercase text-slate-900">${company.name}</p></div>
+                <div class="text-center border-t border-slate-300 pt-3 relative"><p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</p><p class="text-[10px] font-black uppercase text-slate-900">${customer.name}</p></div>
+              </div>
+            </div>
+          </div>
+        </td></tr></tbody>
+        <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;"><div style="height: ${company.printMarginBottom || 15}mm; display: block;">&nbsp;</div></td></tr></tfoot>
+      </table>
+      <div class="print-footer no-screen"><span>Documento gerado em ${new Date().toLocaleString('pt-BR')} -&nbsp;</span></div>
+      <script>
+         window.onload = function() { setTimeout(() => { window.print(); window.close(); }, 800); }
+      </script>
+    </body>
+    </html>`;
         printWindow.document.write(html);
         printWindow.document.close();
     };
