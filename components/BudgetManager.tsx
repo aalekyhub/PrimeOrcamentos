@@ -177,11 +177,12 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                        <div>
                            <h1 class="text-2xl font-black text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
                            <p class="text-[9px] font-black text-blue-600 uppercase tracking-widest leading-none">Soluções em Gestão Profissional</p>
-                           <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tight mt-2">${company.cnpj || ''} | ${company.phone || ''}</p>
+                            <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tight mt-2">${company.cnpj || ''}</p>
+                            <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tight">${company.phone || ''}</p>
                        </div>
                    </div>
                    <div class="text-right">
-                       <h2 class="text-xl font-black text-slate-900 tracking-tight uppercase leading-none mb-2">Proposta<br>Comercial</h2>
+                        <h2 class="text-xl font-black text-slate-900 tracking-tight uppercase leading-none mb-2">Proposta Comercial<br><span class="text-blue-600">${budget.description}</span></h2>
                        <p class="text-2xl font-black text-blue-600 tracking-tighter mb-2">${budget.id}</p>
                        <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest text-right">EMISSÃO: ${emissionDate} <br> VALIDADE: ${validityDate}</p>
                    </div>
@@ -202,7 +203,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
                <!-- Description Blocks (Optional) -->
                ${budget.descriptionBlocks && budget.descriptionBlocks.length > 0 ? `
-               <div class="mb-8">
+               <div class="mb-8 mt-10">
                    <div class="section-title">Descrição Técnica / Escopo</div>
                    <div class="space-y-4">
                        ${budget.descriptionBlocks.map(block => block.type === 'text'
