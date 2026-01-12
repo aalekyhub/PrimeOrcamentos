@@ -4,7 +4,7 @@ import React, { useState, useMemo } from 'react';
 import {
   Plus, Search, X, Trash2, Pencil, Printer, Save,
   UserPlus, Package, Type, Image as ImageIcon,
-  FileText, Upload
+  FileText, Upload, CheckCircle
 } from 'lucide-react';
 import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock } from '../types';
 import { useNotify } from './ToastProvider';
@@ -45,7 +45,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
   const [currentPrice, setCurrentPrice] = useState(0);
 
   const budgets = useMemo(() => orders.filter(o =>
-    o.status === OrderStatus.PENDING && (o.customerName.toLowerCase().includes(searchTerm.toLowerCase()) || o.id.includes(searchTerm))
+    (o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED) && (o.customerName.toLowerCase().includes(searchTerm.toLowerCase()) || o.id.includes(searchTerm))
   ), [orders, searchTerm]);
 
   const totalAmount = useMemo(() => items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0), [items]);
@@ -116,107 +116,138 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       <head>
         <title>Orçamento</title>
         <script src="https://cdn.tailwindcss.com"></script>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
         <style>
-          body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
-          @page { size: A4; margin: 0 !important; }
-          .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
-          .logo-box { width: 64px; height: 64px; background: #2563eb; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; }
-          .avoid-break { break-inside: avoid; page-break-inside: avoid; }
-          @media screen { body { background: #f1f5f9; padding: 40px 0; } .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; } }
-          @media print { html, body { height: auto !important; overflow: visible !important; } body { background: white !important; margin: 0 !important; } .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; } .no-print { display: none !important; } * { box-shadow: none !important; } .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: #94a3b8; text-transform: uppercase; } .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; } }
+          @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+          body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          .a4-container { width: 210mm; min-height: 297mm; margin: auto; background: white; position: relative; }
+          @media print { 
+            body { background: white; margin: 0; padding: 0; } 
+            .a4-container { width: 100%; height: auto; box-shadow: none; margin: 0; border: none; padding: 15mm !important; }
+            .no-print { display: none !important; }
+            /* Fix for blank page issue */
+            html, body { height: auto !important; overflow: visible !important; }
+          }
+          @media screen { body { background: #f1f5f9; padding: 40px 0; } .a4-container { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 40px; margin-bottom: 40px; } }
+          .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 120px; color: rgba(15, 23, 42, 0.03); font-weight: 900; pointer-events: none; z-index: 0; text-transform: uppercase; white-space: nowrap; }
+          .content-layer { position: relative; z-index: 10; }
         </style>
-    </head>
-      <body class="no-scrollbar">
-        <table style="width: 100%;">
-          <thead><tr><td style="height: ${company.printMarginTop || 15}mm;"><div style="height: ${company.printMarginTop || 15}mm; display: block;">&nbsp;</div></td></tr></thead>
-          <tbody><tr><td>
-            <div class="a4-container">
-        <div class="flex justify-between items-start mb-6">
-            <div class="flex gap-4">
-              <div class="w-16 h-16 shrink-0 flex items-center justify-center overflow-hidden">
-                ${company.logo ? `<img src="${company.logo}" style="height: 100%; object-fit: contain;">` : `<div class="logo-box"><svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></div>`}
-              </div>
-              <div>
-                <h1 class="text-xl font-black text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
-                <p class="text-[9px] font-black text-blue-600 uppercase tracking-widest">${company.tagline || 'Soluções em Gestão e Manutenção Profissional'}</p>
-                <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tight mt-1">${company.cnpj || ''} | ${company.phone || ''}</p>
-              </div>
+      </head>
+      <body>
+        <div class="a4-container">
+          <div class="watermark">Proposta Comercial</div>
+          <div class="content-layer">
+            <div class="flex justify-between items-start mb-12">
+                <div class="flex gap-4">
+                    <div class="w-20 h-20 shrink-0 flex items-center justify-center overflow-hidden">
+                        ${company.logo ? `<img src="${company.logo}" style="height: 100%; object-fit: contain;">` : `<div style="width: 80px; height: 80px; background: #2563eb; border-radius: 16px; display: flex; align-items: center; justify-content: center; color: white;"><svg viewBox="0 0 24 24" width="40" height="40" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></div>`}
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-black text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
+                        <p class="text-[10px] font-black text-blue-600 uppercase tracking-widest">${company.tagline || 'Soluções em Gestão e Manutenção Profissional'}</p>
+                        <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tight mt-1">${company.cnpj || ''} | ${company.phone || ''}</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="bg-blue-600 text-white px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-widest mb-1 inline-block">Proposta Comercial</div>
+                    <h2 class="text-4xl font-black text-slate-900 tracking-tighter">${budget.id}</h2>
+                    <div class="mt-2 space-y-0.5"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">EMISSÃO: ${emissionDate}</p><p class="text-[9px] font-black text-emerald-500 uppercase tracking-widest text-right">VÁLIDO ATÉ: ${validityDate}</p></div>
+                </div>
             </div>
-            <div class="text-right">
-              <h2 class="text-xl font-black text-slate-900 leading-tight uppercase">Proposta<br>Comercial</h2>
-              <p class="text-blue-600 font-black text-lg mt-1">${budget.id}</p>
-              <div class="mt-2 space-y-0.5">
-                <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest">EMISSÃO: ${emissionDate}</p>
-                <p class="text-[8px] font-black text-blue-600 uppercase tracking-widest">VALIDADE: ${validityDate}</p>
-              </div>
-            </div>
-          </div>
-          <div class="border-b-2 border-slate-900 mb-6"></div>
-          <div class="mb-6 grid grid-cols-2 gap-4">
-            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-              <h3 class="text-[9px] font-black text-blue-700 uppercase tracking-widest mb-1.5 ml-1">Cliente / Destinatário</h3>
-              <p class="text-xs font-black text-slate-900 uppercase">${budget.customerName}</p>
-              <p class="text-[9px] text-slate-500 font-bold mt-1 uppercase">${customer.document || ''}</p>
-            </div>
-            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-              <h3 class="text-[9px] font-black text-blue-700 uppercase tracking-widest mb-1.5 ml-1">Proposta Comercial</h3>
-              <p class="text-xs font-black text-slate-900 uppercase">${budget.description || 'Execução de Serviços'}</p>
-            </div>
-          </div>
-          ${budget.descriptionBlocks && budget.descriptionBlocks.length > 0 ? `
-            <div class="mb-8">
-              <h3 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4 border-b pb-1">Descrição Técnica</h3>
-              <div class="space-y-4">
-                ${budget.descriptionBlocks.map((block: any) => block.type === 'text' ? `<p class="text-[10px] text-slate-700 leading-relaxed italic avoid-break">${block.content}</p>` : `<div class="py-2 w-full flex justify-center items-center avoid-break"><img src="${block.content}" class="max-w-[80%] h-auto rounded-xl shadow-sm border border-slate-100 mx-auto block"></div>`).join('')}
-              </div>
-            </div>
-          ` : ''}
-          <div class="mb-6">
-            <h3 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4 border-b pb-1">Detalhamento Financeiro</h3>
-            <table class="w-full text-left">
-              <thead><tr class="text-[9px] font-black text-slate-400 uppercase tracking-widest border-b-[2px] border-slate-900"><th class="pb-2">Item / Descrição</th><th class="pb-2 text-center">Tipo</th><th class="pb-2 text-center">Qtd</th><th class="pb-2 text-right">Unitário</th><th class="pb-2 text-right">Subtotal</th></tr></thead>
-              <tbody>${itemsHtml}</tbody>
-            </table>
-          </div>
-          <div class="avoid-break mb-6">
-            <div class="bg-slate-900 text-white p-6 rounded-xl flex justify-between items-center">
-              <span class="font-black text-xs tracking-widest uppercase">Investimento Total:</span>
-              <span class="text-3xl font-black tracking-tighter text-blue-400">R$ ${budget.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-            </div>
-          </div>
-          <div class="avoid-break mb-6">
-            <div class="grid grid-cols-2 gap-4">
-              <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 h-full">
-                <h3 class="text-[9px] font-black text-blue-700 uppercase tracking-widest mb-3 border-b border-slate-200 pb-1">Forma de Pagamento</h3>
-                <p class="text-[11px] font-bold text-slate-700 leading-relaxed">${budget.paymentTerms || 'A combinar'}</p>
-              </div>
-              <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 h-full">
-                <h3 class="text-[9px] font-black text-blue-700 uppercase tracking-widest mb-3 border-b border-slate-200 pb-1">Prazo de Entrega / Execução</h3>
-                <p class="text-[11px] font-bold text-slate-700 leading-relaxed">${budget.deliveryTime || 'A combinar'}</p>
-              </div>
-            </div>
-          </div>
-          <div class="avoid-break mb-6">
-            <div class="bg-blue-50/50 border border-blue-100 p-8 rounded-3xl relative overflow-hidden">
-              <h3 class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2">Termo de Aceite</h3>
-              <p class="text-[10px] text-slate-600 leading-relaxed italic pr-12 text-justify">"Este documento constitui uma proposta comercial formal. Ao assinar abaixo, o cliente declara estar ciente e de pleno acordo com os valores, prazos e especificações técnicas descritas. Esta aceitação autoriza o início imediato dos trabalhos sob as condições estabelecidas. A contratada reserva-se o direito de renegociar valores caso a aprovação ocorra após o prazo de validade de 30 dias. Eventuais alterações de escopo solicitadas após o aceite estarão sujeitas a nova análise de custos."</p>
-            </div>
-          </div>
 
-          <div class="max-w-[300px] border-t border-slate-400 pt-2 mt-[20mm] avoid-break"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Assinatura do Cliente</p></div>
-          </div>
-        </td></tr></tbody>
-        <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;"><div style="height: ${company.printMarginBottom || 15}mm; display: block;">&nbsp;</div></td></tr></tfoot>
-      </table>
-    </body>
-      </html>
-    `;
+            <!-- Client Info Grid -->
+            <div class="grid grid-cols-2 gap-8 mb-10">
+                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-blue-100 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+                    <h4 class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-3 relative z-10">DADOS DO CLIENTE</h4>
+                    <div class="space-y-1 relative z-10">
+                        <p class="text-sm font-black text-slate-900 uppercase">${customer.name}</p>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tight flex items-center gap-1"><span class="w-1 h-1 bg-blue-500 rounded-full"></span> DOC: ${customer.document || 'Não Informado'}</p>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tight flex items-center gap-1"><span class="w-1 h-1 bg-blue-500 rounded-full"></span> ${customer.city || ''} - ${customer.state || ''}</p>
+                         <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tight flex items-center gap-1"><span class="w-1 h-1 bg-blue-500 rounded-full"></span> TEL: ${customer.phone || customer.whatsapp || 'Não informado'}</p>
+                    </div>
+                </div>
+                 <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-emerald-100 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+                    <h4 class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-3 relative z-10">RESUMO FINANCEIRO</h4>
+                    <div class="flex items-end gap-1 relative z-10">
+                        <span class="text-lg font-bold text-slate-400 mb-1">R$</span>
+                        <span class="text-4xl font-black text-slate-900 tracking-tighter leading-none">${budget.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                    <p class="text-[9px] text-emerald-600 font-black uppercase tracking-tight mt-2 bg-emerald-50 inline-block px-2 py-1 rounded">Pagamento Facilitado</p>
+                </div>
+            </div>
 
+            <!-- Description -->
+            <div class="mb-10">
+                 <h4 class="text-[9px] font-black text-slate-900 uppercase tracking-widest mb-4 border-b pb-2">Escopo dos Serviços</h4>
+                 <div class="bg-white rounded-xl text-xs text-slate-600 leading-relaxed text-justify space-y-4">
+                    ${budget.descriptionBlocks && budget.descriptionBlocks.length > 0 ?
+        budget.descriptionBlocks.map(block => block.type === 'text' ? `<p>${block.content.replace(/\n/g, '<br>')}</p>` : `<div style="display:flex;justify-content:center;margin:10px 0;"><img src="${block.content}" style="max-height:200px;border-radius:8px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);"></div>`).join('')
+        : `<p>${budget.description}</p>`
+      }
+                 </div>
+            </div>
+
+            <!-- Items Table -->
+            <div class="mb-10">
+                <h4 class="text-[9px] font-black text-slate-900 uppercase tracking-widest mb-4 border-b pb-2">Detalhamento de Custos</h4>
+                <table style="width: 100%; border-collapse: separate; border-spacing: 0;">
+                    <thead>
+                        <tr style="text-align: left;">
+                            <th style="padding-bottom: 12px; font-size: 8px; font-black: true; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.1em;">Descrição</th>
+                            <th style="padding-bottom: 12px; font-size: 8px; font-black: true; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.1em; text-align: center;">Tipo</th>
+                            <th style="padding-bottom: 12px; font-size: 8px; font-black: true; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.1em; text-align: center;">Qtd</th>
+                            <th style="padding-bottom: 12px; font-size: 8px; font-black: true; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.1em; text-align: right;">Valor Unit.</th>
+                            <th style="padding-bottom: 12px; font-size: 8px; font-black: true; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.1em; text-align: right;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${itemsHtml}
+                    </tbody>
+                </table>
+                 <div style="border-top: 2px solid #0f172a; margin-top: 10px; padding-top: 10px; display: flex; justify-content: flex-end;">
+                     <div style="text-align: right;">
+                         <p style="font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Valor Total da Proposta</p>
+                         <p style="font-size: 24px; font-weight: 900; color: #0f172a;">R$ ${budget.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                     </div>
+                 </div>
+            </div>
+
+            <!-- Conditions & Signature -->
+            <div class="grid grid-cols-2 gap-12 mt-auto">
+                 <div>
+                    <h4 class="text-[8px] font-black text-slate-900 uppercase tracking-widest mb-3 border-b pb-1">Condições Comerciais</h4>
+                     <ul class="space-y-2">
+                        <li class="flex items-start gap-2 text-[10px] text-slate-600"><span class="font-bold text-slate-900 shrink-0">PAGAMENTO:</span> ${budget.paymentTerms || 'A combinar'}</li>
+                        <li class="flex items-start gap-2 text-[10px] text-slate-600"><span class="font-bold text-slate-900 shrink-0">ENTREGA:</span> ${budget.deliveryTime || '15 dias úteis após aprovação'}</li>
+                        <li class="flex items-start gap-2 text-[10px] text-slate-600"><span class="font-bold text-slate-900 shrink-0">VALIDADE:</span> ${validityDays} dias</li>
+                     </ul>
+                 </div>
+                 <div>
+                    <h4 class="text-[8px] font-black text-slate-900 uppercase tracking-widest mb-3 border-b pb-1">Termo de Aceite</h4>
+                    <p class="text-[9px] text-slate-500 text-justify leading-tight mb-8">
+                      Autorizo a execução dos serviços conforme descritos nesta proposta comercial nº ${budget.id}, concordando com os valores e condições de pagamento aqui estabelecidos.
+                    </p>
+                     <div class="border-t border-slate-300 pt-2 mt-[20mm]"> <!-- 20mm margin -->
+                        <p class="text-center text-[9px] font-bold text-slate-900 uppercase">Assinatura do Responsável</p>
+                    </div>
+                 </div>
+            </div>
+
+            <div class="mt-12 pt-6 border-t border-slate-100 flex justify-between items-center text-[8px] text-slate-400 font-bold uppercase tracking-widest">
+                <span>${company.name} © ${new Date().getFullYear()}</span>
+                <span>Proposta gerada eletronicamente</span>
+            </div>
+          </div>
+        </div>
+        <script>
+           window.onload = function() { setTimeout(() => { window.print(); window.close(); }, 800); }
+        </script>
+      </body>
+      </html>`;
     printWindow.document.write(html);
     printWindow.document.close();
-
-    printWindow.onload = () => { setTimeout(() => { printWindow.print(); printWindow.close(); }, 500); };
   };
 
   // NEXT_Save
@@ -261,36 +292,81 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Propostas Comerciais</h2>
-          <p className="text-slate-500 text-sm">Crie orçamentos profissionais.</p>
+          <h2 className="text-2xl font-black text-slate-900 tracking-tighter uppercase flex items-center gap-2">
+            Orçamentos <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">{orders.filter(o => o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED).length}</span>
+          </h2>
+          <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Gerencie suas propostas comerciais</p>
         </div>
-        <button onClick={() => { setShowForm(true); setEditingBudgetId(null); setSelectedCustomerId(''); setItems([]); setProposalTitle(''); setDescriptionBlocks([]); }} className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold shadow-2xl shadow-blue-200 hover:bg-blue-700 transition-all flex items-center gap-2">
-          <Plus className="w-5 h-5" /> Nova Proposta
-        </button>
-      </div>
-
-      <div className="bg-white p-4 rounded-[1.5rem] border shadow-sm">
-        <div className="relative">
-          <Search className="absolute left-4 top-3 w-4 h-4 text-slate-400" />
-          <input type="text" placeholder="Buscar proposta..." className="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 transition-all" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+        <div className="flex gap-4 w-full md:w-auto">
+          <div className="relative group grow md:grow-0">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4 group-focus-within:text-blue-500 transition-colors" />
+            <input
+              type="text"
+              placeholder="Buscar orçamento..."
+              className="w-full md:w-64 bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-xs font-bold shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <button onClick={() => setShowForm(true)} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-200 hover:shadow-blue-300 transition-all flex items-center gap-2 active:scale-95">
+            <Plus className="w-4 h-4" /> Novo Orçamento
+          </button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {budgets.map(budget => (
-          <div key={budget.id} className="bg-white rounded-[1.5rem] border-l-[6px] border-blue-600 p-6 flex flex-col group relative shadow-sm hover:shadow-xl transition-all">
-            <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-3 py-1 rounded-full uppercase w-fit mb-4 tracking-widest">{budget.id}</span>
+          <div key={budget.id} className={`bg-white rounded-[1.5rem] border-l-[6px] ${budget.status === OrderStatus.APPROVED ? 'border-emerald-500' : 'border-blue-600'} p-6 flex flex-col group relative shadow-sm hover:shadow-xl transition-all`}>
+            <div className="flex justify-between items-start mb-4">
+              <span className={`text-[10px] font-black ${budget.status === OrderStatus.APPROVED ? 'text-emerald-700 bg-emerald-100' : 'text-blue-600 bg-blue-50'} px-3 py-1 rounded-full uppercase w-fit tracking-widest`}>{budget.id} {budget.status === OrderStatus.APPROVED && '(APROVADO)'}</span>
+              {budget.status === OrderStatus.APPROVED && <CheckCircle className="w-5 h-5 text-emerald-500" />}
+            </div>
             <h4 className="font-black text-slate-900 mb-1 uppercase truncate">{budget.customerName}</h4>
             <p className="text-[11px] text-slate-400 font-bold uppercase tracking-tight mb-6 line-clamp-1">{budget.description}</p>
             <div className="mt-auto pt-4 border-t flex justify-between items-center">
               <span className="font-black text-slate-900 text-base">R$ {budget.totalAmount.toLocaleString('pt-BR')}</span>
               <div className="flex gap-1">
+                {budget.status !== OrderStatus.APPROVED && (
+                  <button onClick={async () => {
+                    if (confirm("Deseja APROVAR este orçamento? Ele será convertido em Ordem de Serviço.")) {
+                      // 1. Mark current budget as APPROVED
+                      const approvedBudget = { ...budget, status: OrderStatus.APPROVED };
+
+                      // 2. Create NEW Service Order
+                      const newServiceOrderId = db.generateId('OS');
+                      const newServiceOrder: ServiceOrder = {
+                        ...budget,
+                        id: newServiceOrderId,
+                        status: OrderStatus.IN_PROGRESS,
+                        createdAt: new Date().toISOString(), // Reset dates for the OS
+                        items: budget.items.map(i => ({ ...i })), // Deep copy items
+                        descriptionBlocks: budget.descriptionBlocks ? [...budget.descriptionBlocks] : []
+                      };
+
+                      // 3. Update State & DB
+                      // We need to update the old one AND add the new one
+                      // Actually, if we add the new one (IN_PROGRESS), it won't show in this list, which is correct.
+                      // The old one (APPROVED) WILL show in this list.
+
+                      const newList = orders.map(o => o.id === budget.id ? approvedBudget : o);
+                      const finalList = [...newList, newServiceOrder];
+
+                      setOrders(finalList);
+
+                      const result = await db.save('serviflow_orders', finalList);
+
+                      if (result?.success) notify("Orçamento APROVADO! Cópia gerada em O.S.");
+                      else notify("Erro ao sincronizar.", "error");
+                    }
+                  }} className="p-2 text-slate-300 hover:text-emerald-600 transition-colors bg-slate-50 rounded-xl" title="Aprovar"><CheckCircle className="w-4 h-4" /></button>
+                )}
                 <button onClick={() => {
                   setEditingBudgetId(budget.id);
                   setSelectedCustomerId(budget.customerId);
+
                   setItems(budget.items);
                   setProposalTitle(budget.description);
                   setDescriptionBlocks(budget.descriptionBlocks && budget.descriptionBlocks.length > 0 ? budget.descriptionBlocks : []);

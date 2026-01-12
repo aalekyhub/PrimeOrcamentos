@@ -2,6 +2,7 @@
 export enum OrderStatus {
   DRAFT = 'Rascunho',
   PENDING = 'Pendente',
+  APPROVED = 'Aprovado',
   IN_PROGRESS = 'Em Andamento',
   COMPLETED = 'Concluído',
   CANCELLED = 'Cancelado',

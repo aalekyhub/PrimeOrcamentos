@@ -30,9 +30,9 @@ const Dashboard: React.FC<DashboardProps> = ({ stats, orders, transactions, curr
   }));
 
   const orderStatusData = [
-    { name: 'Pendentes', value: safeOrders.filter(o => o.status === OrderStatus.PENDING).length },
-    { name: 'Em Andamento', value: safeOrders.filter(o => o.status === OrderStatus.IN_PROGRESS).length },
-    { name: 'Concluídas', value: safeOrders.filter(o => o.status === OrderStatus.COMPLETED).length },
+    { name: 'Orçamentos', value: safeOrders.filter(o => o.status === OrderStatus.PENDING).length },
+    { name: 'Serviços Ativos', value: safeOrders.filter(o => o.status === OrderStatus.IN_PROGRESS).length },
+    { name: 'Finalizados', value: safeOrders.filter(o => o.status === OrderStatus.COMPLETED).length },
   ].filter(v => v.value > 0);
 
   return (
@@ -67,7 +67,7 @@ const Dashboard: React.FC<DashboardProps> = ({ stats, orders, transactions, curr
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         <div className="lg:col-span-2 bg-white p-10 rounded-[3rem] border border-slate-200 shadow-xl shadow-slate-200/50">
           <h4 className="font-black text-slate-900 text-xl mb-10 tracking-tight flex items-center gap-3">
-            Fluxo de Caixa dos últimos 7 lançamentos
+            Fluxo de Caixa Recente
           </h4>
           <div className="h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -92,7 +92,7 @@ const Dashboard: React.FC<DashboardProps> = ({ stats, orders, transactions, curr
 
         <div className="lg:col-span-1 space-y-10">
           <div className="bg-white p-10 rounded-[3rem] border border-slate-200 shadow-xl shadow-slate-200/50">
-            <h4 className="font-black text-slate-900 text-xl mb-8 tracking-tight">Status dos Pedidos</h4>
+            <h4 className="font-black text-slate-900 text-xl mb-8 tracking-tight">Status Geral</h4>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
