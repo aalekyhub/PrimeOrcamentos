@@ -43,8 +43,8 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
   const [currentQty, setCurrentQty] = useState(1);
   const [currentPrice, setCurrentPrice] = useState(0);
 
-  const [taxRate, setTaxRate] = useState(0);
-  const [bdiRate, setBdiRate] = useState(0);
+  const [taxRate, setTaxRate] = useState<string | number>(0);
+  const [bdiRate, setBdiRate] = useState<string | number>(0);
 
   const budgets = useMemo(() => orders.filter(o =>
     (o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED) && (o.customerName.toLowerCase().includes(searchTerm.toLowerCase()) || o.id.includes(searchTerm))
@@ -52,9 +52,11 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
   const subtotal = useMemo(() => items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0), [items]);
   const totalAmount = useMemo(() => {
-    const bdiValue = subtotal * (bdiRate / 100);
+    const bdi = Number(bdiRate) || 0;
+    const tax = Number(taxRate) || 0;
+    const bdiValue = subtotal * (bdi / 100);
     const subtotalWithBDI = subtotal + bdiValue;
-    const taxValue = subtotalWithBDI * (taxRate / 100);
+    const taxValue = subtotalWithBDI * (tax / 100);
     return subtotalWithBDI + taxValue;
   }, [subtotal, taxRate, bdiRate]);
 
@@ -108,18 +110,23 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     const validityDays = company.defaultProposalValidity || 15;
     const validityDate = budget.dueDate ? formatDate(budget.dueDate) : formatDate(new Date(new Date(budget.createdAt || Date.now()).getTime() + validityDays * 24 * 60 * 60 * 1000).toISOString());
 
-    // Logic: BDI first, then Tax on (Subtotal + BDI)
     const subTotal = budget.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0);
-    const bdiValue = budget.bdiRate ? subTotal * (budget.bdiRate / 100) : 0;
-    const subTotalWithBDI = subTotal + bdiValue;
-    const taxValue = budget.taxRate ? subTotalWithBDI * (budget.taxRate / 100) : 0;
+
+    // Logic: BDI first, then Tax on (Subtotal + BDI)
+    const bdiR = budget.bdiRate || 0;
+    const taxR = budget.taxRate || 0;
+
+    const bdiValue = subTotal * (bdiR / 100);
+    const subTotalWithBDI = subTotal + bdiValue; // Accumulated base for tax
+    const taxValue = subTotalWithBDI * (taxR / 100);
+
     const finalTotal = subTotalWithBDI + taxValue;
 
     const itemsHtml = budget.items.map((item: ServiceItem) => `
       <tr style="border-bottom: 1px solid #f1f5f9;">
         <td style="padding: 12px 10px; font-weight: 800; text-transform: uppercase; font-size: 10px; color: #0f172a;">${item.description}</td>
-        <td style="padding: 12px 0; text-align: center; color: #94a3b8; font-size: 9px; font-weight: bold; text-transform: uppercase;">SERVIÇO</td>
-        <td style="padding: 12px 0; text-align: center; font-weight: 800; color: #0f172a; font-size: 10px;">${item.quantity}</td>
+        <td style="padding: 12px 0; text-align: center; color: #94a3b8; font-size: 9px; font-weight: bold; text-transform: uppercase;">${item.type === 'Material' ? 'MAT' : 'SERV'}</td>
+        <td style="padding: 12px 0; text-align: center; font-weight: 800; color: #0f172a; font-size: 10px;">${item.quantity} ${item.unit || ''}</td>
         <td style="padding: 12px 0; text-align: right; color: #64748b; font-size: 10px;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
         <td style="padding: 12px 10px; text-align: right; font-weight: 900; font-size: 11px; color: #0f172a;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
       </tr>`).join('');
@@ -230,14 +237,14 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                            <span class="text-[8px] font-bold text-slate-400 uppercase block">Subtotal</span>
                            <span class="text-[10px] font-black text-slate-600 block">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                         </div>
-                        ${budget.bdiRate ? `
+                        ${bdiR > 0 ? `
                         <div class="text-right">
-                           <span class="text-[8px] font-bold text-slate-400 uppercase block">BDI (${budget.bdiRate}%)</span>
+                           <span class="text-[8px] font-bold text-slate-400 uppercase block">BDI (${bdiR}%)</span>
                            <span class="text-[10px] font-black text-emerald-600 block">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                         </div>` : ''}
-                        ${budget.taxRate ? `
+                        ${taxR > 0 ? `
                         <div class="text-right">
-                           <span class="text-[8px] font-bold text-slate-400 uppercase block">Impostos (${budget.taxRate}%)</span>
+                           <span class="text-[8px] font-bold text-slate-400 uppercase block">Impostos (${taxR}%)</span>
                            <span class="text-[10px] font-black text-blue-600 block">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                         </div>` : ''}
                    </div>
@@ -309,7 +316,8 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       description: proposalTitle || 'REFORMA DE PINTURA',
       status: OrderStatus.PENDING,
       items, descriptionBlocks, totalAmount, paymentTerms, deliveryTime,
-      taxRate, bdiRate, // Save rates
+      taxRate: Number(taxRate) || 0, // Ensure number
+      bdiRate: Number(bdiRate) || 0, // Ensure number
       createdAt: existingBudget?.createdAt || new Date().toISOString().split('T')[0],
       dueDate: existingBudget?.dueDate || new Date(Date.now() + (company.defaultProposalValidity || 15) * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
     };
@@ -570,11 +578,11 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                   <div className="grid grid-cols-2 gap-2 mb-4">
                     <div>
                       <label className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">BDI (%)</label>
-                      <input type="number" className="w-full bg-slate-800/50 border border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-200 outline-none focus:ring-1 focus:ring-blue-500" value={bdiRate || ''} onChange={e => setBdiRate(Number(e.target.value))} placeholder="0%" />
+                      <input type="number" className="w-full bg-slate-800/50 border border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-200 outline-none focus:ring-1 focus:ring-blue-500" value={bdiRate} onChange={e => setBdiRate(e.target.value)} placeholder="0%" />
                     </div>
                     <div>
                       <label className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Impostos (%)</label>
-                      <input type="number" className="w-full bg-slate-800/50 border border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-200 outline-none focus:ring-1 focus:ring-blue-500" value={taxRate || ''} onChange={e => setTaxRate(Number(e.target.value))} placeholder="0%" />
+                      <input type="number" className="w-full bg-slate-800/50 border border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-200 outline-none focus:ring-1 focus:ring-blue-500" value={taxRate} onChange={e => setTaxRate(e.target.value)} placeholder="0%" />
                     </div>
                   </div>
 
