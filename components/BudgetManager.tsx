@@ -126,9 +126,9 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     const itemsHtml = budget.items.map((item: ServiceItem) => `
       <tr style="border-bottom: 1px solid #f1f5f9;">
         <td style="padding: 12px 10px; font-weight: 800; text-transform: uppercase; font-size: ${itemFontBase}px; color: #0f172a;">${item.description}</td>
-        <td style="padding: 12px 0; text-align: center; color: #94a3b8; font-size: ${Math.max(8, itemFontBase - 1)}px; font-weight: bold; text-transform: uppercase;">${item.type === 'Material' ? 'MAT' : 'SERV'}</td>
+        <td style="padding: 12px 0; text-align: center; color: #475569; font-size: ${Math.max(8, itemFontBase - 1)}px; font-weight: bold; text-transform: uppercase;">${item.type === 'Material' ? 'MAT' : 'SERV'}</td>
         <td style="padding: 12px 0; text-align: center; font-weight: 800; color: #0f172a; font-size: ${itemFontBase}px;">${item.quantity} ${item.unit || ''}</td>
-        <td style="padding: 12px 0; text-align: right; color: #64748b; font-size: ${itemFontBase}px;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        <td style="padding: 12px 0; text-align: right; color: #475569; font-size: ${itemFontBase}px;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
         <td style="padding: 12px 10px; text-align: right; font-weight: 900; font-size: ${itemFontBase + 1}px; color: #0f172a;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
       </tr>`).join('');
 
@@ -147,11 +147,12 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
            
            /* Premium Box Styles */
            .info-box { background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
-           .info-label { font-size: 9px; font-weight: 900; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block; }
+           .info-label { font-size: ${Math.max(10, (company.descriptionFontSize || 10))}px; font-weight: 900; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block; }
            .info-value { font-size: 11px; font-weight: 900; color: #0f172a; text-transform: uppercase; line-height: 1.4; }
-           .info-sub { font-size: 10px; color: #64748b; font-weight: 600; }
+           .info-value { font-size: 11px; font-weight: 900; color: #0f172a; text-transform: uppercase; line-height: 1.4; }
+           .info-sub { font-size: 10px; color: #475569; font-weight: 600; }
            
-           .section-title { font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; margin-bottom: 16px; }
+           .section-title { font-size: 10px; font-weight: 900; color: #475569; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; margin-bottom: 16px; }
 
            @media screen { body { background: #f1f5f9; padding: 40px 0; } .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; } }
            @media print { 
@@ -159,7 +160,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
              .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; } 
              .no-screen { display: block !important; }
              .no-print { display: none !important; }
-             .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: #94a3b8; text-transform: uppercase; }
+             .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: #475569; text-transform: uppercase; }
              .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; }
            }
         </style>
@@ -178,15 +179,15 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                        <div>
                            <h1 class="text-2xl font-black text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
                            <p class="text-[9px] font-black text-blue-600 uppercase tracking-widest leading-none">Soluções em Gestão Profissional</p>
-                            <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tight mt-1">${company.cnpj || ''}</p>
-                            <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tight">${company.phone || ''}</p>
+                            <p class="text-[8px] text-slate-600 font-bold uppercase tracking-tight mt-1">${company.cnpj || ''}</p>
+                            <p class="text-[8px] text-slate-600 font-bold uppercase tracking-tight">${company.phone || ''}</p>
                        </div>
                    </div>
                    <div class="text-right">
                         <h2 class="text-sm font-black text-slate-900 tracking-tight uppercase leading-none mb-0.5">Proposta Comercial</h2>
                         <p class="text-xl font-black text-blue-600 uppercase leading-none mb-2 tracking-tight">${budget.description}</p>
                        <p class="text-2xl font-black text-blue-600 tracking-tighter mb-1">${budget.id}</p>
-                       <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest text-right">EMISSÃO: ${emissionDate} <br> VALIDADE: ${validityDate}</p>
+                       <p class="text-[8px] font-bold text-slate-600 uppercase tracking-widest text-right">EMISSÃO: ${emissionDate} <br> VALIDADE: ${validityDate}</p>
                    </div>
                </div>
 
@@ -209,7 +210,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                    <div class="section-title">Descrição Técnica / Escopo</div>
                    <div class="space-y-4">
                        ${budget.descriptionBlocks.map(block => block.type === 'text'
-      ? `<p style="font-size: ${company.descriptionFontSize || 10}px;" class="text-slate-600 leading-relaxed text-justify font-medium whitespace-pre-wrap">${block.content}</p>`
+      ? `<p style="font-size: ${company.descriptionFontSize || 10}px;" class="text-slate-700 leading-relaxed text-justify font-medium whitespace-pre-wrap">${block.content}</p>`
       : `<div style="break-inside: avoid; page-break-inside: avoid;"><img src="${block.content}" style="width: 100%; border-radius: 12px; margin-top: 10px;"></div>`
     ).join('')}
                    </div>
@@ -221,11 +222,11 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                    <table style="width: 100%; border-collapse: collapse;">
                        <thead>
                            <tr style="border-bottom: 2px solid #0f172a;">
-                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, (company.itemsFontSize || 10) - 2)}px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 900; letter-spacing: 0.05em;">Item / Descrição</th>
-                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, (company.itemsFontSize || 10) - 2)}px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 900; letter-spacing: 0.05em;">Tipo</th>
-                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, (company.itemsFontSize || 10) - 2)}px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 900; letter-spacing: 0.05em;">Qtd</th>
-                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, (company.itemsFontSize || 10) - 2)}px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 900; letter-spacing: 0.05em;">Unitário</th>
-                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, (company.itemsFontSize || 10) - 2)}px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 900; letter-spacing: 0.05em;">Subtotal</th>
+                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, (company.itemsFontSize || 10) - 2)}px; text-transform: uppercase; color: #475569; text-align: left; font-weight: 900; letter-spacing: 0.05em;">Item / Descrição</th>
+                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, (company.itemsFontSize || 10) - 2)}px; text-transform: uppercase; color: #475569; text-align: center; font-weight: 900; letter-spacing: 0.05em;">Tipo</th>
+                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, (company.itemsFontSize || 10) - 2)}px; text-transform: uppercase; color: #475569; text-align: center; font-weight: 900; letter-spacing: 0.05em;">Qtd</th>
+                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, (company.itemsFontSize || 10) - 2)}px; text-transform: uppercase; color: #475569; text-align: right; font-weight: 900; letter-spacing: 0.05em;">Unitário</th>
+                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, (company.itemsFontSize || 10) - 2)}px; text-transform: uppercase; color: #475569; text-align: right; font-weight: 900; letter-spacing: 0.05em;">Subtotal</th>
                            </tr>
                        </thead>
                        <tbody>${itemsHtml}</tbody>
@@ -237,17 +238,17 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                    <!-- Breakdown above bar -->
                    <div class="flex justify-end mb-2 gap-6 px-2">
                         <div class="text-right">
-                           <span class="text-[8px] font-bold text-slate-400 uppercase block">Subtotal</span>
-                           <span class="text-[10px] font-black text-slate-600 block">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                           <span class="text-[8px] font-bold text-slate-600 uppercase block">Subtotal</span>
+                           <span class="text-[10px] font-black text-slate-700 block">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                         </div>
                         ${bdiR > 0 ? `
                         <div class="text-right">
-                           <span class="text-[8px] font-bold text-slate-400 uppercase block">BDI (${bdiR}%)</span>
+                           <span class="text-[8px] font-bold text-slate-600 uppercase block">BDI (${bdiR}%)</span>
                            <span class="text-[10px] font-black text-emerald-600 block">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                         </div>` : ''}
                         ${taxR > 0 ? `
                         <div class="text-right">
-                           <span class="text-[8px] font-bold text-slate-400 uppercase block">Impostos (${taxR}%)</span>
+                           <span class="text-[8px] font-bold text-slate-600 uppercase block">Impostos (${taxR}%)</span>
                            <span class="text-[10px] font-black text-blue-600 block">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                         </div>` : ''}
                    </div>
@@ -262,11 +263,11 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                    <div class="grid grid-cols-2 gap-6">
                        <div class="info-box">
                            <span class="info-label">Forma de Pagamento</span>
-                           <p class="text-[10px] font-bold text-slate-700 leading-relaxed mt-2">${budget.paymentTerms || 'A combinar'}</p>
+                           <p style="font-size: ${company.descriptionFontSize || 10}px;" class="font-bold text-slate-700 leading-relaxed mt-2">${budget.paymentTerms || 'A combinar'}</p>
                        </div>
                        <div class="info-box">
                            <span class="info-label">Prazo de Entrega / Execução</span>
-                           <p class="text-[10px] font-bold text-slate-700 leading-relaxed mt-2">${budget.deliveryTime || 'A combinar'}</p>
+                           <p style="font-size: ${company.descriptionFontSize || 10}px;" class="font-bold text-slate-700 leading-relaxed mt-2">${budget.deliveryTime || 'A combinar'}</p>
                        </div>
                    </div>
                </div>
@@ -276,9 +277,9 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                    <div class="border border-blue-100 bg-blue-50/50 rounded-2xl p-6">
                         <div class="flex items-center gap-3 mb-4">
                             <div class="bg-blue-600 rounded-full p-1"><svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>
-                            <span class="text-[10px] font-black text-blue-700 uppercase tracking-widest">Termo de Aceite e Autorização Profissional</span>
+                            <span style="font-size: ${Math.max(10, (company.descriptionFontSize || 10))}px;" class="font-black text-blue-700 uppercase tracking-widest">Termo de Aceite e Autorização Profissional</span>
                         </div>
-                        <p class="text-[9px] text-slate-500 leading-relaxed text-justify italic">
+                        <p style="font-size: ${Math.max(9, (company.descriptionFontSize || 10) - 1)}px;" class="text-slate-700 leading-relaxed text-justify italic">
                             "Este documento constitui uma proposta comercial formal. Ao assinar abaixo, o cliente declara estar ciente e de pleno acordo com os valores, prazos e especificações técnicas descritas. Esta aceitação autoriza o início imediato dos trabalhos sob as condições estabelecidas. A contratada reserva-se o direito de renegociar valores caso a aprovação ocorra após o prazo de validade de ${validityDays} dias. Eventuais alterações de escopo solicitadas após o aceite estarão sujeitas a nova análise de custos."
                         </p>
                    </div>
@@ -287,7 +288,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                <!-- Signature Lines -->
                <div class="avoid-break mt-auto">
                    <div style="border-bottom: 2px solid #cbd5e1; width: 40%;"></div>
-                   <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-2">Assinatura do Cliente / Aceite</p>
+                   <p class="text-[9px] font-black text-slate-600 uppercase tracking-widest mt-2">Assinatura do Cliente / Aceite</p>
                </div>
             </div>
           </td></tr></tbody>
