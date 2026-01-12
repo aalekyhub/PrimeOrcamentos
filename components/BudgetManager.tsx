@@ -353,12 +353,18 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     // Load taxes (Handle potential casing issues from DB)
     console.log('[DEBUG] Budget object being loaded:', budget);
     const b: any = budget;
-    // Check for camelCase, lowercase, and snake_case
-    setTaxRate(b.taxRate ?? b.taxrate ?? b.tax_rate ?? 0);
-    setBdiRate(b.bdiRate ?? b.bdirate ?? b.bdi_rate ?? 0);
+    const t = b.taxRate ?? b.taxrate ?? b.tax_rate ?? 0;
+    const d = b.bdiRate ?? b.bdirate ?? b.bdi_rate ?? 0;
+
+    // Alert to confirm Values
+    // alert(`Carregando Orçamento: ${budget.id}\nImposto encontrado: ${t}\nBDI encontrado: ${d}`);
+
+    setTaxRate(t);
+    setBdiRate(d);
 
     setShowForm(true);
   };
+
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -433,17 +439,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                     }
                   }} className="p-2 text-slate-300 hover:text-emerald-600 transition-colors bg-slate-50 rounded-xl" title="Aprovar"><CheckCircle className="w-4 h-4" /></button>
                 )}
-                <button onClick={() => {
-                  setEditingBudgetId(budget.id);
-                  setSelectedCustomerId(budget.customerId);
-
-                  setItems(budget.items);
-                  setProposalTitle(budget.description);
-                  setDescriptionBlocks(budget.descriptionBlocks && budget.descriptionBlocks.length > 0 ? budget.descriptionBlocks : []);
-                  if (budget.paymentTerms) setPaymentTerms(budget.paymentTerms);
-                  if (budget.deliveryTime) setDeliveryTime(budget.deliveryTime);
-                  setShowForm(true);
-                }} className="p-2 text-slate-300 hover:text-blue-600 transition-colors bg-slate-50 rounded-xl"><Pencil className="w-4 h-4" /></button>
+                <button onClick={() => loadBudgetToForm(budget)} className="p-2 text-slate-300 hover:text-blue-600 transition-colors bg-slate-50 rounded-xl"><Pencil className="w-4 h-4" /></button>
                 <button onClick={() => handlePrintPDF(budget)} className="p-2 text-slate-300 hover:text-slate-900 transition-colors bg-slate-50 rounded-xl"><Printer className="w-4 h-4" /></button>
                 <button onClick={async () => {
                   if (confirm("Deseja excluir este orçamento? Esta ação também removerá os dados da nuvem.")) {
