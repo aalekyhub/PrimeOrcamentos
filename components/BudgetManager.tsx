@@ -351,6 +351,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     if (budget.deliveryTime) setDeliveryTime(budget.deliveryTime);
 
     // Load taxes (Handle potential casing issues from DB)
+    console.log('[DEBUG] Budget object being loaded:', budget);
     const b: any = budget;
     setTaxRate(b.taxRate ?? b.taxrate ?? 0);
     setBdiRate(b.bdiRate ?? b.bdirate ?? 0);
