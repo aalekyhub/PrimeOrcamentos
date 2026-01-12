@@ -122,13 +122,14 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
     const finalTotal = subTotalWithBDI + taxValue;
 
+    const itemFontBase = company.itemsFontSize || 10;
     const itemsHtml = budget.items.map((item: ServiceItem) => `
       <tr style="border-bottom: 1px solid #f1f5f9;">
-        <td style="padding: 12px 10px; font-weight: 800; text-transform: uppercase; font-size: 10px; color: #0f172a;">${item.description}</td>
-        <td style="padding: 12px 0; text-align: center; color: #94a3b8; font-size: 9px; font-weight: bold; text-transform: uppercase;">${item.type === 'Material' ? 'MAT' : 'SERV'}</td>
-        <td style="padding: 12px 0; text-align: center; font-weight: 800; color: #0f172a; font-size: 10px;">${item.quantity} ${item.unit || ''}</td>
-        <td style="padding: 12px 0; text-align: right; color: #64748b; font-size: 10px;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-        <td style="padding: 12px 10px; text-align: right; font-weight: 900; font-size: 11px; color: #0f172a;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        <td style="padding: 12px 10px; font-weight: 800; text-transform: uppercase; font-size: ${itemFontBase}px; color: #0f172a;">${item.description}</td>
+        <td style="padding: 12px 0; text-align: center; color: #94a3b8; font-size: ${Math.max(8, itemFontBase - 1)}px; font-weight: bold; text-transform: uppercase;">${item.type === 'Material' ? 'MAT' : 'SERV'}</td>
+        <td style="padding: 12px 0; text-align: center; font-weight: 800; color: #0f172a; font-size: ${itemFontBase}px;">${item.quantity} ${item.unit || ''}</td>
+        <td style="padding: 12px 0; text-align: right; color: #64748b; font-size: ${itemFontBase}px;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        <td style="padding: 12px 10px; text-align: right; font-weight: 900; font-size: ${itemFontBase + 1}px; color: #0f172a;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
       </tr>`).join('');
 
     const html = `
@@ -150,7 +151,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
            .info-value { font-size: 11px; font-weight: 900; color: #0f172a; text-transform: uppercase; line-height: 1.4; }
            .info-sub { font-size: 10px; color: #64748b; font-weight: 600; }
            
-           .section-title { font-size: 9px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; margin-bottom: 16px; }
+           .section-title { font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; margin-bottom: 16px; }
 
            @media screen { body { background: #f1f5f9; padding: 40px 0; } .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; } }
            @media print { 
@@ -169,7 +170,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           <tbody><tr><td>
             <div class="a4-container">
                <!-- Header -->
-               <div class="flex justify-between items-start mb-12 border-b-2 border-slate-900 pb-8">
+               <div class="flex justify-between items-start mb-6 border-b-2 border-slate-900 pb-4">
                    <div class="flex gap-6 items-center">
                        <div style="width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;">
                            ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:30px; color:#2563eb;">PO</div>'}
@@ -177,19 +178,20 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                        <div>
                            <h1 class="text-2xl font-black text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
                            <p class="text-[9px] font-black text-blue-600 uppercase tracking-widest leading-none">Soluções em Gestão Profissional</p>
-                            <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tight mt-2">${company.cnpj || ''}</p>
+                            <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tight mt-1">${company.cnpj || ''}</p>
                             <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tight">${company.phone || ''}</p>
                        </div>
                    </div>
                    <div class="text-right">
-                        <h2 class="text-xl font-black text-slate-900 tracking-tight uppercase leading-none mb-2">Proposta Comercial<br><span class="text-blue-600">${budget.description}</span></h2>
-                       <p class="text-2xl font-black text-blue-600 tracking-tighter mb-2">${budget.id}</p>
+                        <h2 class="text-sm font-black text-slate-900 tracking-tight uppercase leading-none mb-0.5">Proposta Comercial</h2>
+                        <p class="text-xl font-black text-blue-600 uppercase leading-none mb-2 tracking-tight">${budget.description}</p>
+                       <p class="text-2xl font-black text-blue-600 tracking-tighter mb-1">${budget.id}</p>
                        <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest text-right">EMISSÃO: ${emissionDate} <br> VALIDADE: ${validityDate}</p>
                    </div>
                </div>
 
                <!-- Boxes Grid -->
-               <div class="grid grid-cols-2 gap-6 mb-12">
+               <div class="grid grid-cols-2 gap-6 mb-6">
                    <div class="info-box">
                        <span class="info-label">Cliente / Destinatário</span>
                        <div class="info-value">${customer.name}</div>
@@ -203,11 +205,11 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
                <!-- Description Blocks (Optional) -->
                ${budget.descriptionBlocks && budget.descriptionBlocks.length > 0 ? `
-               <div class="mb-8 mt-10">
+               <div class="mb-8 mt-4">
                    <div class="section-title">Descrição Técnica / Escopo</div>
                    <div class="space-y-4">
                        ${budget.descriptionBlocks.map(block => block.type === 'text'
-      ? `<p class="text-[10px] text-slate-600 leading-relaxed text-justify font-medium whitespace-pre-wrap">${block.content}</p>`
+      ? `<p style="font-size: ${company.descriptionFontSize || 10}px;" class="text-slate-600 leading-relaxed text-justify font-medium whitespace-pre-wrap">${block.content}</p>`
       : `<div style="break-inside: avoid; page-break-inside: avoid;"><img src="${block.content}" style="width: 100%; border-radius: 12px; margin-top: 10px;"></div>`
     ).join('')}
                    </div>
@@ -219,11 +221,11 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                    <table style="width: 100%; border-collapse: collapse;">
                        <thead>
                            <tr style="border-bottom: 2px solid #0f172a;">
-                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 900; letter-spacing: 0.05em;">Item / Descrição</th>
-                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 900; letter-spacing: 0.05em;">Tipo</th>
-                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 900; letter-spacing: 0.05em;">Qtd</th>
-                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 900; letter-spacing: 0.05em;">Unitário</th>
-                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 900; letter-spacing: 0.05em;">Subtotal</th>
+                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, (company.itemsFontSize || 10) - 2)}px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 900; letter-spacing: 0.05em;">Item / Descrição</th>
+                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, (company.itemsFontSize || 10) - 2)}px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 900; letter-spacing: 0.05em;">Tipo</th>
+                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, (company.itemsFontSize || 10) - 2)}px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 900; letter-spacing: 0.05em;">Qtd</th>
+                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, (company.itemsFontSize || 10) - 2)}px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 900; letter-spacing: 0.05em;">Unitário</th>
+                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, (company.itemsFontSize || 10) - 2)}px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 900; letter-spacing: 0.05em;">Subtotal</th>
                            </tr>
                        </thead>
                        <tbody>${itemsHtml}</tbody>

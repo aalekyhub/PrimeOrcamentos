@@ -38,6 +38,8 @@ export interface CompanyProfile {
   logoSize: number; // Logo height in pixels
   customUnits: MeasurementUnit[];
   defaultProposalValidity?: number; // Days
+  descriptionFontSize?: number; // Font size for technical description
+  itemsFontSize?: number; // Font size for items table
 }
 
 export interface Customer {

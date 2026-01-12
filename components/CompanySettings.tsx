@@ -159,6 +159,14 @@ const CompanySettings: React.FC<Props> = ({ company, setCompany }) => {
                 <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase"><span>Tamanho Fonte</span><span>{company.nameFontSize}px</span></div>
                 <input type="range" min="16" max="48" step="1" className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-blue-600" value={company.nameFontSize} onChange={e => setCompany({ ...company, nameFontSize: Number(e.target.value) })} />
               </div>
+              <div className="space-y-2">
+                <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase"><span>Tamanho Fonte (Descrição)</span><span>{company.descriptionFontSize || 10}px</span></div>
+                <input type="range" min="8" max="16" step="1" className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-blue-600" value={company.descriptionFontSize || 10} onChange={e => setCompany({ ...company, descriptionFontSize: Number(e.target.value) })} />
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase"><span>Tamanho Fonte (Itens)</span><span>{company.itemsFontSize || 10}px</span></div>
+                <input type="range" min="8" max="14" step="1" className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-blue-600" value={company.itemsFontSize || 10} onChange={e => setCompany({ ...company, itemsFontSize: Number(e.target.value) })} />
+              </div>
             </div>
           </div>
 
