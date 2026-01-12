@@ -350,9 +350,10 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     if (budget.paymentTerms) setPaymentTerms(budget.paymentTerms);
     if (budget.deliveryTime) setDeliveryTime(budget.deliveryTime);
 
-    // Load taxes
-    setTaxRate(budget.taxRate || 0);
-    setBdiRate(budget.bdiRate || 0);
+    // Load taxes (Handle potential casing issues from DB)
+    const b: any = budget;
+    setTaxRate(b.taxRate ?? b.taxrate ?? 0);
+    setBdiRate(b.bdiRate ?? b.bdirate ?? 0);
 
     setShowForm(true);
   };
