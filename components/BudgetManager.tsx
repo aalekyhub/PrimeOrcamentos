@@ -392,69 +392,77 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {budgets.map(budget => (
-          <div key={budget.id} className={`bg-white rounded-[1.5rem] border-l-[6px] ${budget.status === OrderStatus.APPROVED ? 'border-emerald-500' : 'border-blue-600'} p-6 flex flex-col group relative shadow-sm hover:shadow-xl transition-all`}>
-            <div className="flex justify-between items-start mb-4">
-              <span className={`text-[10px] font-black ${budget.status === OrderStatus.APPROVED ? 'text-emerald-700 bg-emerald-100' : 'text-blue-600 bg-blue-50'} px-3 py-1 rounded-full uppercase w-fit tracking-widest`}>{budget.id} {budget.status === OrderStatus.APPROVED && '(APROVADO)'}</span>
-              {budget.status === OrderStatus.APPROVED && <CheckCircle className="w-5 h-5 text-emerald-500" />}
-            </div>
-            <h4 className="font-black text-slate-900 mb-1 uppercase truncate">{budget.customerName}</h4>
-            <p className="text-[11px] text-slate-400 font-bold uppercase tracking-tight mb-6 line-clamp-1">{budget.description}</p>
-            <div className="mt-auto pt-4 border-t flex justify-between items-center">
-              <span className="font-black text-slate-900 text-base">R$ {budget.totalAmount.toLocaleString('pt-BR')}</span>
-              <div className="text-right">
-                <span className="text-sm font-black text-slate-900 tracking-tight">R$ {budget.totalAmount.toLocaleString('pt-BR')}</span>
-              </div>
-              <div className="flex gap-1">
-                {budget.status !== OrderStatus.APPROVED && (
+      <div className="bg-white p-4 rounded-[1.5rem] border shadow-sm">
+        <div className="relative">
+          <Search className="absolute left-4 top-3 w-4 h-4 text-slate-400" />
+          <input type="text" placeholder="Buscar por cliente ou orçamento..." className="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 transition-all font-bold text-slate-700" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+        </div>
+      </div>
+
+      <div className="bg-white rounded-[2rem] border overflow-hidden shadow-sm">
+        <table className="w-full text-left">
+          <thead className="bg-slate-50 text-[10px] font-black uppercase text-slate-400 border-b">
+            <tr>
+              <th className="px-8 py-5">ORÇ #</th>
+              <th className="px-8 py-5">CLIENTE</th>
+              <th className="px-8 py-5">DESCRIÇÃO</th>
+              <th className="px-8 py-5">VALOR</th>
+              <th className="px-8 py-5 text-right">AÇÕES</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {budgets.map(budget => (
+              <tr key={budget.id} className="hover:bg-slate-50 group transition-all">
+                <td className="px-8 py-5 text-xs font-mono font-black text-blue-600">
+                  <div className="flex items-center gap-2">
+                    {budget.id}
+                    {budget.status === OrderStatus.APPROVED && <CheckCircle className="w-3 h-3 text-emerald-500" />}
+                  </div>
+                </td>
+                <td className="px-8 py-5 text-sm font-black uppercase text-slate-900">{budget.customerName}</td>
+                <td className="px-8 py-5 text-xs font-bold text-slate-400 uppercase">{budget.description}</td>
+                <td className="px-8 py-5 text-sm font-black text-slate-900">R$ {budget.totalAmount.toLocaleString('pt-BR')}</td>
+                <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {budget.status !== OrderStatus.APPROVED && (
+                    <button onClick={async () => {
+                      if (confirm("Deseja APROVAR este orçamento? Ele será convertido em Ordem de Serviço.")) {
+                        const approvedBudget = { ...budget, status: OrderStatus.APPROVED };
+                        const newServiceOrderId = db.generateId('OS');
+                        const newServiceOrder: ServiceOrder = {
+                          ...budget,
+                          id: newServiceOrderId,
+                          status: OrderStatus.IN_PROGRESS,
+                          createdAt: new Date().toISOString(),
+                          items: budget.items.map(i => ({ ...i })),
+                          descriptionBlocks: budget.descriptionBlocks ? [...budget.descriptionBlocks] : []
+                        };
+                        const newList = orders.map(o => o.id === budget.id ? approvedBudget : o);
+                        const finalList = [...newList, newServiceOrder];
+                        setOrders(finalList);
+                        const result = await db.save('serviflow_orders', finalList);
+                        if (result?.success) notify("Orçamento APROVADO! Cópia gerada em O.S.");
+                        else notify("Erro ao sincronizar.", "error");
+                      }
+                    }} className="p-2 text-slate-400 hover:text-emerald-600 transition-colors" title="Aprovar">
+                      <CheckCircle className="w-4 h-4" />
+                    </button>
+                  )}
+                  <button onClick={() => loadBudgetToForm(budget)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors"><Pencil className="w-4 h-4" /></button>
+                  <button onClick={() => handlePrintPDF(budget)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors"><Printer className="w-4 h-4" /></button>
                   <button onClick={async () => {
-                    if (confirm("Deseja APROVAR este orçamento? Ele será convertido em Ordem de Serviço.")) {
-                      // 1. Mark current budget as APPROVED
-                      const approvedBudget = { ...budget, status: OrderStatus.APPROVED };
-
-                      // 2. Create NEW Service Order
-                      const newServiceOrderId = db.generateId('OS');
-                      const newServiceOrder: ServiceOrder = {
-                        ...budget,
-                        id: newServiceOrderId,
-                        status: OrderStatus.IN_PROGRESS,
-                        createdAt: new Date().toISOString(), // Reset dates for the OS
-                        items: budget.items.map(i => ({ ...i })), // Deep copy items
-                        descriptionBlocks: budget.descriptionBlocks ? [...budget.descriptionBlocks] : []
-                      };
-
-                      // 3. Update State & DB
-                      const newList = orders.map(o => o.id === budget.id ? approvedBudget : o);
-                      const finalList = [...newList, newServiceOrder];
-
-                      setOrders(finalList);
-
-                      const result = await db.save('serviflow_orders', finalList);
-
-                      if (result?.success) notify("Orçamento APROVADO! Cópia gerada em O.S.");
-                      else notify("Erro ao sincronizar.", "error");
+                    if (confirm("Deseja excluir este orçamento? Esta ação também removerá os dados da nuvem.")) {
+                      const idToDelete = budget.id;
+                      setOrders(prev => prev.filter(o => o.id !== idToDelete));
+                      const result = await db.remove('orders', idToDelete);
+                      if (result?.success) { notify("Orçamento removido da nuvem com sucesso."); }
+                      else { notify("Removido localmente, mas houve um erro ao sincronizar com a nuvem.", "error"); }
                     }
-                  }} className="p-2 text-slate-300 hover:text-emerald-600 transition-colors bg-slate-50 rounded-xl" title="Aprovar"><CheckCircle className="w-4 h-4" /></button>
-                )}
-                <button onClick={() => loadBudgetToForm(budget)} className="p-2 text-slate-300 hover:text-blue-600 transition-colors bg-slate-50 rounded-xl"><Pencil className="w-4 h-4" /></button>
-                <button onClick={() => handlePrintPDF(budget)} className="p-2 text-slate-300 hover:text-slate-900 transition-colors bg-slate-50 rounded-xl"><Printer className="w-4 h-4" /></button>
-                <button onClick={async () => {
-                  if (confirm("Deseja excluir este orçamento? Esta ação também removerá os dados da nuvem.")) {
-                    const idToDelete = budget.id;
-                    setOrders(prev => prev.filter(o => o.id !== idToDelete));
-                    const result = await db.remove('orders', idToDelete);
-                    if (result?.success) {
-                      notify("Orçamento removido da nuvem com sucesso.");
-                    } else {
-                      notify("Removido localmente, mas houve um erro ao sincronizar com a nuvem.", "error");
-                    }
-                  }
-                }} className="p-2 text-slate-300 hover:text-rose-600 transition-colors bg-slate-50 rounded-xl"><Trash2 className="w-4 h-4" /></button>
-              </div>
-            </div>
-          </div>
-        ))}
+                  }} className="p-2 text-rose-300 hover:text-rose-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       {showForm && (
