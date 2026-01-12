@@ -100,6 +100,8 @@ export interface ServiceOrder {
   createdAt: string;
   dueDate: string;
   totalAmount: number;
+  taxRate?: number; // Impostos (%)
+  bdiRate?: number; // BDI (%)
   equipmentBrand?: string;
   equipmentModel?: string;
   equipmentSerialNumber?: string;

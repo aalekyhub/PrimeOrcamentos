@@ -1,5 +1,4 @@
 
-
 import React, { useState, useMemo } from 'react';
 import {
   Plus, Search, X, Trash2, Pencil, Printer, Save,
@@ -44,11 +43,20 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
   const [currentQty, setCurrentQty] = useState(1);
   const [currentPrice, setCurrentPrice] = useState(0);
 
+  const [taxRate, setTaxRate] = useState(0);
+  const [bdiRate, setBdiRate] = useState(0);
+
   const budgets = useMemo(() => orders.filter(o =>
     (o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED) && (o.customerName.toLowerCase().includes(searchTerm.toLowerCase()) || o.id.includes(searchTerm))
   ), [orders, searchTerm]);
 
-  const totalAmount = useMemo(() => items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0), [items]);
+  const subtotal = useMemo(() => items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0), [items]);
+  const totalAmount = useMemo(() => {
+    const bdiValue = subtotal * (bdiRate / 100);
+    const subtotalWithBDI = subtotal + bdiValue;
+    const taxValue = subtotalWithBDI * (taxRate / 100);
+    return subtotalWithBDI + taxValue;
+  }, [subtotal, taxRate, bdiRate]);
 
   const handleAddItem = () => {
     if (!currentDesc || currentPrice <= 0) return;
@@ -82,7 +90,6 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     }
   };
 
-  // NEXT_Print
   const handlePrintPDF = (budget: ServiceOrder, mode: 'print' | 'pdf' = 'print') => {
     const customer = customers.find(c => c.id === budget.customerId) || { name: budget.customerName, address: 'Não informado', document: 'Documento não informado' };
     const printWindow = window.open('', '_blank');
@@ -101,146 +108,182 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     const validityDays = company.defaultProposalValidity || 15;
     const validityDate = budget.dueDate ? formatDate(budget.dueDate) : formatDate(new Date(new Date(budget.createdAt || Date.now()).getTime() + validityDays * 24 * 60 * 60 * 1000).toISOString());
 
+    // Logic: BDI first, then Tax on (Subtotal + BDI)
+    const subTotal = budget.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0);
+    const bdiValue = budget.bdiRate ? subTotal * (budget.bdiRate / 100) : 0;
+    const subTotalWithBDI = subTotal + bdiValue;
+    const taxValue = budget.taxRate ? subTotalWithBDI * (budget.taxRate / 100) : 0;
+    const finalTotal = subTotalWithBDI + taxValue;
+
     const itemsHtml = budget.items.map((item: ServiceItem) => `
       <tr style="border-bottom: 1px solid #f1f5f9;">
-        <td style="padding: 12px 0; font-weight: 800; text-transform: uppercase; font-size: 11px; color: #0f172a;">${item.description}</td>
+        <td style="padding: 12px 10px; font-weight: 800; text-transform: uppercase; font-size: 10px; color: #0f172a;">${item.description}</td>
         <td style="padding: 12px 0; text-align: center; color: #94a3b8; font-size: 9px; font-weight: bold; text-transform: uppercase;">SERVIÇO</td>
-        <td style="padding: 12px 0; text-align: center; font-weight: 800; color: #0f172a; font-size: 11px;">${item.quantity}</td>
-        <td style="padding: 12px 0; text-align: right; color: #64748b; font-size: 11px;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-        <td style="padding: 12px 0; text-align: right; font-weight: 900; font-size: 12px; color: #0f172a;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        <td style="padding: 12px 0; text-align: center; font-weight: 800; color: #0f172a; font-size: 10px;">${item.quantity}</td>
+        <td style="padding: 12px 0; text-align: right; color: #64748b; font-size: 10px;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        <td style="padding: 12px 10px; text-align: right; font-weight: 900; font-size: 11px; color: #0f172a;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
       </tr>`).join('');
 
     const html = `
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Orçamento</title>
+        <title>Orçamento - ${budget.id}</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
         <style>
-          @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
-          body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-          .a4-container { width: 210mm; min-height: 297mm; margin: auto; background: white; position: relative; }
-          @media print { 
-            body { background: white; margin: 0; padding: 0; } 
-            .a4-container { width: 100%; height: auto; box-shadow: none; margin: 0; border: none; padding: 15mm !important; }
-            .no-print { display: none !important; }
-            /* Fix for blank page issue */
-            html, body { height: auto !important; overflow: visible !important; }
-          }
-          @media screen { body { background: #f1f5f9; padding: 40px 0; } .a4-container { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 40px; margin-bottom: 40px; } }
-          .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 120px; color: rgba(15, 23, 42, 0.03); font-weight: 900; pointer-events: none; z-index: 0; text-transform: uppercase; white-space: nowrap; }
-          .content-layer { position: relative; z-index: 10; }
+           body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
+           @page { size: A4; margin: 0 !important; }
+           .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
+           .avoid-break { break-inside: avoid; page-break-inside: avoid; }
+           
+           /* Premium Box Styles */
+           .info-box { background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
+           .info-label { font-size: 9px; font-weight: 900; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block; }
+           .info-value { font-size: 11px; font-weight: 900; color: #0f172a; text-transform: uppercase; line-height: 1.4; }
+           .info-sub { font-size: 10px; color: #64748b; font-weight: 600; }
+           
+           .section-title { font-size: 9px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; margin-bottom: 16px; }
+
+           @media screen { body { background: #f1f5f9; padding: 40px 0; } .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; } }
+           @media print { 
+             body { background: white !important; margin: 0 !important; } 
+             .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; } 
+             .no-screen { display: block !important; }
+             .no-print { display: none !important; }
+             .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: #94a3b8; text-transform: uppercase; }
+             .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; }
+           }
         </style>
       </head>
-      <body>
-        <div class="a4-container">
-          <div class="watermark">Proposta Comercial</div>
-          <div class="content-layer">
-            <div class="flex justify-between items-start mb-12">
-                <div class="flex gap-4">
-                    <div class="w-20 h-20 shrink-0 flex items-center justify-center overflow-hidden">
-                        ${company.logo ? `<img src="${company.logo}" style="height: 100%; object-fit: contain;">` : `<div style="width: 80px; height: 80px; background: #2563eb; border-radius: 16px; display: flex; align-items: center; justify-content: center; color: white;"><svg viewBox="0 0 24 24" width="40" height="40" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></div>`}
-                    </div>
-                    <div>
-                        <h1 class="text-3xl font-black text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
-                        <p class="text-[10px] font-black text-blue-600 uppercase tracking-widest">${company.tagline || 'Soluções em Gestão e Manutenção Profissional'}</p>
-                        <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tight mt-1">${company.cnpj || ''} | ${company.phone || ''}</p>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <div class="bg-blue-600 text-white px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-widest mb-1 inline-block">Proposta Comercial</div>
-                    <h2 class="text-4xl font-black text-slate-900 tracking-tighter">${budget.id}</h2>
-                    <div class="mt-2 space-y-0.5"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">EMISSÃO: ${emissionDate}</p><p class="text-[9px] font-black text-emerald-500 uppercase tracking-widest text-right">VÁLIDO ATÉ: ${validityDate}</p></div>
-                </div>
-            </div>
+      <body class="no-scrollbar">
+        <table style="width: 100%;">
+          <thead><tr><td style="height: ${company.printMarginTop || 15}mm;"><div style="height: ${company.printMarginTop || 15}mm; display: block;">&nbsp;</div></td></tr></thead>
+          <tbody><tr><td>
+            <div class="a4-container">
+               <!-- Header -->
+               <div class="flex justify-between items-start mb-12 border-b-2 border-slate-900 pb-8">
+                   <div class="flex gap-6 items-center">
+                       <div style="width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;">
+                           ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:30px; color:#2563eb;">PO</div>'}
+                       </div>
+                       <div>
+                           <h1 class="text-2xl font-black text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
+                           <p class="text-[9px] font-black text-blue-600 uppercase tracking-widest leading-none">Soluções em Gestão Profissional</p>
+                           <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tight mt-2">${company.cnpj || ''} | ${company.phone || ''}</p>
+                       </div>
+                   </div>
+                   <div class="text-right">
+                       <h2 class="text-xl font-black text-slate-900 tracking-tight uppercase leading-none mb-2">Proposta<br>Comercial</h2>
+                       <p class="text-2xl font-black text-blue-600 tracking-tighter mb-2">${budget.id}</p>
+                       <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest text-right">EMISSÃO: ${emissionDate} <br> VALIDADE: ${validityDate}</p>
+                   </div>
+               </div>
 
-            <!-- Client Info Grid -->
-            <div class="grid grid-cols-2 gap-8 mb-10">
-                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 w-16 h-16 bg-blue-100 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
-                    <h4 class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-3 relative z-10">DADOS DO CLIENTE</h4>
-                    <div class="space-y-1 relative z-10">
-                        <p class="text-sm font-black text-slate-900 uppercase">${customer.name}</p>
-                        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tight flex items-center gap-1"><span class="w-1 h-1 bg-blue-500 rounded-full"></span> DOC: ${customer.document || 'Não Informado'}</p>
-                        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tight flex items-center gap-1"><span class="w-1 h-1 bg-blue-500 rounded-full"></span> ${customer.city || ''} - ${customer.state || ''}</p>
-                         <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tight flex items-center gap-1"><span class="w-1 h-1 bg-blue-500 rounded-full"></span> TEL: ${customer.phone || customer.whatsapp || 'Não informado'}</p>
-                    </div>
-                </div>
-                 <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 w-16 h-16 bg-emerald-100 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
-                    <h4 class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-3 relative z-10">RESUMO FINANCEIRO</h4>
-                    <div class="flex items-end gap-1 relative z-10">
-                        <span class="text-lg font-bold text-slate-400 mb-1">R$</span>
-                        <span class="text-4xl font-black text-slate-900 tracking-tighter leading-none">${budget.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                    </div>
-                    <p class="text-[9px] text-emerald-600 font-black uppercase tracking-tight mt-2 bg-emerald-50 inline-block px-2 py-1 rounded">Pagamento Facilitado</p>
-                </div>
-            </div>
+               <!-- Boxes Grid -->
+               <div class="grid grid-cols-2 gap-6 mb-12">
+                   <div class="info-box">
+                       <span class="info-label">Cliente / Destinatário</span>
+                       <div class="info-value">${customer.name}</div>
+                       <div class="info-sub mt-1">${customer.document || 'CPF/CNPJ não informado'}</div>
+                   </div>
+                   <div class="info-box">
+                       <span class="info-label">Referência do Orçamento</span>
+                       <div class="info-value">${budget.description || 'Proposta de Prestação de Serviços'}</div>
+                   </div>
+               </div>
 
-            <!-- Description -->
-            <div class="mb-10">
-                 <h4 class="text-[9px] font-black text-slate-900 uppercase tracking-widest mb-4 border-b pb-2">Escopo dos Serviços</h4>
-                 <div class="bg-white rounded-xl text-xs text-slate-600 leading-relaxed text-justify space-y-4">
-                    ${budget.descriptionBlocks && budget.descriptionBlocks.length > 0 ?
-        budget.descriptionBlocks.map(block => block.type === 'text' ? `<p>${block.content.replace(/\n/g, '<br>')}</p>` : `<div style="display:flex;justify-content:center;margin:10px 0;"><img src="${block.content}" style="max-height:200px;border-radius:8px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);"></div>`).join('')
-        : `<p>${budget.description}</p>`
-      }
-                 </div>
-            </div>
+               <!-- Description Blocks (Optional) -->
+               ${budget.descriptionBlocks && budget.descriptionBlocks.length > 0 ? `
+               <div class="mb-8">
+                   <div class="section-title">Descrição Técnica / Escopo</div>
+                   <div class="space-y-4">
+                       ${budget.descriptionBlocks.map(block => block.type === 'text'
+      ? `<p class="text-[10px] text-slate-600 leading-relaxed text-justify font-medium">${block.content}</p>`
+      : `<div style="break-inside: avoid; page-break-inside: avoid;"><img src="${block.content}" style="width: 100%; border-radius: 12px; margin-top: 10px;"></div>`
+    ).join('')}
+                   </div>
+               </div>` : ''}
 
-            <!-- Items Table -->
-            <div class="mb-10">
-                <h4 class="text-[9px] font-black text-slate-900 uppercase tracking-widest mb-4 border-b pb-2">Detalhamento de Custos</h4>
-                <table style="width: 100%; border-collapse: separate; border-spacing: 0;">
-                    <thead>
-                        <tr style="text-align: left;">
-                            <th style="padding-bottom: 12px; font-size: 8px; font-black: true; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.1em;">Descrição</th>
-                            <th style="padding-bottom: 12px; font-size: 8px; font-black: true; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.1em; text-align: center;">Tipo</th>
-                            <th style="padding-bottom: 12px; font-size: 8px; font-black: true; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.1em; text-align: center;">Qtd</th>
-                            <th style="padding-bottom: 12px; font-size: 8px; font-black: true; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.1em; text-align: right;">Valor Unit.</th>
-                            <th style="padding-bottom: 12px; font-size: 8px; font-black: true; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.1em; text-align: right;">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${itemsHtml}
-                    </tbody>
-                </table>
-                 <div style="border-top: 2px solid #0f172a; margin-top: 10px; padding-top: 10px; display: flex; justify-content: flex-end;">
-                     <div style="text-align: right;">
-                         <p style="font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Valor Total da Proposta</p>
-                         <p style="font-size: 24px; font-weight: 900; color: #0f172a;">R$ ${budget.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                     </div>
-                 </div>
-            </div>
+               <!-- Items Table -->
+               <div class="mb-8">
+                   <div class="section-title">Detalhamento Financeiro</div>
+                   <table style="width: 100%; border-collapse: collapse;">
+                       <thead>
+                           <tr style="border-bottom: 2px solid #0f172a;">
+                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 900; letter-spacing: 0.05em;">Item / Descrição</th>
+                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 900; letter-spacing: 0.05em;">Tipo</th>
+                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 900; letter-spacing: 0.05em;">Qtd</th>
+                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 900; letter-spacing: 0.05em;">Unitário</th>
+                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 900; letter-spacing: 0.05em;">Subtotal</th>
+                           </tr>
+                       </thead>
+                       <tbody>${itemsHtml}</tbody>
+                   </table>
+               </div>
 
-            <!-- Conditions & Signature -->
-            <div class="grid grid-cols-2 gap-12 mt-auto">
-                 <div>
-                    <h4 class="text-[8px] font-black text-slate-900 uppercase tracking-widest mb-3 border-b pb-1">Condições Comerciais</h4>
-                     <ul class="space-y-2">
-                        <li class="flex items-start gap-2 text-[10px] text-slate-600"><span class="font-bold text-slate-900 shrink-0">PAGAMENTO:</span> ${budget.paymentTerms || 'A combinar'}</li>
-                        <li class="flex items-start gap-2 text-[10px] text-slate-600"><span class="font-bold text-slate-900 shrink-0">ENTREGA:</span> ${budget.deliveryTime || '15 dias úteis após aprovação'}</li>
-                        <li class="flex items-start gap-2 text-[10px] text-slate-600"><span class="font-bold text-slate-900 shrink-0">VALIDADE:</span> ${validityDays} dias</li>
-                     </ul>
-                 </div>
-                 <div>
-                    <h4 class="text-[8px] font-black text-slate-900 uppercase tracking-widest mb-3 border-b pb-1">Termo de Aceite</h4>
-                    <p class="text-[9px] text-slate-500 text-justify leading-tight mb-8">
-                      Autorizo a execução dos serviços conforme descritos nesta proposta comercial nº ${budget.id}, concordando com os valores e condições de pagamento aqui estabelecidos.
-                    </p>
-                     <div class="border-t border-slate-300 pt-2 mt-[20mm]"> <!-- 20mm margin -->
-                        <p class="text-center text-[9px] font-bold text-slate-900 uppercase">Assinatura do Responsável</p>
-                    </div>
-                 </div>
-            </div>
+               <!-- Total Bar (Dark) -->
+               <div class="avoid-break mb-12">
+                   <!-- Breakdown above bar -->
+                   <div class="flex justify-end mb-2 gap-6 px-2">
+                        <div class="text-right">
+                           <span class="text-[8px] font-bold text-slate-400 uppercase block">Subtotal</span>
+                           <span class="text-[10px] font-black text-slate-600 block">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                        </div>
+                        ${budget.bdiRate ? `
+                        <div class="text-right">
+                           <span class="text-[8px] font-bold text-slate-400 uppercase block">BDI (${budget.bdiRate}%)</span>
+                           <span class="text-[10px] font-black text-emerald-600 block">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                        </div>` : ''}
+                        ${budget.taxRate ? `
+                        <div class="text-right">
+                           <span class="text-[8px] font-bold text-slate-400 uppercase block">Impostos (${budget.taxRate}%)</span>
+                           <span class="text-[10px] font-black text-blue-600 block">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                        </div>` : ''}
+                   </div>
+                   <div class="bg-slate-900 text-white p-6 rounded-xl flex justify-between items-center shadow-xl">
+                       <span class="text-[12px] font-black uppercase tracking-widest">Investimento Total:</span>
+                       <span class="text-3xl font-black text-blue-400 tracking-tighter text-right">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                   </div>
+               </div>
 
-            <div class="mt-12 pt-6 border-t border-slate-100 flex justify-between items-center text-[8px] text-slate-400 font-bold uppercase tracking-widest">
-                <span>${company.name} © ${new Date().getFullYear()}</span>
-                <span>Proposta gerada eletronicamente</span>
+               <!-- Terms & Payment -->
+               <div class="avoid-break mb-12">
+                   <div class="grid grid-cols-2 gap-6">
+                       <div class="info-box">
+                           <span class="info-label">Forma de Pagamento</span>
+                           <p class="text-[10px] font-bold text-slate-700 leading-relaxed mt-2">${budget.paymentTerms || 'A combinar'}</p>
+                       </div>
+                       <div class="info-box">
+                           <span class="info-label">Prazo de Entrega / Execução</span>
+                           <p class="text-[10px] font-bold text-slate-700 leading-relaxed mt-2">${budget.deliveryTime || 'A combinar'}</p>
+                       </div>
+                   </div>
+               </div>
+
+               <!-- Acceptance Box -->
+               <div class="avoid-break mb-12">
+                   <div class="border border-blue-100 bg-blue-50/50 rounded-2xl p-6">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="bg-blue-600 rounded-full p-1"><svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>
+                            <span class="text-[10px] font-black text-blue-700 uppercase tracking-widest">Termo de Aceite e Autorização Profissional</span>
+                        </div>
+                        <p class="text-[9px] text-slate-500 leading-relaxed text-justify italic">
+                            "Este documento constitui uma proposta comercial formal. Ao assinar abaixo, o cliente declara estar ciente e de pleno acordo com os valores, prazos e especificações técnicas descritas. Esta aceitação autoriza o início imediato dos trabalhos sob as condições estabelecidas. A contratada reserva-se o direito de renegociar valores caso a aprovação ocorra após o prazo de validade de ${validityDays} dias. Eventuais alterações de escopo solicitadas após o aceite estarão sujeitas a nova análise de custos."
+                        </p>
+                   </div>
+               </div>
+
+               <!-- Signature Lines -->
+               <div class="avoid-break mt-auto">
+                   <div style="border-bottom: 2px solid #cbd5e1; width: 40%;"></div>
+                   <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-2">Assinatura do Cliente / Aceite</p>
+               </div>
             </div>
-          </div>
-        </div>
+          </td></tr></tbody>
+          <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;"><div style="height: ${company.printMarginBottom || 15}mm; display: block;">&nbsp;</div></td></tr></tfoot>
+        </table>
+        <div class="print-footer no-screen"><span>Documento gerado em ${new Date().toLocaleString('pt-BR')}</span></div>
         <script>
            window.onload = function() { setTimeout(() => { window.print(); window.close(); }, 800); }
         </script>
@@ -250,7 +293,6 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     printWindow.document.close();
   };
 
-  // NEXT_Save
   const handleSave = async () => {
     if (isSaving) return;
     const customer = customers.find(c => c.id === selectedCustomerId);
@@ -267,6 +309,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       description: proposalTitle || 'REFORMA DE PINTURA',
       status: OrderStatus.PENDING,
       items, descriptionBlocks, totalAmount, paymentTerms, deliveryTime,
+      taxRate, bdiRate, // Save rates
       createdAt: existingBudget?.createdAt || new Date().toISOString().split('T')[0],
       dueDate: existingBudget?.dueDate || new Date(Date.now() + (company.defaultProposalValidity || 15) * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
     };
@@ -279,16 +322,31 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       const result = await db.save('serviflow_orders', newList);
       if (result?.success) {
         notify("Orçamento salvo e sincronizado!");
-        // Delay para o usuário ver a mensagem
         setTimeout(() => setShowForm(false), 1500);
       } else if (result?.error === 'quota_exceeded') {
-        notify("ERRO DE ARMAZENAMENTO: O navegador bloqueou o salvamento pois os dados (provavelmente imagens) excederam o limite de 5MB. Remova algumas imagens ou diminua a qualidade.", "error");
-        // Não fechamos o formulário para dar chance de corrigir
+        notify("ERRO DE ARMAZENAMENTO: Limite excedido.", "error");
       } else {
-        notify("Salvo localmente. Erro ao sincronizar (veja o console)", "warning");
+        notify("Salvo localmente. Erro ao sincronizar.", "warning");
         setShowForm(false);
       }
     } finally { setIsSaving(false); }
+  };
+
+  // Helper to load existing budget data into form
+  const loadBudgetToForm = (budget: ServiceOrder) => {
+    setEditingBudgetId(budget.id);
+    setSelectedCustomerId(budget.customerId);
+    setItems(budget.items);
+    setProposalTitle(budget.description);
+    setDescriptionBlocks(budget.descriptionBlocks && budget.descriptionBlocks.length > 0 ? budget.descriptionBlocks : []);
+    if (budget.paymentTerms) setPaymentTerms(budget.paymentTerms);
+    if (budget.deliveryTime) setDeliveryTime(budget.deliveryTime);
+
+    // Load taxes
+    setTaxRate(budget.taxRate || 0);
+    setBdiRate(budget.bdiRate || 0);
+
+    setShowForm(true);
   };
 
   return (
@@ -301,17 +359,14 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Gerencie suas propostas comerciais</p>
         </div>
         <div className="flex gap-4 w-full md:w-auto">
-          <div className="relative group grow md:grow-0">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4 group-focus-within:text-blue-500 transition-colors" />
-            <input
-              type="text"
-              placeholder="Buscar orçamento..."
-              className="w-full md:w-64 bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-3 text-xs font-bold shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <button onClick={() => setShowForm(true)} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-200 hover:shadow-blue-300 transition-all flex items-center gap-2 active:scale-95">
+          <button onClick={() => {
+            setEditingBudgetId(null);
+            setItems([]);
+            setProposalTitle('');
+            setTaxRate(0);
+            setBdiRate(0);
+            setShowForm(true);
+          }} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-200 hover:shadow-blue-300 transition-all flex items-center gap-2 active:scale-95">
             <Plus className="w-4 h-4" /> Novo Orçamento
           </button>
         </div>
@@ -347,10 +402,6 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                       };
 
                       // 3. Update State & DB
-                      // We need to update the old one AND add the new one
-                      // Actually, if we add the new one (IN_PROGRESS), it won't show in this list, which is correct.
-                      // The old one (APPROVED) WILL show in this list.
-
                       const newList = orders.map(o => o.id === budget.id ? approvedBudget : o);
                       const finalList = [...newList, newServiceOrder];
 
@@ -392,6 +443,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           </div>
         ))}
       </div>
+
       {showForm && (
         <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-[1240px] h-[95vh] rounded-[2rem] shadow-[0_0_100px_rgba(0,0,0,0.3)] overflow-hidden flex flex-col animate-in zoom-in-95">
@@ -491,7 +543,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                             <p className="text-[8px] text-slate-400 font-bold uppercase tracking-tight">{item.quantity} {item.unit} X R$ {item.unitPrice.toLocaleString('pt-BR')}</p>
                           </div>
                           <div className="flex items-center gap-3">
-                            <span className="text-xs font-black text-slate-900">R$ {(item.unitPrice * item.quantity).toLocaleString('pt-BR')}</span>
+                            <span className="text-xs font-black text-slate-900">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR')}</span>
                             <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="text-rose-300 hover:text-rose-600"><Trash2 className="w-3.5 h-3.5" /></button>
                           </div>
                         </div>
@@ -513,6 +565,25 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
               <div className="w-[340px] bg-[#0f172a] text-white p-6 flex flex-col space-y-6 shrink-0 shadow-2xl relative overflow-hidden">
                 <div className="relative z-10">
                   <h4 className="text-[8px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Investimento Total</h4>
+
+                  {/* Tax & BDI Inputs */}
+                  <div className="grid grid-cols-2 gap-2 mb-4">
+                    <div>
+                      <label className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">BDI (%)</label>
+                      <input type="number" className="w-full bg-slate-800/50 border border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-200 outline-none focus:ring-1 focus:ring-blue-500" value={bdiRate || ''} onChange={e => setBdiRate(Number(e.target.value))} placeholder="0%" />
+                    </div>
+                    <div>
+                      <label className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Impostos (%)</label>
+                      <input type="number" className="w-full bg-slate-800/50 border border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-200 outline-none focus:ring-1 focus:ring-blue-500" value={taxRate || ''} onChange={e => setTaxRate(Number(e.target.value))} placeholder="0%" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1 mb-4 text-[10px] text-slate-400">
+                    <div className="flex justify-between"><span>Subtotal:</span> <span>R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
+                    {bdiRate > 0 && <div className="flex justify-between text-emerald-400"><span>+ BDI:</span> <span>R$ {(subtotal * (bdiRate / 100)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>}
+                    {taxRate > 0 && <div className="flex justify-between text-blue-400"><span>+ Impostos:</span> <span>R$ {((subtotal + (subtotal * (bdiRate / 100))) * (taxRate / 100)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>}
+                  </div>
+
                   <div className="flex justify-between items-baseline border-b border-slate-800 pb-4">
                     <span className="text-[32px] font-black text-blue-400 tracking-tighter leading-none">R$ {totalAmount.toLocaleString('pt-BR')}</span>
                   </div>
@@ -538,32 +609,16 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                       items, totalAmount, description: proposalTitle, descriptionBlocks, paymentTerms, deliveryTime,
                       id: editingBudgetId || 'ORC-XXXX',
                       status: OrderStatus.PENDING,
+                      taxRate, bdiRate, // Pass rates to print
                       createdAt: new Date().toISOString(),
                       dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
                     })} className="bg-slate-800 hover:bg-slate-700 text-white p-4 rounded-xl font-black uppercase text-[8px] flex flex-col items-center gap-1 transition-all border border-slate-700 group">
                       <Printer className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" /> IMPRIMIR
                     </button>
-                    <button onClick={() => handlePrintPDF({
-                      customerId: selectedCustomerId,
-                      customerName: customers.find(c => c.id === selectedCustomerId)?.name || 'N/A',
-                      customerEmail: customers.find(c => c.id === selectedCustomerId)?.email || '',
-                      items, totalAmount, description: proposalTitle, descriptionBlocks, paymentTerms, deliveryTime,
-                      id: editingBudgetId || 'ORC-XXXX',
-                      status: OrderStatus.PENDING,
-                      createdAt: new Date().toISOString(),
-                      dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-                    }, 'pdf')} className="bg-slate-800 hover:bg-slate-700 text-white p-4 rounded-xl font-black uppercase text-[8px] flex flex-col items-center gap-1 transition-all border border-slate-700 group">
-                      <FileText className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" /> PDF
+                    <button onClick={handleSave} className="col-span-2 bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[11px] shadow-xl transition-all flex items-center justify-center gap-2">
+                      <Save className="w-5 h-5" /> REGISTRAR
                     </button>
                   </div>
-                  <button
-                    onClick={handleSave}
-                    disabled={isSaving}
-                    className={`w-full ${isSaving ? 'bg-slate-600 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500'} text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[11px] shadow-xl transition-all flex items-center justify-center gap-2`}
-                  >
-                    <Save className={`w-5 h-5 ${isSaving ? 'animate-pulse' : ''}`} />
-                    {isSaving ? 'SALVANDO...' : 'REGISTRAR ORÇAMENTO'}
-                  </button>
                 </div>
               </div>
             </div>
@@ -572,7 +627,6 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       )}
     </div>
   );
-
 };
 
 export default BudgetManager;
