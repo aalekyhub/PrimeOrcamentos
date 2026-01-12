@@ -199,7 +199,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                    <div class="section-title">Descrição Técnica / Escopo</div>
                    <div class="space-y-4">
                        ${budget.descriptionBlocks.map(block => block.type === 'text'
-      ? `<p class="text-[10px] text-slate-600 leading-relaxed text-justify font-medium">${block.content}</p>`
+      ? `<p class="text-[10px] text-slate-600 leading-relaxed text-justify font-medium whitespace-pre-wrap">${block.content}</p>`
       : `<div style="break-inside: avoid; page-break-inside: avoid;"><img src="${block.content}" style="width: 100%; border-radius: 12px; margin-top: 10px;"></div>`
     ).join('')}
                    </div>
