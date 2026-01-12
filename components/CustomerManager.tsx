@@ -94,6 +94,8 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
 
     if (duplicate) {
       notify(`Já existe um cliente cadastrado com este ${personType === 'PF' ? 'CPF' : 'CNPJ'}: ${duplicate.name}`, "error");
+      // Limpa APENAS o campo de documento para permitir correção sem perder os outros dados (Melhor UX)
+      setNewCustomer(prev => ({ ...prev, document: '' }));
       return;
     }
 
@@ -165,11 +167,49 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className={labelClass}>{personType === 'PF' ? 'CPF' : 'CNPJ (Auto-preenchimento)'}</label>
-                <input type="text" placeholder="Apenas números" className={inputClass} value={newCustomer.document}
+                <input type="text" placeholder={personType === 'PF' ? "000.000.000-00" : "00.000.000/0000-00"} className={inputClass} value={newCustomer.document}
                   onChange={e => {
-                    const val = e.target.value;
+                    let val = e.target.value;
+                    // Remove tudo que não é dígito
+                    val = val.replace(/\D/g, '');
+
+                    if (personType === 'PF') {
+                      // Máscara CPF
+                      if (val.length > 11) val = val.slice(0, 11);
+                      val = val.replace(/(\d{3})(\d)/, '$1.$2');
+                      val = val.replace(/(\d{3})(\d)/, '$1.$2');
+                      val = val.replace(/(\d{3})(\d{1,2})/, '$1-$2');
+
+                      // Check Real-time CPF (11 digits)
+                      if (val.replace(/\D/g, '').length === 11) {
+                        const dup = checkDuplicateCustomer(val, customers, editingCustomerId);
+                        if (dup) {
+                          notify(`CPF já cadastrado: ${dup.name}`, "error");
+                          val = ''; // Clear immediately
+                        }
+                      }
+                    } else {
+                      // Máscara CNPJ
+                      if (val.length > 14) val = val.slice(0, 14);
+                      val = val.replace(/^(\d{2})(\d)/, '$1.$2');
+                      val = val.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+                      val = val.replace(/\.(\d{3})(\d)/, '.$1/$2');
+                      val = val.replace(/(\d{4})(\d)/, '$1-$2');
+
+                      // Check Real-time CNPJ (14 digits)
+                      if (val.replace(/\D/g, '').length === 14) {
+                        const dup = checkDuplicateCustomer(val, customers, editingCustomerId);
+                        if (dup) {
+                          notify(`CNPJ já cadastrado: ${dup.name}`, "error");
+                          val = ''; // Clear immediately
+                        } else {
+                          // Only lookup if NOT duplicate
+                          lookupCNPJ(val);
+                        }
+                      }
+                    }
+
                     setNewCustomer({ ...newCustomer, document: val });
-                    if (personType === 'PJ' && val.replace(/\D/g, '').length === 14) lookupCNPJ(val);
                   }} required />
               </div>
               <div className="md:col-span-2">

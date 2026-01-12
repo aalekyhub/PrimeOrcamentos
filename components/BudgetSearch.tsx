@@ -63,7 +63,7 @@ const BudgetSearch: React.FC<Props> = ({ orders, setOrders, customers, company, 
         {/* Opção 1: Busca por Cliente */}
         <div
           className={`p-8 rounded-3xl border-2 transition-all cursor-pointer ${searchBy === 'client' ? 'border-blue-600 bg-white shadow-xl shadow-blue-50' : 'border-slate-200 bg-slate-50 opacity-60'}`}
-          onClick={() => setSearchBy('client')}
+          onClick={() => { setSearchBy('client'); }}
         >
           <div className="flex items-center gap-4 mb-6">
             <div className={`p-3 rounded-2xl ${searchBy === 'client' ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-400'}`}>
@@ -74,7 +74,7 @@ const BudgetSearch: React.FC<Props> = ({ orders, setOrders, customers, company, 
               <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Filtrar orçamentos de um cliente específico</p>
             </div>
           </div>
-          <div className="relative">
+          <div className="relative group">
             <Search className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
             <input
               type="text"
@@ -85,6 +85,27 @@ const BudgetSearch: React.FC<Props> = ({ orders, setOrders, customers, company, 
               disabled={searchBy !== 'client'}
               onClick={e => e.stopPropagation()}
             />
+            {/* Autocomplete Dropdown */}
+            {searchBy === 'client' && clientTerm.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-slate-100 max-h-60 overflow-y-auto z-20 empty:hidden">
+                {customers
+                  .filter(c => c.name.toLowerCase().includes(clientTerm.toLowerCase()))
+                  .slice(0, 5)
+                  .map(c => (
+                    <div
+                      key={c.id}
+                      className="p-3 hover:bg-blue-50 cursor-pointer border-b border-slate-50 last:border-none transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setClientTerm(c.name);
+                      }}
+                    >
+                      <p className="text-xs font-bold text-slate-900 uppercase">{c.name}</p>
+                      <p className="text-[10px] text-slate-400">{c.city || 'Cidade não inf.'} - {c.phone || c.whatsapp || 'Sem contato'}</p>
+                    </div>
+                  ))}
+              </div>
+            )}
           </div>
         </div>
 
