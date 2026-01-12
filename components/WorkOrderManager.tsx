@@ -8,6 +8,7 @@ import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, Compa
 import { useNotify } from './ToastProvider';
 import CustomerManager from './CustomerManager';
 import { db } from '../services/db';
+import { formatDocument } from '../services/validation';
 
 interface Props {
     orders: ServiceOrder[];
