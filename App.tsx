@@ -189,7 +189,6 @@ const AppContent: React.FC = () => {
         }
 
         if (cloudData.orders) {
-          console.log('[DEBUG] Cloud Orders received:', cloudData.orders.length > 0 ? cloudData.orders[0] : 'Empty array');
           setOrders(prev => {
             const localMap = new Map<string, ServiceOrder>(prev.map(o => [o.id, o]));
             (cloudData.orders as ServiceOrder[]).forEach((o: ServiceOrder) => {

@@ -351,7 +351,6 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     if (budget.deliveryTime) setDeliveryTime(budget.deliveryTime);
 
     // Load taxes (Handle potential casing issues from DB)
-    console.log('[DEBUG] Budget object being loaded:', budget);
     const b: any = budget;
     const t = b.taxRate ?? b.taxrate ?? b.tax_rate ?? 0;
     const d = b.bdiRate ?? b.bdirate ?? b.bdi_rate ?? 0;
@@ -402,11 +401,6 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
               <span className="font-black text-slate-900 text-base">R$ {budget.totalAmount.toLocaleString('pt-BR')}</span>
               <div className="text-right">
                 <span className="text-sm font-black text-slate-900 tracking-tight">R$ {budget.totalAmount.toLocaleString('pt-BR')}</span>
-                {/* DEBUG INFO: Display BDI/Tax in List to confirm data presence */}
-                <div className="text-[8px] text-xs space-x-2 text-slate-400">
-                  {(budget.bdiRate || (budget as any).bdi_rate) ? <span className="text-emerald-600">BDI: {budget.bdiRate || (budget as any).bdi_rate}%</span> : null}
-                  {(budget.taxRate || (budget as any).tax_rate) ? <span className="text-blue-600">Imp: {budget.taxRate || (budget as any).tax_rate}%</span> : null}
-                </div>
               </div>
               <div className="flex gap-1">
                 {budget.status !== OrderStatus.APPROVED && (
