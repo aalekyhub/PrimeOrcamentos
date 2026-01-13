@@ -220,7 +220,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
                <!-- Items Table -->
                 <div class="mb-8 avoid-break">
-                    <div style="border-top: 4px solid #000; margin-bottom: 24px;"></div>
+                    <div style="border-top: 2px solid #000; margin-bottom: 24px;"></div>
                     <div class="section-title">Detalhamento Financeiro</div>
                    <table style="width: 100%; border-collapse: collapse;">
                        <thead>
