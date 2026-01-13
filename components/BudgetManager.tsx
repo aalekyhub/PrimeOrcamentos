@@ -289,7 +289,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                </div>
 
                <!-- Signature Lines -->
-               <div class="avoid-break mt-auto">
+               <div class="avoid-break mt-12">
                    <div style="border-bottom: 2px solid #cbd5e1; width: 40%;"></div>
                    <p class="text-[9px] font-black text-slate-600 uppercase tracking-widest mt-2">Assinatura do Cliente / Aceite</p>
                </div>
