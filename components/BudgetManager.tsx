@@ -423,7 +423,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                 </td>
                 <td className="px-8 py-5 text-sm font-black uppercase text-slate-900">{budget.customerName}</td>
                 <td className="px-8 py-5 text-xs font-bold text-slate-400 uppercase">{budget.description}</td>
-                <td className="px-8 py-5 text-sm font-black text-slate-900">R$ {budget.totalAmount.toLocaleString('pt-BR')}</td>
+                <td className="px-8 py-5 text-sm font-black text-slate-900">R$ {budget.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
                 <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   {budget.status !== OrderStatus.APPROVED && (
                     <button onClick={async () => {
