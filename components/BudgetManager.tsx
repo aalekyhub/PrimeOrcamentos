@@ -237,7 +237,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                </div>
 
                <!-- Total Bar (Dark) -->
-               <div class="avoid-break mb-12">
+               <div class="avoid-break mb-6">
                    <!-- Breakdown above bar -->
                    <div class="flex justify-end mb-2 gap-6 px-2">
                         <div class="text-right">
@@ -262,7 +262,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                </div>
 
                <!-- Terms & Payment -->
-               <div class="avoid-break mb-12">
+               <div class="avoid-break mb-6">
                    <div class="grid grid-cols-2 gap-6">
                        <div class="info-box">
                            <span class="info-label">Forma de Pagamento</span>
@@ -276,7 +276,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                </div>
 
                <!-- Acceptance Box -->
-               <div class="avoid-break mb-12">
+               <div class="avoid-break mb-6">
                    <div class="border border-blue-100 bg-blue-50/50 rounded-2xl p-6">
                         <div class="flex items-center gap-3 mb-4">
                             <div class="bg-blue-600 rounded-full p-1"><svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>
