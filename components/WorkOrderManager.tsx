@@ -2,9 +2,9 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
     Plus, Search, X, Trash2, Pencil, Printer, Save,
-    UserPlus, HardHat, Eraser, FileText, ScrollText
+    UserPlus, HardHat, Eraser, FileText, ScrollText, Wallet
 } from 'lucide-react';
-import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock } from '../types';
+import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock, Transaction } from '../types';
 import { useNotify } from './ToastProvider';
 import CustomerManager from './CustomerManager';
 import { db } from '../services/db';
@@ -18,9 +18,11 @@ interface Props {
     catalogServices: CatalogService[];
     setCatalogServices: React.Dispatch<React.SetStateAction<CatalogService[]>>;
     company: CompanyProfile;
+    transactions: Transaction[];
+    setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>;
 }
 
-const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCustomers, company }) => {
+const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCustomers, company, transactions, setTransactions }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [showForm, setShowForm] = useState(false);
     const [showFullClientForm, setShowFullClientForm] = useState(false);
@@ -40,6 +42,52 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     const [currentDesc, setCurrentDesc] = useState('');
     const [currentPrice, setCurrentPrice] = useState(0);
     const [currentQty, setCurrentQty] = useState(1);
+
+    // Financial State
+    const [activeTab, setActiveTab] = useState<'details' | 'financial'>('details');
+    const [expenseDesc, setExpenseDesc] = useState('');
+    const [expenseAmount, setExpenseAmount] = useState('');
+    const [expenseCategory, setExpenseCategory] = useState('');
+
+    const workExpenses = useMemo(() => {
+        if (!editingOrderId) return [];
+        return transactions.filter(t => t.relatedOrderId === editingOrderId && t.type === 'DESPESA');
+    }, [transactions, editingOrderId]);
+
+    const totalExpenses = useMemo(() => workExpenses.reduce((acc, t) => acc + t.amount, 0), [workExpenses]);
+    const profit = useMemo(() => {
+        // Live calculation based on current items if editing, or saved total
+        const revenue = items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0);
+        return revenue - totalExpenses;
+    }, [items, totalExpenses]);
+
+    const handleAddExpense = async () => {
+        if (!editingOrderId || !expenseAmount || !expenseDesc) return;
+        const newExpense: Transaction = {
+            id: `T-${Date.now()}`,
+            date: new Date().toISOString().split('T')[0],
+            amount: Number(expenseAmount),
+            type: 'DESPESA',
+            category: expenseCategory || 'Geral',
+            description: expenseDesc,
+            relatedOrderId: editingOrderId
+        };
+        const newList = [newExpense, ...transactions];
+        setTransactions(newList);
+        await db.save('serviflow_transactions', newList);
+        setExpenseAmount('');
+        setExpenseDesc('');
+        setExpenseCategory('');
+        notify("Despesa lançada!");
+    };
+
+    const handleDeleteExpense = async (id: string) => {
+        if (confirm("Remover esta despesa?")) {
+            const newList = transactions.filter(t => t.id !== id);
+            setTransactions(newList);
+            await db.save('serviflow_transactions', newList);
+        }
+    };
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -344,7 +392,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     <h2 className="text-2xl font-bold text-slate-900 tracking-tight">OS de Obra</h2>
                     <p className="text-slate-500 text-sm">Gestão de reformas e construções.</p>
                 </div>
-                <button onClick={() => { setShowForm(true); setEditingOrderId(null); setSelectedCustomerId(''); setItems([]); setOsTitle('Reforma / Obra'); setDiagnosis(''); setDescriptionBlocks([]); setPaymentTerms(''); setDeliveryTime(''); }} className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold shadow-2xl shadow-blue-100 hover:bg-blue-700 transition-all flex items-center gap-2">
+                <button onClick={() => { setShowForm(true); setActiveTab('details'); setEditingOrderId(null); setSelectedCustomerId(''); setItems([]); setOsTitle('Reforma / Obra'); setDiagnosis(''); setDescriptionBlocks([]); setPaymentTerms(''); setDeliveryTime(''); }} className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold shadow-2xl shadow-blue-100 hover:bg-blue-700 transition-all flex items-center gap-2">
                     <Plus className="w-5 h-5" /> Nova Obra
                 </button>
             </div>
@@ -369,6 +417,19 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                 <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button onClick={() => handlePrintContract(order)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Contrato"><ScrollText className="w-4 h-4" /></button>
                                     <button onClick={() => handlePrintOS(order)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors"><Printer className="w-4 h-4" /></button>
+                                    <button onClick={() => {
+                                        setEditingOrderId(order.id);
+                                        setSelectedCustomerId(order.customerId);
+                                        setItems(order.items);
+                                        setOsTitle(order.description);
+                                        setDiagnosis(order.serviceDescription || '');
+                                        setDeliveryDate(order.dueDate);
+                                        setDescriptionBlocks(order.descriptionBlocks || []);
+                                        setPaymentTerms(order.paymentTerms || '');
+                                        setDeliveryTime(order.deliveryTime || '');
+                                        setActiveTab('financial');
+                                        setShowForm(true);
+                                    }} className="p-2 text-slate-400 hover:text-emerald-600 transition-colors" title="Gestão Financeira"><Wallet className="w-4 h-4" /></button>
                                     <button onClick={() => {
                                         setEditingOrderId(order.id);
                                         setSelectedCustomerId(order.customerId);
@@ -410,41 +471,116 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                             </div>
                             <button onClick={() => setShowForm(false)} className="bg-slate-100 hover:bg-slate-200 p-2 rounded-full transition-colors"><X className="w-6 h-6 text-slate-400" /></button>
                         </div>
+
+                        {/* Tabs */}
+                        {editingOrderId && (
+                            <div className="bg-white px-8 border-b flex gap-6">
+                                <button onClick={() => setActiveTab('details')} className={`py-3 text-xs font-black uppercase tracking-widest border-b-2 transition-colors ${activeTab === 'details' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>Detalhes da Obra</button>
+                                <button onClick={() => setActiveTab('financial')} className={`py-3 text-xs font-black uppercase tracking-widest border-b-2 transition-colors ${activeTab === 'financial' ? 'border-purple-600 text-purple-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>Gestão Financeira</button>
+                            </div>
+                        )}
+
                         <div className="flex-1 flex overflow-hidden">
                             <div className="flex-1 overflow-y-auto p-8 space-y-6 bg-[#f8fafc] no-scrollbar">
-                                <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <div className="flex justify-between items-center mb-2"><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest ml-1">Cliente</label><button onClick={() => setShowFullClientForm(true)} className="text-blue-600 text-[9px] font-black uppercase flex items-center gap-1 hover:underline"><UserPlus className="w-3 h-3" /> Novo</button></div>
-                                            <select className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all custom-select" value={selectedCustomerId} onChange={e => setSelectedCustomerId(e.target.value)}><option value="">Selecione...</option>{customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
-                                        </div>
-                                        <div><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-2 block ml-1">Título da Obra</label><input type="text" placeholder="Ex: Reforma da Cozinha" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400" value={osTitle} onChange={e => setOsTitle(e.target.value)} /></div>
-                                    </div>
-                                </div>
-
-                                <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                                    <div><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Detalhamento do Escopo / Observações</label><textarea className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-700 outline-none h-24 focus:ring-2 focus:ring-blue-500" placeholder="Descreva os serviços a serem executados..." value={diagnosis} onChange={e => setDiagnosis(e.target.value)} /></div>
-                                </div>
-
-                                <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                                    <div className="flex justify-between items-center mb-4"><h4 className="text-[9px] font-black text-slate-400 uppercase tracking-widest border-b pb-2 grow mr-4">Itens da Obra</h4></div>
-                                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
-                                        <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
-                                            <div className="md:col-span-6"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Descrição</label><input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentDesc} onChange={e => setCurrentDesc(e.target.value)} /></div>
-                                            <div className="md:col-span-2"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Valor</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} /></div>
-                                            <div className="md:col-span-2"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Qtd</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} /></div>
-                                            <div className="md:col-span-2"><button onClick={handleAddItem} className="bg-blue-600 text-white w-full h-[42px] rounded-xl flex items-center justify-center hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200"><Plus className="w-5 h-5" /></button></div>
-                                        </div>
-                                        <div className="space-y-1">
-                                            {items.map(item => (
-                                                <div key={item.id} className="flex justify-between items-center p-3 bg-white rounded-xl border border-slate-100 shadow-sm">
-                                                    <div><p className="text-[10px] font-black text-slate-900 uppercase">{item.description}</p><p className="text-[9px] text-slate-400 font-bold uppercase tracking-tight">{item.quantity} un x R$ {item.unitPrice.toLocaleString('pt-BR')}</p></div>
-                                                    <div className="flex items-center gap-3"><span className="text-xs font-black text-slate-900">R$ {(item.unitPrice * item.quantity).toLocaleString('pt-BR')}</span><button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="text-slate-300 hover:text-rose-500 transition-colors"><Trash2 className="w-4 h-4" /></button></div>
+                                {activeTab === 'details' ? (
+                                    <>
+                                        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div>
+                                                    <div className="flex justify-between items-center mb-2"><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest ml-1">Cliente</label><button onClick={() => setShowFullClientForm(true)} className="text-blue-600 text-[9px] font-black uppercase flex items-center gap-1 hover:underline"><UserPlus className="w-3 h-3" /> Novo</button></div>
+                                                    <select className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all custom-select" value={selectedCustomerId} onChange={e => setSelectedCustomerId(e.target.value)}><option value="">Selecione...</option>{customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
                                                 </div>
-                                            ))}
+                                                <div><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-2 block ml-1">Título da Obra</label><input type="text" placeholder="Ex: Reforma da Cozinha" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400" value={osTitle} onChange={e => setOsTitle(e.target.value)} /></div>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                                            <div><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Detalhamento do Escopo / Observações</label><textarea className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-700 outline-none h-24 focus:ring-2 focus:ring-blue-500" placeholder="Descreva os serviços a serem executados..." value={diagnosis} onChange={e => setDiagnosis(e.target.value)} /></div>
+                                        </div>
+
+                                        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                                            <div className="flex justify-between items-center mb-4"><h4 className="text-[9px] font-black text-slate-400 uppercase tracking-widest border-b pb-2 grow mr-4">Itens da Obra</h4></div>
+                                            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+                                                <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
+                                                    <div className="md:col-span-6"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Descrição</label><input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentDesc} onChange={e => setCurrentDesc(e.target.value)} /></div>
+                                                    <div className="md:col-span-2"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Valor</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} /></div>
+                                                    <div className="md:col-span-2"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Qtd</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} /></div>
+                                                    <div className="md:col-span-2"><button onClick={handleAddItem} className="bg-blue-600 text-white w-full h-[42px] rounded-xl flex items-center justify-center hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200"><Plus className="w-5 h-5" /></button></div>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    {items.map(item => (
+                                                        <div key={item.id} className="flex justify-between items-center p-3 bg-white rounded-xl border border-slate-100 shadow-sm">
+                                                            <div><p className="text-[10px] font-black text-slate-900 uppercase">{item.description}</p><p className="text-[9px] text-slate-400 font-bold uppercase tracking-tight">{item.quantity} un x R$ {item.unitPrice.toLocaleString('pt-BR')}</p></div>
+                                                            <div className="flex items-center gap-3"><span className="text-xs font-black text-slate-900">R$ {(item.unitPrice * item.quantity).toLocaleString('pt-BR')}</span><button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="text-slate-300 hover:text-rose-500 transition-colors"><Trash2 className="w-4 h-4" /></button></div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="space-y-6">
+                                        <div className="grid grid-cols-3 gap-4">
+                                            <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Valor da Obra (Receita)</p>
+                                                <p className="text-2xl font-black text-blue-600">R$ {items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                            </div>
+                                            <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Total de Gastos (Despesas)</p>
+                                                <p className="text-2xl font-black text-rose-600">R$ {totalExpenses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                            </div>
+                                            <div className={`p-6 rounded-[2rem] border shadow-sm ${profit >= 0 ? 'bg-emerald-50 border-emerald-100' : 'bg-rose-50 border-rose-100'}`}>
+                                                <p className={`text-[9px] font-black uppercase tracking-widest mb-2 ${profit >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>Lucro Estimado</p>
+                                                <p className={`text-2xl font-black ${profit >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>R$ {profit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Lançar Novo Custo / Despesa</h4>
+                                            <div className="grid grid-cols-12 gap-3 items-end bg-slate-50 p-4 rounded-xl">
+                                                <div className="col-span-4">
+                                                    <label className="text-[9px] font-bold text-slate-400 uppercase mb-1 block">Descrição do Gasto</label>
+                                                    <input type="text" className="w-full p-2.5 rounded-lg border border-slate-200 text-xs font-bold" placeholder="Ex: Compra de Cimento" value={expenseDesc} onChange={e => setExpenseDesc(e.target.value)} />
+                                                </div>
+                                                <div className="col-span-3">
+                                                    <label className="text-[9px] font-bold text-slate-400 uppercase mb-1 block">Categoria</label>
+                                                    <input type="text" className="w-full p-2.5 rounded-lg border border-slate-200 text-xs font-bold" placeholder="Ex: Material" value={expenseCategory} onChange={e => setExpenseCategory(e.target.value)} />
+                                                </div>
+                                                <div className="col-span-3">
+                                                    <label className="text-[9px] font-bold text-slate-400 uppercase mb-1 block">Valor (R$)</label>
+                                                    <input type="number" className="w-full p-2.5 rounded-lg border border-slate-200 text-xs font-bold" value={expenseAmount} onChange={e => setExpenseAmount(e.target.value)} />
+                                                </div>
+                                                <div className="col-span-2">
+                                                    <button onClick={handleAddExpense} className="w-full bg-slate-900 text-white p-2.5 rounded-lg text-xs font-bold hover:bg-slate-800 transition-colors">Lançar</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+                                            <div className="p-4 bg-slate-50 border-b flex justify-between items-center">
+                                                <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Histórico de Despesas</h4>
+                                            </div>
+                                            <div className="divide-y divide-slate-100">
+                                                {workExpenses.length === 0 ? (
+                                                    <p className="p-8 text-center text-xs text-slate-400 font-medium italic">Nenhuma despesa lançada para esta obra.</p>
+                                                ) : (
+                                                    workExpenses.map(t => (
+                                                        <div key={t.id} className="p-4 flex justify-between items-center hover:bg-slate-50">
+                                                            <div>
+                                                                <p className="text-xs font-black text-slate-900 uppercase">{t.description}</p>
+                                                                <p className="text-[9px] font-bold text-slate-400 uppercase">{t.date} • {t.category}</p>
+                                                            </div>
+                                                            <div className="flex items-center gap-4">
+                                                                <span className="text-sm font-black text-rose-600">- R$ {t.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                                                <button onClick={() => handleDeleteExpense(t.id)} className="text-slate-300 hover:text-rose-500"><Trash2 className="w-4 h-4" /></button>
+                                                            </div>
+                                                        </div>
+                                                    ))
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                )}
                                 {showFullClientForm && (
                                     <div className="fixed inset-0 z-[60] bg-black/20 backdrop-blur-sm flex items-center justify-center p-4">
                                         <div className="bg-white w-full max-w-2xl max-h-[90vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col">
