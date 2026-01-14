@@ -85,6 +85,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         if (confirm("Remover esta despesa?")) {
             const newList = transactions.filter(t => t.id !== id);
             setTransactions(newList);
+            await db.remove('serviflow_transactions', id);
             await db.save('serviflow_transactions', newList);
         }
     };
