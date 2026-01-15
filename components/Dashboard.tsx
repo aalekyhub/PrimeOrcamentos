@@ -15,11 +15,12 @@ interface DashboardProps {
   transactions: Transaction[];
   currentUser: UserAccount;
   company: CompanyProfile;
+  onNavigate: (tab: string) => void;
 }
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#6366f1'];
 
-const Dashboard: React.FC<DashboardProps> = ({ stats, orders, transactions, currentUser, company }) => {
+const Dashboard: React.FC<DashboardProps> = ({ stats, orders, transactions, currentUser, company, onNavigate }) => {
   const isAdmin = currentUser.role === 'admin';
   const safeOrders = Array.isArray(orders) ? orders : [];
   const safeTransactions = Array.isArray(transactions) ? transactions : [];
@@ -44,12 +45,16 @@ const Dashboard: React.FC<DashboardProps> = ({ stats, orders, transactions, curr
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         {[
-          { label: 'Receita Total', value: stats.totalRevenue, icon: DollarSign, color: 'blue', sub: 'Total acumulado', show: true },
-          { label: 'Lucro Líquido', value: stats.netProfit, icon: TrendingUp, color: 'emerald', sub: 'Saldo em caixa', show: isAdmin },
-          { label: 'Serviços Ativos', value: stats.pendingOrders, icon: FileText, color: 'amber', sub: 'Em execução', show: true },
-          { label: 'Eficiência', value: '92%', icon: Target, color: 'indigo', sub: 'Taxa de conclusão', show: true },
+          { label: 'Receita Total', value: stats.totalRevenue, icon: DollarSign, color: 'blue', sub: 'Total acumulado', show: true, isCurrency: true, target: 'financials' },
+          { label: 'Lucro Líquido', value: stats.netProfit, icon: TrendingUp, color: 'emerald', sub: 'Saldo em caixa', show: isAdmin, isCurrency: true, target: 'financials' },
+          { label: 'Serviços Ativos', value: stats.pendingOrders, icon: FileText, color: 'amber', sub: 'Em execução', show: true, isCurrency: false, target: 'orders' },
+          { label: 'Eficiência', value: '92%', icon: Target, color: 'indigo', sub: 'Taxa de conclusão', show: true, isCurrency: false, target: null },
         ].filter(s => s.show).map((stat, i) => (
-          <div key={i} className="bg-white p-10 rounded-[2.5rem] border border-slate-200 shadow-xl shadow-slate-200/50 hover:shadow-2xl transition-all duration-300 group">
+          <div
+            key={i}
+            onClick={() => stat.target && onNavigate(stat.target)}
+            className={`bg-white p-10 rounded-[2.5rem] border border-slate-200 shadow-xl shadow-slate-200/50 hover:shadow-2xl transition-all duration-300 group ${stat.target ? 'cursor-pointer hover:scale-105 active:scale-95' : ''}`}
+          >
             <div className="flex items-center justify-between mb-8">
               <div className={`p-4 bg-${stat.color}-50 text-${stat.color}-600 rounded-2xl group-hover:scale-110 transition-transform`}>
                 <stat.icon className="w-8 h-8" />
@@ -57,7 +62,7 @@ const Dashboard: React.FC<DashboardProps> = ({ stats, orders, transactions, curr
               <span className="text-xs font-black text-slate-400 uppercase tracking-widest">{stat.label}</span>
             </div>
             <h3 className="text-3xl font-black text-slate-900 tracking-tighter">
-              {typeof stat.value === 'number' ? `R$ ${stat.value.toLocaleString()}` : stat.value}
+              {stat.isCurrency && typeof stat.value === 'number' ? `R$ ${stat.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : stat.value}
             </h3>
             <p className="text-xs mt-3 text-slate-400 font-bold uppercase tracking-wider">{stat.sub}</p>
           </div>
