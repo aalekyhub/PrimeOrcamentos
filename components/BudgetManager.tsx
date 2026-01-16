@@ -3,7 +3,7 @@ import React, { useState, useMemo } from 'react';
 import {
   Plus, Search, X, Trash2, Pencil, Printer, Save,
   UserPlus, Package, Type, Image as ImageIcon,
-  FileText, Upload, CheckCircle
+  FileText, Upload, CheckCircle, Zap
 } from 'lucide-react';
 import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock } from '../types';
 import { useNotify } from './ToastProvider';
@@ -45,6 +45,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
   const [taxRate, setTaxRate] = useState<string | number>(0);
   const [bdiRate, setBdiRate] = useState<string | number>(0);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const budgets = useMemo(() => orders.filter(o =>
     (o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED) && (o.customerName.toLowerCase().includes(searchTerm.toLowerCase()) || o.id.includes(searchTerm))
@@ -615,7 +616,12 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
                 <div className="space-y-4 relative z-10">
                   <div>
-                    <label className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Pagamento</label>
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="text-[8px] font-bold text-slate-400 uppercase tracking-widest block">Pagamento</label>
+                      <button onClick={() => setShowPaymentModal(true)} className="text-[8px] font-black text-emerald-400 hover:text-emerald-300 uppercase tracking-widest flex items-center gap-1 transition-colors">
+                        <Zap className="w-3 h-3" /> Gerar
+                      </button>
+                    </div>
                     <textarea className="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-3 text-[9px] font-bold text-slate-200 outline-none h-20 focus:ring-1 focus:ring-blue-500 leading-relaxed shadow-inner" value={paymentTerms} onChange={e => setPaymentTerms(e.target.value)} />
                   </div>
                   <div>
@@ -649,8 +655,109 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           </div>
         </div>
       )}
+      {showPaymentModal && (
+        <PaymentTypeModal
+          onClose={() => setShowPaymentModal(false)}
+          onConfirm={(text) => {
+            setPaymentTerms(text);
+            setShowPaymentModal(false);
+          }}
+          totalValue={totalAmount}
+        />
+      )}
     </div>
   );
+};
+
+// Sub-component for Payment Logic to keep main file clean(er)
+const PaymentTypeModal: React.FC<{ onClose: () => void, onConfirm: (text: string) => void, totalValue: number }> = ({ onClose, onConfirm, totalValue }) => {
+  const [type, setType] = useState<'vista' | 'parcelado' | 'conclusao'>('parcelado');
+  const [entryValue, setEntryValue] = useState(0);
+  const [installments, setInstallments] = useState(3);
+  const [preview, setPreview] = useState('');
+
+  // Auto-calculate defaults when opening
+  React.useEffect(() => {
+    if (totalValue > 0) setEntryValue(totalValue * 0.3); // Default 30% entry
+  }, [totalValue]);
+
+  // Update preview effect
+  React.useEffect(() => {
+    let text = '';
+    const currency = (val: number) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+    if (type === 'vista') {
+      text = `Pagamento à vista com desconto na aprovação do orçamento. Total: ${currency(totalValue)}.`;
+    } else if (type === 'conclusao') {
+      text = `Pagamento integral ${currency(totalValue)} a ser realizado após entrega técnica e aprovação dos serviços.`;
+    } else if (type === 'parcelado') {
+      const remainder = totalValue - entryValue;
+      const parcValue = installments > 0 ? remainder / installments : 0;
+
+      text = `Entrada de ${currency(entryValue)} na aprovação.`;
+      if (installments > 0) {
+        text += `\nSaldo restante de ${currency(remainder)} dividido em ${installments}x de ${currency(parcValue)} (30/${installments > 1 ? '60/90...' : ' dias'}).`;
+      }
+    }
+    setPreview(text);
+  }, [type, entryValue, installments, totalValue]);
+
+  return (
+    <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[70] flex items-center justify-center p-4">
+      <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95">
+        <div className="p-6 border-b flex justify-between items-center bg-slate-50">
+          <h3 className="font-black text-slate-800 uppercase tracking-tight">Condição de Pagamento</h3>
+          <button onClick={onClose}><X className="w-5 h-5 text-slate-400 hover:text-rose-500" /></button>
+        </div>
+
+        <div className="p-6 space-y-6">
+          <div>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Tipo de Negociação</label>
+            <div className="grid grid-cols-3 gap-2">
+              <button onClick={() => setType('vista')} className={`p-3 rounded-xl border text-xs font-bold uppercase transition-all ${type === 'vista' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>À Vista</button>
+              <button onClick={() => setType('parcelado')} className={`p-3 rounded-xl border text-xs font-bold uppercase transition-all ${type === 'parcelado' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>Parcelado</button>
+              <button onClick={() => setType('conclusao')} className={`p-3 rounded-xl border text-xs font-bold uppercase transition-all ${type === 'conclusao' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>Entrega</button>
+            </div>
+          </div>
+
+          {type === 'parcelado' && (
+            <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+              <div className="col-span-2">
+                <div className="flex justify-between mb-1"><span className="text-[10px] font-bold text-slate-400 uppercase">Valor Total</span> <span className="text-[10px] font-black text-slate-900">{totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span></div>
+                <div className="h-1 w-full bg-slate-200 rounded-full overflow-hidden"><div className="h-full bg-blue-500" style={{ width: `${Math.min(100, (entryValue / totalValue) * 100)}%` }}></div></div>
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Entrada (R$)</label>
+                <input type="number" className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500" value={entryValue} onChange={e => setEntryValue(Number(e.target.value))} />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Parcelas</label>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setInstallments(Math.max(1, installments - 1))} className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-100 font-bold text-slate-600">-</button>
+                  <span className="flex-1 text-center font-black text-slate-900 text-lg">{installments}x</span>
+                  <button onClick={() => setInstallments(installments + 1)} className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-100 font-bold text-slate-600">+</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Prévia do Texto</label>
+            <div className="bg-slate-800 text-slate-200 p-4 rounded-xl text-sm font-medium leading-relaxed border border-slate-700 min-h-[80px]">
+              {preview}
+            </div>
+          </div>
+        </div>
+
+        <div className="p-4 bg-slate-50 border-t flex gap-3">
+          <button onClick={onClose} className="flex-1 py-3 text-xs font-bold uppercase text-slate-500 hover:bg-slate-200 rounded-xl transition-colors">Cancelar</button>
+          <button onClick={() => onConfirm(preview)} className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black uppercase tracking-wide shadow-lg shadow-blue-200 transition-all active:scale-95">Aplicar Texto</button>
+        </div>
+      </div>
+    </div>
+  );
+
+
 };
 
 export default BudgetManager;
