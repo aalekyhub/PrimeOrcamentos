@@ -302,7 +302,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
       <script src="https://cdn.tailwindcss.com"></script>
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
       <style>
-        body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; counter-reset: page 1; }
+        body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
         @page { size: A4; margin: 0 !important; }
         .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
         .avoid-break { break-inside: avoid; page-break-inside: avoid; }
@@ -333,20 +333,50 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4 mb-8">
+            <div class="grid grid-cols-2 gap-4 mb-5">
               <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</h4><p class="text-sm font-black text-slate-900 uppercase">${company.name}</p><p class="text-[11px] text-slate-500 uppercase">${company.address || ''}</p><p class="text-[11px] text-slate-500 uppercase">${company.email || ''}</p></div>
               <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</h4><p class="text-sm font-black text-slate-900 uppercase">${customer.name}</p><p class="text-[11px] text-slate-500 uppercase">${(customer.document || '').replace(/\D/g, '').length <= 11 ? 'CPF' : 'CNPJ'}: ${formatDocument(customer.document || '') || 'N/A'}</p><p class="text-[11px] text-slate-500 uppercase">${customer.address || ''}, ${customer.number || ''} - ${customer.city || ''}</p></div>
             </div>
 
-            <div class="mb-6"><h4 class="text-[12px] font-black text-slate-900 uppercase tracking-widest mb-2 border-b pb-1">1. OBJETO DO CONTRATO</h4><p class="text-[12px] text-slate-600 leading-relaxed text-justify">O presente contrato tem por objeto a prestação dos serviços técnicos descritos abaixo, a serem realizados pela CONTRATADA à CONTRATANTE:</p><div class="bg-blue-50/50 p-4 rounded-lg border-l-4 border-blue-500 mt-2"><p class="text-[12px] font-bold text-blue-900 uppercase">${order.description}</p><p class="text-[11px] text-blue-700 mt-1">${order.items.map(i => `${i.quantity}x ${i.description}`).join(', ')}</p></div></div>
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[12px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA PRIMEIRA – OBJETO DO CONTRATO</h4><p class="text-[12px] text-slate-600 leading-relaxed text-justify">O presente contrato tem por objeto a prestação dos serviços técnicos descritos abaixo, a serem realizados pela CONTRATADA à CONTRATANTE:</p><div class="bg-blue-50/50 p-4 rounded-xl border-l-4 border-blue-500 mt-4"><p class="text-[12px] font-bold text-blue-900 uppercase tracking-wide">${order.description}</p></div></div>
             
-            <div class="mb-6"><h4 class="text-[12px] font-black text-slate-900 uppercase tracking-widest mb-2 border-b pb-1">2. VALORES E PAGAMENTO</h4><p class="text-[12px] text-slate-600 leading-relaxed text-justify">Pelos serviços contratados, a CONTRATANTE pagará o valor total de <b class="text-slate-900">R$ ${order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>. Condições: ${order.paymentTerms || 'Conforme combinado'}.</p></div>
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[12px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA SEGUNDA – VALORES E PAGAMENTO</h4><p class="text-[12px] text-slate-600 leading-relaxed text-justify">Pelos serviços contratados, a CONTRATANTE pagará o valor total de <b class="text-slate-900">R$ ${order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>. Condições: ${order.paymentTerms || 'Conforme combinado'}.</p></div>
 
-            <div class="mb-6"><h4 class="text-[12px] font-black text-slate-900 uppercase tracking-widest mb-2 border-b pb-1">3. PRAZOS E GARANTIA</h4><p class="text-[12px] text-slate-600 leading-relaxed text-justify">O prazo estimado é de <b>${order.deliveryTime || 'A combinar'}</b>. A garantia dos serviços é de 90 dias (Art. 26 CDC).</p></div>
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[12px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA TERCEIRA – PRAZO</h4><p class="text-[12px] text-slate-600 leading-relaxed text-justify">O prazo para execução dos serviços será de <b>${order.deliveryTime || 'conforme demanda'}</b>, contado a partir da assinatura deste contrato ou da emissão de ordem de serviço. <br>O prazo poderá ser prorrogado mediante acordo entre as partes, sem que isso caracterize descumprimento contratual.</p></div>
+
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
+                <h4 class="text-[12px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA QUARTA – OBRIGAÇÕES DA CONTRATADA</h4>
+                <p class="text-[12px] text-slate-600 leading-relaxed text-justify">São obrigações da CONTRATADA:</p>
+                <ul class="list-disc pl-5 mt-3 text-[12px] text-slate-600 leading-relaxed space-y-2">
+                    <li>Executar os serviços com zelo, qualidade e profissionalismo;</li>
+                    <li>Cumprir as condições acordadas neste contrato;</li>
+                    <li>Responder por eventuais danos comprovadamente causados por falha na execução dos serviços;</li>
+                    <li>Manter regularidade fiscal e legal durante a vigência do contrato, quando exigível.</li>
+                </ul>
+            </div>
+
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
+                <h4 class="text-[12px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA QUINTA – OBRIGAÇÕES DA CONTRATANTE</h4>
+                <p class="text-[12px] text-slate-600 leading-relaxed text-justify">São obrigações da CONTRATANTE:</p>
+                <ul class="list-disc pl-5 mt-3 text-[12px] text-slate-600 leading-relaxed space-y-2">
+                    <li>Fornecer as informações necessárias à execução dos serviços;</li>
+                    <li>Permitir o acesso da CONTRATADA ao local, quando aplicável;</li>
+                    <li>Efetuar os pagamentos nos prazos ajustados;</li>
+                    <li>Não interferir indevidamente na execução técnica dos serviços.</li>
+                </ul>
+            </div>
+
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[12px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA SEXTA – VÍNCULO TRABALHISTA</h4><p class="text-[12px] text-slate-600 leading-relaxed text-justify">O presente contrato não gera qualquer vínculo empregatício entre a CONTRATANTE e os empregados, prepostos ou subcontratados da CONTRATADA, sendo esta a única responsável por encargos trabalhistas, previdenciários, fiscais e sociais.</p></div>
             
-            <div class="mb-6"><h4 class="text-[12px] font-black text-slate-900 uppercase tracking-widest mb-2 border-b pb-1">4. DIREITOS E OBRIGAÇÕES</h4><p class="text-[12px] text-slate-600 leading-relaxed text-justify">4.1. A CONTRATADA compromete-se a executar os serviços com qualidade técnica, utilizando mão-de-obra qualificada.<br>4.2. A garantia dos serviços prestados é de 90 (noventa) dias, conforme Art. 26 do Código de Defesa do Consumidor.<br>4.3. A CONTRATANTE deve fornecer as condições necessárias (acesso, energia, etc.) para a execução dos trabalhos.</p></div>
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[12px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA SÉTIMA – RESPONSABILIDADE</h4><p class="text-[12px] text-slate-600 leading-relaxed text-justify">A CONTRATADA será responsável apenas pelos danos diretamente causados por culpa ou dolo na execução dos serviços, não se responsabilizando por danos decorrentes de mau uso, intervenções de terceiros, informações incorretas fornecidas pela CONTRATANTE ou fatos alheios à sua atuação.</p></div>
 
-            <div class="mb-6"><h4 class="text-[12px] font-black text-slate-900 uppercase tracking-widest mb-2 border-b pb-1">5. FORO</h4><p class="text-[12px] text-slate-600 leading-relaxed text-justify">Fica eleito o foro da comarca de São Paulo/SP para dirimir quaisquer dúvidas oriundas deste contrato.</p></div>
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[12px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA OITAVA – RESCISÃO</h4><p class="text-[12px] text-slate-600 leading-relaxed text-justify">O presente contrato poderá ser rescindido por qualquer das partes, a qualquer tempo, mediante comunicação escrita com antecedência mínima de <b>30 dias</b>, sem ônus, desde que não haja serviços em andamento ou valores pendentes.<br>Em caso de descumprimento contratual, a parte prejudicada poderá rescindir o contrato de forma imediata.</p></div>
+
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[12px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA NONA – CONFIDENCIALIDADE</h4><p class="text-[12px] text-slate-600 leading-relaxed text-justify">As partes comprometem-se a manter sigilo sobre informações técnicas, comerciais ou estratégicas a que tiverem acesso em razão deste contrato.</p></div>
+
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[12px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA DÉCIMA – DISPOSIÇÕES GERAIS</h4><p class="text-[12px] text-slate-600 leading-relaxed text-justify">Este contrato constitui o acordo integral entre as partes, substituindo quaisquer entendimentos anteriores, verbais ou escritos.<br>Qualquer alteração deverá ser feita por escrito e assinada por ambas as partes.</p></div>
+
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[12px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA DÉCIMA PRIMEIRA – FORO</h4><p class="text-[12px] text-slate-600 leading-relaxed text-justify">Fica eleito o foro da Comarca de <b>${customer.city || 'São Paulo'} - ${customer.state || 'SP'}</b>, com renúncia a qualquer outro, por mais privilegiado que seja.</p></div>
 
             <div class="avoid-break mt-12 mb-8">
               <div class="grid grid-cols-2 gap-16 px-10">
