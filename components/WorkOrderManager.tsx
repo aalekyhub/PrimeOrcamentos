@@ -1,7 +1,9 @@
 
+// @ts-ignore
+import html2pdf from 'html2pdf.js';
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
-    Plus, Search, X, Trash2, Pencil, Printer, Save,
+    Plus, Search, X, Trash2, Pencil, Printer, Save, FileDown,
     UserPlus, HardHat, Eraser, FileText, ScrollText, Wallet
 } from 'lucide-react';
 import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock, Transaction } from '../types';
@@ -289,6 +291,126 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         printWindow.document.close();
     };
 
+    const handleDownloadPDF = (order: ServiceOrder) => {
+        const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', address: 'Endereço não informado', city: '', state: '', cep: '' };
+
+        const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Contrato - ${order.id}</title>
+      <script src="https://cdn.tailwindcss.com"></script>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
+      <style>
+        body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
+        .a4-container { width: 210mm; margin: 0 auto; background: white; padding-left: 15mm; padding-right: 15mm; }
+        .avoid-break { break-inside: avoid; page-break-inside: avoid; }
+        .print-footer { font-size: 10px; font-weight: bold; color: #94a3b8; text-transform: uppercase; background: white; text-align: center; padding-top: 10px; }
+      </style>
+    </head>
+    <body class="no-scrollbar">
+      <div id="contract-content">
+      <table style="width: 100%;">
+        <thead><tr><td style="height: ${company.printMarginTop || 15}mm;"><div style="height: ${company.printMarginTop || 15}mm; display: block;">&nbsp;</div></td></tr></thead>
+        <tbody><tr><td>
+          <div class="a4-container">
+            <div class="flex justify-between items-start mb-8">
+                <div class="flex gap-4">
+                    <div class="w-16 h-16 shrink-0 flex items-center justify-center overflow-hidden">
+                        ${company.logo ? `<img src="${company.logo}" style="height: 100%; object-fit: contain;">` : `<div style="width: 64px; height: 64px; background: #2563eb; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white;"><svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></div>`}
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-black text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
+                        <p class="text-[9px] font-black text-blue-600 uppercase tracking-widest">${company.tagline || 'Soluções em Gestão e Manutenção Profissional'}</p>
+                        <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tight mt-1">${company.cnpj || ''} | ${company.phone || ''}</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="bg-blue-600 text-white px-4 py-1 rounded text-[8px] font-black uppercase tracking-widest mb-1 inline-block">CONTRATO</div>
+                    <h2 class="text-3xl font-black text-slate-900 tracking-tighter">${order.id}</h2>
+                    <div class="mt-2 space-y-0.5"><p class="text-[8px] font-black text-slate-400 uppercase tracking-widest text-right">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-5">
+              <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</h4><p class="text-sm font-black text-slate-900 uppercase">${company.name}</p><p class="text-[11px] text-slate-500 uppercase">${company.address || ''}</p><p class="text-[11px] text-slate-500 uppercase">${company.email || ''}</p></div>
+              <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</h4><p class="text-sm font-black text-slate-900 uppercase">${customer.name}</p><p class="text-[11px] text-slate-500 uppercase">${(customer.document || '').replace(/\D/g, '').length <= 11 ? 'CPF' : 'CNPJ'}: ${formatDocument(customer.document || '') || 'N/A'}</p><p class="text-[11px] text-slate-500 uppercase">${customer.address || ''}, ${customer.number || ''} - ${customer.city || ''}</p></div>
+            </div>
+
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA PRIMEIRA – OBJETO DO CONTRATO</h4><p class="text-[14px] text-slate-600 leading-relaxed text-justify">O presente contrato tem por objeto a prestação dos serviços técnicos descritos abaixo, a serem realizados pela CONTRATADA à CONTRATANTE:</p><div class="bg-blue-50/50 p-4 rounded-xl border-l-4 border-blue-500 mt-4"><p class="text-[14px] font-bold text-blue-900 uppercase tracking-wide">${order.description}</p></div></div>
+            
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA SEGUNDA – VALORES E PAGAMENTO</h4><p class="text-[14px] text-slate-600 leading-relaxed text-justify">Pelos serviços contratados, a CONTRATANTE pagará o valor total de <b class="text-slate-900">R$ ${order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>. Condições: ${order.paymentTerms || 'Conforme combinado'}.</p></div>
+
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA TERCEIRA – PRAZO</h4><p class="text-[14px] text-slate-600 leading-relaxed text-justify">O prazo para execução dos serviços será de <b>${order.deliveryTime || 'conforme demanda'}</b>, contado a partir da assinatura deste contrato ou da emissão de ordem de serviço. <br>O prazo poderá ser prorrogado mediante acordo entre as partes, sem que isso caracterize descumprimento contratual.</p></div>
+
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
+                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA QUARTA – OBRIGAÇÕES DA CONTRATADA</h4>
+                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">São obrigações da CONTRATADA:</p>
+                <ul class="list-disc pl-5 mt-3 text-[14px] text-slate-600 leading-relaxed space-y-2">
+                    <li>Executar os serviços com zelo, qualidade e profissionalismo;</li>
+                    <li>Cumprir as condições acordadas neste contrato;</li>
+                    <li>Responder por eventuais danos comprovadamente causados por falha na execução dos serviços;</li>
+                    <li>Manter regularidade fiscal e legal durante a vigência do contrato, quando exigível.</li>
+                </ul>
+            </div>
+
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
+                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA QUINTA – OBRIGAÇÕES DA CONTRATANTE</h4>
+                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">São obrigações da CONTRATANTE:</p>
+                <ul class="list-disc pl-5 mt-3 text-[14px] text-slate-600 leading-relaxed space-y-2">
+                    <li>Fornecer as informações necessárias à execução dos serviços;</li>
+                    <li>Permitir o acesso da CONTRATADA ao local, quando aplicável;</li>
+                    <li>Efetuar os pagamentos nos prazos ajustados;</li>
+                    <li>Não interferir indevidamente na execução técnica dos serviços.</li>
+                </ul>
+            </div>
+
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA SEXTA – VÍNCULO TRABALHISTA</h4><p class="text-[14px] text-slate-600 leading-relaxed text-justify">O presente contrato não gera qualquer vínculo empregatício entre a CONTRATANTE e os empregados, prepostos ou subcontratados da CONTRATADA, sendo esta a única responsável por encargos trabalhistas, previdenciários, fiscais e sociais.</p></div>
+            
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA SÉTIMA – RESPONSABILIDADE</h4><p class="text-[14px] text-slate-600 leading-relaxed text-justify">A CONTRATADA será responsável apenas pelos danos diretamente causados por culpa ou dolo na execução dos serviços, não se responsabilizando por danos decorrentes de mau uso, intervenções de terceiros, informações incorretas fornecidas pela CONTRATANTE ou fatos alheios à sua atuação.</p></div>
+
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA OITAVA – RESCISÃO</h4><p class="text-[14px] text-slate-600 leading-relaxed text-justify">O presente contrato poderá ser rescindido por qualquer das partes, a qualquer tempo, mediante comunicação escrita com antecedência mínima de <b>30 dias</b>, sem ônus, desde que não haja serviços em andamento ou valores pendentes.<br>Em caso de descumprimento contratual, a parte prejudicada poderá rescindir o contrato de forma imediata.</p></div>
+
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA NONA – CONFIDENCIALIDADE</h4><p class="text-[14px] text-slate-600 leading-relaxed text-justify">As partes comprometem-se a manter sigilo sobre informações técnicas, comerciais ou estratégicas a que tiverem acesso em razão deste contrato.</p></div>
+
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA DÉCIMA – DISPOSIÇÕES GERAIS</h4><p class="text-[14px] text-slate-600 leading-relaxed text-justify">Este contrato constitui o acordo integral entre as partes, substituindo quaisquer entendimentos anteriores, verbais ou escritos.<br>Qualquer alteração deverá ser feita por escrito e assinada por ambas as partes.</p></div>
+
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA DÉCIMA PRIMEIRA – FORO</h4><p class="text-[14px] text-slate-600 leading-relaxed text-justify">Fica eleito o foro da Comarca de <b>${customer.city || 'São Paulo'} - ${customer.state || 'SP'}</b>, com renúncia a qualquer outro, por mais privilegiado que seja.</p></div>
+
+            <div className="mb-8" style="padding-top: 50mm; page-break-inside: avoid; break-inside: avoid;">
+              <div class="grid grid-cols-2 gap-16 px-10">
+                <div class="text-center border-t border-slate-300 pt-3"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</p><p class="text-sm font-black uppercase text-slate-900">${company.name}</p></div>
+                <div class="text-center border-t border-slate-300 pt-3 relative"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</p><p class="text-sm font-black uppercase text-slate-900">${customer.name}</p></div>
+              </div>
+            </div>
+          </div>
+        </td></tr></tbody>
+        <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;"><div style="height: ${company.printMarginBottom || 15}mm; display: block;">&nbsp;</div></td></tr></tfoot>
+      </table>
+      </div>
+    </body>
+    </html>`;
+
+        const opt = {
+            margin: 0,
+            filename: `Contrato-${order.id}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        // @ts-ignore
+        html2pdf().set(opt).from(html).toPdf().get('pdf').then(function (pdf: any) {
+            var totalPages = pdf.internal.getNumberOfPages();
+            for (var i = 1; i <= totalPages; i++) {
+                pdf.setPage(i);
+                pdf.setFontSize(10);
+                pdf.setTextColor(148, 163, 184); // #94a3b8
+                pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
+            }
+        }).save();
+    };
+
     const handlePrintContract = (order: ServiceOrder) => {
         const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', address: 'Endereço não informado', city: '', state: '', cep: '' };
         const printWindow = window.open('', '_blank');
@@ -307,7 +429,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
         .avoid-break { break-inside: avoid; page-break-inside: avoid; }
         @media screen { body { background: #f1f5f9; padding: 40px 0; } .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; } }
-        @media print { body { background: white !important; margin: 0 !important; } .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; } .no-print { display: none !important; } * { box-shadow: none !important; } .print-footer { position: fixed; bottom: 0; left: 0; right: 0; height: 15mm; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: bold; color: #94a3b8; text-transform: uppercase; background: white; } .print-footer::after { content: "Página " counter(page); } .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; } }
+        @media print { body { background: white !important; margin: 0 !important; } .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; } .no-print { display: none !important; } * { box-shadow: none !important; } .print-footer { position: fixed; bottom: 0; left: 0; right: 0; height: 15mm; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; color: #94a3b8; text-transform: uppercase; background: white; } .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; } }
       </style>
     </head>
     <body class="no-scrollbar">
@@ -338,16 +460,16 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
               <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</h4><p class="text-sm font-black text-slate-900 uppercase">${customer.name}</p><p class="text-[11px] text-slate-500 uppercase">${(customer.document || '').replace(/\D/g, '').length <= 11 ? 'CPF' : 'CNPJ'}: ${formatDocument(customer.document || '') || 'N/A'}</p><p class="text-[11px] text-slate-500 uppercase">${customer.address || ''}, ${customer.number || ''} - ${customer.city || ''}</p></div>
             </div>
 
-            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[12px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA PRIMEIRA – OBJETO DO CONTRATO</h4><p class="text-[12px] text-slate-600 leading-relaxed text-justify">O presente contrato tem por objeto a prestação dos serviços técnicos descritos abaixo, a serem realizados pela CONTRATADA à CONTRATANTE:</p><div class="bg-blue-50/50 p-4 rounded-xl border-l-4 border-blue-500 mt-4"><p class="text-[12px] font-bold text-blue-900 uppercase tracking-wide">${order.description}</p></div></div>
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA PRIMEIRA – OBJETO DO CONTRATO</h4><p class="text-[14px] text-slate-600 leading-relaxed text-justify">O presente contrato tem por objeto a prestação dos serviços técnicos descritos abaixo, a serem realizados pela CONTRATADA à CONTRATANTE:</p><div class="bg-blue-50/50 p-4 rounded-xl border-l-4 border-blue-500 mt-4"><p class="text-[14px] font-bold text-blue-900 uppercase tracking-wide">${order.description}</p></div></div>
             
-            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[12px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA SEGUNDA – VALORES E PAGAMENTO</h4><p class="text-[12px] text-slate-600 leading-relaxed text-justify">Pelos serviços contratados, a CONTRATANTE pagará o valor total de <b class="text-slate-900">R$ ${order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>. Condições: ${order.paymentTerms || 'Conforme combinado'}.</p></div>
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA SEGUNDA – VALORES E PAGAMENTO</h4><p class="text-[14px] text-slate-600 leading-relaxed text-justify">Pelos serviços contratados, a CONTRATANTE pagará o valor total de <b class="text-slate-900">R$ ${order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>. Condições: ${order.paymentTerms || 'Conforme combinado'}.</p></div>
 
-            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[12px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA TERCEIRA – PRAZO</h4><p class="text-[12px] text-slate-600 leading-relaxed text-justify">O prazo para execução dos serviços será de <b>${order.deliveryTime || 'conforme demanda'}</b>, contado a partir da assinatura deste contrato ou da emissão de ordem de serviço. <br>O prazo poderá ser prorrogado mediante acordo entre as partes, sem que isso caracterize descumprimento contratual.</p></div>
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA TERCEIRA – PRAZO</h4><p class="text-[14px] text-slate-600 leading-relaxed text-justify">O prazo para execução dos serviços será de <b>${order.deliveryTime || 'conforme demanda'}</b>, contado a partir da assinatura deste contrato ou da emissão de ordem de serviço. <br>O prazo poderá ser prorrogado mediante acordo entre as partes, sem que isso caracterize descumprimento contratual.</p></div>
 
             <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                <h4 class="text-[12px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA QUARTA – OBRIGAÇÕES DA CONTRATADA</h4>
-                <p class="text-[12px] text-slate-600 leading-relaxed text-justify">São obrigações da CONTRATADA:</p>
-                <ul class="list-disc pl-5 mt-3 text-[12px] text-slate-600 leading-relaxed space-y-2">
+                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA QUARTA – OBRIGAÇÕES DA CONTRATADA</h4>
+                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">São obrigações da CONTRATADA:</p>
+                <ul class="list-disc pl-5 mt-3 text-[14px] text-slate-600 leading-relaxed space-y-2">
                     <li>Executar os serviços com zelo, qualidade e profissionalismo;</li>
                     <li>Cumprir as condições acordadas neste contrato;</li>
                     <li>Responder por eventuais danos comprovadamente causados por falha na execução dos serviços;</li>
@@ -356,9 +478,9 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             </div>
 
             <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                <h4 class="text-[12px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA QUINTA – OBRIGAÇÕES DA CONTRATANTE</h4>
-                <p class="text-[12px] text-slate-600 leading-relaxed text-justify">São obrigações da CONTRATANTE:</p>
-                <ul class="list-disc pl-5 mt-3 text-[12px] text-slate-600 leading-relaxed space-y-2">
+                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA QUINTA – OBRIGAÇÕES DA CONTRATANTE</h4>
+                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">São obrigações da CONTRATANTE:</p>
+                <ul class="list-disc pl-5 mt-3 text-[14px] text-slate-600 leading-relaxed space-y-2">
                     <li>Fornecer as informações necessárias à execução dos serviços;</li>
                     <li>Permitir o acesso da CONTRATADA ao local, quando aplicável;</li>
                     <li>Efetuar os pagamentos nos prazos ajustados;</li>
@@ -366,19 +488,19 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                 </ul>
             </div>
 
-            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[12px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA SEXTA – VÍNCULO TRABALHISTA</h4><p class="text-[12px] text-slate-600 leading-relaxed text-justify">O presente contrato não gera qualquer vínculo empregatício entre a CONTRATANTE e os empregados, prepostos ou subcontratados da CONTRATADA, sendo esta a única responsável por encargos trabalhistas, previdenciários, fiscais e sociais.</p></div>
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA SEXTA – VÍNCULO TRABALHISTA</h4><p class="text-[14px] text-slate-600 leading-relaxed text-justify">O presente contrato não gera qualquer vínculo empregatício entre a CONTRATANTE e os empregados, prepostos ou subcontratados da CONTRATADA, sendo esta a única responsável por encargos trabalhistas, previdenciários, fiscais e sociais.</p></div>
             
-            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[12px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA SÉTIMA – RESPONSABILIDADE</h4><p class="text-[12px] text-slate-600 leading-relaxed text-justify">A CONTRATADA será responsável apenas pelos danos diretamente causados por culpa ou dolo na execução dos serviços, não se responsabilizando por danos decorrentes de mau uso, intervenções de terceiros, informações incorretas fornecidas pela CONTRATANTE ou fatos alheios à sua atuação.</p></div>
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA SÉTIMA – RESPONSABILIDADE</h4><p class="text-[14px] text-slate-600 leading-relaxed text-justify">A CONTRATADA será responsável apenas pelos danos diretamente causados por culpa ou dolo na execução dos serviços, não se responsabilizando por danos decorrentes de mau uso, intervenções de terceiros, informações incorretas fornecidas pela CONTRATANTE ou fatos alheios à sua atuação.</p></div>
 
-            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[12px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA OITAVA – RESCISÃO</h4><p class="text-[12px] text-slate-600 leading-relaxed text-justify">O presente contrato poderá ser rescindido por qualquer das partes, a qualquer tempo, mediante comunicação escrita com antecedência mínima de <b>30 dias</b>, sem ônus, desde que não haja serviços em andamento ou valores pendentes.<br>Em caso de descumprimento contratual, a parte prejudicada poderá rescindir o contrato de forma imediata.</p></div>
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA OITAVA – RESCISÃO</h4><p class="text-[14px] text-slate-600 leading-relaxed text-justify">O presente contrato poderá ser rescindido por qualquer das partes, a qualquer tempo, mediante comunicação escrita com antecedência mínima de <b>30 dias</b>, sem ônus, desde que não haja serviços em andamento ou valores pendentes.<br>Em caso de descumprimento contratual, a parte prejudicada poderá rescindir o contrato de forma imediata.</p></div>
 
-            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[12px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA NONA – CONFIDENCIALIDADE</h4><p class="text-[12px] text-slate-600 leading-relaxed text-justify">As partes comprometem-se a manter sigilo sobre informações técnicas, comerciais ou estratégicas a que tiverem acesso em razão deste contrato.</p></div>
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA NONA – CONFIDENCIALIDADE</h4><p class="text-[14px] text-slate-600 leading-relaxed text-justify">As partes comprometem-se a manter sigilo sobre informações técnicas, comerciais ou estratégicas a que tiverem acesso em razão deste contrato.</p></div>
 
-            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[12px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA DÉCIMA – DISPOSIÇÕES GERAIS</h4><p class="text-[12px] text-slate-600 leading-relaxed text-justify">Este contrato constitui o acordo integral entre as partes, substituindo quaisquer entendimentos anteriores, verbais ou escritos.<br>Qualquer alteração deverá ser feita por escrito e assinada por ambas as partes.</p></div>
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA DÉCIMA – DISPOSIÇÕES GERAIS</h4><p class="text-[14px] text-slate-600 leading-relaxed text-justify">Este contrato constitui o acordo integral entre as partes, substituindo quaisquer entendimentos anteriores, verbais ou escritos.<br>Qualquer alteração deverá ser feita por escrito e assinada por ambas as partes.</p></div>
 
-            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[12px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA DÉCIMA PRIMEIRA – FORO</h4><p class="text-[12px] text-slate-600 leading-relaxed text-justify">Fica eleito o foro da Comarca de <b>${customer.city || 'São Paulo'} - ${customer.state || 'SP'}</b>, com renúncia a qualquer outro, por mais privilegiado que seja.</p></div>
+            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA DÉCIMA PRIMEIRA – FORO</h4><p class="text-[14px] text-slate-600 leading-relaxed text-justify">Fica eleito o foro da Comarca de <b>${customer.city || 'São Paulo'} - ${customer.state || 'SP'}</b>, com renúncia a qualquer outro, por mais privilegiado que seja.</p></div>
 
-            <div class="avoid-break mt-12 mb-8">
+            <div className="mb-8" style="padding-top: 50mm; page-break-inside: avoid; break-inside: avoid;">
               <div class="grid grid-cols-2 gap-16 px-10">
                 <div class="text-center border-t border-slate-300 pt-3"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</p><p class="text-sm font-black uppercase text-slate-900">${company.name}</p></div>
                 <div class="text-center border-t border-slate-300 pt-3 relative"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</p><p class="text-sm font-black uppercase text-slate-900">${customer.name}</p></div>
@@ -446,6 +568,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                 <td className="px-8 py-5 text-sm font-black uppercase text-slate-900">{order.customerName}</td>
                                 <td className="px-8 py-5 text-xs font-bold text-slate-400 uppercase">{order.description}</td>
                                 <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button onClick={() => handleDownloadPDF(order)} className="p-2 text-slate-400 hover:text-emerald-500 transition-colors" title="Baixar PDF"><FileDown className="w-4 h-4" /></button>
                                     <button onClick={() => handlePrintContract(order)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Contrato"><ScrollText className="w-4 h-4" /></button>
                                     <button onClick={() => handlePrintOS(order)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors"><Printer className="w-4 h-4" /></button>
                                     <button onClick={() => {
