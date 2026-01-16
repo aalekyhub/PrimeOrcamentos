@@ -302,17 +302,14 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
       <script src="https://cdn.tailwindcss.com"></script>
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
       <style>
-        body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
-        .a4-container { width: 210mm; margin: 0 auto; background: white; padding-left: 15mm; padding-right: 15mm; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
+        .a4-container { width: 100%; background: white; }
         .avoid-break { break-inside: avoid; page-break-inside: avoid; }
-        .print-footer { font-size: 10px; font-weight: bold; color: #94a3b8; text-transform: uppercase; background: white; text-align: center; padding-top: 10px; }
       </style>
     </head>
     <body class="no-scrollbar">
       <div id="contract-content">
-      <table style="width: 100%;">
-        <thead><tr><td style="height: ${company.printMarginTop || 15}mm;"><div style="height: ${company.printMarginTop || 15}mm; display: block;">&nbsp;</div></td></tr></thead>
-        <tbody><tr><td>
           <div class="a4-container">
             <div class="flex justify-between items-start mb-8">
                 <div class="flex gap-4">
@@ -384,21 +381,19 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
               </div>
             </div>
           </div>
-        </td></tr></tbody>
-        <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;"><div style="height: ${company.printMarginBottom || 15}mm; display: block;">&nbsp;</div></td></tr></tfoot>
-      </table>
       </div>
     </body>
     </html>`;
 
         const opt = {
-            margin: 0,
+            margin: 15,
             filename: `Contrato-${order.id}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2 },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
+        // @ts-ignore
         // @ts-ignore
         html2pdf().set(opt).from(html).toPdf().get('pdf').then(function (pdf: any) {
             var totalPages = pdf.internal.getNumberOfPages();
@@ -408,7 +403,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                 pdf.setTextColor(148, 163, 184); // #94a3b8
                 pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
             }
-        }).save();
+            pdf.save(opt.filename);
+        });
     };
 
     const handlePrintContract = (order: ServiceOrder) => {
