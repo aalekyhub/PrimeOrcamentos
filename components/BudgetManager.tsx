@@ -588,7 +588,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                             </div>
                           </div>
                           <div className="flex items-center gap-3 shrink-0">
-                            <span className="text-xs font-black text-slate-900">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                            <span className="text-xs font-black text-slate-900">{(item.unitPrice * item.quantity).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                             <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="text-rose-300 hover:text-rose-600"><Trash2 className="w-3.5 h-3.5" /></button>
                           </div>
                         </div>
