@@ -183,7 +183,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
       <!DOCTYPE html>
       <html>
       <head>
-        <title>OS Obra - ${order.id}</title>
+        <title>OS - ${order.id.replace('OS-', 'OS')} - ${order.description || 'Obra'}</title>
          <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
         <style>
@@ -436,7 +436,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     <!DOCTYPE html>
     <html>
     <head>
-      <title>Contrato - ${order.id}</title>
+      <title>Contrato - ${order.id.replace('OS-', 'OS')} - ${order.description || 'Proposta'}</title>
       <script src="https://cdn.tailwindcss.com"></script>
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
       <style>
