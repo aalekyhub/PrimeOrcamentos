@@ -46,6 +46,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
   const [taxRate, setTaxRate] = useState<string | number>(0);
   const [bdiRate, setBdiRate] = useState<string | number>(0);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedCatalogId, setSelectedCatalogId] = useState('');
 
   const budgets = useMemo(() => orders.filter(o =>
     (o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED) && (o.customerName.toLowerCase().includes(searchTerm.toLowerCase()) || o.id.includes(searchTerm))
@@ -73,6 +74,11 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     };
     setItems([...items, newItem]);
     setCurrentDesc(''); setCurrentPrice(0); setCurrentQty(1);
+    setSelectedCatalogId('');
+  };
+
+  const updateItem = (id: string, field: keyof ServiceItem, value: any) => {
+    setItems(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item));
   };
 
   // NEXT_Methods
@@ -541,7 +547,12 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                   <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
                     <div>
                       <label className="text-[8px] font-black text-blue-600 uppercase tracking-widest block mb-1.5">Puxar do Catálogo</label>
-                      <select className="w-full bg-white border-none rounded-xl p-2.5 text-[10px] font-bold text-slate-500 outline-none" onChange={e => { const s = catalogServices.find(x => x.id === e.target.value); if (s) { setCurrentDesc(s.name); setCurrentPrice(s.basePrice); setCurrentUnit(s.unit || 'un'); } }}>
+                      <select className="w-full bg-white border-none rounded-xl p-2.5 text-[10px] font-bold text-slate-500 outline-none" value={selectedCatalogId} onChange={e => {
+                        const id = e.target.value;
+                        setSelectedCatalogId(id);
+                        const s = catalogServices.find(x => x.id === id);
+                        if (s) { setCurrentDesc(s.name); setCurrentPrice(s.basePrice); setCurrentUnit(s.unit || 'un'); }
+                      }}>
                         <option value="">Selecione para preencher...</option>
                         {catalogServices.map(s => <option key={s.id} value={s.id}>{s.name} (R$ {s.basePrice.toLocaleString()})</option>)}
                       </select>
@@ -562,13 +573,22 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
                     <div className="space-y-1.5 max-h-40 overflow-y-auto no-scrollbar">
                       {items.map(item => (
-                        <div key={item.id} className="flex justify-between items-center p-2.5 bg-white rounded-lg border border-slate-100 group">
-                          <div>
-                            <p className="text-[10px] font-black text-slate-900 uppercase">{item.description}</p>
-                            <p className="text-[8px] text-slate-400 font-bold uppercase tracking-tight">{item.quantity} {item.unit} X R$ {item.unitPrice.toLocaleString('pt-BR')}</p>
+                        <div key={item.id} className="flex justify-between items-center p-2.5 bg-white rounded-lg border border-slate-100 group gap-2">
+                          <div className="grow">
+                            <p className="text-[10px] font-black text-slate-900 uppercase mb-1">{item.description}</p>
+                            <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-1 bg-slate-50 rounded px-2 py-1 border border-slate-100">
+                                <span className="text-[8px] font-bold text-slate-400">QTD:</span>
+                                <input type="number" className="w-12 bg-transparent text-[9px] font-black text-slate-700 outline-none" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', Number(e.target.value))} />
+                              </div>
+                              <div className="flex items-center gap-1 bg-slate-50 rounded px-2 py-1 border border-slate-100">
+                                <span className="text-[8px] font-bold text-slate-400">VALOR:</span>
+                                <input type="number" className="w-20 bg-transparent text-[9px] font-black text-slate-700 outline-none" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', Number(e.target.value))} />
+                              </div>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-3">
-                            <span className="text-xs font-black text-slate-900">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR')}</span>
+                          <div className="flex items-center gap-3 shrink-0">
+                            <span className="text-xs font-black text-slate-900">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                             <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="text-rose-300 hover:text-rose-600"><Trash2 className="w-3.5 h-3.5" /></button>
                           </div>
                         </div>
