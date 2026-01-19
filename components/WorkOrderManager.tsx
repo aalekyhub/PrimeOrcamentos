@@ -134,6 +134,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             deliveryTime,
             createdAt: existingOrder?.createdAt || new Date().toISOString().split('T')[0],
             dueDate: deliveryDate,
+            taxRate: existingOrder?.taxRate || 0,
+            bdiRate: existingOrder?.bdiRate || 0,
             osType: 'WORK' // Explicitly set as WORK
         };
 
