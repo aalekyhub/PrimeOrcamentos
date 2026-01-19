@@ -402,6 +402,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     </body>
     </html>`;
 
+        // PDF Generation Options
         const opt = {
             margin: 15,
             filename: `Contrato - ${order.id.replace('OS-', 'OS')} - ${order.description || 'Proposta'}.pdf`,
@@ -411,7 +412,6 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
         };
 
-        // @ts-ignore
         // @ts-ignore
         html2pdf().set(opt).from(html).toPdf().get('pdf').then(function (pdf: any) {
             var totalPages = pdf.internal.getNumberOfPages();
