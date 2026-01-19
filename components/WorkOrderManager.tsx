@@ -285,7 +285,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                    </div>
                 </div>
 
-               <div class="avoid-break mt-auto pt-48">
+                <div class="avoid-break mt-auto" style="padding-top: 100px;">
                    <div class="grid grid-cols-2 gap-16 px-10">
                        <div class="text-center">
                            <div style="border-top: 1px solid #cbd5e1; margin-bottom: 8px;"></div>
