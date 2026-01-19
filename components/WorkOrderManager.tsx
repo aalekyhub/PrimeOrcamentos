@@ -341,9 +341,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     </div>
                 </div>
                 <div class="text-right">
-                    <table style="display: inline-table; background: #2563eb; border-radius: 4px; border-collapse: separate; margin-bottom: 4px;">
-                        <tr><td style="padding: 4px 12px; font-size: 8px; font-weight: 900; color: white; text-transform: uppercase; vertical-align: middle; letter-spacing: 0.1em;">CONTRATO</td></tr>
-                    </table>
+                    <div class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-0.5">CONTRATO</div>
                     <h2 class="text-3xl font-black text-slate-900 tracking-tighter">${order.id}</h2>
                     <div class="mt-2 space-y-0.5"><p class="text-[8px] font-black text-slate-400 uppercase tracking-widest text-right">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p></div>
                 </div>
