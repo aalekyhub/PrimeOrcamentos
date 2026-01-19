@@ -402,35 +402,34 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     </body>
     </html>`;
 
-        const opt = {
-            margin: 15,
-            filename: `Contrato-${order.id}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-        };
-
-        // @ts-ignore
-        // @ts-ignore
-        html2pdf().set(opt).from(html).toPdf().get('pdf').then(function (pdf: any) {
-            var totalPages = pdf.internal.getNumberOfPages();
-            for (var i = 1; i <= totalPages; i++) {
-                pdf.setPage(i);
-                pdf.setFontSize(10);
-                pdf.setTextColor(148, 163, 184); // #94a3b8
-                pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
-            }
-            pdf.save(opt.filename);
-        });
+        margin: 15,
+            filename: `Contrato - ${order.id.replace('OS-', 'OS')} - ${order.description || 'Proposta'}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
     };
 
-    const handlePrintContract = (order: ServiceOrder) => {
-        const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', address: 'Endereço não informado', city: '', state: '', cep: '' };
-        const printWindow = window.open('', '_blank');
-        if (!printWindow) return;
+    // @ts-ignore
+    // @ts-ignore
+    html2pdf().set(opt).from(html).toPdf().get('pdf').then(function (pdf: any) {
+        var totalPages = pdf.internal.getNumberOfPages();
+        for (var i = 1; i <= totalPages; i++) {
+            pdf.setPage(i);
+            pdf.setFontSize(10);
+            pdf.setTextColor(148, 163, 184); // #94a3b8
+            pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
+        }
+        pdf.save(opt.filename);
+    });
+};
 
-        const html = `
+const handlePrintContract = (order: ServiceOrder) => {
+    const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', address: 'Endereço não informado', city: '', state: '', cep: '' };
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    const html = `
     <!DOCTYPE html>
     <html>
     <head>
@@ -531,265 +530,265 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
       </script>
     </body>
     </html>`;
-        printWindow.document.write(html);
-        printWindow.document.close();
-    };
+    printWindow.document.write(html);
+    printWindow.document.close();
+};
 
-    const initCanvas = () => {
-        if (!canvasRef.current) return;
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-        let drawing = false;
-        ctx.strokeStyle = '#0f172a';
-        ctx.lineWidth = 2;
-        const start = (e: any) => { drawing = true; const rect = canvas.getBoundingClientRect(); ctx.beginPath(); ctx.moveTo((e.clientX || e.touches[0].clientX) - rect.left, (e.clientY || e.touches[0].clientY) - rect.top); };
-        const draw = (e: any) => { if (!drawing) return; const rect = canvas.getBoundingClientRect(); ctx.lineTo((e.clientX || e.touches[0].clientX) - rect.left, (e.clientY || e.touches[0].clientY) - rect.top); ctx.stroke(); };
-        const stop = () => drawing = false;
-        canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', draw); canvas.addEventListener('mouseup', stop);
-        canvas.addEventListener('touchstart', start); canvas.addEventListener('touchmove', draw); canvas.addEventListener('touchend', stop);
-    };
+const initCanvas = () => {
+    if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    let drawing = false;
+    ctx.strokeStyle = '#0f172a';
+    ctx.lineWidth = 2;
+    const start = (e: any) => { drawing = true; const rect = canvas.getBoundingClientRect(); ctx.beginPath(); ctx.moveTo((e.clientX || e.touches[0].clientX) - rect.left, (e.clientY || e.touches[0].clientY) - rect.top); };
+    const draw = (e: any) => { if (!drawing) return; const rect = canvas.getBoundingClientRect(); ctx.lineTo((e.clientX || e.touches[0].clientX) - rect.left, (e.clientY || e.touches[0].clientY) - rect.top); ctx.stroke(); };
+    const stop = () => drawing = false;
+    canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', draw); canvas.addEventListener('mouseup', stop);
+    canvas.addEventListener('touchstart', start); canvas.addEventListener('touchmove', draw); canvas.addEventListener('touchend', stop);
+};
 
-    useEffect(() => { if (showForm) setTimeout(initCanvas, 500); }, [showForm]);
-    const clearSignature = () => { canvasRef.current?.getContext('2d')?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height); };
+useEffect(() => { if (showForm) setTimeout(initCanvas, 500); }, [showForm]);
+const clearSignature = () => { canvasRef.current?.getContext('2d')?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height); };
 
-    return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <div>
-                    <h2 className="text-2xl font-bold text-slate-900 tracking-tight">OS de Obra</h2>
-                    <p className="text-slate-500 text-sm">Gestão de reformas e construções.</p>
-                </div>
-                <button onClick={() => { setShowForm(true); setActiveTab('details'); setEditingOrderId(null); setSelectedCustomerId(''); setItems([]); setOsTitle('Reforma / Obra'); setDiagnosis(''); setDescriptionBlocks([]); setPaymentTerms(''); setDeliveryTime(''); }} className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold shadow-2xl shadow-blue-100 hover:bg-blue-700 transition-all flex items-center gap-2">
-                    <Plus className="w-5 h-5" /> Nova Obra
-                </button>
+return (
+    <div className="space-y-6">
+        <div className="flex justify-between items-center">
+            <div>
+                <h2 className="text-2xl font-bold text-slate-900 tracking-tight">OS de Obra</h2>
+                <p className="text-slate-500 text-sm">Gestão de reformas e construções.</p>
             </div>
-            <div className="bg-white p-4 rounded-[1.5rem] border shadow-sm">
-                <div className="relative">
-                    <Search className="absolute left-4 top-3 w-4 h-4 text-slate-400" />
-                    <input type="text" placeholder="Buscar por cliente ou obra..." className="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 transition-all" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
-                </div>
+            <button onClick={() => { setShowForm(true); setActiveTab('details'); setEditingOrderId(null); setSelectedCustomerId(''); setItems([]); setOsTitle('Reforma / Obra'); setDiagnosis(''); setDescriptionBlocks([]); setPaymentTerms(''); setDeliveryTime(''); }} className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold shadow-2xl shadow-blue-100 hover:bg-blue-700 transition-all flex items-center gap-2">
+                <Plus className="w-5 h-5" /> Nova Obra
+            </button>
+        </div>
+        <div className="bg-white p-4 rounded-[1.5rem] border shadow-sm">
+            <div className="relative">
+                <Search className="absolute left-4 top-3 w-4 h-4 text-slate-400" />
+                <input type="text" placeholder="Buscar por cliente ou obra..." className="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 transition-all" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
             </div>
+        </div>
 
-            <div className="bg-white rounded-[2rem] border overflow-hidden shadow-sm">
-                <table className="w-full text-left">
-                    <thead className="bg-slate-50 text-[10px] font-black uppercase text-slate-400 border-b">
-                        <tr><th className="px-8 py-5">OS #</th><th className="px-8 py-5">CLIENTE</th><th className="px-8 py-5">OBRA / DESCRIÇÃO</th><th className="px-8 py-5 text-right">AÇÕES</th></tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                        {activeOrders.map(order => (
-                            <tr key={order.id} className="hover:bg-slate-50 group transition-all">
-                                <td className="px-8 py-5 text-xs font-mono font-black text-blue-600">{order.id}</td>
-                                <td className="px-8 py-5 text-sm font-black uppercase text-slate-900">{order.customerName}</td>
-                                <td className="px-8 py-5 text-xs font-bold text-slate-400 uppercase">{order.description}</td>
-                                <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onClick={() => handleDownloadPDF(order)} className="p-2 text-slate-400 hover:text-emerald-500 transition-colors" title="Baixar PDF"><FileDown className="w-4 h-4" /></button>
-                                    <button onClick={() => handlePrintContract(order)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Contrato"><ScrollText className="w-4 h-4" /></button>
-                                    <button onClick={() => handlePrintOS(order)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors"><Printer className="w-4 h-4" /></button>
-                                    <button onClick={() => {
-                                        setEditingOrderId(order.id);
-                                        setSelectedCustomerId(order.customerId);
-                                        setItems(order.items);
-                                        setOsTitle(order.description);
-                                        setDiagnosis(order.serviceDescription || '');
-                                        setDeliveryDate(order.dueDate);
-                                        setDescriptionBlocks(order.descriptionBlocks || []);
-                                        setPaymentTerms(order.paymentTerms || '');
-                                        setDeliveryTime(order.deliveryTime || '');
-                                        setActiveTab('financial');
-                                        setShowForm(true);
-                                    }} className="p-2 text-slate-400 hover:text-emerald-600 transition-colors" title="Gestão Financeira"><Wallet className="w-4 h-4" /></button>
-                                    <button onClick={() => {
-                                        setEditingOrderId(order.id);
-                                        setSelectedCustomerId(order.customerId);
-                                        setItems(order.items);
-                                        setOsTitle(order.description);
-                                        setDiagnosis(order.serviceDescription || '');
-                                        setDeliveryDate(order.dueDate);
-                                        setDescriptionBlocks(order.descriptionBlocks || []);
-                                        setPaymentTerms(order.paymentTerms || '');
-                                        setDeliveryTime(order.deliveryTime || '');
-                                        setShowForm(true);
-                                    }} className="p-2 text-slate-400 hover:text-blue-600 transition-colors"><Pencil className="w-4 h-4" /></button>
-                                    <button onClick={async () => {
-                                        if (confirm("Excluir esta OS de Obra?")) {
-                                            const idToDelete = order.id;
-                                            setOrders(p => p.filter(x => x.id !== idToDelete));
-                                            await db.remove('orders', idToDelete);
-                                            notify("OS removida.");
-                                        }
-                                    }} className="p-2 text-rose-300 hover:text-rose-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-            {showForm && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
-                    <div className="bg-slate-50 w-full max-w-[1240px] h-[95vh] rounded-[2.5rem] shadow-[0_0_80px_rgba(0,0,0,0.2)] overflow-hidden flex flex-col animate-in zoom-in-95">
-                        <div className="bg-white px-8 py-5 border-b flex justify-between items-center shrink-0">
-                            <div className="flex items-center gap-4">
-                                <div className="bg-slate-900 p-2.5 rounded-xl text-white shadow-xl shadow-slate-200"><HardHat className="w-5 h-5" /></div>
-                                <div>
-                                    <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter mb-0.5">{editingOrderId ? `Editando Obra ${editingOrderId}` : 'Nova OS de Obra'}</h3>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-[10px] font-black uppercase tracking-widest bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md">Construção Civil</span>
-                                    </div>
+        <div className="bg-white rounded-[2rem] border overflow-hidden shadow-sm">
+            <table className="w-full text-left">
+                <thead className="bg-slate-50 text-[10px] font-black uppercase text-slate-400 border-b">
+                    <tr><th className="px-8 py-5">OS #</th><th className="px-8 py-5">CLIENTE</th><th className="px-8 py-5">OBRA / DESCRIÇÃO</th><th className="px-8 py-5 text-right">AÇÕES</th></tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                    {activeOrders.map(order => (
+                        <tr key={order.id} className="hover:bg-slate-50 group transition-all">
+                            <td className="px-8 py-5 text-xs font-mono font-black text-blue-600">{order.id}</td>
+                            <td className="px-8 py-5 text-sm font-black uppercase text-slate-900">{order.customerName}</td>
+                            <td className="px-8 py-5 text-xs font-bold text-slate-400 uppercase">{order.description}</td>
+                            <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button onClick={() => handleDownloadPDF(order)} className="p-2 text-slate-400 hover:text-emerald-500 transition-colors" title="Baixar PDF"><FileDown className="w-4 h-4" /></button>
+                                <button onClick={() => handlePrintContract(order)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Contrato"><ScrollText className="w-4 h-4" /></button>
+                                <button onClick={() => handlePrintOS(order)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors"><Printer className="w-4 h-4" /></button>
+                                <button onClick={() => {
+                                    setEditingOrderId(order.id);
+                                    setSelectedCustomerId(order.customerId);
+                                    setItems(order.items);
+                                    setOsTitle(order.description);
+                                    setDiagnosis(order.serviceDescription || '');
+                                    setDeliveryDate(order.dueDate);
+                                    setDescriptionBlocks(order.descriptionBlocks || []);
+                                    setPaymentTerms(order.paymentTerms || '');
+                                    setDeliveryTime(order.deliveryTime || '');
+                                    setActiveTab('financial');
+                                    setShowForm(true);
+                                }} className="p-2 text-slate-400 hover:text-emerald-600 transition-colors" title="Gestão Financeira"><Wallet className="w-4 h-4" /></button>
+                                <button onClick={() => {
+                                    setEditingOrderId(order.id);
+                                    setSelectedCustomerId(order.customerId);
+                                    setItems(order.items);
+                                    setOsTitle(order.description);
+                                    setDiagnosis(order.serviceDescription || '');
+                                    setDeliveryDate(order.dueDate);
+                                    setDescriptionBlocks(order.descriptionBlocks || []);
+                                    setPaymentTerms(order.paymentTerms || '');
+                                    setDeliveryTime(order.deliveryTime || '');
+                                    setShowForm(true);
+                                }} className="p-2 text-slate-400 hover:text-blue-600 transition-colors"><Pencil className="w-4 h-4" /></button>
+                                <button onClick={async () => {
+                                    if (confirm("Excluir esta OS de Obra?")) {
+                                        const idToDelete = order.id;
+                                        setOrders(p => p.filter(x => x.id !== idToDelete));
+                                        await db.remove('orders', idToDelete);
+                                        notify("OS removida.");
+                                    }
+                                }} className="p-2 text-rose-300 hover:text-rose-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+        {showForm && (
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+                <div className="bg-slate-50 w-full max-w-[1240px] h-[95vh] rounded-[2.5rem] shadow-[0_0_80px_rgba(0,0,0,0.2)] overflow-hidden flex flex-col animate-in zoom-in-95">
+                    <div className="bg-white px-8 py-5 border-b flex justify-between items-center shrink-0">
+                        <div className="flex items-center gap-4">
+                            <div className="bg-slate-900 p-2.5 rounded-xl text-white shadow-xl shadow-slate-200"><HardHat className="w-5 h-5" /></div>
+                            <div>
+                                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter mb-0.5">{editingOrderId ? `Editando Obra ${editingOrderId}` : 'Nova OS de Obra'}</h3>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[10px] font-black uppercase tracking-widest bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md">Construção Civil</span>
                                 </div>
                             </div>
-                            <button onClick={() => setShowForm(false)} className="bg-slate-100 hover:bg-slate-200 p-2 rounded-full transition-colors"><X className="w-6 h-6 text-slate-400" /></button>
                         </div>
+                        <button onClick={() => setShowForm(false)} className="bg-slate-100 hover:bg-slate-200 p-2 rounded-full transition-colors"><X className="w-6 h-6 text-slate-400" /></button>
+                    </div>
 
-                        {/* Tabs */}
-                        {editingOrderId && (
-                            <div className="bg-white px-8 border-b flex gap-6">
-                                <button onClick={() => setActiveTab('details')} className={`py-3 text-xs font-black uppercase tracking-widest border-b-2 transition-colors ${activeTab === 'details' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>Detalhes da Obra</button>
-                                <button onClick={() => setActiveTab('financial')} className={`py-3 text-xs font-black uppercase tracking-widest border-b-2 transition-colors ${activeTab === 'financial' ? 'border-purple-600 text-purple-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>Gestão Financeira</button>
-                            </div>
-                        )}
+                    {/* Tabs */}
+                    {editingOrderId && (
+                        <div className="bg-white px-8 border-b flex gap-6">
+                            <button onClick={() => setActiveTab('details')} className={`py-3 text-xs font-black uppercase tracking-widest border-b-2 transition-colors ${activeTab === 'details' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>Detalhes da Obra</button>
+                            <button onClick={() => setActiveTab('financial')} className={`py-3 text-xs font-black uppercase tracking-widest border-b-2 transition-colors ${activeTab === 'financial' ? 'border-purple-600 text-purple-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>Gestão Financeira</button>
+                        </div>
+                    )}
 
-                        <div className="flex-1 flex overflow-hidden">
-                            <div className="flex-1 overflow-y-auto p-8 space-y-6 bg-[#f8fafc] no-scrollbar">
-                                {activeTab === 'details' ? (
-                                    <>
-                                        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div>
-                                                    <div className="flex justify-between items-center mb-2"><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest ml-1">Cliente</label><button onClick={() => setShowFullClientForm(true)} className="text-blue-600 text-[9px] font-black uppercase flex items-center gap-1 hover:underline"><UserPlus className="w-3 h-3" /> Novo</button></div>
-                                                    <select className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all custom-select" value={selectedCustomerId} onChange={e => setSelectedCustomerId(e.target.value)}><option value="">Selecione...</option>{customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
-                                                </div>
-                                                <div><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-2 block ml-1">Título da Obra</label><input type="text" placeholder="Ex: Reforma da Cozinha" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400" value={osTitle} onChange={e => setOsTitle(e.target.value)} /></div>
+                    <div className="flex-1 flex overflow-hidden">
+                        <div className="flex-1 overflow-y-auto p-8 space-y-6 bg-[#f8fafc] no-scrollbar">
+                            {activeTab === 'details' ? (
+                                <>
+                                    <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <div className="flex justify-between items-center mb-2"><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest ml-1">Cliente</label><button onClick={() => setShowFullClientForm(true)} className="text-blue-600 text-[9px] font-black uppercase flex items-center gap-1 hover:underline"><UserPlus className="w-3 h-3" /> Novo</button></div>
+                                                <select className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all custom-select" value={selectedCustomerId} onChange={e => setSelectedCustomerId(e.target.value)}><option value="">Selecione...</option>{customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
+                                            </div>
+                                            <div><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-2 block ml-1">Título da Obra</label><input type="text" placeholder="Ex: Reforma da Cozinha" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400" value={osTitle} onChange={e => setOsTitle(e.target.value)} /></div>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                                        <div><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Detalhamento do Escopo / Observações</label><textarea className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-700 outline-none h-24 focus:ring-2 focus:ring-blue-500" placeholder="Descreva os serviços a serem executados..." value={diagnosis} onChange={e => setDiagnosis(e.target.value)} /></div>
+                                    </div>
+
+                                    <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                                        <div className="flex justify-between items-center mb-4"><h4 className="text-[9px] font-black text-slate-400 uppercase tracking-widest border-b pb-2 grow mr-4">Itens da Obra</h4></div>
+                                        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+                                            <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
+                                                <div className="md:col-span-6"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Descrição</label><input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentDesc} onChange={e => setCurrentDesc(e.target.value)} /></div>
+                                                <div className="md:col-span-2"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Valor</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} /></div>
+                                                <div className="md:col-span-2"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Qtd</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} /></div>
+                                                <div className="md:col-span-2"><button onClick={handleAddItem} className="bg-blue-600 text-white w-full h-[42px] rounded-xl flex items-center justify-center hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200"><Plus className="w-5 h-5" /></button></div>
+                                            </div>
+                                            <div className="space-y-1">
+                                                {items.map(item => (
+                                                    <div key={item.id} className="flex justify-between items-center p-3 bg-white rounded-xl border border-slate-100 shadow-sm">
+                                                        <div><p className="text-[10px] font-black text-slate-900 uppercase">{item.description}</p><p className="text-[9px] text-slate-400 font-bold uppercase tracking-tight">{item.quantity} un x R$ {item.unitPrice.toLocaleString('pt-BR')}</p></div>
+                                                        <div className="flex items-center gap-3"><span className="text-xs font-black text-slate-900">R$ {(item.unitPrice * item.quantity).toLocaleString('pt-BR')}</span><button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="text-slate-300 hover:text-rose-500 transition-colors"><Trash2 className="w-4 h-4" /></button></div>
+                                                    </div>
+                                                ))}
                                             </div>
                                         </div>
-
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="space-y-6">
+                                    <div className="grid grid-cols-3 gap-4">
                                         <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                                            <div><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Detalhamento do Escopo / Observações</label><textarea className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-700 outline-none h-24 focus:ring-2 focus:ring-blue-500" placeholder="Descreva os serviços a serem executados..." value={diagnosis} onChange={e => setDiagnosis(e.target.value)} /></div>
+                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Valor da Obra (Receita)</p>
+                                            <p className="text-2xl font-black text-blue-600">R$ {items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                                         </div>
-
                                         <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                                            <div className="flex justify-between items-center mb-4"><h4 className="text-[9px] font-black text-slate-400 uppercase tracking-widest border-b pb-2 grow mr-4">Itens da Obra</h4></div>
-                                            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
-                                                <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
-                                                    <div className="md:col-span-6"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Descrição</label><input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentDesc} onChange={e => setCurrentDesc(e.target.value)} /></div>
-                                                    <div className="md:col-span-2"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Valor</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} /></div>
-                                                    <div className="md:col-span-2"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Qtd</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} /></div>
-                                                    <div className="md:col-span-2"><button onClick={handleAddItem} className="bg-blue-600 text-white w-full h-[42px] rounded-xl flex items-center justify-center hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200"><Plus className="w-5 h-5" /></button></div>
-                                                </div>
-                                                <div className="space-y-1">
-                                                    {items.map(item => (
-                                                        <div key={item.id} className="flex justify-between items-center p-3 bg-white rounded-xl border border-slate-100 shadow-sm">
-                                                            <div><p className="text-[10px] font-black text-slate-900 uppercase">{item.description}</p><p className="text-[9px] text-slate-400 font-bold uppercase tracking-tight">{item.quantity} un x R$ {item.unitPrice.toLocaleString('pt-BR')}</p></div>
-                                                            <div className="flex items-center gap-3"><span className="text-xs font-black text-slate-900">R$ {(item.unitPrice * item.quantity).toLocaleString('pt-BR')}</span><button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="text-slate-300 hover:text-rose-500 transition-colors"><Trash2 className="w-4 h-4" /></button></div>
+                                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Total de Gastos (Despesas)</p>
+                                            <p className="text-2xl font-black text-rose-600">R$ {totalExpenses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                        </div>
+                                        <div className={`p-6 rounded-[2rem] border shadow-sm ${profit >= 0 ? 'bg-emerald-50 border-emerald-100' : 'bg-rose-50 border-rose-100'}`}>
+                                            <p className={`text-[9px] font-black uppercase tracking-widest mb-2 ${profit >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>Lucro Estimado</p>
+                                            <p className={`text-2xl font-black ${profit >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>R$ {profit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Lançar Novo Custo / Despesa</h4>
+                                        <div className="grid grid-cols-12 gap-3 items-end bg-slate-50 p-4 rounded-xl">
+                                            <div className="col-span-4">
+                                                <label className="text-[9px] font-bold text-slate-400 uppercase mb-1 block">Descrição do Gasto</label>
+                                                <input type="text" className="w-full p-2.5 rounded-lg border border-slate-200 text-xs font-bold" placeholder="Ex: Compra de Cimento" value={expenseDesc} onChange={e => setExpenseDesc(e.target.value)} />
+                                            </div>
+                                            <div className="col-span-3">
+                                                <label className="text-[9px] font-bold text-slate-400 uppercase mb-1 block">Categoria</label>
+                                                <input type="text" className="w-full p-2.5 rounded-lg border border-slate-200 text-xs font-bold" placeholder="Ex: Material" value={expenseCategory} onChange={e => setExpenseCategory(e.target.value)} />
+                                            </div>
+                                            <div className="col-span-3">
+                                                <label className="text-[9px] font-bold text-slate-400 uppercase mb-1 block">Valor (R$)</label>
+                                                <input type="number" className="w-full p-2.5 rounded-lg border border-slate-200 text-xs font-bold" value={expenseAmount} onChange={e => setExpenseAmount(e.target.value)} />
+                                            </div>
+                                            <div className="col-span-2">
+                                                <button onClick={handleAddExpense} className="w-full bg-slate-900 text-white p-2.5 rounded-lg text-xs font-bold hover:bg-slate-800 transition-colors">Lançar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+                                        <div className="p-4 bg-slate-50 border-b flex justify-between items-center">
+                                            <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Histórico de Despesas</h4>
+                                        </div>
+                                        <div className="divide-y divide-slate-100">
+                                            {workExpenses.length === 0 ? (
+                                                <p className="p-8 text-center text-xs text-slate-400 font-medium italic">Nenhuma despesa lançada para esta obra.</p>
+                                            ) : (
+                                                workExpenses.map(t => (
+                                                    <div key={t.id} className="p-4 flex justify-between items-center hover:bg-slate-50">
+                                                        <div>
+                                                            <p className="text-xs font-black text-slate-900 uppercase">{t.description}</p>
+                                                            <p className="text-[9px] font-bold text-slate-400 uppercase">{t.date} • {t.category}</p>
                                                         </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </>
-                                ) : (
-                                    <div className="space-y-6">
-                                        <div className="grid grid-cols-3 gap-4">
-                                            <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Valor da Obra (Receita)</p>
-                                                <p className="text-2xl font-black text-blue-600">R$ {items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                                            </div>
-                                            <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Total de Gastos (Despesas)</p>
-                                                <p className="text-2xl font-black text-rose-600">R$ {totalExpenses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                                            </div>
-                                            <div className={`p-6 rounded-[2rem] border shadow-sm ${profit >= 0 ? 'bg-emerald-50 border-emerald-100' : 'bg-rose-50 border-rose-100'}`}>
-                                                <p className={`text-[9px] font-black uppercase tracking-widest mb-2 ${profit >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>Lucro Estimado</p>
-                                                <p className={`text-2xl font-black ${profit >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>R$ {profit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Lançar Novo Custo / Despesa</h4>
-                                            <div className="grid grid-cols-12 gap-3 items-end bg-slate-50 p-4 rounded-xl">
-                                                <div className="col-span-4">
-                                                    <label className="text-[9px] font-bold text-slate-400 uppercase mb-1 block">Descrição do Gasto</label>
-                                                    <input type="text" className="w-full p-2.5 rounded-lg border border-slate-200 text-xs font-bold" placeholder="Ex: Compra de Cimento" value={expenseDesc} onChange={e => setExpenseDesc(e.target.value)} />
-                                                </div>
-                                                <div className="col-span-3">
-                                                    <label className="text-[9px] font-bold text-slate-400 uppercase mb-1 block">Categoria</label>
-                                                    <input type="text" className="w-full p-2.5 rounded-lg border border-slate-200 text-xs font-bold" placeholder="Ex: Material" value={expenseCategory} onChange={e => setExpenseCategory(e.target.value)} />
-                                                </div>
-                                                <div className="col-span-3">
-                                                    <label className="text-[9px] font-bold text-slate-400 uppercase mb-1 block">Valor (R$)</label>
-                                                    <input type="number" className="w-full p-2.5 rounded-lg border border-slate-200 text-xs font-bold" value={expenseAmount} onChange={e => setExpenseAmount(e.target.value)} />
-                                                </div>
-                                                <div className="col-span-2">
-                                                    <button onClick={handleAddExpense} className="w-full bg-slate-900 text-white p-2.5 rounded-lg text-xs font-bold hover:bg-slate-800 transition-colors">Lançar</button>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-                                            <div className="p-4 bg-slate-50 border-b flex justify-between items-center">
-                                                <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Histórico de Despesas</h4>
-                                            </div>
-                                            <div className="divide-y divide-slate-100">
-                                                {workExpenses.length === 0 ? (
-                                                    <p className="p-8 text-center text-xs text-slate-400 font-medium italic">Nenhuma despesa lançada para esta obra.</p>
-                                                ) : (
-                                                    workExpenses.map(t => (
-                                                        <div key={t.id} className="p-4 flex justify-between items-center hover:bg-slate-50">
-                                                            <div>
-                                                                <p className="text-xs font-black text-slate-900 uppercase">{t.description}</p>
-                                                                <p className="text-[9px] font-bold text-slate-400 uppercase">{t.date} • {t.category}</p>
-                                                            </div>
-                                                            <div className="flex items-center gap-4">
-                                                                <span className="text-sm font-black text-rose-600">- R$ {t.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                                                                <button onClick={() => handleDeleteExpense(t.id)} className="text-slate-300 hover:text-rose-500"><Trash2 className="w-4 h-4" /></button>
-                                                            </div>
+                                                        <div className="flex items-center gap-4">
+                                                            <span className="text-sm font-black text-rose-600">- R$ {t.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                                            <button onClick={() => handleDeleteExpense(t.id)} className="text-slate-300 hover:text-rose-500"><Trash2 className="w-4 h-4" /></button>
                                                         </div>
-                                                    ))
-                                                )}
-                                            </div>
+                                                    </div>
+                                                ))
+                                            )}
                                         </div>
                                     </div>
-                                )}
-                                {showFullClientForm && (
-                                    <div className="fixed inset-0 z-[60] bg-black/20 backdrop-blur-sm flex items-center justify-center p-4">
-                                        <div className="bg-white w-full max-w-2xl max-h-[90vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col">
-                                            <div className="p-4 border-b flex justify-between items-center"><h3 className="font-bold">Novo Cliente</h3><button onClick={() => setShowFullClientForm(false)}><X className="w-5 h-5" /></button></div>
-                                            <div className="flex-1 overflow-y-auto p-0">
-                                                <CustomerManager customers={customers} setCustomers={setCustomers} orders={orders} defaultOpenForm={true} onSuccess={(c) => { setSelectedCustomerId(c.id); setShowFullClientForm(false); }} onCancel={() => setShowFullClientForm(false)} />
-                                            </div>
+                                </div>
+                            )}
+                            {showFullClientForm && (
+                                <div className="fixed inset-0 z-[60] bg-black/20 backdrop-blur-sm flex items-center justify-center p-4">
+                                    <div className="bg-white w-full max-w-2xl max-h-[90vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col">
+                                        <div className="p-4 border-b flex justify-between items-center"><h3 className="font-bold">Novo Cliente</h3><button onClick={() => setShowFullClientForm(false)}><X className="w-5 h-5" /></button></div>
+                                        <div className="flex-1 overflow-y-auto p-0">
+                                            <CustomerManager customers={customers} setCustomers={setCustomers} orders={orders} defaultOpenForm={true} onSuccess={(c) => { setSelectedCustomerId(c.id); setShowFullClientForm(false); }} onCancel={() => setShowFullClientForm(false)} />
                                         </div>
                                     </div>
-                                )}
+                                </div>
+                            )}
+                        </div>
+                        <div className="w-[380px] bg-slate-50 border-l border-slate-200 p-8 flex flex-col shrink-0 relative overflow-hidden">
+                            <div className="mb-8 p-6 bg-white rounded-3xl border border-slate-100 shadow-sm text-center relative overflow-hidden group">
+                                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Total da Obra</p>
+                                <div className="text-4xl font-black text-slate-900 tracking-tighter mb-1">R$ {totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
                             </div>
-                            <div className="w-[380px] bg-slate-50 border-l border-slate-200 p-8 flex flex-col shrink-0 relative overflow-hidden">
-                                <div className="mb-8 p-6 bg-white rounded-3xl border border-slate-100 shadow-sm text-center relative overflow-hidden group">
-                                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Total da Obra</p>
-                                    <div className="text-4xl font-black text-slate-900 tracking-tighter mb-1">R$ {totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                                </div>
 
-                                <div className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm relative grow flex flex-col mb-4">
-                                    <div className="p-3 bg-slate-50 border-b flex justify-between items-center">
-                                        <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Assinatura do Cliente</h4>
-                                        <button onClick={clearSignature} className="bg-rose-50 hover:bg-rose-100 text-rose-500 hover:text-rose-600 p-1.5 rounded-lg transition-colors" title="Limpar"><Eraser className="w-3 h-3" /></button>
-                                    </div>
-                                    <div className="grow bg-white relative cursor-crosshair">
-                                        <canvas ref={canvasRef} width={320} height={180} className="w-full h-full touch-none" />
-                                    </div>
+                            <div className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm relative grow flex flex-col mb-4">
+                                <div className="p-3 bg-slate-50 border-b flex justify-between items-center">
+                                    <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Assinatura do Cliente</h4>
+                                    <button onClick={clearSignature} className="bg-rose-50 hover:bg-rose-100 text-rose-500 hover:text-rose-600 p-1.5 rounded-lg transition-colors" title="Limpar"><Eraser className="w-3 h-3" /></button>
                                 </div>
+                                <div className="grow bg-white relative cursor-crosshair">
+                                    <canvas ref={canvasRef} width={320} height={180} className="w-full h-full touch-none" />
+                                </div>
+                            </div>
 
-                                <div className="space-y-3 mt-auto">
-                                    <button onClick={handleSaveOS} disabled={isSaving} className={`w-full ${isSaving ? 'bg-slate-800 cursor-not-allowed' : 'bg-slate-900 hover:bg-slate-800'} text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-slate-200 hover:shadow-2xl transition-all flex items-center justify-center gap-3`}>
-                                        <Save className={`w-4 h-4 ${isSaving ? 'animate-pulse' : ''}`} /> {isSaving ? 'Salvando...' : 'Salvar OS de Obra'}
-                                    </button>
-                                </div>
+                            <div className="space-y-3 mt-auto">
+                                <button onClick={handleSaveOS} disabled={isSaving} className={`w-full ${isSaving ? 'bg-slate-800 cursor-not-allowed' : 'bg-slate-900 hover:bg-slate-800'} text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-slate-200 hover:shadow-2xl transition-all flex items-center justify-center gap-3`}>
+                                    <Save className={`w-4 h-4 ${isSaving ? 'animate-pulse' : ''}`} /> {isSaving ? 'Salvando...' : 'Salvar OS de Obra'}
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
-            )}
-        </div>
-    );
+            </div>
+        )}
+    </div>
+);
 };
 
 export default WorkOrderManager;
