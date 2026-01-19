@@ -436,7 +436,8 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                     <button onClick={async () => {
                       if (confirm("Deseja APROVAR este orçamento? Ele será convertido em Ordem de Serviço.")) {
                         const approvedBudget = { ...budget, status: OrderStatus.APPROVED };
-                        const newServiceOrderId = db.generateId('OS');
+                        // Maintain the same ID number, just changing the prefix
+                        const newServiceOrderId = budget.id.replace('ORC', 'OS');
                         const newServiceOrder: ServiceOrder = {
                           ...budget,
                           id: newServiceOrderId,
