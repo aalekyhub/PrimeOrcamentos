@@ -163,9 +163,14 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         };
 
         const subTotal = order.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0);
-        const bdiValue = order.bdiRate ? subTotal * (order.bdiRate / 100) : 0;
+
+        // Logic: BDI first, then Tax on (Subtotal + BDI)
+        const bdiR = order.bdiRate || 0;
+        const taxR = order.taxRate || 0;
+
+        const bdiValue = subTotal * (bdiR / 100);
         const subTotalWithBDI = subTotal + bdiValue;
-        const taxValue = order.taxRate ? subTotalWithBDI * (order.taxRate / 100) : 0;
+        const taxValue = subTotalWithBDI * (taxR / 100);
         const finalTotal = subTotalWithBDI + taxValue;
 
         const itemsHtml = order.items.map((item: ServiceItem) => `
@@ -263,14 +268,14 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                            <span class="text-[8px] font-bold text-slate-600 uppercase block">Subtotal</span>
                            <span class="text-[10px] font-black text-slate-700 block">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                         </div>
-                        ${order.bdiRate ? `
+                        ${bdiR > 0 ? `
                         <div class="text-right">
-                           <span class="text-[8px] font-bold text-slate-600 uppercase block">BDI (${order.bdiRate}%)</span>
+                           <span class="text-[8px] font-bold text-slate-600 uppercase block">BDI (${bdiR}%)</span>
                            <span class="text-[10px] font-black text-emerald-600 block">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                         </div>` : ''}
-                        ${order.taxRate ? `
+                        ${taxR > 0 ? `
                         <div class="text-right">
-                           <span class="text-[8px] font-bold text-slate-600 uppercase block">Impostos (${order.taxRate}%)</span>
+                           <span class="text-[8px] font-bold text-slate-600 uppercase block">Impostos (${taxR}%)</span>
                            <span class="text-[10px] font-black text-blue-600 block">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                         </div>` : ''}
                    </div>
