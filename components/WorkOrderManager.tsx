@@ -334,6 +334,19 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
               <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</h4><p class="text-sm font-black text-slate-900 uppercase">${customer.name}</p><p class="text-[11px] text-slate-500 uppercase">${(customer.document || '').replace(/\D/g, '').length <= 11 ? 'CPF' : 'CNPJ'}: ${formatDocument(customer.document || '') || 'N/A'}</p><p class="text-[11px] text-slate-500 uppercase">${customer.address || ''}, ${customer.number || ''} - ${customer.city || ''}</p></div>
             </div>
 
+            <div class="mb-8 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                <div class="flex justify-between items-center text-[10px] uppercase font-bold text-slate-500 mb-2">
+                    <span>Subtotal</span>
+                    <span>BDI ${(order.bdiRate || 0)}%</span>
+                    <span>Impostos ${(order.taxRate || 0)}%</span>
+                </div>
+                <div class="flex justify-between items-center text-sm font-black text-slate-900">
+                    <span>${(order.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                    <span class="text-emerald-600">+ ${((order.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0)) * ((order.bdiRate || 0) / 100)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                    <span class="text-blue-600">+ ${(((order.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0)) + (order.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0) * ((order.bdiRate || 0) / 100))) * ((order.taxRate || 0) / 100)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                </div>
+            </div>
+
             <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA PRIMEIRA – OBJETO DO CONTRATO</h4><p class="text-[14px] text-slate-600 leading-relaxed text-justify">O presente contrato tem por objeto a prestação dos serviços técnicos descritos abaixo, a serem realizados pela CONTRATADA à CONTRATANTE:</p><div class="bg-blue-50/50 p-4 rounded-xl border-l-4 border-blue-500 mt-4"><p class="text-[14px] font-bold text-blue-900 uppercase tracking-wide">${order.description}</p></div></div>
             
             <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA SEGUNDA – VALORES E PAGAMENTO</h4><p class="text-[14px] text-slate-600 leading-relaxed text-justify">Pelos serviços contratados, a CONTRATANTE pagará o valor total de <b class="text-slate-900">R$ ${order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>. Condições: ${order.paymentTerms || 'Conforme combinado'}.</p></div>
@@ -455,6 +468,19 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             <div class="grid grid-cols-2 gap-4 mb-5">
               <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</h4><p class="text-sm font-black text-slate-900 uppercase">${company.name}</p><p class="text-[11px] text-slate-500 uppercase">${company.address || ''}</p><p class="text-[11px] text-slate-500 uppercase">${company.email || ''}</p></div>
               <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</h4><p class="text-sm font-black text-slate-900 uppercase">${customer.name}</p><p class="text-[11px] text-slate-500 uppercase">${(customer.document || '').replace(/\D/g, '').length <= 11 ? 'CPF' : 'CNPJ'}: ${formatDocument(customer.document || '') || 'N/A'}</p><p class="text-[11px] text-slate-500 uppercase">${customer.address || ''}, ${customer.number || ''} - ${customer.city || ''}</p></div>
+            </div>
+
+            <div class="mb-8 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                <div class="flex justify-between items-center text-[10px] uppercase font-bold text-slate-500 mb-2">
+                    <span>Subtotal</span>
+                    <span>BDI ${(order.bdiRate || 0)}%</span>
+                    <span>Impostos ${(order.taxRate || 0)}%</span>
+                </div>
+                <div class="flex justify-between items-center text-sm font-black text-slate-900">
+                    <span>${(order.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                    <span class="text-emerald-600">+ ${((order.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0)) * ((order.bdiRate || 0) / 100)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                    <span class="text-blue-600">+ ${(((order.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0)) + (order.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0) * ((order.bdiRate || 0) / 100))) * ((order.taxRate || 0) / 100)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                </div>
             </div>
 
             <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA PRIMEIRA – OBJETO DO CONTRATO</h4><p class="text-[14px] text-slate-600 leading-relaxed text-justify">O presente contrato tem por objeto a prestação dos serviços técnicos descritos abaixo, a serem realizados pela CONTRATADA à CONTRATANTE:</p><div class="bg-blue-50/50 p-4 rounded-xl border-l-4 border-blue-500 mt-4"><p class="text-[14px] font-bold text-blue-900 uppercase tracking-wide">${order.description}</p></div></div>
