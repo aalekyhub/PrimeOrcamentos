@@ -374,10 +374,10 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
             <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA DÉCIMA PRIMEIRA – FORO</h4><p class="text-[14px] text-slate-600 leading-relaxed text-justify">Fica eleito o foro da Comarca de <b>${customer.city || 'São Paulo'} - ${customer.state || 'SP'}</b>, com renúncia a qualquer outro, por mais privilegiado que seja.</p></div>
 
-            <div className="mb-8" style="padding-top: 50mm; page-break-inside: avoid; break-inside: avoid;">
+            <div className="mb-8" style="padding-top: 30mm; padding-bottom: 20mm; page-break-inside: avoid; break-inside: avoid;">
               <div class="grid grid-cols-2 gap-16 px-10">
-                <div class="text-center border-t border-slate-300 pt-3"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</p><p class="text-sm font-black uppercase text-slate-900">${company.name}</p></div>
-                <div class="text-center border-t border-slate-300 pt-3 relative"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</p><p class="text-sm font-black uppercase text-slate-900">${customer.name}</p></div>
+                <div class="text-center border-t border-slate-300 pt-3" style="page-break-inside: avoid; break-inside: avoid;"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</p><p class="text-sm font-black uppercase text-slate-900">${company.name}</p></div>
+                <div class="text-center border-t border-slate-300 pt-3 relative" style="page-break-inside: avoid; break-inside: avoid;"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</p><p class="text-sm font-black uppercase text-slate-900">${customer.name}</p></div>
               </div>
             </div>
           </div>
@@ -390,7 +390,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             filename: `Contrato-${order.id}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2 },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
         };
 
         // @ts-ignore
