@@ -1,78 +1,123 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Prime Pro - Gestão Profissional</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
-    <style>
-      body {
-        font-family: 'Inter', sans-serif;
-        background-color: #f1f5f9;
-        margin: 0;
-        height: 100vh;
-        overflow: hidden;
-      }
-      .no-scrollbar::-webkit-scrollbar { display: none; }
-      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      #root { height: 100%; }
-      
-      @media print {
-        @page { margin: 0; size: auto; }
-        body { background: white !important; overflow: visible !important; height: auto !important; margin: 0 !important; padding: 0 !important; }
-        #root > *:not(.print-container) { display: none !important; }
-        aside, main, header, .print-hide, button { display: none !important; }
-        .print-container { position: absolute; top: 0; left: 0; width: 100%; margin: 0; padding: 0; visibility: visible !important; display: block !important; }
-      }
 
-      #error-boundary {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: #fff;
-        z-index: 9999;
-        padding: 40px;
-        text-align: center;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-      }
-    </style>
-    
-    <script>
-      // Evita erro de 'process is not defined' que causa tela branca no navegador
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prime Pro - Gestão Profissional</title>
+
+  <script>
+    // FIX CRÍTICO: Previne erro "Cannot assign to read only property 'ethereum'"
+    // Deve ser o primeiro script a rodar.
+    (function () {
       window.process = { env: { API_KEY: '' } };
 
-      // FIX: Previne erro "Cannot assign to read only property 'ethereum'" causado por extesões ou scripts de terceiros
-      // Define a propriedade como configurável e gravável antes que qualquer outra coisa a toque
       try {
-        Object.defineProperty(window, 'ethereum', {
-          value: undefined,
-          writable: true,
-          configurable: true,
-          enumerable: true
-        });
+        const property = Object.getOwnPropertyDescriptor(window, 'ethereum');
+        if (!property || property.configurable) {
+          Object.defineProperty(window, 'ethereum', {
+            value: undefined,
+            writable: true,
+            configurable: true,
+            enumerable: true
+          });
+        }
       } catch (e) { console.warn('Falha ao aplicar shim no ethereum:', e); }
 
-      window.onerror = function(msg, url, lineNo, columnNo, error) {
+      window.onerror = function (msg) {
         console.error('Erro detectado:', msg);
         const errDiv = document.getElementById('error-boundary');
         if (errDiv) {
           errDiv.style.display = 'flex';
-          document.getElementById('error-msg').innerText = msg;
+          const msgEl = document.getElementById('error-msg');
+          if (msgEl) msgEl.innerText = msg;
         }
         return false;
       };
-      
-      function resetSystem() {
-        if(confirm('Isso apagará todos os dados locais para tentar recuperar o sistema. Continuar?')) {
-          localStorage.clear();
-          window.location.reload();
-        }
+    })();
+
+    function resetSystem() {
+      if (confirm('Isso apagará todos os dados locais para tentar recuperar o sistema. Continuar?')) {
+        localStorage.clear();
+        window.location.reload();
       }
-    </script>
+    }
+  </script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: Helvetica, Arial, sans-serif;
+      background-color: #f1f5f9;
+      margin: 0;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    #root {
+      height: 100%;
+    }
+
+    @media print {
+      @page {
+        margin: 0;
+        size: auto;
+      }
+
+      body {
+        background: white !important;
+        overflow: visible !important;
+        height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      #root>*:not(.print-container) {
+        display: none !important;
+      }
+
+      aside,
+      main,
+      header,
+      .print-hide,
+      button {
+        display: none !important;
+      }
+
+      .print-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        visibility: visible !important;
+        display: block !important;
+      }
+    }
+
+    #error-boundary {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #fff;
+      z-index: 9999;
+      padding: 40px;
+      text-align: center;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
 
   <script type="importmap">
 {
@@ -88,23 +133,27 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
+  <link rel="stylesheet" href="/index.css">
 </head>
-  <body>
-    <div id="root"></div>
-    <!-- Carregamento do módulo principal -->
-    <script type="module" src="./index.tsx"></script>
 
-    <div id="error-boundary">
-      <div style="background: #fee2e2; color: #b91c1c; padding: 32px; border-radius: 32px; border: 1px solid #fecaca; max-width: 500px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1);">
-        <h2 style="font-weight: 900; font-size: 24px; margin-bottom: 8px;">Falha Crítica</h2>
-        <p id="error-msg" style="font-size: 14px; opacity: 0.8; margin-bottom: 24px; font-family: monospace;"></p>
-        <div style="display: flex; gap: 12px; justify-content: center;">
-          <button onclick="window.location.reload()" style="background: #1e293b; color: white; padding: 12px 24px; border-radius: 16px; border: none; font-weight: bold; cursor: pointer;">Recarregar</button>
-          <button onclick="resetSystem()" style="background: #ef4444; color: white; padding: 12px 24px; border-radius: 16px; border: none; font-weight: bold; cursor: pointer;">Limpar Banco de Dados</button>
-        </div>
+<body>
+  <div id="root"></div>
+  <script type="module" src="./index.tsx"></script>
+
+  <div id="error-boundary">
+    <div
+      style="background: #fee2e2; color: #b91c1c; padding: 32px; border-radius: 32px; border: 1px solid #fecaca; max-width: 500px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1);">
+      <h2 style="font-weight: 900; font-size: 24px; margin-bottom: 8px;">Falha Crítica</h2>
+      <p id="error-msg" style="font-size: 14px; opacity: 0.8; margin-bottom: 24px; font-family: monospace;"></p>
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button onclick="window.location.reload()"
+          style="background: #1e293b; color: white; padding: 12px 24px; border-radius: 16px; border: none; font-weight: bold; cursor: pointer;">Recarregar</button>
+        <button onclick="resetSystem()"
+          style="background: #ef4444; color: white; padding: 12px 24px; border-radius: 16px; border: none; font-weight: bold; cursor: pointer;">Limpar
+          Banco de Dados</button>
       </div>
     </div>
-  <script type="module" src="/index.tsx"></script>
+  </div>
 </body>
+
 </html>

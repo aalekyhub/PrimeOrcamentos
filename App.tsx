@@ -198,10 +198,10 @@ const AppContent: React.FC = () => {
     <div className="flex h-screen bg-slate-100 overflow-hidden text-slate-900 font-sans">
       {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/60 z-20 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
-      <aside className={`fixed lg:static inset-y-0 left-0 z-30 w-72 bg-slate-900 text-white transition-transform duration-300 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 shadow-2xl`}>
+      <aside className={`fixed lg:static inset-y-0 left-0 z-30 w-72 bg-white border-r border-slate-100 transition-transform duration-300 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 shadow-lg shadow-slate-200/50`}>
         <div className="p-8 h-full flex flex-col">
           <div className="flex items-center gap-4 mb-10">
-            <div className="w-12 h-12 bg-white rounded-2xl shadow-lg flex items-center justify-center overflow-hidden border border-slate-700">
+            <div className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center overflow-hidden border border-slate-100">
               {company.logo ? (
                 <img src={company.logo} className="w-full h-full object-contain p-1" alt="Logo" />
               ) : (
@@ -210,7 +210,7 @@ const AppContent: React.FC = () => {
                 </div>
               )}
             </div>
-            <h1 className="text-2xl font-black tracking-tighter">Prime</h1>
+            <h1 className="text-2xl font-medium tracking-tighter text-slate-900">Prime</h1>
           </div>
 
           <nav className="space-y-1.5 flex-1 overflow-y-auto no-scrollbar">
@@ -218,18 +218,18 @@ const AppContent: React.FC = () => {
               <button
                 key={item.id}
                 onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
-                className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all ${activeTab === item.id ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
+                className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl transition-all ${activeTab === item.id ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}
               >
-                <item.icon className={`w-5 h-5 ${activeTab === item.id ? 'text-white' : 'text-slate-500'}`} />
-                <span className="font-bold text-sm">{item.label}</span>
+                <item.icon className={`w-6 h-6 ${activeTab === item.id ? 'text-blue-600' : 'text-slate-400'}`} />
+                <span className="font-normal text-lg">{item.label}</span>
               </button>
             ))}
           </nav>
 
-          <div className="mt-auto pt-6 border-t border-slate-800 space-y-4">
+          <div className="mt-auto pt-6 border-t border-slate-100 space-y-4">
             <button
               onClick={() => confirm("Encerrar sessão?") && (setCurrentUser(null), localStorage.removeItem(STORAGE_KEYS.SESSION))}
-              className="w-full flex items-center gap-4 px-5 py-3 rounded-xl text-rose-400 hover:bg-rose-500/10 transition-all font-bold text-xs"
+              className="w-full flex items-center gap-4 px-5 py-3 rounded-xl text-rose-400 hover:bg-rose-500/10 transition-all font-semibold text-xs"
             >
               <LogOut className="w-4 h-4" /> Sair
             </button>
@@ -244,7 +244,7 @@ const AppContent: React.FC = () => {
               <Menu className="w-6 h-6 text-slate-600" />
             </button>
             <div className="flex items-center gap-3">
-              <h2 className="font-black text-slate-400 text-[10px] uppercase tracking-[0.2em]">
+              <h2 className="font-semibold text-slate-400 text-[10px] uppercase tracking-[0.2em]">
                 {navItems.find(n => n.id === activeTab)?.label || 'Painel'}
               </h2>
 
@@ -261,7 +261,7 @@ const AppContent: React.FC = () => {
                 ) : (
                   <CloudOff className="w-3 h-3 text-slate-300" />
                 )}
-                <span className={`text-[8px] font-black uppercase tracking-tighter ${isSyncing ? 'text-blue-500' : db.isConnected() ? 'text-emerald-600' : 'text-slate-400'}`}>
+                <span className={`text-[8px] font-semibold uppercase tracking-tighter ${isSyncing ? 'text-blue-500' : db.isConnected() ? 'text-emerald-600' : 'text-slate-400'}`}>
                   {isSyncing ? 'Sincronizando' : db.isConnected() ? 'Nuvem Ativa' : 'Apenas Local'}
                 </span>
               </button>
@@ -270,8 +270,8 @@ const AppContent: React.FC = () => {
 
           <div className="flex items-center gap-4 text-right">
             <div className="hidden sm:block">
-              <p className="text-sm font-black text-slate-900">{company.name}</p>
-              <p className="text-[10px] text-blue-600 font-bold uppercase tracking-widest">{new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date())}</p>
+              <p className="text-sm font-semibold text-slate-900">{company.name}</p>
+              <p className="text-[10px] text-blue-600 font-medium uppercase tracking-widest">{new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date())}</p>
             </div>
             <div className="w-10 h-10 bg-slate-200 rounded-xl flex items-center justify-center border-2 border-white shadow-sm overflow-hidden">
               {company.logo ? <img src={company.logo} className="w-full h-full object-cover" alt="Logo" /> : <Building2 className="w-5 h-5 text-slate-400" />}
