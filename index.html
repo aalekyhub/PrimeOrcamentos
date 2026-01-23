@@ -4,28 +4,41 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>Prime Pro - Gestão Profissional</title>
 
   <script>
-    // FIX CRÍTICO: Previne erro "Cannot assign to read only property 'ethereum'"
-    // Deve ser o primeiro script a rodar.
+    // DEFESA FINAL: Bloqueia o erro 'ethereum' antes que ele chegue ao UI
     (function () {
       window.process = { env: { API_KEY: '' } };
 
+      // Tenta neutralizar o ethereum se ele tentar ser definido como read-only
       try {
-        const property = Object.getOwnPropertyDescriptor(window, 'ethereum');
-        if (!property || property.configurable) {
-          Object.defineProperty(window, 'ethereum', {
-            value: undefined,
-            writable: true,
-            configurable: true,
-            enumerable: true
-          });
+        let ethCache = window.ethereum;
+        Object.defineProperty(window, 'ethereum', {
+          get: function () { return ethCache; },
+          set: function (v) { ethCache = v; },
+          configurable: true,
+          enumerable: true
+        });
+      } catch (e) { }
+
+      // Bloqueador de erros global
+      window.addEventListener('error', function (event) {
+        if (event.message && event.message.toLowerCase().includes('ethereum')) {
+          console.warn('Conflito de extensão detectado e bloqueado:', event.message);
+          event.stopImmediatePropagation();
+          event.preventDefault();
         }
-      } catch (e) { console.warn('Falha ao aplicar shim no ethereum:', e); }
+      }, true);
 
       window.onerror = function (msg) {
-        console.error('Erro detectado:', msg);
+        if (msg && msg.toString().toLowerCase().includes('ethereum')) {
+          return true; // Impede que o erro mostre a caixa vermelha
+        }
+
         const errDiv = document.getElementById('error-boundary');
         if (errDiv) {
           errDiv.style.display = 'flex';
@@ -37,7 +50,7 @@
     })();
 
     function resetSystem() {
-      if (confirm('Isso apagará todos os dados locais para tentar recuperar o sistema. Continuar?')) {
+      if (confirm('Isso apagará todos os dados locais. Continuar?')) {
         localStorage.clear();
         window.location.reload();
       }
@@ -46,8 +59,12 @@
 
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    /* OVERRIDE GLOBAL DE FONTE */
+    * {
+      font-family: Helvetica, Arial, sans-serif !important;
+    }
+
     body {
-      font-family: Helvetica, Arial, sans-serif;
       background-color: #f1f5f9;
       margin: 0;
       height: 100vh;
@@ -120,20 +137,19 @@
   </style>
 
   <script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@18.2.0",
-    "react-dom": "https://esm.sh/react-dom@18.2.0",
-    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-    "react/": "https://esm.sh/react@18.2.0/",
-    "react-dom/": "https://esm.sh/react-dom@18.2.0/",
-    "lucide-react": "https://esm.sh/lucide-react@0.474.0?external=react",
-    "recharts": "https://esm.sh/recharts@2.12.7?external=react,react-dom",
-    "@google/genai": "https://esm.sh/@google/genai@1.34.0"
+  {
+    "imports": {
+      "react": "https://esm.sh/react@18.2.0",
+      "react-dom": "https://esm.sh/react-dom@18.2.0",
+      "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+      "react/": "https://esm.sh/react@18.2.0/",
+      "react-dom/": "https://esm.sh/react-dom@18.2.0/",
+      "lucide-react": "https://esm.sh/lucide-react@0.474.0?external=react",
+      "recharts": "https://esm.sh/recharts@2.12.7?external=react,react-dom",
+      "@google/genai": "https://esm.sh/@google/genai@1.34.0"
+    }
   }
-}
-</script>
-  <link rel="stylesheet" href="/index.css">
+  </script>
 </head>
 
 <body>

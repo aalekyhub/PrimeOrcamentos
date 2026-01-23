@@ -409,7 +409,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col md:flex-row justify-between items-center gap-4">
         <div>
-          <h2 className="text-2xl font-black text-slate-900 tracking-tighter uppercase flex items-center gap-2">
+          <h2 className="text-2xl font-black text-slate-900 tracking-tighter flex items-center gap-2">
             Orçamentos <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">{orders.filter(o => o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED).length}</span>
           </h2>
           <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Gerencie suas propostas comerciais</p>

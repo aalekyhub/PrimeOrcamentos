@@ -58,8 +58,8 @@ const Dashboard: React.FC<DashboardProps> = ({ stats, orders, transactions, curr
               <item.icon className="w-8 h-8" />
             </div>
             <div>
-              <p className="text-[11px] font-medium text-slate-400 uppercase tracking-[0.2em] mb-1">{item.label}</p>
-              <h3 className="text-xl font-medium text-slate-900 tracking-tight">{item.title}</h3>
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-1">{item.label}</p>
+              <h3 className="text-xl font-bold text-slate-900 tracking-tight">{item.title}</h3>
             </div>
           </div>
         ))}
@@ -81,12 +81,12 @@ const Dashboard: React.FC<DashboardProps> = ({ stats, orders, transactions, curr
               <div className={`p-4 bg-${stat.color}-50 text-${stat.color}-600 rounded-2xl group-hover:scale-110 transition-transform`}>
                 <stat.icon className="w-8 h-8" />
               </div>
-              <span className="text-sm font-medium text-slate-400 uppercase tracking-widest">{stat.label}</span>
+              <span className="text-sm font-bold text-slate-400 uppercase tracking-widest">{stat.label}</span>
             </div>
-            <h3 className="text-2xl font-medium text-slate-900 tracking-tighter">
+            <h3 className="text-2xl font-bold text-slate-900 tracking-tighter">
               {stat.isCurrency && typeof stat.value === 'number' ? `R$ ${stat.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : stat.value}
             </h3>
-            <p className="text-sm mt-3 text-slate-400 font-normal uppercase tracking-wider">{stat.sub}</p>
+            <p className="text-sm mt-3 text-slate-400 font-bold uppercase tracking-wider">{stat.sub}</p>
           </div>
         ))}
       </div>

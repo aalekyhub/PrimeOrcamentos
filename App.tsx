@@ -199,8 +199,8 @@ const AppContent: React.FC = () => {
       {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/60 z-20 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
       <aside className={`fixed lg:static inset-y-0 left-0 z-30 w-72 bg-white border-r border-slate-100 transition-transform duration-300 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 shadow-lg shadow-slate-200/50`}>
-        <div className="p-8 h-full flex flex-col">
-          <div className="flex items-center gap-4 mb-10">
+        <div className="p-6 h-full flex flex-col">
+          <div className="flex items-center gap-4 mb-8">
             <div className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center overflow-hidden border border-slate-100">
               {company.logo ? (
                 <img src={company.logo} className="w-full h-full object-contain p-1" alt="Logo" />
@@ -218,10 +218,10 @@ const AppContent: React.FC = () => {
               <button
                 key={item.id}
                 onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
-                className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl transition-all ${activeTab === item.id ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}
+                className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${activeTab === item.id ? 'bg-blue-50 text-blue-600 font-bold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium'}`}
               >
-                <item.icon className={`w-6 h-6 ${activeTab === item.id ? 'text-blue-600' : 'text-slate-400'}`} />
-                <span className="font-normal text-lg">{item.label}</span>
+                <item.icon className={`w-5 h-5 ${activeTab === item.id ? 'text-blue-600' : 'text-slate-500'}`} />
+                <span className="text-[16px] leading-relaxed">{item.label}</span>
               </button>
             ))}
           </nav>
