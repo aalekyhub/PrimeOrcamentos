@@ -95,6 +95,7 @@ export interface ServiceOrder {
   descriptionBlocks?: DescriptionBlock[]; // Novo campo para descrição rica
   paymentTerms?: string;
   deliveryTime?: string;
+  paymentEntryPercent?: number; // Persisting the entry percentage
   status: OrderStatus;
   items: ServiceItem[];
   images?: string[];

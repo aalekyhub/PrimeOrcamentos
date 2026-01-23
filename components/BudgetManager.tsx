@@ -35,6 +35,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
   const [proposalTitle, setProposalTitle] = useState('');
   const [paymentTerms, setPaymentTerms] = useState('50% avista, 25% com 30 dias, 25% restante na conclusão');
+  const [paymentEntryPercent, setPaymentEntryPercent] = useState<number>(30);
   const [deliveryTime, setDeliveryTime] = useState('15 dias uteis');
   const [items, setItems] = useState<ServiceItem[]>([]);
   const [descriptionBlocks, setDescriptionBlocks] = useState<DescriptionBlock[]>([]);
@@ -355,7 +356,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       customerEmail: customer.email,
       description: proposalTitle || 'REFORMA DE PINTURA',
       status: OrderStatus.PENDING,
-      items, descriptionBlocks, totalAmount, paymentTerms, deliveryTime,
+      items, descriptionBlocks, totalAmount, paymentTerms, deliveryTime, paymentEntryPercent,
       taxRate: Number(taxRate) || 0, // Ensure number
       bdiRate: Number(bdiRate) || 0, // Ensure number
       createdAt: existingBudget?.createdAt || new Date().toISOString().split('T')[0],
@@ -389,6 +390,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     setDescriptionBlocks(budget.descriptionBlocks && budget.descriptionBlocks.length > 0 ? budget.descriptionBlocks : []);
     if (budget.paymentTerms) setPaymentTerms(budget.paymentTerms);
     if (budget.deliveryTime) setDeliveryTime(budget.deliveryTime);
+    setPaymentEntryPercent(budget.paymentEntryPercent ?? 30);
 
     // Load taxes (Handle potential casing issues from DB)
     const b: any = budget;
@@ -733,11 +735,13 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       {showPaymentModal && (
         <PaymentTypeModal
           onClose={() => setShowPaymentModal(false)}
-          onConfirm={(text) => {
+          onConfirm={(text, percent) => {
             setPaymentTerms(text);
+            setPaymentEntryPercent(percent);
             setShowPaymentModal(false);
           }}
           totalValue={totalAmount}
+          initialPercent={paymentEntryPercent}
         />
       )}
     </div>
@@ -745,20 +749,26 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 };
 
 // Sub-component for Payment Logic to keep main file clean(er)
-const PaymentTypeModal: React.FC<{ onClose: () => void, onConfirm: (text: string) => void, totalValue: number }> = ({ onClose, onConfirm, totalValue }) => {
+const PaymentTypeModal: React.FC<{
+  onClose: () => void,
+  onConfirm: (text: string, percent: number) => void,
+  totalValue: number,
+  initialPercent?: number
+}> = ({ onClose, onConfirm, totalValue, initialPercent }) => {
   const [type, setType] = useState<'vista' | 'parcelado' | 'conclusao'>('parcelado');
   const [entryValue, setEntryValue] = useState(0);
-  const [percentValue, setPercentValue] = useState(30);
+  const [percentValue, setPercentValue] = useState(initialPercent || 30);
   const [installments, setInstallments] = useState(3);
   const [preview, setPreview] = useState('');
 
   // Auto-calculate defaults when opening
   React.useEffect(() => {
     if (totalValue > 0) {
-      setEntryValue(totalValue * 0.3);
-      setPercentValue(30);
+      const p = initialPercent || 30;
+      setEntryValue(totalValue * (p / 100));
+      setPercentValue(p);
     }
-  }, [totalValue]);
+  }, [totalValue, initialPercent]);
 
   // Update preview effect
   React.useEffect(() => {
@@ -844,7 +854,7 @@ const PaymentTypeModal: React.FC<{ onClose: () => void, onConfirm: (text: string
 
         <div className="p-4 bg-slate-50 border-t flex gap-3">
           <button onClick={onClose} className="flex-1 py-3 text-xs font-bold uppercase text-slate-500 hover:bg-slate-200 rounded-xl transition-colors">Cancelar</button>
-          <button onClick={() => onConfirm(preview)} className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black uppercase tracking-wide shadow-lg shadow-blue-200 transition-all active:scale-95">Aplicar Texto</button>
+          <button onClick={() => onConfirm(preview, percentValue)} className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black uppercase tracking-wide shadow-lg shadow-blue-200 transition-all active:scale-95">Aplicar Texto</button>
         </div>
       </div>
     </div>
