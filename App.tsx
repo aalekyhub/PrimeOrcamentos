@@ -281,7 +281,7 @@ const AppContent: React.FC = () => {
 
         <div className="flex-1 overflow-y-auto p-10 bg-slate-50 no-scrollbar">
           <div className="max-w-[1400px] mx-auto">
-            {activeTab === 'dashboard' && <Dashboard stats={stats} orders={orders} transactions={transactions} currentUser={currentUser} company={company} />}
+            {activeTab === 'dashboard' && <Dashboard stats={stats} orders={orders} transactions={transactions} currentUser={currentUser} company={company} onNavigate={setActiveTab} />}
             {activeTab === 'customers' && <CustomerManager customers={customers} setCustomers={setCustomers} orders={orders} />}
             {activeTab === 'catalog' && <ServiceCatalog services={catalog} setServices={setCatalog} company={company} />}
             {activeTab === 'budgets' && <BudgetManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} />}

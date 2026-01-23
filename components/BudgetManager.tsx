@@ -1,9 +1,10 @@
 
 import React, { useState, useMemo } from 'react';
+import html2pdf from 'html2pdf.js';
 import {
   Plus, Search, X, Trash2, Pencil, Printer, Save,
   UserPlus, Package, Type, Image as ImageIcon,
-  FileText, Upload, CheckCircle, Zap
+  FileText, Upload, CheckCircle, Zap, FileDown
 } from 'lucide-react';
 import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock } from '../types';
 import { useNotify } from './ToastProvider';
@@ -101,8 +102,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
   const handlePrintPDF = (budget: ServiceOrder, mode: 'print' | 'pdf' = 'print') => {
     const customer = customers.find(c => c.id === budget.customerId) || { name: budget.customerName, address: 'Não informado', document: 'Documento não informado' };
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
+    // window.open moved to the end to support PDF mode without popup
 
     const formatDate = (dateStr: string) => {
       try {
@@ -309,8 +309,35 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         </script>
       </body>
       </html>`;
-    printWindow.document.write(html);
-    printWindow.document.close();
+    if (mode === 'pdf') {
+      const cleanHtml = html.replace(/<script>window.onload[\s\S]*?<\/script>/, '');
+      const opt = {
+        margin: 0,
+        filename: `Orçamento - ${budget.id} - ${budget.description || 'Proposta'}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 3, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+      };
+
+      // @ts-ignore
+      html2pdf().set(opt).from(cleanHtml).toPdf().get('pdf').then(function (pdf: any) {
+        var totalPages = pdf.internal.getNumberOfPages();
+        for (var i = 1; i <= totalPages; i++) {
+          pdf.setPage(i);
+          pdf.setFontSize(10);
+          pdf.setTextColor(148, 163, 184);
+          pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
+        }
+        pdf.save(opt.filename);
+      });
+    } else {
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(html);
+        printWindow.document.close();
+      }
+    }
   };
 
   const handleSave = async () => {
@@ -459,7 +486,8 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                     </button>
                   )}
                   <button onClick={() => loadBudgetToForm(budget)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors"><Pencil className="w-4 h-4" /></button>
-                  <button onClick={() => handlePrintPDF(budget)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors"><Printer className="w-4 h-4" /></button>
+                  <button onClick={() => handlePrintPDF(budget, 'print')} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Imprimir"><Printer className="w-4 h-4" /></button>
+                  <button onClick={() => handlePrintPDF(budget, 'pdf')} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Baixar PDF"><FileDown className="w-4 h-4" /></button>
                   <button onClick={async () => {
                     if (confirm("Deseja excluir este orçamento? Esta ação também removerá os dados da nuvem.")) {
                       const idToDelete = budget.id;
