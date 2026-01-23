@@ -463,22 +463,48 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                     <button onClick={async () => {
                       if (confirm("Deseja APROVAR este orçamento? Ele será convertido em Ordem de Serviço.")) {
                         const approvedBudget = { ...budget, status: OrderStatus.APPROVED };
-                        // Maintain the same ID number, just changing the prefix
                         const newServiceOrderId = budget.id.replace('ORC', 'OS');
-                        const newServiceOrder: ServiceOrder = {
-                          ...budget,
-                          id: newServiceOrderId,
-                          status: OrderStatus.IN_PROGRESS,
-                          createdAt: new Date().toISOString(),
-                          items: budget.items.map(i => ({ ...i })),
-                          descriptionBlocks: budget.descriptionBlocks ? [...budget.descriptionBlocks] : [],
-                          osType: 'WORK' // Automatically create as Work Order for Construction
-                        };
-                        const newList = orders.map(o => o.id === budget.id ? approvedBudget : o);
-                        const finalList = [...newList, newServiceOrder];
+
+                        // Check if an OS with this ID already exists
+                        const existingOSIndex = orders.findIndex(o => o.id === newServiceOrderId);
+
+                        let finalList;
+                        if (existingOSIndex !== -1) {
+                          // Update existing OS
+                          const updatedOS = {
+                            ...orders[existingOSIndex],
+                            items: budget.items.map(i => ({ ...i })),
+                            descriptionBlocks: budget.descriptionBlocks ? [...budget.descriptionBlocks] : [],
+                            totalAmount: budget.totalAmount,
+                            taxRate: budget.taxRate,
+                            bdiRate: budget.bdiRate,
+                            description: budget.description,
+                            paymentTerms: budget.paymentTerms,
+                            deliveryTime: budget.deliveryTime,
+                            customerName: budget.customerName,
+                            customerEmail: budget.customerEmail
+                          };
+
+                          const newList = orders.map(o => o.id === budget.id ? approvedBudget : o);
+                          finalList = newList.map(o => o.id === newServiceOrderId ? updatedOS : o);
+                        } else {
+                          // Create new OS
+                          const newServiceOrder: ServiceOrder = {
+                            ...budget,
+                            id: newServiceOrderId,
+                            status: OrderStatus.IN_PROGRESS,
+                            createdAt: new Date().toISOString(),
+                            items: budget.items.map(i => ({ ...i })),
+                            descriptionBlocks: budget.descriptionBlocks ? [...budget.descriptionBlocks] : [],
+                            osType: 'WORK'
+                          };
+                          const newList = orders.map(o => o.id === budget.id ? approvedBudget : o);
+                          finalList = [...newList, newServiceOrder];
+                        }
+
                         setOrders(finalList);
                         const result = await db.save('serviflow_orders', finalList);
-                        if (result?.success) notify("Orçamento APROVADO! Cópia gerada em O.S.");
+                        if (result?.success) notify(existingOSIndex !== -1 ? "O.S. atualizada com novos dados do orçamento!" : "Orçamento APROVADO! Cópia gerada em O.S.");
                         else notify("Erro ao sincronizar.", "error");
                       }
                     }} className="p-2 text-slate-400 hover:text-emerald-600 transition-colors" title="Aprovar">
