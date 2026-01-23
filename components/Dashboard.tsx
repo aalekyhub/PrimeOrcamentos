@@ -39,7 +39,7 @@ const Dashboard: React.FC<DashboardProps> = ({ stats, orders, transactions, curr
   return (
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div>
-        <h2 className="text-3xl font-medium text-slate-900 tracking-tighter">Painel de Controle</h2>
+        <h2 className="text-3xl font-bold text-slate-900 tracking-tighter">Painel de Controle</h2>
         <p className="text-slate-400 font-normal text-lg mt-2">Bom dia, {company.name}! Aqui está o resumo do seu negócio hoje.</p>
       </div>
 

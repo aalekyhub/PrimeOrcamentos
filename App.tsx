@@ -181,7 +181,7 @@ const AppContent: React.FC = () => {
   }
 
   const navItems = [
-    { id: 'dashboard', label: 'Início', icon: LayoutDashboard },
+    { id: 'dashboard', label: 'Painel de Controle', icon: LayoutDashboard },
     { id: 'customers', label: 'Clientes', icon: Users },
     { id: 'catalog', label: 'Serviços', icon: Briefcase },
     { id: 'budgets', label: 'Orçamentos', icon: FileText },
