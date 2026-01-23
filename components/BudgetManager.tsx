@@ -748,12 +748,16 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 const PaymentTypeModal: React.FC<{ onClose: () => void, onConfirm: (text: string) => void, totalValue: number }> = ({ onClose, onConfirm, totalValue }) => {
   const [type, setType] = useState<'vista' | 'parcelado' | 'conclusao'>('parcelado');
   const [entryValue, setEntryValue] = useState(0);
+  const [percentValue, setPercentValue] = useState(30);
   const [installments, setInstallments] = useState(3);
   const [preview, setPreview] = useState('');
 
   // Auto-calculate defaults when opening
   React.useEffect(() => {
-    if (totalValue > 0) setEntryValue(totalValue * 0.3); // Default 30% entry
+    if (totalValue > 0) {
+      setEntryValue(totalValue * 0.3);
+      setPercentValue(30);
+    }
   }, [totalValue]);
 
   // Update preview effect
@@ -801,11 +805,25 @@ const PaymentTypeModal: React.FC<{ onClose: () => void, onConfirm: (text: string
                 <div className="flex justify-between mb-1"><span className="text-[10px] font-bold text-slate-400 uppercase">Valor Total</span> <span className="text-[10px] font-black text-slate-900">{totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span></div>
                 <div className="h-1 w-full bg-slate-200 rounded-full overflow-hidden"><div className="h-full bg-blue-500" style={{ width: `${Math.min(100, (entryValue / totalValue) * 100)}%` }}></div></div>
               </div>
-              <div>
-                <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Entrada (R$)</label>
-                <input type="number" className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500" value={entryValue} onChange={e => setEntryValue(Number(e.target.value))} />
+              <div className="grid grid-cols-2 gap-2 col-span-2">
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Entrada (%)</label>
+                  <input type="number" className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500" value={percentValue} onChange={e => {
+                    const val = Number(e.target.value);
+                    setPercentValue(val);
+                    setEntryValue(totalValue * (val / 100));
+                  }} />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Entrada (R$)</label>
+                  <input type="number" className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500" value={entryValue} onChange={e => {
+                    const val = Number(e.target.value);
+                    setEntryValue(val);
+                    if (totalValue > 0) setPercentValue(Number(((val / totalValue) * 100).toFixed(1)));
+                  }} />
+                </div>
               </div>
-              <div>
+              <div className="col-span-2">
                 <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Parcelas</label>
                 <div className="flex items-center gap-2">
                   <button onClick={() => setInstallments(Math.max(1, installments - 1))} className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-100 font-bold text-slate-600">-</button>
