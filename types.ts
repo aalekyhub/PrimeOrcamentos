@@ -110,6 +110,8 @@ export interface ServiceOrder {
   osType?: 'EQUIPMENT' | 'WORK';
 }
 
+export type RecurrenceFrequency = 'NONE' | 'MONTHLY' | 'SEMIANNUAL' | 'ANNUAL';
+
 export interface Transaction {
   id: string;
   date: string;
@@ -118,4 +120,21 @@ export interface Transaction {
   category: string;
   description: string;
   relatedOrderId?: string;
+  isRecurring?: boolean;
+  frequency?: RecurrenceFrequency;
+  installments?: number; // Total installments for loans/purchases
+  currentInstallment?: number; // Current installment number
+}
+
+export interface Loan {
+  id: string;
+  bankName: string;
+  totalAmount: number;
+  remainingAmount: number;
+  startDate: string;
+  installmentsCount: number;
+  installmentsPaid: number;
+  installmentValue: number;
+  interestRate?: number;
+  description: string;
 }

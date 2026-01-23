@@ -17,7 +17,7 @@ import UserManager from './components/UserManager';
 import Login from './components/Login';
 import DataCleanup from './components/DataCleanup';
 import { ToastProvider, useNotify } from './components/ToastProvider';
-import { ServiceOrder, Transaction, OrderStatus, Customer, CatalogService, CompanyProfile, UserAccount } from './types';
+import { ServiceOrder, Transaction, OrderStatus, Customer, CatalogService, CompanyProfile, UserAccount, Loan } from './types';
 import { db } from './services/db';
 
 const STORAGE_KEYS = {
@@ -27,6 +27,7 @@ const STORAGE_KEYS = {
   ORDERS: 'serviflow_orders',
   TRANSACTIONS: 'serviflow_transactions',
   USERS: 'serviflow_users',
+  LOANS: 'serviflow_loans',
   SESSION: 'serviflow_session'
 };
 
@@ -67,6 +68,7 @@ const AppContent: React.FC = () => {
   const [customers, setCustomers] = useState<Customer[]>(() => db.load(STORAGE_KEYS.CUSTOMERS, []));
   const [catalog, setCatalog] = useState<CatalogService[]>(() => db.load(STORAGE_KEYS.CATALOG, []));
   const [company, setCompany] = useState<CompanyProfile>(() => db.load(STORAGE_KEYS.COMPANY, INITIAL_COMPANY));
+  const [loans, setLoans] = useState<Loan[]>(() => db.load(STORAGE_KEYS.LOANS, []));
 
   const handleManualSync = async () => {
     if (!db.isConnected()) {
@@ -144,6 +146,9 @@ const AppContent: React.FC = () => {
             return Array.from(localMap.values());
           });
         }
+        if (cloudData.loans) {
+          setLoans(cloudData.loans as Loan[]);
+        }
         notify("Sincronização concluída (Dados mesclados)");
       } else {
         notify("Falha ao baixar dados da nuvem.", "error");
@@ -166,8 +171,9 @@ const AppContent: React.FC = () => {
     db.save(STORAGE_KEYS.CATALOG, catalog);
     db.save(STORAGE_KEYS.COMPANY, company);
     db.save(STORAGE_KEYS.USERS, users);
+    db.save(STORAGE_KEYS.LOANS, loans);
     if (currentUser) db.save(STORAGE_KEYS.SESSION, currentUser);
-  }, [orders, transactions, customers, catalog, company, users, currentUser]);
+  }, [orders, transactions, customers, catalog, company, users, loans, currentUser]);
 
   const stats = useMemo(() => {
     const rev = transactions.filter(t => t.type === 'RECEITA').reduce((a, c) => a + c.amount, 0);
@@ -288,7 +294,7 @@ const AppContent: React.FC = () => {
             {activeTab === 'orders' && <ServiceOrderManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} />}
             {activeTab === 'works' && <WorkOrderManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} transactions={transactions} setTransactions={setTransactions} />}
             {activeTab === 'search' && <BudgetSearch orders={orders} setOrders={setOrders} customers={customers} company={company} catalogServices={catalog} setCatalogServices={setCatalog} />}
-            {activeTab === 'financials' && <FinancialControl transactions={transactions} setTransactions={setTransactions} currentUser={currentUser} />}
+            {activeTab === 'financials' && <FinancialControl transactions={transactions} setTransactions={setTransactions} loans={loans} setLoans={setLoans} currentUser={currentUser} />}
             {activeTab === 'users' && <UserManager users={users} setUsers={setUsers} />}
             {activeTab === 'audit' && <DataCleanup
               customers={customers}
