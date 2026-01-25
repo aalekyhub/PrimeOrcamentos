@@ -26,12 +26,13 @@ const Login: React.FC<Props> = ({ onLogin, users, company, onSync, isSyncing, is
 
     // Simulação de delay de rede
     setTimeout(() => {
-      const user = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
+      const dbUsers = users || [];
+      const user = dbUsers.find(u => u.email.trim().toLowerCase() === email.trim().toLowerCase() && u.password === password.trim());
 
       if (user) {
         onLogin(user);
       } else {
-        setError('E-mail ou senha incorretos.');
+        setError(`E-mail ou senha incorretos. (Base: ${dbUsers.length})`);
       }
       setLoading(false);
     }, 800);
@@ -127,7 +128,7 @@ const Login: React.FC<Props> = ({ onLogin, users, company, onSync, isSyncing, is
               </button>
             </div>
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-              Segurança Prime &copy; 2024
+              Segurança Prime &copy; 2024 • {users?.length || 0} Usuários
             </p>
           </div>
         </div>
