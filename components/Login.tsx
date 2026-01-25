@@ -126,6 +126,13 @@ const Login: React.FC<Props> = ({ onLogin, users, company, onSync, isSyncing, is
                   {isSyncing ? 'Sincronizando...' : isConnected ? 'Nuvem Conectada' : 'Modo Offline'}
                 </span>
               </button>
+              <button
+                type="button"
+                onClick={() => { localStorage.clear(); window.location.reload(); }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-rose-100 bg-rose-50 hover:bg-rose-100 transition-all text-rose-600"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-widest">Reset Total</span>
+              </button>
             </div>
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
               Segurança Prime &copy; 2024 • {users?.length || 0} Usuários
