@@ -183,7 +183,7 @@ const AppContent: React.FC = () => {
   }, [orders, transactions]);
 
   if (!currentUser) {
-    return <Login users={users} onLogin={(u) => { setCurrentUser(u); db.save(STORAGE_KEYS.SESSION, u); }} company={company} />;
+    return <Login users={users} onLogin={(u) => { setCurrentUser(u); db.save(STORAGE_KEYS.SESSION, u); }} company={company} onSync={handleManualSync} isSyncing={isSyncing} isConnected={db.isConnected()} />;
   }
 
   const navItems = [

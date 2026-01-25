@@ -7,9 +7,12 @@ interface Props {
   onLogin: (user: UserAccount) => void;
   users: UserAccount[];
   company?: CompanyProfile;
+  onSync: () => void;
+  isSyncing: boolean;
+  isConnected: boolean;
 }
 
-const Login: React.FC<Props> = ({ onLogin, users, company }) => {
+const Login: React.FC<Props> = ({ onLogin, users, company, onSync, isSyncing, isConnected }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -109,7 +112,20 @@ const Login: React.FC<Props> = ({ onLogin, users, company }) => {
             </button>
           </form>
 
-          <div className="mt-8 pt-8 border-t border-slate-100 text-center">
+          <div className="mt-8 pt-8 border-t border-slate-100 flex flex-col items-center gap-3">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={onSync}
+                disabled={isSyncing || !isConnected}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-all ${isSyncing ? 'bg-blue-50 border-blue-100' : isConnected ? 'bg-emerald-50 border-emerald-100 hover:bg-emerald-100' : 'bg-slate-50 border-slate-100'}`}
+              >
+                <div className={`w-2 h-2 rounded-full ${isSyncing ? 'bg-blue-500 animate-pulse' : isConnected ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                <span className={`text-[10px] font-bold uppercase tracking-widest ${isSyncing ? 'text-blue-600' : isConnected ? 'text-emerald-600' : 'text-slate-400'}`}>
+                  {isSyncing ? 'Sincronizando...' : isConnected ? 'Nuvem Conectada' : 'Modo Offline'}
+                </span>
+              </button>
+            </div>
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
               Segurança Prime &copy; 2024
             </p>
