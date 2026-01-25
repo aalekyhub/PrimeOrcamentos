@@ -177,7 +177,7 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
       )}
 
       {!defaultOpenForm && (
-        <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden overflow-x-auto">
           <div className="p-8 border-b border-slate-100 flex items-center gap-4">
             <div className="relative w-full max-w-md">
               <Search className="absolute left-4 top-3.5 w-4 h-4 text-slate-400" />

@@ -440,7 +440,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
         </div>
       </div>
 
-      <div className="bg-white rounded-[2rem] border overflow-hidden shadow-sm">
+      <div className="bg-white rounded-[2rem] border overflow-hidden shadow-sm overflow-x-auto">
         <table className="w-full text-left">
           <thead className="bg-slate-50 text-[10px] font-black uppercase text-slate-400 border-b">
             <tr><th className="px-8 py-5">OS #</th><th className="px-8 py-5">CLIENTE</th><th className="px-8 py-5">EQUIPAMENTO</th><th className="px-8 py-5 text-right">AÇÕES</th></tr>
@@ -503,7 +503,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
               </div>
               <button onClick={() => setShowForm(false)} className="bg-slate-100 hover:bg-slate-200 p-2 rounded-full transition-colors"><X className="w-6 h-6 text-slate-400" /></button>
             </div>
-            <div className="flex-1 flex overflow-hidden">
+            <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
               <div className="flex-1 overflow-y-auto p-8 space-y-6 bg-[#f8fafc] no-scrollbar">
                 <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -556,7 +556,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                 )}
                 {showFullClientForm && <div className="hidden"><CustomerManager customers={customers} setCustomers={setCustomers} orders={orders} defaultOpenForm={true} onSuccess={() => { }} /></div>}
               </div>
-              <div className="w-[380px] bg-slate-50 border-l border-slate-200 p-8 flex flex-col shrink-0 relative overflow-hidden">
+              <div className="w-full lg:w-[380px] bg-slate-50 border-t lg:border-t-0 lg:border-l border-slate-200 p-8 flex flex-col shrink-0 relative overflow-hidden overflow-y-auto lg:overflow-y-hidden h-auto lg:h-full">
                 <div className="mb-8 p-6 bg-white rounded-3xl border border-slate-100 shadow-sm text-center relative overflow-hidden group">
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Valor Total Estimado</p>
@@ -564,12 +564,12 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Peças + Mão de Obra</p>
                 </div>
 
-                <div className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm relative grow flex flex-col mb-4">
+                <div className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm relative grow flex flex-col mb-4 min-h-[200px] lg:min-h-0">
                   <div className="p-3 bg-slate-50 border-b flex justify-between items-center">
                     <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Assinatura do Cliente</h4>
                     <button onClick={clearSignature} className="bg-rose-50 hover:bg-rose-100 text-rose-500 hover:text-rose-600 p-1.5 rounded-lg transition-colors" title="Limpar"><Eraser className="w-3 h-3" /></button>
                   </div>
-                  <div className="grow bg-white relative cursor-crosshair">
+                  <div className="grow bg-white relative cursor-crosshair h-32 lg:h-auto">
                     <canvas ref={canvasRef} width={320} height={180} className="w-full h-full touch-none" />
                     <div className="absolute bottom-2 left-0 w-full text-center pointer-events-none opacity-20"><p className="text-[8px] font-black uppercase text-slate-300">Área de Assinatura Digital</p></div>
                   </div>

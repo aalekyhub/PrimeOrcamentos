@@ -350,8 +350,8 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
           {loans.length === 0 && <p className="col-span-full text-center py-20 text-slate-400 font-bold italic">Nenhum empréstimo ou financiamento ativo.</p>}
         </div>
       ) : (
-        <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+        <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden overflow-x-auto">
+          <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 min-w-[600px]">
             <h4 className="font-bold text-slate-800 text-sm">
               {activeSubTab === 'geral' ? 'Histórico de Lançamentos' : 'Itens de Recorrência Fixa'}
             </h4>

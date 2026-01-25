@@ -437,7 +437,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         </div>
       </div>
 
-      <div className="bg-white rounded-[2rem] border overflow-hidden shadow-sm">
+      <div className="bg-white rounded-[2rem] border overflow-hidden shadow-sm overflow-x-auto">
         <table className="w-full text-left">
           <thead className="bg-slate-50 text-[10px] font-black uppercase text-slate-400 border-b">
             <tr>
@@ -545,8 +545,8 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
               </div>
               <button onClick={() => setShowForm(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X className="w-6 h-6 text-slate-300" /></button>
             </div>
-            <div className="flex-1 flex overflow-hidden relative">
-              <div className="flex-1 overflow-y-auto p-6 bg-[#f8fafc] space-y-6 no-scrollbar">
+            <div className="flex-1 flex flex-col lg:flex-row overflow-hidden overflow-y-auto lg:overflow-y-hidden relative">
+              <div className="flex-1 lg:overflow-y-auto p-6 bg-[#f8fafc] space-y-6 no-scrollbar">
                 <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -664,7 +664,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                   </div>
                 )}
               </div>
-              <div className="w-[340px] bg-[#0f172a] text-white p-6 flex flex-col space-y-6 shrink-0 shadow-2xl relative overflow-hidden">
+              <div className="w-full lg:w-[340px] bg-[#0f172a] text-white p-6 flex flex-col space-y-6 shrink-0 shadow-2xl relative overflow-hidden h-auto lg:h-full">
                 <div className="relative z-10">
                   <h4 className="text-[8px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Investimento Total</h4>
 

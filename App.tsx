@@ -244,7 +244,7 @@ const AppContent: React.FC = () => {
       </aside>
 
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-10 shrink-0 z-10">
+        <header className="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-10 shrink-0 z-10">
           <div className="flex items-center gap-4">
             <button className="lg:hidden p-2 hover:bg-slate-100 rounded-xl" onClick={() => setSidebarOpen(true)}>
               <Menu className="w-6 h-6 text-slate-600" />
@@ -285,7 +285,7 @@ const AppContent: React.FC = () => {
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-10 bg-slate-50 no-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 md:p-10 bg-slate-50 no-scrollbar">
           <div className="max-w-[1400px] mx-auto">
             {activeTab === 'dashboard' && <Dashboard stats={stats} orders={orders} transactions={transactions} currentUser={currentUser} company={company} onNavigate={setActiveTab} />}
             {activeTab === 'customers' && <CustomerManager customers={customers} setCustomers={setCustomers} orders={orders} />}
