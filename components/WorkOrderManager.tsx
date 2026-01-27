@@ -4,13 +4,15 @@ import html2pdf from 'html2pdf.js';
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
     Plus, Search, X, Trash2, Pencil, Printer, Save, FileDown,
-    UserPlus, HardHat, Eraser, FileText, ScrollText, Wallet
+    UserPlus, HardHat, Eraser, FileText, ScrollText, Wallet,
+    Type, Image as ImageIcon, Zap, Upload
 } from 'lucide-react';
 import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock, Transaction } from '../types';
 import { useNotify } from './ToastProvider';
 import CustomerManager from './CustomerManager';
 import { db } from '../services/db';
 import { formatDocument } from '../services/validation';
+import { compressImage } from '../services/imageUtils';
 
 interface Props {
     orders: ServiceOrder[];
@@ -102,6 +104,24 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     }), [orders, searchTerm]);
 
     const totalAmount = useMemo(() => items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0), [items]);
+
+    const addTextBlock = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'text', content: '' }]);
+    const addImageBlock = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'image', content: '' }]);
+    const addPageBreak = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'page-break', content: 'QUEBRA DE PÁGINA' }]);
+    const updateBlockContent = (id: string, content: string) => setDescriptionBlocks(prev => prev.map(b => b.id === id ? { ...b, content } : b));
+
+    const handleImageUpload = async (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            try {
+                const compressedBase64 = await compressImage(file);
+                updateBlockContent(id, compressedBase64);
+            } catch (error) {
+                console.error("Erro ao comprimir imagem:", error);
+                notify("Erro ao processar imagem. Tente uma menor.", "error");
+            }
+        }
+    };
 
     const handleAddItem = () => {
         if (!currentDesc || currentPrice <= 0) return;
@@ -253,9 +273,26 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                <div class="mb-12">
                    <div class="section-title">Escopo dos Serviços</div>
                    <div class="info-box bg-slate-50 border border-slate-100">
-                       <p class="text-[10px] text-slate-600 leading-relaxed italic">${order.serviceDescription || 'Nenhuma observação técnica registrada.'}</p>
+                       <p class="text-[10px] text-slate-600 leading-relaxed italic whitespace-pre-wrap">${order.serviceDescription || 'Nenhuma observação técnica registrada.'}</p>
                    </div>
                </div>
+
+               ${order.descriptionBlocks && order.descriptionBlocks.length > 0 ? `
+               <div class="mb-12">
+                   <div class="section-title">Anexos e Fotos</div>
+                   <div class="space-y-4">
+                       ${order.descriptionBlocks.map(block => {
+            if (block.type === 'text') {
+                return `<p class="text-slate-700 leading-relaxed text-justify font-medium whitespace-pre-wrap text-[11px] mb-4">${block.content}</p>`;
+            } else if (block.type === 'image') {
+                return `<div style="break-inside: avoid; page-break-inside: avoid; margin: 15px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; object-fit: contain;"></div>`;
+            } else if (block.type === 'page-break') {
+                return `<div style="page-break-after: always; break-after: page; height: 0; margin: 0; padding: 0;"></div>`;
+            }
+            return '';
+        }).join('')}
+                   </div>
+               </div>` : ''}
 
                <div class="mb-8">
                    <div class="section-title">Materiais e Mão de Obra</div>
@@ -680,7 +717,46 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                         </div>
 
                                         <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                                            <div><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Detalhamento do Escopo / Observações</label><textarea className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-700 outline-none h-24 focus:ring-2 focus:ring-blue-500" placeholder="Descreva os serviços a serem executados..." value={diagnosis} onChange={e => setDiagnosis(e.target.value)} /></div>
+                                            <div><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Detalhamento do Escopo / Observações</label><textarea className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-700 outline-none h-24 focus:ring-2 focus:ring-blue-500 shadow-inner" placeholder="Descreva os serviços a serem executados..." value={diagnosis} onChange={e => setDiagnosis(e.target.value)} /></div>
+                                        </div>
+
+                                        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
+                                            <div className="flex justify-between items-center">
+                                                <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-widest border-b pb-2 grow mr-6">FOTOS E ANEXOS DA OBRA</h4>
+                                                <div className="flex gap-2">
+                                                    <button onClick={addTextBlock} className="bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase flex items-center gap-1 hover:bg-blue-100"><Type className="w-3.5 h-3.5" /> + TEXTO</button>
+                                                    <button onClick={addImageBlock} className="bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase flex items-center gap-1 hover:bg-emerald-100"><ImageIcon className="w-3.5 h-3.5" /> + IMAGEM</button>
+                                                    <button onClick={addPageBreak} className="bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase flex items-center gap-1 hover:bg-slate-200"><Zap className="w-3.5 h-3.5" /> + QUEBRA</button>
+                                                </div>
+                                            </div>
+                                            <div className="space-y-3">
+                                                {descriptionBlocks.map((block) => (
+                                                    <div key={block.id} className="relative group">
+                                                        {block.type === 'text' ? (
+                                                            <textarea className="w-full bg-slate-50 border border-slate-100 rounded-xl p-4 text-[11px] font-medium outline-none h-24 focus:ring-2 focus:ring-blue-500 shadow-inner" value={block.content} onChange={e => updateBlockContent(block.id, e.target.value)} placeholder="Detalhes da foto ou texto..." />
+                                                        ) : block.type === 'image' ? (
+                                                            <div className="w-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center gap-2">
+                                                                {block.content ? (
+                                                                    <div className="relative max-w-[200px]"><img src={block.content} className="w-full h-auto rounded-lg shadow-lg" /><button onClick={() => updateBlockContent(block.id, '')} className="absolute -top-2 -right-2 bg-rose-500 text-white p-1.5 rounded-full"><Trash2 className="w-3 h-3" /></button></div>
+                                                                ) : (
+                                                                    <label className="cursor-pointer flex flex-col items-center gap-1"><Upload className="w-5 h-5 text-blue-500" /><span className="text-[8px] font-black text-slate-400 uppercase">Subir Foto</span><input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(block.id, e)} /></label>
+                                                                )}
+                                                            </div>
+                                                        ) : (
+                                                            <div className="w-full bg-slate-100 border border-slate-200 rounded-xl p-4 flex items-center justify-between">
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="bg-slate-900 p-2 rounded-lg text-white"><Zap className="w-3 h-3" /></div>
+                                                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Quebra de Página Forçada</span>
+                                                                </div>
+                                                                <button onClick={() => setDescriptionBlocks(descriptionBlocks.filter(b => b.id !== block.id))} className="text-rose-300 hover:text-rose-600 p-1"><Trash2 className="w-4 h-4" /></button>
+                                                            </div>
+                                                        )}
+                                                        {block.type !== 'page-break' && (
+                                                            <button onClick={() => setDescriptionBlocks(descriptionBlocks.filter(b => b.id !== block.id))} className="absolute -top-2 -right-2 bg-slate-200 text-slate-500 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><X className="w-3 h-3" /></button>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
 
                                         <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">

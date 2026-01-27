@@ -81,7 +81,7 @@ export interface ServiceItem {
 
 export interface DescriptionBlock {
   id: string;
-  type: 'text' | 'image';
+  type: 'text' | 'image' | 'page-break';
   content: string;
 }
 
