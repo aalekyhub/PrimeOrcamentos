@@ -232,7 +232,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                    <div class="space-y-4">
                         ${budget.descriptionBlocks.map(block => {
       if (block.type === 'text') {
-        return `<p style="font-size: ${company.descriptionFontSize || 12}px;" class="text-slate-700 leading-relaxed text-justify font-medium whitespace-pre-wrap mb-4">${block.content}</p>`;
+        return `<p style="font-size: ${company.descriptionFontSize || 14}px;" class="text-slate-700 leading-relaxed text-justify font-medium whitespace-pre-wrap mb-4">${block.content}</p>`;
       } else if (block.type === 'image') {
         return `<div style="break-inside: avoid; page-break-inside: avoid; margin: 15px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; object-fit: contain;"></div>`;
       } else if (block.type === 'page-break') {

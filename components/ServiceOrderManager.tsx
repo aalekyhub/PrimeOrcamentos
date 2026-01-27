@@ -240,7 +240,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                <div class="mb-12">
                    <div class="section-title">Relatório Técnico / Diagnóstico</div>
                    <div class="info-box bg-slate-50 border border-slate-100">
-                       <p class="text-[10px] text-slate-600 leading-relaxed italic whitespace-pre-wrap">${order.serviceDescription || 'Nenhum laudo técnico registrado.'}</p>
+                       <p class="text-[14px] text-slate-800 leading-relaxed font-medium whitespace-pre-wrap">${order.serviceDescription || 'Nenhum laudo técnico registrado.'}</p>
                    </div>
                </div>
 
@@ -250,7 +250,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                    <div class="space-y-4">
                        ${order.descriptionBlocks.map(block => {
       if (block.type === 'text') {
-        return `<p class="text-slate-700 leading-relaxed text-justify font-medium whitespace-pre-wrap text-[10px] mb-4">${block.content}</p>`;
+        return `<p class="text-slate-800 leading-relaxed text-justify font-medium whitespace-pre-wrap text-[14px] mb-4">${block.content}</p>`;
       } else if (block.type === 'image') {
         return `<div style="break-inside: avoid; page-break-inside: avoid; margin: 15px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; object-fit: contain;"></div>`;
       } else if (block.type === 'page-break') {
