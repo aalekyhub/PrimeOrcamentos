@@ -262,7 +262,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                    </div>
                    <div class="bg-slate-900 text-white p-6 rounded-xl flex justify-between items-center shadow-xl">
                        <span class="text-[12px] font-black uppercase tracking-widest">Valor Total:</span>
-                       <span class="text-3xl font-black text-blue-400 tracking-tighter text-right">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                       <span class="text-3xl font-black text-white tracking-tighter text-right">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                    </div>
                </div>
 
