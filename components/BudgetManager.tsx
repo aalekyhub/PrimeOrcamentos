@@ -148,7 +148,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         <td style="padding: 12px 0; text-align: center; color: #475569; font-size: ${Math.max(8, itemFontBase - 1)}px; font-weight: 500; text-transform: uppercase;">${item.type === 'Material' ? 'MAT' : 'SERV'}</td>
         <td style="padding: 12px 0; text-align: center; font-weight: 500; color: #0f172a; font-size: ${itemFontBase}px;">${item.quantity} ${item.unit || ''}</td>
         <td style="padding: 12px 0; text-align: right; color: #475569; font-size: ${itemFontBase}px;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-        <td style="padding: 12px 10px; text-align: right; font-weight: 700; font-size: ${itemFontBase + 1}px; color: #0f172a;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        <td style="padding: 12px 10px; text-align: right; font-weight: 500; font-size: ${itemFontBase + 1}px; color: #0f172a;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
       </tr>`).join('');
 
     const html = `
