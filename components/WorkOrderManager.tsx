@@ -206,11 +206,11 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
         const itemsHtml = order.items.map((item: ServiceItem) => `
       <tr style="border-bottom: 1px solid #f1f5f9;">
-        <td style="padding: 12px 10px; font-weight: 800; text-transform: uppercase; font-size: 10px; color: #0f172a;">${item.description}</td>
-        <td style="padding: 12px 0; text-align: center; color: #94a3b8; font-size: 9px; font-weight: bold; text-transform: uppercase;">${item.unit || 'UN'}</td>
-        <td style="padding: 12px 0; text-align: center; font-weight: 800; color: #0f172a; font-size: 10px;">${item.quantity}</td>
+        <td style="padding: 12px 10px; font-weight: 600; text-transform: uppercase; font-size: 10px; color: #0f172a;">${item.description}</td>
+        <td style="padding: 12px 0; text-align: center; color: #94a3b8; font-size: 9px; font-weight: 600; text-transform: uppercase;">${item.unit || 'UN'}</td>
+        <td style="padding: 12px 0; text-align: center; font-weight: 600; color: #0f172a; font-size: 10px;">${item.quantity}</td>
         <td style="padding: 12px 0; text-align: right; color: #64748b; font-size: 10px;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-        <td style="padding: 12px 10px; text-align: right; font-weight: 900; font-size: 11px; color: #0f172a;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        <td style="padding: 12px 10px; text-align: right; font-weight: 700; font-size: 11px; color: #0f172a;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
       </tr>`).join('');
 
         const html = `
@@ -226,10 +226,10 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
            .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
            .avoid-break { break-inside: avoid; page-break-inside: avoid; }
            .info-box { background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
-           .info-label { font-size: 9px; font-weight: 900; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block; }
-           .info-value { font-size: 11px; font-weight: 900; color: #0f172a; text-transform: uppercase; line-height: 1.4; }
-           .info-sub { font-size: 10px; color: #64748b; font-weight: 600; }
-           .section-title { font-size: 9px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; margin-bottom: 16px; }
+           .info-label { font-size: 9px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block; }
+           .info-value { font-size: 11px; font-weight: 700; color: #0f172a; text-transform: uppercase; line-height: 1.4; }
+           .info-sub { font-size: 10px; color: #64748b; font-weight: 500; }
+           .section-title { font-size: 9px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; margin-bottom: 16px; }
            @media screen { body { background: #f1f5f9; padding: 40px 0; } .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; } }
            @media print { body { background: white !important; margin: 0 !important; } .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; } .no-screen { display: block !important; } .no-print { display: none !important; } .print-footer { display: none !important; } .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; } }
         </style>
@@ -242,18 +242,18 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                <div class="flex justify-between items-start mb-12 border-b-2 border-slate-900 pb-8">
                    <div class="flex gap-6 items-center">
                        <div style="width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;">
-                           ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:30px; color:#2563eb;">PO</div>'}
+                           ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:700; font-size:30px; color:#2563eb;">PO</div>'}
                        </div>
                        <div>
-                           <h1 class="text-2xl font-black text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
-                           <p class="text-[9px] font-black text-blue-600 uppercase tracking-widest leading-none">Soluções em Construção e Reforma</p>
-                           <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tight mt-2">${company.cnpj || ''} | ${company.phone || ''}</p>
+                           <h1 class="text-2xl font-bold text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
+                           <p class="text-[9px] font-bold text-blue-600 uppercase tracking-widest leading-none">Soluções em Construção e Reforma</p>
+                           <p class="text-[8px] text-slate-400 font-medium uppercase tracking-tight mt-2">${company.cnpj || ''} | ${company.phone || ''}</p>
                        </div>
                    </div>
                    <div class="text-right">
-                       <div class="bg-[#0f172a] text-white px-3 py-1 rounded-md text-[9px] font-black uppercase tracking-widest mb-2 inline-block shadow-sm whitespace-nowrap">ORDEM DE SERVIÇO</div>
-                       <p class="text-3xl font-black text-[#0f172a] tracking-tighter mb-1 whitespace-nowrap">OS-${order.id.replace('OS-', '')}</p>
-                       <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest text-right">ABERTURA: ${formatDate(order.createdAt)}</p>
+                       <div class="bg-[#0f172a] text-white px-3 py-1 rounded-md text-[9px] font-bold uppercase tracking-widest mb-2 inline-block shadow-sm whitespace-nowrap">ORDEM DE SERVIÇO</div>
+                       <p class="text-3xl font-bold text-[#0f172a] tracking-tighter mb-1 whitespace-nowrap">OS-${order.id.replace('OS-', '')}</p>
+                       <p class="text-[9px] font-medium text-slate-500 uppercase tracking-widest text-right">ABERTURA: ${formatDate(order.createdAt)}</p>
                    </div>
                </div>
 
@@ -299,11 +299,11 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                    <table style="width: 100%; border-collapse: collapse;">
                        <thead>
                            <tr style="border-bottom: 2px solid #0f172a;">
-                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 900; letter-spacing: 0.05em;">Descrição</th>
-                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 900; letter-spacing: 0.05em;">UN</th>
-                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 900; letter-spacing: 0.05em;">Qtd</th>
-                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 900; letter-spacing: 0.05em;">Unitário</th>
-                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 900; letter-spacing: 0.05em;">Total</th>
+                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 700; letter-spacing: 0.05em;">Descrição</th>
+                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 700; letter-spacing: 0.05em;">UN</th>
+                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 700; letter-spacing: 0.05em;">Qtd</th>
+                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 700; letter-spacing: 0.05em;">Unitário</th>
+                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 700; letter-spacing: 0.05em;">Total</th>
                            </tr>
                        </thead>
                        <tbody>${itemsHtml}</tbody>
@@ -313,23 +313,23 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                 <div class="avoid-break mb-12">
                    <div class="flex justify-end mb-2 gap-6 px-2">
                         <div class="text-right">
-                           <span class="text-[8px] font-bold text-slate-600 uppercase block">Subtotal</span>
-                           <span class="text-[10px] font-black text-slate-700 block">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                           <span class="text-[8px] font-medium text-slate-600 uppercase block">Subtotal</span>
+                           <span class="text-[10px] font-bold text-slate-700 block">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                         </div>
                         ${order.bdiRate ? `
                         <div class="text-right">
-                           <span class="text-[8px] font-bold text-slate-600 uppercase block">BDI (${order.bdiRate}%)</span>
-                           <span class="text-[10px] font-black text-emerald-600 block">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                           <span class="text-[8px] font-medium text-slate-600 uppercase block">BDI (${order.bdiRate}%)</span>
+                           <span class="text-[10px] font-bold text-emerald-600 block">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                         </div>` : ''}
                         ${order.taxRate ? `
                         <div class="text-right">
-                           <span class="text-[8px] font-bold text-slate-600 uppercase block">Impostos (${order.taxRate}%)</span>
-                           <span class="text-[10px] font-black text-blue-600 block">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                           <span class="text-[8px] font-medium text-slate-600 uppercase block">Impostos (${order.taxRate}%)</span>
+                           <span class="text-[10px] font-bold text-blue-600 block">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                         </div>` : ''}
                    </div>
                    <div class="bg-slate-900 text-white p-6 rounded-xl flex justify-between items-center shadow-xl">
-                       <span class="text-[12px] font-black uppercase tracking-widest">INVESTIMENTO TOTAL:</span>
-                       <span class="text-3xl font-black text-white tracking-tighter text-right">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                       <span class="text-[12px] font-bold uppercase tracking-widest">INVESTIMENTO TOTAL:</span>
+                       <span class="text-3xl font-bold text-white tracking-tighter text-right">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                    </div>
                 </div>
 
@@ -337,14 +337,14 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                    <div class="grid grid-cols-2 gap-16 px-10">
                        <div class="text-center">
                            <div style="border-top: 1px solid #cbd5e1; margin-bottom: 8px;"></div>
-                           <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Responsável Técnico</p>
-                           <p class="text-[10px] font-black uppercase text-slate-900">${company.name}</p>
+                           <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Responsável Técnico</p>
+                           <p class="text-[10px] font-bold uppercase text-slate-900">${company.name}</p>
                        </div>
                        <div class="text-center relative">
                            ${order.signature ? `<img src="${order.signature}" style="max-height: 50px; position: absolute; top: -45px; left: 50%; transform: translateX(-50%);">` : ''}
                            <div style="border-top: 1px solid #cbd5e1; margin-bottom: 8px;"></div>
-                           <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Assinatura do Cliente</p>
-                           <p class="text-[10px] font-black uppercase text-slate-900">${order.customerName}</p>
+                           <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Assinatura do Cliente</p>
+                           <p class="text-[10px] font-bold uppercase text-slate-900">${order.customerName}</p>
                        </div>
                    </div>
                </div>
@@ -399,8 +399,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             </div>
 
             <div class="grid grid-cols-2 gap-4 mb-5">
-              <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</h4><p class="text-sm font-black text-slate-900 uppercase">${company.name}</p><p class="text-[11px] text-slate-500 uppercase">${company.address || ''}</p><p class="text-[11px] text-slate-500 uppercase">${company.email || ''}</p></div>
-              <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</h4><p class="text-sm font-black text-slate-900 uppercase">${customer.name}</p><p class="text-[11px] text-slate-500 uppercase">${(customer.document || '').replace(/\D/g, '').length <= 11 ? 'CPF' : 'CNPJ'}: ${formatDocument(customer.document || '') || 'N/A'}</p><p class="text-[11px] text-slate-500 uppercase">${customer.address || ''}, ${customer.number || ''} - ${customer.city || ''}</p></div>
+              <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</h4><p class="text-sm font-bold text-slate-900 uppercase">${company.name}</p><p class="text-[11px] text-slate-500 uppercase">${company.address || ''}</p><p class="text-[11px] text-slate-500 uppercase">${company.email || ''}</p></div>
+              <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</h4><p class="text-sm font-bold text-slate-900 uppercase">${customer.name}</p><p class="text-[11px] text-slate-500 uppercase">${(customer.document || '').replace(/\D/g, '').length <= 11 ? 'CPF' : 'CNPJ'}: ${formatDocument(customer.document || '') || 'N/A'}</p><p class="text-[11px] text-slate-500 uppercase">${customer.address || ''}, ${customer.number || ''} - ${customer.city || ''}</p></div>
             </div>
 
 
@@ -444,10 +444,10 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
             <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA DÉCIMA PRIMEIRA – FORO</h4><p class="text-[14px] text-slate-600 leading-relaxed text-justify">Fica eleito o foro da Comarca de <b>${customer.city || 'São Paulo'} - ${customer.state || 'SP'}</b>, com renúncia a qualquer outro, por mais privilegiado que seja.</p></div>
 
-            <div className="mb-8" style="padding-top: 30mm; padding-bottom: 20mm; page-break-inside: avoid; break-inside: avoid;">
+            <div class="mb-8" style="padding-top: 30mm; padding-bottom: 20mm; page-break-inside: avoid; break-inside: avoid;">
               <div class="grid grid-cols-2 gap-16 px-10">
-                <div class="text-center border-t border-slate-300 pt-3" style="page-break-inside: avoid; break-inside: avoid;"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</p><p class="text-sm font-black uppercase text-slate-900">${company.name}</p></div>
-                <div class="text-center border-t border-slate-300 pt-3 relative" style="page-break-inside: avoid; break-inside: avoid;"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</p><p class="text-sm font-black uppercase text-slate-900">${customer.name}</p></div>
+                <div class="text-center border-t border-slate-300 pt-3" style="page-break-inside: avoid; break-inside: avoid;"><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</p><p class="text-sm font-bold uppercase text-slate-900">${company.name}</p></div>
+                <div class="text-center border-t border-slate-300 pt-3 relative" style="page-break-inside: avoid; break-inside: avoid;"><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</p><p class="text-sm font-bold uppercase text-slate-900">${customer.name}</p></div>
               </div>
             </div>
           </div>
@@ -510,21 +510,21 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         ${company.logo ? `<img src="${company.logo}" style="height: 100%; object-fit: contain;">` : `<div style="width: 64px; height: 64px; background: #2563eb; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white;"><svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></div>`}
                     </div>
                     <div>
-                        <h1 class="text-xl font-black text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
-                        <p class="text-[9px] font-black text-blue-600 uppercase tracking-widest">${company.tagline || 'Soluções em Gestão e Manutenção Profissional'}</p>
-                        <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tight mt-1">${company.cnpj || ''} | ${company.phone || ''}</p>
+                        <h1 class="text-xl font-bold text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
+                        <p class="text-[9px] font-bold text-blue-600 uppercase tracking-widest">${company.tagline || 'Soluções em Gestão e Manutenção Profissional'}</p>
+                        <p class="text-[8px] text-slate-400 font-medium uppercase tracking-tight mt-1">${company.cnpj || ''} | ${company.phone || ''}</p>
                     </div>
                 </div>
                 <div class="text-right">
-                    <div class="bg-blue-600 text-white px-4 py-1 rounded text-[8px] font-black uppercase tracking-widest mb-1 inline-flex items-center justify-center">CONTRATO</div>
-                    <h2 class="text-3xl font-black text-slate-900 tracking-tighter">${order.id}</h2>
-                    <div class="mt-2 space-y-0.5"><p class="text-[8px] font-black text-slate-400 uppercase tracking-widest text-right">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p></div>
+                    <div class="bg-blue-600 text-white px-4 py-1 rounded text-[8px] font-bold uppercase tracking-widest mb-1 inline-flex items-center justify-center">CONTRATO</div>
+                    <h2 class="text-3xl font-bold text-slate-900 tracking-tighter">${order.id}</h2>
+                    <div class="mt-2 space-y-0.5"><p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest text-right">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p></div>
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-4 mb-5">
-              <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</h4><p class="text-sm font-black text-slate-900 uppercase">${company.name}</p><p class="text-[11px] text-slate-500 uppercase">${company.address || ''}</p><p class="text-[11px] text-slate-500 uppercase">${company.email || ''}</p></div>
-              <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</h4><p class="text-sm font-black text-slate-900 uppercase">${customer.name}</p><p class="text-[11px] text-slate-500 uppercase">${(customer.document || '').replace(/\D/g, '').length <= 11 ? 'CPF' : 'CNPJ'}: ${formatDocument(customer.document || '') || 'N/A'}</p><p class="text-[11px] text-slate-500 uppercase">${customer.address || ''}, ${customer.number || ''} - ${customer.city || ''}</p></div>
+              <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</h4><p class="text-sm font-bold text-slate-900 uppercase">${company.name}</p><p class="text-[11px] text-slate-500 uppercase">${company.address || ''}</p><p class="text-[11px] text-slate-500 uppercase">${company.email || ''}</p></div>
+              <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</h4><p class="text-sm font-bold text-slate-900 uppercase">${customer.name}</p><p class="text-[11px] text-slate-500 uppercase">${(customer.document || '').replace(/\D/g, '').length <= 11 ? 'CPF' : 'CNPJ'}: ${formatDocument(customer.document || '') || 'N/A'}</p><p class="text-[11px] text-slate-500 uppercase">${customer.address || ''}, ${customer.number || ''} - ${customer.city || ''}</p></div>
             </div>
 
 
@@ -568,10 +568,10 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
             <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;"><h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA DÉCIMA PRIMEIRA – FORO</h4><p class="text-[14px] text-slate-600 leading-relaxed text-justify">Fica eleito o foro da Comarca de <b>${customer.city || 'São Paulo'} - ${customer.state || 'SP'}</b>, com renúncia a qualquer outro, por mais privilegiado que seja.</p></div>
 
-            <div className="mb-8" style="padding-top: 50mm; page-break-inside: avoid; break-inside: avoid;">
+            <div class="mb-8" style="padding-top: 50mm; page-break-inside: avoid; break-inside: avoid;">
               <div class="grid grid-cols-2 gap-16 px-10">
-                <div class="text-center border-t border-slate-300 pt-3"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</p><p class="text-sm font-black uppercase text-slate-900">${company.name}</p></div>
-                <div class="text-center border-t border-slate-300 pt-3 relative"><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</p><p class="text-sm font-black uppercase text-slate-900">${customer.name}</p></div>
+                <div class="text-center border-t border-slate-300 pt-3"><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</p><p class="text-sm font-bold uppercase text-slate-900">${company.name}</p></div>
+                <div class="text-center border-t border-slate-300 pt-3 relative"><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</p><p class="text-sm font-bold uppercase text-slate-900">${customer.name}</p></div>
               </div>
             </div>
           </div>

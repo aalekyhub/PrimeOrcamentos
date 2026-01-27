@@ -159,11 +159,11 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
 
     const itemsHtml = order.items.map((item: ServiceItem) => `
       <tr style="border-bottom: 1px solid #f1f5f9;">
-        <td style="padding: 12px 10px; font-weight: 800; text-transform: uppercase; font-size: 10px; color: #0f172a;">${item.description}</td>
-        <td style="padding: 12px 0; text-align: center; color: #94a3b8; font-size: 9px; font-weight: bold; text-transform: uppercase;">${item.unit || 'UN'}</td>
-        <td style="padding: 12px 0; text-align: center; font-weight: 800; color: #0f172a; font-size: 10px;">${item.quantity}</td>
+        <td style="padding: 12px 10px; font-weight: 600; text-transform: uppercase; font-size: 10px; color: #0f172a;">${item.description}</td>
+        <td style="padding: 12px 0; text-align: center; color: #94a3b8; font-size: 9px; font-weight: 600; text-transform: uppercase;">${item.unit || 'UN'}</td>
+        <td style="padding: 12px 0; text-align: center; font-weight: 600; color: #0f172a; font-size: 10px;">${item.quantity}</td>
         <td style="padding: 12px 0; text-align: right; color: #64748b; font-size: 10px;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-        <td style="padding: 12px 10px; text-align: right; font-weight: 900; font-size: 11px; color: #0f172a;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        <td style="padding: 12px 10px; text-align: right; font-weight: 700; font-size: 11px; color: #0f172a;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
       </tr>`).join('');
 
     const html = `
@@ -181,11 +181,11 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
            
            /* Premium Box Styles */
            .info-box { background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
-           .info-label { font-size: 9px; font-weight: 900; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block; }
-           .info-value { font-size: 11px; font-weight: 900; color: #0f172a; text-transform: uppercase; line-height: 1.4; }
-           .info-sub { font-size: 10px; color: #64748b; font-weight: 600; }
+           .info-label { font-size: 9px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block; }
+           .info-value { font-size: 11px; font-weight: 700; color: #0f172a; text-transform: uppercase; line-height: 1.4; }
+           .info-sub { font-size: 10px; color: #64748b; font-weight: 500; }
            
-           .section-title { font-size: 9px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; margin-bottom: 16px; }
+           .section-title { font-size: 9px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; margin-bottom: 16px; }
 
            @media screen { body { background: #f1f5f9; padding: 40px 0; } .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; } }
            @media print { 
@@ -207,18 +207,18 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                <div class="flex justify-between items-start mb-12 border-b-2 border-slate-900 pb-8">
                    <div class="flex gap-6 items-center">
                        <div style="width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;">
-                           ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:30px; color:#2563eb;">PO</div>'}
+                           ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:700; font-size:30px; color:#2563eb;">PO</div>'}
                        </div>
                        <div>
-                           <h1 class="text-2xl font-black text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
-                           <p class="text-[9px] font-black text-blue-600 uppercase tracking-widest leading-none">Soluções em Gestão Profissional</p>
-                           <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tight mt-2">${company.cnpj || ''} | ${company.phone || ''}</p>
+                           <h1 class="text-2xl font-bold text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
+                           <p class="text-[9px] font-bold text-blue-600 uppercase tracking-widest leading-none">Soluções em Gestão Profissional</p>
+                           <p class="text-[8px] text-slate-400 font-medium uppercase tracking-tight mt-2">${company.cnpj || ''} | ${company.phone || ''}</p>
                        </div>
                    </div>
                    <div class="text-right">
-                       <div class="bg-slate-900 text-white px-3 py-1 rounded text-[8px] font-black uppercase tracking-widest mb-2 inline-block">Ordem de Serviço</div>
-                       <p class="text-3xl font-black text-slate-900 tracking-tighter mb-1">${order.id}</p>
-                       <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest text-right">ABERTURA: ${formatDate(order.createdAt)}</p>
+                       <div class="bg-slate-900 text-white px-3 py-1 rounded text-[8px] font-bold uppercase tracking-widest mb-2 inline-block">Ordem de Serviço</div>
+                       <p class="text-3xl font-bold text-slate-900 tracking-tighter mb-1">${order.id}</p>
+                       <p class="text-[8px] font-medium text-slate-400 uppercase tracking-widest text-right">ABERTURA: ${formatDate(order.createdAt)}</p>
                    </div>
                </div>
 
@@ -267,11 +267,11 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                    <table style="width: 100%; border-collapse: collapse;">
                        <thead>
                            <tr style="border-bottom: 2px solid #0f172a;">
-                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 900; letter-spacing: 0.05em;">Descrição</th>
-                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 900; letter-spacing: 0.05em;">UN</th>
-                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 900; letter-spacing: 0.05em;">Qtd</th>
-                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 900; letter-spacing: 0.05em;">Unitário</th>
-                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 900; letter-spacing: 0.05em;">Total</th>
+                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 700; letter-spacing: 0.05em;">Descrição</th>
+                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 700; letter-spacing: 0.05em;">UN</th>
+                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 700; letter-spacing: 0.05em;">Qtd</th>
+                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 700; letter-spacing: 0.05em;">Unitário</th>
+                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 700; letter-spacing: 0.05em;">Total</th>
                            </tr>
                        </thead>
                        <tbody>${itemsHtml}</tbody>
@@ -283,30 +283,30 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                    <!-- Breakdown ABOVE the bar (Per user request) -->
                    <div class="flex justify-end mb-2 gap-6 px-2">
                         <div class="text-right">
-                           <span class="text-[8px] font-bold text-slate-400 uppercase block">Subtotal</span>
-                           <span class="text-[10px] font-black text-slate-600 block">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                           <span class="text-[8px] font-medium text-slate-400 uppercase block">Subtotal</span>
+                           <span class="text-[10px] font-bold text-slate-600 block">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                         </div>
                         ${order.bdiRate ? `
                         <div class="text-right">
-                           <span class="text-[8px] font-bold text-slate-400 uppercase block">BDI (${order.bdiRate}%)</span>
-                           <span class="text-[10px] font-black text-emerald-600 block">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                           <span class="text-[8px] font-medium text-slate-400 uppercase block">BDI (${order.bdiRate}%)</span>
+                           <span class="text-[10px] font-bold text-emerald-600 block">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                         </div>` : ''}
                         ${order.taxRate ? `
                         <div class="text-right">
-                           <span class="text-[8px] font-bold text-slate-400 uppercase block">Impostos (${order.taxRate}%)</span>
-                           <span class="text-[10px] font-black text-blue-600 block">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                           <span class="text-[8px] font-medium text-slate-400 uppercase block">Impostos (${order.taxRate}%)</span>
+                           <span class="text-[10px] font-bold text-blue-600 block">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                         </div>` : ''}
                    </div>
                    <div class="bg-slate-900 text-white p-6 rounded-xl flex justify-between items-center shadow-xl">
-                       <span class="text-[12px] font-black uppercase tracking-widest">Valor Total:</span>
-                       <span class="text-3xl font-black text-white tracking-tighter text-right">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                       <span class="text-[12px] font-bold uppercase tracking-widest">Valor Total:</span>
+                       <span class="text-3xl font-bold text-white tracking-tighter text-right">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                    </div>
                </div>
 
                <!-- Legal / Guarantee -->
                <div class="avoid-break mb-12">
                    <div class="border-l-4 border-blue-600 bg-blue-50/40 p-6 rounded-xl">
-                       <h5 class="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-2">Garantia e Notas Legais</h5>
+                       <h5 class="text-[9px] font-bold text-blue-600 uppercase tracking-widest mb-2">Garantia e Notas Legais</h5>
                        <p class="text-[9px] text-slate-700 leading-tight mb-2"><b>• GARANTIA TÉCNICA:</b> 90 dias para os serviços executados (Art. 26 CDC).</p>
                        <p class="text-[9px] text-rose-600 font-bold uppercase leading-tight"><b>• ATENÇÃO:</b> Equipamentos não retirados em até 30 dias após aviso de conclusão estarão sujeitos a taxas de armazenamento ou descarte legal.</p>
                    </div>
@@ -317,14 +317,14 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                    <div class="grid grid-cols-2 gap-16 px-10">
                        <div class="text-center">
                            <div style="border-top: 1px solid #cbd5e1; margin-bottom: 8px;"></div>
-                           <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Responsável Técnico</p>
-                           <p class="text-[10px] font-black uppercase text-slate-900">${company.name}</p>
+                           <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Responsável Técnico</p>
+                           <p class="text-[10px] font-bold uppercase text-slate-900">${company.name}</p>
                        </div>
                        <div class="text-center relative">
                            ${order.signature ? `<img src="${order.signature}" style="max-height: 50px; position: absolute; top: -45px; left: 50%; transform: translateX(-50%);">` : ''}
                            <div style="border-top: 1px solid #cbd5e1; margin-bottom: 8px;"></div>
-                           <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Assinatura do Cliente</p>
-                           <p class="text-[10px] font-black uppercase text-slate-900">${order.customerName}</p>
+                           <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Assinatura do Cliente</p>
+                           <p class="text-[10px] font-bold uppercase text-slate-900">${order.customerName}</p>
                        </div>
                    </div>
                </div>
@@ -381,15 +381,15 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                     </div>
                 </div>
                 <div class="text-right">
-                    <div class="bg-blue-600 text-white px-4 py-1 rounded text-[8px] font-black uppercase tracking-widest mb-1 inline-block">CONTRATO</div>
-                    <h2 class="text-3xl font-black text-slate-900 tracking-tighter">${order.id}</h2>
-                    <div class="mt-2 space-y-0.5"><p class="text-[8px] font-black text-slate-400 uppercase tracking-widest text-right">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p></div>
+                    <div class="bg-blue-600 text-white px-4 py-1 rounded text-[8px] font-bold uppercase tracking-widest mb-1 inline-block">CONTRATO</div>
+                    <h2 class="text-3xl font-bold text-slate-900 tracking-tighter">${order.id}</h2>
+                    <div class="mt-2 space-y-0.5"><p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest text-right">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p></div>
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-4 mb-8">
-              <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 class="text-[7px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</h4><p class="text-[10px] font-black text-slate-900 uppercase">${company.name}</p><p class="text-[9px] text-slate-500 uppercase">${company.address || ''}</p><p class="text-[9px] text-slate-500 uppercase">${company.email || ''}</p></div>
-              <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 class="text-[7px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</h4><p class="text-[10px] font-black text-slate-900 uppercase">${customer.name}</p><p class="text-[9px] text-slate-500 uppercase">DOC: ${customer.document || 'N/A'}</p><p class="text-[9px] text-slate-500 uppercase">${customer.address || ''}, ${customer.number || ''} - ${customer.city || ''}</p></div>
+              <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 class="text-[7px] font-bold text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</h4><p class="text-[10px] font-bold text-slate-900 uppercase">${company.name}</p><p class="text-[9px] text-slate-500 uppercase">${company.address || ''}</p><p class="text-[9px] text-slate-500 uppercase">${company.email || ''}</p></div>
+              <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 class="text-[7px] font-bold text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</h4><p class="text-[10px] font-bold text-slate-900 uppercase">${customer.name}</p><p class="text-[9px] text-slate-500 uppercase">DOC: ${customer.document || 'N/A'}</p><p class="text-[9px] text-slate-500 uppercase">${customer.address || ''}, ${customer.number || ''} - ${customer.city || ''}</p></div>
             </div>
 
             <div class="mb-6"><h4 class="text-[9px] font-black text-slate-900 uppercase tracking-widest mb-2 border-b pb-1">1. OBJETO DO CONTRATO</h4><p class="text-[10px] text-slate-600 leading-relaxed text-justify">O presente contrato tem por objeto a prestação dos serviços técnicos descritos abaixo, a serem realizados pela CONTRATADA à CONTRATANTE:</p><div class="bg-blue-50/50 p-4 rounded-lg border-l-4 border-blue-500 mt-2"><p class="text-[10px] font-bold text-blue-900 uppercase">${order.description}</p><p class="text-[9px] text-blue-700 mt-1">${order.items.map(i => `${i.quantity}x ${i.description}`).join(', ')}</p></div></div>
@@ -404,8 +404,8 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
 
             <div class="avoid-break mt-12 mb-8">
               <div class="grid grid-cols-2 gap-16 px-10">
-                <div class="text-center border-t border-slate-300 pt-3"><p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</p><p class="text-[10px] font-black uppercase text-slate-900">${company.name}</p></div>
-                <div class="text-center border-t border-slate-300 pt-3 relative"><p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</p><p class="text-[10px] font-black uppercase text-slate-900">${customer.name}</p></div>
+                <div class="text-center border-t border-slate-300 pt-3"><p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</p><p class="text-[10px] font-bold uppercase text-slate-900">${company.name}</p></div>
+                <div class="text-center border-t border-slate-300 pt-3 relative"><p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</p><p class="text-[10px] font-bold uppercase text-slate-900">${customer.name}</p></div>
               </div>
             </div>
           </div>
