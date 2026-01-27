@@ -110,6 +110,20 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         notify("Item adicionado");
     };
 
+    const updateItem = (id: string, field: keyof ServiceItem, value: any) => {
+        setItems(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item));
+    };
+
+    const updateItemTotal = (id: string, total: number) => {
+        setItems(prev => prev.map(item => {
+            if (item.id === id) {
+                const quantity = item.quantity || 1;
+                return { ...item, unitPrice: total / quantity };
+            }
+            return item;
+        }));
+    };
+
     const handleSaveOS = async () => {
         if (isSaving) return;
         const customer = customers.find(c => c.id === selectedCustomerId);
@@ -678,11 +692,29 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                     <div className="md:col-span-2"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Qtd</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} /></div>
                                                     <div className="md:col-span-2"><button onClick={handleAddItem} className="bg-blue-600 text-white w-full h-[42px] rounded-xl flex items-center justify-center hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200"><Plus className="w-5 h-5" /></button></div>
                                                 </div>
-                                                <div className="space-y-1">
+                                                <div className="space-y-1.5">
                                                     {items.map(item => (
-                                                        <div key={item.id} className="flex justify-between items-center p-3 bg-white rounded-xl border border-slate-100 shadow-sm">
-                                                            <div><p className="text-[10px] font-black text-slate-900 uppercase">{item.description}</p><p className="text-[9px] text-slate-400 font-bold uppercase tracking-tight">{item.quantity} un x R$ {item.unitPrice.toLocaleString('pt-BR')}</p></div>
-                                                            <div className="flex items-center gap-3"><span className="text-xs font-black text-slate-900">R$ {(item.unitPrice * item.quantity).toLocaleString('pt-BR')}</span><button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="text-slate-300 hover:text-rose-500 transition-colors"><Trash2 className="w-4 h-4" /></button></div>
+                                                        <div key={item.id} className="flex justify-between items-center p-3 bg-white rounded-xl border border-slate-100 shadow-sm gap-2">
+                                                            <div className="grow">
+                                                                <p className="text-[10px] font-black text-slate-900 uppercase mb-1">{item.description}</p>
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="flex items-center gap-1 bg-slate-50 rounded px-2 py-1 border border-slate-100">
+                                                                        <span className="text-[8px] font-bold text-slate-400">QTD:</span>
+                                                                        <input type="number" className="w-12 bg-transparent text-[9px] font-black text-slate-700 outline-none" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', Number(e.target.value))} />
+                                                                    </div>
+                                                                    <div className="flex items-center gap-1 bg-slate-50 rounded px-2 py-1 border border-slate-100">
+                                                                        <span className="text-[8px] font-bold text-slate-400">VALOR:</span>
+                                                                        <input type="number" className="w-20 bg-transparent text-[9px] font-black text-slate-700 outline-none" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', Number(e.target.value))} />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center gap-3 shrink-0">
+                                                                <div className="flex items-center gap-1 bg-slate-50 rounded px-2 py-1 border border-slate-100">
+                                                                    <span className="text-[8px] font-bold text-slate-400">TOTAL:</span>
+                                                                    <input type="number" className="w-24 bg-transparent text-[11px] font-black text-blue-600 outline-none text-right" value={Number((item.unitPrice * item.quantity).toFixed(2))} onChange={e => updateItemTotal(item.id, Number(e.target.value))} />
+                                                                </div>
+                                                                <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="text-slate-300 hover:text-rose-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                                                            </div>
                                                         </div>
                                                     ))}
                                                 </div>

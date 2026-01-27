@@ -83,6 +83,16 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     setItems(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item));
   };
 
+  const updateItemTotal = (id: string, total: number) => {
+    setItems(prev => prev.map(item => {
+      if (item.id === id) {
+        const quantity = item.quantity || 1;
+        return { ...item, unitPrice: total / quantity };
+      }
+      return item;
+    }));
+  };
+
   // NEXT_Methods
   const addTextBlock = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'text', content: '' }]);
   const addImageBlock = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'image', content: '' }]);
@@ -645,7 +655,10 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                             </div>
                           </div>
                           <div className="flex items-center gap-3 shrink-0">
-                            <span className="text-xs font-black text-slate-900">{(item.unitPrice * item.quantity).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                            <div className="flex items-center gap-1 bg-slate-50 rounded px-2 py-1 border border-slate-100">
+                              <span className="text-[8px] font-bold text-slate-400">TOTAL:</span>
+                              <input type="number" className="w-24 bg-transparent text-[11px] font-black text-blue-600 outline-none text-right" value={Number((item.unitPrice * item.quantity).toFixed(2))} onChange={e => updateItemTotal(item.id, Number(e.target.value))} />
+                            </div>
                             <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="text-rose-300 hover:text-rose-600"><Trash2 className="w-3.5 h-3.5" /></button>
                           </div>
                         </div>
