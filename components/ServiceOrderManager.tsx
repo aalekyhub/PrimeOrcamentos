@@ -574,6 +574,15 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                         </div>
                       ))}
                     </div>
+
+                    {items.length > 0 && (
+                      <div className="flex justify-end pt-2">
+                        <div className="bg-white border-2 border-slate-100 rounded-2xl px-6 py-3 flex items-center gap-4 shadow-sm">
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Subtotal dos Serviços</span>
+                          <span className="text-lg font-black text-slate-900">R$ {totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
                 {showFullClientForm && (
