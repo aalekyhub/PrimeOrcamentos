@@ -5,7 +5,7 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
     Plus, Search, X, Trash2, Pencil, Printer, Save, FileDown,
     UserPlus, HardHat, Eraser, FileText, ScrollText, Wallet,
-    Type, Image as ImageIcon, Zap, Upload
+    Type, Image as ImageIcon, Zap, Upload, CheckCircle
 } from 'lucide-react';
 import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock, Transaction } from '../types';
 import { useNotify } from './ToastProvider';
@@ -55,6 +55,12 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     const [taxRate, setTaxRate] = useState<number>(0);
     const [bdiRate, setBdiRate] = useState<number>(0);
 
+    // Edit Expense State
+    const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
+    const [editExpenseDesc, setEditExpenseDesc] = useState('');
+    const [editExpenseAmount, setEditExpenseAmount] = useState('');
+    const [editExpenseCategory, setEditExpenseCategory] = useState('');
+
     const workExpenses = useMemo(() => {
         if (!editingOrderId) return [];
         return transactions.filter(t => t.relatedOrderId === editingOrderId && t.type === 'DESPESA');
@@ -98,6 +104,22 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             await db.remove('serviflow_transactions', id);
             await db.save('serviflow_transactions', newList);
         }
+    };
+
+    const handleUpdateExpense = async (id: string) => {
+        if (!editExpenseAmount || !editExpenseDesc) return;
+        const updatedTransactions = transactions.map(t =>
+            t.id === id ? {
+                ...t,
+                description: editExpenseDesc,
+                amount: Number(editExpenseAmount),
+                category: editExpenseCategory || 'Geral'
+            } : t
+        );
+        setTransactions(updatedTransactions);
+        await db.save('serviflow_transactions', updatedTransactions);
+        setEditingExpenseId(null);
+        notify("Despesa atualizada!");
     };
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -882,15 +904,46 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                     <p className="p-8 text-center text-xs text-slate-400 font-medium italic">Nenhuma despesa lançada para esta obra.</p>
                                                 ) : (
                                                     workExpenses.map(t => (
-                                                        <div key={t.id} className="p-4 flex justify-between items-center hover:bg-slate-50">
-                                                            <div>
-                                                                <p className="text-xs font-black text-slate-900 uppercase">{t.description}</p>
-                                                                <p className="text-[9px] font-bold text-slate-400 uppercase">{t.date} • {t.category}</p>
-                                                            </div>
-                                                            <div className="flex items-center gap-4">
-                                                                <span className="text-sm font-black text-rose-600">- R$ {t.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                                                                <button onClick={() => handleDeleteExpense(t.id)} className="text-slate-300 hover:text-rose-500"><Trash2 className="w-4 h-4" /></button>
-                                                            </div>
+                                                        <div key={t.id} className="p-4 hover:bg-slate-50 transition-colors">
+                                                            {editingExpenseId === t.id ? (
+                                                                <div className="grid grid-cols-12 gap-3 items-end bg-blue-50/50 p-3 rounded-xl border border-blue-100">
+                                                                    <div className="col-span-4">
+                                                                        <label className="text-[7px] font-bold text-blue-400 uppercase mb-1 block">Descrição</label>
+                                                                        <input type="text" className="w-full p-2 rounded-lg border border-blue-200 text-[10px] font-bold outline-none" value={editExpenseDesc} onChange={e => setEditExpenseDesc(e.target.value)} />
+                                                                    </div>
+                                                                    <div className="col-span-3">
+                                                                        <label className="text-[7px] font-bold text-blue-400 uppercase mb-1 block">Categoria</label>
+                                                                        <input type="text" className="w-full p-2 rounded-lg border border-blue-200 text-[10px] font-bold outline-none" value={editExpenseCategory} onChange={e => setEditExpenseCategory(e.target.value)} />
+                                                                    </div>
+                                                                    <div className="col-span-3">
+                                                                        <label className="text-[7px] font-bold text-blue-400 uppercase mb-1 block">Valor (R$)</label>
+                                                                        <input type="number" className="w-full p-2 rounded-lg border border-blue-200 text-[10px] font-bold outline-none" value={editExpenseAmount} onChange={e => setEditExpenseAmount(e.target.value)} />
+                                                                    </div>
+                                                                    <div className="col-span-2 flex gap-1">
+                                                                        <button onClick={() => handleUpdateExpense(t.id)} className="flex-1 bg-emerald-500 text-white p-2 rounded-lg hover:bg-emerald-600 transition-colors"><CheckCircle className="w-4 h-4 mx-auto" /></button>
+                                                                        <button onClick={() => setEditingExpenseId(null)} className="flex-1 bg-slate-200 text-slate-500 p-2 rounded-lg hover:bg-slate-300 transition-colors"><X className="w-4 h-4 mx-auto" /></button>
+                                                                    </div>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="flex justify-between items-center group">
+                                                                    <div>
+                                                                        <p className="text-xs font-black text-slate-900 uppercase">{t.description}</p>
+                                                                        <p className="text-[9px] font-bold text-slate-400 uppercase">{t.date} • {t.category}</p>
+                                                                    </div>
+                                                                    <div className="flex items-center gap-4">
+                                                                        <span className="text-sm font-black text-rose-600">- R$ {t.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                                                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                            <button onClick={() => {
+                                                                                setEditingExpenseId(t.id);
+                                                                                setEditExpenseDesc(t.description);
+                                                                                setEditExpenseAmount(t.amount.toString());
+                                                                                setEditExpenseCategory(t.category || '');
+                                                                            }} className="p-1.5 text-slate-300 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all" title="Editar"><Pencil className="w-3.5 h-3.5" /></button>
+                                                                            <button onClick={() => handleDeleteExpense(t.id)} className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all" title="Excluir"><Trash2 className="w-3.5 h-3.5" /></button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     ))
                                                 )}
