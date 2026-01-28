@@ -52,6 +52,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     const [expenseDesc, setExpenseDesc] = useState('');
     const [expenseAmount, setExpenseAmount] = useState('');
     const [expenseCategory, setExpenseCategory] = useState('');
+    const [taxRate, setTaxRate] = useState<number>(0);
+    const [bdiRate, setBdiRate] = useState<number>(0);
 
     const workExpenses = useMemo(() => {
         if (!editingOrderId) return [];
@@ -59,11 +61,15 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     }, [transactions, editingOrderId]);
 
     const totalExpenses = useMemo(() => workExpenses.reduce((acc, t) => acc + t.amount, 0), [workExpenses]);
-    const profit = useMemo(() => {
-        // Live calculation based on current items if editing, or saved total
-        const revenue = items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0);
-        return revenue - totalExpenses;
-    }, [items, totalExpenses]);
+    const totalAmount = useMemo(() => {
+        const subtotal = items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0);
+        const bdiValue = subtotal * (bdiRate / 100);
+        const subtotalWithBDI = subtotal + bdiValue;
+        const taxValue = subtotalWithBDI * (taxRate / 100);
+        return subtotalWithBDI + taxValue;
+    }, [items, bdiRate, taxRate]);
+
+    const profit = useMemo(() => totalAmount - totalExpenses, [totalAmount, totalExpenses]);
 
     const handleAddExpense = async () => {
         if (!editingOrderId || !expenseAmount || !expenseDesc) return;
@@ -103,7 +109,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         return o.customerName.toLowerCase().includes(searchTerm.toLowerCase()) || o.id.includes(searchTerm);
     }), [orders, searchTerm]);
 
-    const totalAmount = useMemo(() => items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0), [items]);
+    const subtotal = useMemo(() => items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0), [items]);
 
     const addTextBlock = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'text', content: '' }]);
     const addImageBlock = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'image', content: '' }]);
@@ -168,8 +174,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             deliveryTime,
             createdAt: existingOrder?.createdAt || new Date().toISOString().split('T')[0],
             dueDate: deliveryDate,
-            taxRate: existingOrder?.taxRate || 0,
-            bdiRate: existingOrder?.bdiRate || 0,
+            taxRate: taxRate,
+            bdiRate: bdiRate,
             osType: 'WORK' // Explicitly set as WORK
         };
 
@@ -613,7 +619,20 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     <h2 className="text-2xl font-bold text-slate-900 tracking-tight">OS de Obra</h2>
                     <p className="text-slate-500 text-sm">Gestão de reformas e construções.</p>
                 </div>
-                <button onClick={() => { setShowForm(true); setActiveTab('details'); setEditingOrderId(null); setSelectedCustomerId(''); setItems([]); setOsTitle('Reforma / Obra'); setDiagnosis(''); setDescriptionBlocks([]); setPaymentTerms(''); setDeliveryTime(''); }} className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold shadow-2xl shadow-blue-100 hover:bg-blue-700 transition-all flex items-center gap-2">
+                <button onClick={() => {
+                    setShowForm(true);
+                    setActiveTab('details');
+                    setEditingOrderId(null);
+                    setSelectedCustomerId('');
+                    setItems([]);
+                    setOsTitle('Reforma / Obra');
+                    setDiagnosis('');
+                    setDescriptionBlocks([]);
+                    setPaymentTerms('');
+                    setDeliveryTime('');
+                    setTaxRate(0);
+                    setBdiRate(0);
+                }} className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold shadow-2xl shadow-blue-100 hover:bg-blue-700 transition-all flex items-center gap-2">
                     <Plus className="w-5 h-5" /> Nova Obra
                 </button>
             </div>
@@ -649,6 +668,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                         setDescriptionBlocks(order.descriptionBlocks || []);
                                         setPaymentTerms(order.paymentTerms || '');
                                         setDeliveryTime(order.deliveryTime || '');
+                                        setTaxRate(order.taxRate || 0);
+                                        setBdiRate(order.bdiRate || 0);
                                         setActiveTab('financial');
                                         setShowForm(true);
                                     }} className="p-2 text-slate-400 hover:text-emerald-600 transition-colors" title="Gestão Financeira"><Wallet className="w-4 h-4" /></button>
@@ -662,6 +683,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                         setDescriptionBlocks(order.descriptionBlocks || []);
                                         setPaymentTerms(order.paymentTerms || '');
                                         setDeliveryTime(order.deliveryTime || '');
+                                        setTaxRate(order.taxRate || 0);
+                                        setBdiRate(order.bdiRate || 0);
                                         setShowForm(true);
                                     }} className="p-2 text-slate-400 hover:text-blue-600 transition-colors"><Pencil className="w-4 h-4" /></button>
                                     <button onClick={async () => {
@@ -799,7 +822,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                     <div className="flex justify-end pt-2">
                                                         <div className="bg-white border-2 border-slate-100 rounded-2xl px-6 py-3 flex items-center gap-4 shadow-sm">
                                                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Subtotal da Obra</span>
-                                                            <span className="text-lg font-black text-slate-900">R$ {totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                                            <span className="text-lg font-black text-slate-900">R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                                                         </div>
                                                     </div>
                                                 )}
@@ -811,7 +834,13 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                         <div className="grid grid-cols-3 gap-4">
                                             <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
                                                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Valor da Obra (Receita)</p>
-                                                <p className="text-2xl font-black text-blue-600">R$ {items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                                <p className="text-2xl font-black text-blue-600">R$ {totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                                <div className="flex gap-4 mt-2">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[7px] font-black text-slate-400 uppercase">BDI: {bdiRate}%</span>
+                                                        <span className="text-[7px] font-black text-slate-400 uppercase">Imp: {taxRate}%</span>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
                                                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Total de Gastos (Despesas)</p>
