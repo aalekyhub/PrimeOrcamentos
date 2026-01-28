@@ -616,7 +616,185 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         printWindow.document.close();
     };
 
+    const handlePrintWorkReport = (order: ServiceOrder) => {
+        const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, address: 'Não informado', document: 'N/A' };
+        const workExpenses = transactions.filter(t => t.relatedOrderId === order.id && t.type === 'DESPESA');
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) return;
+
+        const formatDate = (dateStr: string) => {
+            try { const d = new Date(dateStr); return isNaN(d.getTime()) ? new Date().toLocaleDateString('pt-BR') : d.toLocaleDateString('pt-BR'); }
+            catch { return new Date().toLocaleDateString('pt-BR'); }
+        };
+
+        const subTotal = order.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0);
+        const bdiValue = order.bdiRate ? subTotal * (order.bdiRate / 100) : 0;
+        const subTotalWithBDI = subTotal + bdiValue;
+        const taxValue = order.taxRate ? subTotalWithBDI * (order.taxRate / 100) : 0;
+        const finalTotal = subTotalWithBDI + taxValue; // This is the Revenue
+        const totalExp = workExpenses.reduce((acc, t) => acc + t.amount, 0);
+        const profitValue = finalTotal - totalExp;
+
+        const itemsHtml = order.items.map((item: ServiceItem) => `
+      <tr style="border-bottom: 1px solid #f1f5f9;">
+        <td style="padding: 12px 10px; font-weight: 600; text-transform: uppercase; font-size: 11px; color: #0f172a;">${item.description}</td>
+        <td style="padding: 12px 0; text-align: center; color: #94a3b8; font-size: 10px; font-weight: 600; text-transform: uppercase;">${item.unit || 'UN'}</td>
+        <td style="padding: 12px 0; text-align: center; font-weight: 600; color: #0f172a; font-size: 11px;">${item.quantity}</td>
+        <td style="padding: 12px 0; text-align: right; color: #64748b; font-size: 11px;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        <td style="padding: 12px 10px; text-align: right; font-weight: 600; font-size: 12px; color: #0f172a;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+      </tr>`).join('');
+
+        const expensesHtml = workExpenses.length > 0 ? workExpenses.map((t: Transaction) => `
+      <tr style="border-bottom: 1px solid #f1f5f9;">
+        <td style="padding: 10px 10px; font-size: 11px; color: #64748b; font-weight: 500;">${formatDate(t.date)}</td>
+        <td style="padding: 10px 0; font-weight: 600; text-transform: uppercase; font-size: 11px; color: #0f172a;">${t.description}</td>
+        <td style="padding: 10px 0; font-size: 10px; font-weight: 600; text-transform: uppercase; color: #94a3b8;">${t.category || 'GERAL'}</td>
+        <td style="padding: 10px 10px; text-align: right; font-weight: 700; font-size: 11px; color: #e11d48;">R$ ${t.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+      </tr>`).join('') : `<tr><td colspan="4" style="padding: 24px; text-align: center; font-size: 11px; color: #94a3b8; font-style: italic;">Nenhuma despesa lançada nesta obra.</td></tr>`;
+
+        const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Relatório de Obra - ${order.id} - ${order.description || 'Obra'}</title>
+         <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+        <style>
+           body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; color: #0f172a; }
+           @page { size: A4; margin: 0 !important; }
+           .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
+           .avoid-break { break-inside: avoid; page-break-inside: avoid; }
+           .info-box { background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
+           .info-label { font-size: 11px; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block; }
+           .info-value { font-size: 16px; font-weight: 700; color: #0f172a; text-transform: uppercase; line-height: 1.2; }
+           .section-title { font-size: 14px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 2px solid #f1f5f9; margin-bottom: 16px; margin-top: 32px; }
+           .card-summary { padding: 12px; border-radius: 12px; border: 1px solid transparent; }
+           @media print { body { background: white !important; margin: 0 !important; } .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; } .no-print { display: none !important; } .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; } }
+        </style>
+      </head>
+      <body>
+        <table style="width: 100%;">
+          <thead><tr><td style="height: ${company.printMarginTop || 15}mm;">&nbsp;</td></tr></thead>
+          <tbody><tr><td>
+            <div class="a4-container">
+                <div class="flex justify-between items-start mb-10 border-b-2 border-slate-900 pb-8">
+                    <div class="flex gap-6 items-center">
+                        <div style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                            ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>'}
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-black text-slate-900 leading-none mb-1.5 uppercase tracking-tight">${company.name}</h1>
+                            <p class="text-[10px] font-extrabold text-blue-600 uppercase tracking-widest leading-none">Relatório Gerencial de Obra</p>
+                            <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tight mt-2">${company.cnpj || ''} | ${company.phone || ''}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="bg-blue-600 text-white px-3 py-1 rounded text-[9px] font-black uppercase tracking-widest mb-1.5 shadow-sm inline-block">CONTROLE DE OBRA</div>
+                        <p class="text-3xl font-black text-[#0f172a] tracking-tighter mb-0.5">${order.id}</p>
+                        <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p>
+                    </div>
+                </div>
+
+               <div class="grid grid-cols-2 gap-4 mb-8">
+                   <div class="info-box">
+                       <span class="info-label">Contratante / Cliente</span>
+                       <div class="info-value">${customer.name}</div>
+                       <div class="text-[11px] text-slate-400 font-bold mt-1.5 uppercase">${customer.document || 'DOC NÃO INF.'}</div>
+                   </div>
+                   <div class="info-box">
+                       <span class="info-label">Identificação da Obra</span>
+                       <div class="info-value">${order.description}</div>
+                       <div class="text-[11px] text-slate-400 font-bold mt-1.5 uppercase">Início: ${formatDate(order.createdAt)} | Entrega: ${order.dueDate ? formatDate(order.dueDate) : 'A COMBINAR'}</div>
+                   </div>
+               </div>
+
+               <div class="section-title">Resumo Financeiro da Obra</div>
+               <div class="grid grid-cols-3 gap-3 mb-8">
+                   <div class="card-summary bg-blue-50 border-blue-100">
+                       <span class="text-[8px] font-black text-blue-600 uppercase tracking-widest block mb-1">Receita Total (Investimento)</span>
+                       <span class="text-lg font-black text-blue-700 block">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                   </div>
+                   <div class="card-summary bg-rose-50 border-rose-100">
+                       <span class="text-[8px] font-black text-rose-600 uppercase tracking-widest block mb-1">Despesas Realizadas (Custos)</span>
+                       <span class="text-lg font-black text-rose-700 block">R$ ${totalExp.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                   </div>
+                   <div class="card-summary ${profitValue >= 0 ? 'bg-emerald-50 border-emerald-100' : 'bg-red-50 border-red-100'}">
+                       <span class="text-[8px] font-black ${profitValue >= 0 ? 'text-emerald-600' : 'text-red-600'} uppercase tracking-widest block mb-1">Resultado (Lucro Bruto)</span>
+                       <span class="text-lg font-black ${profitValue >= 0 ? 'text-emerald-700' : 'text-red-700'} block">R$ ${profitValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                   </div>
+               </div>
+
+               <div class="section-title">Histórico Detalhado de Despesas</div>
+               <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+                   <thead>
+                       <tr style="border-bottom: 2px solid #0f172a;">
+                           <th style="padding-bottom: 8px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; letter-spacing: 0.05em; width: 90px;">Data</th>
+                           <th style="padding-bottom: 8px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; letter-spacing: 0.05em;">Descrição do Gasto</th>
+                           <th style="padding-bottom: 8px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; letter-spacing: 0.05em; width: 120px;">Categoria</th>
+                           <th style="padding-bottom: 8px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; letter-spacing: 0.05em; width: 120px;">Valor</th>
+                       </tr>
+                   </thead>
+                   <tbody>${expensesHtml}</tbody>
+                   <tfoot>
+                       <tr>
+                           <td colspan="3" style="padding: 12px 0; text-align: right; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #64748b;">Total de Despesas:</td>
+                           <td style="padding: 12px 10px; text-align: right; font-size: 13px; font-weight: 900; color: #e11d48;">R$ ${totalExp.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                       </tr>
+                   </tfoot>
+               </table>
+
+               <div class="avoid-break mt-8">
+                   <div class="section-title">Itens Orcamentados / Escopo</div>
+                   <table style="width: 100%; border-collapse: collapse;">
+                       <thead>
+                           <tr style="border-bottom: 2px solid #0f172a;">
+                               <th style="padding-bottom: 8px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800;">Descrição</th>
+                               <th style="padding-bottom: 8px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800; width: 50px;">UN</th>
+                               <th style="padding-bottom: 8px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800; width: 50px;">Qtd</th>
+                               <th style="padding-bottom: 8px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 100px;">Unitário</th>
+                               <th style="padding-bottom: 8px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 110px;">Total</th>
+                           </tr>
+                       </thead>
+                       <tbody>${itemsHtml}</tbody>
+                   </table>
+               </div>
+
+                ${order.descriptionBlocks && order.descriptionBlocks.length > 0 ? `
+               <div class="mt-8">
+                   <div class="space-y-4">
+                       ${order.descriptionBlocks.map(block => {
+            if (block.type === 'image') {
+                return `<div class="avoid-break" style="margin: 10px 0;"><img src="${block.content}" style="width: 100%; max-height: 180mm; border-radius: 8px; border: 1px solid #f1f5f9; object-fit: contain;"></div>`;
+            } else if (block.type === 'page-break') {
+                return `<div style="page-break-after: always; height: 0;"></div>`;
+            }
+            return '';
+        }).join('')}
+                   </div>
+               </div>` : ''}
+
+               <div class="avoid-break mt-12 pt-12 border-t border-slate-100">
+                   <div class="flex justify-center px-8">
+                       <div class="text-center w-64">
+                           <div style="border-top: 1px solid #cbd5e1; margin-bottom: 6px;"></div>
+                           <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Responsável Técnico</p>
+                           <p class="text-[12px] font-black uppercase text-slate-900">${company.name}</p>
+                       </div>
+                   </div>
+               </div>
+            </div>
+          </td></tr></tbody>
+          <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;">&nbsp;</td></tr></tfoot>
+        </table>
+        <script>window.onload = function() { setTimeout(() => { window.print(); window.close(); }, 800); }</script>
+      </body>
+      </html>`;
+        printWindow.document.write(html);
+        printWindow.document.close();
+    };
+
     const initCanvas = () => {
+
         if (!canvasRef.current) return;
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
@@ -679,6 +857,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                 <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button onClick={() => handleDownloadPDF(order)} className="p-2 text-slate-400 hover:text-emerald-500 transition-colors" title="Baixar Contrato"><FileDown className="w-4 h-4" /></button>
                                     <button onClick={() => handlePrintContract(order)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Gerar Contrato"><ScrollText className="w-4 h-4" /></button>
+                                    <button onClick={() => handlePrintWorkReport(order)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Relatório de Obra"><FileText className="w-4 h-4" /></button>
                                     <button onClick={() => handlePrintOS(order)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Imprimir OS"><Printer className="w-4 h-4" /></button>
                                     <button onClick={() => {
                                         setEditingOrderId(order.id);
