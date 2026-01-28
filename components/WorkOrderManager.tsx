@@ -734,13 +734,13 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                            <th style="padding-bottom: 8px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; letter-spacing: 0.05em; width: 120px;">Valor</th>
                        </tr>
                    </thead>
-                   <tbody>${expensesHtml}</tbody>
-                   <tfoot>
-                       <tr>
-                           <td colspan="3" style="padding: 12px 0; text-align: right; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #64748b;">Total de Despesas:</td>
+                   <tbody>
+                       ${expensesHtml}
+                       <tr style="border-top: 2px solid #0f172a;">
+                           <td colspan="3" style="padding: 12px 10px; text-align: right; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #64748b;">Total de Despesas Realizadas:</td>
                            <td style="padding: 12px 10px; text-align: right; font-size: 13px; font-weight: 900; color: #e11d48;">R$ ${totalExp.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
                        </tr>
-                   </tfoot>
+                   </tbody>
                </table>
 
                <div class="avoid-break mt-8">
