@@ -681,8 +681,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         const revenue = order.contractPrice || order.totalAmount || 0; // O que o cliente paga
         const plannedCost = (order.costItems || []).reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0); // O que a empresa gasta (planejado)
 
-        // NOVO: Despesas Reais agora baseadas na Medição (Items) para alinhar com o Dashboard
-        const totalActualExpenses = order.items.reduce((acc, i) => acc + (i.actualQuantity ? (i.actualQuantity * (i.actualUnitPrice || 0)) : (i.actualValue || 0)), 0);
+        // NOVO: Despesas Reais agora baseadas na Medição (CostItems) para alinhar com o Dashboard
+        const totalActualExpenses = (order.costItems || []).reduce((acc, i) => acc + (i.actualQuantity ? (i.actualQuantity * (i.actualUnitPrice || 0)) : (i.actualValue || 0)), 0);
 
         const profitValue = revenue - totalActualExpenses; // Lucro Real (baseado em medição)
         const plannedProfit = revenue - plannedCost; // Lucro Previsto
@@ -692,8 +692,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         const bdiValue = order.bdiRate ? budgetSubTotal * (order.bdiRate / 100) : 0;
         const taxValue = order.taxRate ? (budgetSubTotal + bdiValue) * (order.taxRate / 100) : 0;
 
-        // Gerar HTML da Tabela de Itens (CostItems no Previsto, Comparação no Real)
-        const itemsHtml = (reportMode === 'estimated' ? (order.costItems || []) : order.items).map((item: ServiceItem) => {
+        // Gerar HTML da Tabela de Itens (Sempre usando costItems para consistência na Obra)
+        const itemsHtml = (order.costItems || []).map((item: ServiceItem) => {
             const plannedTotal = item.quantity * item.unitPrice;
 
             if (reportMode === 'estimated') {
