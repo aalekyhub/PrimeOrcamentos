@@ -1,4 +1,4 @@
-
+﻿
 // @ts-ignore
 import html2pdf from 'html2pdf.js';
 import React, { useState, useMemo, useRef, useEffect } from 'react';
@@ -41,11 +41,13 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     const [paymentTerms, setPaymentTerms] = useState('');
     const [deliveryTime, setDeliveryTime] = useState('');
     const [deliveryDate, setDeliveryDate] = useState(new Date().toISOString().split('T')[0]);
+    const [contractPrice, setContractPrice] = useState<number>(0);
     const [items, setItems] = useState<ServiceItem[]>([]);
 
     const [currentDesc, setCurrentDesc] = useState('');
     const [currentPrice, setCurrentPrice] = useState(0);
     const [currentQty, setCurrentQty] = useState(1);
+    const [currentActual, setCurrentActual] = useState<number | ''>('');
 
     // Financial State
     const [activeTab, setActiveTab] = useState<'details' | 'financial'>('details');
@@ -66,16 +68,27 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         return transactions.filter(t => t.relatedOrderId === editingOrderId && t.type === 'DESPESA');
     }, [transactions, editingOrderId]);
 
-    const totalExpenses = useMemo(() => workExpenses.reduce((acc, t) => acc + t.amount, 0), [workExpenses]);
-    const totalAmount = useMemo(() => {
-        const subtotal = items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0);
-        const bdiValue = subtotal * (bdiRate / 100);
-        const subtotalWithBDI = subtotal + bdiValue;
-        const taxValue = subtotalWithBDI * (taxRate / 100);
-        return subtotalWithBDI + taxValue;
-    }, [items, bdiRate, taxRate]);
+    const totalExpenses = useMemo(() => items.reduce((acc, i) => acc + (i.actualValue || 0), 0), [items]);
+    const expensesByCategory = useMemo(() => {
+        const groups: { [key: string]: number } = {};
+        items.forEach(i => {
+            if (i.actualValue && i.actualValue > 0) {
+                const cat = (i.type || 'Geral').toUpperCase();
+                groups[cat] = (groups[cat] || 0) + i.actualValue;
+            }
+        });
+        return groups;
+    }, [items]);
 
-    const profit = useMemo(() => totalAmount - totalExpenses, [totalAmount, totalExpenses]);
+    const plannedCost = useMemo(() => {
+        return items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0);
+    }, [items]);
+
+    const revenue = contractPrice || 0;
+
+    const plannedProfit = useMemo(() => revenue - plannedCost, [revenue, plannedCost]);
+    const actualProfit = useMemo(() => revenue - totalExpenses, [revenue, totalExpenses]);
+    const executionVariance = useMemo(() => plannedCost - totalExpenses, [plannedCost, totalExpenses]);
 
     const handleAddExpense = async () => {
         if (!editingOrderId || !expenseAmount || !expenseDesc) return;
@@ -122,8 +135,6 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         notify("Despesa atualizada!");
     };
 
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-
     // Filter for WORK orders
     const activeOrders = useMemo(() => orders.filter(o => {
         if (o.osType !== 'WORK') return false; // Only Work Orders
@@ -135,7 +146,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
     const addTextBlock = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'text', content: '' }]);
     const addImageBlock = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'image', content: '' }]);
-    const addPageBreak = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'page-break', content: 'QUEBRA DE PÁGINA' }]);
+    const addPageBreak = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'page-break', content: 'QUEBRA DE PÃGINA' }]);
     const updateBlockContent = (id: string, content: string) => setDescriptionBlocks(prev => prev.map(b => b.id === id ? { ...b, content } : b));
 
     const handleImageUpload = async (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
@@ -152,9 +163,18 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     };
 
     const handleAddItem = () => {
-        if (!currentDesc || currentPrice <= 0) return;
-        setItems([...items, { id: Date.now().toString(), description: currentDesc, quantity: currentQty, unitPrice: currentPrice, type: 'Serviço', unit: 'un' }]);
-        setCurrentDesc(''); setCurrentPrice(0); setCurrentQty(1);
+        if (!currentDesc) return;
+        const unitVal = currentQty > 0 ? currentPrice / currentQty : 0;
+        setItems([...items, {
+            id: Date.now().toString(),
+            description: currentDesc,
+            quantity: currentQty,
+            unitPrice: unitVal,
+            type: 'Serviço',
+            unit: 'un',
+            actualValue: currentActual === '' ? 0 : currentActual
+        }]);
+        setCurrentDesc(''); setCurrentPrice(0); setCurrentQty(1); setCurrentActual('');
         notify("Item adicionado");
     };
 
@@ -177,7 +197,6 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         const customer = customers.find(c => c.id === selectedCustomerId);
         if (!customer) { notify("Selecione um cliente", "error"); return; }
 
-        const signatureData = canvasRef.current?.toDataURL();
         const existingOrder = editingOrderId ? orders.find(o => o.id === editingOrderId) : null;
 
         const data: ServiceOrder = {
@@ -188,9 +207,9 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             description: osTitle,
             serviceDescription: diagnosis,
             status: OrderStatus.IN_PROGRESS,
-            items: items,
-            totalAmount: totalAmount,
-            signature: signatureData,
+            items: existingOrder?.items || items, // Preserve original budget items
+            costItems: items, // Save current list as Planned Costs
+            totalAmount: revenue,
             descriptionBlocks,
             paymentTerms,
             deliveryTime,
@@ -198,7 +217,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             dueDate: deliveryDate,
             taxRate: taxRate,
             bdiRate: bdiRate,
-            osType: 'WORK' // Explicitly set as WORK
+            osType: 'WORK',
+            contractPrice: contractPrice
         };
 
         const newList = editingOrderId ? orders.map(o => o.id === editingOrderId ? data : o) : [data, ...orders];
@@ -230,7 +250,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         const bdiValue = order.bdiRate ? subTotal * (order.bdiRate / 100) : 0;
         const subTotalWithBDI = subTotal + bdiValue;
         const taxValue = order.taxRate ? subTotalWithBDI * (order.taxRate / 100) : 0;
-        const finalTotal = subTotalWithBDI + taxValue;
+        const plannedCost = subTotalWithBDI + taxValue; // Planned Expenses
+        const finalTotal = order.contractPrice && order.contractPrice > 0 ? order.contractPrice : plannedCost; // Use Contract Price if available
 
         const itemsHtml = order.items.map((item: ServiceItem) => `
       <tr style="border-bottom: 1px solid #f1f5f9;">
@@ -322,26 +343,26 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                    </div>
                </div>` : ''}
 
-               <div class="mb-8">
-                   <div class="section-title">Materiais e Mão de Obra</div>
-                   <table style="width: 100%; border-collapse: collapse;">
-                       <thead>
-                           <tr style="border-bottom: 2px solid #0f172a;">
-                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 700; letter-spacing: 0.05em;">Descrição</th>
-                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 700; letter-spacing: 0.05em;">UN</th>
-                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 700; letter-spacing: 0.05em;">Qtd</th>
-                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 700; letter-spacing: 0.05em;">Unitário</th>
-                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 700; letter-spacing: 0.05em;">Total</th>
-                           </tr>
-                       </thead>
-                       <tbody>${itemsHtml}</tbody>
-                   </table>
-               </div>
+                <div class="mb-8">
+                    <div class="section-title">Previsão de Gastos (Materiais e Mão de Obra)</div>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid #0f172a;">
+                                <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 700; letter-spacing: 0.05em;">Descrição</th>
+                                <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 700; letter-spacing: 0.05em;">UN</th>
+                                <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 700; letter-spacing: 0.05em;">Qtd</th>
+                                <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 700; letter-spacing: 0.05em;">Unitário</th>
+                                <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 700; letter-spacing: 0.05em;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>${itemsHtml}</tbody>
+                    </table>
+                </div>
 
-                <div class="avoid-break mb-12">
+                 <div class="avoid-break mb-12">
                    <div class="flex justify-end mb-2 gap-6 px-2">
                         <div class="text-right">
-                           <span class="text-[8px] font-medium text-slate-600 uppercase block">Subtotal</span>
+                           <span class="text-[8px] font-medium text-slate-600 uppercase block">Subtotal dos Itens</span>
                            <span class="text-[10px] font-bold text-slate-700 block">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                         </div>
                         ${order.bdiRate ? `
@@ -356,8 +377,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         </div>` : ''}
                    </div>
                    <div class="bg-slate-900 text-white p-6 rounded-xl flex justify-between items-center shadow-xl">
-                       <span class="text-[12px] font-bold uppercase tracking-widest">INVESTIMENTO TOTAL:</span>
-                       <span class="text-3xl font-bold text-white tracking-tighter text-right">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                       <p class="text-[10px] font-black uppercase tracking-[0.2em] opacity-60">${order.contractPrice && order.contractPrice > 0 ? 'Valor Total do Contrato' : 'Custo Total Planejado'}</p>
+                       <p class="text-3xl font-black tracking-tighter">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                    </div>
                 </div>
 
@@ -368,12 +389,11 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                            <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Responsável Técnico</p>
                            <p class="text-[10px] font-bold uppercase text-slate-900">${company.name}</p>
                        </div>
-                       <div class="text-center relative">
-                           ${order.signature ? `<img src="${order.signature}" style="max-height: 50px; position: absolute; top: -45px; left: 50%; transform: translateX(-50%);">` : ''}
-                           <div style="border-top: 1px solid #cbd5e1; margin-bottom: 8px;"></div>
-                           <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Assinatura do Cliente</p>
-                           <p class="text-[10px] font-bold uppercase text-slate-900">${order.customerName}</p>
-                       </div>
+                        <div class="text-center relative">
+                            <div style="border-top: 1px solid #cbd5e1; margin-bottom: 8px;"></div>
+                            <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Assinatura do Cliente</p>
+                            <p class="text-[10px] font-bold uppercase text-slate-900">${order.customerName}</p>
+                        </div>
                    </div>
                </div>
             </div>
@@ -455,7 +475,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
             <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
                 <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 3ª – DO PREÇO E DA FORMA DE PAGAMENTO</h4>
-                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">3.1. Pelos serviços objeto deste contrato, o CONTRATANTE pagará à CONTRATADA o valor global de <b class="text-slate-900">R$ ${order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>.</p>
+                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">3.1. Pelos serviços objeto deste contrato, o CONTRATANTE pagará à CONTRATADA o valor global de <b class="text-slate-900">R$ ${order.contractPrice && order.contractPrice > 0 ? order.contractPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>.</p>
                 <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">3.2. O pagamento será efetuado da seguinte forma: <b>${order.paymentTerms || 'Conforme combinado'}</b>.</p>
                 <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">3.3. O valor contratado corresponde ao preço fechado da obra, não estando vinculado a horas trabalhadas, número de funcionários ou fornecimento de mão de obra.</p>
             </div>
@@ -612,7 +632,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
             <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
                 <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 3ª – DO PREÇO E DA FORMA DE PAGAMENTO</h4>
-                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">3.1. Pelos serviços objeto deste contrato, o CONTRATANTE pagará à CONTRATADA o valor global de <b class="text-slate-900">R$ ${order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>.</p>
+                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">3.1. Pelos serviços objeto deste contrato, o CONTRATANTE pagará à CONTRATADA o valor global de <b class="text-slate-900">R$ ${order.contractPrice && order.contractPrice > 0 ? order.contractPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>.</p>
                 <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">3.2. O pagamento será efetuado da seguinte forma: <b>${order.paymentTerms || 'Conforme combinado'}</b>.</p>
                 <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">3.3. O valor contratado corresponde ao preço fechado da obra, não estando vinculado a horas trabalhadas, número de funcionários ou fornecimento de mão de obra.</p>
             </div>
@@ -659,7 +679,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
             <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
                 <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 10ª – DO FORO</h4>
-                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">10.1. Fica eleito o foro da comarca de <b>${customer.city || 'São Paulo'} - ${customer.state || 'SP'}</b>, para dirimir quaisquer controverdias oriundas deste contrato, renunciando as partes a qualquer outro, por mais privilegiado que seja.</p>
+                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">10.1. Fica eleito o foro da comarca de <b>${customer.city || 'São Paulo'} - ${customer.state || 'SP'}</b>, para dirimir quaisquer controvérsias oriundas deste contrato, renunciando as partes a qualquer outro, por mais privilegiado que seja.</p>
             </div>
 
             <div class="mb-8" style="padding-top: 50mm; page-break-inside: avoid; break-inside: avoid;">
@@ -697,9 +717,10 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         const bdiValue = order.bdiRate ? subTotal * (order.bdiRate / 100) : 0;
         const subTotalWithBDI = subTotal + bdiValue;
         const taxValue = order.taxRate ? subTotalWithBDI * (order.taxRate / 100) : 0;
-        const finalTotal = subTotalWithBDI + taxValue; // This is the Revenue
+        const plannedCost = subTotalWithBDI + taxValue; // Planned Expenses
+        const revenue = order.contractPrice && order.contractPrice > 0 ? order.contractPrice : plannedCost; // Revenue
         const totalExp = workExpenses.reduce((acc, t) => acc + t.amount, 0);
-        const profitValue = finalTotal - totalExp;
+        const profitValue = revenue - totalExp;
 
         const itemsHtml = order.items.map((item: ServiceItem) => `
       <tr style="border-bottom: 1px solid #f1f5f9;">
@@ -775,27 +796,31 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                </div>
 
                <div class="section-title">Resumo Financeiro da Obra</div>
-               <div class="grid grid-cols-3 gap-3 mb-8">
-                   <div class="card-summary bg-blue-50 border-blue-100">
-                       <span class="text-[8px] font-black text-blue-600 uppercase tracking-widest block mb-1">Receita Total (Investimento)</span>
-                       <span class="text-lg font-black text-blue-700 block">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                   </div>
-                   <div class="card-summary bg-rose-50 border-rose-100">
-                       <span class="text-[8px] font-black text-rose-600 uppercase tracking-widest block mb-1">Despesas Realizadas (Custos)</span>
-                       <span class="text-lg font-black text-rose-700 block">R$ ${totalExp.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                   </div>
-                   <div class="card-summary ${profitValue >= 0 ? 'bg-emerald-50 border-emerald-100' : 'bg-red-50 border-red-100'}">
-                       <span class="text-[8px] font-black ${profitValue >= 0 ? 'text-emerald-600' : 'text-red-600'} uppercase tracking-widest block mb-1">Resultado (Lucro Bruto)</span>
-                       <span class="text-lg font-black ${profitValue >= 0 ? 'text-emerald-700' : 'text-red-700'} block">R$ ${profitValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                   </div>
-               </div>
+                <div class="grid grid-cols-4 gap-2 mb-8">
+                    <div class="card-summary bg-blue-50 border-blue-100">
+                        <span class="text-[8px] font-black text-blue-600 uppercase tracking-widest block mb-1">1. Receita (Contrato)</span>
+                        <span class="text-sm font-black text-blue-700 block">R$ ${revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                    <div class="card-summary bg-amber-50 border-amber-100">
+                        <span class="text-[8px] font-black text-amber-600 uppercase tracking-widest block mb-1">2. Despesa Planejada</span>
+                        <span class="text-sm font-black text-amber-700 block">R$ ${plannedCost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                    <div class="card-summary bg-rose-50 border-rose-100">
+                        <span class="text-[8px] font-black text-rose-600 uppercase tracking-widest block mb-1">3. Gastos Reais (Realizado)</span>
+                        <span class="text-sm font-black text-rose-700 block">R$ ${totalExp.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                    <div class="card-summary ${profitValue >= 0 ? 'bg-emerald-50 border-emerald-100' : 'bg-red-50 border-red-100'}">
+                        <span class="text-[8px] font-black ${profitValue >= 0 ? 'text-emerald-600' : 'text-red-600'} uppercase tracking-widest block mb-1">4. Lucro Final Atual</span>
+                        <span class="text-sm font-black ${profitValue >= 0 ? 'text-emerald-700' : 'text-red-700'} block">R$ ${profitValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                </div>
 
                <div class="section-title">Histórico Detalhado de Despesas</div>
                <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
                    <thead>
                        <tr style="border-bottom: 2px solid #0f172a;">
                            <th style="padding-bottom: 8px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; letter-spacing: 0.05em; width: 90px;">Data</th>
-                           <th style="padding-bottom: 8px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; letter-spacing: 0.05em;">Descriçào do Gasto</th>
+                           <th style="padding-bottom: 8px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; letter-spacing: 0.05em;">Descrição do Gasto</th>
                            <th style="padding-bottom: 8px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; letter-spacing: 0.05em; width: 120px;">Categoria</th>
                            <th style="padding-bottom: 8px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; letter-spacing: 0.05em; width: 120px;">Valor</th>
                        </tr>
@@ -809,9 +834,9 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                    </tbody>
                </table>
 
-               <div class="avoid-break mt-8">
-                   <div class="section-title">Itens Orcamentados / Escopo</div>
-                   <table style="width: 100%; border-collapse: collapse;">
+                <div class="avoid-break mt-8">
+                    <div class="section-title">DESPESAS PREVISTAS (PLANEJAMENTO)</div>
+                    <table style="width: 100%; border-collapse: collapse;">
                        <thead>
                            <tr style="border-bottom: 2px solid #0f172a;">
                                <th style="padding-bottom: 8px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800;">Descrição</th>
@@ -837,10 +862,10 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                 <td colspan="4" style="padding: 6px 10px; text-align: right; font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Impostos (${order.taxRate}%):</td>
                                 <td style="padding: 6px 10px; text-align: right; font-size: 11px; font-weight: 700; color: #0f172a;">R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
                             </tr>` : ''}
-                            <tr style="border-top: 2px solid #0f172a; background: #f8fafc;">
-                                <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 11px; font-weight: 900; color: #0f172a; text-transform: uppercase;">Receita Total da Obra:</td>
-                                <td style="padding: 12px 10px; text-align: right; font-size: 13px; font-weight: 900; color: #2563eb;">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                            </tr>
+                             <tr style="border-top: 2px solid #0f172a; background: #f8fafc;">
+                                 <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 11px; font-weight: 900; color: #0f172a; text-transform: uppercase;">Custo Total Planejado (Orçado):</td>
+                                 <td style="padding: 12px 10px; text-align: right; font-size: 13px; font-weight: 900; color: #2563eb;">R$ ${plannedCost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                             </tr>
                         </tbody>
 
                    </table>
@@ -880,24 +905,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         printWindow.document.close();
     };
 
-    const initCanvas = () => {
-
-        if (!canvasRef.current) return;
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-        let drawing = false;
-        ctx.strokeStyle = '#0f172a';
-        ctx.lineWidth = 2;
-        const start = (e: any) => { drawing = true; const rect = canvas.getBoundingClientRect(); ctx.beginPath(); ctx.moveTo((e.clientX || e.touches[0].clientX) - rect.left, (e.clientY || e.touches[0].clientY) - rect.top); };
-        const draw = (e: any) => { if (!drawing) return; const rect = canvas.getBoundingClientRect(); ctx.lineTo((e.clientX || e.touches[0].clientX) - rect.left, (e.clientY || e.touches[0].clientY) - rect.top); ctx.stroke(); };
-        const stop = () => drawing = false;
-        canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', draw); canvas.addEventListener('mouseup', stop);
-        canvas.addEventListener('touchstart', start); canvas.addEventListener('touchmove', draw); canvas.addEventListener('touchend', stop);
-    };
-
-    useEffect(() => { if (showForm) setTimeout(initCanvas, 500); }, [showForm]);
-    const clearSignature = () => { canvasRef.current?.getContext('2d')?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height); };
+    useEffect(() => { /* Signature Removed */ }, [showForm]);
 
     return (
         <div className="space-y-6">
@@ -917,6 +925,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     setDescriptionBlocks([]);
                     setPaymentTerms('');
                     setDeliveryTime('');
+                    setContractPrice(0);
                     setTaxRate(0);
                     setBdiRate(0);
                 }} className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold shadow-2xl shadow-blue-100 hover:bg-blue-700 transition-all flex items-center gap-2">
@@ -941,7 +950,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                 <td className="px-8 py-5 text-xs font-mono font-black text-blue-600">{order.id}</td>
                                 <td className="px-8 py-5 text-sm font-black uppercase text-slate-900">{order.customerName}</td>
                                 <td className="px-8 py-5 text-xs font-bold text-slate-400 uppercase">{order.description}</td>
-                                <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transitionãopacity">
+                                <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button onClick={() => handleDownloadPDF(order)} className="p-2 text-slate-400 hover:text-emerald-500 transition-colors" title="Baixar Contrato"><FileDown className="w-4 h-4" /></button>
                                     <button onClick={() => handlePrintContract(order)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Gerar Contrato"><ScrollText className="w-4 h-4" /></button>
                                     <button onClick={() => handlePrintWorkReport(order)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Relatório de Obra"><FileText className="w-4 h-4" /></button>
@@ -949,13 +958,15 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                     <button onClick={() => {
                                         setEditingOrderId(order.id);
                                         setSelectedCustomerId(order.customerId);
-                                        setItems(order.items);
+                                        setItems(order.costItems || []); // Load COST items (empty initially)
                                         setOsTitle(order.description);
                                         setDiagnosis(order.serviceDescription || '');
                                         setDeliveryDate(order.dueDate);
                                         setDescriptionBlocks(order.descriptionBlocks || []);
                                         setPaymentTerms(order.paymentTerms || '');
                                         setDeliveryTime(order.deliveryTime || '');
+                                        const calculatedTotal = order.items?.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0) || 0;
+                                        setContractPrice(order.contractPrice || order.totalAmount || calculatedTotal || 0);
                                         setTaxRate(order.taxRate || 0);
                                         setBdiRate(order.bdiRate || 0);
                                         setActiveTab('financial');
@@ -964,13 +975,15 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                     <button onClick={() => {
                                         setEditingOrderId(order.id);
                                         setSelectedCustomerId(order.customerId);
-                                        setItems(order.items);
+                                        setItems(order.costItems || []); // Load COST items (empty initially)
                                         setOsTitle(order.description);
                                         setDiagnosis(order.serviceDescription || '');
                                         setDeliveryDate(order.dueDate);
                                         setDescriptionBlocks(order.descriptionBlocks || []);
                                         setPaymentTerms(order.paymentTerms || '');
                                         setDeliveryTime(order.deliveryTime || '');
+                                        const calculatedTotal = order.items?.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0) || 0;
+                                        setContractPrice(order.contractPrice || order.totalAmount || calculatedTotal || 0);
                                         setTaxRate(order.taxRate || 0);
                                         setBdiRate(order.bdiRate || 0);
                                         setShowForm(true);
@@ -1023,12 +1036,13 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                     <div className="flex justify-between items-center mb-2"><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest ml-1">Cliente</label><button onClick={() => setShowFullClientForm(true)} className="text-blue-600 text-[9px] font-black uppercase flex items-center gap-1 hover:underline"><UserPlus className="w-3 h-3" /> Novo</button></div>
                                                     <select className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all custom-select" value={selectedCustomerId} onChange={e => setSelectedCustomerId(e.target.value)}><option value="">Selecione...</option>{customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
                                                 </div>
-                                                <div><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-2 block ml-1">Título da Obra</label><input type="text" placeholder="Ex: Reforma da Cozinha" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400" value={osTitle} onChange={e => setOsTitle(e.target.value)} /></div>
+                                                <div><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-2 block ml-1">Valor Fechado do Contrato (Receita)</label><input type="number" placeholder="R$ 0,00" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400" value={contractPrice} onChange={e => setContractPrice(Number(e.target.value))} /></div>
+                                                <div className="md:col-span-2"><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-2 block ml-1">Título da Obra</label><input type="text" placeholder="Ex: Reforma da Cozinha" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400" value={osTitle} onChange={e => setOsTitle(e.target.value)} /></div>
                                             </div>
                                         </div>
 
                                         <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                                            <div><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Detalhamento do Escopo / Observações</label><textarea className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-700 outline-none h-24 focus:ring-2 focus:ring-blue-500 shadow-inner" placeholder="Descreva os serviços a serem executados..." value={diagnosis} onChange={e => setDiagnosis(e.target.value)} /></div>
+                                            <div><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Observações Técnicas e Escopo Detalhado</label><textarea className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-700 outline-none h-24 focus:ring-2 focus:ring-blue-500 shadow-inner" placeholder="Descreva os serviços a serem executados por extenso..." value={diagnosis} onChange={e => setDiagnosis(e.target.value)} /></div>
                                         </div>
 
                                         <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
@@ -1063,166 +1077,81 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                             </div>
                                                         )}
                                                         {block.type !== 'page-break' && (
-                                                            <button onClick={() => setDescriptionBlocks(descriptionBlocks.filter(b => b.id !== block.id))} className="absolute -top-2 -right-2 bg-slate-200 text-slate-500 p-1 rounded-full opacity-0 group-hover:opacity-100 transitionãopacity"><X className="w-3 h-3" /></button>
+                                                            <button onClick={() => setDescriptionBlocks(descriptionBlocks.filter(b => b.id !== block.id))} className="absolute -top-2 -right-2 bg-slate-200 text-slate-500 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><X className="w-3 h-3" /></button>
                                                         )}
                                                     </div>
                                                 ))}
                                             </div>
                                         </div>
+                                    </>
+                                ) : (
+                                    <div className="space-y-6">
+                                        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+                                            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
+                                                <div className="absolute top-0 left-0 w-full h-1 bg-blue-500"></div>
+                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Valor do Orçamento</p>
+                                                <p className="text-lg font-black text-blue-600 leading-none">R$ {revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                            </div>
+                                            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
+                                                <div className="absolute top-0 left-0 w-full h-1 bg-amber-500"></div>
+                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Despesas Previstas</p>
+                                                <p className="text-lg font-black text-amber-600 leading-none">R$ {plannedCost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                            </div>
+                                            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
+                                                <div className="absolute top-0 left-0 w-full h-1 bg-rose-500"></div>
+                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Despesas Reais</p>
+                                                <p className="text-lg font-black text-rose-600 leading-none">R$ {totalExpenses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                            </div>
+                                            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
+                                                <div className="absolute top-0 left-0 w-full h-1 bg-indigo-500"></div>
+                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Lucro Previsto</p>
+                                                <p className="text-lg font-black text-indigo-600 leading-none">R$ {plannedProfit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                            </div>
+                                            <div className={`p-4 rounded-2xl border shadow-sm relative overflow-hidden ${actualProfit >= 0 ? 'bg-emerald-50/50 border-emerald-100' : 'bg-rose-50/50 border-rose-100'}`}>
+                                                <div className={`absolute top-0 left-0 w-full h-1 ${actualProfit >= 0 ? 'bg-emerald-500' : 'bg-rose-500'}`}></div>
+                                                <p className={`text-[8px] font-black uppercase tracking-widest mb-1.5 ${actualProfit >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>Lucro Real</p>
+                                                <p className={`text-lg font-black leading-none ${actualProfit >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>R$ {actualProfit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                            </div>
+                                        </div>
 
                                         <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                                            <div className="flex justify-between items-center mb-4"><h4 className="text-[9px] font-black text-slate-400 uppercase tracking-widest border-b pb-2 grow mr-4">Itens da Obra</h4></div>
-                                            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+                                            <div className="flex justify-between items-center mb-4"><h1 className="text-xs font-black text-slate-900 uppercase tracking-tight">1. Planejamento de Custos e Acompanhamento</h1></div>
+                                            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-4">
                                                 <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
-                                                    <div className="md:col-span-6"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Descrição</label><input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentDesc} onChange={e => setCurrentDesc(e.target.value)} /></div>
-                                                    <div className="md:col-span-2"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Valor</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} /></div>
-                                                    <div className="md:col-span-2"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Qtd</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} /></div>
-                                                    <div className="md:col-span-2"><button onClick={handleAddItem} className="bg-blue-600 text-white w-full h-[42px] rounded-xl flex items-center justify-center hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200"><Plus className="w-5 h-5" /></button></div>
+                                                    <div className="md:col-span-5"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Descrição (Material/Serviço)</label><input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentDesc} onChange={e => setCurrentDesc(e.target.value)} placeholder="Ex: Cimento, Pedreiro, etc." /></div>
+                                                    <div className="md:col-span-2 text-center"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Qtd</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-center" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} /></div>
+                                                    <div className="md:col-span-2 text-right"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Valor Previsto</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-right" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} /></div>
+                                                    <div className="md:col-span-2 text-right"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Valor Real</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-right" value={currentActual || ''} onChange={e => setCurrentActual(e.target.value === '' ? 0 : Number(e.target.value))} /></div>
+                                                    <div className="md:col-span-1"><button onClick={handleAddItem} className="bg-amber-600 text-white w-full h-[42px] rounded-xl flex items-center justify-center hover:bg-amber-700 transition-colors shadow-lg shadow-amber-200 font-bold"><Plus className="w-5 h-5" /></button></div>
                                                 </div>
-                                                <div className="space-y-1.5">
+                                                <div className="mt-6 mb-2 grid grid-cols-12 gap-2 px-3">
+                                                    <div className="col-span-12 md:col-span-5"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">DESCRIÇÃO</span></div>
+                                                    <div className="col-span-3 md:col-span-2 text-center"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">QTD</span></div>
+                                                    <div className="col-span-4 md:col-span-2 text-right"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">PREVISTO</span></div>
+                                                    <div className="col-span-4 md:col-span-2 text-right"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">REALIZADO</span></div>
+                                                </div>
+                                                <div className="max-h-[300px] overflow-y-auto no-scrollbar">
                                                     {items.map(item => (
-                                                        <div key={item.id} className="flex justify-between items-center p-3 bg-white rounded-xl border border-slate-100 shadow-sm gap-2">
-                                                            <div className="grow">
-                                                                <p className="text-[10px] font-black text-slate-900 uppercase mb-1">{item.description}</p>
-                                                                <div className="flex items-center gap-2">
-                                                                    <div className="flex items-center gap-1 bg-slate-50 rounded px-2 py-1 border border-slate-100">
-                                                                        <span className="text-[8px] font-bold text-slate-400">QTD:</span>
-                                                                        <input type="number" className="w-12 bg-transparent text-[9px] font-black text-slate-700 outline-none" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', Number(e.target.value))} />
-                                                                    </div>
-                                                                    <div className="flex items-center gap-1 bg-slate-50 rounded px-2 py-1 border border-slate-100">
-                                                                        <span className="text-[8px] font-bold text-slate-400">VALOR:</span>
-                                                                        <input type="number" className="w-20 bg-transparent text-[9px] font-black text-slate-700 outline-none" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', Number(e.target.value))} />
-                                                                    </div>
-                                                                </div>
+                                                        <div key={item.id} className="grid grid-cols-12 gap-2 items-center py-3 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors px-3">
+                                                            <div className="col-span-12 md:col-span-5">
+                                                                <p className="text-[10px] font-bold text-slate-700 uppercase">{item.description}</p>
                                                             </div>
-                                                            <div className="flex items-center gap-3 shrink-0">
-                                                                <div className="flex items-center gap-1 bg-slate-50 rounded px-2 py-1 border border-slate-100">
-                                                                    <span className="text-[8px] font-bold text-slate-400">TOTAL:</span>
-                                                                    <input type="number" className="w-24 bg-transparent text-[11px] font-black text-blue-600 outline-none text-right" value={Number((item.unitPrice * item.quantity).toFixed(2))} onChange={e => updateItemTotal(item.id, Number(e.target.value))} />
-                                                                </div>
+                                                            <div className="col-span-3 md:col-span-2">
+                                                                <input type="number" className="w-full bg-transparent text-[9px] font-bold text-slate-600 outline-none text-center appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', Number(e.target.value))} />
+                                                            </div>
+                                                            <div className="col-span-4 md:col-span-2">
+                                                                <input type="number" className="w-full bg-transparent text-[9px] font-bold text-amber-600 outline-none text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" value={Number((item.unitPrice * item.quantity).toFixed(2))} onChange={e => updateItemTotal(item.id, Number(e.target.value))} />
+                                                            </div>
+                                                            <div className="col-span-4 md:col-span-2 flex items-center gap-2">
+                                                                <input type="number" className="w-full bg-transparent text-[9px] font-black text-rose-600 outline-none text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" value={item.actualValue || ''} onChange={e => {
+                                                                    const val = e.target.value === '' ? 0 : Number(e.target.value);
+                                                                    setItems(items.map(i => i.id === item.id ? { ...i, actualValue: val } : i));
+                                                                }} />
                                                                 <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="text-slate-300 hover:text-rose-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
                                                             </div>
                                                         </div>
                                                     ))}
                                                 </div>
-
-                                                {items.length > 0 && (
-                                                    <div className="flex justify-end pt-2">
-                                                        <div className="bg-white border-2 border-slate-100 rounded-2xl px-6 py-3 flex items-center gap-4 shadow-sm">
-                                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Subtotal da Obra</span>
-                                                            <span className="text-lg font-black text-slate-900">R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </>
-                                ) : (
-                                    <div className="space-y-6">
-                                        <div className="grid grid-cols-3 gap-4">
-                                            <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Valor da Obra (Receita)</p>
-                                                <p className="text-2xl font-black text-blue-600">R$ {totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                                                <div className="flex gap-4 mt-2">
-                                                    <div className="flex flex-col">
-                                                        <span className="text-[7px] font-black text-slate-400 uppercase">BDI: {bdiRate}%</span>
-                                                        <span className="text-[7px] font-black text-slate-400 uppercase">Imp: {taxRate}%</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Total de Gastos (Despesas)</p>
-                                                <p className="text-2xl font-black text-rose-600">R$ {totalExpenses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                                            </div>
-                                            <div className={`p-6 rounded-[2rem] border shadow-sm ${profit >= 0 ? 'bg-emerald-50 border-emerald-100' : 'bg-rose-50 border-rose-100'}`}>
-                                                <p className={`text-[9px] font-black uppercase tracking-widest mb-2 ${profit >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>Lucro Estimado</p>
-                                                <p className={`text-2xl font-black ${profit >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>R$ {profit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Lançar Novo Custo / Despesa</h4>
-                                            <div className="grid grid-cols-12 gap-3 items-end bg-slate-50 p-4 rounded-xl">
-                                                <div className="col-span-4">
-                                                    <label className="text-[9px] font-bold text-slate-400 uppercase mb-1 block">Descrição do Gasto</label>
-                                                    <input type="text" className="w-full p-2.5 rounded-lg border border-slate-200 text-xs font-bold" placeholder="Ex: Compra de Cimento" value={expenseDesc} onChange={e => setExpenseDesc(e.target.value)} />
-                                                </div>
-                                                <div className="col-span-3">
-                                                    <label className="text-[9px] font-bold text-slate-400 uppercase mb-1 block">Categoria</label>
-                                                    <input type="text" className="w-full p-2.5 rounded-lg border border-slate-200 text-xs font-bold" placeholder="Ex: Material" value={expenseCategory} onChange={e => setExpenseCategory(e.target.value)} />
-                                                </div>
-                                                <div className="col-span-3">
-                                                    <label className="text-[9px] font-bold text-slate-400 uppercase mb-1 block">Valor (R$)</label>
-                                                    <input type="number" className="w-full p-2.5 rounded-lg border border-slate-200 text-xs font-bold" value={expenseAmount} onChange={e => setExpenseAmount(e.target.value)} />
-                                                </div>
-                                                <div className="col-span-2">
-                                                    <button onClick={handleAddExpense} className="w-full bg-slate-900 text-white p-2.5 rounded-lg text-xs font-bold hover:bg-slate-800 transition-colors">Lançar</button>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-                                            <div className="p-4 bg-slate-50 border-b flex justify-between items-center">
-                                                <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Histórico de Despesas</h4>
-                                            </div>
-                                            <div className="divide-y divide-slate-100">
-                                                {workExpenses.length === 0 ? (
-                                                    <p className="p-8 text-center text-xs text-slate-400 font-medium italic">Nenhuma despesa lançada para esta obra.</p>
-                                                ) : (
-                                                    workExpenses.map(t => (
-                                                        <div key={t.id} className="p-4 hover:bg-slate-50 transition-colors">
-                                                            {editingExpenseId === t.id ? (
-                                                                <div className="grid grid-cols-12 gap-3 items-end bg-blue-50/50 p-3 rounded-xl border border-blue-100">
-                                                                    <div className="col-span-4">
-                                                                        <label className="text-[7px] font-bold text-blue-400 uppercase mb-1 block">Descriçào</label>
-                                                                        <input type="text" className="w-full p-2 rounded-lg border border-blue-200 text-[10px] font-bold outline-none" value={editExpenseDesc} onChange={e => setEditExpenseDesc(e.target.value)} />
-                                                                    </div>
-                                                                    <div className="col-span-3">
-                                                                        <label className="text-[7px] font-bold text-blue-400 uppercase mb-1 block">Categoria</label>
-                                                                        <input type="text" className="w-full p-2 rounded-lg border border-blue-200 text-[10px] font-bold outline-none" value={editExpenseCategory} onChange={e => setEditExpenseCategory(e.target.value)} />
-                                                                    </div>
-                                                                    <div className="col-span-3">
-                                                                        <label className="text-[7px] font-bold text-blue-400 uppercase mb-1 block">Valor (R$)</label>
-                                                                        <input type="number" className="w-full p-2 rounded-lg border border-blue-200 text-[10px] font-bold outline-none" value={editExpenseAmount} onChange={e => setEditExpenseAmount(e.target.value)} />
-                                                                    </div>
-                                                                    <div className="col-span-2 flex gap-1">
-                                                                        <button onClick={() => handleUpdateExpense(t.id)} className="flex-1 bg-emerald-500 text-white p-2 rounded-lg hover:bg-emerald-600 transition-colors"><CheckCircle className="w-4 h-4 mx-auto" /></button>
-                                                                        <button onClick={() => setEditingExpenseId(null)} className="flex-1 bg-slate-200 text-slate-500 p-2 rounded-lg hover:bg-slate-300 transition-colors"><X className="w-4 h-4 mx-auto" /></button>
-                                                                    </div>
-                                                                </div>
-                                                            ) : (
-                                                                <div className="flex justify-between items-center group">
-                                                                    <div>
-                                                                        <p className="text-xs font-black text-slate-900 uppercase">{t.description}</p>
-                                                                        <p className="text-[9px] font-bold text-slate-400 uppercase">{t.date} • {t.category}</p>
-                                                                    </div>
-                                                                    <div className="flex items-center gap-4">
-                                                                        <span className="text-sm font-black text-rose-600">- R$ {t.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                                                                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transitionãopacity">
-                                                                            <button onClick={() => {
-                                                                                setEditingExpenseId(t.id);
-                                                                                setEditExpenseDesc(t.description);
-                                                                                setEditExpenseAmount(t.amount.toString());
-                                                                                setEditExpenseCategory(t.category || '');
-                                                                            }} className="p-1.5 text-slate-300 hover:text-blue-500 hover:bg-blue-50 rounded-lg transition-all" title="Editar"><Pencil className="w-3.5 h-3.5" /></button>
-                                                                            <button onClick={() => handleDeleteExpense(t.id)} className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all" title="Excluir"><Trash2 className="w-3.5 h-3.5" /></button>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    ))
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                                {showFullClientForm && (
-                                    <div className="fixed inset-0 z-[60] bg-black/20 backdrop-blur-sm flex items-center justify-center p-4">
-                                        <div className="bg-white w-full max-w-2xl max-h-[90vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col">
-                                            <div className="p-4 border-b flex justify-between items-center"><h3 className="font-bold">Novo Cliente</h3><button onClick={() => setShowFullClientForm(false)}><X className="w-5 h-5" /></button></div>
-                                            <div className="flex-1 overflow-y-auto p-0">
-                                                <CustomerManager customers={customers} setCustomers={setCustomers} orders={orders} defaultOpenForm={true} onSuccess={(c) => { setSelectedCustomerId(c.id); setShowFullClientForm(false); }} onCancel={() => setShowFullClientForm(false)} />
                                             </div>
                                         </div>
                                     </div>
@@ -1231,18 +1160,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                             <div className="w-full lg:w-[380px] bg-slate-50 border-t lg:border-t-0 lg:border-l border-slate-200 p-8 flex flex-col shrink-0 relative overflow-hidden overflow-y-auto lg:overflow-y-hidden h-auto lg:h-full">
                                 <div className="mb-8 p-6 bg-white rounded-3xl border border-slate-100 shadow-sm text-center relative overflow-hidden group">
                                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Total da Obra</p>
-                                    <div className="text-4xl font-black text-slate-900 tracking-tighter mb-1">R$ {totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                                </div>
-
-                                <div className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm relative grow flex flex-col mb-4 min-h-[200px] lg:min-h-0">
-                                    <div className="p-3 bg-slate-50 border-b flex justify-between items-center">
-                                        <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Assinatura do Cliente</h4>
-                                        <button onClick={clearSignature} className="bg-rose-50 hover:bg-rose-100 text-rose-500 hover:text-rose-600 p-1.5 rounded-lg transition-colors" title="Limpar"><Eraser className="w-3 h-3" /></button>
-                                    </div>
-                                    <div className="grow bg-white relative cursor-crosshair h-32 lg:h-auto">
-                                        <canvas ref={canvasRef} width={320} height={180} className="w-full h-full touch-none" />
-                                    </div>
+                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Resumo de Receita</p>
+                                    <div className="text-4xl font-black text-slate-900 tracking-tighter mb-1">R$ {revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
                                 </div>
 
                                 <div className="space-y-3 mt-auto">
@@ -1255,9 +1174,20 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     </div>
                 </div>
             )}
+            {showFullClientForm && (
+                <div className="fixed inset-0 z-[60] bg-black/20 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="bg-white w-full max-w-2xl max-h-[90vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col">
+                        <div className="p-4 border-b flex justify-between items-center"><h3 className="font-bold">Novo Cliente</h3><button onClick={() => setShowFullClientForm(false)}><X className="w-5 h-5" /></button></div>
+                        <div className="flex-1 overflow-y-auto p-0">
+                            <CustomerManager customers={customers} setCustomers={setCustomers} orders={orders} defaultOpenForm={true} onSuccess={(c) => { setSelectedCustomerId(c.id); setShowFullClientForm(false); }} onCancel={() => setShowFullClientForm(false)} />
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
 
 export default WorkOrderManager;
+
 

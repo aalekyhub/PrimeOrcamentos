@@ -77,6 +77,7 @@ export interface ServiceItem {
   unitPrice: number;
   unit?: string;
   type: 'Serviço' | 'Material';
+  actualValue?: number; // Valor Realizado (Total)
 }
 
 export interface DescriptionBlock {
@@ -109,6 +110,8 @@ export interface ServiceOrder {
   equipmentModel?: string;
   equipmentSerialNumber?: string;
   osType?: 'EQUIPMENT' | 'WORK';
+  contractPrice?: number; // Valor fechado com o cliente
+  costItems?: ServiceItem[]; // Itens de custo (separados do escopo)
 }
 
 export type RecurrenceFrequency = 'NONE' | 'MONTHLY' | 'SEMIANNUAL' | 'ANNUAL';
