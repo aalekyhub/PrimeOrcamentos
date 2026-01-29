@@ -57,6 +57,10 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     const [taxRate, setTaxRate] = useState<number>(0);
     const [bdiRate, setBdiRate] = useState<number>(0);
 
+    // Current Item Real Fields
+    const [currentActualQty, setCurrentActualQty] = useState<number>(0);
+    const [currentActualPrice, setCurrentActualPrice] = useState<number>(0);
+
     // Edit Expense State
     const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
     const [editExpenseDesc, setEditExpenseDesc] = useState('');
@@ -68,13 +72,14 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         return transactions.filter(t => t.relatedOrderId === editingOrderId && t.type === 'DESPESA');
     }, [transactions, editingOrderId]);
 
-    const totalExpenses = useMemo(() => items.reduce((acc, i) => acc + (i.actualValue || 0), 0), [items]);
+    const totalExpenses = useMemo(() => items.reduce((acc, i) => acc + (i.actualQuantity ? (i.actualQuantity * (i.actualUnitPrice || 0)) : (i.actualValue || 0)), 0), [items]);
     const expensesByCategory = useMemo(() => {
         const groups: { [key: string]: number } = {};
         items.forEach(i => {
-            if (i.actualValue && i.actualValue > 0) {
+            const val = i.actualQuantity ? (i.actualQuantity * (i.actualUnitPrice || 0)) : (i.actualValue || 0);
+            if (val && val > 0) {
                 const cat = (i.type || 'Geral').toUpperCase();
-                groups[cat] = (groups[cat] || 0) + i.actualValue;
+                groups[cat] = (groups[cat] || 0) + val;
             }
         });
         return groups;
@@ -164,17 +169,19 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
     const handleAddItem = () => {
         if (!currentDesc) return;
-        const unitVal = currentQty > 0 ? currentPrice / currentQty : 0;
         setItems([...items, {
             id: Date.now().toString(),
             description: currentDesc,
-            quantity: currentQty,
-            unitPrice: unitVal,
+            quantity: currentQty || 1,
+            unitPrice: currentPrice || 0,
             type: 'Serviço',
             unit: 'un',
-            actualValue: currentActual === '' ? 0 : currentActual
+            actualValue: (currentActual === '' ? 0 : currentActual) || ((currentActualQty || 0) * (currentActualPrice || 0)),
+            actualQuantity: currentActualQty || 0,
+            actualUnitPrice: currentActualPrice || 0
         }]);
         setCurrentDesc(''); setCurrentPrice(0); setCurrentQty(1); setCurrentActual('');
+        setCurrentActualQty(0); setCurrentActualPrice(0);
         notify("Item adicionado");
     };
 
@@ -253,14 +260,34 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         const plannedCost = subTotalWithBDI + taxValue; // Planned Expenses
         const finalTotal = order.contractPrice && order.contractPrice > 0 ? order.contractPrice : plannedCost; // Use Contract Price if available
 
-        const itemsHtml = order.items.map((item: ServiceItem) => `
+        const itemsHtml = order.items.map((item: ServiceItem) => {
+            const actualTotal = (item.actualQuantity || 0) * (item.actualUnitPrice || 0);
+            const plannedTotal = item.quantity * item.unitPrice;
+            const diff = actualTotal - plannedTotal;
+            const diffColor = diff > 0 ? '#e11d48' : diff < 0 ? '#059669' : '#64748b';
+
+            return `
       <tr style="border-bottom: 1px solid #f1f5f9;">
-        <td style="padding: 12px 10px; font-weight: 600; text-transform: uppercase; font-size: 10px; color: #0f172a;">${item.description}</td>
-        <td style="padding: 12px 0; text-align: center; color: #94a3b8; font-size: 9px; font-weight: 600; text-transform: uppercase;">${item.unit || 'UN'}</td>
-        <td style="padding: 12px 0; text-align: center; font-weight: 600; color: #0f172a; font-size: 10px;">${item.quantity}</td>
-        <td style="padding: 12px 0; text-align: right; color: #64748b; font-size: 10px;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-        <td style="padding: 12px 10px; text-align: right; font-weight: 600; font-size: 11px; color: #0f172a;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-      </tr>`).join('');
+        <td style="padding: 8px 10px;">
+            <div style="font-weight: 700; text-transform: uppercase; font-size: 10px; color: #0f172a;">${item.description}</div>
+            <div style="font-size: 8px; color: #94a3b8; font-weight: 600;">${item.type || 'GERAL'}</div>
+        </td>
+        <td style="padding: 8px 0; text-align: center; color: #94a3b8; font-size: 9px; font-weight: 600; text-transform: uppercase;">${item.unit || 'UN'}</td>
+        <td style="padding: 8px 0; text-align: center;">
+            <div style="font-weight: 600; color: #64748b; font-size: 9px;">Est: ${item.quantity}</div>
+            <div style="font-weight: 700; color: #0f172a; font-size: 9px;">Real: ${item.actualQuantity || 0}</div>
+        </td>
+        <td style="padding: 8px 0; text-align: right;">
+            <div style="color: #64748b; font-size: 9px;">Est: R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+            <div style="color: #0f172a; font-size: 9px; font-weight: 700;">Real: R$ ${(item.actualUnitPrice || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+        </td>
+        <td style="padding: 8px 10px; text-align: right;">
+            <div style="font-weight: 600; font-size: 9px; color: #64748b;">Est: R$ ${plannedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+            <div style="font-weight: 800; font-size: 10px; color: #0f172a;">Real: R$ ${actualTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+            ${diff !== 0 ? `<div style="font-size: 8px; font-weight: 700; color: ${diffColor};">${diff > 0 ? '+' : ''} R$ ${diff.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>` : ''}
+        </td>
+      </tr>`;
+        }).join('');
 
         const html = `
       <!DOCTYPE html>
@@ -722,14 +749,34 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         const totalExp = workExpenses.reduce((acc, t) => acc + t.amount, 0);
         const profitValue = revenue - totalExp;
 
-        const itemsHtml = order.items.map((item: ServiceItem) => `
+        const itemsHtml = order.items.map((item: ServiceItem) => {
+            const actualTotal = (item.actualQuantity || 0) * (item.actualUnitPrice || 0);
+            const plannedTotal = item.quantity * item.unitPrice;
+            const diff = actualTotal - plannedTotal;
+            const diffColor = diff > 0 ? '#e11d48' : diff < 0 ? '#059669' : '#64748b';
+
+            return `
       <tr style="border-bottom: 1px solid #f1f5f9;">
-        <td style="padding: 12px 10px; font-weight: 600; text-transform: uppercase; font-size: 11px; color: #0f172a;">${item.description}</td>
-        <td style="padding: 12px 0; text-align: center; color: #94a3b8; font-size: 10px; font-weight: 600; text-transform: uppercase;">${item.unit || 'UN'}</td>
-        <td style="padding: 12px 0; text-align: center; font-weight: 600; color: #0f172a; font-size: 11px;">${item.quantity}</td>
-        <td style="padding: 12px 0; text-align: right; color: #64748b; font-size: 11px;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-        <td style="padding: 12px 10px; text-align: right; font-weight: 600; font-size: 12px; color: #0f172a;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-      </tr>`).join('');
+        <td style="padding: 10px 10px;">
+            <div style="font-weight: 700; text-transform: uppercase; font-size: 11px; color: #0f172a;">${item.description}</div>
+            <div style="font-size: 9px; color: #94a3b8; font-weight: 600;">${item.type || 'GERAL'}</div>
+        </td>
+        <td style="padding: 10px 0; text-align: center; color: #94a3b8; font-size: 10px; font-weight: 600; text-transform: uppercase;">${item.unit || 'UN'}</td>
+        <td style="padding: 10px 0; text-align: center;">
+            <div style="font-weight: 600; color: #64748b; font-size: 10px;">Est: ${item.quantity}</div>
+            <div style="font-weight: 700; color: #0f172a; font-size: 11px;">Real: ${item.actualQuantity || 0}</div>
+        </td>
+        <td style="padding: 10px 0; text-align: right;">
+            <div style="color: #64748b; font-size: 10px;">Est: R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+            <div style="color: #0f172a; font-size: 11px; font-weight: 700;">Real: R$ ${(item.actualUnitPrice || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+        </td>
+        <td style="padding: 10px 10px; text-align: right;">
+            <div style="font-weight: 600; font-size: 10px; color: #64748b;">Est: R$ ${plannedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+            <div style="font-weight: 800; font-size: 12px; color: #0f172a;">Real: R$ ${actualTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+            ${diff !== 0 ? `<div style="font-size: 9px; font-weight: 700; color: ${diffColor};">${diff > 0 ? '+' : ''} R$ ${diff.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>` : ''}
+        </td>
+      </tr>`;
+        }).join('');
 
         const expensesHtml = workExpenses.length > 0 ? workExpenses.map((t: Transaction) => `
       <tr style="border-bottom: 1px solid #f1f5f9;">
@@ -1087,30 +1134,30 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                 ) : (
                                     <div className="space-y-6">
                                         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-                                            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
+                                            <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden flex flex-col justify-center">
                                                 <div className="absolute top-0 left-0 w-full h-1 bg-blue-500"></div>
-                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Valor do Orçamento</p>
-                                                <p className="text-lg font-black text-blue-600 leading-none">R$ {revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Valor do Orçamento</p>
+                                                <p className="text-xl font-black text-blue-600 leading-none">R$ {revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                                             </div>
-                                            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
+                                            <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden flex flex-col justify-center">
                                                 <div className="absolute top-0 left-0 w-full h-1 bg-amber-500"></div>
-                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Despesas Previstas</p>
-                                                <p className="text-lg font-black text-amber-600 leading-none">R$ {plannedCost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Despesas Previstas</p>
+                                                <p className="text-xl font-black text-amber-600 leading-none">R$ {plannedCost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                                             </div>
-                                            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
+                                            <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden flex flex-col justify-center">
                                                 <div className="absolute top-0 left-0 w-full h-1 bg-rose-500"></div>
-                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Despesas Reais</p>
-                                                <p className="text-lg font-black text-rose-600 leading-none">R$ {totalExpenses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Despesas Reais</p>
+                                                <p className="text-xl font-black text-rose-600 leading-none">R$ {totalExpenses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                                             </div>
-                                            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
+                                            <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden flex flex-col justify-center">
                                                 <div className="absolute top-0 left-0 w-full h-1 bg-indigo-500"></div>
-                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Lucro Previsto</p>
-                                                <p className="text-lg font-black text-indigo-600 leading-none">R$ {plannedProfit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Lucro Previsto</p>
+                                                <p className="text-xl font-black text-indigo-600 leading-none">R$ {plannedProfit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                                             </div>
-                                            <div className={`p-4 rounded-2xl border shadow-sm relative overflow-hidden ${actualProfit >= 0 ? 'bg-emerald-50/50 border-emerald-100' : 'bg-rose-50/50 border-rose-100'}`}>
+                                            <div className={`p-5 rounded-2xl border shadow-sm relative overflow-hidden flex flex-col justify-center ${actualProfit >= 0 ? 'bg-emerald-50/50 border-emerald-100' : 'bg-rose-50/50 border-rose-100'}`}>
                                                 <div className={`absolute top-0 left-0 w-full h-1 ${actualProfit >= 0 ? 'bg-emerald-500' : 'bg-rose-500'}`}></div>
-                                                <p className={`text-[8px] font-black uppercase tracking-widest mb-1.5 ${actualProfit >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>Lucro Real</p>
-                                                <p className={`text-lg font-black leading-none ${actualProfit >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>R$ {actualProfit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                                <p className={`text-[9px] font-black uppercase tracking-widest mb-2 ${actualProfit >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>Lucro Real</p>
+                                                <p className={`text-xl font-black leading-none ${actualProfit >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>R$ {actualProfit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                                             </div>
                                         </div>
 
@@ -1118,35 +1165,45 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                             <div className="flex justify-between items-center mb-4"><h1 className="text-xs font-black text-slate-900 uppercase tracking-tight">1. Planejamento de Custos e Acompanhamento</h1></div>
                                             <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-4">
                                                 <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
-                                                    <div className="md:col-span-5"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Descrição (Material/Serviço)</label><input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentDesc} onChange={e => setCurrentDesc(e.target.value)} placeholder="Ex: Cimento, Pedreiro, etc." /></div>
-                                                    <div className="md:col-span-2 text-center"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Qtd</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-center" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} /></div>
-                                                    <div className="md:col-span-2 text-right"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Valor Previsto</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-right" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} /></div>
-                                                    <div className="md:col-span-2 text-right"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Valor Real</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-right" value={currentActual || ''} onChange={e => setCurrentActual(e.target.value === '' ? 0 : Number(e.target.value))} /></div>
-                                                    <div className="md:col-span-1"><button onClick={handleAddItem} className="bg-amber-600 text-white w-full h-[42px] rounded-xl flex items-center justify-center hover:bg-amber-700 transition-colors shadow-lg shadow-amber-200 font-bold"><Plus className="w-5 h-5" /></button></div>
+                                                    <div className="md:col-span-3"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Descrição</label><input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentDesc} onChange={e => setCurrentDesc(e.target.value)} placeholder="Ex: Tinta, Cimento..." /></div>
+                                                    <div className="md:col-span-1 text-center"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Qtd Est.</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-center" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} /></div>
+                                                    <div className="md:col-span-1 text-right"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Unit. Est.</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-right" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} /></div>
+                                                    <div className="md:col-span-2 border-l pl-2"><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-1.5 block ml-1">Total Est.</label><div className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-black text-blue-700 text-right min-h-[42px] flex items-center justify-end">R$ {((currentQty || 0) * (currentPrice || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div></div>
+
+                                                    <div className="md:col-span-1 text-center border-l pl-2"><label className="text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1.5 block ml-1">Qtd Real</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-center" value={currentActualQty} onChange={e => setCurrentActualQty(Number(e.target.value))} /></div>
+                                                    <div className="md:col-span-1 text-right"><label className="text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1.5 block ml-1">Unit. Real</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-right" value={currentActualPrice} onChange={e => setCurrentActualPrice(Number(e.target.value))} /></div>
+                                                    <div className="md:col-span-2 border-l pl-2"><label className="text-[9px] font-black text-amber-600 uppercase tracking-widest mb-1.5 block ml-1">Total Real</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-black text-slate-900 outline-none text-right" value={currentActual || ((currentActualQty || 0) * (currentActualPrice || 0)) || ''} onChange={e => setCurrentActual(e.target.value === '' ? 0 : Number(e.target.value))} /></div>
+                                                    <div className="md:col-span-1"><button onClick={handleAddItem} className="bg-slate-900 text-white w-full h-[42px] rounded-xl flex items-center justify-center hover:bg-slate-800 transition-colors shadow-lg font-bold"><Plus className="w-5 h-5" /></button></div>
                                                 </div>
                                                 <div className="mt-6 mb-2 grid grid-cols-12 gap-2 px-3">
-                                                    <div className="col-span-12 md:col-span-5"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">DESCRIÇÃO</span></div>
-                                                    <div className="col-span-3 md:col-span-2 text-center"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">QTD</span></div>
-                                                    <div className="col-span-4 md:col-span-2 text-right"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">PREVISTO</span></div>
-                                                    <div className="col-span-4 md:col-span-2 text-right"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">REALIZADO</span></div>
+                                                    <div className="col-span-12 md:col-span-3"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">DESCRIÇÃO</span></div>
+                                                    <div className="col-span-6 md:col-span-4 text-center"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">PLANEJADO (QTD x UNIT = TOTAL)</span></div>
+                                                    <div className="col-span-6 md:col-span-5 text-center"><span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">REALIZADO (QTD x UNIT = TOTAL)</span></div>
                                                 </div>
                                                 <div className="max-h-[300px] overflow-y-auto no-scrollbar">
                                                     {items.map(item => (
-                                                        <div key={item.id} className="grid grid-cols-12 gap-2 items-center py-3 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors px-3">
-                                                            <div className="col-span-12 md:col-span-5">
+                                                        <div key={item.id} className="grid grid-cols-12 gap-1 items-center py-2 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors px-3">
+                                                            <div className="col-span-12 md:col-span-3">
                                                                 <input type="text" className="w-full bg-transparent text-[10px] font-bold text-slate-700 uppercase outline-none" value={item.description} onChange={e => updateItem(item.id, 'description', e.target.value)} />
                                                             </div>
-                                                            <div className="col-span-3 md:col-span-2">
-                                                                <input type="number" className="w-full bg-transparent text-[9px] font-bold text-slate-600 outline-none text-center appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', Number(e.target.value))} />
+                                                            <div className="col-span-1 md:col-span-1">
+                                                                <input type="number" className="w-full bg-transparent text-[9px] font-bold text-slate-600 outline-none text-center appearance-none" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', Number(e.target.value))} />
                                                             </div>
-                                                            <div className="col-span-4 md:col-span-2">
-                                                                <input type="number" className="w-full bg-transparent text-[9px] font-bold text-amber-600 outline-none text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" value={Number((item.unitPrice * item.quantity).toFixed(2))} onChange={e => updateItemTotal(item.id, Number(e.target.value))} />
+                                                            <div className="col-span-1 md:col-span-1">
+                                                                <input type="number" className="w-full bg-transparent text-[9px] font-bold text-slate-600 outline-none text-right appearance-none" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', Number(e.target.value))} />
                                                             </div>
-                                                            <div className="col-span-4 md:col-span-2 flex items-center gap-2">
-                                                                <input type="number" className="w-full bg-transparent text-[9px] font-black text-rose-600 outline-none text-right appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" value={item.actualValue || ''} onChange={e => {
-                                                                    const val = e.target.value === '' ? 0 : Number(e.target.value);
-                                                                    setItems(items.map(i => i.id === item.id ? { ...i, actualValue: val } : i));
-                                                                }} />
+                                                            <div className="col-span-2 md:col-span-2 text-right px-2">
+                                                                <span className="text-[9px] font-black text-blue-600">R$ {(item.quantity * item.unitPrice).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                                            </div>
+
+                                                            <div className="col-span-1 md:col-span-1 border-l border-rose-100 pl-1">
+                                                                <input type="number" className="w-full bg-transparent text-[9px] font-black text-rose-600 outline-none text-center appearance-none" value={item.actualQuantity || 0} onChange={e => updateItem(item.id, 'actualQuantity', Number(e.target.value))} />
+                                                            </div>
+                                                            <div className="col-span-1 md:col-span-1">
+                                                                <input type="number" className="w-full bg-transparent text-[9px] font-black text-rose-600 outline-none text-right appearance-none" value={item.actualUnitPrice || 0} onChange={e => updateItem(item.id, 'actualUnitPrice', Number(e.target.value))} />
+                                                            </div>
+                                                            <div className="col-span-2 md:col-span-2 border-l border-amber-100 pl-1 flex items-center justify-between">
+                                                                <span className="text-[10px] font-black text-amber-700">R$ {((item.actualQuantity || 0) * (item.actualUnitPrice || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                                                                 <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="text-slate-300 hover:text-rose-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
                                                             </div>
                                                         </div>
@@ -1157,19 +1214,12 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                     </div>
                                 )}
                             </div>
-                            <div className="w-full lg:w-[380px] bg-slate-50 border-t lg:border-t-0 lg:border-l border-slate-200 p-8 flex flex-col shrink-0 relative overflow-hidden overflow-y-auto lg:overflow-y-hidden h-auto lg:h-full">
-                                <div className="mb-8 p-6 bg-white rounded-3xl border border-slate-100 shadow-sm text-center relative overflow-hidden group">
-                                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Resumo de Receita</p>
-                                    <div className="text-4xl font-black text-slate-900 tracking-tighter mb-1">R$ {revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                                </div>
+                        </div>
 
-                                <div className="space-y-3 mt-auto">
-                                    <button onClick={handleSaveOS} disabled={isSaving} className={`w-full ${isSaving ? 'bg-slate-800 cursor-not-allowed' : 'bg-slate-900 hover:bg-slate-800'} text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-slate-200 hover:shadow-2xl transition-all flex items-center justify-center gap-3`}>
-                                        <Save className={`w-4 h-4 ${isSaving ? 'animate-pulse' : ''}`} /> {isSaving ? 'Salvando...' : 'Salvar OS de Obra'}
-                                    </button>
-                                </div>
-                            </div>
+                        <div className="bg-white px-8 py-5 border-t flex justify-end shrink-0">
+                            <button onClick={handleSaveOS} disabled={isSaving} className={`bg-slate-900 text-white px-12 py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-slate-200 hover:shadow-2xl transition-all flex items-center justify-center gap-3 ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                <Save className={`w-4 h-4 ${isSaving ? 'animate-pulse' : ''}`} /> {isSaving ? 'Salvando...' : 'Salvar OS de Obra'}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1177,9 +1227,19 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             {showFullClientForm && (
                 <div className="fixed inset-0 z-[60] bg-black/20 backdrop-blur-sm flex items-center justify-center p-4">
                     <div className="bg-white w-full max-w-2xl max-h-[90vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col">
-                        <div className="p-4 border-b flex justify-between items-center"><h3 className="font-bold">Novo Cliente</h3><button onClick={() => setShowFullClientForm(false)}><X className="w-5 h-5" /></button></div>
+                        <div className="p-4 border-b flex justify-between items-center">
+                            <h3 className="font-bold">Novo Cliente</h3>
+                            <button onClick={() => setShowFullClientForm(false)}><X className="w-5 h-5" /></button>
+                        </div>
                         <div className="flex-1 overflow-y-auto p-0">
-                            <CustomerManager customers={customers} setCustomers={setCustomers} orders={orders} defaultOpenForm={true} onSuccess={(c) => { setSelectedCustomerId(c.id); setShowFullClientForm(false); }} onCancel={() => setShowFullClientForm(false)} />
+                            <CustomerManager
+                                customers={customers}
+                                setCustomers={setCustomers}
+                                orders={orders}
+                                defaultOpenForm={true}
+                                onSuccess={(c) => { setSelectedCustomerId(c.id); setShowFullClientForm(false); }}
+                                onCancel={() => setShowFullClientForm(false)}
+                            />
                         </div>
                     </div>
                 </div>

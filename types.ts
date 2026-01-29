@@ -77,7 +77,9 @@ export interface ServiceItem {
   unitPrice: number;
   unit?: string;
   type: 'Serviço' | 'Material';
-  actualValue?: number; // Valor Realizado (Total)
+  actualValue?: number; // Valor Realizado (Total) - Keeping for compatibility if needed, but adding granular fields
+  actualQuantity?: number;
+  actualUnitPrice?: number;
 }
 
 export interface DescriptionBlock {
