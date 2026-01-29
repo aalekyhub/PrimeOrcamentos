@@ -1167,43 +1167,56 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                 <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
                                                     <div className="md:col-span-3"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Descrição</label><input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentDesc} onChange={e => setCurrentDesc(e.target.value)} placeholder="Ex: Tinta, Cimento..." /></div>
                                                     <div className="md:col-span-1 text-center"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Qtd Est.</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-center" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} /></div>
-                                                    <div className="md:col-span-1 text-right"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Unit. Est.</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-right" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} /></div>
+                                                    <div className="md:col-span-1 text-right"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">VALOR ESTIM.</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-right" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} /></div>
                                                     <div className="md:col-span-2 border-l pl-2"><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-1.5 block ml-1">Total Est.</label><div className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold text-blue-700 text-right min-h-[42px] flex items-center justify-end">R$ {((currentQty || 0) * (currentPrice || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div></div>
 
                                                     <div className="md:col-span-1 text-center border-l pl-2"><label className="text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1.5 block ml-1">Qtd Real</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-center" value={currentActualQty} onChange={e => setCurrentActualQty(Number(e.target.value))} /></div>
-                                                    <div className="md:col-span-1 text-right"><label className="text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1.5 block ml-1">Unit. Real</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-right" value={currentActualPrice} onChange={e => setCurrentActualPrice(Number(e.target.value))} /></div>
+                                                    <div className="md:col-span-1 text-right"><label className="text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1.5 block ml-1">VALOR REAL</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-right" value={currentActualPrice} onChange={e => setCurrentActualPrice(Number(e.target.value))} /></div>
                                                     <div className="md:col-span-2 border-l pl-2"><label className="text-[9px] font-black text-amber-600 uppercase tracking-widest mb-1.5 block ml-1">Total Real</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-right" value={currentActual || ((currentActualQty || 0) * (currentActualPrice || 0)) || ''} onChange={e => setCurrentActual(e.target.value === '' ? 0 : Number(e.target.value))} /></div>
                                                     <div className="md:col-span-1"><button onClick={handleAddItem} className="bg-slate-900 text-white w-full h-[42px] rounded-xl flex items-center justify-center hover:bg-slate-800 transition-colors shadow-lg font-bold"><Plus className="w-5 h-5" /></button></div>
                                                 </div>
-                                                <div className="mt-6 mb-2 grid grid-cols-12 gap-2 px-3">
-                                                    <div className="col-span-12 md:col-span-3"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">DESCRIÇÃO</span></div>
-                                                    <div className="col-span-6 md:col-span-4 text-center"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">PLANEJADO (QTD x UNIT = TOTAL)</span></div>
-                                                    <div className="col-span-6 md:col-span-5 text-center"><span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">REALIZADO (QTD x UNIT = TOTAL)</span></div>
+                                                <div className="mt-6 mb-1 grid grid-cols-12 gap-2 px-3">
+                                                    <div className="col-span-3"></div>
+                                                    <div className="col-span-4 text-center border-b border-slate-200 pb-1 mx-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">PLANEJADO</span></div>
+                                                    <div className="col-span-4 text-center border-b border-rose-100 pb-1 mx-2"><span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">REALIZADO</span></div>
+                                                    <div className="col-span-1"></div>
+                                                </div>
+                                                <div className="mb-2 grid grid-cols-12 gap-1 px-3">
+                                                    <div className="col-span-3"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">DESCRIÇÃO</span></div>
+                                                    <div className="col-span-1 text-center"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">QTD</span></div>
+                                                    <div className="col-span-1 text-right pr-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">UNIT</span></div>
+                                                    <div className="col-span-2 text-right pr-4"><span className="text-[9px] font-black text-blue-600 uppercase tracking-widest">TOTAL</span></div>
+                                                    <div className="col-span-1 text-center border-l border-rose-100 pl-1"><span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">QTD</span></div>
+                                                    <div className="col-span-1 text-right pr-2"><span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">UNIT</span></div>
+                                                    <div className="col-span-2 text-right pr-4"><span className="text-[9px] font-black text-amber-600 uppercase tracking-widest">TOTAL</span></div>
+                                                    <div className="col-span-1"></div>
                                                 </div>
                                                 <div className="max-h-[300px] overflow-y-auto no-scrollbar">
                                                     {items.map(item => (
                                                         <div key={item.id} className="grid grid-cols-12 gap-1 items-center py-2 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors px-3">
-                                                            <div className="col-span-12 md:col-span-3">
+                                                            <div className="col-span-3">
                                                                 <input type="text" className="w-full bg-transparent text-xs font-bold text-slate-700 uppercase outline-none" value={item.description} onChange={e => updateItem(item.id, 'description', e.target.value)} />
                                                             </div>
-                                                            <div className="col-span-1 md:col-span-1 border-l border-slate-100 pl-1">
+                                                            <div className="col-span-1 border-l border-slate-100 pl-1">
                                                                 <input type="number" className="w-full bg-transparent text-xs font-bold text-slate-600 outline-none text-center appearance-none" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', Number(e.target.value))} />
                                                             </div>
-                                                            <div className="col-span-1 md:col-span-1">
+                                                            <div className="col-span-1">
                                                                 <input type="number" className="w-full bg-transparent text-xs font-bold text-slate-600 outline-none text-right appearance-none" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', Number(e.target.value))} />
                                                             </div>
-                                                            <div className="col-span-2 md:col-span-2 text-right px-2">
+                                                            <div className="col-span-2 text-right px-2">
                                                                 <span className="text-xs font-bold text-blue-600">R$ {(item.quantity * item.unitPrice).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                                                             </div>
 
-                                                            <div className="col-span-1 md:col-span-1 border-l border-rose-100 pl-1">
+                                                            <div className="col-span-1 border-l border-rose-100 pl-1">
                                                                 <input type="number" className="w-full bg-transparent text-xs font-bold text-rose-600 outline-none text-center appearance-none" value={item.actualQuantity || 0} onChange={e => updateItem(item.id, 'actualQuantity', Number(e.target.value))} />
                                                             </div>
-                                                            <div className="col-span-1 md:col-span-1">
+                                                            <div className="col-span-1">
                                                                 <input type="number" className="w-full bg-transparent text-xs font-bold text-rose-600 outline-none text-right appearance-none" value={item.actualUnitPrice || 0} onChange={e => updateItem(item.id, 'actualUnitPrice', Number(e.target.value))} />
                                                             </div>
-                                                            <div className="col-span-2 md:col-span-2 border-l border-amber-100 pl-1 flex items-center justify-between">
+                                                            <div className="col-span-2 border-l border-amber-100 pl-1 text-right px-2">
                                                                 <span className="text-xs font-bold text-amber-700">R$ {((item.actualQuantity || 0) * (item.actualUnitPrice || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                                            </div>
+                                                            <div className="col-span-1 flex justify-center">
                                                                 <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="text-slate-300 hover:text-rose-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
                                                             </div>
                                                         </div>
