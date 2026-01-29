@@ -781,10 +781,10 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
         const expensesHtml = workExpenses.length > 0 ? workExpenses.map((t: Transaction) => `
       <tr style="border-bottom: 1px solid #f1f5f9;">
-        <td style="padding: 10px 10px; font-size: 11px; color: #64748b; font-weight: 500;">${formatDate(t.date)}</td>
-        <td style="padding: 10px 0; font-weight: 600; text-transform: uppercase; font-size: 11px; color: #0f172a;">${t.description}</td>
-        <td style="padding: 10px 0; font-size: 10px; font-weight: 600; text-transform: uppercase; color: #94a3b8;">${t.category || 'GERAL'}</td>
-        <td style="padding: 10px 10px; text-align: right; font-weight: 700; font-size: 11px; color: #e11d48;">R$ ${t.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        <td style="padding: 12px 10px; font-size: 11px; color: #64748b; font-weight: 500; vertical-align: top; width: 15%;">${formatDate(t.date)}</td>
+        <td style="padding: 12px 0; font-weight: 600; text-transform: uppercase; font-size: 11px; color: #0f172a; vertical-align: top; width: 50%;">${t.description}</td>
+        <td style="padding: 12px 0; font-size: 10px; font-weight: 600; text-transform: uppercase; color: #94a3b8; vertical-align: top; width: 15%;">${t.category || 'GERAL'}</td>
+        <td style="padding: 12px 10px; text-align: right; font-weight: 700; font-size: 11px; color: #e11d48; vertical-align: top; width: 20%;">R$ ${t.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
       </tr>`).join('') : `<tr><td colspan="4" style="padding: 24px; text-align: center; font-size: 11px; color: #94a3b8; font-style: italic;">Nenhuma despesa lançada nesta obra.</td></tr>`;
 
         const html = `
@@ -871,13 +871,13 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                 </div>
 
                 <div class="${reportMode === 'real' ? 'section-title' : 'hidden'}">Histórico Detalhado de Despesas</div>
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; ${reportMode === 'real' ? '' : 'display: none;'}">
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; table-layout: fixed; ${reportMode === 'real' ? '' : 'display: none;'}">
                    <thead>
                        <tr style="border-bottom: 2px solid #0f172a;">
-                           <th style="padding-bottom: 8px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; letter-spacing: 0.05em; width: 90px;">Data</th>
-                           <th style="padding-bottom: 8px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; letter-spacing: 0.05em;">Descrição do Gasto</th>
-                           <th style="padding-bottom: 8px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; letter-spacing: 0.05em; width: 120px;">Categoria</th>
-                           <th style="padding-bottom: 8px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; letter-spacing: 0.05em; width: 120px;">Valor</th>
+                           <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; width: 15%;">Data</th>
+                           <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; width: 50%;">Descrição do Gasto</th>
+                           <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; width: 15%;">Categoria</th>
+                           <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 20%;">Valor</th>
                        </tr>
                    </thead>
                    <tbody>
