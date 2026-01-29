@@ -67,6 +67,10 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     const [editExpenseAmount, setEditExpenseAmount] = useState('');
     const [editExpenseCategory, setEditExpenseCategory] = useState('');
 
+    // Report State
+    const [showReportTypeModal, setShowReportTypeModal] = useState(false);
+    const [selectedOrderForReport, setSelectedOrderForReport] = useState<ServiceOrder | null>(null);
+
     const workExpenses = useMemo(() => {
         if (!editingOrderId) return [];
         return transactions.filter(t => t.relatedOrderId === editingOrderId && t.type === 'DESPESA');
@@ -293,19 +297,19 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
       <!DOCTYPE html>
       <html>
       <head>
-        <title>OS - ${order.id.replace('OS-', 'OS')} - ${order.description || 'Obra'}</title>
+        <title>OS - ${order.id.replace('OS-', '')} - ${order.description || 'Obra'}</title>
          <script src="https://cdn.tailwindcss.com"></script>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
         <style>
            body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
            @page { size: A4; margin: 0 !important; }
            .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
            .avoid-break { break-inside: avoid; page-break-inside: avoid; }
-           .info-box { background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
-           .info-label { font-size: 9px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block; }
-           .info-value { font-size: 11px; font-weight: 700; color: #0f172a; text-transform: uppercase; line-height: 1.4; }
-           .info-sub { font-size: 10px; color: #64748b; font-weight: 500; }
-           .section-title { font-size: 9px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; margin-bottom: 16px; }
+           .info-box { background: #f8fafc; border-radius: 12px; padding: 22px; border: 1px solid #e2e8f0; }
+           .info-label { font-size: 10px; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; display: block; }
+           .info-value { font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4; }
+           .info-sub { font-size: 11px; color: #64748b; font-weight: 600; }
+           .section-title { font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; margin-bottom: 16px; }
            @media screen { body { background: #f1f5f9; padding: 40px 0; } .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; } }
            @media print { body { background: white !important; margin: 0 !important; } .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; } .no-screen { display: block !important; } .no-print { display: none !important; } .print-footer { display: none !important; } .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; } }
         </style>
@@ -315,21 +319,21 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
           <thead><tr><td style="height: ${company.printMarginTop || 15}mm;"><div style="height: ${company.printMarginTop || 15}mm; display: block;">&nbsp;</div></td></tr></thead>
           <tbody><tr><td>
             <div class="a4-container">
-               <div class="flex justify-between items-start mb-12 border-b-2 border-slate-900 pb-8">
+               <div class="flex justify-between items-start mb-12 border-b-[3px] border-slate-900 pb-8">
                    <div class="flex gap-6 items-center">
-                       <div style="width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;">
-                           ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:700; font-size:30px; color:#2563eb;">PO</div>'}
+                       <div style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                           ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>'}
                        </div>
                        <div>
-                           <h1 class="text-2xl font-bold text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
-                           <p class="text-[9px] font-bold text-blue-600 uppercase tracking-widest leading-none">Soluções em Construção e Reforma</p>
-                           <p class="text-[8px] text-slate-400 font-medium uppercase tracking-tight mt-2">${company.cnpj || ''} | ${company.phone || ''}</p>
+                           <h1 class="text-3xl font-black text-slate-900 leading-none mb-2 uppercase tracking-tight">${company.name}</h1>
+                           <p class="text-[11px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">Ordem de Serviço de Obra / Reforma</p>
+                           <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tight">${company.cnpj || ''} | ${company.phone || ''}</p>
                        </div>
                    </div>
                    <div class="text-right">
-                       <div class="bg-[#0f172a] text-white px-3 py-1 rounded-md text-[9px] font-bold uppercase tracking-widest mb-2 inline-block shadow-sm whitespace-nowrap">ORDEM DE SERVIÇO</div>
-                       <p class="text-3xl font-bold text-[#0f172a] tracking-tighter mb-1 whitespace-nowrap">OS-${order.id.replace('OS-', '')}</p>
-                       <p class="text-[9px] font-medium text-slate-500 uppercase tracking-widest text-right">ABERTURA: ${formatDate(order.createdAt)}</p>
+                       <div class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest mb-2 shadow-md inline-block">ORDEM DE SERVIÇO</div>
+                       <p class="text-4xl font-black text-[#0f172a] tracking-tighter mb-1 whitespace-nowrap">${order.id}</p>
+                       <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">ABERTURA: ${formatDate(order.createdAt)}</p>
                    </div>
                </div>
 
@@ -386,30 +390,15 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     </table>
                 </div>
 
-                 <div class="avoid-break mb-12">
-                   <div class="flex justify-end mb-2 gap-6 px-2">
-                        <div class="text-right">
-                           <span class="text-[8px] font-medium text-slate-600 uppercase block">Subtotal dos Itens</span>
-                           <span class="text-[10px] font-bold text-slate-700 block">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                        </div>
-                        ${order.bdiRate ? `
-                        <div class="text-right">
-                           <span class="text-[8px] font-medium text-slate-600 uppercase block">BDI (${order.bdiRate}%)</span>
-                           <span class="text-[10px] font-bold text-emerald-600 block">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                        </div>` : ''}
-                        ${order.taxRate ? `
-                        <div class="text-right">
-                           <span class="text-[8px] font-medium text-slate-600 uppercase block">Impostos (${order.taxRate}%)</span>
-                           <span class="text-[10px] font-bold text-blue-600 block">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                        </div>` : ''}
+                <div class="avoid-break mt-12 bg-slate-900 text-white p-8 rounded-2xl flex justify-between items-center shadow-2xl relative overflow-hidden">
+                   <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
+                   <div>
+                       <p class="text-[11px] font-black uppercase tracking-[0.3em] opacity-60 mb-1">${order.contractPrice && order.contractPrice > 0 ? 'Valor Total do Contrato' : 'Custo Total Estimado'}</p>
+                       <p class="text-xs font-bold text-blue-300 uppercase tracking-widest">${order.paymentTerms || 'Consulte condições'}</p>
                    </div>
-                   <div class="bg-slate-900 text-white p-6 rounded-xl flex justify-between items-center shadow-xl">
-                       <p class="text-[10px] font-black uppercase tracking-[0.2em] opacity-60">${order.contractPrice && order.contractPrice > 0 ? 'Valor Total do Contrato' : 'Custo Total Planejado'}</p>
-                       <p class="text-3xl font-black tracking-tighter">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                   </div>
-                </div>
-
-               <div class="avoid-break mt-auto pt-8">
+                   <p class="text-4xl font-black tracking-tighter">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+               </div>
+                <div class="avoid-break mt-auto pt-16">
                    <div class="grid grid-cols-2 gap-16 px-10">
                        <div class="text-center">
                            <div style="border-top: 1px solid #cbd5e1; margin-bottom: 8px;"></div>
@@ -455,27 +444,27 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     <body class="no-scrollbar">
       <div id="contract-content">
           <div class="a4-container">
-            <div class="flex justify-between items-start mb-8">
-                <div class="flex gap-4">
-                    <div class="w-16 h-16 shrink-0 flex items-center justify-center overflow-hidden">
-                        ${company.logo ? `<img src="${company.logo}" style="height: 100%; object-fit: contain;">` : `<div style="width: 64px; height: 64px; background: #2563eb; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white;"><svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></div>`}
-                    </div>
-                    <div>
-                        <h1 class="text-xl font-black text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
-                        <p class="text-[9px] font-black text-blue-600 uppercase tracking-widest">${company.tagline || 'Soluções em Gestão e Manutenção Profissional'}</p>
-                        <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tight mt-1">${company.cnpj || ''} | ${company.phone || ''}</p>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <div class="text-[14px] font-black text-blue-600 uppercase tracking-widest mb-0.5">CONTRATO</div>
-                    <h2 class="text-3xl font-black text-slate-900 tracking-tighter">${order.id}</h2>
-                    <div class="mt-2 space-y-0.5"><p class="text-[8px] font-black text-slate-400 uppercase tracking-widest text-right">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p></div>
-                </div>
-            </div>
+               <div class="flex justify-between items-start mb-10 border-b-[3px] border-slate-900 pb-8">
+                   <div class="flex gap-6 items-center">
+                       <div style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                           ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>'}
+                       </div>
+                       <div>
+                           <h1 class="text-3xl font-black text-slate-900 leading-none mb-2 uppercase tracking-tight">${company.name}</h1>
+                           <p class="text-[11px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">Contrato de Prestação de Serviços</p>
+                           <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tight">${company.cnpj || ''} | ${company.phone || ''}</p>
+                       </div>
+                   </div>
+                   <div class="text-right">
+                       <div class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest mb-2 shadow-md inline-block">CONTRATO</div>
+                       <p class="text-4xl font-black text-[#0f172a] tracking-tighter mb-1 whitespace-nowrap">${order.id}</p>
+                       <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p>
+                   </div>
+               </div>
 
-            <div class="grid grid-cols-2 gap-4 mb-5">
-              <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</h4><p class="text-sm font-bold text-slate-900 uppercase">${company.name}</p><p class="text-[11px] text-slate-500 uppercase">${company.address || ''}</p><p class="text-[11px] text-slate-500 uppercase">${company.email || ''}</p></div>
-              <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</h4><p class="text-sm font-bold text-slate-900 uppercase">${customer.name}</p><p class="text-[11px] text-slate-500 uppercase">${(customer.document || '').replace(/\D/g, '').length <= 11 ? 'CPF' : 'CNPJ'}: ${formatDocument(customer.document || '') || 'N/A'}</p><p class="text-[11px] text-slate-500 uppercase">${customer.address || ''}, ${customer.number || ''} - ${customer.city || ''}</p></div>
+            <div class="grid grid-cols-2 gap-4 mb-8">
+              <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100"><h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</h4><p class="text-base font-black text-slate-900 uppercase">${company.name}</p><p class="text-xs font-bold text-slate-500 uppercase mt-1">${company.address || ''}</p><p class="text-xs font-bold text-slate-500 uppercase">${company.email || ''}</p></div>
+              <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100"><h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</h4><p class="text-base font-black text-slate-900 uppercase">${customer.name}</p><p class="text-xs font-bold text-slate-500 uppercase mt-1">${(customer.document || '').replace(/\D/g, '').length <= 11 ? 'CPF' : 'CNPJ'}: ${formatDocument(customer.document || '') || 'N/A'}</p><p class="text-xs font-bold text-slate-500 uppercase">${customer.address || ''}, ${customer.number || ''} - ${customer.city || ''}</p></div>
             </div>
 
 
@@ -612,30 +601,28 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         <thead><tr><td style="height: ${company.printMarginTop || 15}mm;"><div style="height: ${company.printMarginTop || 15}mm; display: block;">&nbsp;</div></td></tr></thead>
         <tbody><tr><td>
           <div class="a4-container">
-            <div class="flex justify-between items-start mb-8">
-                <div class="flex gap-4">
-                    <div class="w-16 h-16 shrink-0 flex items-center justify-center overflow-hidden">
-                        ${company.logo ? `<img src="${company.logo}" style="height: 100%; object-fit: contain;">` : `<div style="width: 64px; height: 64px; background: #2563eb; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white;"><svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></div>`}
-                    </div>
-                    <div>
-                        <h1 class="text-xl font-bold text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
-                        <p class="text-[9px] font-bold text-blue-600 uppercase tracking-widest">${company.tagline || 'Soluções em Gestão e Manutenção Profissional'}</p>
-                        <p class="text-[8px] text-slate-400 font-medium uppercase tracking-tight mt-1">${company.cnpj || ''} | ${company.phone || ''}</p>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <div class="bg-blue-600 text-white px-4 py-1 rounded text-[8px] font-bold uppercase tracking-widest mb-1 inline-flex items-center justify-center">CONTRATO</div>
-                    <h2 class="text-3xl font-bold text-slate-900 tracking-tighter">${order.id}</h2>
-                    <div class="mt-2 space-y-0.5"><p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest text-right">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p></div>
-                </div>
+               <div class="flex justify-between items-start mb-10 border-b-[3px] border-slate-900 pb-8">
+                   <div class="flex gap-6 items-center">
+                       <div style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                           ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>'}
+                       </div>
+                       <div>
+                           <h1 class="text-3xl font-black text-slate-900 leading-none mb-2 uppercase tracking-tight">${company.name}</h1>
+                           <p class="text-[11px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">Contrato de Prestação de Serviços</p>
+                           <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tight">${company.cnpj || ''} | ${company.phone || ''}</p>
+                       </div>
+                   </div>
+                   <div class="text-right">
+                       <div class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest mb-2 shadow-md inline-block">CONTRATO</div>
+                       <p class="text-4xl font-black text-[#0f172a] tracking-tighter mb-1 whitespace-nowrap">${order.id}</p>
+                       <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p>
+                   </div>
+               </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-8">
+              <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100"><h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</h4><p class="text-base font-black text-slate-900 uppercase">${company.name}</p><p class="text-xs font-bold text-slate-500 uppercase mt-1">${company.address || ''}</p><p class="text-xs font-bold text-slate-500 uppercase">${company.email || ''}</p></div>
+              <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100"><h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</h4><p class="text-base font-black text-slate-900 uppercase">${customer.name}</p><p class="text-xs font-bold text-slate-500 uppercase mt-1">${(customer.document || '').replace(/\D/g, '').length <= 11 ? 'CPF' : 'CNPJ'}: ${formatDocument(customer.document || '') || 'N/A'}</p><p class="text-xs font-bold text-slate-500 uppercase">${customer.address || ''}, ${customer.number || ''} - ${customer.city || ''}</p></div>
             </div>
-
-            <div class="grid grid-cols-2 gap-4 mb-5">
-              <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</h4><p class="text-sm font-bold text-slate-900 uppercase">${company.name}</p><p class="text-[11px] text-slate-500 uppercase">${company.address || ''}</p><p class="text-[11px] text-slate-500 uppercase">${company.email || ''}</p></div>
-              <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</h4><p class="text-sm font-bold text-slate-900 uppercase">${customer.name}</p><p class="text-[11px] text-slate-500 uppercase">${(customer.document || '').replace(/\D/g, '').length <= 11 ? 'CPF' : 'CNPJ'}: ${formatDocument(customer.document || '') || 'N/A'}</p><p class="text-[11px] text-slate-500 uppercase">${customer.address || ''}, ${customer.number || ''} - ${customer.city || ''}</p></div>
-            </div>
-
-
 
             <div className="mb-10">
                 <p class="text-[14px] text-slate-600 leading-relaxed text-justify">As partes acima identificadas resolvem firmar o presente Contrato de Prestação de Serviços por Empreitada Global, nos termos da legislação civil e previdenciária vigente, mediante as cláusulas e condições seguintes:</p>
@@ -729,7 +716,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         printWindow.document.close();
     };
 
-    const handlePrintWorkReport = (order: ServiceOrder) => {
+    const handlePrintWorkReport = (order: ServiceOrder, reportMode: 'estimated' | 'real' = 'real') => {
         const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, address: 'Não informado', document: 'N/A' };
         const workExpenses = transactions.filter(t => t.relatedOrderId === order.id && t.type === 'DESPESA');
         const printWindow = window.open('', '_blank');
@@ -754,6 +741,20 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             const plannedTotal = item.quantity * item.unitPrice;
             const diff = actualTotal - plannedTotal;
             const diffColor = diff > 0 ? '#e11d48' : diff < 0 ? '#059669' : '#64748b';
+
+            if (reportMode === 'estimated') {
+                return `
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 10px 10px;">
+                        <div style="font-weight: 700; text-transform: uppercase; font-size: 11px; color: #0f172a;">${item.description}</div>
+                        <div style="font-size: 9px; color: #94a3b8; font-weight: 600;">${item.type || 'GERAL'}</div>
+                    </td>
+                    <td style="padding: 10px 0; text-align: center; color: #94a3b8; font-size: 10px; font-weight: 600; text-transform: uppercase;">${item.unit || 'UN'}</td>
+                    <td style="padding: 10px 0; text-align: center; font-weight: 700; color: #0f172a; font-size: 11px;">${item.quantity}</td>
+                    <td style="padding: 10px 0; text-align: right; color: #0f172a; font-size: 11px; font-weight: 700;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                    <td style="padding: 10px 10px; text-align: right; font-weight: 800; font-size: 12px; color: #2563eb;">R$ ${plannedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                </tr>`;
+            }
 
             return `
       <tr style="border-bottom: 1px solid #f1f5f9;">
@@ -811,21 +812,21 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
           <thead><tr><td style="height: ${company.printMarginTop || 15}mm;">&nbsp;</td></tr></thead>
           <tbody><tr><td>
             <div class="a4-container">
-                <div class="flex justify-between items-start mb-10 border-b-2 border-slate-900 pb-8">
+                <div class="flex justify-between items-start mb-10 border-b-[3px] border-slate-900 pb-8">
                     <div class="flex gap-6 items-center">
                         <div style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
                             ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>'}
                         </div>
                         <div>
-                            <h1 class="text-2xl font-black text-slate-900 leading-none mb-1.5 uppercase tracking-tight">${company.name}</h1>
-                            <p class="text-[10px] font-extrabold text-blue-600 uppercase tracking-widest leading-none">Relatório Gerencial de Obra</p>
-                            <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tight mt-2">${company.cnpj || ''} | ${company.phone || ''}</p>
+                            <h1 class="text-3xl font-black text-slate-900 leading-none mb-2 uppercase tracking-tight">${company.name}</h1>
+                            <p class="text-[11px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">Relatório Gerencial de Obra - ${reportMode === 'estimated' ? 'PLANEJAMENTO' : 'EXECUÇÃO'}</p>
+                            <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tight">${company.cnpj || ''} | ${company.phone || ''}</p>
                         </div>
                     </div>
                     <div class="text-right">
-                        <div class="bg-blue-600 text-white px-3 py-1 rounded text-[9px] font-black uppercase tracking-widest mb-1.5 shadow-sm inline-block">CONTROLE DE OBRA</div>
-                        <p class="text-3xl font-black text-[#0f172a] tracking-tighter mb-0.5">${order.id}</p>
-                        <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p>
+                        <div class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest mb-2 shadow-md inline-block">CONTROLE DE OBRA</div>
+                        <p class="text-4xl font-black text-[#0f172a] tracking-tighter mb-1">${order.id}</p>
+                        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p>
                     </div>
                 </div>
 
@@ -843,27 +844,34 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                </div>
 
                <div class="section-title">Resumo Financeiro da Obra</div>
-                <div class="grid grid-cols-4 gap-2 mb-8">
-                    <div class="card-summary bg-blue-50 border-blue-100">
-                        <span class="text-[8px] font-black text-blue-600 uppercase tracking-widest block mb-1">1. Receita (Contrato)</span>
-                        <span class="text-sm font-black text-blue-700 block">R$ ${revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                <div class="grid grid-cols-${reportMode === 'estimated' ? '2' : '4'} gap-4 mb-10">
+                    <div class="card-summary bg-blue-50/50 border-blue-100 px-8 py-6">
+                        <span class="text-[11px] font-black text-blue-600 uppercase tracking-widest block mb-1">Total Orçado</span>
+                        <span class="text-2xl font-black text-blue-700 block">R$ ${plannedCost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
-                    <div class="card-summary bg-amber-50 border-amber-100">
-                        <span class="text-[8px] font-black text-amber-600 uppercase tracking-widest block mb-1">2. Despesa Planejada</span>
-                        <span class="text-sm font-black text-amber-700 block">R$ ${plannedCost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    ${reportMode === 'real' ? `
+                    <div class="card-summary bg-rose-50/50 border-rose-100 px-8 py-6">
+                        <span class="text-[11px] font-black text-rose-600 uppercase tracking-widest block mb-1">Total Realizado</span>
+                        <span class="text-2xl font-black text-rose-700 block">R$ ${totalExp.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
-                    <div class="card-summary bg-rose-50 border-rose-100">
-                        <span class="text-[8px] font-black text-rose-600 uppercase tracking-widest block mb-1">3. Gastos Reais (Realizado)</span>
-                        <span class="text-sm font-black text-rose-700 block">R$ ${totalExp.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    <div class="card-summary bg-amber-50/50 border-amber-100 px-8 py-6">
+                        <span class="text-[11px] font-black text-amber-600 uppercase tracking-widest block mb-1">Receita Total</span>
+                        <span class="text-2xl font-black text-amber-700 block">R$ ${revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
-                    <div class="card-summary ${profitValue >= 0 ? 'bg-emerald-50 border-emerald-100' : 'bg-red-50 border-red-100'}">
-                        <span class="text-[8px] font-black ${profitValue >= 0 ? 'text-emerald-600' : 'text-red-600'} uppercase tracking-widest block mb-1">4. Lucro Final Atual</span>
-                        <span class="text-sm font-black ${profitValue >= 0 ? 'text-emerald-700' : 'text-red-700'} block">R$ ${profitValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    <div class="card-summary ${profitValue >= 0 ? 'bg-emerald-50/50 border-emerald-100' : 'bg-red-50/50 border-red-100'} px-8 py-6">
+                        <span class="text-[11px] font-black ${profitValue >= 0 ? 'text-emerald-600' : 'text-red-600'} uppercase tracking-widest block mb-1">Resultado Final</span>
+                        <span class="text-2xl font-black ${profitValue >= 0 ? 'text-emerald-700' : 'text-red-700'} block">R$ ${profitValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>` : `
+                    <div class="card-summary bg-emerald-50/50 border-emerald-100 px-8 py-6 text-right">
+                        <span class="text-[11px] font-black text-emerald-600 uppercase tracking-widest block mb-1">Lucro Estimado</span>
+                        <span class="text-2xl font-black text-emerald-700 block">R$ ${(revenue - plannedCost).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
+                    `}
+                </div>
                 </div>
 
-               <div class="section-title">Histórico Detalhado de Despesas</div>
-               <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+                <div class="${reportMode === 'real' ? 'section-title' : 'hidden'}">Histórico Detalhado de Despesas</div>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; ${reportMode === 'real' ? '' : 'display: none;'}">
                    <thead>
                        <tr style="border-bottom: 2px solid #0f172a;">
                            <th style="padding-bottom: 8px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; letter-spacing: 0.05em; width: 90px;">Data</th>
@@ -881,8 +889,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                    </tbody>
                </table>
 
-                <div class="avoid-break mt-8">
-                    <div class="section-title">DESPESAS PREVISTAS (PLANEJAMENTO)</div>
+                <div class="avoid-break mt-6">
+                    <div class="section-title">${reportMode === 'estimated' ? 'DESPESAS PREVISTAS (PLANEJAMENTO)' : 'DETALHAMENTO DE CUSTOS (EXECUÇÃO)'}</div>
                     <table style="width: 100%; border-collapse: collapse;">
                        <thead>
                            <tr style="border-bottom: 2px solid #0f172a;">
@@ -895,24 +903,24 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                        </thead>
                                                <tbody>
                             ${itemsHtml}
-                            <tr style="border-top: 1px solid #f1f5f9;">
-                                <td colspan="4" style="padding: 10px 10px; text-align: right; font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Subtotal dos Itens:</td>
-                                <td style="padding: 10px 10px; text-align: right; font-size: 11px; font-weight: 700; color: #0f172a;">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                            </tr>
-                            ${order.bdiRate ? `
-                            <tr>
-                                <td colspan="4" style="padding: 6px 10px; text-align: right; font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">BDI (${order.bdiRate}%):</td>
-                                <td style="padding: 6px 10px; text-align: right; font-size: 11px; font-weight: 700; color: #0f172a;">R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                            </tr>` : ''}
-                            ${order.taxRate ? `
-                            <tr>
-                                <td colspan="4" style="padding: 6px 10px; text-align: right; font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Impostos (${order.taxRate}%):</td>
-                                <td style="padding: 6px 10px; text-align: right; font-size: 11px; font-weight: 700; color: #0f172a;">R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                            </tr>` : ''}
-                             <tr style="border-top: 2px solid #0f172a; background: #f8fafc;">
-                                 <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 11px; font-weight: 900; color: #0f172a; text-transform: uppercase;">Custo Total Planejado (Orçado):</td>
-                                 <td style="padding: 12px 10px; text-align: right; font-size: 13px; font-weight: 900; color: #2563eb;">R$ ${plannedCost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                             <tr style="border-top: 1px solid #f1f5f9; background: #fafafa;">
+                                 <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Subtotal dos Itens:</td>
+                                 <td style="padding: 12px 10px; text-align: right; font-size: 12px; font-weight: 800; color: #0f172a;">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                              </tr>
+                             ${order.bdiRate ? `
+                             <tr>
+                                 <td colspan="4" style="padding: 8px 10px; text-align: right; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">BDI (${order.bdiRate}%):</td>
+                                 <td style="padding: 8px 10px; text-align: right; font-size: 12px; font-weight: 800; color: #0f172a;">R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                             </tr>` : ''}
+                             ${order.taxRate ? `
+                             <tr>
+                                 <td colspan="4" style="padding: 8px 10px; text-align: right; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Impostos (${order.taxRate}%):</td>
+                                 <td style="padding: 8px 10px; text-align: right; font-size: 12px; font-weight: 800; color: #0f172a;">R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                             </tr>` : ''}
+                              <tr style="border-top: 3px solid #0f172a; background: #f1f5f9;">
+                                  <td colspan="4" style="padding: 16px 10px; text-align: right; font-size: 13px; font-weight: 900; color: #0f172a; text-transform: uppercase;">Custo Total Planejado (Orçado):</td>
+                                  <td style="padding: 16px 10px; text-align: right; font-size: 14px; font-weight: 900; color: #2563eb;">R$ ${plannedCost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                              </tr>
                         </tbody>
 
                    </table>
@@ -1000,7 +1008,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                 <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button onClick={() => handleDownloadPDF(order)} className="p-2 text-slate-400 hover:text-emerald-500 transition-colors" title="Baixar Contrato"><FileDown className="w-4 h-4" /></button>
                                     <button onClick={() => handlePrintContract(order)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Gerar Contrato"><ScrollText className="w-4 h-4" /></button>
-                                    <button onClick={() => handlePrintWorkReport(order)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Relatório de Obra"><FileText className="w-4 h-4" /></button>
+                                    <button onClick={() => { setSelectedOrderForReport(order); setShowReportTypeModal(true); }} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Relatório de Obra"><FileText className="w-4 h-4" /></button>
                                     <button onClick={() => handlePrintOS(order)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Imprimir OS"><Printer className="w-4 h-4" /></button>
                                     <button onClick={() => {
                                         setEditingOrderId(order.id);
@@ -1253,6 +1261,51 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                 onSuccess={(c) => { setSelectedCustomerId(c.id); setShowFullClientForm(false); }}
                                 onCancel={() => setShowFullClientForm(false)}
                             />
+                        </div>
+                    </div>
+                </div>
+            )}
+            {showReportTypeModal && selectedOrderForReport && (
+                <div className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-300">
+                    <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl p-8 transform animate-in zoom-in-95 duration-200">
+                        <div className="flex justify-between items-start mb-6">
+                            <div>
+                                <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase">Tipo de Relatório</h3>
+                                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">Selecione para imprimir</p>
+                            </div>
+                            <button onClick={() => setShowReportTypeModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X className="w-5 h-5 text-slate-400" /></button>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-4">
+                            <button
+                                onClick={() => { handlePrintWorkReport(selectedOrderForReport, 'estimated'); setShowReportTypeModal(false); }}
+                                className="group flex items-center gap-4 p-5 bg-blue-50 hover:bg-blue-600 rounded-3xl transition-all border border-blue-100 text-left"
+                            >
+                                <div className="p-3 bg-white rounded-2xl shadow-sm text-blue-600 group-hover:scale-110 transition-transform">
+                                    <ScrollText className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <h4 className="font-black text-blue-900 group-hover:text-white uppercase text-sm tracking-tight">RELATÓRIO ESTIMATIVO</h4>
+                                    <p className="text-blue-600/70 group-hover:text-white/80 text-[10px] font-bold uppercase">Apenas planejamento e custos orçados</p>
+                                </div>
+                            </button>
+
+                            <button
+                                onClick={() => { handlePrintWorkReport(selectedOrderForReport, 'real'); setShowReportTypeModal(false); }}
+                                className="group flex items-center gap-4 p-5 bg-emerald-50 hover:bg-emerald-600 rounded-3xl transition-all border border-emerald-100 text-left"
+                            >
+                                <div className="p-3 bg-white rounded-2xl shadow-sm text-emerald-600 group-hover:scale-110 transition-transform">
+                                    <CheckCircle className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <h4 className="font-black text-emerald-900 group-hover:text-white uppercase text-sm tracking-tight">RELATÓRIO DE EXECUÇÃO</h4>
+                                    <p className="text-emerald-600/70 group-hover:text-white/80 text-[10px] font-bold uppercase">Custos orçados vs Realizados e Resultado</p>
+                                </div>
+                            </button>
+                        </div>
+
+                        <div className="mt-8 pt-6 border-t border-slate-100 flex justify-center">
+                            <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">ServiFlow v2.0</p>
                         </div>
                     </div>
                 </div>
