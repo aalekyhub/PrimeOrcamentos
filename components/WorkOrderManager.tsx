@@ -833,7 +833,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         </div>
                         <div>
                             <h1 class="text-3xl font-black text-slate-900 leading-none mb-2 uppercase tracking-tight">${company.name}</h1>
-                            <p class="text-[11px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">Relatório Gerencial de Obra - ${reportMode === 'estimated' ? 'PLANEJAMENTO' : 'EXECUÇÃO'}</p>
+                            <p class="text-[11px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">Relatório Gerencial de Obra - ${reportMode === 'estimated' ? 'ESTIMADO' : 'REAL'}</p>
                             <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tight">${company.cnpj || ''} | ${company.phone || ''}</p>
                         </div>
                     </div>
@@ -906,7 +906,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                </table>
 
                 <div class="avoid-break mt-6">
-                    <div class="section-title">${reportMode === 'estimated' ? 'DESPESAS PREVISTAS (PLANEJAMENTO)' : 'DETALHAMENTO DE CUSTOS (EXECUÇÃO)'}</div>
+                    <div class="section-title">${reportMode === 'estimated' ? 'DESPESAS PREVISTAS (ESTIMADO)' : 'DETALHAMENTO DE CUSTOS (REAL)'}</div>
                     <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                        <thead>
                            <tr style="border-bottom: 2px solid #0f172a;">
@@ -1301,7 +1301,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                     <ScrollText className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h4 className="font-black text-blue-900 group-hover:text-white uppercase text-sm tracking-tight">RELATÓRIO ESTIMATIVO</h4>
+                                    <h4 className="font-black text-blue-900 group-hover:text-white uppercase text-sm tracking-tight">RELATÓRIO DO ESTIMADO</h4>
                                     <p className="text-blue-600/70 group-hover:text-white/80 text-[10px] font-bold uppercase">Apenas planejamento e custos orçados</p>
                                 </div>
                             </button>
@@ -1314,7 +1314,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                     <CheckCircle className="w-6 h-6" />
                                 </div>
                                 <div>
-                                    <h4 className="font-black text-emerald-900 group-hover:text-white uppercase text-sm tracking-tight">RELATÓRIO DE EXECUÇÃO</h4>
+                                    <h4 className="font-black text-emerald-900 group-hover:text-white uppercase text-sm tracking-tight">RELATÓRIO DO REAL</h4>
                                     <p className="text-emerald-600/70 group-hover:text-white/80 text-[10px] font-bold uppercase">Custos orçados vs Realizados e Resultado</p>
                                 </div>
                             </button>
