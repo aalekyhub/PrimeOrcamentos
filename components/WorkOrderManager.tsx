@@ -1134,7 +1134,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                     {items.map(item => (
                                                         <div key={item.id} className="grid grid-cols-12 gap-2 items-center py-3 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors px-3">
                                                             <div className="col-span-12 md:col-span-5">
-                                                                <p className="text-[10px] font-bold text-slate-700 uppercase">{item.description}</p>
+                                                                <input type="text" className="w-full bg-transparent text-[10px] font-bold text-slate-700 uppercase outline-none" value={item.description} onChange={e => updateItem(item.id, 'description', e.target.value)} />
                                                             </div>
                                                             <div className="col-span-3 md:col-span-2">
                                                                 <input type="number" className="w-full bg-transparent text-[9px] font-bold text-slate-600 outline-none text-center appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', Number(e.target.value))} />
