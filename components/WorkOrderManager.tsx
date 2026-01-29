@@ -272,23 +272,23 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
             return `
       <tr style="border-bottom: 1px solid #f1f5f9;">
-        <td style="padding: 8px 10px;">
+        <td style="padding: 12px 10px; text-align: left; vertical-align: top;">
             <div style="font-weight: 700; text-transform: uppercase; font-size: 10px; color: #0f172a;">${item.description}</div>
             <div style="font-size: 8px; color: #94a3b8; font-weight: 600;">${item.type || 'GERAL'}</div>
         </td>
-        <td style="padding: 8px 0; text-align: center; color: #94a3b8; font-size: 9px; font-weight: 600; text-transform: uppercase;">${item.unit || 'UN'}</td>
-        <td style="padding: 8px 0; text-align: center;">
-            <div style="font-weight: 600; color: #64748b; font-size: 9px;">Est: ${item.quantity}</div>
-            <div style="font-weight: 700; color: #0f172a; font-size: 9px;">Real: ${item.actualQuantity || 0}</div>
+        <td style="padding: 12px 0; text-align: center; vertical-align: top; color: #64748b; font-size: 9px; font-weight: 600; text-transform: uppercase;">${item.unit || 'UN'}</td>
+        <td style="padding: 12px 0; text-align: center; vertical-align: top;">
+            <div style="font-weight: 600; color: #64748b; font-size: 9px; margin-bottom: 2px;">Est: ${item.quantity}</div>
+            <div style="font-weight: 700; color: #0f172a; font-size: 10px;">Real: ${item.actualQuantity || 0}</div>
         </td>
-        <td style="padding: 8px 0; text-align: right;">
-            <div style="color: #64748b; font-size: 9px;">Est: R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-            <div style="color: #0f172a; font-size: 9px; font-weight: 700;">Real: R$ ${(item.actualUnitPrice || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+        <td style="padding: 12px 0; text-align: right; vertical-align: top;">
+            <div style="color: #64748b; font-size: 9px; margin-bottom: 2px;">Est: R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+            <div style="color: #0f172a; font-size: 10px; font-weight: 800;">Real: R$ ${(item.actualUnitPrice || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
         </td>
-        <td style="padding: 8px 10px; text-align: right;">
-            <div style="font-weight: 600; font-size: 9px; color: #64748b;">Est: R$ ${plannedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-            <div style="font-weight: 800; font-size: 10px; color: #0f172a;">Real: R$ ${actualTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-            ${diff !== 0 ? `<div style="font-size: 8px; font-weight: 700; color: ${diffColor};">${diff > 0 ? '+' : ''} R$ ${diff.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>` : ''}
+        <td style="padding: 12px 10px; text-align: right; vertical-align: top;">
+            <div style="font-weight: 600; font-size: 9px; color: #64748b; margin-bottom: 2px;">Est: R$ ${plannedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+            <div style="font-weight: 900; font-size: 11px; color: #0f172a;">Real: R$ ${actualTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+            ${diff !== 0 ? `<div style="font-size: 8px; font-weight: 800; color: ${diffColor}; margin-top: 2px;">${diff > 0 ? '+' : ''} R$ ${diff.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>` : ''}
         </td>
       </tr>`;
         }).join('');
@@ -376,14 +376,14 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
                 <div class="mb-8">
                     <div class="section-title">Previsão de Gastos (Materiais e Mão de Obra)</div>
-                    <table style="width: 100%; border-collapse: collapse;">
+                    <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                         <thead>
                             <tr style="border-bottom: 2px solid #0f172a;">
-                                <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 700; letter-spacing: 0.05em;">Descrição</th>
-                                <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 700; letter-spacing: 0.05em;">UN</th>
-                                <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 700; letter-spacing: 0.05em;">Qtd</th>
-                                <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 700; letter-spacing: 0.05em;">Unitário</th>
-                                <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 700; letter-spacing: 0.05em;">Total</th>
+                                <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 700; letter-spacing: 0.05em; width: 45%;">Descrição</th>
+                                <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 700; letter-spacing: 0.05em; width: 8%;">UN</th>
+                                <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 700; letter-spacing: 0.05em; width: 12%;">Qtd</th>
+                                <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 700; letter-spacing: 0.05em; width: 15%;">Unitário</th>
+                                <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 700; letter-spacing: 0.05em; width: 20%;">Total</th>
                             </tr>
                         </thead>
                         <tbody>${itemsHtml}</tbody>
@@ -745,36 +745,36 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             if (reportMode === 'estimated') {
                 return `
                 <tr style="border-bottom: 1px solid #f1f5f9;">
-                    <td style="padding: 10px 10px;">
+                    <td style="padding: 12px 10px; text-align: left; vertical-align: top;">
                         <div style="font-weight: 700; text-transform: uppercase; font-size: 11px; color: #0f172a;">${item.description}</div>
                         <div style="font-size: 9px; color: #94a3b8; font-weight: 600;">${item.type || 'GERAL'}</div>
                     </td>
-                    <td style="padding: 10px 0; text-align: center; color: #94a3b8; font-size: 10px; font-weight: 600; text-transform: uppercase;">${item.unit || 'UN'}</td>
-                    <td style="padding: 10px 0; text-align: center; font-weight: 700; color: #0f172a; font-size: 11px;">${item.quantity}</td>
-                    <td style="padding: 10px 0; text-align: right; color: #0f172a; font-size: 11px; font-weight: 700;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                    <td style="padding: 10px 10px; text-align: right; font-weight: 800; font-size: 12px; color: #2563eb;">R$ ${plannedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                    <td style="padding: 12px 0; text-align: center; vertical-align: top; color: #64748b; font-size: 11px; font-weight: 600; text-transform: uppercase;">${item.unit || 'UN'}</td>
+                    <td style="padding: 12px 0; text-align: center; vertical-align: top; font-weight: 700; color: #0f172a; font-size: 11px;">${item.quantity}</td>
+                    <td style="padding: 12px 0; text-align: right; vertical-align: top; color: #0f172a; font-size: 11px; font-weight: 700;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                    <td style="padding: 12px 10px; text-align: right; vertical-align: top; font-weight: 800; font-size: 12px; color: #2563eb;">R$ ${plannedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
                 </tr>`;
             }
 
             return `
       <tr style="border-bottom: 1px solid #f1f5f9;">
-        <td style="padding: 10px 10px;">
+        <td style="padding: 12px 10px; text-align: left; vertical-align: top;">
             <div style="font-weight: 700; text-transform: uppercase; font-size: 11px; color: #0f172a;">${item.description}</div>
             <div style="font-size: 9px; color: #94a3b8; font-weight: 600;">${item.type || 'GERAL'}</div>
         </td>
-        <td style="padding: 10px 0; text-align: center; color: #94a3b8; font-size: 10px; font-weight: 600; text-transform: uppercase;">${item.unit || 'UN'}</td>
-        <td style="padding: 10px 0; text-align: center;">
-            <div style="font-weight: 600; color: #64748b; font-size: 10px;">Est: ${item.quantity}</div>
+        <td style="padding: 12px 0; text-align: center; vertical-align: top; color: #64748b; font-size: 11px; font-weight: 600; text-transform: uppercase;">${item.unit || 'UN'}</td>
+        <td style="padding: 12px 0; text-align: center; vertical-align: top;">
+            <div style="font-weight: 600; color: #64748b; font-size: 10px; margin-bottom: 2px;">Est: ${item.quantity}</div>
             <div style="font-weight: 700; color: #0f172a; font-size: 11px;">Real: ${item.actualQuantity || 0}</div>
         </td>
-        <td style="padding: 10px 0; text-align: right;">
-            <div style="color: #64748b; font-size: 10px;">Est: R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-            <div style="color: #0f172a; font-size: 11px; font-weight: 700;">Real: R$ ${(item.actualUnitPrice || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+        <td style="padding: 12px 0; text-align: right; vertical-align: top;">
+            <div style="color: #64748b; font-size: 10px; margin-bottom: 2px;">Est: R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+            <div style="color: #0f172a; font-size: 11px; font-weight: 800;">Real: R$ ${(item.actualUnitPrice || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
         </td>
-        <td style="padding: 10px 10px; text-align: right;">
-            <div style="font-weight: 600; font-size: 10px; color: #64748b;">Est: R$ ${plannedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-            <div style="font-weight: 800; font-size: 12px; color: #0f172a;">Real: R$ ${actualTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-            ${diff !== 0 ? `<div style="font-size: 9px; font-weight: 700; color: ${diffColor};">${diff > 0 ? '+' : ''} R$ ${diff.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>` : ''}
+        <td style="padding: 12px 10px; text-align: right; vertical-align: top;">
+            <div style="font-weight: 600; font-size: 10px; color: #64748b; margin-bottom: 2px;">Est: R$ ${plannedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+            <div style="font-weight: 900; font-size: 12px; color: #0f172a;">Real: R$ ${actualTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+            ${diff !== 0 ? `<div style="font-size: 9px; font-weight: 800; color: ${diffColor}; margin-top: 2px;">${diff > 0 ? '+' : ''} R$ ${diff.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>` : ''}
         </td>
       </tr>`;
         }).join('');
@@ -891,29 +891,29 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
                 <div class="avoid-break mt-6">
                     <div class="section-title">${reportMode === 'estimated' ? 'DESPESAS PREVISTAS (PLANEJAMENTO)' : 'DETALHAMENTO DE CUSTOS (EXECUÇÃO)'}</div>
-                    <table style="width: 100%; border-collapse: collapse;">
+                    <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                        <thead>
                            <tr style="border-bottom: 2px solid #0f172a;">
-                               <th style="padding-bottom: 8px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800;">Descrição</th>
-                               <th style="padding-bottom: 8px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800; width: 50px;">UN</th>
-                               <th style="padding-bottom: 8px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800; width: 50px;">Qtd</th>
-                               <th style="padding-bottom: 8px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 100px;">Unitário</th>
-                               <th style="padding-bottom: 8px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 110px;">Total</th>
+                               <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; width: 45%;">Descrição</th>
+                               <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800; width: 8%;">UN</th>
+                               <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800; width: 12%;">Qtd</th>
+                               <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 15%;">Unitário</th>
+                               <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 20%;">Total</th>
                            </tr>
                        </thead>
-                                               <tbody>
+                       <tbody>
                             ${itemsHtml}
                              <tr style="border-top: 1px solid #f1f5f9; background: #fafafa;">
                                  <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Subtotal dos Itens:</td>
                                  <td style="padding: 12px 10px; text-align: right; font-size: 12px; font-weight: 800; color: #0f172a;">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                              </tr>
                              ${order.bdiRate ? `
-                             <tr>
+                             <tr style="background: #fafafa;">
                                  <td colspan="4" style="padding: 8px 10px; text-align: right; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">BDI (${order.bdiRate}%):</td>
                                  <td style="padding: 8px 10px; text-align: right; font-size: 12px; font-weight: 800; color: #0f172a;">R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                              </tr>` : ''}
                              ${order.taxRate ? `
-                             <tr>
+                             <tr style="background: #fafafa;">
                                  <td colspan="4" style="padding: 8px 10px; text-align: right; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Impostos (${order.taxRate}%):</td>
                                  <td style="padding: 8px 10px; text-align: right; font-size: 12px; font-weight: 800; color: #0f172a;">R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                              </tr>` : ''}
