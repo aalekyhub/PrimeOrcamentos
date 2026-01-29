@@ -879,10 +879,9 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     <div class="card-summary bg-emerald-50/50 border-emerald-100 px-8 py-6 text-right">
                         <span class="text-[11px] font-black text-emerald-600 uppercase tracking-widest block mb-1">Lucro Estimado</span>
                         <span class="text-2xl font-black text-emerald-700 block">R$ ${(revenue - plannedCost).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                    </div>
-                    `}
                 </div>
-                </div>
+                `}
+
 
                 <div class="${reportMode === 'real' ? 'section-title' : 'hidden'}">Histórico Detalhado de Despesas</div>
                 <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; table-layout: fixed; ${reportMode === 'real' ? '' : 'display: none;'}">
