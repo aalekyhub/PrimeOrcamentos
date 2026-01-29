@@ -755,7 +755,28 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                <th style="padding-bottom: 8px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 110px;">Total</th>
                            </tr>
                        </thead>
-                       <tbody>${itemsHtml}</tbody>
+                                               <tbody>
+                            ${itemsHtml}
+                            <tr style="border-top: 1px solid #f1f5f9;">
+                                <td colspan="4" style="padding: 10px 10px; text-align: right; font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Subtotal dos Itens:</td>
+                                <td style="padding: 10px 10px; text-align: right; font-size: 11px; font-weight: 700; color: #0f172a;">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                            </tr>
+                            ${order.bdiRate ? `
+                            <tr>
+                                <td colspan="4" style="padding: 6px 10px; text-align: right; font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">BDI (${order.bdiRate}%):</td>
+                                <td style="padding: 6px 10px; text-align: right; font-size: 11px; font-weight: 700; color: #0f172a;">R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                            </tr>` : ''}
+                            ${order.taxRate ? `
+                            <tr>
+                                <td colspan="4" style="padding: 6px 10px; text-align: right; font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase;">Impostos (${order.taxRate}%):</td>
+                                <td style="padding: 6px 10px; text-align: right; font-size: 11px; font-weight: 700; color: #0f172a;">R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                            </tr>` : ''}
+                            <tr style="border-top: 2px solid #0f172a; background: #f8fafc;">
+                                <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 11px; font-weight: 900; color: #0f172a; text-transform: uppercase;">Receita Total da Obra:</td>
+                                <td style="padding: 12px 10px; text-align: right; font-size: 13px; font-weight: 900; color: #2563eb;">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                            </tr>
+                        </tbody>
+
                    </table>
                </div>
 
