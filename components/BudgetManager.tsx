@@ -484,13 +484,17 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                         const newServiceOrderId = budget.id.replace('ORC', 'OS');
 
                         // Check if an OS with this ID already exists
-                        const existingOSIndex = orders.findIndex(o => o.id === newServiceOrderId);
+                        const existingOSIndex = orders.findIndex(o =>
+                          (o.osType === 'WORK' && o.originBudgetId === budget.id) ||
+                          o.id === newServiceOrderId
+                        );
 
                         let finalList;
                         if (existingOSIndex !== -1) {
                           // Update existing OS
+                          const previousOS = orders[existingOSIndex];
                           const updatedOS = {
-                            ...orders[existingOSIndex],
+                            ...previousOS,
                             items: budget.items.map(i => ({ ...i })),
                             descriptionBlocks: budget.descriptionBlocks ? [...budget.descriptionBlocks] : [],
                             totalAmount: budget.totalAmount,
@@ -500,11 +504,12 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                             paymentTerms: budget.paymentTerms,
                             deliveryTime: budget.deliveryTime,
                             customerName: budget.customerName,
-                            customerEmail: budget.customerEmail
+                            customerEmail: budget.customerEmail,
+                            originBudgetId: budget.id // Ensure it's linked
                           };
 
                           const newList = orders.map(o => o.id === budget.id ? approvedBudget : o);
-                          finalList = newList.map(o => o.id === newServiceOrderId ? updatedOS : o);
+                          finalList = newList.map(o => o.id === previousOS.id ? updatedOS : o);
                         } else {
                           // Create new OS
                           const newServiceOrder: ServiceOrder = {
@@ -514,7 +519,8 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                             createdAt: new Date().toISOString(),
                             items: budget.items.map(i => ({ ...i })),
                             descriptionBlocks: budget.descriptionBlocks ? [...budget.descriptionBlocks] : [],
-                            osType: 'WORK'
+                            osType: 'WORK',
+                            originBudgetId: budget.id
                           };
                           const newList = orders.map(o => o.id === budget.id ? approvedBudget : o);
                           finalList = [...newList, newServiceOrder];

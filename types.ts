@@ -114,6 +114,7 @@ export interface ServiceOrder {
   osType?: 'EQUIPMENT' | 'WORK';
   contractPrice?: number; // Valor fechado com o cliente
   costItems?: ServiceItem[]; // Itens de custo (separados do escopo)
+  originBudgetId?: string; // ID do orçamento que gerou esta OS
 }
 
 export type RecurrenceFrequency = 'NONE' | 'MONTHLY' | 'SEMIANNUAL' | 'ANNUAL';
