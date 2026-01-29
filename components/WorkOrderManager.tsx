@@ -724,31 +724,33 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         printWindow.document.close();
     };
 
-    const handlePrintWorkReport = (order: ServiceOrder, reportMode: 'estimated' | 'real' = 'real') => {
-        const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, address: 'Não informado', document: 'N/A' };
-        const workExpenses = transactions.filter(t => t.relatedOrderId === order.id && t.type === 'DESPESA');
+    const handlePrintWorkReport = (order: ServiceOrder, reportMode: 'estimated' | 'real') => {
         const printWindow = window.open('', '_blank');
         if (!printWindow) return;
+        const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', city: '', state: '' };
+        const workExpenses = transactions.filter(t => t.relatedOrderId === order.id && t.type === 'DESPESA');
 
         const formatDate = (dateStr: string) => {
             try { const d = new Date(dateStr); return isNaN(d.getTime()) ? new Date().toLocaleDateString('pt-BR') : d.toLocaleDateString('pt-BR'); }
             catch { return new Date().toLocaleDateString('pt-BR'); }
         };
 
-        const subTotal = order.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0);
-        const bdiValue = order.bdiRate ? subTotal * (order.bdiRate / 100) : 0;
-        const subTotalWithBDI = subTotal + bdiValue;
-        const taxValue = order.taxRate ? subTotalWithBDI * (order.taxRate / 100) : 0;
-        const plannedCost = subTotalWithBDI + taxValue; // Planned Expenses
-        const revenue = order.contractPrice && order.contractPrice > 0 ? order.contractPrice : plannedCost; // Revenue
-        const totalExp = workExpenses.reduce((acc, t) => acc + t.amount, 0);
-        const profitValue = revenue - totalExp;
+        // --- CALCULAÇÕES FINANCEIRAS ---
+        const revenue = order.contractPrice || order.totalAmount || 0; // O que o cliente paga
+        const plannedCost = (order.costItems || []).reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0); // O que a empresa gasta (planejado)
+        const totalExp = workExpenses.reduce((acc, t) => acc + t.amount, 0); // O que a empresa gastou (real)
 
-        const itemsHtml = order.items.map((item: ServiceItem) => {
-            const actualTotal = (item.actualQuantity || 0) * (item.actualUnitPrice || 0);
+        const profitValue = revenue - totalExp; // Lucro Real
+        const plannedProfit = revenue - plannedCost; // Lucro Previsto
+
+        // Valores do Orçamento Original (para referência se necessário)
+        const budgetSubTotal = order.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0);
+        const bdiValue = order.bdiRate ? budgetSubTotal * (order.bdiRate / 100) : 0;
+        const taxValue = order.taxRate ? (budgetSubTotal + bdiValue) * (order.taxRate / 100) : 0;
+
+        // Gerar HTML da Tabela de Itens (CostItems no Previsto, Comparação no Real)
+        const itemsHtml = (reportMode === 'estimated' ? (order.costItems || []) : order.items).map((item: ServiceItem) => {
             const plannedTotal = item.quantity * item.unitPrice;
-            const diff = actualTotal - plannedTotal;
-            const diffColor = diff > 0 ? '#e11d48' : diff < 0 ? '#059669' : '#64748b';
 
             if (reportMode === 'estimated') {
                 return `
@@ -763,6 +765,10 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     <td style="padding: 12px 10px; text-align: right; vertical-align: top; font-weight: 800; font-size: 12px; color: #2563eb;">R$ ${plannedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
                 </tr>`;
             }
+
+            const actualTotal = (item.actualQuantity || 0) * (item.actualUnitPrice || 0);
+            const diff = actualTotal - plannedTotal;
+            const diffColor = diff > 0 ? '#e11d48' : diff < 0 ? '#059669' : '#64748b';
 
             return `
       <tr style="border-bottom: 1px solid #f1f5f9;">
@@ -917,7 +923,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                             ${itemsHtml}
                              <tr style="border-top: 1px solid #f1f5f9; background: #fafafa;">
                                  <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Subtotal dos Itens:</td>
-                                 <td style="padding: 12px 10px; text-align: right; font-size: 12px; font-weight: 800; color: #0f172a;">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                 <td style="padding: 12px 10px; text-align: right; font-size: 12px; font-weight: 800; color: #0f172a;">R$ ${budgetSubTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                              </tr>
                              ${order.bdiRate ? `
                              <tr style="background: #fafafa;">
