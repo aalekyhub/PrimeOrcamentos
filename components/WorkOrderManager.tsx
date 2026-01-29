@@ -51,30 +51,17 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
     // Financial State
     const [activeTab, setActiveTab] = useState<'details' | 'financial'>('details');
-    const [expenseDesc, setExpenseDesc] = useState('');
-    const [expenseAmount, setExpenseAmount] = useState('');
-    const [expenseCategory, setExpenseCategory] = useState('');
     const [taxRate, setTaxRate] = useState<number>(0);
     const [bdiRate, setBdiRate] = useState<number>(0);
 
-    // Current Item Real Fields
+    // Current Item Real Fields (Medição)
     const [currentActualQty, setCurrentActualQty] = useState<number>(0);
     const [currentActualPrice, setCurrentActualPrice] = useState<number>(0);
-
-    // Edit Expense State
-    const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
-    const [editExpenseDesc, setEditExpenseDesc] = useState('');
-    const [editExpenseAmount, setEditExpenseAmount] = useState('');
-    const [editExpenseCategory, setEditExpenseCategory] = useState('');
 
     // Report State
     const [showReportTypeModal, setShowReportTypeModal] = useState(false);
     const [selectedOrderForReport, setSelectedOrderForReport] = useState<ServiceOrder | null>(null);
 
-    const workExpenses = useMemo(() => {
-        if (!editingOrderId) return [];
-        return transactions.filter(t => t.relatedOrderId === editingOrderId && t.type === 'DESPESA');
-    }, [transactions, editingOrderId]);
 
     const totalExpenses = useMemo(() => items.reduce((acc, i) => acc + (i.actualQuantity ? (i.actualQuantity * (i.actualUnitPrice || 0)) : (i.actualValue || 0)), 0), [items]);
     const expensesByCategory = useMemo(() => {
@@ -99,50 +86,6 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     const actualProfit = useMemo(() => revenue - totalExpenses, [revenue, totalExpenses]);
     const executionVariance = useMemo(() => plannedCost - totalExpenses, [plannedCost, totalExpenses]);
 
-    const handleAddExpense = async () => {
-        if (!editingOrderId || !expenseAmount || !expenseDesc) return;
-        const newExpense: Transaction = {
-            id: `T-${Date.now()}`,
-            date: new Date().toISOString().split('T')[0],
-            amount: Number(expenseAmount),
-            type: 'DESPESA',
-            category: expenseCategory || 'Geral',
-            description: expenseDesc,
-            relatedOrderId: editingOrderId
-        };
-        const newList = [newExpense, ...transactions];
-        setTransactions(newList);
-        await db.save('serviflow_transactions', newList);
-        setExpenseAmount('');
-        setExpenseDesc('');
-        setExpenseCategory('');
-        notify("Despesa lançada!");
-    };
-
-    const handleDeleteExpense = async (id: string) => {
-        if (confirm("Remover esta despesa?")) {
-            const newList = transactions.filter(t => t.id !== id);
-            setTransactions(newList);
-            await db.remove('serviflow_transactions', id);
-            await db.save('serviflow_transactions', newList);
-        }
-    };
-
-    const handleUpdateExpense = async (id: string) => {
-        if (!editExpenseAmount || !editExpenseDesc) return;
-        const updatedTransactions = transactions.map(t =>
-            t.id === id ? {
-                ...t,
-                description: editExpenseDesc,
-                amount: Number(editExpenseAmount),
-                category: editExpenseCategory || 'Geral'
-            } : t
-        );
-        setTransactions(updatedTransactions);
-        await db.save('serviflow_transactions', updatedTransactions);
-        setEditingExpenseId(null);
-        notify("Despesa atualizada!");
-    };
 
     // Filter for WORK orders
     const activeOrders = useMemo(() => orders.filter(o => {
@@ -728,7 +671,6 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         const printWindow = window.open('', '_blank');
         if (!printWindow) return;
         const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', city: '', state: '' };
-        const workExpenses = transactions.filter(t => t.relatedOrderId === order.id && t.type === 'DESPESA');
 
         const formatDate = (dateStr: string) => {
             try { const d = new Date(dateStr); return isNaN(d.getTime()) ? new Date().toLocaleDateString('pt-BR') : d.toLocaleDateString('pt-BR'); }
@@ -738,9 +680,11 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         // --- CALCULAÇÕES FINANCEIRAS ---
         const revenue = order.contractPrice || order.totalAmount || 0; // O que o cliente paga
         const plannedCost = (order.costItems || []).reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0); // O que a empresa gasta (planejado)
-        const totalExp = workExpenses.reduce((acc, t) => acc + t.amount, 0); // O que a empresa gastou (real)
 
-        const profitValue = revenue - totalExp; // Lucro Real
+        // NOVO: Despesas Reais agora baseadas na Medição (Items) para alinhar com o Dashboard
+        const totalActualExpenses = order.items.reduce((acc, i) => acc + (i.actualQuantity ? (i.actualQuantity * (i.actualUnitPrice || 0)) : (i.actualValue || 0)), 0);
+
+        const profitValue = revenue - totalActualExpenses; // Lucro Real (baseado em medição)
         const plannedProfit = revenue - plannedCost; // Lucro Previsto
 
         // Valores do Orçamento Original (para referência se necessário)
@@ -771,35 +715,27 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             const diffColor = diff > 0 ? '#e11d48' : diff < 0 ? '#059669' : '#64748b';
 
             return `
-      <tr style="border-bottom: 1px solid #f1f5f9;">
-        <td style="padding: 12px 10px; text-align: left; vertical-align: top;">
-            <div style="font-weight: 700; text-transform: uppercase; font-size: 11px; color: #0f172a;">${item.description}</div>
-            <div style="font-size: 9px; color: #94a3b8; font-weight: 600;">${item.type || 'GERAL'}</div>
-        </td>
-        <td style="padding: 12px 0; text-align: center; vertical-align: top; color: #64748b; font-size: 11px; font-weight: 600; text-transform: uppercase;">${item.unit || 'UN'}</td>
-        <td style="padding: 12px 0; text-align: center; vertical-align: top;">
-            <div style="font-weight: 600; color: #64748b; font-size: 10px; margin-bottom: 2px;">Est: ${item.quantity}</div>
-            <div style="font-weight: 700; color: #0f172a; font-size: 11px;">Real: ${item.actualQuantity || 0}</div>
-        </td>
-        <td style="padding: 12px 0; text-align: right; vertical-align: top;">
-            <div style="color: #64748b; font-size: 10px; margin-bottom: 2px;">Est: R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-            <div style="color: #0f172a; font-size: 11px; font-weight: 800;">Real: R$ ${(item.actualUnitPrice || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-        </td>
-        <td style="padding: 12px 10px; text-align: right; vertical-align: top;">
-            <div style="font-weight: 600; font-size: 10px; color: #64748b; margin-bottom: 2px;">Est: R$ ${plannedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-            <div style="font-weight: 900; font-size: 12px; color: #0f172a;">Real: R$ ${actualTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-            ${diff !== 0 ? `<div style="font-size: 9px; font-weight: 800; color: ${diffColor}; margin-top: 2px;">${diff > 0 ? '+' : ''} R$ ${diff.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>` : ''}
-        </td>
-      </tr>`;
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 12px 10px; text-align: left; vertical-align: top;">
+                        <div style="font-weight: 700; text-transform: uppercase; font-size: 11px; color: #0f172a;">${item.description}</div>
+                        <div style="font-size: 9px; color: #94a3b8; font-weight: 600;">${item.type || 'GERAL'}</div>
+                    </td>
+                    <td style="padding: 12px 0; text-align: center; vertical-align: top; color: #64748b; font-size: 11px; font-weight: 600; text-transform: uppercase;">${item.unit || 'UN'}</td>
+                    <td style="padding: 12px 0; text-align: center; vertical-align: top;">
+                        <div style="font-weight: 600; color: #64748b; font-size: 10px; margin-bottom: 2px;">Est: ${item.quantity}</div>
+                        <div style="font-weight: 700; color: #0f172a; font-size: 11px;">Real: ${item.actualQuantity || 0}</div>
+                    </td>
+                    <td style="padding: 12px 0; text-align: right; vertical-align: top;">
+                        <div style="color: #64748b; font-size: 10px; margin-bottom: 2px;">Est: R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                        <div style="color: #0f172a; font-size: 11px; font-weight: 800;">Real: R$ ${(item.actualUnitPrice || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                    </td>
+                    <td style="padding: 12px 10px; text-align: right; vertical-align: top;">
+                        <div style="font-weight: 600; font-size: 10px; color: #64748b; margin-bottom: 2px;">Est: R$ ${plannedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                        <div style="font-weight: 900; font-size: 12px; color: #0f172a;">Real: R$ ${actualTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                        ${diff !== 0 ? `<div style="font-size: 9px; font-weight: 800; color: ${diffColor}; margin-top: 2px;">${diff > 0 ? '+' : ''} R$ ${diff.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>` : ''}
+                    </td>
+                </tr>`;
         }).join('');
-
-        const expensesHtml = workExpenses.length > 0 ? workExpenses.map((t: Transaction) => `
-      <tr style="border-bottom: 1px solid #f1f5f9;">
-        <td style="padding: 12px 10px; font-size: 11px; color: #64748b; font-weight: 500; vertical-align: top; width: 15%;">${formatDate(t.date)}</td>
-        <td style="padding: 12px 0; font-weight: 600; text-transform: uppercase; font-size: 11px; color: #0f172a; vertical-align: top; width: 50%;">${t.description}</td>
-        <td style="padding: 12px 0; font-size: 10px; font-weight: 600; text-transform: uppercase; color: #94a3b8; vertical-align: top; width: 15%;">${t.category || 'GERAL'}</td>
-        <td style="padding: 12px 10px; text-align: right; font-weight: 700; font-size: 11px; color: #e11d48; vertical-align: top; width: 20%;">R$ ${t.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-      </tr>`).join('') : `<tr><td colspan="4" style="padding: 24px; text-align: center; font-size: 11px; color: #94a3b8; font-style: italic;">Nenhuma despesa lançada nesta obra.</td></tr>`;
 
         const html = `
       <!DOCTYPE html>
@@ -871,10 +807,10 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         <span class="text-xl font-black text-blue-700 block">R$ ${revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
 
-                    <!-- Card 2: Despesas (Previstas ou Reais) -->
+                    <!-- Card 2: Despesas (Previstas ou Reais baseadas em Medição) -->
                     <div class="card-summary bg-rose-50/50 border-rose-100 px-6 py-4">
-                        <span class="text-[10px] font-black text-rose-600 uppercase tracking-widest block mb-1">${reportMode === 'estimated' ? 'Despesas Previstas' : 'Despesas Reais'}</span>
-                        <span class="text-xl font-black text-rose-700 block">R$ ${(reportMode === 'estimated' ? plannedCost : totalExp).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        <span class="text-[10px] font-black text-rose-600 uppercase tracking-widest block mb-1">${reportMode === 'estimated' ? 'Despesas Previstas' : 'Despesas Reais (Medição)'}</span>
+                        <span class="text-xl font-black text-rose-700 block">R$ ${(reportMode === 'estimated' ? plannedCost : totalActualExpenses).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
 
                     <!-- Card 3: Lucro (Previsto ou Real) -->
@@ -888,27 +824,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
 
 
-                <div class="${reportMode === 'real' ? 'section-title' : 'hidden'}">Histórico Detalhado de Despesas</div>
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; table-layout: fixed; ${reportMode === 'real' ? '' : 'display: none;'}">
-                   <thead>
-                       <tr style="border-bottom: 2px solid #0f172a;">
-                           <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; width: 15%;">Data</th>
-                           <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; width: 50%;">Descrição do Gasto</th>
-                           <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; width: 15%;">Categoria</th>
-                           <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 20%;">Valor</th>
-                       </tr>
-                   </thead>
-                   <tbody>
-                       ${expensesHtml}
-                       <tr style="border-top: 2px solid #0f172a;">
-                           <td colspan="3" style="padding: 12px 10px; text-align: right; font-size: 11px; font-weight: 800; text-transform: uppercase; color: #64748b;">Total de Despesas Realizadas:</td>
-                           <td style="padding: 12px 10px; text-align: right; font-size: 13px; font-weight: 900; color: #e11d48;">R$ ${totalExp.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                       </tr>
-                   </tbody>
-               </table>
-
                 <div class="avoid-break mt-6">
-                    <div class="section-title">${reportMode === 'estimated' ? 'DESPESAS PREVISTAS (ESTIMADO)' : 'DETALHAMENTO DE CUSTOS (REAL)'}</div>
+                    <div class="section-title">${reportMode === 'estimated' ? 'DETALHAMENTO DE CUSTOS ESTIMADOS' : 'COMPARATIVO DE ITENS (ORÇADO VS REAL)'}</div>
                     <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                        <thead>
                            <tr style="border-bottom: 2px solid #0f172a;">
@@ -920,9 +837,9 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                            </tr>
                        </thead>
                        <tbody>
-                            ${itemsHtml}
+                             ${itemsHtml}
                              <tr style="border-top: 1px solid #f1f5f9; background: #fafafa;">
-                                 <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Subtotal dos Itens:</td>
+                                 <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Subtotal dos Itens (Orçamento):</td>
                                  <td style="padding: 12px 10px; text-align: right; font-size: 12px; font-weight: 800; color: #0f172a;">R$ ${budgetSubTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                              </tr>
                              ${order.bdiRate ? `
@@ -935,9 +852,13 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                  <td colspan="4" style="padding: 8px 10px; text-align: right; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Impostos (${order.taxRate}%):</td>
                                  <td style="padding: 8px 10px; text-align: right; font-size: 12px; font-weight: 800; color: #0f172a;">R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                              </tr>` : ''}
+                              <tr style="border-top: 1px solid #cbd5e1; background: #f8fafc;">
+                                  <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 12px; font-weight: 900; color: #334155; text-transform: uppercase;">Total do Orçamento (Arrecadação):</td>
+                                  <td style="padding: 12px 10px; text-align: right; font-size: 13px; font-weight: 900; color: #1e40af;">R$ ${revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                              </tr>
                               <tr style="border-top: 3px solid #0f172a; background: #f1f5f9;">
-                                  <td colspan="4" style="padding: 16px 10px; text-align: right; font-size: 13px; font-weight: 900; color: #0f172a; text-transform: uppercase;">Custo Total Planejado (Orçado):</td>
-                                  <td style="padding: 16px 10px; text-align: right; font-size: 14px; font-weight: 900; color: #2563eb;">R$ ${plannedCost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                  <td colspan="4" style="padding: 16px 10px; text-align: right; font-size: 13px; font-weight: 900; color: #0f172a; text-transform: uppercase;">${reportMode === 'estimated' ? 'Custo Total Estimado de Obra:' : 'Total Realizado em Obra (Medição):'}</td>
+                                  <td style="padding: 16px 10px; text-align: right; font-size: 14px; font-weight: 900; color: ${reportMode === 'estimated' ? '#2563eb' : '#e11d48'};">R$ ${(reportMode === 'estimated' ? plannedCost : totalActualExpenses).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                               </tr>
                         </tbody>
 
