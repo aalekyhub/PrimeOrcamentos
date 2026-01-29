@@ -340,7 +340,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                    </div>
                    <div class="text-right">
                        <div class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest mb-2 shadow-md inline-block">ORDEM DE SERVIÇO</div>
-                       <p class="text-4xl font-black text-[#0f172a] tracking-tighter mb-1 whitespace-nowrap">${order.id}</p>
+                       <p class="text-2xl font-black text-[#0f172a] tracking-tighter mb-1 whitespace-nowrap">${order.id}</p>
                        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">ABERTURA: ${formatDate(order.createdAt)}</p>
                    </div>
                </div>
@@ -839,7 +839,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     </div>
                     <div class="text-right">
                         <div class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest mb-2 shadow-md inline-block">CONTROLE DE OBRA</div>
-                        <p class="text-4xl font-black text-[#0f172a] tracking-tighter mb-1">${order.id}</p>
+                        <p class="text-2xl font-black text-[#0f172a] tracking-tighter mb-1">${order.id}</p>
                         <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p>
                     </div>
                 </div>
