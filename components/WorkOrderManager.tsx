@@ -858,28 +858,24 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                </div>
 
                <div class="section-title">Resumo Financeiro da Obra</div>
-                <div class="grid grid-cols-${reportMode === 'estimated' ? '2' : '4'} gap-4 mb-10">
-                    <div class="card-summary bg-blue-50/50 border-blue-100 px-8 py-6">
-                        <span class="text-[11px] font-black text-blue-600 uppercase tracking-widest block mb-1">Total Orçado</span>
-                        <span class="text-2xl font-black text-blue-700 block">R$ ${plannedCost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                <div class="grid grid-cols-3 gap-4 mb-10">
+                    <!-- Card 1: Valor do Orçamento (Receita) -->
+                    <div class="card-summary bg-blue-50/50 border-blue-100 px-6 py-4">
+                        <span class="text-[10px] font-black text-blue-600 uppercase tracking-widest block mb-1">Valor do Orçamento</span>
+                        <span class="text-xl font-black text-blue-700 block">R$ ${revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
-                    ${reportMode === 'real' ? `
-                    <div class="card-summary bg-rose-50/50 border-rose-100 px-8 py-6">
-                        <span class="text-[11px] font-black text-rose-600 uppercase tracking-widest block mb-1">Total Realizado</span>
-                        <span class="text-2xl font-black text-rose-700 block">R$ ${totalExp.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+
+                    <!-- Card 2: Despesas (Previstas ou Reais) -->
+                    <div class="card-summary bg-rose-50/50 border-rose-100 px-6 py-4">
+                        <span class="text-[10px] font-black text-rose-600 uppercase tracking-widest block mb-1">${reportMode === 'estimated' ? 'Despesas Previstas' : 'Despesas Reais'}</span>
+                        <span class="text-xl font-black text-rose-700 block">R$ ${(reportMode === 'estimated' ? plannedCost : totalExp).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
-                    <div class="card-summary bg-amber-50/50 border-amber-100 px-8 py-6">
-                        <span class="text-[11px] font-black text-amber-600 uppercase tracking-widest block mb-1">Receita Total</span>
-                        <span class="text-2xl font-black text-amber-700 block">R$ ${revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+
+                    <!-- Card 3: Lucro (Previsto ou Real) -->
+                    <div class="card-summary ${(reportMode === 'estimated' ? (revenue - plannedCost) : profitValue) >= 0 ? 'bg-emerald-50/50 border-emerald-100' : 'bg-red-50/50 border-red-100'} px-6 py-4">
+                        <span class="text-[10px] font-black ${(reportMode === 'estimated' ? (revenue - plannedCost) : profitValue) >= 0 ? 'text-emerald-600' : 'text-red-600'} uppercase tracking-widest block mb-1">${reportMode === 'estimated' ? 'Lucro Previsto' : 'Lucro Real'}</span>
+                        <span class="text-xl font-black ${(reportMode === 'estimated' ? (revenue - plannedCost) : profitValue) >= 0 ? 'text-emerald-700' : 'text-red-700'} block">R$ ${(reportMode === 'estimated' ? (revenue - plannedCost) : profitValue).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
-                    <div class="card-summary ${profitValue >= 0 ? 'bg-emerald-50/50 border-emerald-100' : 'bg-red-50/50 border-red-100'} px-8 py-6">
-                        <span class="text-[11px] font-black ${profitValue >= 0 ? 'text-emerald-600' : 'text-red-600'} uppercase tracking-widest block mb-1">Resultado Final</span>
-                        <span class="text-2xl font-black ${profitValue >= 0 ? 'text-emerald-700' : 'text-red-700'} block">R$ ${profitValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                    </div>` : `
-                    <div class="card-summary bg-emerald-50/50 border-emerald-100 px-8 py-6 text-right">
-                        <span class="text-[11px] font-black text-emerald-600 uppercase tracking-widest block mb-1">Lucro Estimado</span>
-                        <span class="text-2xl font-black text-emerald-700 block">R$ ${(revenue - plannedCost).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                    </div>`}
                 </div>
 
 
