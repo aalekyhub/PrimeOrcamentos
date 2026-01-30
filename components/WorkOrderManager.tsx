@@ -214,23 +214,23 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             const diffColor = diff > 0 ? '#e11d48' : diff < 0 ? '#059669' : '#64748b';
 
             return `
-        <td style="padding: 10px; text-align: left; vertical-align: top;">
-            <div style="font-weight: 800; text-transform: uppercase; font-size: 10.5px; color: #0f172a; line-height: 1.2;">${item.description}</div>
-            <div style="font-size: 8px; color: #94a3b8; font-weight: 700; margin-top: 2px; letter-spacing: 0.05em;">${item.type || 'GERAL'}</div>
+        <td style="padding: 12px 10px; text-align: left; vertical-align: top;">
+            <div style="font-weight: 800; text-transform: uppercase; font-size: 10px; color: #0f172a; line-height: 1.2;">${item.description}</div>
+            <div style="font-size: 7.5px; color: #94a3b8; font-weight: 700; margin-top: 3px; letter-spacing: 0.05em;">${item.type || 'GERAL'}</div>
         </td>
-        <td style="padding: 10px 0; text-align: center; vertical-align: top; color: #64748b; font-size: 9px; font-weight: 700; text-transform: uppercase;">${item.unit || 'UN'}</td>
-        <td style="padding: 10px 0; text-align: center; vertical-align: top;">
-            <div style="font-weight: 600; color: #64748b; font-size: 8.5px; margin-bottom: 2px;">EST: ${item.quantity}</div>
-            <div style="font-weight: 800; color: #0f172a; font-size: 10px;">REAL: ${item.actualQuantity || 0}</div>
+        <td style="padding: 12px 0; text-align: center; vertical-align: top; color: #64748b; font-size: 9px; font-weight: 700; text-transform: uppercase;">${item.unit || 'UN'}</td>
+        <td style="padding: 12px 0; text-align: center; vertical-align: top;">
+            <div style="font-weight: 700; color: #94a3b8; font-size: 7.5px; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.05em;">Est: ${item.quantity}</div>
+            <div style="font-weight: 800; color: #0f172a; font-size: 9.5px;">REAL: ${item.actualQuantity || 0}</div>
         </td>
-        <td style="padding: 10px 0; text-align: right; vertical-align: top;">
-            <div style="color: #64748b; font-size: 8.5px; margin-bottom: 2px; font-weight: 600;">EST: R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-            <div style="color: #0f172a; font-size: 10.5px; font-weight: 800;">REAL: R$ ${(item.actualUnitPrice || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+        <td style="padding: 12px 0; text-align: right; vertical-align: top;">
+            <div style="color: #94a3b8; font-size: 7.5px; margin-bottom: 2px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Est: R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+            <div style="color: #0f172a; font-size: 9.5px; font-weight: 800;">REAL: R$ ${(item.actualUnitPrice || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
         </td>
-        <td style="padding: 10px; text-align: right; vertical-align: top;">
-            <div style="font-weight: 600; font-size: 8.5px; color: #64748b; margin-bottom: 2px;">EST: R$ ${plannedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-            <div style="font-weight: 900; font-size: 11.5px; color: #0f172a;">REAL: R$ ${actualTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-            ${diff !== 0 ? `<div style="font-size: 9px; font-weight: 900; color: ${diffColor}; margin-top: 3px; font-variant-numeric: tabular-nums;">${diff > 0 ? '+' : ''} R$ ${diff.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>` : ''}
+        <td style="padding: 12px 10px; text-align: right; vertical-align: top;">
+            <div style="font-weight: 700; font-size: 7.5px; color: #94a3b8; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.05em;">Est: R$ ${plannedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+            <div style="font-weight: 900; font-size: 11px; color: #0f172a;">REAL: R$ ${actualTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+            ${diff !== 0 ? `<div style="font-size: 8.5px; font-weight: 900; color: ${diffColor}; margin-top: 3px; font-variant-numeric: tabular-nums;">${diff > 0 ? '+' : ''} R$ ${diff.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>` : ''}
         </td>
       </tr>`;
         }).join('');
@@ -340,18 +340,18 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     </table>
                 </div>
 
-                <div class="avoid-break mt-12 bg-slate-900 text-white p-8 rounded-2xl flex justify-between items-center shadow-2xl relative overflow-hidden">
+                <div class="avoid-break mt-12 bg-slate-900 text-white p-8 rounded-2xl shadow-2xl relative overflow-hidden" style="display: grid; grid-template-columns: 1fr 200px; align-items: center; gap: 30px;">
                    <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
-                   <div style="flex: 1; min-width: 0; padding-right: 20px;">
-                       <p style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; opacity: 0.6; margin-bottom: 4px;">
+                   <div style="min-width: 0;">
+                       <p style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.25em; opacity: 0.5; margin-bottom: 6px;">
                            ${order.contractPrice && order.contractPrice > 0 ? 'Valor Total do Contrato' : 'Custo Total Estimado'}
                        </p>
-                       <p style="font-size: 12px; font-weight: 700; color: #93c5fd; text-transform: uppercase; line-height: 1.4; margin: 0;">
+                       <p style="font-size: 11px; font-weight: 700; color: #93c5fd; text-transform: uppercase; line-height: 1.5; margin: 0; word-wrap: break-word;">
                            ${order.paymentTerms || 'Consulte condições'}
                        </p>
                    </div>
-                   <div style="text-align: right; flex-shrink: 0;">
-                       <p style="font-size: 36px; font-weight: 900; letter-spacing: -0.05em; line-height: 1; margin: 0;">
+                   <div style="text-align: right; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 20px;">
+                       <p style="font-size: 32px; font-weight: 900; letter-spacing: -0.05em; line-height: 1; margin: 0; white-space: nowrap;">
                            R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                        </p>
                    </div>
@@ -728,18 +728,18 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         <div style="font-size: 9px; color: #94a3b8; font-weight: 600;">${item.type || 'GERAL'}</div>
                     </td>
                     <td style="padding: 12px 0; text-align: center; vertical-align: top; color: #64748b; font-size: 11px; font-weight: 600; text-transform: uppercase;">${item.unit || 'UN'}</td>
-                    <td style="padding: 10px 0; text-align: center; vertical-align: top;">
-                        <div style="font-weight: 600; color: #64748b; font-size: 9px; margin-bottom: 2px;">EST: ${item.quantity}</div>
-                        <div style="font-weight: 800; color: #0f172a; font-size: 10.5px;">REAL: ${item.actualQuantity || 0}</div>
+                    <td style="padding: 12px 0; text-align: center; vertical-align: top;">
+                        <div style="font-weight: 700; color: #94a3b8; font-size: 8px; margin-bottom: 2px; text-transform: uppercase;">Est: ${item.quantity}</div>
+                        <div style="font-weight: 800; color: #0f172a; font-size: 10px;">REAL: ${item.actualQuantity || 0}</div>
                     </td>
-                    <td style="padding: 10px 0; text-align: right; vertical-align: top;">
-                        <div style="color: #64748b; font-size: 9px; margin-bottom: 2px; font-weight: 600;">EST: R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                        <div style="color: #0f172a; font-size: 11px; font-weight: 800;">REAL: R$ ${(item.actualUnitPrice || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                    <td style="padding: 12px 0; text-align: right; vertical-align: top;">
+                        <div style="color: #94a3b8; font-size: 8px; margin-bottom: 2px; font-weight: 700; text-transform: uppercase;">Est: R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                        <div style="color: #0f172a; font-size: 10.5px; font-weight: 800;">REAL: R$ ${(item.actualUnitPrice || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
                     </td>
-                    <td style="padding: 10px; text-align: right; vertical-align: top;">
-                        <div style="font-weight: 600; font-size: 9px; color: #64748b; margin-bottom: 2px;">EST: R$ ${plannedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                        <div style="font-weight: 900; font-size: 12.5px; color: #0f172a;">REAL: R$ ${actualTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                        ${diff !== 0 ? `<div style="font-size: 10px; font-weight: 900; color: ${diffColor}; margin-top: 3px; font-variant-numeric: tabular-nums;">${diff > 0 ? '+' : ''} R$ ${diff.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>` : ''}
+                    <td style="padding: 12px 10px; text-align: right; vertical-align: top;">
+                        <div style="font-weight: 700; font-size: 8px; color: #94a3b8; margin-bottom: 2px; text-transform: uppercase;">Est: R$ ${plannedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                        <div style="font-weight: 900; font-size: 12px; color: #0f172a;">REAL: R$ ${actualTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                        ${diff !== 0 ? `<div style="font-size: 9.5px; font-weight: 900; color: ${diffColor}; margin-top: 3px; font-variant-numeric: tabular-nums;">${diff > 0 ? '+' : ''} R$ ${diff.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>` : ''}
                     </td>
                 </tr>`;
         }).join('');
