@@ -343,12 +343,12 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     </div>` : ''}
                 </div>
 
-                <div class="avoid-break bg-[#0f172a] text-white p-5 rounded-2xl shadow-xl flex flex-col justify-center items-start mb-6">
-                   <p style="font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; margin: 0; opacity: 0.8; margin-bottom: 4px;">INVESTIMENTO TOTAL:</p>
+                <div class="avoid-break bg-[#0f172a] text-white p-5 rounded-2xl shadow-xl flex justify-between items-center mb-6">
+                   <p style="font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; margin: 0; opacity: 0.8;">INVESTIMENTO TOTAL:</p>
                    <p style="font-size: 32px; font-weight: 900; letter-spacing: -0.05em; margin: 0; line-height: 1;">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                </div>
 
-                <div class="flex flex-col gap-3 mb-12 avoid-break">
+                <div class="grid grid-cols-2 gap-4 mb-8 avoid-break">
                     <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 shadow-sm">
                         <p class="text-blue-600 font-black text-[10px] uppercase tracking-widest mb-2">Forma de Pagamento</p>
                         <p class="text-slate-700 text-[11px] font-bold leading-relaxed">${order.paymentTerms || 'A combinar com o responsável.'}</p>
