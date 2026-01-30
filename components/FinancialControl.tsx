@@ -33,8 +33,15 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
     startDate: new Date().toISOString().split('T')[0]
   });
 
-  const totalIncome = transactions.filter(t => t.type === 'RECEITA').reduce((s, t) => s + t.amount, 0);
-  const totalExpense = transactions.filter(t => t.type === 'DESPESA').reduce((s, t) => s + t.amount, 0);
+  const today = new Date().toISOString().split('T')[0];
+  const realizedTransactions = transactions.filter(t => t.date <= today);
+
+  const totalIncome = realizedTransactions.filter(t => t.type === 'RECEITA').reduce((s, t) => s + t.amount, 0);
+  const totalExpense = realizedTransactions.filter(t => t.type === 'DESPESA').reduce((s, t) => s + t.amount, 0);
+
+  const projectedIncome = transactions.filter(t => t.type === 'RECEITA').reduce((s, t) => s + t.amount, 0);
+  const projectedExpense = transactions.filter(t => t.type === 'DESPESA').reduce((s, t) => s + t.amount, 0);
+  const projectedBalance = projectedIncome - projectedExpense;
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -149,19 +156,22 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Saldo em Caixa</p>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Saldo Realizado (Hoje)</p>
           <h3 className="text-2xl font-black text-slate-900">R$ {(totalIncome - totalExpense).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+          <p className="text-[9px] text-slate-400 mt-2 font-bold uppercase tracking-widest">
+            Projetado: <span className={projectedBalance >= 0 ? 'text-emerald-600' : 'text-rose-600'}>R$ {projectedBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+          </p>
         </div>
         <div className="bg-emerald-50 p-6 rounded-3xl border border-emerald-100 shadow-sm group">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em]">Faturamento</p>
+            <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em]">Faturamento Realizado</p>
             <ArrowUpRight className="w-4 h-4 text-emerald-600 group-hover:scale-125 transition-transform" />
           </div>
           <h3 className="text-2xl font-black text-emerald-700">R$ {totalIncome.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
         </div>
         <div className="bg-rose-50 p-6 rounded-3xl border border-rose-100 shadow-sm group">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] font-black text-rose-600 uppercase tracking-[0.2em]">Total Gasto</p>
+            <p className="text-[10px] font-black text-rose-600 uppercase tracking-[0.2em]">Gastos Realizados</p>
             <ArrowDownLeft className="w-4 h-4 text-rose-600 group-hover:scale-125 transition-transform" />
           </div>
           <h3 className="text-2xl font-black text-rose-700">R$ {totalExpense.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
@@ -375,6 +385,11 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
                       <p className="text-sm font-black text-slate-900 leading-tight">{t.category}</p>
                       <div className="flex items-center gap-2 mt-1">
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{t.date.split('-').reverse().join('/')}</p>
+                        {t.date > today && (
+                          <span className="text-[8px] bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded-md font-black uppercase tracking-tighter">
+                            Agendado
+                          </span>
+                        )}
                         {t.isRecurring && (
                           <span className="text-[8px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded-md font-black uppercase tracking-tighter">
                             Recorrente ({t.frequency})

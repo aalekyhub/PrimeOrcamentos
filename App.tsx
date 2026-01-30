@@ -177,10 +177,26 @@ const AppContent: React.FC = () => {
   }, [orders, transactions, customers, catalog, company, users, loans, currentUser]);
 
   const stats = useMemo(() => {
-    const rev = transactions.filter(t => t.type === 'RECEITA').reduce((a, c) => a + c.amount, 0);
-    const exp = transactions.filter(t => t.type === 'DESPESA').reduce((a, c) => a + c.amount, 0);
+    const today = new Date().toISOString().split('T')[0];
+
+    const realizedTransactions = transactions.filter(t => t.date <= today);
+    const projectedTransactions = transactions;
+
+    const realizedRev = realizedTransactions.filter(t => t.type === 'RECEITA').reduce((a, c) => a + c.amount, 0);
+    const realizedExp = realizedTransactions.filter(t => t.type === 'DESPESA').reduce((a, c) => a + c.amount, 0);
+
+    const projectedRev = projectedTransactions.filter(t => t.type === 'RECEITA').reduce((a, c) => a + c.amount, 0);
+    const projectedExp = projectedTransactions.filter(t => t.type === 'DESPESA').reduce((a, c) => a + c.amount, 0);
+
     const pend = orders.filter(o => o.status === OrderStatus.PENDING || o.status === OrderStatus.IN_PROGRESS).length;
-    return { totalRevenue: rev, totalExpenses: exp, netProfit: rev - exp, pendingOrders: pend };
+
+    return {
+      totalRevenue: realizedRev,
+      totalExpenses: realizedExp,
+      netProfit: realizedRev - realizedExp,
+      projectedProfit: projectedRev - projectedExp,
+      pendingOrders: pend
+    };
   }, [orders, transactions]);
 
   if (!currentUser) {
