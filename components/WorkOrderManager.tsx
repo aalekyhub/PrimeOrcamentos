@@ -339,19 +339,34 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         <tbody>${itemsHtml}</tbody>
                     </table>
                 </div>
+                <!-- Detalhamento de Impostos e BDI -->
+                <div class="mt-12 mb-2 flex justify-end items-end gap-10 px-4 avoid-break">
+                    <div style="text-align: right;">
+                        <p style="font-size: 8px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.05em;">Subtotal</p>
+                        <p style="font-size: 14px; font-weight: 800; color: #0f172a; margin: 0;">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    </div>
+                    ${order.bdiRate ? `
+                    <div style="text-align: right;">
+                        <p style="font-size: 8px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.05em;">BDI (${order.bdiRate}%)</p>
+                        <p style="font-size: 14px; font-weight: 800; color: #059669; margin: 0;">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    </div>` : ''}
+                    ${order.taxRate ? `
+                    <div style="text-align: right;">
+                        <p style="font-size: 8px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.05em;">Impostos (${order.taxRate}%)</p>
+                        <p style="font-size: 14px; font-weight: 800; color: #2563eb; margin: 0;">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    </div>` : ''}
+                </div>
 
-                <div class="avoid-break mt-12 bg-slate-900 text-white p-8 rounded-2xl shadow-2xl relative overflow-hidden" style="display: grid; grid-template-columns: 1fr 200px; align-items: center; gap: 30px;">
+                <div class="avoid-break bg-[#0f172a] text-white p-7 rounded-2xl shadow-xl relative overflow-hidden" style="display: flex; justify-content: space-between; align-items: center;">
                    <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
-                   <div style="min-width: 0;">
-                       <p style="font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.25em; opacity: 0.5; margin-bottom: 6px;">
-                           ${order.contractPrice && order.contractPrice > 0 ? 'Valor Total do Contrato' : 'Custo Total Estimado'}
+                   <div>
+                       <p style="font-size: 16px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.15em; margin: 0;">
+                           INVESTIMENTO TOTAL:
                        </p>
-                       <p style="font-size: 11px; font-weight: 700; color: #93c5fd; text-transform: uppercase; line-height: 1.5; margin: 0; word-wrap: break-word;">
-                           ${order.paymentTerms || 'Consulte condições'}
-                       </p>
+                       ${order.paymentTerms ? `<p style="font-size: 9px; font-weight: 700; color: #93c5fd; text-transform: uppercase; margin-top: 5px; opacity: 0.8;">${order.paymentTerms}</p>` : ''}
                    </div>
-                   <div style="text-align: right; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 20px;">
-                       <p style="font-size: 32px; font-weight: 900; letter-spacing: -0.05em; line-height: 1; margin: 0; white-space: nowrap;">
+                   <div style="text-align: right;">
+                       <p style="font-size: 44px; font-weight: 900; letter-spacing: -0.05em; line-height: 1; margin: 0;">
                            R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                        </p>
                    </div>
