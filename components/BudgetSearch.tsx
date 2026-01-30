@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { Search, Calendar, User, FileText, ChevronRight, Trash2 } from 'lucide-react';
+import { Search, Calendar, User, FileText, ChevronRight } from 'lucide-react';
 import { ServiceOrder, OrderStatus, Customer, CompanyProfile, CatalogService } from '../types';
 import { useNotify } from './ToastProvider';
 import { db } from '../services/db';
@@ -40,17 +40,6 @@ const BudgetSearch: React.FC<Props> = ({ orders, setOrders, customers, company, 
     });
   }, [orders, searchBy, clientTerm, startDate, endDate]);
 
-  const handleDelete = async (id: string) => {
-    if (confirm("Deseja realmente excluir este orçamento definitivamente? Esta ação também removerá os dados da nuvem.")) {
-      setOrders(prev => prev.filter(o => o.id !== id));
-      const result = await db.remove('orders', id);
-      if (result?.success) {
-        notify("Orçamento removido da nuvem com sucesso.");
-      } else {
-        notify("Removido localmente, mas houve um erro ao sincronizar com a nuvem.", "error");
-      }
-    }
-  };
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -174,18 +163,9 @@ const BudgetSearch: React.FC<Props> = ({ orders, setOrders, customers, company, 
                   <p className="text-sm font-black text-slate-900">R$ {order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                   <p className={`text-[10px] font-bold uppercase tracking-widest ${order.status === OrderStatus.APPROVED ? 'text-emerald-600' : 'text-blue-600'}`}>{order.status === OrderStatus.APPROVED ? 'Orçamento Aprovado' : 'Orçamento Pendente'}</p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => handleDelete(order.id)}
-                    className="p-2 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all opacity-0 group-hover:opacity-100"
-                    title="Excluir Orçamento"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
-                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <p className="text-[10px] text-blue-600 font-bold">Gerencie na aba Orçamentos</p>
-                    <ChevronRight className="w-5 h-5 text-slate-300" />
-                  </div>
+                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <p className="text-[10px] text-blue-600 font-bold">Gerencie na aba Orçamentos</p>
+                  <ChevronRight className="w-5 h-5 text-slate-300" />
                 </div>
               </div>
             </div>
