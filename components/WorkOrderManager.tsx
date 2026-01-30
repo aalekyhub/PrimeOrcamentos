@@ -326,7 +326,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     </table>
                 </div>
 
-                <div class="mb-4 px-4 avoid-break" style="display: flex; flex-direction: row; justify-content: flex-end; gap: 40px; align-items: flex-end;">
+                <div class="avoid-break" style="display: flex !important; flex-direction: row !important; justify-content: flex-end !important; gap: 40px !important; align-items: flex-end !important; margin-bottom: 24px; padding: 0 16px;">
                     <div style="text-align: right;">
                         <p style="font-size: 7px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px;">Subtotal</p>
                         <p style="font-size: 10px; font-weight: 800; color: #0f172a; margin: 0;">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
@@ -343,24 +343,24 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     </div>` : ''}
                 </div>
 
-                <div class="avoid-break bg-[#0f172a] text-white p-5 rounded-2xl shadow-xl flex justify-between items-center mb-6">
-                   <p style="font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; margin: 0; opacity: 0.8;">INVESTIMENTO TOTAL:</p>
-                   <p style="font-size: 32px; font-weight: 900; letter-spacing: -0.05em; margin: 0; line-height: 1;">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <div class="avoid-break bg-[#0f172a] text-white p-5 rounded-2xl shadow-xl mb-6" style="display: flex !important; flex-direction: row !important; justify-content: space-between !important; align-items: center !important;">
+                   <p style="font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; margin: 0; opacity: 0.8 !important;">INVESTIMENTO TOTAL:</p>
+                   <p style="font-size: 32px; font-weight: 900; letter-spacing: -0.05em; margin: 0 !important; line-height: 1 !important;">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                </div>
 
-                <div class="grid grid-cols-2 gap-4 mb-8 avoid-break">
+                <div class="avoid-break mb-8" style="display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 16px !important;">
                     <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 shadow-sm">
-                        <p class="text-blue-600 font-black text-[10px] uppercase tracking-widest mb-2">Forma de Pagamento</p>
+                        <p class="text-blue-600 font-black text-[10px] uppercase tracking-widest mb-2" style="display: block;">Forma de Pagamento</p>
                         <p class="text-slate-700 text-[11px] font-bold leading-relaxed">${order.paymentTerms || 'A combinar com o responsável.'}</p>
                     </div>
                     <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 shadow-sm">
-                        <p class="text-blue-600 font-black text-[10px] uppercase tracking-widest mb-2">Prazo de Entrega / Execução</p>
+                        <p class="text-blue-600 font-black text-[10px] uppercase tracking-widest mb-2" style="display: block;">Prazo de Entrega / Execução</p>
                         <p class="text-slate-700 text-[11px] font-bold leading-relaxed">${order.deliveryTime || 'Conforme cronograma da obra.'}</p>
                     </div>
                 </div>
 
                 <div class="avoid-break mt-auto pt-8">
-                   <div class="grid grid-cols-2 gap-16 px-10">
+                   <div style="display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 64px !important; padding: 0 40px !important;">
                        <div class="text-center">
                            <div style="border-top: 1px solid #cbd5e1; margin-bottom: 8px;"></div>
                            <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Responsável Técnico</p>
@@ -378,7 +378,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
           <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;"><div style="height: ${company.printMarginBottom || 15}mm; display: block;">&nbsp;</div></td></tr></tfoot>
         </table>
         <div class="print-footer no-screen"><span>Página 1 de 1</span></div>
-        <script>window.onload = function() { setTimeout(() => { window.print(); window.close(); }, 800); }</script>
+        <script>window.onload = function() { setTimeout(() => { window.print(); window.close(); }, 1200); }</script>
       </body>
       </html>`;
         printWindow.document.write(html);
