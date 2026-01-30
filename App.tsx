@@ -13,7 +13,6 @@ import CustomerManager from './components/CustomerManager';
 import ServiceCatalog from './components/ServiceCatalog';
 import CompanySettings from './components/CompanySettings';
 import BudgetSearch from './components/BudgetSearch';
-import GlobalConsultDrawer from './components/GlobalConsultDrawer';
 import UserManager from './components/UserManager';
 import Login from './components/Login';
 import DataCleanup from './components/DataCleanup';
@@ -59,7 +58,6 @@ const INITIAL_COMPANY: CompanyProfile = {
 const AppContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isSidebarOpen, setSidebarOpen] = useState(false);
-  const [isConsultDrawerOpen, setIsConsultDrawerOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const { notify } = useNotify();
 
@@ -225,14 +223,7 @@ const AppContent: React.FC = () => {
             {navItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => {
-                  if (item.id === 'search') {
-                    setIsConsultDrawerOpen(true);
-                  } else {
-                    setActiveTab(item.id);
-                  }
-                  setSidebarOpen(false);
-                }}
+                onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
                 className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${activeTab === item.id ? 'bg-blue-50 text-blue-600 font-bold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium'}`}
               >
                 <item.icon className={`w-5 h-5 ${activeTab === item.id ? 'text-blue-600' : 'text-slate-500'}`} />
@@ -296,18 +287,13 @@ const AppContent: React.FC = () => {
 
         <div className="flex-1 overflow-y-auto p-4 md:p-10 bg-slate-50 no-scrollbar">
           <div className="max-w-[1400px] mx-auto">
-            {activeTab === 'dashboard' && <Dashboard stats={stats} orders={orders} transactions={transactions} currentUser={currentUser} company={company} onNavigate={(tab) => {
-              if (tab === 'search') {
-                setIsConsultDrawerOpen(true);
-              } else {
-                setActiveTab(tab);
-              }
-            }} />}
+            {activeTab === 'dashboard' && <Dashboard stats={stats} orders={orders} transactions={transactions} currentUser={currentUser} company={company} onNavigate={setActiveTab} />}
             {activeTab === 'customers' && <CustomerManager customers={customers} setCustomers={setCustomers} orders={orders} />}
             {activeTab === 'catalog' && <ServiceCatalog services={catalog} setServices={setCatalog} company={company} />}
             {activeTab === 'budgets' && <BudgetManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} />}
             {activeTab === 'orders' && <ServiceOrderManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} />}
             {activeTab === 'works' && <WorkOrderManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} transactions={transactions} setTransactions={setTransactions} />}
+            {activeTab === 'search' && <BudgetSearch orders={orders} setOrders={setOrders} customers={customers} company={company} catalogServices={catalog} setCatalogServices={setCatalog} />}
             {activeTab === 'financials' && <FinancialControl transactions={transactions} setTransactions={setTransactions} loans={loans} setLoans={setLoans} currentUser={currentUser} />}
             {activeTab === 'users' && <UserManager users={users} setUsers={setUsers} />}
             {activeTab === 'audit' && <DataCleanup
@@ -319,14 +305,6 @@ const AppContent: React.FC = () => {
             {activeTab === 'settings' && <CompanySettings company={company} setCompany={setCompany} />}
           </div>
         </div>
-
-        <GlobalConsultDrawer
-          isOpen={isConsultDrawerOpen}
-          onClose={() => setIsConsultDrawerOpen(false)}
-          orders={orders}
-          customers={customers}
-          catalog={catalog}
-        />
       </main>
     </div>
   );
