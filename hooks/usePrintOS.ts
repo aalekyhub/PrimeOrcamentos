@@ -18,17 +18,19 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
 
         const { subtotal, bdiValue, taxValue, finalTotal } = financeUtils.getDetailedFinancials(order);
 
+        const itemFontBase = company.itemsFontSize || 12;
+
         const itemsHtml = order.items.map((item) => {
             const total = item.quantity * item.unitPrice;
             return `
       <tr style="border-bottom: 1px solid #f1f5f9;">
         <td style="padding: 10px; text-align: left; vertical-align: middle;">
-            <div style="font-weight: 700; text-transform: uppercase; font-size: 10px; color: #0f172a;">${item.description}</div>
+            <div style="font-weight: 700; text-transform: uppercase; font-size: ${itemFontBase}px; color: #0f172a;">${item.description}</div>
         </td>
-        <td style="padding: 10px 0; text-align: center; vertical-align: middle; color: #64748b; font-size: 9px; font-weight: 700; text-transform: uppercase;">${item.type || 'SERV'}</td>
-        <td style="padding: 10px 0; text-align: center; vertical-align: middle; color: #0f172a; font-size: 10px; font-weight: 700;">${item.quantity} ${item.unit || 'un'}</td>
-        <td style="padding: 10px 0; text-align: right; vertical-align: middle; color: #64748b; font-size: 10px; font-weight: 700;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-        <td style="padding: 10px; text-align: right; vertical-align: middle; font-weight: 800; font-size: 11px; color: #0f172a;">R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        <td style="padding: 10px 0; text-align: center; vertical-align: middle; color: #64748b; font-size: ${Math.max(8, itemFontBase - 1)}px; font-weight: 700; text-transform: uppercase;">${item.type || 'SERV'}</td>
+        <td style="padding: 10px 0; text-align: center; vertical-align: middle; color: #0f172a; font-size: ${itemFontBase}px; font-weight: 700;">${item.quantity} ${item.unit || 'un'}</td>
+        <td style="padding: 10px 0; text-align: right; vertical-align: middle; color: #64748b; font-size: ${itemFontBase}px; font-weight: 700;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        <td style="padding: 10px; text-align: right; vertical-align: middle; font-weight: 800; font-size: ${itemFontBase + 1}px; color: #0f172a;">R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
       </tr>`;
         }).join('');
 
@@ -103,7 +105,7 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
                    <div class="space-y-4">
                        ${order.descriptionBlocks.map(block => {
             if (block.type === 'text') {
-                return `<p class="text-slate-800 leading-relaxed text-justify font-medium whitespace-pre-wrap text-[12px] mb-4">${block.content}</p>`;
+                return `<p class="text-slate-800 leading-relaxed text-justify font-medium whitespace-pre-wrap text-[${company.descriptionFontSize || 14}px] mb-4">${block.content}</p>`;
             } else if (block.type === 'image') {
                 return `<div style="break-inside: avoid; page-break-inside: avoid; margin: 15px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; object-fit: contain;"></div>`;
             } else if (block.type === 'page-break') {
@@ -131,17 +133,17 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
 
                     <div style="display: flex !important; flex-direction: row !important; justify-content: flex-end !important; gap: 40px !important; align-items: flex-end !important; margin-top: 16px; margin-bottom: 24px; padding: 0 16px;">
                         <div style="text-align: right;">
-                            <p style="font-size: 7px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px;">Subtotal</p>
+                            <p style="font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px;">Subtotal</p>
                             <p style="font-size: 10px; font-weight: 800; color: #0f172a; margin: 0;">R$ ${subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                         </div>
                         ${order.bdiRate ? `
                         <div style="text-align: right;">
-                            <p style="font-size: 7px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px;">BDI (${order.bdiRate}%)</p>
+                            <p style="font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px;">BDI (${order.bdiRate}%)</p>
                             <p style="font-size: 10px; font-weight: 800; color: #059669; margin: 0;">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                         </div>` : ''}
                         ${order.taxRate ? `
                         <div style="text-align: right;">
-                            <p style="font-size: 7px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px;">Impostos (${order.taxRate}%)</p>
+                            <p style="font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px;">Impostos (${order.taxRate}%)</p>
                             <p style="font-size: 10px; font-weight: 800; color: #2563eb; margin: 0;">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                         </div>` : ''}
                     </div>
@@ -155,11 +157,11 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
                 <div class="avoid-break mb-8" style="display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 16px !important;">
                     <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 shadow-sm">
                         <p class="text-blue-600 font-black text-[10px] uppercase tracking-widest mb-2" style="display: block;">Forma de Pagamento</p>
-                        <p class="text-slate-700 text-[11px] font-bold leading-relaxed">${order.paymentTerms || 'A combinar com o responsável.'}</p>
+                        <p class="text-slate-700 text-[${company.descriptionFontSize || 12}px] font-bold leading-relaxed">${order.paymentTerms || 'A combinar com o responsável.'}</p>
                     </div>
                     <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 shadow-sm">
                         <p class="text-blue-600 font-black text-[10px] uppercase tracking-widest mb-2" style="display: block;">Prazo de Entrega / Execução</p>
-                        <p class="text-slate-700 text-[11px] font-bold leading-relaxed">${order.deliveryTime || 'Conforme cronograma da obra.'}</p>
+                        <p class="text-slate-700 text-[${company.descriptionFontSize || 12}px] font-bold leading-relaxed">${order.deliveryTime || 'Conforme cronograma da obra.'}</p>
                     </div>
                 </div>
 
@@ -173,7 +175,7 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
                         <div class="text-center relative">
                             <div style="border-top: 1px solid #cbd5e1; margin-bottom: 8px;"></div>
                             <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Assinatura do Cliente</p>
-                            <p class="text-[10px] font-bold uppercase text-slate-900">${order.customerName}</p>
+                            <p class="text-[11px] font-bold uppercase text-slate-900">${order.customerName}</p>
                         </div>
                    </div>
                </div>
