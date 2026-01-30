@@ -15,7 +15,7 @@ interface Props {
 
 const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loans, setLoans, currentUser }) => {
   const [showForm, setShowForm] = useState(false);
-  const [activeSubTab, setActiveSubTab] = useState<'geral' | 'recorrencia' | 'emprestimos'>('geral');
+  const [activeSubTab, setActiveSubTab] = useState<'geral' | 'recorrencia' | 'emprestimos' | 'historico'>('geral');
   const { notify } = useNotify();
   const isAdmin = currentUser.role === 'admin';
   const [formData, setFormData] = useState<Partial<Transaction>>({
@@ -109,7 +109,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
     }
   };
 
-  // Projeção para os próximos 30 dias (itens recorrentes e parcelas)
+  // Projeção para os próximos 30 dias
   const recurringTotal = transactions
     .filter(t => t.isRecurring)
     .reduce((s, t) => s + t.amount, 0);
@@ -137,17 +137,17 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
         </div>
       </div>
 
-      {/* Tabs Financeiras */}
-      <div className="flex gap-1 p-1 bg-slate-100 rounded-2xl w-fit">
+      <div className="flex bg-slate-100 p-1.5 rounded-[1.5rem] self-start mb-8 gap-2 overflow-x-auto no-scrollbar">
         {[
-          { id: 'geral', label: 'Lançamentos' },
-          { id: 'recorrencia', label: 'Mensal/Recorrente' },
-          { id: 'emprestimos', label: 'Empréstimos' }
-        ].map(tab => (
+          { id: 'geral', label: 'LANÇAMENTOS' },
+          { id: 'recorrencia', label: 'MENSAL/RECORRENTE' },
+          { id: 'emprestimos', label: 'EMPRÉSTIMOS' },
+          { id: 'historico', label: 'HISTÓRICO' }
+        ].map((tab) => (
           <button
             key={tab.id}
             onClick={() => { setActiveSubTab(tab.id as any); setShowForm(false); }}
-            className={`px-8 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeSubTab === tab.id ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+            className={`px-8 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest whitespace-nowrap transition-all ${activeSubTab === tab.id ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
           >
             {tab.label}
           </button>
@@ -186,57 +186,127 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
         </div>
       </div>
 
-      {showForm && (
+      {activeSubTab === 'historico' ? (
+        <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-xl space-y-8 animate-in slide-in-from-top-4 duration-300">
+          <div className="flex items-center justify-between border-b pb-6">
+            <div>
+              <h4 className="font-black text-slate-900 text-lg uppercase tracking-tight">Extrato Financeiro Completo</h4>
+              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mt-1">Todas as entradas e saídas registradas</p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-xl border border-slate-100">
+                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                <span className="text-[10px] font-black text-slate-500 uppercase">{transactions.length} Lançamentos</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="divide-y divide-slate-100 max-h-[600px] overflow-y-auto pr-2 no-scrollbar">
+            {transactions
+              .sort((a, b) => b.date.localeCompare(a.date))
+              .map(t => (
+                <div key={t.id} className="group py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-50/50 transition-all rounded-2xl px-4 -mx-4">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${t.type === 'RECEITA' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+                      {t.type === 'RECEITA' ? <ArrowUpRight className="w-5 h-5" /> : <ArrowDownLeft className="w-5 h-5" />}
+                    </div>
+                    <div>
+                      <p className="text-sm font-black text-slate-900 leading-tight uppercase">{t.category}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{t.date.split('-').reverse().join('/')}</p>
+                        {t.date > today && (
+                          <span className="text-[8px] bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded-md font-black uppercase tracking-tighter">
+                            Agendado
+                          </span>
+                        )}
+                        {t.isRecurring && (
+                          <span className="text-[8px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded-md font-black uppercase tracking-tighter">
+                            Recorrente
+                          </span>
+                        )}
+                      </div>
+                      {t.description && (
+                        <p className="text-[10px] text-slate-500 italic mt-1 bg-slate-50/80 p-1.5 rounded-lg border border-slate-100 flex items-center gap-2 max-w-sm">
+                          <Tag className="w-2.5 h-2.5 text-slate-300" />
+                          {t.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between md:justify-end gap-8">
+                    <div className="text-right">
+                      <p className={`text-sm font-black ${t.type === 'RECEITA' ? 'text-emerald-600' : 'text-rose-600'}`}>
+                        {t.type === 'RECEITA' ? '+' : '-'} R$ {t.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </p>
+                      <p className="text-[9px] text-slate-300 font-bold uppercase mt-0.5">{t.id}</p>
+                    </div>
+                    <button onClick={() => removeTransaction(t.id)} className="p-2 text-slate-200 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            {transactions.length === 0 && (
+              <div className="py-20 text-center space-y-4">
+                <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-300">
+                  <Wallet className="w-8 h-8 opacity-20" />
+                </div>
+                <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Nenhum lançamento encontrado</p>
+              </div>
+            )}
+          </div>
+        </div>
+      ) : showForm ? (
         activeSubTab === 'emprestimos' ? (
           <form onSubmit={handleAddLoan} className="bg-white p-8 rounded-[2.5rem] border-2 border-blue-100 shadow-xl space-y-6 animate-in slide-in-from-top-4 duration-300">
             <h4 className="font-bold text-slate-800 text-sm border-b pb-4">Registrar Novo Empréstimo</h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className="block text-xs font-bold text-slate-500 mb-1">Instituição / Banco</label>
-                <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold"
                   required value={loanFormData.bankName} onChange={e => setLoanFormData({ ...loanFormData, bankName: e.target.value })} />
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-500 mb-1">Valor Total (R$)</label>
-                <input type="number" step="0.01" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                <input type="number" step="0.01" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold"
                   required value={loanFormData.totalAmount || ''} onChange={e => setLoanFormData({ ...loanFormData, totalAmount: Number(e.target.value) })} />
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-500 mb-1">Valor da Parcela (R$)</label>
-                <input type="number" step="0.01" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                <input type="number" step="0.01" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold"
                   required value={loanFormData.installmentValue || ''} onChange={e => setLoanFormData({ ...loanFormData, installmentValue: Number(e.target.value) })} />
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-500 mb-1">Total de Parcelas</label>
-                <input type="number" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                <input type="number" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold"
                   required value={loanFormData.installmentsCount} onChange={e => setLoanFormData({ ...loanFormData, installmentsCount: Number(e.target.value) })} />
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-500 mb-1">Data de Início</label>
-                <input type="date" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                <input type="date" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold"
                   required value={loanFormData.startDate} onChange={e => setLoanFormData({ ...loanFormData, startDate: e.target.value })} />
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-500 mb-1">Taxa de Juros Mensal (%)</label>
-                <input type="number" step="0.01" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                <input type="number" step="0.01" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold"
                   value={loanFormData.interestRate || ''} onChange={e => setLoanFormData({ ...loanFormData, interestRate: Number(e.target.value) })} />
               </div>
             </div>
             <div className="flex justify-end pt-2">
-              <button type="submit" className="bg-blue-600 text-white px-10 py-3.5 rounded-xl text-sm font-bold shadow-lg hover:bg-blue-700 transition-all">
+              <button type="submit" className="bg-blue-600 text-white px-10 py-3.5 rounded-xl text-sm font-bold shadow-lg hover:bg-blue-700 transition-all font-bold uppercase tracking-widest">
                 Registrar Compromisso
               </button>
             </div>
           </form>
         ) : (
           <form onSubmit={handleAdd} className="bg-white p-8 rounded-[2.5rem] border-2 border-blue-100 shadow-xl space-y-6 animate-in slide-in-from-top-4 duration-300">
-            <h4 className="font-bold text-slate-800 text-sm border-b pb-4">
+            <h4 className="font-bold text-slate-800 text-sm border-b pb-4 uppercase tracking-widest">
               {activeSubTab === 'recorrencia' ? 'Novo Item Recorrente (Fixo)' : 'Lançamento Único'}
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div>
                 <label className="block text-xs font-bold text-slate-500 mb-1">Tipo</label>
-                <select className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                <select className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold"
                   value={formData.type} onChange={e => setFormData({ ...formData, type: e.target.value as any })}>
                   <option value="RECEITA">Receita (+)</option>
                   <option value="DESPESA">Despesa (-)</option>
@@ -244,22 +314,22 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-500 mb-1">Valor (R$)</label>
-                <input type="number" step="0.01" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                <input type="number" step="0.01" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold"
                   required value={formData.amount || ''} onChange={e => setFormData({ ...formData, amount: Number(e.target.value) })} />
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-500 mb-1">Categoria / Descrição</label>
-                <input type="text" placeholder="ex: Aluguel, Venda..." className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                <input type="text" placeholder="ex: Aluguel, Venda..." className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold"
                   required value={formData.category || ''} onChange={e => setFormData({ ...formData, category: e.target.value })} />
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-500 mb-1">Data</label>
-                <input type="date" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                <input type="date" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold"
                   required value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })} />
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-500 mb-1">Frequência</label>
-                <select className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                <select className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold"
                   value={formData.frequency} onChange={e => setFormData({ ...formData, frequency: e.target.value as RecurrenceFrequency, isRecurring: e.target.value !== 'NONE' })}>
                   <option value="NONE">Lançamento Avulso</option>
                   <option value="MONTHLY">Mensal</option>
@@ -267,17 +337,20 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
                   <option value="ANNUAL">Anual</option>
                 </select>
               </div>
+              <div className="lg:col-span-3">
+                <label className="block text-xs font-bold text-slate-500 mb-1">Observações / Notas Extras</label>
+                <input type="text" placeholder="Adicione detalhes adicionais aqui..." className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                  value={formData.description || ''} onChange={e => setFormData({ ...formData, description: e.target.value })} />
+              </div>
             </div>
             <div className="flex justify-end pt-2">
-              <button type="submit" className="bg-blue-600 text-white px-10 py-3.5 rounded-xl text-sm font-bold shadow-lg hover:bg-blue-700 transition-all">
+              <button type="submit" className="bg-blue-600 text-white px-10 py-3.5 rounded-xl text-sm font-bold shadow-lg hover:bg-blue-700 transition-all font-bold uppercase tracking-widest">
                 Efetivar Lançamento
               </button>
             </div>
           </form>
         )
-      )}
-
-      {activeSubTab === 'emprestimos' ? (
+      ) : activeSubTab === 'emprestimos' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loans.map(loan => (
             <div key={loan.id} className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm space-y-4">
@@ -325,7 +398,6 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
                       return;
                     }
                     if (confirm(`Confirmar pagamento da parcela de R$ ${loan.installmentValue.toLocaleString()}?`)) {
-                      // 1. Atualiza o empréstimo
                       const updatedLoans = loans.map(l => {
                         if (l.id === loan.id) {
                           return {
@@ -339,7 +411,6 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
                       setLoans(updatedLoans);
                       await db.save('serviflow_loans', updatedLoans);
 
-                      // 2. Cria a transação de despesa
                       const newT: Transaction = {
                         id: `T-LOAN-${Date.now()}`,
                         amount: loan.installmentValue,
@@ -355,7 +426,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
                       notify("Parcela baixada com sucesso!");
                     }
                   }}
-                  className="flex-1 bg-blue-50 text-blue-600 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all"
+                  className="flex-1 bg-blue-50 text-blue-600 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all font-bold"
                 >
                   Baixar Parcela
                 </button>
@@ -365,60 +436,13 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
           {loans.length === 0 && <p className="col-span-full text-center py-20 text-slate-400 font-bold italic">Nenhum empréstimo ou financiamento ativo.</p>}
         </div>
       ) : (
-        <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden overflow-x-auto">
-          <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 min-w-[600px]">
-            <h4 className="font-bold text-slate-800 text-sm">
-              {activeSubTab === 'geral' ? 'Histórico de Lançamentos' : 'Itens de Recorrência Fixa'}
-            </h4>
+        <div className="py-20 text-center space-y-6 bg-slate-50/50 rounded-[3rem] border-2 border-dashed border-slate-200">
+          <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto shadow-sm border border-slate-100">
+            <Plus className="w-8 h-8 text-blue-500" />
           </div>
-          <div className="divide-y divide-slate-100">
-            {transactions
-              .filter(t => activeSubTab === 'geral' ? !t.isRecurring : t.isRecurring)
-              .sort((a, b) => b.date.localeCompare(a.date)) // Sort by date descending
-              .map(t => (
-                <div key={t.id} className="flex items-center justify-between p-6 hover:bg-slate-50 transition-colors group">
-                  <div className="flex items-center gap-4">
-                    <div className={`p-3 rounded-2xl ${t.type === 'RECEITA' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
-                      {t.type === 'RECEITA' ? <ArrowUpRight className="w-5 h-5" /> : <ArrowDownLeft className="w-5 h-5" />}
-                    </div>
-                    <div>
-                      <p className="text-sm font-black text-slate-900 leading-tight">{t.category}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{t.date.split('-').reverse().join('/')}</p>
-                        {t.date > today && (
-                          <span className="text-[8px] bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded-md font-black uppercase tracking-tighter">
-                            Agendado
-                          </span>
-                        )}
-                        {t.isRecurring && (
-                          <span className="text-[8px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded-md font-black uppercase tracking-tighter">
-                            Recorrente ({t.frequency})
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-8">
-                    <div className="text-right">
-                      <p className={`text-sm font-black ${t.type === 'RECEITA' ? 'text-emerald-600' : 'text-rose-600'}`}>
-                        {t.type === 'RECEITA' ? '+' : '-'} R$ {t.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </p>
-                      <p className="text-[10px] text-slate-400 italic">{t.description}</p>
-                    </div>
-                    {isAdmin && (
-                      <button
-                        onClick={() => removeTransaction(t.id)}
-                        className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl opacity-0 group-hover:opacity-100 transition-all"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            {transactions.filter(t => activeSubTab === 'geral' ? !t.isRecurring : t.isRecurring).length === 0 && (
-              <p className="text-center py-20 text-slate-400 font-bold italic">Nenhum lançamento encontrado nesta categoria.</p>
-            )}
+          <div className="space-y-1">
+            <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Pronto para lançar?</h3>
+            <p className="text-sm text-slate-500 max-w-xs mx-auto">Clique no botão "Novo Lançamento" acima para registrar dados nesta categoria.</p>
           </div>
         </div>
       )}
