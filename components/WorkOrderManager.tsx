@@ -286,16 +286,9 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                    </div>
                </div>
 
-                <div class="mb-8">
-                    <div class="section-title">Escopo dos Serviços</div>
-                    <div class="info-box bg-slate-50 border border-slate-100">
-                        <p class="text-[12px] text-slate-800 leading-relaxed font-medium whitespace-pre-wrap">${order.serviceDescription || 'Nenhuma observação técnica registrada.'}</p>
-                    </div>
-                </div>
-
                ${order.descriptionBlocks && order.descriptionBlocks.length > 0 ? `
                <div class="mb-8">
-                   <div class="section-title">Anexos e Fotos</div>
+                   <div class="section-title">DESCRIÇÃO TÉCNICA</div>
                    <div class="space-y-4">
                        ${order.descriptionBlocks.map(block => {
             if (block.type === 'text') {
