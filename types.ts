@@ -40,6 +40,8 @@ export interface CompanyProfile {
   defaultProposalValidity?: number; // Days
   descriptionFontSize?: number; // Font size for technical description
   itemsFontSize?: number; // Font size for items table
+  printMarginTop?: number;
+  printMarginBottom?: number;
 }
 
 export interface Customer {

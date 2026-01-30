@@ -60,6 +60,7 @@ const AppContent: React.FC = () => {
   const [openTabs, setOpenTabs] = useState<string[]>(['dashboard']);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => db.load('serviflow_dark_mode', false));
   const { notify } = useNotify();
 
   const [currentUser, setCurrentUser] = useState<UserAccount | null>(() => db.load(STORAGE_KEYS.SESSION, null));
@@ -173,8 +174,9 @@ const AppContent: React.FC = () => {
     db.save(STORAGE_KEYS.COMPANY, company);
     db.save(STORAGE_KEYS.USERS, users);
     db.save(STORAGE_KEYS.LOANS, loans);
+    db.save('serviflow_dark_mode', darkMode);
     if (currentUser) db.save(STORAGE_KEYS.SESSION, currentUser);
-  }, [orders, transactions, customers, catalog, company, users, loans, currentUser]);
+  }, [orders, transactions, customers, catalog, company, users, loans, currentUser, darkMode]);
 
   const stats = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
@@ -218,10 +220,10 @@ const AppContent: React.FC = () => {
   ].filter(item => currentUser.role === 'admin' || currentUser.permissions?.includes(item.id));
 
   return (
-    <div className="flex h-screen bg-slate-100 overflow-hidden text-slate-900 font-sans">
+    <div className={`flex h-screen overflow-hidden font-sans transition-colors duration-300 ${darkMode ? 'dark bg-slate-900 text-slate-100' : 'bg-slate-100 text-slate-900'}`}>
       {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/60 z-20 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
-      <aside className={`fixed lg:static inset-y-0 left-0 z-30 w-72 bg-white border-r border-slate-100 transition-transform duration-300 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 shadow-lg shadow-slate-200/50`}>
+      <aside className={`fixed lg:static inset-y-0 left-0 z-30 w-72 border-r transition-all duration-300 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 shadow-lg ${darkMode ? 'bg-slate-800 border-slate-700 shadow-black/20' : 'bg-white border-slate-100 shadow-slate-200/50'}`}>
         <div className="p-6 h-full flex flex-col">
           <div className="flex items-center gap-4 mb-8">
             <div className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center overflow-hidden border border-slate-100">
@@ -233,7 +235,7 @@ const AppContent: React.FC = () => {
                 </div>
               )}
             </div>
-            <h1 className="text-2xl font-medium tracking-tighter text-slate-900">Prime</h1>
+            <h1 className={`text-2xl font-medium tracking-tighter ${darkMode ? 'text-white' : 'text-slate-900'}`}>Prime</h1>
           </div>
 
           <nav className="space-y-1.5 flex-1 overflow-y-auto no-scrollbar">
@@ -247,9 +249,9 @@ const AppContent: React.FC = () => {
                   setActiveTab(item.id);
                   setSidebarOpen(false);
                 }}
-                className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${activeTab === item.id ? 'bg-blue-50 text-blue-600 font-bold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium'}`}
+                className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${activeTab === item.id ? (darkMode ? 'bg-blue-900/40 text-blue-400 font-bold' : 'bg-blue-50 text-blue-600 font-bold') : (darkMode ? 'text-slate-400 hover:bg-slate-700 hover:text-white font-medium' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium')}`}
               >
-                <item.icon className={`w-5 h-5 ${activeTab === item.id ? 'text-blue-600' : 'text-slate-500'}`} />
+                <item.icon className={`w-5 h-5 ${activeTab === item.id ? (darkMode ? 'text-blue-400' : 'text-blue-600') : (darkMode ? 'text-slate-500' : 'text-slate-500')}`} />
                 <span className="text-[16px] leading-relaxed">{item.label}</span>
               </button>
             ))}
@@ -267,7 +269,7 @@ const AppContent: React.FC = () => {
       </aside>
 
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-10 shrink-0 z-10">
+        <header className={`h-20 border-b flex items-center justify-between px-4 md:px-10 shrink-0 z-10 transition-colors ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
           <div className="flex items-center gap-4">
             <button className="lg:hidden p-2 hover:bg-slate-100 rounded-xl" onClick={() => setSidebarOpen(true)}>
               <Menu className="w-6 h-6 text-slate-600" />
@@ -290,7 +292,7 @@ const AppContent: React.FC = () => {
                 ) : (
                   <CloudOff className="w-3 h-3 text-slate-300" />
                 )}
-                <span className={`text-[8px] font-semibold uppercase tracking-tighter ${isSyncing ? 'text-blue-500' : db.isConnected() ? 'text-emerald-600' : 'text-slate-400'}`}>
+                <span className={`text-[8px] font-semibold uppercase tracking-tighter ${isSyncing ? 'text-blue-500' : db.isConnected() ? 'text-emerald-600' : (darkMode ? 'text-slate-500' : 'text-slate-400')}`}>
                   {isSyncing ? 'Sincronizando' : db.isConnected() ? 'Nuvem Ativa' : 'Apenas Local'}
                 </span>
               </button>
@@ -298,6 +300,13 @@ const AppContent: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4 text-right">
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              className={`p-2.5 rounded-xl border transition-all hover:scale-110 active:scale-90 ${darkMode ? 'bg-slate-700 border-slate-600 text-amber-400 hover:bg-slate-600' : 'bg-slate-50 border-slate-200 text-slate-400 hover:bg-white hover:text-blue-600 hover:shadow-md'}`}
+              title={darkMode ? "Ativar Modo Claro" : "Ativar Modo Escuro"}
+            >
+              {darkMode ? <Zap className="w-5 h-5 fill-current" /> : <Zap className="w-5 h-5" />}
+            </button>
             <div className="hidden sm:block">
               <p className="text-sm font-semibold text-slate-900">{company.name}</p>
               <p className="text-[10px] text-blue-600 font-medium uppercase tracking-widest">{new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date())}</p>
@@ -309,7 +318,7 @@ const AppContent: React.FC = () => {
         </header>
 
         {/* Multi-Tab Bar */}
-        <div className="bg-white border-b border-slate-200 px-4 md:px-10 flex items-center gap-2 overflow-x-auto no-scrollbar shrink-0 h-12">
+        <div className={`border-b px-4 md:px-10 flex items-center gap-2 overflow-x-auto no-scrollbar shrink-0 h-12 transition-colors ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
           {openTabs.map(tabId => {
             const item = navItems.find(n => n.id === tabId);
             if (!item) return null;
@@ -317,12 +326,12 @@ const AppContent: React.FC = () => {
             return (
               <div
                 key={tabId}
-                className={`flex items-center h-full min-w-[120px] max-w-[200px] border-b-2 transition-all cursor-pointer group ${IsActive ? 'border-blue-600 bg-blue-50/30' : 'border-transparent hover:bg-slate-50'}`}
+                className={`flex items-center h-full min-w-[120px] max-w-[200px] border-b-2 transition-all cursor-pointer group ${IsActive ? (darkMode ? 'border-blue-500 bg-blue-900/30' : 'border-blue-600 bg-blue-50/30') : (darkMode ? 'border-transparent hover:bg-slate-700/50' : 'border-transparent hover:bg-slate-50')}`}
                 onClick={() => setActiveTab(tabId)}
               >
                 <div className="flex items-center gap-2 px-4 w-full">
-                  <item.icon className={`w-3.5 h-3.5 shrink-0 ${IsActive ? 'text-blue-600' : 'text-slate-400'}`} />
-                  <span className={`text-[11px] font-bold truncate ${IsActive ? 'text-blue-600' : 'text-slate-500'}`}>
+                  <item.icon className={`w-3.5 h-3.5 shrink-0 ${IsActive ? (darkMode ? 'text-blue-400' : 'text-blue-600') : (darkMode ? 'text-slate-500' : 'text-slate-400')}`} />
+                  <span className={`text-[11px] font-bold truncate ${IsActive ? (darkMode ? 'text-blue-400' : 'text-blue-600') : (darkMode ? 'text-slate-500' : 'text-slate-500')}`}>
                     {item.label}
                   </span>
                   {tabId !== 'dashboard' && (
@@ -346,7 +355,7 @@ const AppContent: React.FC = () => {
           })}
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 md:p-10 bg-slate-50 no-scrollbar relative">
+        <div className={`flex-1 overflow-y-auto p-4 md:p-10 no-scrollbar relative transition-colors ${darkMode ? 'bg-slate-900' : 'bg-slate-50'}`}>
           <div className="max-w-[1400px] mx-auto h-full">
             {/* Persistent Tab Container */}
             {navItems.map(item => {
@@ -357,7 +366,7 @@ const AppContent: React.FC = () => {
 
               return (
                 <div key={item.id} className={isVisible ? 'block h-full' : 'hidden'}>
-                  {item.id === 'dashboard' && <Dashboard stats={stats} orders={orders} transactions={transactions} currentUser={currentUser} company={company} onNavigate={(target) => {
+                  {item.id === 'dashboard' && <Dashboard stats={stats} orders={orders} transactions={transactions} currentUser={currentUser} company={company} isLoading={isSyncing} onNavigate={(target) => {
                     if (!openTabs.includes(target)) setOpenTabs([...openTabs, target]);
                     setActiveTab(target);
                   }} />}
@@ -366,7 +375,7 @@ const AppContent: React.FC = () => {
                   {item.id === 'budgets' && <BudgetManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} />}
                   {item.id === 'orders' && <ServiceOrderManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} />}
                   {item.id === 'works' && <WorkOrderManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} transactions={transactions} setTransactions={setTransactions} />}
-                  {item.id === 'search' && <BudgetSearch orders={orders} setOrders={setOrders} customers={customers} company={company} catalogServices={catalog} setCatalogServices={setCatalog} />}
+                  {item.id === 'search' && <BudgetSearch orders={orders} setOrders={setOrders} customers={customers} company={company} catalogServices={catalog} setCatalogServices={setCatalog} isLoading={isSyncing} />}
                   {item.id === 'financials' && <FinancialControl transactions={transactions} setTransactions={setTransactions} loans={loans} setLoans={setLoans} currentUser={currentUser} />}
                   {item.id === 'users' && <UserManager users={users} setUsers={setUsers} />}
                   {item.id === 'audit' && <DataCleanup customers={customers} setCustomers={setCustomers} services={catalog} setServices={setCatalog} />}

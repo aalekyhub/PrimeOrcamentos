@@ -1,5 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
+import Skeleton from './ui/Skeleton';
 import { Search, Calendar, User, FileText, ChevronRight } from 'lucide-react';
 import { ServiceOrder, OrderStatus, Customer, CompanyProfile, CatalogService } from '../types';
 import { useNotify } from './ToastProvider';
@@ -12,9 +13,10 @@ interface Props {
   company: CompanyProfile;
   catalogServices: CatalogService[];
   setCatalogServices: React.Dispatch<React.SetStateAction<CatalogService[]>>;
+  isLoading?: boolean;
 }
 
-const BudgetSearch: React.FC<Props> = ({ orders, setOrders, customers, company, catalogServices, setCatalogServices }) => {
+const BudgetSearch: React.FC<Props> = ({ orders, setOrders, customers, company, catalogServices, setCatalogServices, isLoading = false }) => {
   const [searchBy, setSearchBy] = useState<'client' | 'date'>('client');
   const [clientTerm, setClientTerm] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -44,23 +46,23 @@ const BudgetSearch: React.FC<Props> = ({ orders, setOrders, customers, company, 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div>
-        <h2 className="text-2xl font-bold text-slate-900">Consultar</h2>
-        <p className="text-slate-500 text-sm">Localize rapidamente propostas por cliente ou período.</p>
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Consultar</h2>
+        <p className="text-slate-500 dark:text-slate-400 text-sm">Localize rapidamente propostas por cliente ou período.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Opção 1: Busca por Cliente */}
         <div
-          className={`p-8 rounded-3xl border-2 transition-all cursor-pointer ${searchBy === 'client' ? 'border-blue-600 bg-white shadow-xl shadow-blue-50' : 'border-slate-200 bg-slate-50 opacity-60'}`}
+          className={`p-8 rounded-3xl border-2 transition-all cursor-pointer ${searchBy === 'client' ? 'border-blue-600 bg-white dark:bg-slate-800 shadow-xl shadow-blue-50 dark:shadow-black/20' : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 opacity-60'}`}
           onClick={() => { setSearchBy('client'); }}
         >
           <div className="flex items-center gap-4 mb-6">
-            <div className={`p-3 rounded-2xl ${searchBy === 'client' ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-400'}`}>
+            <div className={`p-3 rounded-2xl ${searchBy === 'client' ? 'bg-blue-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500'}`}>
               <User className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-bold text-lg">Busca por Cliente</h3>
-              <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Filtrar orçamentos de um cliente específico</p>
+              <h3 className="font-bold text-lg text-slate-900 dark:text-white">Busca por Cliente</h3>
+              <p className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest">Filtrar orçamentos de um cliente específico</p>
             </div>
           </div>
           <div className="relative group">
@@ -68,7 +70,7 @@ const BudgetSearch: React.FC<Props> = ({ orders, setOrders, customers, company, 
             <input
               type="text"
               placeholder="Digite o nome do cliente..."
-              className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 font-medium"
+              className="w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 font-medium text-slate-900 dark:text-white"
               value={clientTerm}
               onChange={e => setClientTerm(e.target.value)}
               disabled={searchBy !== 'client'}
@@ -76,21 +78,21 @@ const BudgetSearch: React.FC<Props> = ({ orders, setOrders, customers, company, 
             />
             {/* Autocomplete Dropdown */}
             {searchBy === 'client' && clientTerm.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-slate-100 max-h-60 overflow-y-auto z-20 empty:hidden">
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-100 dark:border-slate-700 max-h-60 overflow-y-auto z-20 empty:hidden">
                 {customers
                   .filter(c => c.name.toLowerCase().includes(clientTerm.toLowerCase()))
                   .slice(0, 5)
                   .map(c => (
                     <div
                       key={c.id}
-                      className="p-3 hover:bg-blue-50 cursor-pointer border-b border-slate-50 last:border-none transition-colors"
+                      className="p-3 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer border-b border-slate-50 dark:border-slate-700 last:border-none transition-colors"
                       onClick={(e) => {
                         e.stopPropagation();
                         setClientTerm(c.name);
                       }}
                     >
-                      <p className="text-xs font-bold text-slate-900 uppercase">{c.name}</p>
-                      <p className="text-[10px] text-slate-400">{c.city || 'Cidade não inf.'} - {c.phone || c.whatsapp || 'Sem contato'}</p>
+                      <p className="text-xs font-bold text-slate-900 dark:text-white uppercase">{c.name}</p>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500">{c.city || 'Cidade não inf.'} - {c.phone || c.whatsapp || 'Sem contato'}</p>
                     </div>
                   ))}
               </div>
@@ -100,16 +102,16 @@ const BudgetSearch: React.FC<Props> = ({ orders, setOrders, customers, company, 
 
         {/* Opção 2: Busca por Período */}
         <div
-          className={`p-8 rounded-3xl border-2 transition-all cursor-pointer ${searchBy === 'date' ? 'border-blue-600 bg-white shadow-xl shadow-blue-50' : 'border-slate-200 bg-slate-50 opacity-60'}`}
+          className={`p-8 rounded-3xl border-2 transition-all cursor-pointer ${searchBy === 'date' ? 'border-blue-600 bg-white dark:bg-slate-800 shadow-xl shadow-blue-50 dark:shadow-black/20' : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 opacity-60'}`}
           onClick={() => setSearchBy('date')}
         >
           <div className="flex items-center gap-4 mb-6">
-            <div className={`p-3 rounded-2xl ${searchBy === 'date' ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-400'}`}>
+            <div className={`p-3 rounded-2xl ${searchBy === 'date' ? 'bg-blue-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500'}`}>
               <Calendar className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-bold text-lg">Busca por Período</h3>
-              <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Consultar orçamentos por data ou intervalo</p>
+              <h3 className="font-bold text-lg text-slate-900 dark:text-white">Busca por Período</h3>
+              <p className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest">Consultar orçamentos por data ou intervalo</p>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -139,33 +141,49 @@ const BudgetSearch: React.FC<Props> = ({ orders, setOrders, customers, company, 
         </div>
       </div>
 
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-          <h4 className="font-bold text-slate-900 flex items-center gap-2">
-            <FileText className="w-4 h-4 text-blue-600" />
-            Resultados Encontrados ({filteredOrders.length})
+      <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/20">
+          <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            {isLoading ? <Skeleton width={150} height={20} /> : `Resultados Encontrados (${filteredOrders.length})`}
           </h4>
         </div>
-        <div className="divide-y divide-slate-100">
-          {filteredOrders.map(order => (
-            <div key={order.id} className="p-6 hover:bg-slate-50 transition-colors flex items-center justify-between group">
+        <div className="divide-y divide-slate-100 dark:divide-slate-700">
+          {isLoading ? (
+            [1, 2, 3].map(i => (
+              <div key={i} className="p-6 flex items-center justify-between">
+                <div className="flex items-center gap-6">
+                  <Skeleton width={48} height={48} className="rounded-2xl" />
+                  <div className="space-y-2">
+                    <Skeleton width={200} height={16} />
+                    <Skeleton width={150} height={12} />
+                  </div>
+                </div>
+                <div className="text-right space-y-2">
+                  <Skeleton width={100} height={16} />
+                  <Skeleton width={80} height={10} />
+                </div>
+              </div>
+            ))
+          ) : filteredOrders.map(order => (
+            <div key={order.id} className="p-6 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors flex items-center justify-between group">
               <div className="flex items-center gap-6">
-                <div className={`w-12 h-12 bg-white border rounded-2xl flex items-center justify-center font-bold shadow-sm ${order.status === OrderStatus.APPROVED ? 'text-emerald-600 border-emerald-200' : 'text-blue-600 border-slate-200'}`}>
+                <div className={`w-12 h-12 bg-white dark:bg-slate-800 border rounded-2xl flex items-center justify-center font-bold shadow-sm ${order.status === OrderStatus.APPROVED ? 'text-emerald-600 border-emerald-200 dark:border-emerald-900' : 'text-blue-600 border-slate-200 dark:border-slate-700'}`}>
                   {order.id.split('-')[1] || order.id}
                 </div>
                 <div>
-                  <h5 className="font-bold text-slate-900 leading-tight">{order.customerName}</h5>
-                  <p className="text-xs text-slate-400 font-medium mt-1">{order.description} • Emissão: {new Date(order.createdAt).toLocaleDateString('pt-BR')}</p>
+                  <h5 className="font-bold text-slate-900 dark:text-white leading-tight">{order.customerName}</h5>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 font-medium mt-1">{order.description} • Emissão: {new Date(order.createdAt).toLocaleDateString('pt-BR')}</p>
                 </div>
               </div>
               <div className="flex items-center gap-8">
                 <div className="text-right">
-                  <p className="text-sm font-black text-slate-900">R$ {order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                  <p className="text-sm font-black text-slate-900 dark:text-white">R$ {order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                   <p className={`text-[10px] font-bold uppercase tracking-widest ${order.status === OrderStatus.APPROVED ? 'text-emerald-600' : 'text-blue-600'}`}>{order.status === OrderStatus.APPROVED ? 'Orçamento Aprovado' : 'Orçamento Pendente'}</p>
                 </div>
                 <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <p className="text-[10px] text-blue-600 font-bold">Gerencie na aba Orçamentos</p>
-                  <ChevronRight className="w-5 h-5 text-slate-300" />
+                  <p className="text-[10px] text-blue-600 dark:text-blue-400 font-bold">Gerencie na aba Orçamentos</p>
+                  <ChevronRight className="w-5 h-5 text-slate-300 dark:text-slate-600" />
                 </div>
               </div>
             </div>
