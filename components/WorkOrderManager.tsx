@@ -326,7 +326,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     </table>
                 </div>
 
-                <div class="mb-4 flex justify-end items-end gap-8 px-4 avoid-break">
+                <div class="mb-4 px-4 avoid-break" style="display: flex; flex-direction: row; justify-content: flex-end; gap: 40px; align-items: flex-end;">
                     <div style="text-align: right;">
                         <p style="font-size: 7px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px;">Subtotal</p>
                         <p style="font-size: 10px; font-weight: 800; color: #0f172a; margin: 0;">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
