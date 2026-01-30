@@ -214,24 +214,23 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             const diffColor = diff > 0 ? '#e11d48' : diff < 0 ? '#059669' : '#64748b';
 
             return `
-      <tr style="border-bottom: 1px solid #f1f5f9;">
-        <td style="padding: 12px 10px; text-align: left; vertical-align: top;">
-            <div style="font-weight: 700; text-transform: uppercase; font-size: 10px; color: #0f172a;">${item.description}</div>
-            <div style="font-size: 8px; color: #94a3b8; font-weight: 600;">${item.type || 'GERAL'}</div>
+        <td style="padding: 10px; text-align: left; vertical-align: top;">
+            <div style="font-weight: 800; text-transform: uppercase; font-size: 10.5px; color: #0f172a; line-height: 1.2;">${item.description}</div>
+            <div style="font-size: 8px; color: #94a3b8; font-weight: 700; margin-top: 2px; letter-spacing: 0.05em;">${item.type || 'GERAL'}</div>
         </td>
-        <td style="padding: 12px 0; text-align: center; vertical-align: top; color: #64748b; font-size: 9px; font-weight: 600; text-transform: uppercase;">${item.unit || 'UN'}</td>
-        <td style="padding: 12px 0; text-align: center; vertical-align: top;">
-            <div style="font-weight: 600; color: #64748b; font-size: 9px; margin-bottom: 2px;">Est: ${item.quantity}</div>
-            <div style="font-weight: 700; color: #0f172a; font-size: 10px;">Real: ${item.actualQuantity || 0}</div>
+        <td style="padding: 10px 0; text-align: center; vertical-align: top; color: #64748b; font-size: 9px; font-weight: 700; text-transform: uppercase;">${item.unit || 'UN'}</td>
+        <td style="padding: 10px 0; text-align: center; vertical-align: top;">
+            <div style="font-weight: 600; color: #64748b; font-size: 8.5px; margin-bottom: 2px;">EST: ${item.quantity}</div>
+            <div style="font-weight: 800; color: #0f172a; font-size: 10px;">REAL: ${item.actualQuantity || 0}</div>
         </td>
-        <td style="padding: 12px 0; text-align: right; vertical-align: top;">
-            <div style="color: #64748b; font-size: 9px; margin-bottom: 2px;">Est: R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-            <div style="color: #0f172a; font-size: 10px; font-weight: 800;">Real: R$ ${(item.actualUnitPrice || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+        <td style="padding: 10px 0; text-align: right; vertical-align: top;">
+            <div style="color: #64748b; font-size: 8.5px; margin-bottom: 2px; font-weight: 600;">EST: R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+            <div style="color: #0f172a; font-size: 10.5px; font-weight: 800;">REAL: R$ ${(item.actualUnitPrice || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
         </td>
-        <td style="padding: 12px 10px; text-align: right; vertical-align: top;">
-            <div style="font-weight: 600; font-size: 9px; color: #64748b; margin-bottom: 2px;">Est: R$ ${plannedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-            <div style="font-weight: 900; font-size: 11px; color: #0f172a;">Real: R$ ${actualTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-            ${diff !== 0 ? `<div style="font-size: 8px; font-weight: 800; color: ${diffColor}; margin-top: 2px;">${diff > 0 ? '+' : ''} R$ ${diff.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>` : ''}
+        <td style="padding: 10px; text-align: right; vertical-align: top;">
+            <div style="font-weight: 600; font-size: 8.5px; color: #64748b; margin-bottom: 2px;">EST: R$ ${plannedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+            <div style="font-weight: 900; font-size: 11.5px; color: #0f172a;">REAL: R$ ${actualTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+            ${diff !== 0 ? `<div style="font-size: 9px; font-weight: 900; color: ${diffColor}; margin-top: 3px; font-variant-numeric: tabular-nums;">${diff > 0 ? '+' : ''} R$ ${diff.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>` : ''}
         </td>
       </tr>`;
         }).join('');
@@ -330,11 +329,11 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                         <thead>
                             <tr style="border-bottom: 2px solid #0f172a;">
-                                <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 700; letter-spacing: 0.05em; width: 45%;">Descrição</th>
-                                <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 700; letter-spacing: 0.05em; width: 8%;">UN</th>
-                                <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 700; letter-spacing: 0.05em; width: 12%;">Qtd</th>
-                                <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 700; letter-spacing: 0.05em; width: 15%;">Unitário</th>
-                                <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 700; letter-spacing: 0.05em; width: 20%;">Total</th>
+                                <th style="padding-bottom: 12px; font-size: 9px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; letter-spacing: 0.1em; width: 38%;">Descrição</th>
+                                <th style="padding-bottom: 12px; font-size: 9px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800; letter-spacing: 0.1em; width: 7%;">UN</th>
+                                <th style="padding-bottom: 12px; font-size: 9px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800; letter-spacing: 0.1em; width: 15%;">Qtd</th>
+                                <th style="padding-bottom: 12px; font-size: 9px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; letter-spacing: 0.1em; width: 22%;">Unitário</th>
+                                <th style="padding-bottom: 12px; font-size: 9px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; letter-spacing: 0.1em; width: 18%;">Total</th>
                             </tr>
                         </thead>
                         <tbody>${itemsHtml}</tbody>
@@ -343,11 +342,19 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
                 <div class="avoid-break mt-12 bg-slate-900 text-white p-8 rounded-2xl flex justify-between items-center shadow-2xl relative overflow-hidden">
                    <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
-                   <div>
-                       <p class="text-[11px] font-black uppercase tracking-[0.3em] opacity-60 mb-1">${order.contractPrice && order.contractPrice > 0 ? 'Valor Total do Contrato' : 'Custo Total Estimado'}</p>
-                       <p class="text-xs font-bold text-blue-300 uppercase tracking-widest">${order.paymentTerms || 'Consulte condições'}</p>
+                   <div style="flex: 1; min-width: 0; padding-right: 20px;">
+                       <p style="font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.2em; opacity: 0.6; margin-bottom: 4px;">
+                           ${order.contractPrice && order.contractPrice > 0 ? 'Valor Total do Contrato' : 'Custo Total Estimado'}
+                       </p>
+                       <p style="font-size: 12px; font-weight: 700; color: #93c5fd; text-transform: uppercase; line-height: 1.4; margin: 0;">
+                           ${order.paymentTerms || 'Consulte condições'}
+                       </p>
                    </div>
-                   <p class="text-4xl font-black tracking-tighter">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                   <div style="text-align: right; flex-shrink: 0;">
+                       <p style="font-size: 36px; font-weight: 900; letter-spacing: -0.05em; line-height: 1; margin: 0;">
+                           R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                       </p>
+                   </div>
                </div>
                 <div class="avoid-break mt-auto pt-16">
                    <div class="grid grid-cols-2 gap-16 px-10">
@@ -721,18 +728,18 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         <div style="font-size: 9px; color: #94a3b8; font-weight: 600;">${item.type || 'GERAL'}</div>
                     </td>
                     <td style="padding: 12px 0; text-align: center; vertical-align: top; color: #64748b; font-size: 11px; font-weight: 600; text-transform: uppercase;">${item.unit || 'UN'}</td>
-                    <td style="padding: 12px 0; text-align: center; vertical-align: top;">
-                        <div style="font-weight: 600; color: #64748b; font-size: 10px; margin-bottom: 2px;">Est: ${item.quantity}</div>
-                        <div style="font-weight: 700; color: #0f172a; font-size: 11px;">Real: ${item.actualQuantity || 0}</div>
+                    <td style="padding: 10px 0; text-align: center; vertical-align: top;">
+                        <div style="font-weight: 600; color: #64748b; font-size: 9px; margin-bottom: 2px;">EST: ${item.quantity}</div>
+                        <div style="font-weight: 800; color: #0f172a; font-size: 10.5px;">REAL: ${item.actualQuantity || 0}</div>
                     </td>
-                    <td style="padding: 12px 0; text-align: right; vertical-align: top;">
-                        <div style="color: #64748b; font-size: 10px; margin-bottom: 2px;">Est: R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                        <div style="color: #0f172a; font-size: 11px; font-weight: 800;">Real: R$ ${(item.actualUnitPrice || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                    <td style="padding: 10px 0; text-align: right; vertical-align: top;">
+                        <div style="color: #64748b; font-size: 9px; margin-bottom: 2px; font-weight: 600;">EST: R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                        <div style="color: #0f172a; font-size: 11px; font-weight: 800;">REAL: R$ ${(item.actualUnitPrice || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
                     </td>
-                    <td style="padding: 12px 10px; text-align: right; vertical-align: top;">
-                        <div style="font-weight: 600; font-size: 10px; color: #64748b; margin-bottom: 2px;">Est: R$ ${plannedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                        <div style="font-weight: 900; font-size: 12px; color: #0f172a;">Real: R$ ${actualTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                        ${diff !== 0 ? `<div style="font-size: 9px; font-weight: 800; color: ${diffColor}; margin-top: 2px;">${diff > 0 ? '+' : ''} R$ ${diff.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>` : ''}
+                    <td style="padding: 10px; text-align: right; vertical-align: top;">
+                        <div style="font-weight: 600; font-size: 9px; color: #64748b; margin-bottom: 2px;">EST: R$ ${plannedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                        <div style="font-weight: 900; font-size: 12.5px; color: #0f172a;">REAL: R$ ${actualTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                        ${diff !== 0 ? `<div style="font-size: 10px; font-weight: 900; color: ${diffColor}; margin-top: 3px; font-variant-numeric: tabular-nums;">${diff > 0 ? '+' : ''} R$ ${diff.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>` : ''}
                     </td>
                 </tr>`;
         }).join('');
@@ -829,11 +836,11 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                        <thead>
                            <tr style="border-bottom: 2px solid #0f172a;">
-                               <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; width: 45%;">Descrição</th>
-                               <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800; width: 8%;">UN</th>
-                               <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800; width: 12%;">Qtd</th>
-                               <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 15%;">Unitário</th>
-                               <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 20%;">Total</th>
+                               <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; width: 38%;">Descrição</th>
+                               <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800; width: 7%;">UN</th>
+                               <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800; width: 15%;">Qtd</th>
+                               <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 22%;">Unitário</th>
+                               <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 18%;">Total</th>
                            </tr>
                        </thead>
                        <tbody>
