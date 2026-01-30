@@ -243,6 +243,11 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
                   required value={formData.category || ''} onChange={e => setFormData({ ...formData, category: e.target.value })} />
               </div>
               <div>
+                <label className="block text-xs font-bold text-slate-500 mb-1">Data</label>
+                <input type="date" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                  required value={formData.date} onChange={e => setFormData({ ...formData, date: e.target.value })} />
+              </div>
+              <div>
                 <label className="block text-xs font-bold text-slate-500 mb-1">Frequência</label>
                 <select className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500"
                   value={formData.frequency} onChange={e => setFormData({ ...formData, frequency: e.target.value as RecurrenceFrequency, isRecurring: e.target.value !== 'NONE' })}>
@@ -359,6 +364,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
           <div className="divide-y divide-slate-100">
             {transactions
               .filter(t => activeSubTab === 'geral' ? !t.isRecurring : t.isRecurring)
+              .sort((a, b) => b.date.localeCompare(a.date)) // Sort by date descending
               .map(t => (
                 <div key={t.id} className="flex items-center justify-between p-6 hover:bg-slate-50 transition-colors group">
                   <div className="flex items-center gap-4">
@@ -368,7 +374,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
                     <div>
                       <p className="text-sm font-black text-slate-900 leading-tight">{t.category}</p>
                       <div className="flex items-center gap-2 mt-1">
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{t.date}</p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{t.date.split('-').reverse().join('/')}</p>
                         {t.isRecurring && (
                           <span className="text-[8px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded-md font-black uppercase tracking-tighter">
                             Recorrente ({t.frequency})

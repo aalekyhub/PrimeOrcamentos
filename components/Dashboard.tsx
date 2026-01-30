@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { TrendingUp, DollarSign, FileText, Target, Users, Briefcase, Package } from 'lucide-react';
 import { ServiceOrder, Transaction, OrderStatus, UserAccount, CompanyProfile } from '../types';
@@ -25,10 +25,20 @@ const Dashboard: React.FC<DashboardProps> = ({ stats, orders, transactions, curr
   const safeOrders = Array.isArray(orders) ? orders : [];
   const safeTransactions = Array.isArray(transactions) ? transactions : [];
 
-  const chartData = safeTransactions.slice(-7).map(t => ({
-    name: t.date,
-    amount: t.type === 'RECEITA' ? t.amount : -t.amount
-  }));
+  const chartData = useMemo(() => {
+    const dailyData: { [key: string]: number } = {};
+    safeTransactions.forEach(t => {
+      dailyData[t.date] = (dailyData[t.date] || 0) + (t.type === 'RECEITA' ? t.amount : -t.amount);
+    });
+    return Object.entries(dailyData)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .slice(-7)
+      .map(([date, amount]) => ({
+        name: date.split('-').reverse().slice(0, 2).join('/'), // DD/MM
+        fullName: date,
+        amount
+      }));
+  }, [safeTransactions]);
 
   const orderStatusData = [
     { name: 'Orçamentos', value: safeOrders.filter(o => o.status === OrderStatus.PENDING).length },
