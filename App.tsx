@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import {
-  LayoutDashboard, FileText, Wallet, Target, Search, Menu,
+  LayoutDashboard, FileText, Wallet, Target, Search, Menu, X,
   Users, Briefcase, ClipboardList, Zap, Settings, Building2, Lock, LogOut, RefreshCw, Cloud, CloudOff, Database, HardHat
 } from 'lucide-react';
 import Dashboard from './components/Dashboard';
@@ -57,6 +57,7 @@ const INITIAL_COMPANY: CompanyProfile = {
 
 const AppContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [openTabs, setOpenTabs] = useState<string[]>(['dashboard']);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const { notify } = useNotify();
@@ -223,7 +224,13 @@ const AppContent: React.FC = () => {
             {navItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => { setActiveTab(item.id); setSidebarOpen(false); }}
+                onClick={() => {
+                  if (!openTabs.includes(item.id)) {
+                    setOpenTabs([...openTabs, item.id]);
+                  }
+                  setActiveTab(item.id);
+                  setSidebarOpen(false);
+                }}
                 className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${activeTab === item.id ? 'bg-blue-50 text-blue-600 font-bold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium'}`}
               >
                 <item.icon className={`w-5 h-5 ${activeTab === item.id ? 'text-blue-600' : 'text-slate-500'}`} />
@@ -285,24 +292,72 @@ const AppContent: React.FC = () => {
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-4 md:p-10 bg-slate-50 no-scrollbar">
-          <div className="max-w-[1400px] mx-auto">
-            {activeTab === 'dashboard' && <Dashboard stats={stats} orders={orders} transactions={transactions} currentUser={currentUser} company={company} onNavigate={setActiveTab} />}
-            {activeTab === 'customers' && <CustomerManager customers={customers} setCustomers={setCustomers} orders={orders} />}
-            {activeTab === 'catalog' && <ServiceCatalog services={catalog} setServices={setCatalog} company={company} />}
-            {activeTab === 'budgets' && <BudgetManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} />}
-            {activeTab === 'orders' && <ServiceOrderManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} />}
-            {activeTab === 'works' && <WorkOrderManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} transactions={transactions} setTransactions={setTransactions} />}
-            {activeTab === 'search' && <BudgetSearch orders={orders} setOrders={setOrders} customers={customers} company={company} catalogServices={catalog} setCatalogServices={setCatalog} />}
-            {activeTab === 'financials' && <FinancialControl transactions={transactions} setTransactions={setTransactions} loans={loans} setLoans={setLoans} currentUser={currentUser} />}
-            {activeTab === 'users' && <UserManager users={users} setUsers={setUsers} />}
-            {activeTab === 'audit' && <DataCleanup
-              customers={customers}
-              setCustomers={setCustomers}
-              services={catalog}
-              setServices={setCatalog}
-            />}
-            {activeTab === 'settings' && <CompanySettings company={company} setCompany={setCompany} />}
+        {/* Multi-Tab Bar */}
+        <div className="bg-white border-b border-slate-200 px-4 md:px-10 flex items-center gap-2 overflow-x-auto no-scrollbar shrink-0 h-12">
+          {openTabs.map(tabId => {
+            const item = navItems.find(n => n.id === tabId);
+            if (!item) return null;
+            const IsActive = activeTab === tabId;
+            return (
+              <div
+                key={tabId}
+                className={`flex items-center h-full min-w-[120px] max-w-[200px] border-b-2 transition-all cursor-pointer group ${IsActive ? 'border-blue-600 bg-blue-50/30' : 'border-transparent hover:bg-slate-50'}`}
+                onClick={() => setActiveTab(tabId)}
+              >
+                <div className="flex items-center gap-2 px-4 w-full">
+                  <item.icon className={`w-3.5 h-3.5 shrink-0 ${IsActive ? 'text-blue-600' : 'text-slate-400'}`} />
+                  <span className={`text-[11px] font-bold truncate ${IsActive ? 'text-blue-600' : 'text-slate-500'}`}>
+                    {item.label}
+                  </span>
+                  {tabId !== 'dashboard' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const newTabs = openTabs.filter(t => t !== tabId);
+                        setOpenTabs(newTabs);
+                        if (activeTab === tabId) {
+                          setActiveTab(newTabs[newTabs.length - 1] || 'dashboard');
+                        }
+                      }}
+                      className="ml-auto p-1 hover:bg-slate-200 rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-3 h-3 text-slate-400" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4 md:p-10 bg-slate-50 no-scrollbar relative">
+          <div className="max-w-[1400px] mx-auto h-full">
+            {/* Persistent Tab Container */}
+            {navItems.map(item => {
+              const isMounted = openTabs.includes(item.id);
+              if (!isMounted) return null;
+
+              const isVisible = activeTab === item.id;
+
+              return (
+                <div key={item.id} className={isVisible ? 'block h-full' : 'hidden'}>
+                  {item.id === 'dashboard' && <Dashboard stats={stats} orders={orders} transactions={transactions} currentUser={currentUser} company={company} onNavigate={(target) => {
+                    if (!openTabs.includes(target)) setOpenTabs([...openTabs, target]);
+                    setActiveTab(target);
+                  }} />}
+                  {item.id === 'customers' && <CustomerManager customers={customers} setCustomers={setCustomers} orders={orders} />}
+                  {item.id === 'catalog' && <ServiceCatalog services={catalog} setServices={setCatalog} company={company} />}
+                  {item.id === 'budgets' && <BudgetManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} />}
+                  {item.id === 'orders' && <ServiceOrderManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} />}
+                  {item.id === 'works' && <WorkOrderManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} transactions={transactions} setTransactions={setTransactions} />}
+                  {item.id === 'search' && <BudgetSearch orders={orders} setOrders={setOrders} customers={customers} company={company} catalogServices={catalog} setCatalogServices={setCatalog} />}
+                  {item.id === 'financials' && <FinancialControl transactions={transactions} setTransactions={setTransactions} loans={loans} setLoans={setLoans} currentUser={currentUser} />}
+                  {item.id === 'users' && <UserManager users={users} setUsers={setUsers} />}
+                  {item.id === 'audit' && <DataCleanup customers={customers} setCustomers={setCustomers} services={catalog} setServices={setCatalog} />}
+                  {item.id === 'settings' && <CompanySettings company={company} setCompany={setCompany} />}
+                </div>
+              );
+            })}
           </div>
         </div>
       </main>
