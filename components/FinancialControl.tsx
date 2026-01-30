@@ -435,17 +435,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
           ))}
           {loans.length === 0 && <p className="col-span-full text-center py-20 text-slate-400 font-bold italic">Nenhum empréstimo ou financiamento ativo.</p>}
         </div>
-      ) : (
-        <div className="py-20 text-center space-y-6 bg-slate-50/50 rounded-[3rem] border-2 border-dashed border-slate-200">
-          <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto shadow-sm border border-slate-100">
-            <Plus className="w-8 h-8 text-blue-500" />
-          </div>
-          <div className="space-y-1">
-            <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Pronto para lançar?</h3>
-            <p className="text-sm text-slate-500 max-w-xs mx-auto">Clique no botão "Novo Lançamento" acima para registrar dados nesta categoria.</p>
-          </div>
-        </div>
-      )}
+      ) : null}
     </div>
   );
 };
