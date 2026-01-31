@@ -142,6 +142,13 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
     const finalTotal = subTotalWithBDI + taxValue;
 
+    // Helper to format legacy plain text as HTML
+    const formatLegacyText = (text: string) => {
+      if (!text) return '';
+      if (/<[a-z][\s\S]*>/i.test(text)) return text;
+      return text.replace(/\n/g, '<br/>');
+    };
+
     const itemFontBase = company.itemsFontSize || 12;
     const itemsHtml = budget.items.map((item: ServiceItem) => `
       <tr style="border-bottom: 1px solid #f1f5f9;">
@@ -184,11 +191,15 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
              .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; }
              
              /* Styles for Rich Text (Quill) */
-             .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
-             .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
-             .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
-             .ql-editor-print strong { font-weight: bold !important; }
+             .ql-editor-print p { margin-bottom: 8px !important; }
+             .ql-editor-print ul { list-style-type: disc !important; padding-left: 25px !important; margin: 12px 0 !important; }
+             .ql-editor-print ol { list-style-type: decimal !important; padding-left: 25px !important; margin: 12px 0 !important; }
+             .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; list-style-position: outside !important; }
+             .ql-editor-print strong { font-weight: 800 !important; color: #0f172a !important; }
              .ql-editor-print em { font-style: italic !important; }
+             .ql-editor-print h1 { font-size: 2em !important; font-weight: 800 !important; margin: 16px 0 8px 0 !important; }
+             .ql-editor-print h2 { font-size: 1.5em !important; font-weight: 800 !important; margin: 14px 0 6px 0 !important; }
+             .ql-editor-print h3 { font-size: 1.17em !important; font-weight: 800 !important; margin: 12px 0 4px 0 !important; }
              .ql-editor-print .ql-align-center { text-align: center !important; }
              .ql-editor-print .ql-align-right { text-align: right !important; }
              .ql-editor-print .ql-align-justify { text-align: justify !important; }
@@ -243,7 +254,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                    <div class="space-y-4">
                         ${budget.descriptionBlocks.map(block => {
       if (block.type === 'text') {
-        return `<div style="font-size: ${company.descriptionFontSize || 14}px;" class="text-slate-700 leading-relaxed text-justify font-medium mb-4 ql-editor-print">${block.content}</div>`;
+        return `<div style="font-size: ${company.descriptionFontSize || 14}px;" class="text-slate-700 leading-relaxed text-justify font-medium mb-4 ql-editor-print">${formatLegacyText(block.content)}</div>`;
       } else if (block.type === 'image') {
         return `<div style="break-inside: avoid; page-break-inside: avoid; margin: 15px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; object-fit: contain;"></div>`;
       } else if (block.type === 'page-break') {

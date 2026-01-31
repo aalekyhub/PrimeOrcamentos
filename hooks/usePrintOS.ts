@@ -20,6 +20,12 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
 
         const itemFontBase = company.itemsFontSize || 12;
 
+        const formatLegacyText = (text: string) => {
+            if (!text) return '';
+            if (/<[a-z][\s\S]*>/i.test(text)) return text;
+            return text.replace(/\n/g, '<br/>');
+        };
+
         const itemsHtml = order.items.map((item) => {
             const total = item.quantity * item.unitPrice;
             return `
@@ -62,11 +68,15 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
              .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; } 
              
              /* Styles for Rich Text (Quill) */
-             .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
-             .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
-             .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
-             .ql-editor-print strong { font-weight: bold !important; }
+             .ql-editor-print p { margin-bottom: 8px !important; }
+             .ql-editor-print ul { list-style-type: disc !important; padding-left: 25px !important; margin: 12px 0 !important; }
+             .ql-editor-print ol { list-style-type: decimal !important; padding-left: 25px !important; margin: 12px 0 !important; }
+             .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; list-style-position: outside !important; }
+             .ql-editor-print strong { font-weight: 800 !important; color: #0f172a !important; }
              .ql-editor-print em { font-style: italic !important; }
+             .ql-editor-print h1 { font-size: 2em !important; font-weight: 800 !important; margin: 16px 0 8px 0 !important; }
+             .ql-editor-print h2 { font-size: 1.5em !important; font-weight: 800 !important; margin: 14px 0 6px 0 !important; }
+             .ql-editor-print h3 { font-size: 1.17em !important; font-weight: 800 !important; margin: 12px 0 4px 0 !important; }
              .ql-editor-print .ql-align-center { text-align: center !important; }
              .ql-editor-print .ql-align-right { text-align: right !important; }
              .ql-editor-print .ql-align-justify { text-align: justify !important; }
