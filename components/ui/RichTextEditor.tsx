@@ -41,7 +41,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeh
   ];
 
   return (
-    <div className="rich-text-editor bg-white dark:bg-slate-800 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+    <div className="rich-text-editor bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
       <style>{`
         .ql-toolbar.ql-snow {
           border: none !important;
@@ -50,10 +50,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeh
           position: sticky !important;
           top: 0;
           z-index: 50;
+          border-top-left-radius: 12px;
+          border-top-right-radius: 12px;
+          box-shadow: 0 2px 4px -1px rgba(0,0,0,0.05);
         }
         .dark .ql-toolbar.ql-snow {
           background: #1e293b !important;
           border-bottom: 1px solid #334155 !important;
+          box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2);
         }
         .dark .ql-toolbar.ql-snow .ql-stroke {
           stroke: #94a3b8 !important;
