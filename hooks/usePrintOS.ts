@@ -60,6 +60,10 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
              .no-print { display: none !important; } 
              .print-footer { display: none !important; } 
              .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; } 
+             .ql-editor-print ul { list-style-type: disc !important; padding-left: 20px !important; margin: 10px 0 !important; }
+             .ql-editor-print ol { list-style-type: decimal !important; padding-left: 20px !important; margin: 10px 0 !important; }
+             .ql-editor-print strong { font-weight: bold !important; }
+             .ql-editor-print em { font-style: italic !important; }
            }
         </style>
       </head>
@@ -105,7 +109,7 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
                    <div class="space-y-4">
                        ${order.descriptionBlocks.map(block => {
             if (block.type === 'text') {
-                return `<p class="text-slate-800 leading-relaxed text-justify font-medium whitespace-pre-wrap text-[${company.descriptionFontSize || 14}px] mb-4">${block.content}</p>`;
+                return `<div class="text-slate-800 leading-relaxed text-justify font-medium ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px; margin-bottom: 16px;">${block.content}</div>`;
             } else if (block.type === 'image') {
                 return `<div style="break-inside: avoid; page-break-inside: avoid; margin: 15px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; object-fit: contain;"></div>`;
             } else if (block.type === 'page-break') {

@@ -6,6 +6,7 @@ import {
   UserPlus, Package, Type, Image as ImageIcon,
   FileText, Upload, CheckCircle, Zap, FileDown
 } from 'lucide-react';
+import RichTextEditor from './ui/RichTextEditor';
 import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock } from '../types';
 import { useNotify } from './ToastProvider';
 import CustomerManager from './CustomerManager';
@@ -232,7 +233,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                    <div class="space-y-4">
                         ${budget.descriptionBlocks.map(block => {
       if (block.type === 'text') {
-        return `<p style="font-size: ${company.descriptionFontSize || 14}px;" class="text-slate-700 leading-relaxed text-justify font-medium whitespace-pre-wrap mb-4">${block.content}</p>`;
+        return `<div style="font-size: ${company.descriptionFontSize || 14}px;" class="text-slate-700 leading-relaxed text-justify font-medium mb-4 ql-editor-print">${block.content}</div>`;
       } else if (block.type === 'image') {
         return `<div style="break-inside: avoid; page-break-inside: avoid; margin: 15px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; object-fit: contain;"></div>`;
       } else if (block.type === 'page-break') {
@@ -603,9 +604,16 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                   <div className="space-y-3">
                     {descriptionBlocks.map((block) => (
                       <div key={block.id} className="relative group">
-                        {block.type === 'text' ? (
-                          <textarea className="w-full bg-slate-50 border border-slate-100 rounded-xl p-4 text-[11px] font-medium outline-none h-24 focus:ring-2 focus:ring-blue-500 shadow-inner" value={block.content} onChange={e => updateBlockContent(block.id, e.target.value)} placeholder="Detalhes técnicos..." />
-                        ) : block.type === 'image' ? (
+                        {block.type === 'text' && (
+                          <div className="flex-1">
+                            <RichTextEditor
+                              value={block.content}
+                              onChange={(content) => updateBlockContent(block.id, content)}
+                              placeholder="Descreva aqui os detalhes técnicos do serviço..."
+                            />
+                          </div>
+                        )}
+                        {block.type === 'image' ? (
                           <div className="w-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center gap-2">
                             {block.content ? (
                               <div className="relative max-w-[200px]"><img src={block.content} className="w-full h-auto rounded-lg shadow-lg" /><button onClick={() => updateBlockContent(block.id, '')} className="absolute -top-2 -right-2 bg-rose-500 text-white p-1.5 rounded-full"><Trash2 className="w-3 h-3" /></button></div>

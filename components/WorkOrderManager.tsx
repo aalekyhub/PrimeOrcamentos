@@ -16,6 +16,7 @@ import { compressImage } from '../services/imageUtils';
 import { usePrintOS } from '../hooks/usePrintOS';
 import { financeUtils } from '../services/financeUtils';
 import InfoCard from './ui/InfoCard';
+import RichTextEditor from './ui/RichTextEditor';
 
 interface Props {
     orders: ServiceOrder[];
@@ -850,7 +851,14 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                         </div>
 
                                         <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                                            <div><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Observações Técnicas e Escopo Detalhado</label><textarea className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-700 outline-none h-24 focus:ring-2 focus:ring-blue-500 shadow-inner" placeholder="Descreva os serviços a serem executados por extenso..." value={diagnosis} onChange={e => setDiagnosis(e.target.value)} /></div>
+                                            <div>
+                                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Observações Técnicas e Escopo Detalhado</label>
+                                                <RichTextEditor
+                                                    value={diagnosis}
+                                                    onChange={setDiagnosis}
+                                                    placeholder="Descreva os serviços a serem executados por extenso..."
+                                                />
+                                            </div>
                                         </div>
 
                                         <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
@@ -866,7 +874,13 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                 {descriptionBlocks.map((block) => (
                                                     <div key={block.id} className="relative group">
                                                         {block.type === 'text' ? (
-                                                            <textarea className="w-full bg-slate-50 border border-slate-100 rounded-xl p-4 text-[11px] font-medium outline-none h-24 focus:ring-2 focus:ring-blue-500 shadow-inner" value={block.content} onChange={e => updateBlockContent(block.id, e.target.value)} placeholder="Detalhes da foto ou texto..." />
+                                                            <div className="flex-1">
+                                                                <RichTextEditor
+                                                                    value={block.content}
+                                                                    onChange={(content) => updateBlockContent(block.id, content)}
+                                                                    placeholder="Detalhes da foto ou texto..."
+                                                                />
+                                                            </div>
                                                         ) : block.type === 'image' ? (
                                                             <div className="w-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center gap-2">
                                                                 {block.content ? (
