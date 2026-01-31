@@ -4,33 +4,45 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
 interface RichTextEditorProps {
-    value: string;
-    onChange: (content: string) => void;
-    placeholder?: string;
+  value: string;
+  onChange: (content: string) => void;
+  placeholder?: string;
 }
 
 const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeholder }) => {
-    const modules = {
-        toolbar: [
-            [{ 'header': [1, 2, 3, false] }],
-            ['bold', 'italic', 'underline', 'strike'],
-            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-            [{ 'align': [] }],
-            ['clean']
-        ],
-    };
+  // Detect if value is legacy plain text (contains \n but not HTML tags)
+  const processedValue = React.useMemo(() => {
+    if (!value) return '';
+    // If it contains HTML tags, assume it's already Rich Text
+    if (/<[a-z][\s\S]*>/i.test(value)) return value;
+    // If it has newlines but no tags, convert to paragraphs
+    if (value.includes('\n')) {
+      return value.split('\n').map(line => `<p>${line}</p>`).join('');
+    }
+    return value;
+  }, [value]);
 
-    const formats = [
-        'header',
-        'bold', 'italic', 'underline', 'strike',
-        'list', 'bullet',
-        'align',
-        'clean'
-    ];
+  const modules = {
+    toolbar: [
+      [{ 'header': [1, 2, 3, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+      [{ 'align': [] }],
+      ['clean']
+    ],
+  };
 
-    return (
-        <div className="rich-text-editor bg-white dark:bg-slate-800 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
-            <style>{`
+  const formats = [
+    'header',
+    'bold', 'italic', 'underline', 'strike',
+    'list', 'bullet',
+    'align',
+    'clean'
+  ];
+
+  return (
+    <div className="rich-text-editor bg-white dark:bg-slate-800 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+      <style>{`
         .ql-toolbar.ql-snow {
           border: none !important;
           border-bottom: 1px solid #e2e8f0 !important;
@@ -63,16 +75,16 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeh
           font-style: normal;
         }
       `}</style>
-            <ReactQuill
-                theme="snow"
-                value={value}
-                onChange={onChange}
-                modules={modules}
-                formats={formats}
-                placeholder={placeholder}
-            />
-        </div>
-    );
+      <ReactQuill
+        theme="snow"
+        value={processedValue}
+        onChange={onChange}
+        modules={modules}
+        formats={formats}
+        placeholder={placeholder}
+      />
+    </div>
+  );
 };
 
 export default RichTextEditor;
