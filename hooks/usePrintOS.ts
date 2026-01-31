@@ -60,10 +60,16 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
              .no-print { display: none !important; } 
              .print-footer { display: none !important; } 
              .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; } 
-             .ql-editor-print ul { list-style-type: disc !important; padding-left: 20px !important; margin: 10px 0 !important; }
-             .ql-editor-print ol { list-style-type: decimal !important; padding-left: 20px !important; margin: 10px 0 !important; }
+             
+             /* Styles for Rich Text (Quill) */
+             .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
+             .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
+             .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
              .ql-editor-print strong { font-weight: bold !important; }
              .ql-editor-print em { font-style: italic !important; }
+             .ql-editor-print .ql-align-center { text-align: center !important; }
+             .ql-editor-print .ql-align-right { text-align: right !important; }
+             .ql-editor-print .ql-align-justify { text-align: justify !important; }
            }
         </style>
       </head>

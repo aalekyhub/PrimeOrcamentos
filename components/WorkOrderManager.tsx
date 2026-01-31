@@ -360,6 +360,16 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         .avoid-break { break-inside: avoid; page-break-inside: avoid; }
                         @media screen {body {background: #f1f5f9; padding: 40px 0; } .a4-container {width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; } }
                         @media print {body {background: white !important; margin: 0 !important; } .a4-container {box - shadow: none !important; border: none !important; min-height: auto; position: relative; } .no-print {display: none !important; } * {box - shadow: none !important; } .print-footer {display: none !important; } .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; } }
+                        
+                        /* Styles for Rich Text (Quill) */
+                        .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
+                        .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
+                        .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
+                        .ql-editor-print strong { font-weight: bold !important; }
+                        .ql-editor-print em { font-style: italic !important; }
+                        .ql-editor-print .ql-align-center { text-align: center !important; }
+                        .ql-editor-print .ql-align-right { text-align: right !important; }
+                        .ql-editor-print .ql-align-justify { text-align: justify !important; }
                     </style>
             </head>
             <body class="no-scrollbar">
@@ -576,6 +586,16 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         .no-print {display: none !important; }
                         .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; } 
            }
+           
+                        /* Styles for Rich Text (Quill) */
+                        .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
+                        .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
+                        .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
+                        .ql-editor-print strong { font-weight: bold !important; }
+                        .ql-editor-print em { font-style: italic !important; }
+                        .ql-editor-print .ql-align-center { text-align: center !important; }
+                        .ql-editor-print .ql-align-right { text-align: right !important; }
+                        .ql-editor-print .ql-align-justify { text-align: justify !important; }
                     </style>
             </head>
             <body>
@@ -684,7 +704,9 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                <div class="mt-8">
                    <div class="space-y-4">
                        ${order.descriptionBlocks.map(block => {
-            if (block.type === 'image') {
+            if (block.type === 'text') {
+                return `<div class="text-slate-800 leading-relaxed text-justify font-medium ql-editor-print" style="font-size: 13px; margin-bottom: 16px;">${block.content}</div>`;
+            } else if (block.type === 'image') {
                 return `<div class="avoid-break" style="margin: 10px 0;"><img src="${block.content}" style="width: 100%; max-height: 180mm; border-radius: 8px; border: 1px solid #f1f5f9; object-fit: contain;"></div>`;
             } else if (block.type === 'page-break') {
                 return `<div style="page-break-after: always; height: 0;"></div>`;

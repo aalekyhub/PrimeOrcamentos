@@ -182,6 +182,16 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
              .no-print { display: none !important; }
              .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: #475569; text-transform: uppercase; }
              .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; }
+             
+             /* Styles for Rich Text (Quill) */
+             .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
+             .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
+             .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
+             .ql-editor-print strong { font-weight: bold !important; }
+             .ql-editor-print em { font-style: italic !important; }
+             .ql-editor-print .ql-align-center { text-align: center !important; }
+             .ql-editor-print .ql-align-right { text-align: right !important; }
+             .ql-editor-print .ql-align-justify { text-align: justify !important; }
            }
         </style>
       </head>
