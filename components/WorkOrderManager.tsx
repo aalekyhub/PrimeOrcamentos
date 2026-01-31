@@ -1,4 +1,4 @@
-﻿
+
 // @ts-ignore
 import html2pdf from 'html2pdf.js';
 import React, { useState, useMemo, useRef, useEffect } from 'react';
@@ -243,7 +243,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                             <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 1ª – DO OBJETO</h4>
                             <p class="text-[14px] text-slate-600 leading-relaxed text-justify">1.1. O presente contrato tem por objeto a execução de reforma em unidade residencial, situada no endereço do CONTRATANTE, compreendendo os serviços descritos abaixo, os quais serão executados por empreitada global, com responsabilidade técnica, administrativa e operacional integral da CONTRATADA.</p>
                             <div class="bg-blue-50/50 p-4 rounded-xl border-l-4 border-blue-500 mt-4">
-                                <p class="text-[14px] font-bold text-blue-900 uppercase tracking-wide">${order.description}</p>
+                                <p class="text-[14px] font-bold text-blue-900 uppercase tracking-wide ql-editor-print">${formatLegacyText(order.description)}</p>
                             </div>
                             <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-4">1.2. A execução dos serviços será realizada por obra certa, com preço previamente ajustado, não se caracterizando, em hipótese alguma, cessão ou locação de mão de obra.</p>
                         </div>
@@ -258,7 +258,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
                             <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 3ª – DO PREÇO E DA FORMA DE PAGAMENTO</h4>
                             <p class="text-[14px] text-slate-600 leading-relaxed text-justify">3.1. Pelos serviços objeto deste contrato, o CONTRATANTE pagará à CONTRATADA o valor global de <b class="text-slate-900">R$ ${order.contractPrice && order.contractPrice > 0 ? order.contractPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>.</p>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">3.2. O pagamento será efetuado da seguinte forma: <b>${order.paymentTerms || 'Conforme combinado'}</b>.</p>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">3.2. O pagamento será efetuado da seguinte forma: <b>${formatLegacyText(order.paymentTerms || 'Conforme combinado')}</b>.</p>
                             <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">3.3. O valor contratado corresponde ao preço fechado da obra, não estando vinculado a horas trabalhadas, número de funcionários ou fornecimento de mão de obra.</p>
                         </div>
 
@@ -343,6 +343,13 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
     const handlePrintContract = (order: ServiceOrder) => {
         const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', address: 'Endereço não informado', city: '', state: '', cep: '' };
+
+        const formatLegacyText = (text: string) => {
+            if (!text) return '';
+            if (/<[a-z][\s\S]*>/i.test(text)) return text;
+            return text.replace(/\n/g, '<br/>');
+        };
+
         const printWindow = window.open('', '_blank');
         if (!printWindow) return;
 
@@ -361,15 +368,19 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         @media screen {body {background: #f1f5f9; padding: 40px 0; } .a4-container {width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; } }
                         @media print {body {background: white !important; margin: 0 !important; } .a4-container {box - shadow: none !important; border: none !important; min-height: auto; position: relative; } .no-print {display: none !important; } * {box - shadow: none !important; } .print-footer {display: none !important; } .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; } }
                         
-                        /* Styles for Rich Text (Quill) */
-                        .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
-                        .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
-                        .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
-                        .ql-editor-print strong { font-weight: bold !important; }
-                        .ql-editor-print em { font-style: italic !important; }
-                        .ql-editor-print .ql-align-center { text-align: center !important; }
-                        .ql-editor-print .ql-align-right { text-align: right !important; }
-                        .ql-editor-print .ql-align-justify { text-align: justify !important; }
+                                                 /* Styles for Rich Text (Quill) */
+                         .ql-editor-print p { margin-bottom: 8px !important; }
+                         .ql-editor-print ul { list-style-type: disc !important; padding-left: 25px !important; margin: 12px 0 !important; }
+                         .ql-editor-print ol { list-style-type: decimal !important; padding-left: 25px !important; margin: 12px 0 !important; }
+                         .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; list-style-position: outside !important; }
+                         .ql-editor-print strong { font-weight: 800 !important; color: #0f172a !important; }
+                         .ql-editor-print em { font-style: italic !important; }
+                         .ql-editor-print h1 { font-size: 2em !important; font-weight: 800 !important; margin: 16px 0 8px 0 !important; }
+                         .ql-editor-print h2 { font-size: 1.5em !important; font-weight: 800 !important; margin: 14px 0 6px 0 !important; }
+                         .ql-editor-print h3 { font-size: 1.17em !important; font-weight: 800 !important; margin: 12px 0 4px 0 !important; }
+                         .ql-editor-print .ql-align-center { text-align: center !important; }
+                         .ql-editor-print .ql-align-right { text-align: right !important; }
+                         .ql-editor-print .ql-align-justify { text-align: justify !important; }
                     </style>
             </head>
             <body class="no-scrollbar">
@@ -408,7 +419,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                 <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 1ª – DO OBJETO</h4>
                                 <p class="text-[14px] text-slate-600 leading-relaxed text-justify">1.1. O presente contrato tem por objeto a execução de reforma em unidade residencial, situada no endereço do CONTRATANTE, compreendendo os serviços descritos abaixo, os quais serão executados por empreitada global, com responsabilidade técnica, administrativa e operacional integral da CONTRATADA.</p>
                                 <div class="bg-blue-50/50 p-4 rounded-xl border-l-4 border-blue-500 mt-4">
-                                    <p class="text-[14px] font-bold text-blue-900 uppercase tracking-wide">${order.description}</p>
+                                    <p class="text-[14px] font-bold text-blue-900 uppercase tracking-wide ql-editor-print">${formatLegacyText(order.description)}</p>
                                 </div>
                                 <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-4">1.2. A execução dos serviços será realizada por obra certa, com preço previamente ajustado, não se caracterizando, em hipótese alguma, cessão ou locação de mão de obra.</p>
                             </div>
@@ -423,7 +434,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                             <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
                                 <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 3ª – DO PREÇO E DA FORMA DE PAGAMENTO</h4>
                                 <p class="text-[14px] text-slate-600 leading-relaxed text-justify">3.1. Pelos serviços objeto deste contrato, o CONTRATANTE pagará à CONTRATADA o valor global de <b class="text-slate-900">R$ ${order.contractPrice && order.contractPrice > 0 ? order.contractPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>.</p>
-                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">3.2. O pagamento será efetuado da seguinte forma: <b>${order.paymentTerms || 'Conforme combinado'}</b>.</p>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">3.2. O pagamento será efetuado da seguinte forma: <b>${formatLegacyText(order.paymentTerms || 'Conforme combinado')}</b>.</p>
                                 <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">3.3. O valor contratado corresponde ao preço fechado da obra, não estando vinculado a horas trabalhadas, número de funcionários ou fornecimento de mão de obra.</p>
                             </div>
 
@@ -496,6 +507,12 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         const printWindow = window.open('', '_blank');
         if (!printWindow) return;
         const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', city: '', state: '' };
+
+        const formatLegacyText = (text: string) => {
+            if (!text) return '';
+            if (/<[a-z][\s\S]*>/i.test(text)) return text;
+            return text.replace(/\n/g, '<br/>');
+        };
 
         const formatDate = (dateStr: string) => {
             try { const d = new Date(dateStr); return isNaN(d.getTime()) ? new Date().toLocaleDateString('pt-BR') : d.toLocaleDateString('pt-BR'); }
@@ -587,15 +604,19 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; } 
            }
            
-                        /* Styles for Rich Text (Quill) */
-                        .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
-                        .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
-                        .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
-                        .ql-editor-print strong { font-weight: bold !important; }
-                        .ql-editor-print em { font-style: italic !important; }
-                        .ql-editor-print .ql-align-center { text-align: center !important; }
-                        .ql-editor-print .ql-align-right { text-align: right !important; }
-                        .ql-editor-print .ql-align-justify { text-align: justify !important; }
+                                                 /* Styles for Rich Text (Quill) */
+                         .ql-editor-print p { margin-bottom: 8px !important; }
+                         .ql-editor-print ul { list-style-type: disc !important; padding-left: 25px !important; margin: 12px 0 !important; }
+                         .ql-editor-print ol { list-style-type: decimal !important; padding-left: 25px !important; margin: 12px 0 !important; }
+                         .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; list-style-position: outside !important; }
+                         .ql-editor-print strong { font-weight: 800 !important; color: #0f172a !important; }
+                         .ql-editor-print em { font-style: italic !important; }
+                         .ql-editor-print h1 { font-size: 2em !important; font-weight: 800 !important; margin: 16px 0 8px 0 !important; }
+                         .ql-editor-print h2 { font-size: 1.5em !important; font-weight: 800 !important; margin: 14px 0 6px 0 !important; }
+                         .ql-editor-print h3 { font-size: 1.17em !important; font-weight: 800 !important; margin: 12px 0 4px 0 !important; }
+                         .ql-editor-print .ql-align-center { text-align: center !important; }
+                         .ql-editor-print .ql-align-right { text-align: right !important; }
+                         .ql-editor-print .ql-align-justify { text-align: justify !important; }
                     </style>
             </head>
             <body>
@@ -629,7 +650,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                 </div>
                                 <div class="info-box">
                                     <span class="info-label">Identificação da Obra</span>
-                                    <div class="info-value">${order.description}</div>
+                                    <div class="info-value">${formatLegacyText(order.description)}</div>
                                     <div class="text-[11px] text-slate-400 font-bold mt-1.5 uppercase">Início: ${formatDate(order.createdAt)} | Entrega: ${order.dueDate ? formatDate(order.dueDate) : 'A COMBINAR'}</div>
                                 </div>
                             </div>
@@ -705,9 +726,9 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                    <div class="space-y-4">
                        ${order.descriptionBlocks.map(block => {
             if (block.type === 'text') {
-                return `<div class="text-slate-800 leading-relaxed text-justify font-medium ql-editor-print" style="font-size: 13px; margin-bottom: 16px;">${block.content}</div>`;
+                return `<div class="text-slate-800 leading-relaxed text-justify font-medium ql-editor-print" style="font-size: 13px; margin-bottom: 16px;">${formatLegacyText(block.content)}</div>`;
             } else if (block.type === 'image') {
-                return `<div class="avoid-break" style="margin: 10px 0;"><img src="${block.content}" style="width: 100%; max-height: 180mm; border-radius: 8px; border: 1px solid #f1f5f9; object-fit: contain;"></div>`;
+                return `<div class="avoid-break" style="margin: 10px 0;"><img src="${formatLegacyText(block.content)}" style="width: 100%; max-height: 180mm; border-radius: 8px; border: 1px solid #f1f5f9; object-fit: contain;"></div>`;
             } else if (block.type === 'page-break') {
                 return `<div style="page-break-after: always; height: 0;"></div>`;
             }

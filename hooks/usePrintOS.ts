@@ -125,7 +125,7 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
                    <div class="space-y-4">
                        ${order.descriptionBlocks.map(block => {
             if (block.type === 'text') {
-                return `<div class="text-slate-800 leading-relaxed text-justify font-medium ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px; margin-bottom: 16px;">${block.content}</div>`;
+                return `<div class="text-slate-800 leading-relaxed text-justify font-medium ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px; margin-bottom: 16px;">${formatLegacyText(block.content)}</div>`;
             } else if (block.type === 'image') {
                 return `<div style="break-inside: avoid; page-break-inside: avoid; margin: 15px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; object-fit: contain;"></div>`;
             } else if (block.type === 'page-break') {

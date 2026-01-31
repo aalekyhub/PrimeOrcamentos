@@ -47,6 +47,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeh
           border: none !important;
           border-bottom: 1px solid #e2e8f0 !important;
           background: #f8fafc !important;
+          position: sticky !important;
+          top: 0;
+          z-index: 50;
         }
         .dark .ql-toolbar.ql-snow {
           background: #1e293b !important;
