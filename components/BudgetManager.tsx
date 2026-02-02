@@ -164,7 +164,8 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
            body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
            @page { size: A4; margin: 0 !important; }
            .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
-           .avoid-break { break-inside: avoid; page-break-inside: avoid; }
+            .avoid-break { break-inside: avoid; page-break-inside: avoid; }
+            .break-after-avoid { break-after: avoid !important; page-break-after: avoid !important; }
            
            /* Premium Box Styles */
            .info-box { background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
@@ -191,8 +192,15 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
              .ql-editor-print em { font-style: italic !important; }
              .ql-editor-print .ql-align-center { text-align: center !important; }
              .ql-editor-print .ql-align-right { text-align: right !important; }
-             .ql-editor-print .ql-align-justify { text-align: justify !important; }
-           }
+              .ql-editor-print .ql-align-justify { text-align: justify !important; }
+              
+              /* Prevent widowed headings */
+              .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4, .ql-editor-print h5, .ql-editor-print h6 { 
+                break-after: avoid-page !important; 
+                page-break-after: avoid !important; 
+              }
+              .ql-editor-print p { orphans: 3; widows: 3; }
+            }
         </style>
       </head>
       <body class="no-scrollbar">

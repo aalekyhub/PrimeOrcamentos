@@ -179,6 +179,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
            @page { size: A4; margin: 0 !important; }
            .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
            .avoid-break { break-inside: avoid; page-break-inside: avoid; }
+           .break-after-avoid { break-after: avoid !important; page-break-after: avoid !important; }
            
            /* Premium Box Styles */
            .info-box { background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
@@ -195,7 +196,15 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
              .no-screen { display: block !important; }
              .no-print { display: none !important; }
              .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: #94a3b8; text-transform: uppercase; }
+             .ql-editor-print .ql-align-justify { text-align: justify !important; }
              .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; }
+
+             /* Prevent widowed headings */
+             .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4, .ql-editor-print h5, .ql-editor-print h6 { 
+               break-after: avoid-page !important; 
+               page-break-after: avoid !important; 
+             }
+             .ql-editor-print p { orphans: 3; widows: 3; }
            }
         </style>
       </head>
