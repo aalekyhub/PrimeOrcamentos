@@ -178,23 +178,9 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
            body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
            @page { size: A4; margin: 0 !important; }
            .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
-           .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
-           
-           /* Global Protection Classes (Visible to PDF Engine) */
-           .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; }
-           .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; }
+           .avoid-break { break-inside: avoid; page-break-inside: avoid; }
            .break-after-avoid { break-after: avoid !important; page-break-after: avoid !important; }
-           .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: white !important; text-transform: uppercase; visibility: visible; }
-           
-           /* Styles for Rich Text (Quill) - Global for PDF */
-           .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
-           .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
-           .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
-           .ql-editor-print strong { font-weight: bold !important; }
-           .ql-editor-print em { font-style: italic !important; }
-           .ql-editor-print .ql-align-center { text-align: center !important; }
-           .ql-editor-print .ql-align-right { text-align: right !important; }
-           .ql-editor-print .ql-align-justify { text-align: justify !important; }
+           .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; }
            
            /* Premium Box Styles */
            .info-box { background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
@@ -210,7 +196,16 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
              .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; width: 100% !important; padding-left: 20mm !important; padding-right: 20mm !important; } 
              .no-screen { display: block !important; }
              .no-print { display: none !important; }
-             .avoid-break { display: table !important; width: 100% !important; }
+             .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: white !important; text-transform: uppercase; }
+             .ql-editor-print .ql-align-justify { text-align: justify !important; }
+             .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; }
+
+             /* Prevent widowed headings */
+             .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4, .ql-editor-print h5, .ql-editor-print h6 { 
+               break-after: avoid-page !important; 
+               page-break-after: avoid !important; 
+             }
+             .ql-editor-print p { orphans: 3; widows: 3; }
            }
         </style>
       </head>
