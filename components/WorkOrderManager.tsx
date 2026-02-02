@@ -338,31 +338,43 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         document.body.appendChild(worker);
 
         // Apply optimizations manually (scripts in innerHTML don't run)
-        const containers = worker.querySelectorAll('.a4-container');
-        containers.forEach(container => {
-            const potentialTitles = Array.from(container.children).filter(el => {
-                if (el.matches('h1, h2, h3, h4, h5, h6, .section-title')) return true;
-                if (el.tagName === 'P') {
-                    const text = (el as HTMLElement).innerText.trim();
-                    if (text.length === 0 || text.length > 150) return false;
-                    const isNumbered = /^\d+[\.\)]/.test(text);
-                    const hasBold = el.querySelector('strong, b');
-                    return isNumbered && hasBold;
+        // Apply optimizations manually
+        const root = worker.querySelector('.print-description-content .space-y-6');
+        if (root) {
+            const allNodes: any[] = [];
+            Array.from(root.children).forEach(block => {
+                if (block.classList.contains('ql-editor-print')) {
+                    allNodes.push(...Array.from(block.children));
+                } else {
+                    allNodes.push(block);
                 }
-                return false;
             });
 
-            potentialTitles.forEach(title => {
-                const next = title.nextElementSibling;
-                if (next && !next.matches('h1, h2, h3, h4, h5, h6, .section-title')) {
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'keep-together';
-                    title.parentNode?.insertBefore(wrapper, title);
-                    wrapper.appendChild(title);
-                    wrapper.appendChild(next);
+            for (let i = 0; i < allNodes.length - 1; i++) {
+                const el = allNodes[i] as HTMLElement;
+                let isTitle = false;
+
+                if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
+                else if (el.tagName === 'P' || el.tagName === 'DIV') {
+                    const text = el.innerText.trim();
+                    const isNumbered = /^\d+[\.\)]/.test(text);
+                    const hasBold = el.querySelector('strong, b');
+                    if (isNumbered && hasBold && text.length < 150) isTitle = true;
                 }
-            });
-        });
+
+                if (isTitle) {
+                    const next = allNodes[i + 1];
+                    if (next && !next.matches('h1, h2, h3, h4, h5, h6')) {
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'keep-together';
+                        el.parentNode?.insertBefore(wrapper, el);
+                        wrapper.appendChild(el);
+                        wrapper.appendChild(next);
+                        i++;
+                    }
+                }
+            }
+        }
 
         // @ts-ignore
         html2pdf().set(opt).from(worker).toPdf().get('pdf').then(function (pdf: any) {
@@ -398,7 +410,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         .break-after-avoid { break-after: avoid !important; page-break-after: avoid !important; }
                         .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; }
                         @media screen {body {background: #f1f5f9; padding: 40px 0; } .a4-container {width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; } }
-                        @media print {body {background: white !important; margin: 0 !important; } .a4-container {box-shadow: none !important; border: none !important; min-height: auto; position: relative; } .no-print {display: none !important; } * {box-shadow: none !important; } .print-footer {display: none !important; } .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; } }
+                        @media print {body {background: white !important; margin: 0 !important; } .a4-container {box-shadow: none !important; border: none !important; min-height: auto; position: relative; } .no-print {display: none !important; } * {box-shadow: none !important; } .print-footer {display: none !important; color: white !important; } .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; } }
                         
                         /* Styles for Rich Text (Quill) */
                         .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
@@ -747,20 +759,21 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                             </div>
 
                             ${order.descriptionBlocks && order.descriptionBlocks.length > 0 ? `
-               <div class="mt-8">
-                   <div class="space-y-4">
-                       ${order.descriptionBlocks.map(block => {
+                <div class="mb-10 print-description-content">
+                    <div class="section-title">DESCRIÇÃO TÉCNICA / ESCOPO</div>
+                    <div class="space-y-6">
+                        ${order.descriptionBlocks.map(block => {
             if (block.type === 'text') {
-                return `<div class="text-slate-800 leading-relaxed text-justify font-medium ql-editor-print" style="font-size: 13px; margin-bottom: 16px;">${block.content}</div>`;
+                return `<div class="text-slate-600 leading-relaxed text-justify ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px;">${block.content}</div>`;
             } else if (block.type === 'image') {
-                return `<div class="avoid-break" style="margin: 10px 0;"><img src="${block.content}" style="width: 100%; max-height: 180mm; border-radius: 8px; border: 1px solid #f1f5f9; object-fit: contain;"></div>`;
+                return `<div style="break-inside: avoid; page-break-inside: avoid; margin: 20px 0;"><img src="${block.content}" style="width: 100%; border-radius: 12px; border: 1px solid #e2e8f0;"></div>`;
             } else if (block.type === 'page-break') {
-                return `<div style="page-break-after: always; height: 0;"></div>`;
+                return `<div style="page-break-after: always; break-after: page; height: 0; margin: 0; padding: 0;"></div>`;
             }
             return '';
         }).join('')}
-                   </div>
-               </div>` : ''}
+                    </div>
+                </div>` : ''}
 
                             <div class="avoid-break mt-32 pt-12 border-t border-slate-100">
                                 <div class="flex justify-center px-8">
@@ -777,31 +790,42 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                 </table>
                 <script>
                     function optimizePageBreaks() {
-                        const containers = document.querySelectorAll('.a4-container');
-                        containers.forEach(container => {
-                            const potentialTitles = Array.from(container.children).filter(el => {
-                                if (el.matches('h1, h2, h3, h4, h5, h6, .section-title')) return true;
-                                if (el.tagName === 'P') {
-                                    const text = el.innerText.trim();
-                                    if (text.length === 0 || text.length > 150) return false;
-                                    const isNumbered = /^\d+[\.\)]/.test(text);
-                                    const hasBold = el.querySelector('strong, b');
-                                    return isNumbered && hasBold;
-                                }
-                                return false;
-                            });
+                        const root = document.querySelector('.print-description-content .space-y-6');
+                        if (!root) return;
 
-                            potentialTitles.forEach(title => {
-                                const next = title.nextElementSibling;
-                                if (next && !next.matches('h1, h2, h3, h4, h5, h6, .section-title')) {
+                        const allNodes = [];
+                        Array.from(root.children).forEach(block => {
+                            if (block.classList.contains('ql-editor-print')) {
+                                allNodes.push(...Array.from(block.children));
+                            } else {
+                                allNodes.push(block);
+                            }
+                        });
+
+                        for (let i = 0; i < allNodes.length - 1; i++) {
+                            const el = allNodes[i];
+                            let isTitle = false;
+                            
+                            if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
+                            else if (el.tagName === 'P' || el.tagName === 'DIV') {
+                                const text = el.innerText.trim();
+                                const isNumbered = /^\d+[\.\)]/.test(text);
+                                const hasBold = el.querySelector('strong, b') || (el.style && el.style.fontWeight > 500);
+                                if (isNumbered && hasBold && text.length < 150) isTitle = true;
+                            }
+
+                            if (isTitle) {
+                                const next = allNodes[i+1];
+                                if (next && !next.matches('h1, h2, h3, h4, h5, h6')) {
                                     const wrapper = document.createElement('div');
                                     wrapper.className = 'keep-together';
-                                    title.parentNode.insertBefore(wrapper, title);
-                                    wrapper.appendChild(title);
+                                    el.parentNode.insertBefore(wrapper, el);
+                                    wrapper.appendChild(el);
                                     wrapper.appendChild(next);
+                                    i++;
                                 }
-                            });
-                        });
+                            }
+                        }
                     }
                     window.onload = function() { 
                         optimizePageBreaks();

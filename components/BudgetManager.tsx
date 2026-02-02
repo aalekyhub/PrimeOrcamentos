@@ -182,7 +182,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
              .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; width: 100% !important; padding-left: 20mm !important; padding-right: 20mm !important; } 
              .no-screen { display: block !important; }
              .no-print { display: none !important; }
-             .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: #475569; text-transform: uppercase; }
+             .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: white !important; text-transform: uppercase; }
              .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; }
              
              /* Styles for Rich Text (Quill) */
@@ -247,21 +247,21 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                     <p class="text-xl font-bold text-blue-600 uppercase leading-none tracking-tight">${budget.description}</p>
                </div>
                ${budget.descriptionBlocks && budget.descriptionBlocks.length > 0 ? `
-               <div class="mb-8 mt-4">
-                   <div class="section-title">Descrição Técnica / Escopo</div>
-                   <div class="space-y-4">
-                        ${budget.descriptionBlocks.map(block => {
+                <div class="mb-10 print-description-content">
+                  <div class="section-title">DESCRIÇÃO DOS SERVIÇOS</div>
+                  <div class="space-y-6">
+                    ${budget.descriptionBlocks.map(block => {
       if (block.type === 'text') {
-        return `<div style="font-size: ${company.descriptionFontSize || 14}px;" class="text-slate-700 leading-relaxed text-justify font-medium mb-4 ql-editor-print">${block.content}</div>`;
+        return `<div class="text-slate-700 leading-relaxed text-justify ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px;">${block.content}</div>`;
       } else if (block.type === 'image') {
-        return `<div style="break-inside: avoid; page-break-inside: avoid; margin: 15px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; object-fit: contain;"></div>`;
+        return `<div style="break-inside: avoid; page-break-inside: avoid; margin: 20px 0;"><img src="${block.content}" style="width: 100%; border-radius: 12px; border: 1px solid #e2e8f0;"></div>`;
       } else if (block.type === 'page-break') {
         return `<div style="page-break-after: always; break-after: page; height: 0; margin: 0; padding: 0;"></div>`;
       }
       return '';
     }).join('')}
-                   </div>
-               </div>` : ''}
+                  </div>
+                </div>` : ''}
 
                <!-- Items Table -->
                 <div class="mb-8 avoid-break" style="page-break-before: always; break-before: page;">
@@ -344,32 +344,47 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         <div class="print-footer no-screen"><span>Documento gerado em ${new Date().toLocaleString('pt-BR')}</span></div>
         <script>
            function optimizePageBreaks() {
-             const containers = document.querySelectorAll('.ql-editor-print, .a4-container');
-             containers.forEach(container => {
-               const potentialTitles = Array.from(container.children).filter(el => {
-                 if (el.matches('h1, h2, h3, h4, h5, h6')) return true;
-                 if (el.tagName === 'P') {
-                   const text = el.innerText.trim();
-                   if (text.length === 0 || text.length > 150) return false;
-                   const isNumbered = /^\d+[\.\)]/.test(text);
-                   const hasBold = el.querySelector('strong, b');
-                   const isAtitle = isNumbered && hasBold;
-                   return isAtitle;
-                 }
-                 return false;
-               });
+             // 1. Target the main content area
+             const root = document.querySelector('.print-description-content .space-y-6');
+             if (!root) return;
 
-               potentialTitles.forEach(title => {
-                 const next = title.nextElementSibling;
+             // 2. Flatten nodes if they are inside .ql-editor-print wrappers
+             // This is crucial because each block might be its own wrapper
+             const allNodes = [];
+             Array.from(root.children).forEach(block => {
+               if (block.classList.contains('ql-editor-print')) {
+                  allNodes.push(...Array.from(block.children));
+               } else {
+                  allNodes.push(block);
+               }
+             });
+
+             // 3. Detect and wrap
+             for (let i = 0; i < allNodes.length - 1; i++) {
+               const el = allNodes[i];
+               let isTitle = false;
+               
+               if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
+               else if (el.tagName === 'P' || el.tagName === 'DIV') {
+                 const text = el.innerText.trim();
+                 const isNumbered = /^\d+[\.\)]/.test(text);
+                 const hasBold = el.querySelector('strong, b') || (el.style && el.style.fontWeight > 500);
+                 if (isNumbered && hasBold && text.length < 150) isTitle = true;
+               }
+
+               if (isTitle) {
+                 const next = allNodes[i+1];
                  if (next && !next.matches('h1, h2, h3, h4, h5, h6')) {
                    const wrapper = document.createElement('div');
                    wrapper.className = 'keep-together';
-                   title.parentNode.insertBefore(wrapper, title);
-                   wrapper.appendChild(title);
+                   el.parentNode.insertBefore(wrapper, el);
+                   wrapper.appendChild(el);
                    wrapper.appendChild(next);
+                   // Skip next since it's now wrapped
+                   i++; 
                  }
-               });
-             });
+               }
+             }
            }
            window.onload = function() { 
              optimizePageBreaks();
@@ -389,31 +404,42 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       document.body.appendChild(worker);
 
       // Apply optimizations manually (scripts in innerHTML don't run)
-      const containers = worker.querySelectorAll('.ql-editor-print, .a4-container');
-      containers.forEach(container => {
-        const potentialTitles = Array.from(container.children).filter(el => {
-          if (el.matches('h1, h2, h3, h4, h5, h6')) return true;
-          if (el.tagName === 'P') {
-            const text = (el as HTMLElement).innerText.trim();
-            if (text.length === 0 || text.length > 150) return false;
-            const isNumbered = /^\d+[\.\)]/.test(text);
-            const hasBold = el.querySelector('strong, b');
-            return isNumbered && hasBold;
+      const root = worker.querySelector('.print-description-content .space-y-6');
+      if (root) {
+        const allNodes = [];
+        Array.from(root.children).forEach(block => {
+          if (block.classList.contains('ql-editor-print')) {
+            allNodes.push(...Array.from(block.children));
+          } else {
+            allNodes.push(block);
           }
-          return false;
         });
 
-        potentialTitles.forEach(title => {
-          const next = title.nextElementSibling;
-          if (next && !next.matches('h1, h2, h3, h4, h5, h6')) {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'keep-together';
-            title.parentNode?.insertBefore(wrapper, title);
-            wrapper.appendChild(title);
-            wrapper.appendChild(next);
+        for (let i = 0; i < allNodes.length - 1; i++) {
+          const el = allNodes[i] as HTMLElement;
+          let isTitle = false;
+
+          if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
+          else if (el.tagName === 'P' || el.tagName === 'DIV') {
+            const text = el.innerText.trim();
+            const isNumbered = /^\d+[\.\)]/.test(text);
+            const hasBold = el.querySelector('strong, b');
+            if (isNumbered && hasBold && text.length < 150) isTitle = true;
           }
-        });
-      });
+
+          if (isTitle) {
+            const next = allNodes[i + 1];
+            if (next && !next.matches('h1, h2, h3, h4, h5, h6')) {
+              const wrapper = document.createElement('div');
+              wrapper.className = 'keep-together';
+              el.parentNode?.insertBefore(wrapper, el);
+              wrapper.appendChild(el);
+              wrapper.appendChild(next);
+              i++;
+            }
+          }
+        }
+      }
 
       const opt = {
         margin: 0,

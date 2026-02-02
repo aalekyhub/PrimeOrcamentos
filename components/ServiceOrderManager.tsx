@@ -196,7 +196,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
              .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; width: 100% !important; padding-left: 20mm !important; padding-right: 20mm !important; } 
              .no-screen { display: block !important; }
              .no-print { display: none !important; }
-             .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: #94a3b8; text-transform: uppercase; }
+             .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: white !important; text-transform: uppercase; }
              .ql-editor-print .ql-align-justify { text-align: justify !important; }
              .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; }
 
@@ -256,14 +256,14 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                </div>
 
                ${order.descriptionBlocks && order.descriptionBlocks.length > 0 ? `
-               <div class="mb-12">
-                   <div class="section-title">Anexos e Fotos</div>
-                   <div class="space-y-4">
+               <div class="mb-10 print-description-content">
+                   <div class="section-title">DESCRIÇÃO TÉCNICA E ESCOPO</div>
+                   <div class="space-y-6">
                        ${order.descriptionBlocks.map(block => {
       if (block.type === 'text') {
-        return `<p class="text-slate-800 leading-relaxed text-justify font-medium whitespace-pre-wrap text-[14px] mb-4">${block.content}</p>`;
+        return `<div class="text-slate-700 leading-relaxed text-justify ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px;">${block.content}</div>`;
       } else if (block.type === 'image') {
-        return `<div style="break-inside: avoid; page-break-inside: avoid; margin: 15px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; object-fit: contain;"></div>`;
+        return `<div style="break-inside: avoid; page-break-inside: avoid; margin: 20px 0;"><img src="${block.content}" style="width: 100%; border-radius: 12px; border: 1px solid #e2e8f0;"></div>`;
       } else if (block.type === 'page-break') {
         return `<div style="page-break-after: always; break-after: page; height: 0; margin: 0; padding: 0;"></div>`;
       }
@@ -346,31 +346,42 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
         <div class="print-footer no-screen"><span>Página 1 de 1</span></div>
         <script>
            function optimizePageBreaks() {
-             const containers = document.querySelectorAll('.ql-editor-print, .a4-container, .info-box');
-             containers.forEach(container => {
-               const potentialTitles = Array.from(container.children).filter(el => {
-                 if (el.matches('h1, h2, h3, h4, h5, h6, .section-title')) return true;
-                 if (el.tagName === 'P') {
-                   const text = el.innerText.trim();
-                   if (text.length === 0 || text.length > 150) return false;
-                   const isNumbered = /^\d+[\.\)]/.test(text);
-                   const hasBold = el.querySelector('strong, b');
-                   return isNumbered && hasBold;
-                 }
-                 return false;
-               });
+             const root = document.querySelector('.print-description-content .space-y-6');
+             if (!root) return;
 
-               potentialTitles.forEach(title => {
-                 const next = title.nextElementSibling;
-                 if (next && !next.matches('h1, h2, h3, h4, h5, h6, .section-title')) {
+             const allNodes = [];
+             Array.from(root.children).forEach(block => {
+               if (block.classList.contains('ql-editor-print')) {
+                  allNodes.push(...Array.from(block.children));
+               } else {
+                  allNodes.push(block);
+               }
+             });
+
+             for (let i = 0; i < allNodes.length - 1; i++) {
+               const el = allNodes[i];
+               let isTitle = false;
+               
+               if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
+               else if (el.tagName === 'P' || el.tagName === 'DIV') {
+                 const text = el.innerText.trim();
+                 const isNumbered = /^\d+[\.\)]/.test(text);
+                 const hasBold = el.querySelector('strong, b') || (el.style && el.style.fontWeight > 500);
+                 if (isNumbered && hasBold && text.length < 150) isTitle = true;
+               }
+
+               if (isTitle) {
+                 const next = allNodes[i+1];
+                 if (next && !next.matches('h1, h2, h3, h4, h5, h6')) {
                    const wrapper = document.createElement('div');
                    wrapper.className = 'keep-together';
-                   title.parentNode.insertBefore(wrapper, title);
-                   wrapper.appendChild(title);
+                   el.parentNode.insertBefore(wrapper, el);
+                   wrapper.appendChild(el);
                    wrapper.appendChild(next);
+                   i++; 
                  }
-               });
-             });
+               }
+             }
            }
            window.onload = function() { 
              optimizePageBreaks();
