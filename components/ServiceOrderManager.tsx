@@ -141,6 +141,12 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
+    const formatLegacyText = (text: string) => {
+      if (!text) return '';
+      if (/<[a-z][\s\S]*>/i.test(text)) return text;
+      return text.replace(/\n/g, '<br/>');
+    };
+
     const formatDate = (dateStr: string) => {
       try {
         const d = new Date(dateStr);
@@ -264,7 +270,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                     <div class="space-y-1">
                        ${order.descriptionBlocks.map(block => {
       if (block.type === 'text') {
-        return `<p class="text-slate-800 leading-relaxed text-justify font-medium ql-editor-print text-[14px]">${block.content}</p>`;
+        return `<p class="text-slate-800 leading-relaxed text-justify font-medium ql-editor-print text-[14px]">${formatLegacyText(block.content)}</p>`;
       } else if (block.type === 'image') {
         return `<div style="break-inside: avoid; page-break-inside: avoid; margin: 8px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; object-fit: contain;"></div>`;
       } else if (block.type === 'page-break') {

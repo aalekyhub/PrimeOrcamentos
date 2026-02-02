@@ -193,6 +193,12 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     const handleDownloadPDF = (order: ServiceOrder) => {
         const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', address: 'Endereço não informado', city: '', state: '', cep: '' };
 
+        const formatLegacyText = (text: string) => {
+            if (!text) return '';
+            if (/<[a-z][\s\S]*>/i.test(text)) return text;
+            return text.replace(/\n/g, '<br/>');
+        };
+
         const html = `
     < !DOCTYPE html >
         <html>
@@ -728,14 +734,14 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             if (block.type === 'text') {
                 return `<div class="text-slate-800 leading-relaxed text-justify font-medium ql-editor-print" style="font-size: 13px;">${formatLegacyText(block.content)}</div>`;
             } else if (block.type === 'image') {
-                return `<div class="avoid-break" style="margin: 8px 0;"><img src="${formatLegacyText(block.content)}" style="width: 100%; max-height: 180mm; border-radius: 8px; border: 1px solid #f1f5f9; object-fit: contain;"></div>`;
+                return `<div class="avoid-break" style="margin: 8px 0;"><img src="${block.content}" style="width: 100%; max-height: 180mm; border-radius: 8px; border: 1px solid #f1f5f9; object-fit: contain;"></div>`;
             } else if (block.type === 'page-break') {
                 return `<div style="page-break-after: always; height: 0;"></div>`;
             }
             return '';
         }).join('')}
-                   </div>
-               </div>` : ''}
+                   </div >
+               </div > ` : ''}
 
                             <div class="avoid-break mt-32 pt-12 border-t border-slate-100">
                                 <div class="flex justify-center px-8">

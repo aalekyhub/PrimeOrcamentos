@@ -248,6 +248,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                     <h2 class="text-sm font-bold text-slate-900 tracking-tight uppercase leading-none mb-0.5">Proposta Comercial</h2>
                     <p class="text-xl font-bold text-blue-600 uppercase leading-none tracking-tight">${budget.description}</p>
                </div>
+                ${budget.descriptionBlocks && budget.descriptionBlocks.length > 0 ? `
                 <div class="mb-4 mt-2">
                    <div class="section-title">Descrição Técnica / Escopo</div>
                    <div class="space-y-1">
@@ -262,8 +263,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       return '';
     }).join('')}
                    </div>
-               </div>` : ''
-  }
+               </div>` : ''}
 
                < !--Items Table-- >
                 <div class="mb-8 avoid-break" style="page-break-before: always; break-before: page;">
@@ -353,7 +353,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       const cleanHtml = html.replace(/<script>window.onload[\s\S]*?<\/script>/, '');
       const opt = {
         margin: 0,
-        filename: `Orçamento - ${ budget.id } - ${ budget.description || 'Proposta' }.pdf`,
+        filename: `Orçamento - ${budget.id} - ${budget.description || 'Proposta'}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 3, useCORS: true },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
@@ -414,7 +414,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       } else if (result?.error === 'quota_exceeded') {
         notify("ERRO DE ARMAZENAMENTO: Limite excedido.", "error");
       } else {
-        notify(`Salvo localmente.Erro Sync: ${ result?.error?.message || JSON.stringify(result?.error) } `, "warning");
+        notify(`Salvo localmente.Erro Sync: ${result?.error?.message || JSON.stringify(result?.error)} `, "warning");
         setShowForm(false);
       }
     } finally { setIsSaving(false); }
@@ -851,16 +851,16 @@ const PaymentTypeModal: React.FC<{
     const currency = (val: number) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
     if (type === 'vista') {
-      text = `Pagamento à vista com desconto na aprovação do orçamento.Total: ${ currency(totalValue) }.`;
+      text = `Pagamento à vista com desconto na aprovação do orçamento.Total: ${currency(totalValue)}.`;
     } else if (type === 'conclusao') {
-      text = `Pagamento integral ${ currency(totalValue) } a ser realizado após entrega técnica e aprovação dos serviços.`;
+      text = `Pagamento integral ${currency(totalValue)} a ser realizado após entrega técnica e aprovação dos serviços.`;
     } else if (type === 'parcelado') {
       const remainder = totalValue - entryValue;
       const parcValue = installments > 0 ? remainder / installments : 0;
 
-      text = `Entrada de ${ currency(entryValue) } na aprovação.`;
+      text = `Entrada de ${currency(entryValue)} na aprovação.`;
       if (installments > 0) {
-        text += `\nSaldo restante de ${ currency(remainder) } dividido em ${ installments }x de ${ currency(parcValue) } (30 / ${ installments > 1 ? '60/90...' : ' dias' }).`;
+        text += `\nSaldo restante de ${currency(remainder)} dividido em ${installments}x de ${currency(parcValue)} (30 / ${installments > 1 ? '60/90...' : ' dias'}).`;
       }
     }
     setPreview(text);
@@ -878,9 +878,9 @@ const PaymentTypeModal: React.FC<{
           <div>
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Tipo de Negociação</label>
             <div className="grid grid-cols-3 gap-2">
-              <button onClick={() => setType('vista')} className={`p - 3 rounded - xl border text - xs font - bold uppercase transition - all ${ type === 'vista' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50' } `}>À Vista</button>
-              <button onClick={() => setType('parcelado')} className={`p - 3 rounded - xl border text - xs font - bold uppercase transition - all ${ type === 'parcelado' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50' } `}>Parcelado</button>
-              <button onClick={() => setType('conclusao')} className={`p - 3 rounded - xl border text - xs font - bold uppercase transition - all ${ type === 'conclusao' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50' } `}>Entrega</button>
+              <button onClick={() => setType('vista')} className={`p - 3 rounded - xl border text - xs font - bold uppercase transition - all ${type === 'vista' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'} `}>À Vista</button>
+              <button onClick={() => setType('parcelado')} className={`p - 3 rounded - xl border text - xs font - bold uppercase transition - all ${type === 'parcelado' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'} `}>Parcelado</button>
+              <button onClick={() => setType('conclusao')} className={`p - 3 rounded - xl border text - xs font - bold uppercase transition - all ${type === 'conclusao' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'} `}>Entrega</button>
             </div>
           </div>
 
@@ -888,7 +888,7 @@ const PaymentTypeModal: React.FC<{
             <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
               <div className="col-span-2">
                 <div className="flex justify-between mb-1"><span className="text-[10px] font-bold text-slate-400 uppercase">Valor Total</span> <span className="text-[10px] font-black text-slate-900">{totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span></div>
-                <div className="h-1 w-full bg-slate-200 rounded-full overflow-hidden"><div className="h-full bg-blue-500" style={{ width: `${ Math.min(100, (entryValue / totalValue) * 100) }% ` }}></div></div>
+                <div className="h-1 w-full bg-slate-200 rounded-full overflow-hidden"><div className="h-full bg-blue-500" style={{ width: `${Math.min(100, (entryValue / totalValue) * 100)}% ` }}></div></div>
               </div>
               <div className="grid grid-cols-2 gap-2 col-span-2">
                 <div>
