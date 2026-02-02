@@ -141,12 +141,6 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    const formatLegacyText = (text: string) => {
-      if (!text) return '';
-      if (/<[a-z][\s\S]*>/i.test(text)) return text;
-      return text.replace(/\n/g, '<br/>');
-    };
-
     const formatDate = (dateStr: string) => {
       try {
         const d = new Date(dateStr);
@@ -201,19 +195,6 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
              .no-screen { display: block !important; }
              .no-print { display: none !important; }
              .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: #94a3b8; text-transform: uppercase; }
-             /* Styles for Rich Text (Quill) */
-             .ql-editor-print p { margin-bottom: 2px !important; }
-             .ql-editor-print ul { list-style-type: disc !important; padding-left: 25px !important; margin: 12px 0 !important; }
-             .ql-editor-print ol { list-style-type: decimal !important; padding-left: 25px !important; margin: 12px 0 !important; }
-             .ql-editor-print li { display: list-item !important; margin-bottom: 2px !important; list-style-position: outside !important; }
-             .ql-editor-print strong { font-weight: 800 !important; color: #0f172a !important; }
-             .ql-editor-print em { font-style: italic !important; }
-             .ql-editor-print h1 { font-size: 2em !important; font-weight: 800 !important; margin: 12px 0 4px 0 !important; }
-             .ql-editor-print h2 { font-size: 1.5em !important; font-weight: 800 !important; margin: 10px 0 4px 0 !important; }
-             .ql-editor-print h3 { font-size: 1.17em !important; font-weight: 800 !important; margin: 8px 0 2px 0 !important; }
-             .ql-editor-print .ql-align-center { text-align: center !important; }
-             .ql-editor-print .ql-align-right { text-align: right !important; }
-             .ql-editor-print .ql-align-justify { text-align: justify !important; }
              .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; }
            }
         </style>
@@ -267,12 +248,12 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                ${order.descriptionBlocks && order.descriptionBlocks.length > 0 ? `
                <div class="mb-12">
                    <div class="section-title">Anexos e Fotos</div>
-                    <div class="space-y-1">
+                   <div class="space-y-4">
                        ${order.descriptionBlocks.map(block => {
       if (block.type === 'text') {
-        return `<p class="text-slate-800 leading-relaxed text-justify font-medium ql-editor-print text-[14px]">${formatLegacyText(block.content)}</p>`;
+        return `<p class="text-slate-800 leading-relaxed text-justify font-medium whitespace-pre-wrap text-[14px] mb-4">${block.content}</p>`;
       } else if (block.type === 'image') {
-        return `<div style="break-inside: avoid; page-break-inside: avoid; margin: 8px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; object-fit: contain;"></div>`;
+        return `<div style="break-inside: avoid; page-break-inside: avoid; margin: 15px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; object-fit: contain;"></div>`;
       } else if (block.type === 'page-break') {
         return `<div style="page-break-after: always; break-after: page; height: 0; margin: 0; padding: 0;"></div>`;
       }

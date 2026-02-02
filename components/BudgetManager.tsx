@@ -142,13 +142,6 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
     const finalTotal = subTotalWithBDI + taxValue;
 
-    // Helper to format legacy plain text as HTML
-    const formatLegacyText = (text: string) => {
-      if (!text) return '';
-      if (/<[a-z][\s\S]*>/i.test(text)) return text;
-      return text.replace(/\n/g, '<br/>');
-    };
-
     const itemFontBase = company.itemsFontSize || 12;
     const itemsHtml = budget.items.map((item: ServiceItem) => `
       <tr style="border-bottom: 1px solid #f1f5f9;">
@@ -191,15 +184,11 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
              .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; }
              
              /* Styles for Rich Text (Quill) */
-             .ql-editor-print p { margin-bottom: 2px !important; }
-             .ql-editor-print ul { list-style-type: disc !important; padding-left: 25px !important; margin: 12px 0 !important; }
-             .ql-editor-print ol { list-style-type: decimal !important; padding-left: 25px !important; margin: 12px 0 !important; }
-             .ql-editor-print li { display: list-item !important; margin-bottom: 2px !important; list-style-position: outside !important; }
-             .ql-editor-print strong { font-weight: 800 !important; color: #0f172a !important; }
+             .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
+             .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
+             .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
+             .ql-editor-print strong { font-weight: bold !important; }
              .ql-editor-print em { font-style: italic !important; }
-             .ql-editor-print h1 { font-size: 2em !important; font-weight: 800 !important; margin: 12px 0 4px 0 !important; }
-             .ql-editor-print h2 { font-size: 1.5em !important; font-weight: 800 !important; margin: 10px 0 4px 0 !important; }
-             .ql-editor-print h3 { font-size: 1.17em !important; font-weight: 800 !important; margin: 8px 0 2px 0 !important; }
              .ql-editor-print .ql-align-center { text-align: center !important; }
              .ql-editor-print .ql-align-right { text-align: right !important; }
              .ql-editor-print .ql-align-justify { text-align: justify !important; }
@@ -248,15 +237,15 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                     <h2 class="text-sm font-bold text-slate-900 tracking-tight uppercase leading-none mb-0.5">Proposta Comercial</h2>
                     <p class="text-xl font-bold text-blue-600 uppercase leading-none tracking-tight">${budget.description}</p>
                </div>
-                ${budget.descriptionBlocks && budget.descriptionBlocks.length > 0 ? `
-                <div class="mb-4 mt-2">
+               ${budget.descriptionBlocks && budget.descriptionBlocks.length > 0 ? `
+               <div class="mb-8 mt-4">
                    <div class="section-title">Descrição Técnica / Escopo</div>
-                   <div class="space-y-1">
+                   <div class="space-y-4">
                         ${budget.descriptionBlocks.map(block => {
       if (block.type === 'text') {
-        return `<div style="font-size: ${company.descriptionFontSize || 14}px;" class="text-slate-700 leading-relaxed text-justify font-medium ql-editor-print">${formatLegacyText(block.content)}</div>`;
+        return `<div style="font-size: ${company.descriptionFontSize || 14}px;" class="text-slate-700 leading-relaxed text-justify font-medium mb-4 ql-editor-print">${block.content}</div>`;
       } else if (block.type === 'image') {
-        return `<div style="break-inside: avoid; page-break-inside: avoid; margin: 10px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; object-fit: contain;"></div>`;
+        return `<div style="break-inside: avoid; page-break-inside: avoid; margin: 15px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; object-fit: contain;"></div>`;
       } else if (block.type === 'page-break') {
         return `<div style="page-break-after: always; break-after: page; height: 0; margin: 0; padding: 0;"></div>`;
       }
@@ -265,7 +254,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                    </div>
                </div>` : ''}
 
-               < !--Items Table-- >
+               <!-- Items Table -->
                 <div class="mb-8 avoid-break" style="page-break-before: always; break-before: page;">
                     <div class="section-title">Detalhamento Financeiro</div>
                     <table style="width: 100%; border-collapse: collapse;">
@@ -282,7 +271,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                    </table>
                </div>
 
-               <!--Total Bar(Dark)-- >
+               <!-- Total Bar (Dark) -->
                <div class="avoid-break mb-6">
                    <!-- Breakdown above bar -->
                    <div class="flex justify-end mb-2 gap-6 px-2">
@@ -307,7 +296,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                    </div>
                </div>
 
-               <!--Terms & Payment-- >
+               <!-- Terms & Payment -->
                <div class="avoid-break mb-6">
                    <div class="grid grid-cols-2 gap-6">
                        <div class="info-box">
@@ -321,7 +310,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                    </div>
                </div>
 
-               <!--Acceptance Box-- >
+               <!-- Acceptance Box -->
                <div class="avoid-break mb-6">
                    <div class="border border-blue-100 bg-blue-50/50 rounded-2xl p-6">
                         <div class="flex items-center gap-3 mb-4">
@@ -334,21 +323,21 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                    </div>
                </div>
 
-               <!--Signature Lines-- >
-    <div class="avoid-break mt-24">
-      <div style="border-bottom: 2px solid #cbd5e1; width: 40%;"></div>
-      <p class="text-[11px] font-bold text-slate-600 uppercase tracking-widest mt-2">Assinatura do Cliente / Aceite</p>
-    </div>
-            </div >
-          </td ></tr ></tbody >
-  <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;"><div style="height: ${company.printMarginBottom || 15}mm; display: block;">&nbsp;</div></td></tr></tfoot>
-        </table >
+               <!-- Signature Lines -->
+                <div class="avoid-break mt-24">
+                   <div style="border-bottom: 2px solid #cbd5e1; width: 40%;"></div>
+                   <p class="text-[11px] font-bold text-slate-600 uppercase tracking-widest mt-2">Assinatura do Cliente / Aceite</p>
+               </div>
+            </div>
+          </td></tr></tbody>
+          <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;"><div style="height: ${company.printMarginBottom || 15}mm; display: block;">&nbsp;</div></td></tr></tfoot>
+        </table>
         <div class="print-footer no-screen"><span>Documento gerado em ${new Date().toLocaleString('pt-BR')}</span></div>
         <script>
            window.onload = function() { setTimeout(() => { window.print(); window.close(); }, 800); }
         </script>
-      </body >
-      </html > `;
+      </body>
+      </html>`;
     if (mode === 'pdf') {
       const cleanHtml = html.replace(/<script>window.onload[\s\S]*?<\/script>/, '');
       const opt = {
@@ -414,7 +403,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       } else if (result?.error === 'quota_exceeded') {
         notify("ERRO DE ARMAZENAMENTO: Limite excedido.", "error");
       } else {
-        notify(`Salvo localmente.Erro Sync: ${result?.error?.message || JSON.stringify(result?.error)} `, "warning");
+        notify(`Salvo localmente. Erro Sync: ${result?.error?.message || JSON.stringify(result?.error)}`, "warning");
         setShowForm(false);
       }
     } finally { setIsSaving(false); }
@@ -437,7 +426,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     const d = b.bdiRate ?? b.bdirate ?? b.bdi_rate ?? 0;
 
     // Alert to confirm Values
-    // alert(`Carregando Orçamento: ${ budget.id } \nImposto encontrado: ${ t } \nBDI encontrado: ${ d } `);
+    // alert(`Carregando Orçamento: ${budget.id}\nImposto encontrado: ${t}\nBDI encontrado: ${d}`);
 
     setTaxRate(t);
     setBdiRate(d);
@@ -851,7 +840,7 @@ const PaymentTypeModal: React.FC<{
     const currency = (val: number) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
     if (type === 'vista') {
-      text = `Pagamento à vista com desconto na aprovação do orçamento.Total: ${currency(totalValue)}.`;
+      text = `Pagamento à vista com desconto na aprovação do orçamento. Total: ${currency(totalValue)}.`;
     } else if (type === 'conclusao') {
       text = `Pagamento integral ${currency(totalValue)} a ser realizado após entrega técnica e aprovação dos serviços.`;
     } else if (type === 'parcelado') {
@@ -860,7 +849,7 @@ const PaymentTypeModal: React.FC<{
 
       text = `Entrada de ${currency(entryValue)} na aprovação.`;
       if (installments > 0) {
-        text += `\nSaldo restante de ${currency(remainder)} dividido em ${installments}x de ${currency(parcValue)} (30 / ${installments > 1 ? '60/90...' : ' dias'}).`;
+        text += `\nSaldo restante de ${currency(remainder)} dividido em ${installments}x de ${currency(parcValue)} (30/${installments > 1 ? '60/90...' : ' dias'}).`;
       }
     }
     setPreview(text);
@@ -878,9 +867,9 @@ const PaymentTypeModal: React.FC<{
           <div>
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Tipo de Negociação</label>
             <div className="grid grid-cols-3 gap-2">
-              <button onClick={() => setType('vista')} className={`p - 3 rounded - xl border text - xs font - bold uppercase transition - all ${type === 'vista' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'} `}>À Vista</button>
-              <button onClick={() => setType('parcelado')} className={`p - 3 rounded - xl border text - xs font - bold uppercase transition - all ${type === 'parcelado' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'} `}>Parcelado</button>
-              <button onClick={() => setType('conclusao')} className={`p - 3 rounded - xl border text - xs font - bold uppercase transition - all ${type === 'conclusao' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'} `}>Entrega</button>
+              <button onClick={() => setType('vista')} className={`p-3 rounded-xl border text-xs font-bold uppercase transition-all ${type === 'vista' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>À Vista</button>
+              <button onClick={() => setType('parcelado')} className={`p-3 rounded-xl border text-xs font-bold uppercase transition-all ${type === 'parcelado' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>Parcelado</button>
+              <button onClick={() => setType('conclusao')} className={`p-3 rounded-xl border text-xs font-bold uppercase transition-all ${type === 'conclusao' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>Entrega</button>
             </div>
           </div>
 
@@ -888,7 +877,7 @@ const PaymentTypeModal: React.FC<{
             <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
               <div className="col-span-2">
                 <div className="flex justify-between mb-1"><span className="text-[10px] font-bold text-slate-400 uppercase">Valor Total</span> <span className="text-[10px] font-black text-slate-900">{totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span></div>
-                <div className="h-1 w-full bg-slate-200 rounded-full overflow-hidden"><div className="h-full bg-blue-500" style={{ width: `${Math.min(100, (entryValue / totalValue) * 100)}% ` }}></div></div>
+                <div className="h-1 w-full bg-slate-200 rounded-full overflow-hidden"><div className="h-full bg-blue-500" style={{ width: `${Math.min(100, (entryValue / totalValue) * 100)}%` }}></div></div>
               </div>
               <div className="grid grid-cols-2 gap-2 col-span-2">
                 <div>
