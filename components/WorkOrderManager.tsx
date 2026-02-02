@@ -328,22 +328,37 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
         };
 
-        // Use a hidden div to process HTML for PDF
+        // Use a hidden div to process HTML for PDF (must be in DOM and visible for layout)
         const worker = document.createElement('div');
-        worker.style.display = 'none';
+        worker.style.position = 'absolute';
+        worker.style.left = '-9999px';
+        worker.style.top = '0';
+        worker.style.width = '210mm';
         worker.innerHTML = html;
         document.body.appendChild(worker);
 
+        // Apply optimizations manually (scripts in innerHTML don't run)
         const containers = worker.querySelectorAll('.a4-container');
         containers.forEach(container => {
-            const headings = container.querySelectorAll('h1, h2, h3, h4, h5, h6, .section-title');
-            headings.forEach(h => {
-                const next = h.nextElementSibling;
+            const potentialTitles = Array.from(container.children).filter(el => {
+                if (el.matches('h1, h2, h3, h4, h5, h6, .section-title')) return true;
+                if (el.tagName === 'P') {
+                    const text = (el as HTMLElement).innerText.trim();
+                    if (text.length === 0 || text.length > 150) return false;
+                    const isNumbered = /^\d+[\.\)]/.test(text);
+                    const hasBold = el.querySelector('strong, b');
+                    return isNumbered && hasBold;
+                }
+                return false;
+            });
+
+            potentialTitles.forEach(title => {
+                const next = title.nextElementSibling;
                 if (next && !next.matches('h1, h2, h3, h4, h5, h6, .section-title')) {
                     const wrapper = document.createElement('div');
                     wrapper.className = 'keep-together';
-                    h.parentNode?.insertBefore(wrapper, h);
-                    wrapper.appendChild(h);
+                    title.parentNode?.insertBefore(wrapper, title);
+                    wrapper.appendChild(title);
                     wrapper.appendChild(next);
                 }
             });
@@ -764,14 +779,25 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     function optimizePageBreaks() {
                         const containers = document.querySelectorAll('.a4-container');
                         containers.forEach(container => {
-                            const headings = container.querySelectorAll('h1, h2, h3, h4, h5, h6, .section-title');
-                            headings.forEach(h => {
-                                const next = h.nextElementSibling;
+                            const potentialTitles = Array.from(container.children).filter(el => {
+                                if (el.matches('h1, h2, h3, h4, h5, h6, .section-title')) return true;
+                                if (el.tagName === 'P') {
+                                    const text = el.innerText.trim();
+                                    if (text.length === 0 || text.length > 150) return false;
+                                    const isNumbered = /^\d+[\.\)]/.test(text);
+                                    const hasBold = el.querySelector('strong, b');
+                                    return isNumbered && hasBold;
+                                }
+                                return false;
+                            });
+
+                            potentialTitles.forEach(title => {
+                                const next = title.nextElementSibling;
                                 if (next && !next.matches('h1, h2, h3, h4, h5, h6, .section-title')) {
                                     const wrapper = document.createElement('div');
                                     wrapper.className = 'keep-together';
-                                    h.parentNode.insertBefore(wrapper, h);
-                                    wrapper.appendChild(h);
+                                    title.parentNode.insertBefore(wrapper, title);
+                                    wrapper.appendChild(title);
                                     wrapper.appendChild(next);
                                 }
                             });

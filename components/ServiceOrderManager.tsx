@@ -345,7 +345,37 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
         </table>
         <div class="print-footer no-screen"><span>Página 1 de 1</span></div>
         <script>
-           window.onload = function() { setTimeout(() => { window.print(); window.close(); }, 800); }
+           function optimizePageBreaks() {
+             const containers = document.querySelectorAll('.ql-editor-print, .a4-container, .info-box');
+             containers.forEach(container => {
+               const potentialTitles = Array.from(container.children).filter(el => {
+                 if (el.matches('h1, h2, h3, h4, h5, h6, .section-title')) return true;
+                 if (el.tagName === 'P') {
+                   const text = el.innerText.trim();
+                   if (text.length === 0 || text.length > 150) return false;
+                   const isNumbered = /^\d+[\.\)]/.test(text);
+                   const hasBold = el.querySelector('strong, b');
+                   return isNumbered && hasBold;
+                 }
+                 return false;
+               });
+
+               potentialTitles.forEach(title => {
+                 const next = title.nextElementSibling;
+                 if (next && !next.matches('h1, h2, h3, h4, h5, h6, .section-title')) {
+                   const wrapper = document.createElement('div');
+                   wrapper.className = 'keep-together';
+                   title.parentNode.insertBefore(wrapper, title);
+                   wrapper.appendChild(title);
+                   wrapper.appendChild(next);
+                 }
+               });
+             });
+           }
+           window.onload = function() { 
+             optimizePageBreaks();
+             setTimeout(() => { window.print(); window.close(); }, 800); 
+           }
         </script>
       </body>
       </html>`;

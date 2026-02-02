@@ -344,16 +344,28 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         <div class="print-footer no-screen"><span>Documento gerado em ${new Date().toLocaleString('pt-BR')}</span></div>
         <script>
            function optimizePageBreaks() {
-             const editors = document.querySelectorAll('.ql-editor-print');
-             editors.forEach(editor => {
-               const headings = editor.querySelectorAll('h1, h2, h3, h4, h5, h6');
-               headings.forEach(h => {
-                 const next = h.nextElementSibling;
+             const containers = document.querySelectorAll('.ql-editor-print, .a4-container');
+             containers.forEach(container => {
+               const potentialTitles = Array.from(container.children).filter(el => {
+                 if (el.matches('h1, h2, h3, h4, h5, h6')) return true;
+                 if (el.tagName === 'P') {
+                   const text = el.innerText.trim();
+                   if (text.length === 0 || text.length > 150) return false;
+                   const isNumbered = /^\d+[\.\)]/.test(text);
+                   const hasBold = el.querySelector('strong, b');
+                   const isAtitle = isNumbered && hasBold;
+                   return isAtitle;
+                 }
+                 return false;
+               });
+
+               potentialTitles.forEach(title => {
+                 const next = title.nextElementSibling;
                  if (next && !next.matches('h1, h2, h3, h4, h5, h6')) {
                    const wrapper = document.createElement('div');
                    wrapper.className = 'keep-together';
-                   h.parentNode.insertBefore(wrapper, h);
-                   wrapper.appendChild(h);
+                   title.parentNode.insertBefore(wrapper, title);
+                   wrapper.appendChild(title);
                    wrapper.appendChild(next);
                  }
                });
@@ -367,27 +379,37 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       </body>
       </html>`;
     if (mode === 'pdf') {
-      // Use a hidden div to process HTML for PDF
+      // Use a hidden div to process HTML for PDF (must be in DOM and visible for layout)
       const worker = document.createElement('div');
-      worker.style.display = 'none';
+      worker.style.position = 'absolute';
+      worker.style.left = '-9999px';
+      worker.style.top = '0';
+      worker.style.width = '210mm';
       worker.innerHTML = html;
       document.body.appendChild(worker);
 
-      // Mark as PDF for the internal script
-      // @ts-ignore
-      worker.isPDF = true;
+      // Apply optimizations manually (scripts in innerHTML don't run)
+      const containers = worker.querySelectorAll('.ql-editor-print, .a4-container');
+      containers.forEach(container => {
+        const potentialTitles = Array.from(container.children).filter(el => {
+          if (el.matches('h1, h2, h3, h4, h5, h6')) return true;
+          if (el.tagName === 'P') {
+            const text = (el as HTMLElement).innerText.trim();
+            if (text.length === 0 || text.length > 150) return false;
+            const isNumbered = /^\d+[\.\)]/.test(text);
+            const hasBold = el.querySelector('strong, b');
+            return isNumbered && hasBold;
+          }
+          return false;
+        });
 
-      // Apply optimizations directly to the DOM for html2pdf
-      const editors = worker.querySelectorAll('.ql-editor-print');
-      editors.forEach(editor => {
-        const headings = editor.querySelectorAll('h1, h2, h3, h4, h5, h6');
-        headings.forEach(h => {
-          const next = h.nextElementSibling;
+        potentialTitles.forEach(title => {
+          const next = title.nextElementSibling;
           if (next && !next.matches('h1, h2, h3, h4, h5, h6')) {
             const wrapper = document.createElement('div');
             wrapper.className = 'keep-together';
-            h.parentNode?.insertBefore(wrapper, h);
-            wrapper.appendChild(h);
+            title.parentNode?.insertBefore(wrapper, title);
+            wrapper.appendChild(title);
             wrapper.appendChild(next);
           }
         });
