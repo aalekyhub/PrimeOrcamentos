@@ -166,6 +166,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
            .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
             .avoid-break { break-inside: avoid; page-break-inside: avoid; }
             .break-after-avoid { break-after: avoid !important; page-break-after: avoid !important; }
+            .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; }
            
            /* Premium Box Styles */
            .info-box { background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
@@ -342,12 +343,56 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         </table>
         <div class="print-footer no-screen"><span>Documento gerado em ${new Date().toLocaleString('pt-BR')}</span></div>
         <script>
-           window.onload = function() { setTimeout(() => { window.print(); window.close(); }, 800); }
+           function optimizePageBreaks() {
+             const editors = document.querySelectorAll('.ql-editor-print');
+             editors.forEach(editor => {
+               const headings = editor.querySelectorAll('h1, h2, h3, h4, h5, h6');
+               headings.forEach(h => {
+                 const next = h.nextElementSibling;
+                 if (next && !next.matches('h1, h2, h3, h4, h5, h6')) {
+                   const wrapper = document.createElement('div');
+                   wrapper.className = 'keep-together';
+                   h.parentNode.insertBefore(wrapper, h);
+                   wrapper.appendChild(h);
+                   wrapper.appendChild(next);
+                 }
+               });
+             });
+           }
+           window.onload = function() { 
+             optimizePageBreaks();
+             setTimeout(() => { if (!window.isPDF) { window.print(); window.close(); } }, 800); 
+           }
         </script>
       </body>
       </html>`;
     if (mode === 'pdf') {
-      const cleanHtml = html.replace(/<script>window.onload[\s\S]*?<\/script>/, '');
+      // Use a hidden div to process HTML for PDF
+      const worker = document.createElement('div');
+      worker.style.display = 'none';
+      worker.innerHTML = html;
+      document.body.appendChild(worker);
+
+      // Mark as PDF for the internal script
+      // @ts-ignore
+      worker.isPDF = true;
+
+      // Apply optimizations directly to the DOM for html2pdf
+      const editors = worker.querySelectorAll('.ql-editor-print');
+      editors.forEach(editor => {
+        const headings = editor.querySelectorAll('h1, h2, h3, h4, h5, h6');
+        headings.forEach(h => {
+          const next = h.nextElementSibling;
+          if (next && !next.matches('h1, h2, h3, h4, h5, h6')) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'keep-together';
+            h.parentNode?.insertBefore(wrapper, h);
+            wrapper.appendChild(h);
+            wrapper.appendChild(next);
+          }
+        });
+      });
+
       const opt = {
         margin: 0,
         filename: `Orçamento - ${budget.id} - ${budget.description || 'Proposta'}.pdf`,
@@ -358,7 +403,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       };
 
       // @ts-ignore
-      html2pdf().set(opt).from(cleanHtml).toPdf().get('pdf').then(function (pdf: any) {
+      html2pdf().set(opt).from(worker).toPdf().get('pdf').then(function (pdf: any) {
         var totalPages = pdf.internal.getNumberOfPages();
         for (var i = 1; i <= totalPages; i++) {
           pdf.setPage(i);
@@ -367,6 +412,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
         }
         pdf.save(opt.filename);
+        document.body.removeChild(worker);
       });
     } else {
       const printWindow = window.open('', '_blank');

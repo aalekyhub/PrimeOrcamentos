@@ -180,6 +180,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
            .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
            .avoid-break { break-inside: avoid; page-break-inside: avoid; }
            .break-after-avoid { break-after: avoid !important; page-break-after: avoid !important; }
+           .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; }
            
            /* Premium Box Styles */
            .info-box { background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }

@@ -328,8 +328,29 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
         };
 
+        // Use a hidden div to process HTML for PDF
+        const worker = document.createElement('div');
+        worker.style.display = 'none';
+        worker.innerHTML = html;
+        document.body.appendChild(worker);
+
+        const containers = worker.querySelectorAll('.a4-container');
+        containers.forEach(container => {
+            const headings = container.querySelectorAll('h1, h2, h3, h4, h5, h6, .section-title');
+            headings.forEach(h => {
+                const next = h.nextElementSibling;
+                if (next && !next.matches('h1, h2, h3, h4, h5, h6, .section-title')) {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'keep-together';
+                    h.parentNode?.insertBefore(wrapper, h);
+                    wrapper.appendChild(h);
+                    wrapper.appendChild(next);
+                }
+            });
+        });
+
         // @ts-ignore
-        html2pdf().set(opt).from(html).toPdf().get('pdf').then(function (pdf: any) {
+        html2pdf().set(opt).from(worker).toPdf().get('pdf').then(function (pdf: any) {
             var totalPages = pdf.internal.getNumberOfPages();
             for (var i = 1; i <= totalPages; i++) {
                 pdf.setPage(i);
@@ -338,6 +359,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                 pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
             }
             pdf.save(opt.filename);
+            document.body.removeChild(worker);
         });
     };
 
@@ -359,6 +381,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         .a4-container {width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
                         .avoid-break { break-inside: avoid; page-break-inside: avoid; }
                         .break-after-avoid { break-after: avoid !important; page-break-after: avoid !important; }
+                        .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; }
                         @media screen {body {background: #f1f5f9; padding: 40px 0; } .a4-container {width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; } }
                         @media print {body {background: white !important; margin: 0 !important; } .a4-container {box-shadow: none !important; border: none !important; min-height: auto; position: relative; } .no-print {display: none !important; } * {box-shadow: none !important; } .print-footer {display: none !important; } .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; } }
                         
@@ -737,7 +760,28 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     </td></tr></tbody>
                     <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;">&nbsp;</td></tr></tfoot>
                 </table>
-                <script>window.onload = function() {setTimeout(() => { window.print(); window.close(); }, 800); }</script>
+                <script>
+                    function optimizePageBreaks() {
+                        const containers = document.querySelectorAll('.a4-container');
+                        containers.forEach(container => {
+                            const headings = container.querySelectorAll('h1, h2, h3, h4, h5, h6, .section-title');
+                            headings.forEach(h => {
+                                const next = h.nextElementSibling;
+                                if (next && !next.matches('h1, h2, h3, h4, h5, h6, .section-title')) {
+                                    const wrapper = document.createElement('div');
+                                    wrapper.className = 'keep-together';
+                                    h.parentNode.insertBefore(wrapper, h);
+                                    wrapper.appendChild(h);
+                                    wrapper.appendChild(next);
+                                }
+                            });
+                        });
+                    }
+                    window.onload = function() { 
+                        optimizePageBreaks();
+                        setTimeout(() => { window.print(); window.close(); }, 800); 
+                    }
+                </script>
             </body>
         </html>`;
         printWindow.document.write(html);
