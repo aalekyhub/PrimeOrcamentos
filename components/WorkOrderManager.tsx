@@ -723,12 +723,12 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
                             ${order.descriptionBlocks && order.descriptionBlocks.length > 0 ? `
                <div class="mt-8">
-                   <div class="space-y-4">
-                       ${order.descriptionBlocks.map(block => {
+                            <div class="space-y-1">
+                        ${order.descriptionBlocks.map(block => {
             if (block.type === 'text') {
-                return `<div class="text-slate-800 leading-relaxed text-justify font-medium ql-editor-print" style="font-size: 13px; margin-bottom: 16px;">${formatLegacyText(block.content)}</div>`;
+                return `<div class="text-slate-800 leading-relaxed text-justify font-medium ql-editor-print" style="font-size: 13px;">${formatLegacyText(block.content)}</div>`;
             } else if (block.type === 'image') {
-                return `<div class="avoid-break" style="margin: 10px 0;"><img src="${formatLegacyText(block.content)}" style="width: 100%; max-height: 180mm; border-radius: 8px; border: 1px solid #f1f5f9; object-fit: contain;"></div>`;
+                return `<div class="avoid-break" style="margin: 8px 0;"><img src="${formatLegacyText(block.content)}" style="width: 100%; max-height: 180mm; border-radius: 8px; border: 1px solid #f1f5f9; object-fit: contain;"></div>`;
             } else if (block.type === 'page-break') {
                 return `<div style="page-break-after: always; height: 0;"></div>`;
             }
