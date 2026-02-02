@@ -46,31 +46,29 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
            body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
            @page { size: A4; margin: 0 !important; }
            .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
-           .avoid-break { break-inside: avoid; page-break-inside: avoid; }
-           .info-box { background: #f8fafc; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; }
-           .info-label { font-size: 9px; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; display: block; }
-           .info-value { font-size: 11px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.3; }
-           .info-sub { font-size: 10px; color: #64748b; font-weight: 600; }
            .section-title { font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 6px; border-bottom: 2px solid #e2e8f0; margin-bottom: 12px; }
+           
+           /* Global Protection Classes (Visible to PDF Engine) */
+           .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; }
+           .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; }
+           .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: white !important; text-transform: uppercase; visibility: visible; }
+           
+           /* Styles for Rich Text (Quill) - Global for PDF */
+           .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
+           .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
+           .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
+           .ql-editor-print strong { font-weight: bold !important; }
+           .ql-editor-print em { font-style: italic !important; }
+           .ql-editor-print .ql-align-center { text-align: center !important; }
+           .ql-editor-print .ql-align-right { text-align: right !important; }
+           .ql-editor-print .ql-align-justify { text-align: justify !important; }
            @media screen { body { background: #f1f5f9; padding: 40px 0; } .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; } }
            @media print { 
              body { background: white !important; margin: 0 !important; } 
              .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; width: 100% !important; padding-left: 20mm !important; padding-right: 20mm !important; } 
              .no-screen { display: block !important; } 
              .no-print { display: none !important; } 
-             .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: white !important; text-transform: uppercase; } 
-             .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; } 
-             
-             /* Styles for Rich Text (Quill) */
-             .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
-             .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
-             .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
-             .ql-editor-print strong { font-weight: bold !important; }
-             .ql-editor-print em { font-style: italic !important; }
-             .ql-editor-print .ql-align-center { text-align: center !important; }
-             .ql-editor-print .ql-align-right { text-align: right !important; }
-             .ql-editor-print .ql-align-justify { text-align: justify !important; }
-             .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; }
+             .avoid-break { display: block !important; width: 100% !important; } 
            }
         </style>
       </head>
