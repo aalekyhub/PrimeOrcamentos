@@ -40,7 +40,7 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
       <head>
         <title>OS - ${order.id.replace('OS-', '')} - ${order.description || 'Obra'}</title>
          <script src="https://cdn.tailwindcss.com"></script>
-              <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+              <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&family=Roboto:wght@400;700&family=Montserrat:wght@400;700&family=Open+Sans:wght@400;700&family=Lato:wght@400;700&family=Poppins:wght@400;700&family=Oswald:wght@400;700&family=Playfair+Display:wght@400;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
         <style>
            * { box-sizing: border-box; }
            body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
@@ -77,6 +77,13 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
               .ql-font-roboto { font-family: 'Roboto', sans-serif !important; }
               .ql-font-serif { font-family: serif !important; }
               .ql-font-monospace { font-family: monospace !important; }
+              .ql-font-montserrat { font-family: 'Montserrat', sans-serif !important; }
+              .ql-font-opensans { font-family: 'Open Sans', sans-serif !important; }
+              .ql-font-lato { font-family: 'Lato', sans-serif !important; }
+              .ql-font-poppins { font-family: 'Poppins', sans-serif !important; }
+              .ql-font-oswald { font-family: 'Oswald', sans-serif !important; }
+              .ql-font-playfair { font-family: 'Playfair Display', serif !important; }
+              .ql-font-nunito { font-family: 'Nunito', sans-serif !important; }
 
               /* Size Classes for Print */
               .ql-size-10px { font-size: 10px !important; }

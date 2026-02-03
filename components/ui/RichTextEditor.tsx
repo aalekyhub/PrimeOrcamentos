@@ -6,7 +6,7 @@ import { Type, Image as ImageIcon } from 'lucide-react';
 
 // Whitelist fonts
 const Font = Quill.import('formats/font');
-Font.whitelist = ['inter', 'arial', 'roboto', 'serif', 'monospace'];
+Font.whitelist = ['inter', 'arial', 'roboto', 'serif', 'monospace', 'montserrat', 'opensans', 'lato', 'poppins', 'oswald', 'playfair', 'nunito'];
 Quill.register(Font, true);
 
 // Whitelist sizes
@@ -32,6 +32,13 @@ const CustomToolbar: React.FC<{ id: string; onAddText?: () => void; onAddImage?:
         <option value="roboto">Roboto</option>
         <option value="serif">Serif</option>
         <option value="monospace">Monospace</option>
+        <option value="montserrat">Montserrat</option>
+        <option value="opensans">Open Sans</option>
+        <option value="lato">Lato</option>
+        <option value="poppins">Poppins</option>
+        <option value="oswald">Oswald</option>
+        <option value="playfair">Playfair</option>
+        <option value="nunito">Nunito</option>
       </select>
       <select className="ql-size" defaultValue="14px">
         <option value="10px">10px</option>
@@ -62,12 +69,12 @@ const CustomToolbar: React.FC<{ id: string; onAddText?: () => void; onAddImage?:
     </span>
 
     {(onAddText || onAddImage) && (
-      <div className="flex gap-2 ml-auto pl-4 border-l border-slate-200">
+      <div className="flex gap-2 ml-auto pl-4 pr-8 border-l border-slate-200">
         {onAddText && (
           <button
             type="button"
             onClick={onAddText}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-[9px] font-black uppercase hover:bg-blue-100 transition-all active:scale-95 shadow-sm border border-blue-100 whitespace-nowrap"
+            className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-[9px] font-black uppercase hover:bg-blue-100 transition-all active:scale-95 shadow-sm border border-blue-100 whitespace-nowrap"
             title="Adicionar Bloco de Texto"
           >
             <Type className="w-3.5 h-3.5" /> + TEXTO
@@ -77,7 +84,7 @@ const CustomToolbar: React.FC<{ id: string; onAddText?: () => void; onAddImage?:
           <button
             type="button"
             onClick={onAddImage}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-[9px] font-black uppercase hover:bg-emerald-100 transition-all active:scale-95 shadow-sm border border-emerald-100 whitespace-nowrap"
+            className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-[9px] font-black uppercase hover:bg-emerald-100 transition-all active:scale-95 shadow-sm border border-emerald-100 whitespace-nowrap"
             title="Adicionar Bloco de Imagem"
           >
             <ImageIcon className="w-3.5 h-3.5" /> + IMAGEM
@@ -137,7 +144,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeh
           content: 'Inter';
         }
         .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='inter']::before,
-        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='inter']::before { font-family: 'Inter'; content: 'Inter'; }
+        .ql-snow .ql-picker.ql-font .ql-picker-item::before { font-family: 'Inter'; content: 'Inter'; }
         .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='arial']::before,
         .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='arial']::before { font-family: Arial; content: 'Arial'; }
         .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='roboto']::before,
@@ -146,6 +153,20 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeh
         .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='serif']::before { font-family: serif; content: 'Serif'; }
         .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='monospace']::before,
         .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='monospace']::before { font-family: monospace; content: 'Monospace'; }
+        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='montserrat']::before,
+        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='montserrat']::before { font-family: 'Montserrat'; content: 'Montserrat'; }
+        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='opensans']::before,
+        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='opensans']::before { font-family: 'Open Sans'; content: 'Open Sans'; }
+        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='lato']::before,
+        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='lato']::before { font-family: 'Lato'; content: 'Lato'; }
+        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='poppins']::before,
+        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='poppins']::before { font-family: 'Poppins'; content: 'Poppins'; }
+        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='oswald']::before,
+        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='oswald']::before { font-family: 'Oswald'; content: 'Oswald'; }
+        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='playfair']::before,
+        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='playfair']::before { font-family: 'Playfair Display'; content: 'Playfair'; }
+        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='nunito']::before,
+        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='nunito']::before { font-family: 'Nunito'; content: 'Nunito'; }
 
         /* Sizes */
         .ql-snow .ql-picker.ql-size .ql-picker-label::before,
@@ -173,6 +194,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeh
         .ql-font-roboto { font-family: 'Roboto', sans-serif !important; }
         .ql-font-serif { font-family: serif !important; }
         .ql-font-monospace { font-family: monospace !important; }
+        .ql-font-montserrat { font-family: 'Montserrat', sans-serif !important; }
+        .ql-font-opensans { font-family: 'Open Sans', sans-serif !important; }
+        .ql-font-lato { font-family: 'Lato', sans-serif !important; }
+        .ql-font-poppins { font-family: 'Poppins', sans-serif !important; }
+        .ql-font-oswald { font-family: 'Oswald', sans-serif !important; }
+        .ql-font-playfair { font-family: 'Playfair Display', serif !important; }
+        .ql-font-nunito { font-family: 'Nunito', sans-serif !important; }
 
         /* Size Classes for Rendering */
         .ql-size-10px { font-size: 10px !important; }
