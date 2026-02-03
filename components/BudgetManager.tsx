@@ -344,12 +344,9 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         <div class="print-footer no-screen"><span>Documento gerado em ${new Date().toLocaleString('pt-BR')}</span></div>
         <script>
            function optimizePageBreaks() {
-             // 1. Target the main content area
              const root = document.querySelector('.print-description-content .space-y-6');
              if (!root) return;
 
-             // 2. Flatten nodes if they are inside .ql-editor-print wrappers
-             // This is crucial because each block might be its own wrapper
              const allNodes = [];
              Array.from(root.children).forEach(block => {
                if (block.classList.contains('ql-editor-print')) {
@@ -359,29 +356,40 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                }
              });
 
-             // 3. Detect and wrap
              for (let i = 0; i < allNodes.length - 1; i++) {
                const el = allNodes[i];
                let isTitle = false;
                
                if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
-               else if (el.tagName === 'P' || el.tagName === 'DIV') {
+               else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
                  const text = el.innerText.trim();
                  const isNumbered = /^\d+[\.\)]/.test(text);
-                 const hasBold = el.querySelector('strong, b') || (el.style && el.style.fontWeight > 500);
-                 if (isNumbered && hasBold && text.length < 150) isTitle = true;
+                 const isBold = el.querySelector('strong, b') || (el.style && parseInt(el.style.fontWeight) > 500) || el.tagName === 'STRONG';
+                 const isShort = text.length < 150;
+                 if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
+                   isTitle = true;
+                 }
                }
 
                if (isTitle) {
-                 const next = allNodes[i+1];
-                 if (next && !next.matches('h1, h2, h3, h4, h5, h6')) {
+                 const nodesToWrap = [el];
+                 let j = i + 1;
+                 while (j < allNodes.length && nodesToWrap.length < 3) {
+                   const next = allNodes[j];
+                   const nText = next.innerText.trim();
+                   const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') || 
+                                       (/^\d+[\.\)]/.test(nText) && (next.querySelector('strong, b') || nText === nText.toUpperCase()));
+                   if (nextIsTitle) break;
+                   nodesToWrap.push(next);
+                   j++;
+                 }
+
+                 if (nodesToWrap.length > 1) {
                    const wrapper = document.createElement('div');
                    wrapper.className = 'keep-together';
                    el.parentNode.insertBefore(wrapper, el);
-                   wrapper.appendChild(el);
-                   wrapper.appendChild(next);
-                   // Skip next since it's now wrapped
-                   i++; 
+                   nodesToWrap.forEach(node => wrapper.appendChild(node));
+                   i = j - 1;
                  }
                }
              }
@@ -423,19 +431,32 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           else if (el.tagName === 'P' || el.tagName === 'DIV') {
             const text = el.innerText.trim();
             const isNumbered = /^\d+[\.\)]/.test(text);
-            const hasBold = el.querySelector('strong, b');
-            if (isNumbered && hasBold && text.length < 150) isTitle = true;
+            const isBold = el.querySelector('strong, b');
+            const isShort = text.length < 150;
+            if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
+              isTitle = true;
+            }
           }
 
           if (isTitle) {
-            const next = allNodes[i + 1];
-            if (next && !next.matches('h1, h2, h3, h4, h5, h6')) {
+            const nodesToWrap = [el];
+            let j = i + 1;
+            while (j < allNodes.length && nodesToWrap.length < 3) {
+              const next = allNodes[j] as HTMLElement;
+              const nText = next.innerText.trim();
+              const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') ||
+                (/^\d+[\.\)]/.test(nText) && (next.querySelector('strong, b') || nText === nText.toUpperCase()));
+              if (nextIsTitle) break;
+              nodesToWrap.push(next);
+              j++;
+            }
+
+            if (nodesToWrap.length > 1) {
               const wrapper = document.createElement('div');
               wrapper.className = 'keep-together';
               el.parentNode?.insertBefore(wrapper, el);
-              wrapper.appendChild(el);
-              wrapper.appendChild(next);
-              i++;
+              nodesToWrap.forEach(node => wrapper.appendChild(node));
+              i = j - 1;
             }
           }
         }
