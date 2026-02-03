@@ -59,7 +59,7 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
              .no-screen { display: block !important; } 
              .no-print { display: none !important; } 
              .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: white !important; text-transform: uppercase; } 
-             .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; } 
+              .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; padding: 0 !important; margin: 20px 0 !important; } 
              
              /* Styles for Rich Text (Quill) */
              .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
@@ -70,7 +70,7 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
              .ql-editor-print .ql-align-center { text-align: center !important; }
              .ql-editor-print .ql-align-right { text-align: right !important; }
              .ql-editor-print .ql-align-justify { text-align: justify !important; }
-             .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; }
+              .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
            }
         </style>
       </head>
@@ -118,7 +118,7 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
             if (block.type === 'text') {
                 return `<div class="text-slate-800 leading-relaxed text-justify font-medium ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px;">${block.content}</div>`;
             } else if (block.type === 'image') {
-                return `<div class="avoid-break" style="margin: 20px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; object-fit: contain;"></div>`;
+                return `<div class="avoid-break" style="margin: 20px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; object-fit: contain; display: block;"></div>`;
             } else if (block.type === 'page-break') {
                 return `<div style="page-break-after: always; break-after: page; height: 0; margin: 0; padding: 0;"></div>`;
             }
@@ -248,7 +248,7 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
            }
            window.onload = function() { 
              optimizePageBreaks();
-             setTimeout(() => { window.print(); window.close(); }, 1200); 
+              setTimeout(() => { window.print(); window.close(); }, 2000); 
            }
         </script>
       </body>

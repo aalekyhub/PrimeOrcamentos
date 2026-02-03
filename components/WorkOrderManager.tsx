@@ -412,7 +412,15 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         .break-after-avoid { break-after: avoid !important; page-break-after: avoid !important; }
                         .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; }
                         @media screen {body {background: #f1f5f9; padding: 40px 0; } .a4-container {width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; } }
-                        @media print {body {background: white !important; margin: 0 !important; } .a4-container {box-shadow: none !important; border: none !important; min-height: auto; position: relative; } .no-print {display: none !important; } * {box-shadow: none !important; } .print-footer {display: none !important; color: white !important; } .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; } }
+                         @media print {
+                             body { background: white !important; margin: 0 !important; } 
+                             .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; width: 100% !important; padding-left: 20mm !important; padding-right: 20mm !important; } 
+                             .no-print { display: none !important; } 
+                             * { box-shadow: none !important; } 
+                             .print-footer { display: none !important; color: white !important; } 
+                             .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; overflow: hidden !important; } 
+                             .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; }
+                         }
                         
                         /* Styles for Rich Text (Quill) */
                         .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
@@ -629,23 +637,23 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                 <script src="https://cdn.tailwindcss.com"></script>
                 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
                     <style>
-                        * {box - sizing: border-box; }
-                        body {font - family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; color: #0f172a; }
-                        @page {size: A4; margin: 0 !important; }
-                        .a4-container {width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
+                        * { box-sizing: border-box; }
+                        body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; color: #0f172a; }
+                        @page { size: A4; margin: 0 !important; }
+                        .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
                         .avoid-break { break-inside: avoid; page-break-inside: avoid; }
-                        .info-box {background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
-                        .info-label {font - size: 11px; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block; }
-                        .info-value {font - size: 16px; font-weight: 700; color: #0f172a; text-transform: uppercase; line-height: 1.2; }
-                        .section-title {font - size: 14px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 2px solid #f1f5f9; margin-bottom: 16px; margin-top: 32px; }
-                        .card-summary {padding: 12px; border-radius: 12px; border: 1px solid transparent; }
+                        .info-box { background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
+                        .info-label { font-size: 11px; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block; }
+                        .info-value { font-size: 16px; font-weight: 700; color: #0f172a; text-transform: uppercase; line-height: 1.2; }
+                        .section-title { font-size: 14px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 2px solid #f1f5f9; margin-bottom: 16px; margin-top: 32px; }
+                        .card-summary { padding: 12px; border-radius: 12px; border: 1px solid transparent; }
                         @media print {
-                            body {background: white !important; margin: 0 !important; }
-                        .a4-container {box - shadow: none !important; border: none !important; min-height: auto; position: relative; width: 100% !important; padding-left: 20mm !important; padding-right: 20mm !important; }
-                        .no-print {display: none !important; }
-                        .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; } 
-                        .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; }
-           }
+                            body { background: white !important; margin: 0 !important; }
+                            .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; width: 100% !important; padding-left: 20mm !important; padding-right: 20mm !important; }
+                            .no-print { display: none !important; }
+                            .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; padding: 0 !important; margin: 20px 0 !important; } 
+                            .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
+                        }
            
                         /* Styles for Rich Text (Quill) */
                         .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
@@ -768,7 +776,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             if (block.type === 'text') {
                 return `<div class="text-slate-600 leading-relaxed text-justify ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px;">${block.content}</div>`;
             } else if (block.type === 'image') {
-                return `<div class="avoid-break" style="margin: 20px 0;"><img src="${block.content}" style="width: 100%; border-radius: 12px; border: 1px solid #e2e8f0;"></div>`;
+                return `<div class="avoid-break" style="margin: 20px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; border: 1px solid #e2e8f0; display: block; object-fit: contain;"></div>`;
             } else if (block.type === 'page-break') {
                 return `<div style="page-break-after: always; break-after: page; height: 0; margin: 0; padding: 0;"></div>`;
             }
@@ -844,7 +852,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     }
                     window.onload = function() { 
                         optimizePageBreaks();
-                        setTimeout(() => { window.print(); window.close(); }, 800); 
+                        setTimeout(() => { window.print(); window.close(); }, 2000); 
                     }
                 </script>
             </body>

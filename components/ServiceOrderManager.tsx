@@ -180,7 +180,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
            .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
            .avoid-break { break-inside: avoid; page-break-inside: avoid; }
            .break-after-avoid { break-after: avoid !important; page-break-after: avoid !important; }
-           .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; }
+           .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
            
            /* Premium Box Styles */
            .info-box { background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
@@ -198,7 +198,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
              .no-print { display: none !important; }
              .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: white !important; text-transform: uppercase; }
              .ql-editor-print .ql-align-justify { text-align: justify !important; }
-             .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; }
+             .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; padding: 0 !important; margin: 20px 0 !important; }
 
              /* Prevent widowed headings */
              .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4, .ql-editor-print h5, .ql-editor-print h6 { 
@@ -263,7 +263,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
       if (block.type === 'text') {
         return `<div class="text-slate-700 leading-relaxed text-justify ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px;">${block.content}</div>`;
       } else if (block.type === 'image') {
-        return `<div class="avoid-break" style="margin: 20px 0;"><img src="${block.content}" style="width: 100%; border-radius: 12px; border: 1px solid #e2e8f0;"></div>`;
+        return `<div class="avoid-break" style="margin: 20px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; border: 1px solid #e2e8f0; display: block; object-fit: contain;"></div>`;
       } else if (block.type === 'page-break') {
         return `<div style="page-break-after: always; break-after: page; height: 0; margin: 0; padding: 0;"></div>`;
       }
@@ -397,7 +397,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
            }
            window.onload = function() { 
              optimizePageBreaks();
-             setTimeout(() => { window.print(); window.close(); }, 800); 
+             setTimeout(() => { window.print(); window.close(); }, 2000); 
            }
         </script>
       </body>
