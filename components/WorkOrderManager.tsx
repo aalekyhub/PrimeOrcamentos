@@ -52,6 +52,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     const [currentDesc, setCurrentDesc] = useState('');
     const [currentPrice, setCurrentPrice] = useState(0);
     const [currentQty, setCurrentQty] = useState(1);
+    const [currentUnit, setCurrentUnit] = useState('un');
     const [currentActual, setCurrentActual] = useState<number | ''>('');
 
     // Financial State
@@ -125,12 +126,12 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             quantity: currentQty || 1,
             unitPrice: currentPrice || 0,
             type: 'Serviço',
-            unit: 'un',
+            unit: currentUnit || 'un',
             actualValue: (currentActual === '' ? 0 : currentActual) || ((currentActualQty || 0) * (currentActualPrice || 0)),
             actualQuantity: currentActualQty || 0,
             actualUnitPrice: currentActualPrice || 0
         }]);
-        setCurrentDesc(''); setCurrentPrice(0); setCurrentQty(1); setCurrentActual('');
+        setCurrentDesc(''); setCurrentPrice(0); setCurrentQty(1); setCurrentUnit('un'); setCurrentActual('');
         setCurrentActualQty(0); setCurrentActualPrice(0);
         notify("Item adicionado");
     };
@@ -1069,65 +1070,79 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
                                         <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
                                             <div className="flex justify-between items-center mb-4"><h1 className="text-xs font-black text-slate-900 uppercase tracking-tight">1. Planejamento de Custos e Acompanhamento</h1></div>
-                                            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-4">
-                                                <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
-                                                    <div className="md:col-span-3"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Descrição</label><input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentDesc} onChange={e => setCurrentDesc(e.target.value)} placeholder="Ex: Tinta, Cimento..." /></div>
-                                                    <div className="md:col-span-1 text-center"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Qtd Est.</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-center" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} /></div>
-                                                    <div className="md:col-span-1 text-right"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">VALOR ESTIM.</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-right" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} /></div>
-                                                    <div className="md:col-span-2 border-l pl-2"><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-1.5 block ml-1">Total Est.</label><div className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold text-blue-700 text-right min-h-[42px] flex items-center justify-end">R$ {((currentQty || 0) * (currentPrice || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div></div>
+                                            <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
+                                                <div className="md:col-span-3"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Descrição</label><input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentDesc} onChange={e => setCurrentDesc(e.target.value)} placeholder="Ex: Tinta, Cimento..." /></div>
+                                                <div className="md:col-span-1 text-center"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Qtd Est.</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-center" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} /></div>
+                                                <div className="md:col-span-1 text-center"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">UN</label><input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-center" value={currentUnit} onChange={e => setCurrentUnit(e.target.value)} placeholder="un" /></div>
+                                                <div className="md:col-span-1 text-right"><label className="text-[7px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">VALOR PROJETADO</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-right" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} /></div>
+                                                <div className="md:col-span-1 border-l pl-2"><label className="text-[7px] font-black text-blue-600 uppercase tracking-widest mb-1.5 block ml-1">TOTAL PROJETADO</label><div className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold text-blue-700 text-right min-h-[42px] flex items-center justify-end">R$ {((currentQty || 0) * (currentPrice || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div></div>
 
-                                                    <div className="md:col-span-1 text-center border-l pl-2"><label className="text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1.5 block ml-1">Qtd Real</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-center" value={currentActualQty} onChange={e => setCurrentActualQty(Number(e.target.value))} /></div>
-                                                    <div className="md:col-span-1 text-right"><label className="text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1.5 block ml-1">VALOR REAL</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-right" value={currentActualPrice} onChange={e => setCurrentActualPrice(Number(e.target.value))} /></div>
-                                                    <div className="md:col-span-2 border-l pl-2"><label className="text-[9px] font-black text-amber-600 uppercase tracking-widest mb-1.5 block ml-1">Total Real</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-right" value={currentActual || ((currentActualQty || 0) * (currentActualPrice || 0)) || ''} onChange={e => setCurrentActual(e.target.value === '' ? 0 : Number(e.target.value))} /></div>
-                                                    <div className="md:col-span-1"><button onClick={handleAddItem} className="bg-slate-900 text-white w-full h-[42px] rounded-xl flex items-center justify-center hover:bg-slate-800 transition-colors shadow-lg font-bold"><Plus className="w-5 h-5" /></button></div>
-                                                </div>
-                                                <div className="mt-6 mb-1 grid grid-cols-12 gap-2 px-3">
-                                                    <div className="col-span-3"></div>
-                                                    <div className="col-span-4 text-center border-b border-slate-200 pb-1 mx-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">PLANEJADO</span></div>
-                                                    <div className="col-span-4 text-center border-b border-rose-100 pb-1 mx-2"><span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">REALIZADO</span></div>
-                                                    <div className="col-span-1"></div>
-                                                </div>
-                                                <div className="mb-2 grid grid-cols-12 gap-1 px-3">
-                                                    <div className="col-span-3"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">DESCRIÇÃO</span></div>
-                                                    <div className="col-span-1 text-center"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">QTD</span></div>
-                                                    <div className="col-span-1 text-right pr-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">UNIT</span></div>
-                                                    <div className="col-span-2 text-right pr-4"><span className="text-[9px] font-black text-blue-600 uppercase tracking-widest">TOTAL</span></div>
-                                                    <div className="col-span-1 text-center border-l border-rose-100 pl-1"><span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">QTD</span></div>
-                                                    <div className="col-span-1 text-right pr-2"><span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">UNIT</span></div>
-                                                    <div className="col-span-2 text-right pr-4"><span className="text-[9px] font-black text-amber-600 uppercase tracking-widest">TOTAL</span></div>
-                                                    <div className="col-span-1"></div>
-                                                </div>
-                                                <div className="max-h-[300px] overflow-y-auto no-scrollbar">
-                                                    {items.map(item => (
-                                                        <div key={item.id} className="grid grid-cols-12 gap-1 items-center py-2 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors px-3">
-                                                            <div className="col-span-3">
-                                                                <input type="text" className="w-full bg-transparent text-xs font-bold text-slate-700 uppercase outline-none" value={item.description} onChange={e => updateItem(item.id, 'description', e.target.value)} />
-                                                            </div>
-                                                            <div className="col-span-1 border-l border-slate-100 pl-1">
-                                                                <input type="number" className="w-full bg-transparent text-xs font-bold text-slate-600 outline-none text-center appearance-none" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', Number(e.target.value))} />
-                                                            </div>
-                                                            <div className="col-span-1">
+                                                <div className="md:col-span-1 text-center border-l pl-2"><label className="text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1.5 block ml-1">Qtd Real</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-center" value={currentActualQty} onChange={e => setCurrentActualQty(Number(e.target.value))} /></div>
+                                                <div className="md:col-span-1 text-center"><label className="text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1.5 block ml-1">UN</label><div className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-center min-h-[42px] flex items-center justify-center uppercase">{currentUnit || 'un'}</div></div>
+                                                <div className="md:col-span-1 text-right"><label className="text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1.5 block ml-1">VALOR REAL</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-right" value={currentActualPrice} onChange={e => setCurrentActualPrice(Number(e.target.value))} /></div>
+                                                <div className="md:col-span-1 border-l pl-2"><label className="text-[9px] font-black text-amber-600 uppercase tracking-widest mb-1.5 block ml-1">Total Real</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-right" value={currentActual || ((currentActualQty || 0) * (currentActualPrice || 0)) || ''} onChange={e => setCurrentActual(e.target.value === '' ? 0 : Number(e.target.value))} /></div>
+                                                <div className="md:col-span-1"><button onClick={handleAddItem} className="bg-slate-900 text-white w-full h-[42px] rounded-xl flex items-center justify-center hover:bg-slate-800 transition-colors shadow-lg font-bold"><Plus className="w-5 h-5" /></button></div>
+                                            </div>
+                                            <div className="mt-6 mb-1 grid grid-cols-12 gap-2 px-3">
+                                                <div className="col-span-2"></div>
+                                                <div className="col-span-4 text-center border-b border-slate-200 pb-1 mx-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">PLANEJADO</span></div>
+                                                <div className="col-span-5 text-center border-b border-rose-100 pb-1 mx-2"><span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">REALIZADO</span></div>
+                                                <div className="col-span-1"></div>
+                                            </div>
+                                            <div className="mb-2 grid grid-cols-12 gap-1 px-3">
+                                                <div className="col-span-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">DESCRIÇÃO</span></div>
+                                                <div className="col-span-1 text-center"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">QTD</span></div>
+                                                <div className="col-span-1 text-center"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">UN</span></div>
+                                                <div className="col-span-1 text-right pr-2"><span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">VALOR UNIT.</span></div>
+                                                <div className="col-span-1 text-right pr-4"><span className="text-[9px] font-black text-blue-600 uppercase tracking-widest">TOTAL</span></div>
+                                                <div className="col-span-1 text-center border-l border-rose-100 pl-1"><span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">QTD</span></div>
+                                                <div className="col-span-1 text-center"><span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">UN</span></div>
+                                                <div className="col-span-1 text-right pr-2"><span className="text-[8px] font-black text-rose-400 uppercase tracking-widest">VALOR UNIT.</span></div>
+                                                <div className="col-span-2 text-right pr-4"><span className="text-[9px] font-black text-amber-600 uppercase tracking-widest">TOTAL</span></div>
+                                                <div className="col-span-1"></div>
+                                            </div>
+                                            <div className="max-h-[300px] overflow-y-auto no-scrollbar">
+                                                {items.map(item => (
+                                                    <div key={item.id} className="grid grid-cols-12 gap-1 items-center py-2 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors px-3">
+                                                        <div className="col-span-2">
+                                                            <input type="text" className="w-full bg-transparent text-xs font-bold text-slate-700 uppercase outline-none" value={item.description} onChange={e => updateItem(item.id, 'description', e.target.value)} />
+                                                        </div>
+                                                        <div className="col-span-1 border-l border-slate-100 pl-1">
+                                                            <input type="number" className="w-full bg-transparent text-xs font-bold text-slate-600 outline-none text-center appearance-none" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', Number(e.target.value))} />
+                                                        </div>
+                                                        <div className="col-span-1">
+                                                            <input type="text" className="w-full bg-transparent text-xs font-bold text-slate-400 outline-none text-center uppercase" value={item.unit || 'un'} onChange={e => updateItem(item.id, 'unit', e.target.value)} />
+                                                        </div>
+                                                        <div className="col-span-1">
+                                                            <div className="flex items-center justify-end gap-0.5">
+                                                                <span className="text-[8px] text-slate-400 font-bold">R$</span>
                                                                 <input type="number" className="w-full bg-transparent text-xs font-bold text-slate-600 outline-none text-right appearance-none" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', Number(e.target.value))} />
                                                             </div>
-                                                            <div className="col-span-2 text-right px-2">
-                                                                <span className="text-xs font-bold text-blue-600">R$ {(item.quantity * item.unitPrice).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                                                            </div>
+                                                        </div>
+                                                        <div className="col-span-1 text-right px-2">
+                                                            <span className="text-xs font-bold text-blue-600">R$ {(item.quantity * item.unitPrice).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                                        </div>
 
-                                                            <div className="col-span-1 border-l border-rose-100 pl-1">
-                                                                <input type="number" className="w-full bg-transparent text-xs font-bold text-rose-600 outline-none text-center appearance-none" value={item.actualQuantity || 0} onChange={e => updateItem(item.id, 'actualQuantity', Number(e.target.value))} />
-                                                            </div>
-                                                            <div className="col-span-1">
+                                                        <div className="col-span-1 border-l border-rose-100 pl-1">
+                                                            <input type="number" className="w-full bg-transparent text-xs font-bold text-rose-600 outline-none text-center appearance-none" value={item.actualQuantity || 0} onChange={e => updateItem(item.id, 'actualQuantity', Number(e.target.value))} />
+                                                        </div>
+                                                        <div className="col-span-1 text-center">
+                                                            <span className="text-[10px] font-bold text-slate-400 uppercase">{item.unit || 'un'}</span>
+                                                        </div>
+                                                        <div className="col-span-1">
+                                                            <div className="flex items-center justify-end gap-0.5">
+                                                                <span className="text-[8px] text-rose-400 font-bold">R$</span>
                                                                 <input type="number" className="w-full bg-transparent text-xs font-bold text-rose-600 outline-none text-right appearance-none" value={item.actualUnitPrice || 0} onChange={e => updateItem(item.id, 'actualUnitPrice', Number(e.target.value))} />
                                                             </div>
-                                                            <div className="col-span-2 border-l border-amber-100 pl-1 text-right px-2">
-                                                                <span className="text-xs font-bold text-amber-700">R$ {((item.actualQuantity || 0) * (item.actualUnitPrice || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                                                            </div>
-                                                            <div className="col-span-1 flex justify-center">
-                                                                <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="text-slate-300 hover:text-rose-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
-                                                            </div>
                                                         </div>
-                                                    ))}
-                                                </div>
+                                                        <div className="col-span-2 border-l border-amber-100 pl-1 text-right px-2">
+                                                            <span className="text-xs font-bold text-amber-700">R$ {((item.actualQuantity || 0) * (item.actualUnitPrice || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                                        </div>
+                                                        <div className="col-span-1 flex justify-center">
+                                                            <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="text-slate-300 hover:text-rose-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                                                        </div>
+                                                    </div>
+                                                ))}
                                             </div>
                                         </div>
                                     </div>
@@ -1136,79 +1151,84 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         </div>
 
                         <div className="bg-white px-8 py-5 border-t flex justify-end shrink-0">
-                            <button onClick={handleSaveOS} disabled={isSaving} className={`bg - slate - 900 text - white px - 12 py - 4 rounded - 2xl font - black uppercase tracking - widest text - xs shadow - xl shadow - slate - 200 hover: shadow - 2xl transition - all flex items - center justify - center gap - 3 ${isSaving ? 'opacity-50 cursor-not-allowed' : ''} `}>
-                                <Save className={`w - 4 h - 4 ${isSaving ? 'animate-pulse' : ''} `} /> {isSaving ? 'Salvando...' : 'Salvar OS de Obra'}
+                            <button onClick={handleSaveOS} disabled={isSaving} className={`bg-slate-900 text-white px-12 py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-slate-200 hover:shadow-2xl transition-all flex items-center justify-center gap-3 ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                <Save className={`w-4 h-4 ${isSaving ? 'animate-pulse' : ''}`} /> {isSaving ? 'Salvando...' : 'Salvar OS de Obra'}
                             </button>
                         </div>
                     </div>
                 </div>
-            )}
-            {showFullClientForm && (
-                <div className="fixed inset-0 z-[60] bg-black/20 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div className="bg-white w-full max-w-2xl max-h-[90vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col">
-                        <div className="p-4 border-b flex justify-between items-center">
-                            <h3 className="font-bold">Novo Cliente</h3>
-                            <button onClick={() => setShowFullClientForm(false)}><X className="w-5 h-5" /></button>
-                        </div>
-                        <div className="flex-1 overflow-y-auto p-0">
-                            <CustomerManager
-                                customers={customers}
-                                setCustomers={setCustomers}
-                                orders={orders}
-                                defaultOpenForm={true}
-                                onSuccess={(c) => { setSelectedCustomerId(c.id); setShowFullClientForm(false); }}
-                                onCancel={() => setShowFullClientForm(false)}
-                            />
-                        </div>
-                    </div>
-                </div>
-            )}
-            {showReportTypeModal && selectedOrderForReport && (
-                <div className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-300">
-                    <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl p-8 transform animate-in zoom-in-95 duration-200">
-                        <div className="flex justify-between items-start mb-6">
-                            <div>
-                                <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase">Tipo de Relatório</h3>
-                                <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">Selecione para imprimir</p>
+            )
+            }
+            {
+                showFullClientForm && (
+                    <div className="fixed inset-0 z-[60] bg-black/20 backdrop-blur-sm flex items-center justify-center p-4">
+                        <div className="bg-white w-full max-w-2xl max-h-[90vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col">
+                            <div className="p-4 border-b flex justify-between items-center">
+                                <h3 className="font-bold">Novo Cliente</h3>
+                                <button onClick={() => setShowFullClientForm(false)}><X className="w-5 h-5" /></button>
                             </div>
-                            <button onClick={() => setShowReportTypeModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X className="w-5 h-5 text-slate-400" /></button>
-                        </div>
-
-                        <div className="grid grid-cols-1 gap-4">
-                            <button
-                                onClick={() => { handlePrintWorkReport(selectedOrderForReport, 'estimated'); setShowReportTypeModal(false); }}
-                                className="group flex items-center gap-4 p-5 bg-blue-50 hover:bg-blue-600 rounded-3xl transition-all border border-blue-100 text-left"
-                            >
-                                <div className="p-3 bg-white rounded-2xl shadow-sm text-blue-600 group-hover:scale-110 transition-transform">
-                                    <ScrollText className="w-6 h-6" />
-                                </div>
-                                <div>
-                                    <h4 className="font-black text-blue-900 group-hover:text-white uppercase text-sm tracking-tight">RELATÓRIO DO ESTIMADO</h4>
-                                    <p className="text-blue-600/70 group-hover:text-white/80 text-[10px] font-bold uppercase">Apenas planejamento e custos orçados</p>
-                                </div>
-                            </button>
-
-                            <button
-                                onClick={() => { handlePrintWorkReport(selectedOrderForReport, 'real'); setShowReportTypeModal(false); }}
-                                className="group flex items-center gap-4 p-5 bg-emerald-50 hover:bg-emerald-600 rounded-3xl transition-all border border-emerald-100 text-left"
-                            >
-                                <div className="p-3 bg-white rounded-2xl shadow-sm text-emerald-600 group-hover:scale-110 transition-transform">
-                                    <CheckCircle className="w-6 h-6" />
-                                </div>
-                                <div>
-                                    <h4 className="font-black text-emerald-900 group-hover:text-white uppercase text-sm tracking-tight">RELATÓRIO DO REAL</h4>
-                                    <p className="text-emerald-600/70 group-hover:text-white/80 text-[10px] font-bold uppercase">Custos orçados vs Realizados e Resultado</p>
-                                </div>
-                            </button>
-                        </div>
-
-                        <div className="mt-8 pt-6 border-t border-slate-100 flex justify-center">
-                            <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">ServiFlow v2.0</p>
+                            <div className="flex-1 overflow-y-auto p-0">
+                                <CustomerManager
+                                    customers={customers}
+                                    setCustomers={setCustomers}
+                                    orders={orders}
+                                    defaultOpenForm={true}
+                                    onSuccess={(c) => { setSelectedCustomerId(c.id); setShowFullClientForm(false); }}
+                                    onCancel={() => setShowFullClientForm(false)}
+                                />
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+            {
+                showReportTypeModal && selectedOrderForReport && (
+                    <div className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-300">
+                        <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl p-8 transform animate-in zoom-in-95 duration-200">
+                            <div className="flex justify-between items-start mb-6">
+                                <div>
+                                    <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase">Tipo de Relatório</h3>
+                                    <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">Selecione para imprimir</p>
+                                </div>
+                                <button onClick={() => setShowReportTypeModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X className="w-5 h-5 text-slate-400" /></button>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-4">
+                                <button
+                                    onClick={() => { handlePrintWorkReport(selectedOrderForReport, 'estimated'); setShowReportTypeModal(false); }}
+                                    className="group flex items-center gap-4 p-5 bg-blue-50 hover:bg-blue-600 rounded-3xl transition-all border border-blue-100 text-left"
+                                >
+                                    <div className="p-3 bg-white rounded-2xl shadow-sm text-blue-600 group-hover:scale-110 transition-transform">
+                                        <ScrollText className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-black text-blue-900 group-hover:text-white uppercase text-sm tracking-tight">RELATÓRIO DO ESTIMADO</h4>
+                                        <p className="text-blue-600/70 group-hover:text-white/80 text-[10px] font-bold uppercase">Apenas planejamento e custos orçados</p>
+                                    </div>
+                                </button>
+
+                                <button
+                                    onClick={() => { handlePrintWorkReport(selectedOrderForReport, 'real'); setShowReportTypeModal(false); }}
+                                    className="group flex items-center gap-4 p-5 bg-emerald-50 hover:bg-emerald-600 rounded-3xl transition-all border border-emerald-100 text-left"
+                                >
+                                    <div className="p-3 bg-white rounded-2xl shadow-sm text-emerald-600 group-hover:scale-110 transition-transform">
+                                        <CheckCircle className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-black text-emerald-900 group-hover:text-white uppercase text-sm tracking-tight">RELATÓRIO DO REAL</h4>
+                                        <p className="text-emerald-600/70 group-hover:text-white/80 text-[10px] font-bold uppercase">Custos orçados vs Realizados e Resultado</p>
+                                    </div>
+                                </button>
+                            </div>
+
+                            <div className="mt-8 pt-6 border-t border-slate-100 flex justify-center">
+                                <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">ServiFlow v2.0</p>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+        </div >
     );
 };
 
