@@ -1075,8 +1075,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                 <div className="md:col-span-3"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Descrição</label><input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentDesc} onChange={e => setCurrentDesc(e.target.value)} placeholder="Ex: Tinta, Cimento..." /></div>
                                                 <div className="md:col-span-1 text-center"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Qtd Est.</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-center" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} /></div>
                                                 <div className="md:col-span-1 text-center"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">UN</label><input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-center" value={currentUnit} onChange={e => setCurrentUnit(e.target.value)} placeholder="un" /></div>
-                                                <div className="md:col-span-1 text-right"><label className="text-[7px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">VL. PROJ</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-right" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} /></div>
-                                                <div className="md:col-span-1 pl-1"><label className="text-[7px] font-black text-blue-600 uppercase tracking-widest mb-1.5 block ml-1">TOTAL PROJ</label><div className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold text-blue-700 text-right min-h-[42px] flex items-center justify-end">R$ {((currentQty || 0) * (currentPrice || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div></div>
+                                                <div className="md:col-span-1 text-right"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">VL. PROJ</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-right" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} /></div>
+                                                <div className="md:col-span-1 pl-1"><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-1.5 block ml-1">TOTAL PROJ</label><div className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold text-blue-700 text-right min-h-[42px] flex items-center justify-end">R$ {((currentQty || 0) * (currentPrice || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div></div>
 
                                                 <div className="md:col-span-1 text-center"><label className="text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1.5 block ml-1">Qtd Real</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-center" value={currentActualQty} onChange={e => setCurrentActualQty(Number(e.target.value))} /></div>
                                                 <div className="md:col-span-1 text-center"><label className="text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1.5 block ml-1">UN</label><div className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-center min-h-[42px] flex items-center justify-center uppercase">{currentUnit || 'un'}</div></div>
@@ -1094,11 +1094,11 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                 <div className="col-span-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">DESCRIÇÃO</span></div>
                                                 <div className="col-span-1 text-center"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">QTD</span></div>
                                                 <div className="col-span-1 text-center"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">UN</span></div>
-                                                <div className="col-span-1 text-right pr-2"><span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">VL. PROJ</span></div>
+                                                <div className="col-span-1 text-right pr-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">VL. PROJ</span></div>
                                                 <div className="col-span-1 text-right pr-4"><span className="text-[9px] font-black text-blue-600 uppercase tracking-widest">TOTAL PROJ</span></div>
                                                 <div className="col-span-1 text-center border-l border-rose-100 pl-1"><span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">QTD</span></div>
                                                 <div className="col-span-1 text-center"><span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">UN</span></div>
-                                                <div className="col-span-1 text-right pr-2"><span className="text-[8px] font-black text-rose-400 uppercase tracking-widest">VL. REAL</span></div>
+                                                <div className="col-span-1 text-right pr-2"><span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">VL. REAL</span></div>
                                                 <div className="col-span-2 text-right pr-4"><span className="text-[9px] font-black text-amber-600 uppercase tracking-widest">TOTAL REAL</span></div>
                                                 <div className="col-span-1"></div>
                                             </div>
@@ -1115,19 +1115,20 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                             <input type="text" className="w-full bg-transparent text-xs font-bold text-slate-400 outline-none text-center uppercase" value={item.unit || 'un'} onChange={e => updateItem(item.id, 'unit', e.target.value)} />
                                                         </div>
                                                         <div className="col-span-1">
-                                                            <div className="flex items-center justify-end gap-0.5" onClick={() => setActiveEditField(`${item.id}-price`)}>
+                                                            <div className="flex items-center justify-end gap-1" onClick={() => setActiveEditField(`${item.id}-price`)}>
                                                                 <span className="text-[8px] text-blue-400 font-bold">R$</span>
                                                                 {activeEditField === `${item.id}-price` ? (
                                                                     <input
                                                                         autoFocus
                                                                         type="number"
-                                                                        className="w-full bg-transparent text-xs font-bold text-blue-600 outline-none text-right appearance-none"
+                                                                        className="bg-transparent text-xs font-bold text-blue-600 outline-none text-right appearance-none"
+                                                                        style={{ width: `${(item.unitPrice.toString().length + 2) * 8}px` }}
                                                                         value={item.unitPrice}
                                                                         onChange={e => updateItem(item.id, 'unitPrice', Number(e.target.value))}
                                                                         onBlur={() => setActiveEditField(null)}
                                                                     />
                                                                 ) : (
-                                                                    <span className="w-full text-xs font-bold text-blue-600 text-right cursor-pointer">
+                                                                    <span className="text-xs font-bold text-blue-600 text-right cursor-pointer">
                                                                         {item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                                                                     </span>
                                                                 )}
@@ -1144,19 +1145,20 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                             <span className="text-[10px] font-bold text-slate-400 uppercase">{item.unit || 'un'}</span>
                                                         </div>
                                                         <div className="col-span-1">
-                                                            <div className="flex items-center justify-end gap-0.5" onClick={() => setActiveEditField(`${item.id}-actualPrice`)}>
+                                                            <div className="flex items-center justify-end gap-1" onClick={() => setActiveEditField(`${item.id}-actualPrice`)}>
                                                                 <span className="text-[8px] text-amber-500 font-bold">R$</span>
                                                                 {activeEditField === `${item.id}-actualPrice` ? (
                                                                     <input
                                                                         autoFocus
                                                                         type="number"
-                                                                        className="w-full bg-transparent text-xs font-bold text-amber-700 outline-none text-right appearance-none"
+                                                                        className="bg-transparent text-xs font-bold text-amber-700 outline-none text-right appearance-none"
+                                                                        style={{ width: `${((item.actualUnitPrice || 0).toString().length + 2) * 8}px` }}
                                                                         value={item.actualUnitPrice || 0}
                                                                         onChange={e => updateItem(item.id, 'actualUnitPrice', Number(e.target.value))}
                                                                         onBlur={() => setActiveEditField(null)}
                                                                     />
                                                                 ) : (
-                                                                    <span className="w-full text-xs font-bold text-amber-700 text-right cursor-pointer">
+                                                                    <span className="text-xs font-bold text-amber-700 text-right cursor-pointer">
                                                                         {(item.actualUnitPrice || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                                                                     </span>
                                                                 )}
