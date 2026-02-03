@@ -24,57 +24,59 @@ interface RichTextEditorProps {
 }
 
 const CustomToolbar: React.FC<{ id: string; onAddText?: () => void; onAddImage?: () => void }> = ({ id, onAddText, onAddImage }) => (
-  <div id={id} className="ql-toolbar-custom flex flex-wrap items-center gap-1 p-2 bg-slate-50 border-b border-slate-200">
-    <span className="ql-formats">
-      <select className="ql-font" defaultValue="inter">
-        <option value="inter">Inter</option>
-        <option value="arial">Arial</option>
-        <option value="roboto">Roboto</option>
-        <option value="serif">Serif</option>
-        <option value="monospace">Monospace</option>
-        <option value="montserrat">Montserrat</option>
-        <option value="opensans">Open Sans</option>
-        <option value="lato">Lato</option>
-        <option value="poppins">Poppins</option>
-        <option value="oswald">Oswald</option>
-        <option value="playfair">Playfair</option>
-        <option value="nunito">Nunito</option>
-      </select>
-      <select className="ql-size" defaultValue="14px">
-        <option value="10px">10px</option>
-        <option value="12px">12px</option>
-        <option value="14px">14px</option>
-        <option value="16px">16px</option>
-        <option value="18px">18px</option>
-        <option value="20px">20px</option>
-        <option value="24px">24px</option>
-        <option value="32px">32px</option>
-      </select>
-    </span>
-    <span className="ql-formats">
-      <button className="ql-bold" />
-      <button className="ql-italic" />
-      <button className="ql-underline" />
-      <button className="ql-strike" />
-    </span>
-    <span className="ql-formats">
-      <button className="ql-list" value="ordered" />
-      <button className="ql-list" value="bullet" />
-    </span>
-    <span className="ql-formats">
-      <select className="ql-align" />
-    </span>
-    <span className="ql-formats">
-      <button className="ql-clean" />
-    </span>
+  <div id={id} className="ql-toolbar-custom flex flex-wrap items-center justify-between p-2 bg-slate-50 border-b border-slate-200">
+    <div className="flex flex-wrap items-center gap-1">
+      <span className="ql-formats">
+        <select className="ql-font" defaultValue="inter">
+          <option value="inter">Inter</option>
+          <option value="arial">Arial</option>
+          <option value="roboto">Roboto</option>
+          <option value="serif">Serif</option>
+          <option value="monospace">Monospace</option>
+          <option value="montserrat">Montserrat</option>
+          <option value="opensans">Open Sans</option>
+          <option value="lato">Lato</option>
+          <option value="poppins">Poppins</option>
+          <option value="oswald">Oswald</option>
+          <option value="playfair">Playfair</option>
+          <option value="nunito">Nunito</option>
+        </select>
+        <select className="ql-size" defaultValue="14px">
+          <option value="10px">10px</option>
+          <option value="12px">12px</option>
+          <option value="14px">14px</option>
+          <option value="16px">16px</option>
+          <option value="18px">18px</option>
+          <option value="20px">20px</option>
+          <option value="24px">24px</option>
+          <option value="32px">32px</option>
+        </select>
+      </span>
+      <span className="ql-formats">
+        <button className="ql-bold" />
+        <button className="ql-italic" />
+        <button className="ql-underline" />
+        <button className="ql-strike" />
+      </span>
+      <span className="ql-formats">
+        <button className="ql-list" value="ordered" />
+        <button className="ql-list" value="bullet" />
+      </span>
+      <span className="ql-formats">
+        <select className="ql-align" />
+      </span>
+      <span className="ql-formats">
+        <button className="ql-clean" />
+      </span>
+    </div>
 
     {(onAddText || onAddImage) && (
-      <div className="flex gap-4 ml-auto pl-4 pr-16 border-l border-slate-200">
+      <div className="flex items-center gap-3 px-4 border-l border-slate-200 min-w-fit flex-shrink-0">
         {onAddText && (
           <button
             type="button"
             onClick={onAddText}
-            className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-[9px] font-black uppercase hover:bg-blue-100 transition-all active:scale-95 shadow-sm border border-blue-100 whitespace-nowrap"
+            className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-black uppercase hover:bg-blue-100 transition-all active:scale-95 shadow-sm border border-blue-100 whitespace-nowrap"
             title="Adicionar Bloco de Texto"
           >
             <Type className="w-3.5 h-3.5" /> + TEXTO
@@ -84,7 +86,7 @@ const CustomToolbar: React.FC<{ id: string; onAddText?: () => void; onAddImage?:
           <button
             type="button"
             onClick={onAddImage}
-            className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-[9px] font-black uppercase hover:bg-emerald-100 transition-all active:scale-95 shadow-sm border border-emerald-100 whitespace-nowrap"
+            className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-black uppercase hover:bg-emerald-100 transition-all active:scale-95 shadow-sm border border-emerald-100 whitespace-nowrap"
             title="Adicionar Bloco de Imagem"
           >
             <ImageIcon className="w-3.5 h-3.5" /> + IMAGEM

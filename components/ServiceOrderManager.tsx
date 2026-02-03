@@ -199,7 +199,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
              .no-print { display: none !important; }
              .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: white !important; text-transform: uppercase; }
              .ql-editor-print .ql-align-justify { text-align: justify !important; }
-             .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; padding: 0 !important; margin: 20px 0 !important; }
+             .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
 
              /* Prevent widowed headings */
              .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4, .ql-editor-print h5, .ql-editor-print h6 { 
@@ -342,14 +342,14 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                <!-- Legal / Guarantee -->
                <div class="avoid-break mb-12">
                    <div class="border-l-4 border-blue-600 bg-blue-50/40 p-6 rounded-xl">
-                       <h5 class="text-[9px] font-bold text-blue-600 uppercase tracking-widest mb-2">Garantia e Notas Legais</h5>
-                       <p class="text-[11px] text-slate-700 leading-tight mb-2"><b>â€¢ GARANTIA Tà‰CNICA:</b> 90 dias para os serviços executados (Art. 26 CDC).</p>
-                       <p class="text-[11px] text-rose-600 font-bold uppercase leading-tight"><b>â€¢ ATENà‡àƒO:</b> Equipamentos não retirados em até 30 dias após aviso de conclusào estarào sujeitos a taxas de armazenamento ou descarte legal.</p>
+                       <h5 class="text-[14px] font-bold text-blue-600 uppercase tracking-widest mb-2">Garantia e Notas Legais</h5>
+                       <p class="text-[13px] text-slate-700 leading-tight mb-2"><b>â€¢ GARANTIA Tà‰CNICA:</b> 90 dias para os serviços executados (Art. 26 CDC).</p>
+                       <p class="text-[13px] text-rose-600 font-bold uppercase leading-tight"><b>â€¢ ATENà‡àƒO:</b> Equipamentos não retirados em até 30 dias após aviso de conclusào estarào sujeitos a taxas de armazenamento ou descarte legal.</p>
                    </div>
                </div>
 
                <!-- Signatures -->
-               <div class="avoid-break mt-auto pt-32">
+               <div style="margin-top: 120px !important;" class="avoid-break pt-32">
                    <div class="grid grid-cols-2 gap-16 px-10">
                        <div class="text-center">
                            <div style="border-top: 1px solid #cbd5e1; margin-bottom: 8px;"></div>

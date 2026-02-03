@@ -651,7 +651,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                             body { background: white !important; margin: 0 !important; }
                             .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; width: 100% !important; padding-left: 20mm !important; padding-right: 20mm !important; }
                             .no-print { display: none !important; }
-                            .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; padding: 0 !important; margin: 20px 0 !important; } 
+                            .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; } 
                             .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
                         }
            
@@ -809,7 +809,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     </div>
                 </div>` : ''}
 
-                            <div class="avoid-break mt-40 pt-24 border-t border-slate-100">
+                            <div style="margin-top: 120px !important;" class="avoid-break pt-24 border-t border-slate-100">
                                 <div class="flex justify-center px-8">
                                     <div class="text-center w-80">
                                         <div style="border-top: 1px solid #cbd5e1; margin-bottom: 60px;"></div>

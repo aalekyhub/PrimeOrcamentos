@@ -182,7 +182,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
              .no-screen { display: block !important; }
              .no-print { display: none !important; }
              .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: white !important; text-transform: uppercase; }
-              .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; padding: 0 !important; margin: 20px 0 !important; }
+              .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
              
              /* Styles for Rich Text (Quill) */
              .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
@@ -347,7 +347,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                    <div class="border border-blue-100 bg-blue-50/50 rounded-2xl p-6">
                         <div class="flex items-center gap-3 mb-4">
                             <div class="bg-blue-600 rounded-full p-1"><svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>
-                            <span style="font-size: ${Math.max(10, (company.descriptionFontSize || 12))}px;" class="font-bold text-blue-700 uppercase tracking-widest">Termo de Aceite e Autorização Profissional</span>
+                            <span style="font-size: 14px;" class="font-bold text-blue-700 uppercase tracking-widest">Termo de Aceite e Autorização Profissional</span>
                         </div>
                         <p style="font-size: ${Math.max(13, (company.descriptionFontSize || 14) - 1)}px;" class="text-slate-700 leading-relaxed text-justify italic">
                             "Este documento constitui uma proposta comercial formal. Ao assinar abaixo, o cliente declara estar ciente e de pleno acordo com os valores, prazos e especificações técnicas descritas. Esta aceitação autoriza o início imediato dos trabalhos sob as condições estabelecidas. A contratada reserva-se o direito de renegociar valores caso a aprovação ocorra após o prazo de validade de ${validityDays} dias. Eventuais alterações de escopo solicitadas após o aceite estarão sujeitas a nova análise de custos."
@@ -356,7 +356,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                </div>
 
                <!-- Signature Lines -->
-                <div class="avoid-break mt-32">
+                <div style="margin-top: 120px !important;" class="avoid-break space-y-2">
                    <div style="border-bottom: 2px solid #cbd5e1; width: 40%;"></div>
                    <p class="text-[11px] font-bold text-slate-600 uppercase tracking-widest mt-2">Assinatura do Cliente / Aceite</p>
                </div>

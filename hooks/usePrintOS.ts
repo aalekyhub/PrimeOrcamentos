@@ -59,7 +59,7 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
              .no-screen { display: block !important; } 
              .no-print { display: none !important; } 
              .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: white !important; text-transform: uppercase; } 
-              .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; padding: 0 !important; margin: 20px 0 !important; } 
+              .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; } 
              
              /* Styles for Rich Text (Quill) */
              .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
@@ -200,7 +200,7 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
                     </div>
                 </div>
 
-                <div class="avoid-break mt-auto pt-32">
+                <div style="margin-top: 120px !important;" class="avoid-break pt-32">
                    <div style="display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 64px !important; padding: 0 40px !important;">
                        <div class="text-center">
                            <div style="border-top: 1px solid #cbd5e1; margin-bottom: 8px;"></div>
