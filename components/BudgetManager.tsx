@@ -340,7 +340,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           </td></tr></tbody>
           <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;"><div style="height: ${company.printMarginBottom || 15}mm; display: block;">&nbsp;</div></td></tr></tfoot>
         </table>
-        <div class="print-footer no-screen"><span>Documento gerado em ${new Date().toLocaleString('pt-BR')}</span></div>
+        <div class="print-footer no-screen"><span></span></div>
         <script>
            function optimizePageBreaks() {
              const root = document.querySelector('.print-description-content .space-y-6');

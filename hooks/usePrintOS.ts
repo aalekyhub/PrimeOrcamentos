@@ -59,7 +59,7 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
              .no-screen { display: block !important; } 
              .no-print { display: none !important; } 
              .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: white !important; text-transform: uppercase; } 
-             .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; } 
+             .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; } 
              
              /* Styles for Rich Text (Quill) */
              .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
@@ -70,7 +70,7 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
              .ql-editor-print .ql-align-center { text-align: center !important; }
              .ql-editor-print .ql-align-right { text-align: right !important; }
              .ql-editor-print .ql-align-justify { text-align: justify !important; }
-             .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; }
+             .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; }
            }
         </style>
       </head>
@@ -194,7 +194,6 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
           </td></tr></tbody>
           <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;"><div style="height: ${company.printMarginBottom || 15}mm; display: block;">&nbsp;</div></td></tr></tfoot>
         </table>
-        <div class="print-footer no-screen"><span>Página 1 de 1</span></div>
         <script>
            function optimizePageBreaks() {
              const root = document.querySelector('.print-description-content .space-y-6');

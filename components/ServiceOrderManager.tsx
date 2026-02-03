@@ -343,7 +343,6 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
           </td></tr></tbody>
           <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;"><div style="height: ${company.printMarginBottom || 15}mm; display: block;">&nbsp;</div></td></tr></tfoot>
         </table>
-        <div class="print-footer no-screen"><span>Página 1 de 1</span></div>
         <script>
            function optimizePageBreaks() {
              const root = document.querySelector('.print-description-content .space-y-6');
@@ -486,7 +485,6 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
         </td></tr></tbody>
         <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;"><div style="height: ${company.printMarginBottom || 15}mm; display: block;">&nbsp;</div></td></tr></tfoot>
       </table>
-      <div class="print-footer no-screen"><span>Documento gerado em ${new Date().toLocaleString('pt-BR')} -&nbsp;</span></div>
       <script>
          window.onload = function() { setTimeout(() => { window.print(); window.close(); }, 800); }
       </script>
