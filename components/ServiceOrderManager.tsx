@@ -5,6 +5,7 @@ import {
   UserPlus, Wrench, Eraser, FileText, ScrollText,
   Type, Image as ImageIcon, Zap, Upload, FileDown
 } from 'lucide-react';
+import RichTextEditor from './ui/RichTextEditor';
 import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock } from '../types';
 import { useNotify } from './ToastProvider';
 import CustomerManager from './CustomerManager';
@@ -645,21 +646,35 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                     <div><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Modelo</label><input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500" value={model} onChange={e => setModel(e.target.value)} /></div>
                     <div><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Nº Série / Patrimônio</label><input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500" value={serial} onChange={e => setSerial(e.target.value)} /></div>
                   </div>
-                  <div><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Laudo Técnico / Diagnóstico</label><textarea className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-medium text-slate-700 outline-none h-24 focus:ring-2 focus:ring-blue-500 shadow-inner" placeholder="Descreva o problema ou serviço realizado..." value={diagnosis} onChange={e => setDiagnosis(e.target.value)} /></div>
+                  <div><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Laudo Técnico / Diagnóstico</label><RichTextEditor id="diagnosis-editor" value={diagnosis} onChange={setDiagnosis} placeholder="Descreva o problema ou serviço realizado..." /></div>
 
-                  <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4 mt-6">
+                  <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
                     <div className="flex justify-between items-center">
-                      <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-widest border-b pb-2 grow mr-6">FOTOS E ANEXOS DO SERVIà‡O</h4>
-                      <div className="flex gap-2">
-                        <button onClick={addTextBlock} className="bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase flex items-center gap-1 hover:bg-blue-100"><Type className="w-3.5 h-3.5" /> + TEXTO</button>
-                        <button onClick={addImageBlock} className="bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase flex items-center gap-1 hover:bg-emerald-100"><ImageIcon className="w-3.5 h-3.5" /> + IMAGEM</button>
-                      </div>
+                      <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-widest border-b pb-2 grow mr-6">FOTOS E ANEXOS DO SERVIÇO</h4>
                     </div>
                     <div className="space-y-3">
+                      {descriptionBlocks.length === 0 && (
+                        <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-[2rem] p-8 flex flex-col items-center justify-center gap-4 group hover:border-blue-400 transition-colors cursor-pointer" onClick={addTextBlock}>
+                          <div className="flex gap-4">
+                            <button onClick={(e) => { e.stopPropagation(); addTextBlock(); }} className="bg-blue-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-blue-100 hover:scale-105 transition-all"><Type className="w-4 h-4" /> + Iniciar com Texto</button>
+                            <button onClick={(e) => { e.stopPropagation(); addImageBlock(); }} className="bg-emerald-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-emerald-100 hover:scale-105 transition-all"><ImageIcon className="w-4 h-4" /> + Iniciar com Imagem</button>
+                          </div>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 animate-pulse">Comece a montar o relatório fotográfico acima</p>
+                        </div>
+                      )}
                       {descriptionBlocks.map((block) => (
                         <div key={block.id} className="relative group">
                           {block.type === 'text' && (
-                            <textarea className="w-full bg-slate-50 border border-slate-100 rounded-xl p-4 text-[11px] font-medium outline-none h-24 focus:ring-2 focus:ring-blue-500 shadow-inner" value={block.content} onChange={e => updateBlockContent(block.id, e.target.value)} placeholder="Detalhes da foto ou texto..." />
+                            <div className="flex-1">
+                              <RichTextEditor
+                                id={block.id}
+                                value={block.content}
+                                onChange={(content) => updateBlockContent(block.id, content)}
+                                onAddText={addTextBlock}
+                                onAddImage={addImageBlock}
+                                placeholder="Detalhes da foto ou texto..."
+                              />
+                            </div>
                           )}
                           {block.type === 'image' && (
                             <div className="w-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center gap-2">

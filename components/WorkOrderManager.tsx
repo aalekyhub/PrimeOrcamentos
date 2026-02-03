@@ -1011,36 +1011,42 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                         <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
                                             <div className="flex justify-between items-center">
                                                 <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-widest border-b pb-2 grow mr-6">FOTOS E ANEXOS DA OBRA</h4>
-                                                <div className="flex gap-2">
-                                                    <button onClick={addTextBlock} className="bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase flex items-center gap-1 hover:bg-blue-100"><Type className="w-3.5 h-3.5" /> + TEXTO</button>
-                                                    <button onClick={addImageBlock} className="bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase flex items-center gap-1 hover:bg-emerald-100"><ImageIcon className="w-3.5 h-3.5" /> + IMAGEM</button>
-                                                </div>
                                             </div>
-                                            <div className="space-y-3">
-                                                {descriptionBlocks.map((block) => (
-                                                    <div key={block.id} className="relative group">
-                                                        {block.type === 'text' && (
-                                                            <div className="flex-1">
-                                                                <RichTextEditor
-                                                                    value={block.content}
-                                                                    onChange={(content) => updateBlockContent(block.id, content)}
-                                                                    placeholder="Detalhes da foto ou texto..."
-                                                                />
-                                                            </div>
-                                                        )}
-                                                        {block.type === 'image' && (
-                                                            <div className="w-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center gap-2">
-                                                                {block.content ? (
-                                                                    <div className="relative max-w-[200px]"><img src={block.content} className="w-full h-auto rounded-lg shadow-lg" /><button onClick={() => updateBlockContent(block.id, '')} className="absolute -top-2 -right-2 bg-rose-500 text-white p-1.5 rounded-full"><Trash2 className="w-3 h-3" /></button></div>
-                                                                ) : (
-                                                                    <label className="cursor-pointer flex flex-col items-center gap-1"><Upload className="w-5 h-5 text-blue-500" /><span className="text-[8px] font-black text-slate-400 uppercase">Subir Foto</span><input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(block.id, e)} /></label>
-                                                                )}
-                                                            </div>
-                                                        )}
-                                                        <button onClick={() => setDescriptionBlocks(descriptionBlocks.filter(b => b.id !== block.id))} className="absolute -top-2 -right-2 bg-slate-200 text-slate-500 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><X className="w-3 h-3" /></button>
+                                            {descriptionBlocks.length === 0 && (
+                                                <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-[2rem] p-8 flex flex-col items-center justify-center gap-4 group hover:border-blue-400 transition-colors cursor-pointer" onClick={addTextBlock}>
+                                                    <div className="flex gap-4">
+                                                        <button onClick={(e) => { e.stopPropagation(); addTextBlock(); }} className="bg-blue-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-blue-100 hover:scale-105 transition-all"><Type className="w-4 h-4" /> + Iniciar com Texto</button>
+                                                        <button onClick={(e) => { e.stopPropagation(); addImageBlock(); }} className="bg-emerald-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-emerald-100 hover:scale-105 transition-all"><ImageIcon className="w-4 h-4" /> + Iniciar com Imagem</button>
                                                     </div>
-                                                ))}
-                                            </div>
+                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 animate-pulse">Comece a montar o relatório da obra acima</p>
+                                                </div>
+                                            )}
+                                            {descriptionBlocks.map((block) => (
+                                                <div key={block.id} className="relative group">
+                                                    {block.type === 'text' && (
+                                                        <div className="flex-1">
+                                                            <RichTextEditor
+                                                                id={block.id}
+                                                                value={block.content}
+                                                                onChange={(content) => updateBlockContent(block.id, content)}
+                                                                onAddText={addTextBlock}
+                                                                onAddImage={addImageBlock}
+                                                                placeholder="Detalhes da foto ou texto..."
+                                                            />
+                                                        </div>
+                                                    )}
+                                                    {block.type === 'image' && (
+                                                        <div className="w-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center gap-2">
+                                                            {block.content ? (
+                                                                <div className="relative max-w-[200px]"><img src={block.content} className="w-full h-auto rounded-lg shadow-lg" /><button onClick={() => updateBlockContent(block.id, '')} className="absolute -top-2 -right-2 bg-rose-500 text-white p-1.5 rounded-full"><Trash2 className="w-3 h-3" /></button></div>
+                                                            ) : (
+                                                                <label className="cursor-pointer flex flex-col items-center gap-1"><Upload className="w-5 h-5 text-blue-500" /><span className="text-[8px] font-black text-slate-400 uppercase">Subir Foto</span><input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(block.id, e)} /></label>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                    <button onClick={() => setDescriptionBlocks(descriptionBlocks.filter(b => b.id !== block.id))} className="absolute -top-2 -right-2 bg-slate-200 text-slate-500 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><X className="w-3 h-3" /></button>
+                                                </div>
+                                            ))}
                                         </div>
                                     </>
                                 ) : (
@@ -1048,7 +1054,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
                                             <InfoCard
                                                 label="Valor do Orçamento"
-                                                value={`R$ ${revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                                                value={`R$ ${contractPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
                                                 className="bg-white"
                                                 icon={<div className="absolute top-0 left-0 w-full h-1 bg-blue-500"></div>}
                                             />
