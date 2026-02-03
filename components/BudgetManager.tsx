@@ -157,7 +157,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       <head>
         <title>Orçamento - ${budget.id}</title>
         <script src="https://cdn.tailwindcss.com"></script>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
         <style>
            * { box-sizing: border-box; }
            body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
@@ -199,6 +199,23 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                 break-after: avoid-page !important; 
                 page-break-after: avoid !important; 
               }
+
+              /* Font Classes for Print */
+              .ql-font-inter { font-family: 'Inter', sans-serif !important; }
+              .ql-font-arial { font-family: Arial, sans-serif !important; }
+              .ql-font-roboto { font-family: 'Roboto', sans-serif !important; }
+              .ql-font-serif { font-family: serif !important; }
+              .ql-font-monospace { font-family: monospace !important; }
+
+              /* Size Classes for Print */
+              .ql-size-10px { font-size: 10px !important; }
+              .ql-size-12px { font-size: 12px !important; }
+              .ql-size-14px { font-size: 14px !important; }
+              .ql-size-16px { font-size: 16px !important; }
+              .ql-size-18px { font-size: 18px !important; }
+              .ql-size-20px { font-size: 20px !important; }
+              .ql-size-24px { font-size: 24px !important; }
+              .ql-size-32px { font-size: 32px !important; }
               .ql-editor-print p { orphans: 3; widows: 3; }
             }
         </style>

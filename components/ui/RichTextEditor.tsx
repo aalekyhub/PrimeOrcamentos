@@ -62,25 +62,25 @@ const CustomToolbar: React.FC<{ id: string; onAddText?: () => void; onAddImage?:
     </span>
 
     {(onAddText || onAddImage) && (
-      <div className="flex gap-1 ml-auto pl-2 border-l border-slate-200">
+      <div className="flex gap-2 ml-auto pl-4 border-l border-slate-200">
         {onAddText && (
           <button
             type="button"
             onClick={onAddText}
-            className="flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-600 rounded-md text-[10px] font-black uppercase hover:bg-blue-100 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-[9px] font-black uppercase hover:bg-blue-100 transition-all active:scale-95 shadow-sm border border-blue-100 whitespace-nowrap"
             title="Adicionar Bloco de Texto"
           >
-            <Type className="w-3 h-3" /> + TEXTO
+            <Type className="w-3.5 h-3.5" /> + TEXTO
           </button>
         )}
         {onAddImage && (
           <button
             type="button"
             onClick={onAddImage}
-            className="flex items-center gap-1 px-2 py-1 bg-emerald-50 text-emerald-600 rounded-md text-[10px] font-black uppercase hover:bg-emerald-100 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-[9px] font-black uppercase hover:bg-emerald-100 transition-all active:scale-95 shadow-sm border border-emerald-100 whitespace-nowrap"
             title="Adicionar Bloco de Imagem"
           >
-            <ImageIcon className="w-3 h-3" /> + IMAGEM
+            <ImageIcon className="w-3.5 h-3.5" /> + IMAGEM
           </button>
         )}
       </div>
@@ -151,21 +151,38 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeh
         .ql-snow .ql-picker.ql-size .ql-picker-label::before,
         .ql-snow .ql-picker.ql-size .ql-picker-item::before { content: '14px'; }
         .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='10px']::before,
-        .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='10px']::before { content: '10px'; font-size: 10px; }
+        .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='10px']::before { content: '10px'; }
         .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='12px']::before,
-        .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='12px']::before { content: '12px'; font-size: 12px; }
+        .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='12px']::before { content: '12px'; }
         .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='14px']::before,
-        .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='14px']::before { content: '14px'; font-size: 14px; }
+        .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='14px']::before { content: '14px'; }
         .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='16px']::before,
-        .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='16px']::before { content: '16px'; font-size: 16px; }
+        .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='16px']::before { content: '16px'; }
         .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='18px']::before,
-        .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='18px']::before { content: '18px'; font-size: 18px; }
+        .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='18px']::before { content: '18px'; }
         .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='20px']::before,
-        .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='20px']::before { content: '20px'; font-size: 20px; }
+        .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='20px']::before { content: '20px'; }
         .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='24px']::before,
-        .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='24px']::before { content: '24px'; font-size: 24px; }
+        .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='24px']::before { content: '24px'; }
         .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='32px']::before,
-        .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='32px']::before { content: '32px'; font-size: 32px; }
+        .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='32px']::before { content: '32px'; }
+
+        /* Font Classes for Rendering */
+        .ql-font-inter { font-family: 'Inter', sans-serif !important; }
+        .ql-font-arial { font-family: Arial, sans-serif !important; }
+        .ql-font-roboto { font-family: 'Roboto', sans-serif !important; }
+        .ql-font-serif { font-family: serif !important; }
+        .ql-font-monospace { font-family: monospace !important; }
+
+        /* Size Classes for Rendering */
+        .ql-size-10px { font-size: 10px !important; }
+        .ql-size-12px { font-size: 12px !important; }
+        .ql-size-14px { font-size: 14px !important; }
+        .ql-size-16px { font-size: 16px !important; }
+        .ql-size-18px { font-size: 18px !important; }
+        .ql-size-20px { font-size: 20px !important; }
+        .ql-size-24px { font-size: 24px !important; }
+        .ql-size-32px { font-size: 32px !important; }
 
         .ql-container.ql-snow {
           border: none !important;
