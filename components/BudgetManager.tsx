@@ -165,7 +165,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
            .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
             .avoid-break { break-inside: avoid; page-break-inside: avoid; }
             .break-after-avoid { break-after: avoid !important; page-break-after: avoid !important; }
-            .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; }
+            .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; }
            
            /* Premium Box Styles */
            .info-box { background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
@@ -253,7 +253,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       if (block.type === 'text') {
         return `<div class="text-slate-700 leading-relaxed text-justify ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px;">${block.content}</div>`;
       } else if (block.type === 'image') {
-        return `<div style="break-inside: avoid; page-break-inside: avoid; margin: 20px 0;"><img src="${block.content}" style="width: 100%; border-radius: 12px; border: 1px solid #e2e8f0;"></div>`;
+        return `<div class="avoid-break" style="margin: 20px 0;"><img src="${block.content}" style="width: 100%; border-radius: 12px; border: 1px solid #e2e8f0;"></div>`;
       } else if (block.type === 'page-break') {
         return `<div style="page-break-after: always; break-after: page; height: 0; margin: 0; padding: 0;"></div>`;
       }

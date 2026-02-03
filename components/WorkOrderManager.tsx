@@ -645,6 +645,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         .a4-container {box - shadow: none !important; border: none !important; min-height: auto; position: relative; width: 100% !important; padding-left: 20mm !important; padding-right: 20mm !important; }
                         .no-print {display: none !important; }
                         .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; } 
+                        .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; }
            }
            
                         /* Styles for Rich Text (Quill) */
@@ -768,7 +769,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             if (block.type === 'text') {
                 return `<div class="text-slate-600 leading-relaxed text-justify ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px;">${block.content}</div>`;
             } else if (block.type === 'image') {
-                return `<div style="break-inside: avoid; page-break-inside: avoid; margin: 20px 0;"><img src="${block.content}" style="width: 100%; border-radius: 12px; border: 1px solid #e2e8f0;"></div>`;
+                return `<div class="avoid-break" style="margin: 20px 0;"><img src="${block.content}" style="width: 100%; border-radius: 12px; border: 1px solid #e2e8f0;"></div>`;
             } else if (block.type === 'page-break') {
                 return `<div style="page-break-after: always; break-after: page; height: 0; margin: 0; padding: 0;"></div>`;
             }

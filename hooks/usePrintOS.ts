@@ -118,7 +118,7 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
             if (block.type === 'text') {
                 return `<div class="text-slate-800 leading-relaxed text-justify font-medium ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px;">${block.content}</div>`;
             } else if (block.type === 'image') {
-                return `<div style="break-inside: avoid; page-break-inside: avoid; margin: 20px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; object-fit: contain;"></div>`;
+                return `<div class="avoid-break" style="margin: 20px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; object-fit: contain;"></div>`;
             } else if (block.type === 'page-break') {
                 return `<div style="page-break-after: always; break-after: page; height: 0; margin: 0; padding: 0;"></div>`;
             }
