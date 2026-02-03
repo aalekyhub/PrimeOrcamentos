@@ -24,13 +24,13 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
             const total = item.quantity * item.unitPrice;
             return `
       <tr style="border-bottom: 1px solid #f1f5f9;">
-        <td style="padding: 10px; text-align: left; vertical-align: middle;">
+        <td style="padding: 10px 0; text-align: left; vertical-align: middle;">
             <div style="font-weight: 700; text-transform: uppercase; font-size: ${itemFontBase}px; color: #0f172a;">${item.description}</div>
         </td>
         <td style="padding: 10px 0; text-align: center; vertical-align: middle; color: #64748b; font-size: ${Math.max(8, itemFontBase - 1)}px; font-weight: 700; text-transform: uppercase;">${item.type || 'SERV'}</td>
         <td style="padding: 10px 0; text-align: center; vertical-align: middle; color: #0f172a; font-size: ${itemFontBase}px; font-weight: 700;">${item.quantity} ${item.unit || 'un'}</td>
         <td style="padding: 10px 0; text-align: right; vertical-align: middle; color: #64748b; font-size: ${itemFontBase}px; font-weight: 700;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-        <td style="padding: 10px; text-align: right; vertical-align: middle; font-weight: 800; font-size: ${itemFontBase + 1}px; color: #0f172a;">R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        <td style="padding: 10px 0; text-align: right; vertical-align: middle; font-weight: 800; font-size: ${itemFontBase + 1}px; color: #0f172a;">R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
       </tr>`;
         }).join('');
 

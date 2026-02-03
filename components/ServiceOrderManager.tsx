@@ -159,11 +159,11 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
 
     const itemsHtml = order.items.map((item: ServiceItem) => `
       <tr style="border-bottom: 1px solid #f1f5f9;">
-        <td style="padding: 12px 10px; font-weight: 600; text-transform: uppercase; font-size: 10px; color: #0f172a;">${item.description}</td>
+        <td style="padding: 12px 0; font-weight: 600; text-transform: uppercase; font-size: 10px; color: #0f172a;">${item.description}</td>
         <td style="padding: 12px 0; text-align: center; color: #94a3b8; font-size: 9px; font-weight: 600; text-transform: uppercase;">${item.unit || 'UN'}</td>
         <td style="padding: 12px 0; text-align: center; font-weight: 600; color: #0f172a; font-size: 10px;">${item.quantity}</td>
         <td style="padding: 12px 0; text-align: right; color: #64748b; font-size: 10px;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-        <td style="padding: 12px 10px; text-align: right; font-weight: 600; font-size: 11px; color: #0f172a;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        <td style="padding: 12px 0; text-align: right; font-weight: 600; font-size: 11px; color: #0f172a;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
       </tr>`).join('');
 
     const html = `
