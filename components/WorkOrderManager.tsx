@@ -53,16 +53,17 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     const [currentPrice, setCurrentPrice] = useState(0);
     const [currentQty, setCurrentQty] = useState(1);
     const [currentUnit, setCurrentUnit] = useState('un');
+    const [activeEditField, setActiveEditField] = useState<string | null>(null);
+
+    // Current Item Real Fields (Medição)
+    const [currentActualQty, setCurrentActualQty] = useState<number>(0);
+    const [currentActualPrice, setCurrentActualPrice] = useState<number>(0);
     const [currentActual, setCurrentActual] = useState<number | ''>('');
 
     // Financial State
     const [activeTab, setActiveTab] = useState<'details' | 'financial'>('details');
     const [taxRate, setTaxRate] = useState<number>(0);
     const [bdiRate, setBdiRate] = useState<number>(0);
-
-    // Current Item Real Fields (Medição)
-    const [currentActualQty, setCurrentActualQty] = useState<number>(0);
-    const [currentActualPrice, setCurrentActualPrice] = useState<number>(0);
 
     // Report State
     const [showReportTypeModal, setShowReportTypeModal] = useState(false);
@@ -1107,35 +1108,61 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                         <div className="col-span-2">
                                                             <input type="text" className="w-full bg-transparent text-xs font-bold text-slate-700 uppercase outline-none" value={item.description} onChange={e => updateItem(item.id, 'description', e.target.value)} />
                                                         </div>
-                                                        <div className="col-span-1 border-l border-slate-100 pl-1">
+                                                        <div className="col-span-1 pl-1">
                                                             <input type="number" className="w-full bg-transparent text-xs font-bold text-slate-600 outline-none text-center appearance-none" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', Number(e.target.value))} />
                                                         </div>
                                                         <div className="col-span-1">
                                                             <input type="text" className="w-full bg-transparent text-xs font-bold text-slate-400 outline-none text-center uppercase" value={item.unit || 'un'} onChange={e => updateItem(item.id, 'unit', e.target.value)} />
                                                         </div>
                                                         <div className="col-span-1">
-                                                            <div className="flex items-center justify-end gap-0.5">
+                                                            <div className="flex items-center justify-end gap-0.5" onClick={() => setActiveEditField(`${item.id}-price`)}>
                                                                 <span className="text-[8px] text-blue-400 font-bold">R$</span>
-                                                                <input type="number" className="w-full bg-transparent text-xs font-bold text-blue-600 outline-none text-right appearance-none" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', Number(e.target.value))} />
+                                                                {activeEditField === `${item.id}-price` ? (
+                                                                    <input
+                                                                        autoFocus
+                                                                        type="number"
+                                                                        className="w-full bg-transparent text-xs font-bold text-blue-600 outline-none text-right appearance-none"
+                                                                        value={item.unitPrice}
+                                                                        onChange={e => updateItem(item.id, 'unitPrice', Number(e.target.value))}
+                                                                        onBlur={() => setActiveEditField(null)}
+                                                                    />
+                                                                ) : (
+                                                                    <span className="w-full text-xs font-bold text-blue-600 text-right cursor-pointer">
+                                                                        {item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                                                    </span>
+                                                                )}
                                                             </div>
                                                         </div>
                                                         <div className="col-span-1 text-right px-2">
                                                             <span className="text-xs font-bold text-blue-600">R$ {(item.quantity * item.unitPrice).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                                                         </div>
 
-                                                        <div className="col-span-1 border-l border-rose-100 pl-1">
+                                                        <div className="col-span-1 pl-1">
                                                             <input type="number" className="w-full bg-transparent text-xs font-bold text-rose-600 outline-none text-center appearance-none" value={item.actualQuantity || 0} onChange={e => updateItem(item.id, 'actualQuantity', Number(e.target.value))} />
                                                         </div>
                                                         <div className="col-span-1 text-center">
                                                             <span className="text-[10px] font-bold text-slate-400 uppercase">{item.unit || 'un'}</span>
                                                         </div>
                                                         <div className="col-span-1">
-                                                            <div className="flex items-center justify-end gap-0.5">
+                                                            <div className="flex items-center justify-end gap-0.5" onClick={() => setActiveEditField(`${item.id}-actualPrice`)}>
                                                                 <span className="text-[8px] text-amber-500 font-bold">R$</span>
-                                                                <input type="number" className="w-full bg-transparent text-xs font-bold text-amber-700 outline-none text-right appearance-none" value={item.actualUnitPrice || 0} onChange={e => updateItem(item.id, 'actualUnitPrice', Number(e.target.value))} />
+                                                                {activeEditField === `${item.id}-actualPrice` ? (
+                                                                    <input
+                                                                        autoFocus
+                                                                        type="number"
+                                                                        className="w-full bg-transparent text-xs font-bold text-amber-700 outline-none text-right appearance-none"
+                                                                        value={item.actualUnitPrice || 0}
+                                                                        onChange={e => updateItem(item.id, 'actualUnitPrice', Number(e.target.value))}
+                                                                        onBlur={() => setActiveEditField(null)}
+                                                                    />
+                                                                ) : (
+                                                                    <span className="w-full text-xs font-bold text-amber-700 text-right cursor-pointer">
+                                                                        {(item.actualUnitPrice || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                                                    </span>
+                                                                )}
                                                             </div>
                                                         </div>
-                                                        <div className="col-span-2 border-l border-amber-100 pl-1 text-right px-2">
+                                                        <div className="col-span-2 pl-1 text-right px-2">
                                                             <span className="text-xs font-bold text-amber-700">R$ {((item.actualQuantity || 0) * (item.actualUnitPrice || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                                                         </div>
                                                         <div className="col-span-1 flex justify-center">
