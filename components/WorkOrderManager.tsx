@@ -1095,11 +1095,11 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                 <div className="col-span-1 text-center"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">QTD</span></div>
                                                 <div className="col-span-1 text-center"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">UN</span></div>
                                                 <div className="col-span-1 text-right pr-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">VL. PROJ</span></div>
-                                                <div className="col-span-1 text-right pr-4"><span className="text-[9px] font-black text-blue-600 uppercase tracking-widest">TOTAL PROJ</span></div>
-                                                <div className="col-span-1 text-center border-l border-rose-100 pl-1"><span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">QTD</span></div>
+                                                <div className="col-span-1 text-right pr-2"><span className="text-[9px] font-black text-blue-600 uppercase tracking-widest">TOTAL PROJ</span></div>
+                                                <div className="col-span-1 text-center"><span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">QTD</span></div>
                                                 <div className="col-span-1 text-center"><span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">UN</span></div>
                                                 <div className="col-span-1 text-right pr-2"><span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">VL. REAL</span></div>
-                                                <div className="col-span-2 text-right pr-4"><span className="text-[9px] font-black text-amber-600 uppercase tracking-widest">TOTAL REAL</span></div>
+                                                <div className="col-span-2 text-right pr-2"><span className="text-[9px] font-black text-amber-600 uppercase tracking-widest">TOTAL REAL</span></div>
                                                 <div className="col-span-1"></div>
                                             </div>
                                             <div className="max-h-[300px] overflow-y-auto no-scrollbar">
@@ -1116,7 +1116,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                         </div>
                                                         <div className="col-span-1">
                                                             <div className="flex items-center justify-end gap-1" onClick={() => setActiveEditField(`${item.id}-price`)}>
-                                                                <span className="text-[8px] text-blue-400 font-bold">R$</span>
+                                                                <span className="text-xs text-blue-600 font-bold">R$</span>
                                                                 {activeEditField === `${item.id}-price` ? (
                                                                     <input
                                                                         autoFocus
@@ -1146,7 +1146,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                         </div>
                                                         <div className="col-span-1">
                                                             <div className="flex items-center justify-end gap-1" onClick={() => setActiveEditField(`${item.id}-actualPrice`)}>
-                                                                <span className="text-[8px] text-amber-500 font-bold">R$</span>
+                                                                <span className="text-xs text-amber-700 font-bold">R$</span>
                                                                 {activeEditField === `${item.id}-actualPrice` ? (
                                                                     <input
                                                                         autoFocus
