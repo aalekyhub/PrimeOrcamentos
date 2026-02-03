@@ -349,14 +349,14 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                             <div class="bg-blue-600 rounded-full p-1"><svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>
                             <span style="font-size: ${Math.max(10, (company.descriptionFontSize || 12))}px;" class="font-bold text-blue-700 uppercase tracking-widest">Termo de Aceite e Autorização Profissional</span>
                         </div>
-                        <p style="font-size: ${Math.max(11, (company.descriptionFontSize || 12) - 1)}px;" class="text-slate-700 leading-relaxed text-justify italic">
+                        <p style="font-size: ${Math.max(13, (company.descriptionFontSize || 14) - 1)}px;" class="text-slate-700 leading-relaxed text-justify italic">
                             "Este documento constitui uma proposta comercial formal. Ao assinar abaixo, o cliente declara estar ciente e de pleno acordo com os valores, prazos e especificações técnicas descritas. Esta aceitação autoriza o início imediato dos trabalhos sob as condições estabelecidas. A contratada reserva-se o direito de renegociar valores caso a aprovação ocorra após o prazo de validade de ${validityDays} dias. Eventuais alterações de escopo solicitadas após o aceite estarão sujeitas a nova análise de custos."
                         </p>
                    </div>
                </div>
 
                <!-- Signature Lines -->
-                <div class="avoid-break mt-24">
+                <div class="avoid-break mt-32">
                    <div style="border-bottom: 2px solid #cbd5e1; width: 40%;"></div>
                    <p class="text-[11px] font-bold text-slate-600 uppercase tracking-widest mt-2">Assinatura do Cliente / Aceite</p>
                </div>

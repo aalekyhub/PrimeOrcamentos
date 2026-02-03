@@ -69,7 +69,7 @@ const CustomToolbar: React.FC<{ id: string; onAddText?: () => void; onAddImage?:
     </span>
 
     {(onAddText || onAddImage) && (
-      <div className="flex gap-2 ml-auto pl-4 pr-8 border-l border-slate-200">
+      <div className="flex gap-4 ml-auto pl-4 pr-16 border-l border-slate-200">
         {onAddText && (
           <button
             type="button"

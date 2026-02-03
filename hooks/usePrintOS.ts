@@ -192,15 +192,15 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
                 <div class="avoid-break mb-8" style="display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 16px !important;">
                     <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 shadow-sm">
                         <p class="text-blue-600 font-black text-[10px] uppercase tracking-widest mb-2" style="display: block;">Forma de Pagamento</p>
-                        <p class="text-slate-700 text-[${company.descriptionFontSize || 12}px] font-bold leading-relaxed">${order.paymentTerms || 'A combinar com o responsável.'}</p>
+                        <p class="text-slate-700 text-[${Math.max(13, (company.descriptionFontSize || 12))}px] font-bold leading-relaxed">${order.paymentTerms || 'A combinar com o responsável.'}</p>
                     </div>
                     <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 shadow-sm">
                         <p class="text-blue-600 font-black text-[10px] uppercase tracking-widest mb-2" style="display: block;">Prazo de Entrega / Execução</p>
-                        <p class="text-slate-700 text-[${company.descriptionFontSize || 12}px] font-bold leading-relaxed">${order.deliveryTime || 'Conforme cronograma da obra.'}</p>
+                        <p class="text-slate-700 text-[${Math.max(13, (company.descriptionFontSize || 12))}px] font-bold leading-relaxed">${order.deliveryTime || 'Conforme cronograma da obra.'}</p>
                     </div>
                 </div>
 
-                <div class="avoid-break mt-auto pt-8">
+                <div class="avoid-break mt-auto pt-32">
                    <div style="display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 64px !important; padding: 0 40px !important;">
                        <div class="text-center">
                            <div style="border-top: 1px solid #cbd5e1; margin-bottom: 8px;"></div>

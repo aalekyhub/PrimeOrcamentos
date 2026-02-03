@@ -343,13 +343,13 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                <div class="avoid-break mb-12">
                    <div class="border-l-4 border-blue-600 bg-blue-50/40 p-6 rounded-xl">
                        <h5 class="text-[9px] font-bold text-blue-600 uppercase tracking-widest mb-2">Garantia e Notas Legais</h5>
-                       <p class="text-[9px] text-slate-700 leading-tight mb-2"><b>â€¢ GARANTIA Tà‰CNICA:</b> 90 dias para os serviços executados (Art. 26 CDC).</p>
-                       <p class="text-[9px] text-rose-600 font-bold uppercase leading-tight"><b>â€¢ ATENà‡àƒO:</b> Equipamentos não retirados em até 30 dias após aviso de conclusào estarào sujeitos a taxas de armazenamento ou descarte legal.</p>
+                       <p class="text-[11px] text-slate-700 leading-tight mb-2"><b>â€¢ GARANTIA Tà‰CNICA:</b> 90 dias para os serviços executados (Art. 26 CDC).</p>
+                       <p class="text-[11px] text-rose-600 font-bold uppercase leading-tight"><b>â€¢ ATENà‡àƒO:</b> Equipamentos não retirados em até 30 dias após aviso de conclusào estarào sujeitos a taxas de armazenamento ou descarte legal.</p>
                    </div>
                </div>
 
                <!-- Signatures -->
-               <div class="avoid-break mt-auto pt-8">
+               <div class="avoid-break mt-auto pt-32">
                    <div class="grid grid-cols-2 gap-16 px-10">
                        <div class="text-center">
                            <div style="border-top: 1px solid #cbd5e1; margin-bottom: 8px;"></div>
@@ -500,7 +500,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
 
             <div class="mb-6"><h4 class="text-[9px] font-black text-slate-900 uppercase tracking-widest mb-2 border-b pb-1">5. FORO</h4><p class="text-[10px] text-slate-600 leading-relaxed text-justify">Fica eleito o foro da comarca de São Paulo/SP para dirimir quaisquer dúvidas oriundas deste contrato.</p></div>
 
-            <div class="avoid-break mt-12 mb-8">
+            <div class="avoid-break mt-32 mb-8">
               <div class="grid grid-cols-2 gap-16 px-10">
                 <div class="text-center border-t border-slate-300 pt-3"><p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</p><p class="text-[10px] font-bold uppercase text-slate-900">${company.name}</p></div>
                 <div class="text-center border-t border-slate-300 pt-3 relative"><p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</p><p class="text-[10px] font-bold uppercase text-slate-900">${customer.name}</p></div>

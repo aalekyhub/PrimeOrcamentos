@@ -809,7 +809,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     </div>
                 </div>` : ''}
 
-                            <div class="avoid-break mt-32 pt-12 border-t border-slate-100">
+                            <div class="avoid-break mt-40 pt-24 border-t border-slate-100">
                                 <div class="flex justify-center px-8">
                                     <div class="text-center w-80">
                                         <div style="border-top: 1px solid #cbd5e1; margin-bottom: 60px;"></div>
