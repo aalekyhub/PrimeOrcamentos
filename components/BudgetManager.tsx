@@ -376,7 +376,6 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         <div class="print-footer no-screen"><span></span></div>
         <script>
            function optimizePageBreaks() {
-             const root = document.querySelector('.print-description-content .space-y-6');
              const root = document.querySelector('.print-description-content');
              if (!root) return;
              const allNodes = [];
