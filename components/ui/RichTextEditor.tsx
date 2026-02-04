@@ -71,12 +71,12 @@ const CustomToolbar: React.FC<{ id: string; onAddText?: () => void; onAddImage?:
     </div>
 
     {(onAddText || onAddImage) && (
-      <div className="flex items-center gap-6 px-4 border-l border-slate-200">
+      <div className="flex items-center gap-4 px-4 border-l border-slate-200 flex-shrink-0">
         {onAddText && (
           <button
             type="button"
             onClick={onAddText}
-            className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-black uppercase hover:bg-blue-100 transition-all active:scale-95 shadow-sm border border-blue-100 whitespace-nowrap"
+            className="!w-auto !h-auto flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-black uppercase hover:bg-blue-100 transition-all active:scale-95 shadow-sm border border-blue-100 whitespace-nowrap"
             title="Adicionar Bloco de Texto"
           >
             <Type className="w-3.5 h-3.5" /> + TEXTO
@@ -86,7 +86,7 @@ const CustomToolbar: React.FC<{ id: string; onAddText?: () => void; onAddImage?:
           <button
             type="button"
             onClick={onAddImage}
-            className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-black uppercase hover:bg-emerald-100 transition-all active:scale-95 shadow-sm border border-emerald-100 whitespace-nowrap"
+            className="!w-auto !h-auto flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-black uppercase hover:bg-emerald-100 transition-all active:scale-95 shadow-sm border border-emerald-100 whitespace-nowrap"
             title="Adicionar Bloco de Imagem"
           >
             <ImageIcon className="w-3.5 h-3.5" /> + IMAGEM
@@ -222,6 +222,12 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeh
         .ql-editor {
           font-family: 'Inter', sans-serif;
           font-size: 14px;
+        }
+        .rich-text-editor .ql-toolbar-custom button {
+          width: auto !important;
+          height: auto !important;
+          display: flex !important;
+          align-items: center !important;
         }
       `}</style>
       <CustomToolbar id={toolbarId} onAddText={onAddText} onAddImage={onAddImage} />
