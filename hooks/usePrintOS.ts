@@ -2,27 +2,27 @@ import { ServiceOrder, CompanyProfile, Customer } from '../types';
 import { financeUtils } from '../services/financeUtils';
 
 export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
-    const handlePrintOS = (order: ServiceOrder) => {
-        const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, address: 'Não informado', document: 'N/A' };
-        const printWindow = window.open('', '_blank');
-        if (!printWindow) return;
+  const handlePrintOS = (order: ServiceOrder) => {
+    const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, address: 'Não informado', document: 'N/A' };
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
 
-        const formatDate = (dateStr: string) => {
-            try {
-                const d = new Date(dateStr);
-                return isNaN(d.getTime()) ? new Date().toLocaleDateString('pt-BR') : d.toLocaleDateString('pt-BR');
-            } catch {
-                return new Date().toLocaleDateString('pt-BR');
-            }
-        };
+    const formatDate = (dateStr: string) => {
+      try {
+        const d = new Date(dateStr);
+        return isNaN(d.getTime()) ? new Date().toLocaleDateString('pt-BR') : d.toLocaleDateString('pt-BR');
+      } catch {
+        return new Date().toLocaleDateString('pt-BR');
+      }
+    };
 
-        const { subtotal, bdiValue, taxValue, finalTotal } = financeUtils.getDetailedFinancials(order);
+    const { subtotal, bdiValue, taxValue, finalTotal } = financeUtils.getDetailedFinancials(order);
 
-        const itemFontBase = company.itemsFontSize || 12;
+    const itemFontBase = company.itemsFontSize || 12;
 
-        const itemsHtml = order.items.map((item) => {
-            const total = item.quantity * item.unitPrice;
-            return `
+    const itemsHtml = order.items.map((item) => {
+      const total = item.quantity * item.unitPrice;
+      return `
       <tr style="border-bottom: 1px solid #f1f5f9;">
         <td style="padding: 10px 0; text-align: left; vertical-align: middle;">
             <div style="font-weight: 700; text-transform: uppercase; font-size: ${itemFontBase}px; color: #0f172a;">${item.description}</div>
@@ -32,9 +32,9 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
         <td style="padding: 10px 0; text-align: right; vertical-align: middle; color: #64748b; font-size: ${itemFontBase}px; font-weight: 700;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
         <td style="padding: 10px 0; text-align: right; vertical-align: middle; font-weight: 800; font-size: ${itemFontBase + 1}px; color: #0f172a;">R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
       </tr>`;
-        }).join('');
+    }).join('');
 
-        const html = `
+    const html = `
       <!DOCTYPE html>
       <html>
       <head>
@@ -84,7 +84,7 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
               .ql-editor-print h2 { font-size: 19px !important; }
               .ql-editor-print h3 { font-size: 17px !important; }
               .ql-editor-print h3 { font-size: 17px !important; }
-              .ql-editor-print h4 { font-size: 14px !important; }
+              .ql-editor-print h4 { font-size: 13px !important; }
 
               /* Font Classes for Print */
               .ql-font-inter { font-family: 'Inter', sans-serif !important; }
@@ -154,15 +154,15 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
                     <div class="section-title">DESCRIÇÃO TÉCNICA</div>
                     <div class="space-y-6">
                         ${order.descriptionBlocks.map(block => {
-            if (block.type === 'text') {
-                return `<div class="text-slate-800 leading-relaxed text-justify font-medium ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px;">${block.content}</div>`;
-            } else if (block.type === 'image') {
-                return `<div class="avoid-break" style="margin: 20px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; object-fit: contain; display: block;"></div>`;
-            } else if (block.type === 'page-break') {
-                return `<div style="page-break-after: always; break-after: page; height: 0; margin: 0; padding: 0;"></div>`;
-            }
-            return '';
-        }).join('')}
+      if (block.type === 'text') {
+        return `<div class="text-slate-800 leading-relaxed text-justify font-medium ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px;">${block.content}</div>`;
+      } else if (block.type === 'image') {
+        return `<div class="avoid-break" style="margin: 20px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; object-fit: contain; display: block;"></div>`;
+      } else if (block.type === 'page-break') {
+        return `<div style="page-break-after: always; break-after: page; height: 0; margin: 0; padding: 0;"></div>`;
+      }
+      return '';
+    }).join('')}
                     </div>
                 </div>` : ''}
 
@@ -294,9 +294,9 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
         </script>
       </body>
       </html>`;
-        printWindow.document.write(html);
-        printWindow.document.close();
-    };
+    printWindow.document.write(html);
+    printWindow.document.close();
+  };
 
-    return { handlePrintOS };
+  return { handlePrintOS };
 };
