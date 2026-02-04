@@ -459,10 +459,10 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           let isTitle = false;
 
           if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
-          else if (el.tagName === 'P' || el.tagName === 'DIV') {
+          else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
             const text = el.innerText.trim();
             const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text);
-            const isBold = el.querySelector('strong, b');
+            const isBold = el.querySelector('strong, b') || (el.style && parseInt(el.style.fontWeight) > 500) || el.tagName === 'STRONG';
             const isShort = text.length < 150;
             if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
               isTitle = true;
