@@ -56,6 +56,8 @@ const CustomToolbar: React.FC<{ id: string; onAddText?: () => void; onAddImage?:
         <select className="ql-header" defaultValue="">
           <option value="1">Título 1</option>
           <option value="2">Título 2</option>
+          <option value="3">Título 3</option>
+          <option value="4">Título 4</option>
           <option value="">Normal</option>
         </select>
       </span>
@@ -249,16 +251,27 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeh
         .ql-editor {
           font-family: 'Inter', sans-serif;
           font-size: 14px;
+          line-height: 1.6;
         }
-        .rich-text-editor .ql-toolbar-custom button {
-          width: auto !important;
-          height: auto !important;
-          display: flex !important;
-          align-items: center !important;
+        .ql-editor li {
+          margin-bottom: 4px;
         }
         .rich-text-editor .ql-container {
           max-height: 600px;
           overflow-y: auto;
+        }
+        /* Checklist Icon Fix */
+        .ql-snow .ql-toolbar button.ql-list[value="check"]::before {
+          content: '☐';
+          font-family: Arial, sans-serif;
+          font-weight: bold;
+          font-size: 16px;
+          display: block;
+          margin-top: -2px;
+        }
+        .ql-snow .ql-toolbar button.ql-list[value="check"].ql-active::before {
+          content: '☑';
+          color: #2563eb;
         }
         .rich-text-editor .ql-toolbar-custom {
           position: sticky;
