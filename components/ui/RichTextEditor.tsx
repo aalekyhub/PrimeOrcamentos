@@ -72,14 +72,6 @@ const CustomToolbar: React.FC<{ id: string; onAddText?: () => void; onAddImage?:
         <select className="ql-background" />
       </span>
       <span className="ql-formats">
-        <button className="ql-script" value="sub" />
-        <button className="ql-script" value="super" />
-      </span>
-      <span className="ql-formats">
-        <button className="ql-blockquote" />
-        <button className="ql-code-block" />
-      </span>
-      <span className="ql-formats">
         <button className="ql-list" value="ordered" />
         <button className="ql-list" value="bullet" />
         <button className="ql-list" value="check" />
@@ -87,12 +79,7 @@ const CustomToolbar: React.FC<{ id: string; onAddText?: () => void; onAddImage?:
         <button className="ql-indent" value="+1" />
       </span>
       <span className="ql-formats">
-        <button className="ql-direction" value="rtl" />
         <select className="ql-align" />
-      </span>
-      <span className="ql-formats">
-        <button className="ql-link" />
-        <button className="ql-clean" />
       </span>
     </div>
 
@@ -146,11 +133,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeh
     'header',
     'bold', 'italic', 'underline', 'strike',
     'color', 'background',
-    'script',
-    'blockquote', 'code-block',
     'list', 'bullet', 'check', 'indent',
-    'direction', 'align',
-    'link', 'clean'
+    'align'
   ];
 
   return (
