@@ -80,6 +80,7 @@ const CustomToolbar: React.FC<{ id: string; onAddText?: () => void; onAddImage?:
       <span className="ql-formats">
         <button className="ql-list" value="ordered" />
         <button className="ql-list" value="bullet" />
+        <button className="ql-list" value="check" />
         <button className="ql-indent" value="-1" />
         <button className="ql-indent" value="+1" />
       </span>
@@ -145,7 +146,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeh
     'color', 'background',
     'script',
     'blockquote', 'code-block',
-    'list', 'bullet', 'indent',
+    'list', 'bullet', 'check', 'indent',
     'direction', 'align',
     'link', 'clean'
   ];
