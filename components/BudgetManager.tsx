@@ -443,26 +443,28 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       document.body.appendChild(worker);
 
       // Apply optimizations manually (scripts in innerHTML don't run)
-      const root = worker.querySelector('.print-description-content .space-y-6');
+      // Apply optimizations manually (scripts in innerHTML don't run)
+      const root = worker.querySelector('.print-description-content'); // Updated selector
       if (root) {
-        const allNodes = [];
+        const allNodes: HTMLElement[] = []; // Explicit type
         Array.from(root.children).forEach(block => {
           if (block.classList.contains('ql-editor-print')) {
-            allNodes.push(...Array.from(block.children));
+            allNodes.push(...Array.from(block.children) as HTMLElement[]);
           } else {
-            allNodes.push(block);
+            allNodes.push(block as HTMLElement);
           }
         });
 
         for (let i = 0; i < allNodes.length - 1; i++) {
-          const el = allNodes[i] as HTMLElement;
+          const el = allNodes[i];
           let isTitle = false;
 
           if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
           else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
             const text = el.innerText.trim();
             const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text);
-            const isBold = el.querySelector('strong, b') || (el.style && parseInt(el.style.fontWeight) > 500) || el.tagName === 'STRONG';
+            const hasBoldStyle = el.querySelector('strong, b, [style*="font-weight: bold"], [style*="font-weight: 700"], [style*="font-weight: 800"], [style*="font-weight: 900"]');
+            const isBold = hasBoldStyle || (el.style && parseInt(el.style.fontWeight) > 600) || el.tagName === 'STRONG';
             const isShort = text.length < 150;
             if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
               isTitle = true;
@@ -473,11 +475,11 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
             const nodesToWrap = [el];
             let j = i + 1;
             while (j < allNodes.length && nodesToWrap.length < 3) {
-              const next = allNodes[j] as HTMLElement;
+              const next = allNodes[j];
               const nText = next.innerText.trim();
-              const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') ||
-                (/^\d+(\.\d+)*[\.\s\)]/.test(nText) && (next.querySelector('strong, b') || nText === nText.toUpperCase()));
-              if (nextIsTitle) break;
+              const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(nText);
+              // Check next node 
+              if (next.matches('h1, h2, h3, h4, h5, h6') || (isNumbered && next.querySelector('strong, b'))) break;
               nodesToWrap.push(next);
               j++;
             }
