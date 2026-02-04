@@ -24,7 +24,7 @@ interface RichTextEditorProps {
 }
 
 const CustomToolbar: React.FC<{ id: string; onAddText?: () => void; onAddImage?: () => void }> = ({ id, onAddText, onAddImage }) => (
-  <div id={id} className="ql-toolbar-custom flex flex-wrap items-center gap-2 p-2 pr-12 bg-slate-50 border-b border-slate-200">
+  <div id={id} className="ql-toolbar-custom sticky top-0 z-[100] flex flex-wrap items-center gap-2 p-2 pr-12 bg-slate-50 border-b border-slate-200 backdrop-blur-sm bg-white/95">
     <div className="flex flex-wrap items-center gap-1">
       <span className="ql-formats">
         <select className="ql-font" defaultValue="inter">
@@ -228,6 +228,16 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeh
           height: auto !important;
           display: flex !important;
           align-items: center !important;
+        }
+        .rich-text-editor .ql-container {
+          max-height: 600px;
+          overflow-y: auto;
+        }
+        .rich-text-editor .ql-toolbar-custom {
+          position: sticky;
+          top: 0;
+          z-index: 50;
+          background: white;
         }
       `}</style>
       <CustomToolbar id={toolbarId} onAddText={onAddText} onAddImage={onAddImage} />
