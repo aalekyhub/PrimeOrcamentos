@@ -459,6 +459,24 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
           .print-footer { position: fixed; bottom: 0; left: 0; right: 0; height: 15mm; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: bold; color: #94a3b8; text-transform: uppercase; background: white; } 
           .print-footer::after { content: "Página " counter(page); } 
           .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; } 
+          
+          /* Styles for Rich Text (Quill) */
+          .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4, .ql-editor-print h5, .ql-editor-print h6 { 
+              break-after: avoid-page !important; 
+              page-break-after: avoid !important; 
+              font-weight: 800 !important;
+              color: #0f172a !important;
+              margin-top: 24px !important;
+              margin-bottom: 8px !important;
+          }
+          .ql-editor-print h1 { font-size: 22px !important; }
+          .ql-editor-print h2 { font-size: 19px !important; }
+          .ql-editor-print h3 { font-size: 17px !important; }
+          .ql-editor-print h4 { font-size: 15px !important; }
+          
+          .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
+          .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
+          .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
         }
       </style>
     </head>
@@ -511,7 +529,32 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
         <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;"><div style="height: ${company.printMarginBottom || 15}mm; display: block;">&nbsp;</div></td></tr></tfoot>
       </table>
       <script>
-         window.onload = function() { setTimeout(() => { window.print(); window.close(); }, 800); }
+          function optimizePageBreaks() {
+              const root = document.querySelector('.ql-editor-print');
+              if (!root) return;
+              const allNodes = Array.from(root.children);
+              for (let i = 0; i < allNodes.length - 1; i++) {
+                  const el = allNodes[i];
+                  if (el.matches('h1, h2, h3, h4, h5, h6')) {
+                      const nodesToWrap = [el];
+                      let j = i + 1;
+                      while (j < allNodes.length && nodesToWrap.length < 3) {
+                          const next = allNodes[j];
+                          if (next.matches('h1, h2, h3, h4, h5, h6')) break;
+                          nodesToWrap.push(next);
+                          j++;
+                      }
+                      if (nodesToWrap.length > 1) {
+                          const wrapper = document.createElement('div');
+                          wrapper.className = 'keep-together';
+                          el.parentNode.insertBefore(wrapper, el);
+                          nodesToWrap.forEach(node => wrapper.appendChild(node));
+                          i = j - 1;
+                      }
+                  }
+              }
+          }
+          window.onload = function() { optimizePageBreaks(); setTimeout(() => { window.print(); window.close(); }, 800); }
       </script>
     </body>
     </html>`;

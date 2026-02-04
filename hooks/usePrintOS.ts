@@ -70,6 +70,20 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
              .ql-editor-print .ql-align-center { text-align: center !important; }
              .ql-editor-print .ql-align-right { text-align: right !important; }
              .ql-editor-print .ql-align-justify { text-align: justify !important; }
+ 
+              /* Prevent widowed headings */
+              .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4, .ql-editor-print h5, .ql-editor-print h6 { 
+                break-after: avoid-page !important; 
+                page-break-after: avoid !important; 
+                font-weight: 800 !important;
+                color: #0f172a !important;
+                margin-top: 24px !important;
+                margin-bottom: 8px !important;
+              }
+              .ql-editor-print h1 { font-size: 22px !important; }
+              .ql-editor-print h2 { font-size: 19px !important; }
+              .ql-editor-print h3 { font-size: 17px !important; }
+              .ql-editor-print h4 { font-size: 15px !important; }
 
               /* Font Classes for Print */
               .ql-font-inter { font-family: 'Inter', sans-serif !important; }

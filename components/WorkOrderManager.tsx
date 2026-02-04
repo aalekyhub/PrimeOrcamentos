@@ -436,7 +436,15 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4, .ql-editor-print h5, .ql-editor-print h6 { 
                             break-after: avoid-page !important; 
                             page-break-after: avoid !important; 
+                            font-weight: 800 !important;
+                            color: #0f172a !important;
+                            margin-top: 24px !important;
+                            margin-bottom: 8px !important;
                         }
+                        .ql-editor-print h1 { font-size: 22px !important; }
+                        .ql-editor-print h2 { font-size: 19px !important; }
+                        .ql-editor-print h3 { font-size: 17px !important; }
+                        .ql-editor-print h4 { font-size: 15px !important; }
                         .ql-editor-print p { orphans: 3; widows: 3; }
                     </style>
             </head>
@@ -551,7 +559,32 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;"><div style="height: ${company.printMarginBottom || 15}mm; display: block;">&nbsp;</div></td></tr></tfoot>
                 </table>
                 <script>
-                    window.onload = function() {setTimeout(() => { window.print(); window.close(); }, 800); }
+                    function optimizePageBreaks() {
+                        const root = document.querySelector('.ql-editor-print');
+                        if (!root) return;
+                        const allNodes = Array.from(root.children);
+                        for (let i = 0; i < allNodes.length - 1; i++) {
+                            const el = allNodes[i];
+                            if (el.matches('h1, h2, h3, h4, h5, h6')) {
+                                const nodesToWrap = [el];
+                                let j = i + 1;
+                                while (j < allNodes.length && nodesToWrap.length < 3) {
+                                    const next = allNodes[j];
+                                    if (next.matches('h1, h2, h3, h4, h5, h6')) break;
+                                    nodesToWrap.push(next);
+                                    j++;
+                                }
+                                if (nodesToWrap.length > 1) {
+                                    const wrapper = document.createElement('div');
+                                    wrapper.className = 'keep-together';
+                                    el.parentNode.insertBefore(wrapper, el);
+                                    nodesToWrap.forEach(node => wrapper.appendChild(node));
+                                    i = j - 1;
+                                }
+                            }
+                        }
+                    }
+                    window.onload = function() { optimizePageBreaks(); setTimeout(() => { window.print(); window.close(); }, 800); }
                 </script>
             </body>
         </html>`;
@@ -664,8 +697,22 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         .ql-editor-print .ql-align-center { text-align: center !important; }
                         .ql-editor-print .ql-align-right { text-align: right !important; }
                         .ql-editor-print .ql-align-justify { text-align: justify !important; }
+ 
+                        /* Prevent widowed headings */
+                        .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4, .ql-editor-print h5, .ql-editor-print h6 { 
+                          break-after: avoid-page !important; 
+                          page-break-after: avoid !important; 
+                          font-weight: 800 !important;
+                          color: #0f172a !important;
+                          margin-top: 24px !important;
+                          margin-bottom: 8px !important;
+                        }
+                        .ql-editor-print h1 { font-size: 22px !important; }
+                        .ql-editor-print h2 { font-size: 19px !important; }
+                        .ql-editor-print h3 { font-size: 17px !important; }
+                        .ql-editor-print h4 { font-size: 15px !important; }
 
-                        /* Font Classes for Print */
+                         /* Font Classes for Print */
                         .ql-font-inter { font-family: 'Inter', sans-serif !important; }
                         .ql-font-arial { font-family: Arial, sans-serif !important; }
                         .ql-font-roboto { font-family: 'Roboto', sans-serif !important; }
