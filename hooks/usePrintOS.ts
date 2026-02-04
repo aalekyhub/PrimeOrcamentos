@@ -83,7 +83,8 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
               .ql-editor-print h1 { font-size: 22px !important; }
               .ql-editor-print h2 { font-size: 19px !important; }
               .ql-editor-print h3 { font-size: 17px !important; }
-              .ql-editor-print h4 { font-size: 15px !important; }
+              .ql-editor-print h3 { font-size: 17px !important; }
+              .ql-editor-print h4 { font-size: 14px !important; }
 
               /* Font Classes for Print */
               .ql-font-inter { font-family: 'Inter', sans-serif !important; }
@@ -253,8 +254,10 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
                if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
                else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
                  const text = el.innerText.trim();
+                   const text = el.innerText.trim();
                   const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text);
-                 const isBold = el.querySelector('strong, b') || (el.style && parseInt(el.style.fontWeight) > 500) || el.tagName === 'STRONG';
+                  const hasBoldStyle = el.querySelector('strong, b, [style*="font-weight: bold"], [style*="font-weight: 700"], [style*="font-weight: 800"], [style*="font-weight: 900"]');
+                  const isBold = hasBoldStyle || (el.style && parseInt(el.style.fontWeight) > 600) || el.tagName === 'STRONG';
                  const isShort = text.length < 150;
                  if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
                    isTitle = true;

@@ -206,7 +206,8 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
               .ql-editor-print h1 { font-size: 22px !important; }
               .ql-editor-print h2 { font-size: 19px !important; }
               .ql-editor-print h3 { font-size: 17px !important; }
-              .ql-editor-print h4 { font-size: 15px !important; }
+              .ql-editor-print h3 { font-size: 17px !important; }
+              .ql-editor-print h4 { font-size: 14px !important; }
 
               /* Font Classes for Print */
               .ql-font-inter { font-family: 'Inter', sans-serif !important; }
@@ -376,14 +377,14 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         <script>
            function optimizePageBreaks() {
              const root = document.querySelector('.print-description-content .space-y-6');
+             const root = document.querySelector('.print-description-content');
              if (!root) return;
-
              const allNodes = [];
              Array.from(root.children).forEach(block => {
                if (block.classList.contains('ql-editor-print')) {
-                  allNodes.push(...Array.from(block.children));
+                 allNodes.push(...Array.from(block.children));
                } else {
-                  allNodes.push(block);
+                 allNodes.push(block);
                }
              });
 
@@ -394,8 +395,9 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
                else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
                  const text = el.innerText.trim();
-                 const isNumbered = /^\d+[\.\)]/.test(text);
-                 const isBold = el.querySelector('strong, b') || (el.style && parseInt(el.style.fontWeight) > 500) || el.tagName === 'STRONG';
+                 const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text);
+                 const hasBoldStyle = el.querySelector('strong, b, [style*="font-weight: bold"], [style*="font-weight: 700"], [style*="font-weight: 800"], [style*="font-weight: 900"]');
+                 const isBold = hasBoldStyle || (el.style && parseInt(el.style.fontWeight) > 600) || el.tagName === 'STRONG';
                  const isShort = text.length < 150;
                  if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
                    isTitle = true;
@@ -408,9 +410,8 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                  while (j < allNodes.length && nodesToWrap.length < 3) {
                    const next = allNodes[j];
                    const nText = next.innerText.trim();
-                   const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') || 
-                                       (/^\d+(\.\d+)*[\.\s\)]/.test(nText) && (next.querySelector('strong, b') || nText === nText.toUpperCase()));
-                   if (nextIsTitle) break;
+                   const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(nText);
+                   if (next.matches('h1, h2, h3, h4, h5, h6') || (isNumbered && next.querySelector('strong, b'))) break;
                    nodesToWrap.push(next);
                    j++;
                  }
