@@ -409,7 +409,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                    const next = allNodes[j];
                    const nText = next.innerText.trim();
                    const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') || 
-                                       (/^\d+[\.\)]/.test(nText) && (next.querySelector('strong, b') || nText === nText.toUpperCase()));
+                                       (/^\d+(\.\d+)*[\.\s\)]/.test(nText) && (next.querySelector('strong, b') || nText === nText.toUpperCase()));
                    if (nextIsTitle) break;
                    nodesToWrap.push(next);
                    j++;
@@ -461,7 +461,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
           else if (el.tagName === 'P' || el.tagName === 'DIV') {
             const text = el.innerText.trim();
-            const isNumbered = /^\d+[\.\)]/.test(text);
+            const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text);
             const isBold = el.querySelector('strong, b');
             const isShort = text.length < 150;
             if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
@@ -476,7 +476,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
               const next = allNodes[j] as HTMLElement;
               const nText = next.innerText.trim();
               const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') ||
-                (/^\d+[\.\)]/.test(nText) && (next.querySelector('strong, b') || nText === nText.toUpperCase()));
+                (/^\d+(\.\d+)*[\.\s\)]/.test(nText) && (next.querySelector('strong, b') || nText === nText.toUpperCase()));
               if (nextIsTitle) break;
               nodesToWrap.push(next);
               j++;

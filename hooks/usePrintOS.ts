@@ -253,7 +253,7 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
                if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
                else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
                  const text = el.innerText.trim();
-                 const isNumbered = /^\d+[\.\)]/.test(text);
+                  const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text);
                  const isBold = el.querySelector('strong, b') || (el.style && parseInt(el.style.fontWeight) > 500) || el.tagName === 'STRONG';
                  const isShort = text.length < 150;
                  if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
@@ -268,7 +268,7 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
                    const next = allNodes[j];
                    const nText = next.innerText.trim();
                    const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') || 
-                                       (/^\d+[\.\)]/.test(nText) && (next.querySelector('strong, b') || nText === nText.toUpperCase()));
+                                        (/^\d+(\.\d+)*[\.\s\)]/.test(nText) && (next.querySelector('strong, b') || nText === nText.toUpperCase()));
                    if (nextIsTitle) break;
                    nodesToWrap.push(next);
                    j++;

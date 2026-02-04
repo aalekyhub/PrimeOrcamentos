@@ -535,16 +535,18 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
               const allNodes = Array.from(root.children);
               for (let i = 0; i < allNodes.length - 1; i++) {
                   const el = allNodes[i];
-                  if (el.matches('h1, h2, h3, h4, h5, h6')) {
-                      const nodesToWrap = [el];
-                      let j = i + 1;
-                      while (j < allNodes.length && nodesToWrap.length < 3) {
-                          const next = allNodes[j];
-                          if (next.matches('h1, h2, h3, h4, h5, h6')) break;
-                          nodesToWrap.push(next);
-                          j++;
-                      }
-                      if (nodesToWrap.length > 1) {
+              if (el.matches('h1, h2, h3, h4, h5, h6')) {
+                  const nodesToWrap = [el];
+                  let j = i + 1;
+                  while (j < allNodes.length && nodesToWrap.length < 3) {
+                      const next = allNodes[j];
+                      const nText = next.innerText.trim();
+                      const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(nText);
+                      if (next.matches('h1, h2, h3, h4, h5, h6') || (isNumbered && next.querySelector('strong, b'))) break;
+                      nodesToWrap.push(next);
+                      j++;
+                  }
+                  if (nodesToWrap.length > 1) {
                           const wrapper = document.createElement('div');
                           wrapper.className = 'keep-together';
                           el.parentNode.insertBefore(wrapper, el);
