@@ -24,7 +24,7 @@ interface RichTextEditorProps {
 }
 
 const CustomToolbar: React.FC<{ id: string; onAddText?: () => void; onAddImage?: () => void }> = ({ id, onAddText, onAddImage }) => (
-  <div id={id} className="ql-toolbar-custom flex flex-wrap items-center justify-between p-2 bg-slate-50 border-b border-slate-200">
+  <div id={id} className="ql-toolbar-custom flex flex-wrap items-center gap-2 p-2 pr-12 bg-slate-50 border-b border-slate-200">
     <div className="flex flex-wrap items-center gap-1">
       <span className="ql-formats">
         <select className="ql-font" defaultValue="inter">
@@ -70,29 +70,28 @@ const CustomToolbar: React.FC<{ id: string; onAddText?: () => void; onAddImage?:
       </span>
     </div>
 
-    {onAddText && (
-      <div className="flex items-center px-4 border-l border-slate-200">
-        <button
-          type="button"
-          onClick={onAddText}
-          className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-black uppercase hover:bg-blue-100 transition-all active:scale-95 shadow-sm border border-blue-100 whitespace-nowrap"
-          title="Adicionar Bloco de Texto"
-        >
-          <Type className="w-3.5 h-3.5" /> + TEXTO
-        </button>
-      </div>
-    )}
-
-    {onAddImage && (
-      <div className="flex items-center px-4 ml-auto">
-        <button
-          type="button"
-          onClick={onAddImage}
-          className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-black uppercase hover:bg-emerald-100 transition-all active:scale-95 shadow-sm border border-emerald-100 whitespace-nowrap"
-          title="Adicionar Bloco de Imagem"
-        >
-          <ImageIcon className="w-3.5 h-3.5" /> + IMAGEM
-        </button>
+    {(onAddText || onAddImage) && (
+      <div className="flex items-center gap-6 px-4 border-l border-slate-200">
+        {onAddText && (
+          <button
+            type="button"
+            onClick={onAddText}
+            className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-black uppercase hover:bg-blue-100 transition-all active:scale-95 shadow-sm border border-blue-100 whitespace-nowrap"
+            title="Adicionar Bloco de Texto"
+          >
+            <Type className="w-3.5 h-3.5" /> + TEXTO
+          </button>
+        )}
+        {onAddImage && (
+          <button
+            type="button"
+            onClick={onAddImage}
+            className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-black uppercase hover:bg-emerald-100 transition-all active:scale-95 shadow-sm border border-emerald-100 whitespace-nowrap"
+            title="Adicionar Bloco de Imagem"
+          >
+            <ImageIcon className="w-3.5 h-3.5" /> + IMAGEM
+          </button>
+        )}
       </div>
     )}
   </div>
