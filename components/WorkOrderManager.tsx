@@ -712,7 +712,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         .ql-editor-print h1 { font-size: 22px !important; }
                         .ql-editor-print h2 { font-size: 19px !important; }
                         .ql-editor-print h3 { font-size: 17px !important; }
-                        .ql-editor-print h4 { font-size: 13px !important; }
+                        .ql-editor-print h4 { font-size: 14px !important; }
 
                          /* Font Classes for Print */
                         .ql-font-inter { font-family: 'Inter', sans-serif !important; }

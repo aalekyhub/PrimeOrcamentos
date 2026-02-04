@@ -253,7 +253,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeh
         .ql-editor h1 { font-size: 24px !important; }
         .ql-editor h2 { font-size: 20px !important; }
         .ql-editor h3 { font-size: 18px !important; }
-        .ql-editor h4 { font-size: 13px !important; }
+        .ql-editor h4 { font-size: 14px !important; }
         /* Checklist Icon Fix */
         .ql-snow .ql-toolbar button.ql-list[value="check"]::before {
           content: '☐';
