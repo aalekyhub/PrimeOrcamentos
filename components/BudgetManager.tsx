@@ -449,11 +449,34 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
       // Remove the auto-print command for the PDF generation version by replacing the onload function
       // We keep optimizePageBreaks() but remove the print/close calls
-      const pdfHtml = html.replace(/window\.onload\s*=\s*function\(\)\s*\{[\s\S]*?window\.print\(\);[\s\S]*?\}/, 'window.onload = function() { optimizePageBreaks(); }');
+      let pdfHtml = html.replace(/window\.onload\s*=\s*function\(\)\s*\{[\s\S]*?window\.print\(\);[\s\S]*?\}/, 'window.onload = function() { optimizePageBreaks(); }');
+
+      // Inject PDF-specific styles to override "screen" styles that html2canvas sees
+      const pdfOverrideStyles = `
+        <style>
+           body { background: white !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; }
+           .a4-container { width: 100% !important; height: auto !important; margin: 0 !important; padding: 20mm !important; box-shadow: none !important; border: none !important; }
+           .no-screen { display: block !important; }
+           .no-print { display: none !important; }
+           .print-footer { display: block !important; position: fixed; bottom: 0; left: 0; right: 0; }
+        </style>
+      `;
+      pdfHtml = pdfHtml.replace('</head>', `${pdfOverrideStyles}</head>`);
 
       iframe.onload = () => {
         // Wait for Tailwind CDN and layout to settle
         setTimeout(() => {
+          const body = iframe.contentDocument?.body;
+          if (!body) {
+            notify("Erro ao gerar PDF: Conteúdo vazio.", "error");
+            if (document.body.contains(iframe)) document.body.removeChild(iframe);
+            return;
+          }
+
+          // Resize iframe to fit full content height so html2canvas captures everything
+          const contentHeight = body.scrollHeight;
+          iframe.style.height = (contentHeight + 50) + 'px'; // +50px safety buffer
+
           const opt = {
             margin: 0,
             filename: `Orçamento - ${budget.id} - ${budget.description || 'Proposta'}.pdf`,
@@ -463,7 +486,8 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
               useCORS: true,
               scrollY: 0,
               // Important: Tell html2canvas to use the iframe's window context
-              window: iframe.contentWindow as Window
+              window: iframe.contentWindow as Window,
+              height: contentHeight + 50
             },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
             pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
