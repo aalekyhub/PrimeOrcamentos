@@ -435,44 +435,63 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     if (mode === 'pdf') {
       // Use a hidden div to process HTML for PDF (must be in DOM and visible for layout)
       const iframe = document.createElement('iframe');
-      iframe.style.position = 'fixed'; // Use fixed to ensure it renders even if scrolled away
-      iframe.style.left = '-10000px';
+      iframe.style.position = 'fixed';
+      iframe.style.left = '0'; // Must be in viewport for some renderers
       iframe.style.top = '0';
       iframe.style.width = '210mm';
-      iframe.style.height = '297mm'; // A4 height
+      iframe.style.height = '297mm';
       iframe.style.border = 'none';
+      iframe.style.zIndex = '-9999'; // Hide behind everything
+      iframe.style.opacity = '0';    // Make invisible
+      iframe.style.pointerEvents = 'none'; // No interaction
+      iframe.style.background = 'white'; // Ensure background for capture
       document.body.appendChild(iframe);
 
       // Remove the auto-print command for the PDF generation version by replacing the onload function
+      // We keep optimizePageBreaks() but remove the print/close calls
       const pdfHtml = html.replace(/window\.onload\s*=\s*function\(\)\s*\{[\s\S]*?window\.print\(\);[\s\S]*?\}/, 'window.onload = function() { optimizePageBreaks(); }');
 
       iframe.onload = () => {
-        // Allow a brief moment for dynamic styles/layout to settle if needed, 
-        // though onload should cover most resources.
+        // Wait for Tailwind CDN and layout to settle
         setTimeout(() => {
           const opt = {
             margin: 0,
             filename: `Orçamento - ${budget.id} - ${budget.description || 'Proposta'}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 3, useCORS: true, scrollY: 0 },
+            html2canvas: {
+              scale: 3,
+              useCORS: true,
+              scrollY: 0,
+              // Important: Tell html2canvas to use the iframe's window context
+              window: iframe.contentWindow as Window
+            },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
             pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
           };
 
           const element = iframe.contentDocument?.body;
-          if (!element) return;
+          if (!element) {
+            console.error("PDF Fail: No body in iframe");
+            notify("Erro ao gerar PDF: Conteúdo vazio.", "error");
+            document.body.removeChild(iframe);
+            return;
+          }
 
           // @ts-ignore
           html2pdf().set(opt).from(element).toPdf().get('pdf').then(function (pdf: any) {
-            var totalPages = pdf.internal.getNumberOfPages();
-            for (var i = 1; i <= totalPages; i++) {
-              pdf.setPage(i);
-              pdf.setFontSize(10);
-              pdf.setTextColor(148, 163, 184);
-              pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
+            try {
+              var totalPages = pdf.internal.getNumberOfPages();
+              for (var i = 1; i <= totalPages; i++) {
+                pdf.setPage(i);
+                pdf.setFontSize(10);
+                pdf.setTextColor(148, 163, 184);
+                pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
+              }
+              pdf.save(opt.filename);
+            } catch (e) {
+              console.error("PDF Post-process error", e);
             }
-            pdf.save(opt.filename);
-            document.body.removeChild(iframe);
+            if (document.body.contains(iframe)) document.body.removeChild(iframe);
           }).catch((err: any) => {
             console.error("PDF Error:", err);
             notify("Erro ao gerar PDF.", "error");
@@ -480,7 +499,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
               document.body.removeChild(iframe);
             }
           });
-        }, 1000); // Wait 1s for any final layout adjustments / font rendering
+        }, 1500); // Wait 1.5s for Tailwind and layout
       };
 
       const doc = iframe.contentDocument;
