@@ -460,7 +460,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
              width: 100% !important; 
              height: auto !important; 
              margin: 0 !important; 
-             padding: 10mm !important; /* Slightly reduce padding to fit more */
+             padding: 0mm !important; /* Remove padding to let PDF margin control spacing */
              box-shadow: none !important; 
              border: none !important; 
              background: white !important;
@@ -495,7 +495,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           iframe.style.height = (contentHeight + 100) + 'px';
 
           const opt = {
-            margin: [0, 0, 15, 0], // Reserve 15mm at bottom for footer/page numbers
+            margin: [25, 10, 25, 10], // Top, Right, Bottom, Left (25mm head/foot as requested)
             filename: `Orçamento - ${budget.id} - ${budget.description || 'Proposta'}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: {
@@ -519,7 +519,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                 pdf.setPage(i);
                 pdf.setFontSize(9);
                 pdf.setTextColor(150);
-                pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
+                pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 12, { align: 'center' });
               }
               pdf.save(opt.filename);
             } catch (e) {
