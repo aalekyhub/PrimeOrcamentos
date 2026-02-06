@@ -436,79 +436,89 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       // Use a hidden div to process HTML for PDF (must be in DOM and visible for layout)
       const iframe = document.createElement('iframe');
       iframe.style.position = 'fixed';
-      iframe.style.left = '0'; // Must be in viewport for some renderers
+      iframe.style.left = '0';
       iframe.style.top = '0';
       iframe.style.width = '210mm';
-      iframe.style.height = '297mm';
+      iframe.style.height = '297mm'; // Initial height
       iframe.style.border = 'none';
-      iframe.style.zIndex = '-9999'; // Hide behind everything
-      iframe.style.opacity = '0';    // Make invisible
-      iframe.style.pointerEvents = 'none'; // No interaction
-      iframe.style.background = 'white'; // Ensure background for capture
+      iframe.style.zIndex = '-9999';
+      iframe.style.opacity = '0';
+      iframe.style.pointerEvents = 'none';
+      iframe.style.background = 'white';
       document.body.appendChild(iframe);
 
-      // Remove the auto-print command for the PDF generation version by replacing the onload function
-      // We keep optimizePageBreaks() but remove the print/close calls
+      // Remove the auto-print command but keep optimization
       let pdfHtml = html.replace(/window\.onload\s*=\s*function\(\)\s*\{[\s\S]*?window\.print\(\);[\s\S]*?\}/, 'window.onload = function() { optimizePageBreaks(); }');
 
-      // Inject PDF-specific styles to override "screen" styles that html2canvas sees
+      // Inject robust PDF-specific styles to override "screen" styles
       const pdfOverrideStyles = `
         <style>
-           body { background: white !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; }
-           .a4-container { width: 100% !important; height: auto !important; margin: 0 !important; padding: 20mm !important; box-shadow: none !important; border: none !important; }
+           /* Force white background everywhere */
+           html, body { background: white !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; height: auto !important; }
+           /* Reset container styles for PDF generation */
+           .a4-container { 
+             width: 100% !important; 
+             height: auto !important; 
+             margin: 0 !important; 
+             padding: 10mm !important; /* Slightly reduce padding to fit more */
+             box-shadow: none !important; 
+             border: none !important; 
+             background: white !important;
+           }
+           /* Hide screen-only, show print-only */
            .no-screen { display: block !important; }
            .no-print { display: none !important; }
-           .print-footer { display: block !important; position: fixed; bottom: 0; left: 0; right: 0; }
+           
+           /* Ensure text colors are dark for print */
+           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+           
+           /* Ensure table fits */
+           table { width: 100% !important; }
         </style>
       `;
       pdfHtml = pdfHtml.replace('</head>', `${pdfOverrideStyles}</head>`);
 
       iframe.onload = () => {
-        // Wait for Tailwind CDN and layout to settle
+        // Wait for resources
         setTimeout(() => {
-          const body = iframe.contentDocument?.body;
-          if (!body) {
+          const doc = iframe.contentDocument;
+          const body = doc?.body;
+
+          if (!doc || !body) {
             notify("Erro ao gerar PDF: Conteúdo vazio.", "error");
             if (document.body.contains(iframe)) document.body.removeChild(iframe);
             return;
           }
 
-          // Resize iframe to fit full content height so html2canvas captures everything
-          const contentHeight = body.scrollHeight;
-          iframe.style.height = (contentHeight + 50) + 'px'; // +50px safety buffer
+          // Dynamic height adjustment: Set iframe height to full content height to prevent cropping
+          const contentHeight = Math.max(body.scrollHeight, body.offsetHeight, doc.documentElement.scrollHeight);
+          iframe.style.height = (contentHeight + 100) + 'px';
 
           const opt = {
-            margin: 0,
+            margin: [0, 0, 0, 0], // Margin handled by CSS padding
             filename: `Orçamento - ${budget.id} - ${budget.description || 'Proposta'}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: {
-              scale: 3,
+              scale: 2, // Slightly lower scale for performance/reliability with large height
               useCORS: true,
               scrollY: 0,
-              // Important: Tell html2canvas to use the iframe's window context
-              window: iframe.contentWindow as Window,
-              height: contentHeight + 50
+              window: iframe.contentWindow as Window, // Important for context
+              background: '#ffffff' // Force white canvas background
             },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
             pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
           };
 
-          const element = iframe.contentDocument?.body;
-          if (!element) {
-            console.error("PDF Fail: No body in iframe");
-            notify("Erro ao gerar PDF: Conteúdo vazio.", "error");
-            document.body.removeChild(iframe);
-            return;
-          }
 
           // @ts-ignore
-          html2pdf().set(opt).from(element).toPdf().get('pdf').then(function (pdf: any) {
+          html2pdf().set(opt).from(doc.documentElement).toPdf().get('pdf').then(function (pdf: any) {
+            // Add page numbers
             try {
               var totalPages = pdf.internal.getNumberOfPages();
               for (var i = 1; i <= totalPages; i++) {
                 pdf.setPage(i);
-                pdf.setFontSize(10);
-                pdf.setTextColor(148, 163, 184);
+                pdf.setFontSize(9);
+                pdf.setTextColor(150);
                 pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
               }
               pdf.save(opt.filename);
