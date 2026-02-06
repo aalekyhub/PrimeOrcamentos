@@ -460,7 +460,12 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
              width: 100% !important; 
              height: auto !important; 
              margin: 0 !important; 
-             padding: 0mm !important; /* Remove padding to let PDF margin control spacing */
+             margin: 0 !important; 
+             padding: 0mm !important; 
+             padding-top: 25mm !important; /* CSS handles Top Margin */
+             padding-left: 10mm !important; /* CSS handles Left Margin */
+             padding-right: 10mm !important; /* CSS handles Right Margin */
+             box-shadow: none !important;
              box-shadow: none !important; 
              border: none !important; 
              background: white !important;
@@ -495,15 +500,15 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           iframe.style.height = (contentHeight + 100) + 'px';
 
           const opt = {
-            margin: [25, 10, 25, 10], // Top, Right, Bottom, Left (25mm head/foot as requested)
+            margin: [0, 0, 25, 0], // Top=0 (CSS handles it), Bottom=25 (for Footer)
             filename: `Orçamento - ${budget.id} - ${budget.description || 'Proposta'}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: {
-              scale: 2, // Slightly lower scale for performance/reliability with large height
+              scale: 2,
               useCORS: true,
               scrollY: 0,
-              window: iframe.contentWindow as Window, // Important for context
-              background: '#ffffff' // Force white canvas background
+              window: iframe.contentWindow as Window,
+              background: '#ffffff'
             },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
             pagebreak: { mode: ['css', 'legacy'] }
