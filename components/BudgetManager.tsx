@@ -506,7 +506,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
               background: '#ffffff' // Force white canvas background
             },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+            pagebreak: { mode: ['css', 'legacy'] }
           };
 
 
