@@ -499,7 +499,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           iframe.style.height = (contentHeight + 100) + 'px';
 
           const opt = {
-            margin: [25, 10, 25, 10], // Strict PDF Margins: Top 25mm, Bottom 25mm
+            margin: [15, 10, 15, 10], // Reduced margins to 15mm as requested for more space
             filename: `Orçamento - ${budget.id} - ${budget.description || 'Proposta'}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: {
@@ -523,7 +523,9 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                 pdf.setPage(i);
                 pdf.setFontSize(9);
                 pdf.setTextColor(150);
-                pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 12, { align: 'center' });
+                pdf.setFontSize(9);
+                pdf.setTextColor(150);
+                pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 8, { align: 'center' });
               }
               pdf.save(opt.filename);
             } catch (e) {
