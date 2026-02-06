@@ -495,7 +495,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           iframe.style.height = (contentHeight + 100) + 'px';
 
           const opt = {
-            margin: [0, 0, 0, 0], // Margin handled by CSS padding
+            margin: [0, 0, 15, 0], // Reserve 15mm at bottom for footer/page numbers
             filename: `Orçamento - ${budget.id} - ${budget.description || 'Proposta'}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: {
