@@ -434,88 +434,61 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       </html>`;
     if (mode === 'pdf') {
       // Use a hidden div to process HTML for PDF (must be in DOM and visible for layout)
-      const worker = document.createElement('div');
-      worker.style.position = 'absolute';
-      worker.style.left = '-9999px';
-      worker.style.top = '0';
-      worker.style.width = '210mm';
-      worker.innerHTML = html;
-      document.body.appendChild(worker);
+      const iframe = document.createElement('iframe');
+      iframe.style.position = 'fixed'; // Use fixed to ensure it renders even if scrolled away
+      iframe.style.left = '-10000px';
+      iframe.style.top = '0';
+      iframe.style.width = '210mm';
+      iframe.style.height = '297mm'; // A4 height
+      iframe.style.border = 'none';
+      document.body.appendChild(iframe);
 
-      // Apply optimizations manually (scripts in innerHTML don't run)
-      // Apply optimizations manually (scripts in innerHTML don't run)
-      const root = worker.querySelector('.print-description-content'); // Updated selector
-      if (root) {
-        const allNodes: HTMLElement[] = []; // Explicit type
-        Array.from(root.children).forEach(block => {
-          if (block.classList.contains('ql-editor-print')) {
-            allNodes.push(...Array.from(block.children) as HTMLElement[]);
-          } else {
-            allNodes.push(block as HTMLElement);
-          }
-        });
+      // Remove the auto-print command for the PDF generation version by replacing the onload function
+      const pdfHtml = html.replace(/window\.onload\s*=\s*function\(\)\s*\{[\s\S]*?window\.print\(\);[\s\S]*?\}/, 'window.onload = function() { optimizePageBreaks(); }');
 
-        for (let i = 0; i < allNodes.length - 1; i++) {
-          const el = allNodes[i];
-          let isTitle = false;
+      iframe.onload = () => {
+        // Allow a brief moment for dynamic styles/layout to settle if needed, 
+        // though onload should cover most resources.
+        setTimeout(() => {
+          const opt = {
+            margin: 0,
+            filename: `Orçamento - ${budget.id} - ${budget.description || 'Proposta'}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 3, useCORS: true, scrollY: 0 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+          };
 
-          if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
-          else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
-            const text = el.innerText.trim();
-            const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text);
-            const hasBoldStyle = el.querySelector('strong, b, [style*="font-weight: bold"], [style*="font-weight: 700"], [style*="font-weight: 800"], [style*="font-weight: 900"]');
-            const isBold = hasBoldStyle || (el.style && parseInt(el.style.fontWeight) > 600) || el.tagName === 'STRONG';
-            const isShort = text.length < 150;
-            if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
-              isTitle = true;
+          const element = iframe.contentDocument?.body;
+          if (!element) return;
+
+          // @ts-ignore
+          html2pdf().set(opt).from(element).toPdf().get('pdf').then(function (pdf: any) {
+            var totalPages = pdf.internal.getNumberOfPages();
+            for (var i = 1; i <= totalPages; i++) {
+              pdf.setPage(i);
+              pdf.setFontSize(10);
+              pdf.setTextColor(148, 163, 184);
+              pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
             }
-          }
-
-          if (isTitle) {
-            const nodesToWrap = [el];
-            let j = i + 1;
-            while (j < allNodes.length && nodesToWrap.length < 3) {
-              const next = allNodes[j];
-              const nText = next.innerText.trim();
-              const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(nText);
-              // Check next node 
-              if (next.matches('h1, h2, h3, h4, h5, h6') || (isNumbered && next.querySelector('strong, b'))) break;
-              nodesToWrap.push(next);
-              j++;
+            pdf.save(opt.filename);
+            document.body.removeChild(iframe);
+          }).catch((err: any) => {
+            console.error("PDF Error:", err);
+            notify("Erro ao gerar PDF.", "error");
+            if (document.body.contains(iframe)) {
+              document.body.removeChild(iframe);
             }
-
-            if (nodesToWrap.length > 1) {
-              const wrapper = document.createElement('div');
-              wrapper.className = 'keep-together';
-              el.parentNode?.insertBefore(wrapper, el);
-              nodesToWrap.forEach(node => wrapper.appendChild(node));
-              i = j - 1;
-            }
-          }
-        }
-      }
-
-      const opt = {
-        margin: 0,
-        filename: `Orçamento - ${budget.id} - ${budget.description || 'Proposta'}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 3, useCORS: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+          });
+        }, 1000); // Wait 1s for any final layout adjustments / font rendering
       };
 
-      // @ts-ignore
-      html2pdf().set(opt).from(worker).toPdf().get('pdf').then(function (pdf: any) {
-        var totalPages = pdf.internal.getNumberOfPages();
-        for (var i = 1; i <= totalPages; i++) {
-          pdf.setPage(i);
-          pdf.setFontSize(10);
-          pdf.setTextColor(148, 163, 184);
-          pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
-        }
-        pdf.save(opt.filename);
-        document.body.removeChild(worker);
-      });
+      const doc = iframe.contentDocument;
+      if (doc) {
+        doc.open();
+        doc.write(pdfHtml);
+        doc.close();
+      }
     } else {
       const printWindow = window.open('', '_blank');
       if (printWindow) {
