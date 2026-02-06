@@ -455,17 +455,16 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         <style>
            /* Force white background everywhere */
            html, body { background: white !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; height: auto !important; }
+           
+           /* Hide table spacers in PDF to prevent double margin */
+           thead, tfoot { display: none !important; height: 0 !important; margin: 0 !important; padding: 0 !important; }
+
            /* Reset container styles for PDF generation */
            .a4-container { 
              width: 100% !important; 
              height: auto !important; 
              margin: 0 !important; 
-             margin: 0 !important; 
              padding: 0mm !important; 
-             padding-top: 25mm !important; /* CSS handles Top Margin */
-             padding-left: 10mm !important; /* CSS handles Left Margin */
-             padding-right: 10mm !important; /* CSS handles Right Margin */
-             box-shadow: none !important;
              box-shadow: none !important; 
              border: none !important; 
              background: white !important;
@@ -500,7 +499,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           iframe.style.height = (contentHeight + 100) + 'px';
 
           const opt = {
-            margin: [0, 0, 25, 0], // Top=0 (CSS handles it), Bottom=25 (for Footer)
+            margin: [25, 10, 25, 10], // Strict PDF Margins: Top 25mm, Bottom 25mm
             filename: `Orçamento - ${budget.id} - ${budget.description || 'Proposta'}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: {
