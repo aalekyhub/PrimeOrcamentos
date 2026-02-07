@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
     Building2, Users, Truck, HardHat, FileText,
     Plus, Trash2, Save, ChevronRight, Calculator,
@@ -13,10 +13,13 @@ import {
 
 interface Props {
     customers: Customer[];
-    onGenerateBudget: (plan: PlanningHeader, services: PlannedService[], totalMat: number, totalLab: number, totalInd: number) => void;
+    onGenerateBudget?: (plan: PlanningHeader, services: PlannedService[], totalMat: number, totalLab: number, totalInd: number) => void;
+    embeddedPlanId?: string | null;
+    onBack?: () => void;
+    onPlanCreated?: (plan: PlanningHeader) => void;
 }
 
-const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget }) => {
+const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embeddedPlanId, onBack, onPlanCreated }) => {
     // State
     const [plans, setPlans] = useState<PlanningHeader[]>([]);
     const [activePlanId, setActivePlanId] = useState<string | null>(null);
@@ -34,20 +37,52 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget }) => {
     const [activeTab, setActiveTab] = useState<'dados' | 'servicos' | 'recursos' | 'resumo'>('dados');
     const [resourceTab, setResourceTab] = useState<'material' | 'mo' | 'indireto'>('material');
 
+    // Ref to prevent infinite loop on creation
+    const creationAttemptedRef = useRef(false);
+
     // Load plans on mount
     useEffect(() => {
         loadPlans();
     }, []);
 
+    // Effect to handle Embedded Mode
+    useEffect(() => {
+        if (embeddedPlanId && plans.length > 0) {
+            if (embeddedPlanId === 'new') {
+                if (!creationAttemptedRef.current) {
+                    creationAttemptedRef.current = true;
+                    handleCreatePlan();
+                }
+            } else {
+                creationAttemptedRef.current = false; // Reset for future usage
+                const plan = plans.find(p => p.id === embeddedPlanId);
+                if (plan) {
+                    if (activePlanId !== plan.id) {
+                        setActivePlanId(plan.id);
+                        setCurrentPlan(plan);
+                        loadPlanDetails(plan.id);
+                    }
+                }
+            }
+        }
+    }, [embeddedPlanId, plans, activePlanId]); // Added activePlanId to dependencies to prevent infinite loop if it's not updated correctly
+
     const loadPlans = async () => {
-        // In a real app, this comes from App.tsx props or a global store, 
-        // but for now let's try to load from local storage or db sync
-        // For this module to work isolated, we might need to fetch manually or rely on App passing props.
-        // Given the constraints, I will assume we fetch from DB/Local for now or manage local state.
-        // Ideally, App.tsx should manage this state like 'orders'.
-        // For now, I'll implement local fetching to get started.
-        const localPlans = db.load('serviflow_plans', []);
+        const localPlans = db.load('serviflow_plans', []) as PlanningHeader[];
         setPlans(localPlans);
+    };
+
+    const loadPlanDetails = (planId: string) => {
+        // Load sub-items
+        const allServices = db.load('serviflow_plan_services', []) as PlannedService[];
+        // Filter for this plan
+        setServices(allServices.filter(s => s.plan_id === planId));
+        const allMaterials = db.load('serviflow_plan_materials', []) as PlannedMaterial[];
+        setMaterials(allMaterials.filter(m => m.plan_id === planId));
+        const allLabor = db.load('serviflow_plan_labor', []) as PlannedLabor[];
+        setLabor(allLabor.filter(l => l.plan_id === planId));
+        const allIndirects = db.load('serviflow_plan_indirects', []) as PlannedIndirect[];
+        setIndirects(allIndirects.filter(i => i.plan_id === planId));
     };
 
     const handleCreatePlan = () => {
@@ -60,6 +95,11 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget }) => {
             status: 'Planejamento',
             created_at: new Date().toISOString()
         };
+        // Save to DB immediately to persist? Or just local state?
+        // Original code just setPlans. But for unified view to see it if we reload, we might need to save.
+        // But usually we save on "Save".
+        // Let's keep it local for now, but update the parent.
+
         setPlans([newPlan, ...plans]);
         setActivePlanId(newPlan.id);
         setCurrentPlan(newPlan);
@@ -67,6 +107,10 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget }) => {
         setMaterials([]);
         setLabor([]);
         setIndirects([]);
+
+        if (onPlanCreated) {
+            onPlanCreated(newPlan);
+        }
         setActiveTab('dados');
     };
 
@@ -101,10 +145,14 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget }) => {
     const totalIndirect = useMemo(() => indirects.reduce((acc, i) => acc + i.value, 0), [indirects]);
     const totalGeneral = totalMaterial + totalLabor + totalIndirect;
 
+    if (embeddedPlanId && !currentPlan) {
+        return <div className="p-10 text-center text-slate-500">Carregando planejamento...</div>;
+    }
+
     return (
         <div className="w-full max-w-6xl mx-auto p-6">
             {/* Header / List */}
-            {!activePlanId ? (
+            {(!activePlanId && !embeddedPlanId) ? (
                 <div>
                     <div className="flex justify-between items-center mb-6">
                         <h1 className="text-2xl font-bold text-slate-800">Planejamento de Obras</h1>
@@ -144,9 +192,11 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget }) => {
                     {/* Editor Header */}
                     <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50 rounded-t-2xl">
                         <div className="flex items-center gap-4">
-                            <button onClick={() => setActivePlanId(null)} className="text-slate-400 hover:text-slate-600">
-                                <ArrowRight className="rotate-180" />
-                            </button>
+                            {!embeddedPlanId && (
+                                <button onClick={() => setActivePlanId(null)} className="text-slate-400 hover:text-slate-600">
+                                    <ArrowRight className="rotate-180" />
+                                </button>
+                            )}
                             <div>
                                 <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
                                     <HardHat className="text-blue-600" />
@@ -172,6 +222,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget }) => {
                         ].map(tab => (
                             <button
                                 key={tab.id}
+                                type="button"
                                 onClick={() => setActiveTab(tab.id as any)}
                                 className={`px-6 py-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors ${activeTab === tab.id ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'
                                     }`}
@@ -331,6 +382,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget }) => {
                                     {[{ id: 'material', label: 'Materiais' }, { id: 'mo', label: 'Mão de Obra' }, { id: 'indireto', label: 'Indiretos' }].map(r => (
                                         <button
                                             key={r.id}
+                                            type="button"
                                             onClick={() => setResourceTab(r.id as any)}
                                             className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${resourceTab === r.id ? 'bg-slate-800 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
                                                 }`}
@@ -359,6 +411,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget }) => {
                                                 </div>
                                                 <div className="md:col-span-3">
                                                     <button
+                                                        type="button"
                                                         onClick={() => {
                                                             const name = (document.getElementById('mat_name') as HTMLInputElement).value;
                                                             const qty = parseFloat((document.getElementById('mat_qty') as HTMLInputElement).value) || 0;
@@ -367,6 +420,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget }) => {
 
                                                             setMaterials([...materials, {
                                                                 id: db.generateId('MAT'),
+                                                                plan_id: currentPlan?.id,
                                                                 material_name: name,
                                                                 quantity: qty,
                                                                 unit_cost: cost,
@@ -424,6 +478,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget }) => {
                                                 </div>
                                                 <div className="md:col-span-2">
                                                     <button
+                                                        type="button"
                                                         onClick={() => {
                                                             const role = (document.getElementById('mo_role') as HTMLInputElement).value;
                                                             const type = (document.getElementById('mo_type') as HTMLInputElement).value as any;
@@ -433,6 +488,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget }) => {
 
                                                             setLabor([...labor, {
                                                                 id: db.generateId('LBR'),
+                                                                plan_id: currentPlan?.id,
                                                                 role,
                                                                 cost_type: type,
                                                                 quantity: qty,
@@ -442,6 +498,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget }) => {
                                                             }]);
                                                             (document.getElementById('mo_role') as HTMLInputElement).value = '';
                                                             (document.getElementById('mo_qty') as HTMLInputElement).value = '';
+                                                            (document.getElementById('mo_cost') as HTMLInputElement).value = '';
                                                         }}
                                                         className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-bold text-sm"
                                                     >
@@ -490,6 +547,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget }) => {
                                                 </div>
                                                 <div className="md:col-span-1">
                                                     <button
+                                                        type="button"
                                                         onClick={() => {
                                                             const cat = (document.getElementById('ind_cat') as HTMLInputElement).value;
                                                             const desc = (document.getElementById('ind_desc') as HTMLInputElement).value;
@@ -497,6 +555,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget }) => {
 
                                                             setIndirects([...indirects, {
                                                                 id: db.generateId('IND'),
+                                                                plan_id: currentPlan?.id,
                                                                 category: cat,
                                                                 description: desc,
                                                                 value: val
@@ -550,8 +609,15 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget }) => {
                                         <p className="text-4xl font-bold">R$ {totalGeneral.toFixed(2)}</p>
                                     </div>
                                     <button
-                                        onClick={() => onGenerateBudget(currentPlan, services, totalMaterial, totalLabor, totalIndirect)}
-                                        className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg flex items-center gap-2 transition-all transform hover:scale-105"
+                                        type="button"
+                                        onClick={() => {
+                                            if (onGenerateBudget) {
+                                                onGenerateBudget(currentPlan, services, totalMaterial, totalLabor, totalIndirect);
+                                            } else {
+                                                notify("Função de gerar orçamento não disponível neste modo.", "info");
+                                            }
+                                        }}
+                                        className={`bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg flex items-center gap-2 transition-all transform hover:scale-105 ${!onGenerateBudget ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     >
                                         <Calculator size={20} /> Gerar Orçamento
                                     </button>

@@ -152,6 +152,7 @@ export interface Loan {
 
 export interface PlannedMaterial {
   id: string;
+  plan_id?: string; // Link to plan
   plan_services_id?: string; // Optional link to a specific service
   material_name: string;
   quantity: number;
@@ -162,6 +163,7 @@ export interface PlannedMaterial {
 
 export interface PlannedLabor {
   id: string;
+  plan_id?: string; // Link to plan
   plan_services_id?: string; // Optional link
   role: string;
   cost_type: 'Hora' | 'Diária' | 'Empreitada';
@@ -173,6 +175,7 @@ export interface PlannedLabor {
 
 export interface PlannedIndirect {
   id: string;
+  plan_id?: string; // Link to plan
   category: string;
   description: string;
   value: number;
@@ -213,6 +216,7 @@ export interface PlanningHeader {
 
 export interface WorkMaterial {
   id: string;
+  work_id?: string; // Link to Work
   work_services_id?: string;
   material_name: string;
   quantity: number;
@@ -225,6 +229,7 @@ export interface WorkMaterial {
 
 export interface WorkLabor {
   id: string;
+  work_id?: string; // Link to Work
   work_services_id?: string;
   role: string;
   worker_name?: string;
@@ -247,6 +252,7 @@ export interface WorkIndirect {
 export interface WorkService {
   id: string;
   work_id: string;
+  plan_service_id?: string; // Links this Realized Service to a Planned Service
   description: string;
   unit: string;
   quantity: number; // Executed quantity
@@ -261,10 +267,11 @@ export interface WorkService {
 
 export interface WorkHeader {
   id: string;
+  plan_id?: string; // Links this Realized Work to a Projected Plan
   name: string;
   client_id: string;
   order_id?: string;
-  plan_id?: string;
+
   address: string;
   status: 'Em Andamento' | 'Concluída' | 'Pausada';
   start_date: string;

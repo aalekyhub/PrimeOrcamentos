@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
     Building2, Users, Truck, HardHat, FileText,
     Plus, Trash2, Save, ChevronRight, Calculator,
@@ -8,14 +8,18 @@ import { useNotify } from './ToastProvider';
 import { db } from '../services/db';
 import {
     WorkHeader, WorkService, WorkMaterial,
-    WorkLabor, WorkIndirect, Customer
+    WorkLabor, WorkIndirect, Customer,
+    PlannedService, PlannedMaterial,
+    PlannedLabor, PlannedIndirect
 } from '../types';
 
 interface Props {
     customers: Customer[];
+    embeddedPlanId?: string | null;
+    onBack?: () => void;
 }
 
-const WorksManager: React.FC<Props> = ({ customers }) => {
+const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) => {
     // State
     const [works, setWorks] = useState<WorkHeader[]>([]);
     const [activeWorkId, setActiveWorkId] = useState<string | null>(null);
@@ -32,15 +36,166 @@ const WorksManager: React.FC<Props> = ({ customers }) => {
     // UI State
     const [activeTab, setActiveTab] = useState<'dados' | 'servicos' | 'recursos' | 'resumo'>('dados');
     const [resourceTab, setResourceTab] = useState<'material' | 'mo' | 'indireto'>('material');
+    // Ref to prevent infinite loop on creation
+    const creationAttemptedRef = useRef<{ [key: string]: boolean }>({});
 
     // Load works on mount
     useEffect(() => {
         loadWorks();
     }, []);
 
+    // Effect to handle Embedded Mode
+    useEffect(() => {
+        if (embeddedPlanId && works.length >= 0) {
+            // Check if work already exists for this plan
+            let work = works.find(w => w.plan_id === embeddedPlanId);
+
+            // Should created/updated only if not exists or if exists but is empty/uninitialized
+            if (!work) {
+                // Check if we already attempted to create this specific work in this session
+                if (creationAttemptedRef.current[embeddedPlanId]) {
+                    return;
+                }
+
+                const localWorks = db.load('serviflow_works', []) as WorkHeader[];
+                work = localWorks.find(w => w.plan_id === embeddedPlanId);
+
+                if (!work) {
+                    // Mark as attempted to prevent loop
+                    creationAttemptedRef.current[embeddedPlanId] = true;
+
+                    // Auto-create from Plan
+                    const plans = db.load('serviflow_plans', []) as any[];
+                    const plan = plans.find(p => p.id === embeddedPlanId);
+
+                    if (plan) {
+                        const newWorkId = db.generateId('OBRA');
+                        work = {
+                            id: newWorkId,
+                            plan_id: embeddedPlanId,
+                            name: plan.name,
+                            client_id: plan.client_id,
+                            address: plan.address,
+                            status: 'Em Andamento',
+                            start_date: new Date().toISOString()
+                        };
+
+                        // CLONE logic is shared below
+                        importPlanItems(embeddedPlanId, newWorkId);
+
+                        // Save Work Header
+                        const newWorks = [...localWorks, work];
+                        db.save('serviflow_works', newWorks);
+                        setWorks(newWorks);
+                    }
+                }
+            } else {
+                // WORK EXISTS
+                // We do NOT auto-import here anymore to avoid performance issues.
+                // User can click "Importar do Planejamento" manually.
+            }
+
+            if (work) {
+                if (activeWorkId !== work.id) {
+                    setActiveWorkId(work.id);
+                    setCurrentWork(work);
+                    loadWorkDetails(work.id);
+                }
+            }
+        }
+    }, [embeddedPlanId, works, activeWorkId]); // Added activeWorkId to dependencies
+
+    // Helper to clone items
+    const importPlanItems = (planId: string, workId: string) => {
+        // 1. Services
+        const planServices = (db.load('serviflow_plan_services', []) as PlannedService[]).filter(s => s.plan_id === planId);
+
+        if (planServices.length === 0) {
+            notify("O planejamento não possui itens para importar.", "error");
+            return;
+        }
+
+        const newWorkServices: WorkService[] = planServices.map(s => ({
+            id: db.generateId('WSVC'),
+            work_id: workId,
+            plan_service_id: s.id,
+            description: s.description,
+            unit: s.unit,
+            quantity: 0,
+            unit_labor_cost: 0,
+            unit_material_cost: 0,
+            unit_indirect_cost: 0,
+            total_cost: 0,
+            status: 'Pendente'
+        }));
+
+        const allWorkServices = db.load('serviflow_work_services', []) as WorkService[];
+        db.save('serviflow_work_services', [...allWorkServices, ...newWorkServices]);
+
+        // 2. Materials
+        const planMaterials = (db.load('serviflow_plan_materials', []) as PlannedMaterial[]).filter(m => m.plan_id === planId);
+        const newWorkMaterials: WorkMaterial[] = planMaterials.map(m => ({
+            id: db.generateId('WMAT'),
+            work_id: workId,
+            material_name: m.material_name,
+            quantity: 0,
+            unit_cost: 0,
+            total_cost: 0
+        }));
+
+        const allWorkMaterials = db.load('serviflow_work_materials', []) as WorkMaterial[];
+        db.save('serviflow_work_materials', [...allWorkMaterials, ...newWorkMaterials]);
+
+        // 3. Labor
+        const planLabor = (db.load('serviflow_plan_labor', []) as PlannedLabor[]).filter(l => l.plan_id === planId);
+        const newWorkLabor: WorkLabor[] = planLabor.map(l => ({
+            id: db.generateId('WLBR'),
+            work_id: workId,
+            role: l.role,
+            cost_type: l.cost_type,
+            quantity: 0,
+            unit_cost: 0,
+            total_cost: 0
+        }));
+
+        const allWorkLabor = db.load('serviflow_work_labor', []) as WorkLabor[];
+        db.save('serviflow_work_labor', [...allWorkLabor, ...newWorkLabor]);
+
+        // 4. Indirects
+        const planIndirects = (db.load('serviflow_plan_indirects', []) as PlannedIndirect[]).filter(i => i.plan_id === planId);
+        const newWorkIndirects: WorkIndirect[] = planIndirects.map(i => ({
+            id: db.generateId('WIND'),
+            work_id: workId,
+            category: i.category,
+            description: i.description,
+            value: 0
+        }));
+
+        const allWorkIndirects = db.load('serviflow_work_indirects', []) as WorkIndirect[];
+        db.save('serviflow_work_indirects', [...allWorkIndirects, ...newWorkIndirects]);
+
+        // Update local state
+        notify("Itens importados do planejamento com sucesso!", "success");
+        loadWorkDetails(workId);
+    };
+
     const loadWorks = async () => {
-        const localWorks = db.load('serviflow_works', []);
+        const localWorks = db.load('serviflow_works', []) as WorkHeader[];
         setWorks(localWorks);
+    };
+
+    const loadWorkDetails = (workId: string) => {
+        const allServices = db.load('serviflow_work_services', []) as WorkService[];
+        setServices(allServices.filter(s => s.work_id === workId));
+
+        const allMaterials = db.load('serviflow_work_materials', []) as WorkMaterial[];
+        setMaterials(allMaterials.filter(m => m.work_id === workId));
+
+        const allLabor = db.load('serviflow_work_labor', []) as WorkLabor[];
+        setLabor(allLabor.filter(l => l.work_id === workId));
+
+        const allIndirects = db.load('serviflow_work_indirects', []) as WorkIndirect[];
+        setIndirects(allIndirects.filter(i => i.work_id === workId));
     };
 
     const handleCreateWork = () => {
@@ -99,10 +254,14 @@ const WorksManager: React.FC<Props> = ({ customers }) => {
     const totalIndirect = useMemo(() => indirects.reduce((acc, i) => acc + i.value, 0), [indirects]);
     const totalGeneral = totalMaterial + totalLabor + totalIndirect;
 
+    if (embeddedPlanId && !currentWork) {
+        return <div className="p-10 text-center text-slate-500">Preparando ambiente de execução...</div>;
+    }
+
     return (
         <div className="w-full max-w-6xl mx-auto p-6">
             {/* Header / List */}
-            {!activeWorkId ? (
+            {(!activeWorkId && !embeddedPlanId) ? (
                 <div>
                     <div className="flex justify-between items-center mb-6">
                         <h1 className="text-2xl font-bold text-emerald-800">Gestão de Obras (Realizado)</h1>
@@ -142,9 +301,11 @@ const WorksManager: React.FC<Props> = ({ customers }) => {
                     {/* Editor Header */}
                     <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-emerald-50 rounded-t-2xl">
                         <div className="flex items-center gap-4">
-                            <button onClick={() => setActiveWorkId(null)} className="text-emerald-400 hover:text-emerald-600">
-                                <ArrowRight className="rotate-180" />
-                            </button>
+                            {!embeddedPlanId && (
+                                <button onClick={() => setActiveWorkId(null)} className="text-emerald-400 hover:text-emerald-600">
+                                    <ArrowRight className="rotate-180" />
+                                </button>
+                            )}
                             <div>
                                 <h2 className="text-xl font-bold text-emerald-900 flex items-center gap-2">
                                     <HardHat className="text-emerald-600" />
@@ -156,6 +317,16 @@ const WorksManager: React.FC<Props> = ({ customers }) => {
                             </div>
                         </div>
                         <div className="flex gap-2">
+                            {/* MANUAL IMPORT BUTTON */}
+                            {currentWork?.plan_id && services.length === 0 && (
+                                <button
+                                    onClick={() => importPlanItems(currentWork.plan_id!, currentWork.id)}
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-blue-700 shadow-md animate-pulse"
+                                >
+                                    <ArrowRight size={16} /> Importar do Planejamento
+                                </button>
+                            )}
+
                             <button onClick={handleSave} className="px-4 py-2 bg-emerald-700 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-emerald-800 shadow-md">
                                 <Save size={16} /> Salvar
                             </button>
@@ -172,6 +343,7 @@ const WorksManager: React.FC<Props> = ({ customers }) => {
                         ].map(tab => (
                             <button
                                 key={tab.id}
+                                type="button"
                                 onClick={() => setActiveTab(tab.id as any)}
                                 className={`px-6 py-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors ${activeTab === tab.id ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-500 hover:text-slate-700'
                                     }`}
@@ -314,7 +486,20 @@ const WorksManager: React.FC<Props> = ({ customers }) => {
                                             </div>
                                         </div>
                                     ))}
-                                    {services.length === 0 && <p className="text-center text-slate-400 py-8">Nenhum serviço lançado ainda.</p>}
+                                    {services.length === 0 && (
+                                        <div className="text-center py-8">
+                                            <p className="text-slate-400 mb-2">Nenhum serviço lançado ainda.</p>
+                                            {!currentWork?.plan_id && <p className="text-xs text-slate-300">Essa obra não está vinculada a um planejamento.</p>}
+                                            {currentWork?.plan_id && (
+                                                <button
+                                                    onClick={() => importPlanItems(currentWork.plan_id!, currentWork.id)}
+                                                    className="text-blue-500 hover:underline text-sm font-bold"
+                                                >
+                                                    Importar Itens do Planejamento
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}

@@ -5,7 +5,8 @@ import {
 } from 'lucide-react';
 import Dashboard from './components/Dashboard';
 import WorksManager from './components/WorksManager';
-import PlanningManager from './components/PlanningManager';
+import UnifiedWorksManager from './components/UnifiedWorksManager';
+import BudgetManager from './components/BudgetManager';
 
 // ... (existing imports)
 
@@ -220,7 +221,6 @@ const AppContent: React.FC = () => {
     { id: 'orders', label: 'O.S. (Equip)', icon: ClipboardList },
     { id: 'works', label: 'O.S. Obra', icon: HardHat },
     { id: 'construction', label: 'Gestão de Obras', icon: Building2 },
-    { id: 'planning', label: 'Planejamento', icon: HardHat },
     { id: 'financials', label: 'Financeiro', icon: Wallet },
     { id: 'search', label: 'Consultar', icon: Search },
     { id: 'audit', label: 'Auditoria', icon: Database },
@@ -384,53 +384,7 @@ const AppContent: React.FC = () => {
                   {item.id === 'budgets' && <BudgetManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} />}
                   {item.id === 'orders' && <ServiceOrderManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} />}
                   {item.id === 'works' && <WorkOrderManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} transactions={transactions} setTransactions={setTransactions} />}
-                  {item.id === 'construction' && <WorksManager customers={customers} />}
-                  {item.id === 'planning' && <PlanningManager
-                    customers={customers}
-                    onGenerateBudget={(plan, services) => {
-                      // 1. Find Customer
-                      const customer = customers.find(c => c.id === plan.client_id);
-
-                      // 2. Map Services to Budget Items
-                      const budgetItems = services.map(svc => ({
-                        id: db.generateId('ITEM'),
-                        description: svc.description,
-                        quantity: Number(svc.quantity) || 1,
-                        unit: svc.unit || 'un',
-                        unitPrice: (Number(svc.unit_material_cost) || 0) + (Number(svc.unit_labor_cost) || 0) + (Number(svc.unit_indirect_cost) || 0),
-                        type: 'Serviço' as const
-                      }));
-
-                      const totalAmount = budgetItems.reduce((acc, item) => acc + (item.quantity * item.unitPrice), 0);
-
-                      // 3. Create New Order (Draft as Pending)
-                      const newBudget: ServiceOrder = {
-                        id: db.generateId('ORC'),
-                        customerId: plan.client_id,
-                        customerName: customer ? customer.name : 'Cliente Não Identificado',
-                        customerEmail: customer ? customer.email : '',
-                        description: plan.name,
-                        status: OrderStatus.PENDING,
-                        items: budgetItems,
-                        descriptionBlocks: [
-                          { id: db.generateId('BLK'), type: 'text', content: `Orçamento referente ao planejamento: ${plan.name}` }
-                        ],
-                        createdAt: new Date().toISOString(),
-                        dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
-                        totalAmount: totalAmount,
-                        // osType Removed
-                        originBudgetId: plan.id
-                      };
-
-                      // 4. Save and Navigate
-                      const updatedOrders = [newBudget, ...orders];
-                      setOrders(updatedOrders);
-                      db.save(STORAGE_KEYS.ORDERS, updatedOrders);
-
-                      notify("Orçamento gerado com sucesso! Redirecionando...", "success");
-                      setActiveTab('budgets');
-                    }}
-                  />}
+                  {item.id === 'construction' && <UnifiedWorksManager customers={customers} />}
                   {item.id === 'search' && <BudgetSearch orders={orders} setOrders={setOrders} customers={customers} company={company} catalogServices={catalog} setCatalogServices={setCatalog} isLoading={isSyncing} />}
                   {item.id === 'financials' && <FinancialControl transactions={transactions} setTransactions={setTransactions} loans={loans} setLoans={setLoans} currentUser={currentUser} />}
                   {item.id === 'users' && <UserManager users={users} setUsers={setUsers} />}
