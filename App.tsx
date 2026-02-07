@@ -219,7 +219,7 @@ const AppContent: React.FC = () => {
     { id: 'catalog', label: 'Serviços', icon: Briefcase },
     { id: 'construction', label: 'Gestão de Obras', icon: Building2 },
     { id: 'budgets', label: 'Orçamentos', icon: FileText },
-    { id: 'orders', label: 'O.S. (Equip)', icon: ClipboardList },
+    { id: 'orders', label: 'O.S. Equip', icon: ClipboardList },
     { id: 'works', label: 'O.S. Obra', icon: HardHat },
     { id: 'financials', label: 'Financeiro', icon: Wallet },
     { id: 'search', label: 'Consultar', icon: Search },
