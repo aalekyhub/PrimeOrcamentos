@@ -208,3 +208,69 @@ export interface PlanningHeader {
   total_indirect_cost?: number;
   total_real_cost?: number;
 }
+
+// --- NEW MODULE: Works Management (Realized) ---
+
+export interface WorkMaterial {
+  id: string;
+  work_services_id?: string;
+  material_name: string;
+  quantity: number;
+  unit_cost: number;
+  supplier?: string;
+  purchase_date?: string;
+  invoice_number?: string;
+  total_cost: number;
+}
+
+export interface WorkLabor {
+  id: string;
+  work_services_id?: string;
+  role: string;
+  worker_name?: string;
+  cost_type: 'Hora' | 'Diária' | 'Empreitada';
+  unit_cost: number;
+  quantity: number;
+  charges_percent?: number; // Optional in realized
+  total_cost: number;
+}
+
+export interface WorkIndirect {
+  id: string;
+  work_id?: string; // Linked to Work directly
+  category: string;
+  description: string;
+  value: number;
+  date?: string;
+}
+
+export interface WorkService {
+  id: string;
+  work_id: string;
+  description: string;
+  unit: string;
+  quantity: number; // Executed quantity
+  unit_labor_cost: number;
+  unit_material_cost: number;
+  unit_indirect_cost: number;
+  total_cost: number;
+  status: 'Pendente' | 'Em Execução' | 'Concluído';
+  materials?: WorkMaterial[];
+  labor?: WorkLabor[];
+}
+
+export interface WorkHeader {
+  id: string;
+  name: string;
+  client_id: string;
+  order_id?: string;
+  plan_id?: string;
+  address: string;
+  status: 'Em Andamento' | 'Concluída' | 'Pausada';
+  start_date: string;
+  end_date?: string;
+  total_material_cost?: number;
+  total_labor_cost?: number;
+  total_indirect_cost?: number;
+  total_real_cost?: number;
+}

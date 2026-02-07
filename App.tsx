@@ -4,8 +4,23 @@ import {
   Users, Briefcase, ClipboardList, Zap, Settings, Building2, Lock, LogOut, RefreshCw, Cloud, CloudOff, Database, HardHat
 } from 'lucide-react';
 import Dashboard from './components/Dashboard';
-import PlanningManager from './components/PlanningManager';
-import BudgetManager from './components/BudgetManager';
+import WorksManager from './components/WorksManager';
+
+// ... (existing imports)
+
+// Inside App component render:
+
+{
+  item.id === 'planning' && <PlanningManager
+    customers={customers}
+    onGenerateBudget={(plan, services, totalMat, totalLab, totalInd) => {
+      // ... (existing implementation)
+    }}
+  />
+}
+{ item.id === 'works' && <WorksManager customers={customers} /> }
+{ item.id === 'search' && <BudgetSearch orders={orders} setOrders={setOrders} customers={customers} company={company} catalogServices={catalog} setCatalogServices={setCatalog} isLoading={isSyncing} /> }
+
 import ServiceOrderManager from './components/ServiceOrderManager';
 import WorkOrderManager from './components/WorkOrderManager';
 import FinancialControl from './components/FinancialControl';
@@ -394,21 +409,6 @@ const AppContent: React.FC = () => {
 
                       const totalAmount = budgetItems.reduce((acc, item) => acc + (item.quantity * item.unitPrice), 0);
 
-                      // Calculate Totals for Breakdown
-                      const totalMaterials = services.reduce((acc, s) => acc + ((Number(s.unit_material_cost) || 0) * (Number(s.quantity) || 1)), 0);
-                      const totalLabor = services.reduce((acc, s) => acc + ((Number(s.unit_labor_cost) || 0) * (Number(s.quantity) || 1)), 0);
-                      const totalIndirect = services.reduce((acc, s) => acc + ((Number(s.unit_indirect_cost) || 0) * (Number(s.quantity) || 1)), 0);
-
-                      const summaryText = `
-<p><strong>RESUMO DE CUSTOS DO PLANEJAMENTO:</strong></p>
-<ul>
-  <li><strong>Total Materiais:</strong> R$ ${totalMaterials.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</li>
-  <li><strong>Total Mão de Obra:</strong> R$ ${totalLabor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</li>
-  <li><strong>Total Indiretos:</strong> R$ ${totalIndirect.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</li>
-</ul>
-<p><em>Valores calculados com base no planejamento original (Ref: ${plan.id})</em></p>
-`;
-
                       // 3. Create New Order (Draft as Pending)
                       const newBudget: ServiceOrder = {
                         id: db.generateId('ORC'),
@@ -419,7 +419,7 @@ const AppContent: React.FC = () => {
                         status: OrderStatus.PENDING,
                         items: budgetItems,
                         descriptionBlocks: [
-                          { id: db.generateId('BLK'), type: 'text', content: summaryText }
+                          { id: db.generateId('BLK'), type: 'text', content: `Orçamento referente ao planejamento: ${plan.name}` }
                         ],
                         createdAt: new Date().toISOString(),
                         dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
