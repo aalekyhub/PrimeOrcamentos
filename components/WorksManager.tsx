@@ -321,10 +321,10 @@ const WorksManager: React.FC<Props> = ({ customers }) => {
 
                         {activeTab === 'recursos' && (
                             <div className="max-w-4xl mx-auto">
-                                <div className="flex border-b border-slate-200 mb-6">
-                                    <button onClick={() => setResourceTab('material')} className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors ${resourceTab === 'material' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>Materiais</button>
-                                    <button onClick={() => setResourceTab('mo')} className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors ${resourceTab === 'mo' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>Mão de Obra</button>
-                                    <button onClick={() => setResourceTab('indireto')} className={`px-4 py-2 text-sm font-bold border-b-2 transition-colors ${resourceTab === 'indireto' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>Indiretos</button>
+                                <div className="flex gap-2 mb-6 justify-center">
+                                    <button onClick={() => setResourceTab('material')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${resourceTab === 'material' ? 'bg-emerald-800 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-emerald-50'}`}>Materiais</button>
+                                    <button onClick={() => setResourceTab('mo')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${resourceTab === 'mo' ? 'bg-emerald-800 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-emerald-50'}`}>Mão de Obra</button>
+                                    <button onClick={() => setResourceTab('indireto')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${resourceTab === 'indireto' ? 'bg-emerald-800 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-emerald-50'}`}>Indiretos</button>
                                 </div>
 
                                 {/* MATERIAL TAB */}

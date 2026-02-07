@@ -167,7 +167,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget }) => {
                         {[
                             { id: 'dados', label: 'Dados da Obra', icon: FileText },
                             { id: 'servicos', label: 'Serviços', icon: Building2 },
-                            { id: 'recursos', label: 'Recursos Detalhados', icon: Truck },
+                            { id: 'recursos', label: 'Gastos Detalhados', icon: Truck },
                             { id: 'resumo', label: 'Resumo de Custo', icon: PieChart },
                         ].map(tab => (
                             <button
