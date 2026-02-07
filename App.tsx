@@ -5,21 +5,19 @@ import {
 } from 'lucide-react';
 import Dashboard from './components/Dashboard';
 import WorksManager from './components/WorksManager';
+import PlanningManager from './components/PlanningManager';
 
 // ... (existing imports)
 
-// Inside App component render:
+// Inside component:
+{ id: 'orders', label: 'O.S. (Equip)', icon: ClipboardList },
+{ id: 'works', label: 'O.S. Obra', icon: HardHat },
+{ id: 'construction', label: 'Gestão de Obras', icon: Building2 }, // New Item
+{ id: 'planning', label: 'Planejamento', icon: HardHat },
 
-{
-  item.id === 'planning' && <PlanningManager
-    customers={customers}
-    onGenerateBudget={(plan, services, totalMat, totalLab, totalInd) => {
-      // ... (existing implementation)
-    }}
-  />
-}
-{ item.id === 'works' && <WorksManager customers={customers} /> }
-{ item.id === 'search' && <BudgetSearch orders={orders} setOrders={setOrders} customers={customers} company={company} catalogServices={catalog} setCatalogServices={setCatalog} isLoading={isSyncing} /> }
+// ... (existing imports)
+
+
 
 import ServiceOrderManager from './components/ServiceOrderManager';
 import WorkOrderManager from './components/WorkOrderManager';
@@ -227,6 +225,7 @@ const AppContent: React.FC = () => {
     { id: 'budgets', label: 'Orçamentos', icon: FileText },
     { id: 'orders', label: 'O.S. (Equip)', icon: ClipboardList },
     { id: 'works', label: 'O.S. Obra', icon: HardHat },
+    { id: 'construction', label: 'Gestão de Obras', icon: Building2 },
     { id: 'planning', label: 'Planejamento', icon: HardHat },
     { id: 'financials', label: 'Financeiro', icon: Wallet },
     { id: 'search', label: 'Consultar', icon: Search },
@@ -391,6 +390,7 @@ const AppContent: React.FC = () => {
                   {item.id === 'budgets' && <BudgetManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} />}
                   {item.id === 'orders' && <ServiceOrderManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} />}
                   {item.id === 'works' && <WorkOrderManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} transactions={transactions} setTransactions={setTransactions} />}
+                  {item.id === 'construction' && <WorksManager customers={customers} />}
                   {item.id === 'planning' && <PlanningManager
                     customers={customers}
                     onGenerateBudget={(plan, services) => {
