@@ -107,76 +107,114 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
     // Helper to clone items
     const importPlanItems = (planId: string, workId: string) => {
+        let importedCount = 0;
+
         // 1. Services
         const planServices = (db.load('serviflow_plan_services', []) as PlannedService[]).filter(s => s.plan_id === planId);
-
-        if (planServices.length === 0) {
-            notify("O planejamento não possui itens para importar.", "error");
-            return;
-        }
-
-        const newWorkServices: WorkService[] = planServices.map(s => ({
-            id: db.generateId('WSVC'),
-            work_id: workId,
-            plan_service_id: s.id,
-            description: s.description,
-            unit: s.unit,
-            quantity: 0,
-            unit_labor_cost: 0,
-            unit_material_cost: 0,
-            unit_indirect_cost: 0,
-            total_cost: 0,
-            status: 'Pendente'
-        }));
-
         const allWorkServices = db.load('serviflow_work_services', []) as WorkService[];
-        db.save('serviflow_work_services', [...allWorkServices, ...newWorkServices]);
+        const existingServiceIds = new Set(allWorkServices.filter(s => s.work_id === workId).map(s => s.plan_service_id));
+
+        const newWorkServices: WorkService[] = planServices
+            .filter(s => !existingServiceIds.has(s.id))
+            .map(s => ({
+                id: db.generateId('WSVC'),
+                work_id: workId,
+                plan_service_id: s.id,
+                description: s.description,
+                unit: s.unit,
+                quantity: 0,
+                unit_labor_cost: 0,
+                unit_material_cost: 0,
+                unit_indirect_cost: 0,
+                total_cost: 0,
+                status: 'Pendente'
+            }));
+
+        if (newWorkServices.length > 0) {
+            db.save('serviflow_work_services', [...allWorkServices, ...newWorkServices]);
+            importedCount += newWorkServices.length;
+        }
 
         // 2. Materials
         const planMaterials = (db.load('serviflow_plan_materials', []) as PlannedMaterial[]).filter(m => m.plan_id === planId);
-        const newWorkMaterials: WorkMaterial[] = planMaterials.map(m => ({
-            id: db.generateId('WMAT'),
-            work_id: workId,
-            material_name: m.material_name,
-            quantity: 0,
-            unit_cost: 0,
-            total_cost: 0
-        }));
-
         const allWorkMaterials = db.load('serviflow_work_materials', []) as WorkMaterial[];
-        db.save('serviflow_work_materials', [...allWorkMaterials, ...newWorkMaterials]);
+        // We can't easily track by ID since materials don't have a specific `plan_material_id` field in WorkMaterial type yet,
+        // but we can check if we already have materials for this work. 
+        // If the list is empty locally (which is the case we are fixing), we import.
+        // If not empty, we might duplicate. Ideally we should add `plan_material_id` to WorkMaterial.
+        // For now, let's just check if ANY materials exist for this work. If so, we assume they are imported.
+        // BUT user might have added some manually?
+        // Let's rely on the button logic: it shows if materials.length === 0.
+        // So we only import if we really have 0 materials?
+        // Or better: Check if the specific material name already exists? Not perfect but better.
+
+        const existingMaterialNames = new Set(allWorkMaterials.filter(m => m.work_id === workId).map(m => m.material_name));
+
+        const newWorkMaterials: WorkMaterial[] = planMaterials
+            .filter(m => !existingMaterialNames.has(m.material_name)) // Avoid exact duplicates by name
+            .map(m => ({
+                id: db.generateId('WMAT'),
+                work_id: workId,
+                material_name: m.material_name,
+                quantity: 0,
+                unit_cost: 0,
+                total_cost: 0
+            }));
+
+        if (newWorkMaterials.length > 0) {
+            db.save('serviflow_work_materials', [...allWorkMaterials, ...newWorkMaterials]);
+            importedCount += newWorkMaterials.length;
+        }
 
         // 3. Labor
         const planLabor = (db.load('serviflow_plan_labor', []) as PlannedLabor[]).filter(l => l.plan_id === planId);
-        const newWorkLabor: WorkLabor[] = planLabor.map(l => ({
-            id: db.generateId('WLBR'),
-            work_id: workId,
-            role: l.role,
-            cost_type: l.cost_type,
-            quantity: 0,
-            unit_cost: 0,
-            total_cost: 0
-        }));
-
         const allWorkLabor = db.load('serviflow_work_labor', []) as WorkLabor[];
-        db.save('serviflow_work_labor', [...allWorkLabor, ...newWorkLabor]);
+        const existingLaborRoles = new Set(allWorkLabor.filter(l => l.work_id === workId).map(l => l.role));
+
+        const newWorkLabor: WorkLabor[] = planLabor
+            .filter(l => !existingLaborRoles.has(l.role))
+            .map(l => ({
+                id: db.generateId('WLBR'),
+                work_id: workId,
+                role: l.role,
+                cost_type: l.cost_type,
+                quantity: 0,
+                unit_cost: 0,
+                total_cost: 0
+            }));
+
+        if (newWorkLabor.length > 0) {
+            db.save('serviflow_work_labor', [...allWorkLabor, ...newWorkLabor]);
+            importedCount += newWorkLabor.length;
+        }
 
         // 4. Indirects
         const planIndirects = (db.load('serviflow_plan_indirects', []) as PlannedIndirect[]).filter(i => i.plan_id === planId);
-        const newWorkIndirects: WorkIndirect[] = planIndirects.map(i => ({
-            id: db.generateId('WIND'),
-            work_id: workId,
-            category: i.category,
-            description: i.description,
-            value: 0
-        }));
-
         const allWorkIndirects = db.load('serviflow_work_indirects', []) as WorkIndirect[];
-        db.save('serviflow_work_indirects', [...allWorkIndirects, ...newWorkIndirects]);
+        const existingIndirects = new Set(allWorkIndirects.filter(i => i.work_id === workId).map(i => i.description));
+
+        const newWorkIndirects: WorkIndirect[] = planIndirects
+            .filter(i => !existingIndirects.has(i.description))
+            .map(i => ({
+                id: db.generateId('WIND'),
+                work_id: workId,
+                category: i.category,
+                description: i.description,
+                value: 0
+            }));
+
+        if (newWorkIndirects.length > 0) {
+            db.save('serviflow_work_indirects', [...allWorkIndirects, ...newWorkIndirects]);
+            importedCount += newWorkIndirects.length;
+        }
 
         // Update local state
-        notify("Itens importados do planejamento com sucesso!", "success");
-        loadWorkDetails(workId);
+        if (importedCount > 0) {
+            notify(`${importedCount} novos itens sincronizados do planejamento!`, "success");
+            loadWorkDetails(workId);
+        } else {
+            notify("Todos os itens do planejamento já foram importados.", "info");
+        }
     };
 
     const loadWorks = async () => {
@@ -318,12 +356,12 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         </div>
                         <div className="flex gap-2">
                             {/* MANUAL IMPORT BUTTON */}
-                            {currentWork?.plan_id && services.length === 0 && (
+                            {currentWork?.plan_id && (services.length === 0 || materials.length === 0 || labor.length === 0) && (
                                 <button
                                     onClick={() => importPlanItems(currentWork.plan_id!, currentWork.id)}
                                     className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-blue-700 shadow-md animate-pulse"
                                 >
-                                    <ArrowRight size={16} /> Importar do Planejamento
+                                    <ArrowRight size={16} /> Importar/Sincronizar Planejamento
                                 </button>
                             )}
 

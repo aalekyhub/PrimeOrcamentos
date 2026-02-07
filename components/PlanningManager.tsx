@@ -131,12 +131,40 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
         // Save to DB
         await db.save('serviflow_plans', updatedPlans);
         await db.save('serviflow_plan_services', services);
-        // Note: In a real app we would save materials/labor/indirects too
+
+        // Save sub-lists (materials, labor, indirects)
+        // Need to load existing ones and merge/replace? 
+        // For simplicity in this local-first approach, we load ALL, filter OUT current plan's items, and append NEW ones.
+        // This is safer than just overwriting with current state if we had a real backend, but here:
+
+        // 1. Materials
+        const allMaterials = db.load('serviflow_plan_materials', []) as PlannedMaterial[];
+        const otherMaterials = allMaterials.filter(m => m.plan_id !== currentPlan.id);
+        const materialsToSave = [...otherMaterials, ...materials.map(m => ({ ...m, plan_id: currentPlan.id }))];
+        await db.save('serviflow_plan_materials', materialsToSave);
+
+        // 2. Labor
+        const allLabor = db.load('serviflow_plan_labor', []) as PlannedLabor[];
+        const otherLabor = allLabor.filter(l => l.plan_id !== currentPlan.id);
+        const laborToSave = [...otherLabor, ...labor.map(l => ({ ...l, plan_id: currentPlan.id }))];
+        await db.save('serviflow_plan_labor', laborToSave);
+
+        // 3. Indirects
+        const allIndirects = db.load('serviflow_plan_indirects', []) as PlannedIndirect[];
+        const otherIndirects = allIndirects.filter(i => i.plan_id !== currentPlan.id);
+        const indirectsToSave = [...otherIndirects, ...indirects.map(i => ({ ...i, plan_id: currentPlan.id }))];
+        await db.save('serviflow_plan_indirects', indirectsToSave);
+
+        // Also update Services correctly (filter out old, add new)
+        const allServices = db.load('serviflow_plan_services', []) as PlannedService[];
+        const otherServices = allServices.filter(s => s.plan_id !== currentPlan.id);
+        const servicesToSave = [...otherServices, ...services.map(s => ({ ...s, plan_id: currentPlan.id }))];
+        await db.save('serviflow_plan_services', servicesToSave);
 
         // Update local state so the list reflects changes immediately
         setPlans(updatedPlans);
 
-        notify("Planejamento salvo com sucesso!");
+        notify("Planejamento salvo com sucesso!", "success");
         setLoading(false);
     };
 
