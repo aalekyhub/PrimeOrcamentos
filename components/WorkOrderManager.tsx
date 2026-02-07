@@ -983,25 +983,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                 <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button onClick={() => handleDownloadPDF(order)} className="p-2 text-slate-400 hover:text-emerald-500 transition-colors" title="Baixar Contrato"><FileDown className="w-4 h-4" /></button>
                                     <button onClick={() => handlePrintContract(order)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Gerar Contrato"><ScrollText className="w-4 h-4" /></button>
-                                    <button onClick={() => { setSelectedOrderForReport(order); setShowReportTypeModal(true); }} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Relatório de Obra"><FileText className="w-4 h-4" /></button>
                                     <button onClick={() => handlePrintOS(order)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Imprimir OS"><Printer className="w-4 h-4" /></button>
-                                    <button onClick={() => {
-                                        setEditingOrderId(order.id);
-                                        setSelectedCustomerId(order.customerId);
-                                        setItems(order.costItems || []); // Load COST items (empty initially)
-                                        setOsTitle(order.description);
-                                        setDiagnosis(order.serviceDescription || '');
-                                        setDeliveryDate(order.dueDate);
-                                        setDescriptionBlocks(order.descriptionBlocks || []);
-                                        setPaymentTerms(order.paymentTerms || '');
-                                        setDeliveryTime(order.deliveryTime || '');
-                                        const calculatedTotal = order.items?.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0) || 0;
-                                        setContractPrice(order.contractPrice || order.totalAmount || calculatedTotal || 0);
-                                        setTaxRate(order.taxRate || 0);
-                                        setBdiRate(order.bdiRate || 0);
-                                        setActiveTab('financial');
-                                        setShowForm(true);
-                                    }} className="p-2 text-slate-400 hover:text-emerald-600 transition-colors" title="Gestão Financeira"><Wallet className="w-4 h-4" /></button>
                                     <button onClick={() => {
                                         setEditingOrderId(order.id);
                                         setSelectedCustomerId(order.customerId);
@@ -1048,17 +1030,10 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                             <button onClick={() => setShowForm(false)} className="bg-slate-100 hover:bg-slate-200 p-2 rounded-full transition-colors"><X className="w-6 h-6 text-slate-400" /></button>
                         </div>
 
-                        {/* Tabs */}
-                        {editingOrderId && (
-                            <div className="bg-white px-8 border-b flex gap-6">
-                                <button onClick={() => setActiveTab('details')} className={`py-3 text-xs font-black uppercase tracking-widest border-b-2 transition-colors ${activeTab === 'details' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>Detalhes da Obra</button>
-                                <button onClick={() => setActiveTab('financial')} className={`py-3 text-xs font-black uppercase tracking-widest border-b-2 transition-colors ${activeTab === 'financial' ? 'border-purple-600 text-purple-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>Gestão Financeira</button>
-                            </div>
-                        )}
 
                         <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
                             <div className="flex-1 overflow-y-auto p-8 space-y-6 bg-[#f8fafc] no-scrollbar">
-                                {activeTab === 'details' ? (
+                                {activeTab === 'details' && (
                                     <>
                                         <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1123,7 +1098,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                             ))}
                                         </div>
                                     </>
-                                ) : (
+                                )}
+                                {false && (
                                     <div className="space-y-6">
                                         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
                                             <InfoCard
