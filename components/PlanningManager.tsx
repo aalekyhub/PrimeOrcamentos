@@ -46,14 +46,15 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
     }, []);
 
     // Effect to handle Embedded Mode
+    // Effect to handle Embedded Mode
     useEffect(() => {
-        if (embeddedPlanId && plans.length > 0) {
+        if (embeddedPlanId) {
             if (embeddedPlanId === 'new') {
                 if (!creationAttemptedRef.current) {
                     creationAttemptedRef.current = true;
                     handleCreatePlan();
                 }
-            } else {
+            } else if (plans.length > 0) {
                 creationAttemptedRef.current = false; // Reset for future usage
                 const plan = plans.find(p => p.id === embeddedPlanId);
                 if (plan) {
@@ -65,7 +66,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                 }
             }
         }
-    }, [embeddedPlanId, plans, activePlanId]); // Added activePlanId to dependencies to prevent infinite loop if it's not updated correctly
+    }, [embeddedPlanId, plans, activePlanId]); // Added activePlanId to dependency
 
     const loadPlans = async () => {
         const localPlans = db.load('serviflow_plans', []) as PlanningHeader[];
