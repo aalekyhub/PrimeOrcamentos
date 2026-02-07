@@ -378,8 +378,63 @@ const AppContent: React.FC = () => {
                   {item.id === 'works' && <WorkOrderManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} transactions={transactions} setTransactions={setTransactions} />}
                   {item.id === 'planning' && <PlanningManager
                     customers={customers}
-                    onGenerateBudget={(plan, cost) => {
-                      notify("Funcionalidade de Gerar Orçamento em desenvolvimento", "info");
+                    onGenerateBudget={(plan, services) => {
+                      // 1. Find Customer
+                      const customer = customers.find(c => c.id === plan.client_id);
+
+                      // 2. Map Services to Budget Items
+                      const budgetItems = services.map(svc => ({
+                        id: db.generateId('ITEM'),
+                        description: svc.description,
+                        quantity: Number(svc.quantity) || 1,
+                        unit: svc.unit || 'un',
+                        unitPrice: (Number(svc.unit_material_cost) || 0) + (Number(svc.unit_labor_cost) || 0) + (Number(svc.unit_indirect_cost) || 0),
+                        type: 'Serviço' as const
+                      }));
+
+                      const totalAmount = budgetItems.reduce((acc, item) => acc + (item.quantity * item.unitPrice), 0);
+
+                      // Calculate Totals for Breakdown
+                      const totalMaterials = services.reduce((acc, s) => acc + ((Number(s.unit_material_cost) || 0) * (Number(s.quantity) || 1)), 0);
+                      const totalLabor = services.reduce((acc, s) => acc + ((Number(s.unit_labor_cost) || 0) * (Number(s.quantity) || 1)), 0);
+                      const totalIndirect = services.reduce((acc, s) => acc + ((Number(s.unit_indirect_cost) || 0) * (Number(s.quantity) || 1)), 0);
+
+                      const summaryText = `
+<p><strong>RESUMO DE CUSTOS DO PLANEJAMENTO:</strong></p>
+<ul>
+  <li><strong>Total Materiais:</strong> R$ ${totalMaterials.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</li>
+  <li><strong>Total Mão de Obra:</strong> R$ ${totalLabor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</li>
+  <li><strong>Total Indiretos:</strong> R$ ${totalIndirect.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</li>
+</ul>
+<p><em>Valores calculados com base no planejamento original (Ref: ${plan.id})</em></p>
+`;
+
+                      // 3. Create New Order (Draft as Pending)
+                      const newBudget: ServiceOrder = {
+                        id: db.generateId('ORC'),
+                        customerId: plan.client_id,
+                        customerName: customer ? customer.name : 'Cliente Não Identificado',
+                        customerEmail: customer ? customer.email : '',
+                        description: plan.name,
+                        status: OrderStatus.PENDING,
+                        items: budgetItems,
+                        descriptionBlocks: [
+                          { id: db.generateId('BLK'), type: 'text', content: summaryText }
+                        ],
+                        createdAt: new Date().toISOString(),
+                        dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+                        totalAmount: totalAmount,
+                        // osType Removed
+                        originBudgetId: plan.id
+                      };
+
+                      // 4. Save and Navigate
+                      const updatedOrders = [newBudget, ...orders];
+                      setOrders(updatedOrders);
+                      db.save(STORAGE_KEYS.ORDERS, updatedOrders);
+
+                      notify("Orçamento gerado com sucesso! Redirecionando...", "success");
+                      setActiveTab('budgets');
                     }}
                   />}
                   {item.id === 'search' && <BudgetSearch orders={orders} setOrders={setOrders} customers={customers} company={company} catalogServices={catalog} setCatalogServices={setCatalog} isLoading={isSyncing} />}

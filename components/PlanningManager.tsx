@@ -13,7 +13,7 @@ import {
 
 interface Props {
     customers: Customer[];
-    onGenerateBudget: (plan: PlanningHeader, totalCost: number) => void;
+    onGenerateBudget: (plan: PlanningHeader, services: PlannedService[], totalMat: number, totalLab: number, totalInd: number) => void;
 }
 
 const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget }) => {
@@ -549,7 +549,10 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget }) => {
                                         <p className="text-slate-400 text-sm font-bold uppercase tracking-widest mb-1">Custo Real Total</p>
                                         <p className="text-4xl font-bold">R$ {totalGeneral.toFixed(2)}</p>
                                     </div>
-                                    <button className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg flex items-center gap-2 transition-all transform hover:scale-105">
+                                    <button
+                                        onClick={() => onGenerateBudget(currentPlan, services, totalMaterial, totalLabor, totalIndirect)}
+                                        className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg flex items-center gap-2 transition-all transform hover:scale-105"
+                                    >
                                         <Calculator size={20} /> Gerar Orçamento
                                     </button>
                                 </div>
