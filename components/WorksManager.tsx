@@ -157,7 +157,7 @@ const WorksManager: React.FC<Props> = ({ customers }) => {
                         </div>
                         <div className="flex gap-2">
                             <button onClick={handleSave} className="px-4 py-2 bg-emerald-700 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-emerald-800 shadow-md">
-                                <Save size={16} /> Salvar Alterações
+                                <Save size={16} /> Salvar
                             </button>
                         </div>
                     </div>
