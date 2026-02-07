@@ -147,3 +147,64 @@ export interface Loan {
   interestRate?: number;
   description: string;
 }
+
+// --- NEW MODULE: Work Planning ---
+
+export interface PlannedMaterial {
+  id: string;
+  plan_services_id?: string; // Optional link to a specific service
+  material_name: string;
+  quantity: number;
+  unit_cost: number;
+  supplier?: string;
+  total_cost: number;
+}
+
+export interface PlannedLabor {
+  id: string;
+  plan_services_id?: string; // Optional link
+  role: string;
+  cost_type: 'Hora' | 'Diária' | 'Empreitada';
+  unit_cost: number;
+  quantity: number;
+  charges_percent: number;
+  total_cost: number;
+}
+
+export interface PlannedIndirect {
+  id: string;
+  category: string;
+  description: string;
+  value: number;
+}
+
+export interface PlannedService {
+  id: string;
+  plan_id: string;
+  description: string;
+  unit: string;
+  quantity: number;
+  unit_labor_cost: number;
+  unit_material_cost: number;
+  unit_indirect_cost: number;
+  total_cost: number;
+  // Optional detailed arrays if we load them nested
+  materials?: PlannedMaterial[];
+  labor?: PlannedLabor[];
+}
+
+export interface PlanningHeader {
+  id: string;
+  name: string;
+  client_id: string;
+  client_name?: string; // For display
+  address: string;
+  type: string;
+  status: 'Planejamento' | 'Concluído' | 'Cancelado';
+  created_at: string;
+  // Totals for summary
+  total_material_cost?: number;
+  total_labor_cost?: number;
+  total_indirect_cost?: number;
+  total_real_cost?: number;
+}

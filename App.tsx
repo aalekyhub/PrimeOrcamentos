@@ -1,10 +1,10 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import {
   LayoutDashboard, FileText, Wallet, Target, Search, Menu, X,
   Users, Briefcase, ClipboardList, Zap, Settings, Building2, Lock, LogOut, RefreshCw, Cloud, CloudOff, Database, HardHat
 } from 'lucide-react';
 import Dashboard from './components/Dashboard';
+import PlanningManager from './components/PlanningManager';
 import BudgetManager from './components/BudgetManager';
 import ServiceOrderManager from './components/ServiceOrderManager';
 import WorkOrderManager from './components/WorkOrderManager';
@@ -212,6 +212,7 @@ const AppContent: React.FC = () => {
     { id: 'budgets', label: 'Orçamentos', icon: FileText },
     { id: 'orders', label: 'O.S. (Equip)', icon: ClipboardList },
     { id: 'works', label: 'O.S. Obra', icon: HardHat },
+    { id: 'planning', label: 'Planejamento', icon: HardHat },
     { id: 'financials', label: 'Financeiro', icon: Wallet },
     { id: 'search', label: 'Consultar', icon: Search },
     { id: 'audit', label: 'Auditoria', icon: Database },
@@ -375,6 +376,12 @@ const AppContent: React.FC = () => {
                   {item.id === 'budgets' && <BudgetManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} />}
                   {item.id === 'orders' && <ServiceOrderManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} />}
                   {item.id === 'works' && <WorkOrderManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} transactions={transactions} setTransactions={setTransactions} />}
+                  {item.id === 'planning' && <PlanningManager
+                    customers={customers}
+                    onGenerateBudget={(plan, cost) => {
+                      notify("Funcionalidade de Gerar Orçamento em desenvolvimento", "info");
+                    }}
+                  />}
                   {item.id === 'search' && <BudgetSearch orders={orders} setOrders={setOrders} customers={customers} company={company} catalogServices={catalog} setCatalogServices={setCatalog} isLoading={isSyncing} />}
                   {item.id === 'financials' && <FinancialControl transactions={transactions} setTransactions={setTransactions} loans={loans} setLoans={setLoans} currentUser={currentUser} />}
                   {item.id === 'users' && <UserManager users={users} setUsers={setUsers} />}
