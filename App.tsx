@@ -9,13 +9,7 @@ import PlanningManager from './components/PlanningManager';
 
 // ... (existing imports)
 
-// Inside component:
-{ id: 'orders', label: 'O.S. (Equip)', icon: ClipboardList },
-{ id: 'works', label: 'O.S. Obra', icon: HardHat },
-{ id: 'construction', label: 'Gestão de Obras', icon: Building2 }, // New Item
-{ id: 'planning', label: 'Planejamento', icon: HardHat },
 
-// ... (existing imports)
 
 
 
