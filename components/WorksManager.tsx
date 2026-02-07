@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
     Building2, Users, Truck, HardHat, FileText,
     Plus, Trash2, Save, ChevronRight, Calculator,
-    PieChart, ArrowRight, DollarSign, Calendar
+    PieChart, ArrowRight, DollarSign, Calendar, Pencil, Check, X
 } from 'lucide-react';
 import { useNotify } from './ToastProvider';
 import { db } from '../services/db';
@@ -32,6 +32,9 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
     const [materials, setMaterials] = useState<WorkMaterial[]>([]);
     const [labor, setLabor] = useState<WorkLabor[]>([]);
     const [indirects, setIndirects] = useState<WorkIndirect[]>([]);
+
+    // Edit State
+    const [editingId, setEditingId] = useState<string | null>(null);
 
     // UI State
     const [activeTab, setActiveTab] = useState<'dados' | 'servicos' | 'recursos' | 'resumo'>('dados');
@@ -510,18 +513,96 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 <div className="space-y-2">
                                     {services.map(svc => (
                                         <div key={svc.id} className="bg-white p-4 rounded-lg shadow-sm border border-slate-100 flex justify-between items-center group">
-                                            <div className="flex-1">
-                                                <p className="font-bold text-slate-800">{svc.description}</p>
-                                                <p className="text-xs text-slate-500">
-                                                    {svc.quantity} {svc.unit} • Mat: R$ {svc.unit_material_cost.toFixed(2)} • M.O: R$ {svc.unit_labor_cost.toFixed(2)}
-                                                </p>
-                                            </div>
-                                            <div className="text-right flex items-center gap-4">
-                                                <p className="font-bold text-emerald-600">R$ {svc.total_cost.toFixed(2)}</p>
-                                                <button onClick={() => setServices(services.filter(s => s.id !== svc.id))} className="text-slate-300 hover:text-red-500">
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </div>
+                                            {editingId === svc.id ? (
+                                                <div className="flex-1 grid grid-cols-12 gap-2 items-center">
+                                                    <div className="col-span-4">
+                                                        <input
+                                                            className="w-full text-xs p-1 border rounded"
+                                                            defaultValue={svc.description}
+                                                            id={`edit_desc_${svc.id}`}
+                                                        />
+                                                    </div>
+                                                    <div className="col-span-2">
+                                                        <input
+                                                            type="number"
+                                                            className="w-full text-xs p-1 border rounded"
+                                                            defaultValue={svc.quantity}
+                                                            placeholder="Qtd"
+                                                            id={`edit_qty_${svc.id}`}
+                                                        />
+                                                    </div>
+                                                    <div className="col-span-2">
+                                                        <input
+                                                            type="number"
+                                                            className="w-full text-xs p-1 border rounded"
+                                                            defaultValue={svc.unit_material_cost}
+                                                            placeholder="Mat"
+                                                            id={`edit_mat_${svc.id}`}
+                                                        />
+                                                    </div>
+                                                    <div className="col-span-2">
+                                                        <input
+                                                            type="number"
+                                                            className="w-full text-xs p-1 border rounded"
+                                                            defaultValue={svc.unit_labor_cost}
+                                                            placeholder="M.O."
+                                                            id={`edit_lab_${svc.id}`}
+                                                        />
+                                                    </div>
+                                                    <div className="col-span-2 flex gap-1 justify-end">
+                                                        <button
+                                                            onClick={() => {
+                                                                const newDesc = (document.getElementById(`edit_desc_${svc.id}`) as HTMLInputElement).value;
+                                                                const newQty = parseFloat((document.getElementById(`edit_qty_${svc.id}`) as HTMLInputElement).value) || 0;
+                                                                const newMat = parseFloat((document.getElementById(`edit_mat_${svc.id}`) as HTMLInputElement).value) || 0;
+                                                                const newLab = parseFloat((document.getElementById(`edit_lab_${svc.id}`) as HTMLInputElement).value) || 0;
+
+                                                                const updated = services.map(s => s.id === svc.id ? {
+                                                                    ...s,
+                                                                    description: newDesc,
+                                                                    quantity: newQty,
+                                                                    unit_material_cost: newMat,
+                                                                    unit_labor_cost: newLab,
+                                                                    total_cost: newQty * (newMat + newLab)
+                                                                } : s);
+                                                                setServices(updated);
+                                                                // Save to DB immediately or wait for big save? Let's verify requirement. 
+                                                                // User usually wants immediate feedback but standard is big save. 
+                                                                // But to keep consistency with "delete", let's update state and rely on main Save button or auto-save if we implement it.
+                                                                // Actually, delete is just state update. So this is fine.
+                                                                setEditingId(null);
+                                                            }}
+                                                            className="text-green-600 hover:bg-green-50 p-1 rounded"
+                                                        >
+                                                            <Check size={16} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setEditingId(null)}
+                                                            className="text-red-500 hover:bg-red-50 p-1 rounded"
+                                                        >
+                                                            <X size={16} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <div className="flex-1">
+                                                        <p className="font-bold text-slate-800">{svc.description}</p>
+                                                        <p className="text-xs text-slate-500">
+                                                            {svc.quantity} {svc.unit} • Mat: R$ {svc.unit_material_cost.toFixed(2)} • M.O: R$ {svc.unit_labor_cost.toFixed(2)}
+                                                        </p>
+                                                    </div>
+                                                    <div className="text-right flex items-center gap-4">
+                                                        <p className="font-bold text-emerald-600">R$ {svc.total_cost.toFixed(2)}</p>
+                                                        <button onClick={() => setEditingId(svc.id)} className="text-blue-400 hover:text-blue-600">
+                                                            <Pencil size={16} />
+                                                        </button>
+                                                        <button onClick={() => setServices(services.filter(s => s.id !== svc.id))} className="text-slate-300 hover:text-red-500">
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    </div>
+                                                </>
+                                            )}
                                         </div>
                                     ))}
                                     {services.length === 0 && (
@@ -577,6 +658,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
                                                             setMaterials([...materials, {
                                                                 id: db.generateId('MAT'),
+                                                                work_id: currentWork?.id || '',
                                                                 material_name: name,
                                                                 quantity: qty,
                                                                 unit_cost: cost,
@@ -596,11 +678,72 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         <div className="space-y-2">
                                             {materials.map(m => (
                                                 <div key={m.id} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center text-sm">
-                                                    <span>{m.quantity}x <b>{m.material_name}</b> (R$ {m.unit_cost.toFixed(2)})</span>
-                                                    <div className="flex items-center gap-4">
-                                                        <span className="font-bold">R$ {m.total_cost.toFixed(2)}</span>
-                                                        <Trash2 size={14} className="cursor-pointer text-slate-400 hover:text-red-500" onClick={() => setMaterials(materials.filter(x => x.id !== m.id))} />
-                                                    </div>
+                                                    {editingId === m.id ? (
+                                                        <div className="flex-1 grid grid-cols-12 gap-2 items-center">
+                                                            <div className="col-span-5">
+                                                                <input
+                                                                    className="w-full text-xs p-1 border rounded"
+                                                                    defaultValue={m.material_name}
+                                                                    id={`edit_mname_${m.id}`}
+                                                                />
+                                                            </div>
+                                                            <div className="col-span-2">
+                                                                <input
+                                                                    type="number"
+                                                                    className="w-full text-xs p-1 border rounded"
+                                                                    defaultValue={m.quantity}
+                                                                    placeholder="Qtd"
+                                                                    id={`edit_mqty_${m.id}`}
+                                                                />
+                                                            </div>
+                                                            <div className="col-span-2">
+                                                                <input
+                                                                    type="number"
+                                                                    className="w-full text-xs p-1 border rounded"
+                                                                    defaultValue={m.unit_cost}
+                                                                    placeholder="Unit"
+                                                                    id={`edit_mcost_${m.id}`}
+                                                                />
+                                                            </div>
+                                                            <div className="col-span-3 flex gap-1 justify-end">
+                                                                <button
+                                                                    onClick={() => {
+                                                                        const newName = (document.getElementById(`edit_mname_${m.id}`) as HTMLInputElement).value;
+                                                                        const newQty = parseFloat((document.getElementById(`edit_mqty_${m.id}`) as HTMLInputElement).value) || 0;
+                                                                        const newCost = parseFloat((document.getElementById(`edit_mcost_${m.id}`) as HTMLInputElement).value) || 0;
+
+                                                                        const updated = materials.map(item => item.id === m.id ? {
+                                                                            ...item,
+                                                                            material_name: newName,
+                                                                            quantity: newQty,
+                                                                            unit_cost: newCost,
+                                                                            total_cost: newQty * newCost
+                                                                        } : item);
+                                                                        setMaterials(updated);
+                                                                        setEditingId(null);
+                                                                    }}
+                                                                    className="text-green-600 hover:bg-green-50 p-1 rounded"
+                                                                >
+                                                                    <Check size={16} />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => setEditingId(null)}
+                                                                    className="text-red-500 hover:bg-red-50 p-1 rounded"
+                                                                >
+                                                                    <X size={16} />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            <span>{m.quantity}x <b>{m.material_name}</b> (R$ {m.unit_cost.toFixed(2)})</span>
+                                                            <div className="flex items-center gap-4">
+                                                                <span className="font-bold">R$ {m.total_cost.toFixed(2)}</span>
+                                                                <Pencil size={14} className="cursor-pointer text-blue-400 hover:text-blue-600" onClick={() => setEditingId(m.id)} />
+                                                                <Trash2 size={14} className="cursor-pointer text-slate-400 hover:text-red-500" onClick={() => setMaterials(materials.filter(x => x.id !== m.id))} />
+                                                            </div>
+                                                        </>
+                                                    )}
                                                 </div>
                                             ))}
                                         </div>
@@ -643,6 +786,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
                                                             setLabor([...labor, {
                                                                 id: db.generateId('LBR'),
+                                                                work_id: currentWork?.id || '',
                                                                 role,
                                                                 cost_type: type,
                                                                 quantity: qty,
@@ -652,6 +796,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             }]);
                                                             (document.getElementById('mo_role') as HTMLInputElement).value = '';
                                                             (document.getElementById('mo_qty') as HTMLInputElement).value = '';
+                                                            (document.getElementById('mo_cost') as HTMLInputElement).value = '';
                                                         }}
                                                         className="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 font-bold text-sm"
                                                     >
@@ -663,11 +808,85 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         <div className="space-y-2">
                                             {labor.map(l => (
                                                 <div key={l.id} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center text-sm">
-                                                    <span>{l.quantity} {l.cost_type}(s) de <b>{l.role}</b></span>
-                                                    <div className="flex items-center gap-4">
-                                                        <span className="font-bold">R$ {l.total_cost.toFixed(2)}</span>
-                                                        <Trash2 size={14} className="cursor-pointer text-slate-400 hover:text-red-500" onClick={() => setLabor(labor.filter(x => x.id !== l.id))} />
-                                                    </div>
+                                                    {editingId === l.id ? (
+                                                        <div className="flex-1 grid grid-cols-12 gap-2 items-center">
+                                                            <div className="col-span-4">
+                                                                <input
+                                                                    className="w-full text-xs p-1 border rounded"
+                                                                    defaultValue={l.role}
+                                                                    id={`edit_lrole_${l.id}`}
+                                                                />
+                                                            </div>
+                                                            <div className="col-span-2">
+                                                                <select
+                                                                    className="w-full text-xs p-1 border rounded"
+                                                                    defaultValue={l.cost_type}
+                                                                    id={`edit_ltype_${l.id}`}
+                                                                >
+                                                                    <option value="Diária">Diária</option>
+                                                                    <option value="Hora">Hora</option>
+                                                                    <option value="Empreitada">Empreitada</option>
+                                                                </select>
+                                                            </div>
+                                                            <div className="col-span-2">
+                                                                <input
+                                                                    type="number"
+                                                                    className="w-full text-xs p-1 border rounded"
+                                                                    defaultValue={l.quantity}
+                                                                    placeholder="Qtd"
+                                                                    id={`edit_lqty_${l.id}`}
+                                                                />
+                                                            </div>
+                                                            <div className="col-span-2">
+                                                                <input
+                                                                    type="number"
+                                                                    className="w-full text-xs p-1 border rounded"
+                                                                    defaultValue={l.unit_cost}
+                                                                    placeholder="Unit"
+                                                                    id={`edit_lcost_${l.id}`}
+                                                                />
+                                                            </div>
+                                                            <div className="col-span-2 flex gap-1 justify-end">
+                                                                <button
+                                                                    onClick={() => {
+                                                                        const newRole = (document.getElementById(`edit_lrole_${l.id}`) as HTMLInputElement).value;
+                                                                        const newType = (document.getElementById(`edit_ltype_${l.id}`) as HTMLInputElement).value as any;
+                                                                        const newQty = parseFloat((document.getElementById(`edit_lqty_${l.id}`) as HTMLInputElement).value) || 0;
+                                                                        const newCost = parseFloat((document.getElementById(`edit_lcost_${l.id}`) as HTMLInputElement).value) || 0;
+
+                                                                        const updated = labor.map(item => item.id === l.id ? {
+                                                                            ...item,
+                                                                            role: newRole,
+                                                                            cost_type: newType,
+                                                                            quantity: newQty,
+                                                                            unit_cost: newCost,
+                                                                            total_cost: newQty * newCost
+                                                                        } : item);
+                                                                        setLabor(updated);
+                                                                        setEditingId(null);
+                                                                    }}
+                                                                    className="text-green-600 hover:bg-green-50 p-1 rounded"
+                                                                >
+                                                                    <Check size={16} />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => setEditingId(null)}
+                                                                    className="text-red-500 hover:bg-red-50 p-1 rounded"
+                                                                >
+                                                                    <X size={16} />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            <span>{l.quantity} {l.cost_type}(s) de <b>{l.role}</b></span>
+                                                            <div className="flex items-center gap-4">
+                                                                <span className="font-bold">R$ {l.total_cost.toFixed(2)}</span>
+                                                                <Pencil size={14} className="cursor-pointer text-blue-400 hover:text-blue-600" onClick={() => setEditingId(l.id)} />
+                                                                <Trash2 size={14} className="cursor-pointer text-slate-400 hover:text-red-500" onClick={() => setLabor(labor.filter(x => x.id !== l.id))} />
+                                                            </div>
+                                                        </>
+                                                    )}
                                                 </div>
                                             ))}
                                         </div>
@@ -707,6 +926,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
                                                             setIndirects([...indirects, {
                                                                 id: db.generateId('IND'),
+                                                                work_id: currentWork?.id || '',
                                                                 category: cat,
                                                                 description: desc,
                                                                 value: val
@@ -724,11 +944,76 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         <div className="space-y-2">
                                             {indirects.map(i => (
                                                 <div key={i.id} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center text-sm">
-                                                    <span>[{i.category}] <b>{i.description}</b></span>
-                                                    <div className="flex items-center gap-4">
-                                                        <span className="font-bold">R$ {i.value.toFixed(2)}</span>
-                                                        <Trash2 size={14} className="cursor-pointer text-slate-400 hover:text-red-500" onClick={() => setIndirects(indirects.filter(x => x.id !== i.id))} />
-                                                    </div>
+                                                    {editingId === i.id ? (
+                                                        <div className="flex-1 grid grid-cols-12 gap-2 items-center">
+                                                            <div className="col-span-3">
+                                                                <select
+                                                                    className="w-full text-xs p-1 border rounded"
+                                                                    defaultValue={i.category}
+                                                                    id={`edit_icat_${i.id}`}
+                                                                >
+                                                                    <option>Transporte</option>
+                                                                    <option>Alimentação</option>
+                                                                    <option>EPI</option>
+                                                                    <option>Equipamentos</option>
+                                                                    <option>Taxas</option>
+                                                                    <option>Outros</option>
+                                                                </select>
+                                                            </div>
+                                                            <div className="col-span-6">
+                                                                <input
+                                                                    className="w-full text-xs p-1 border rounded"
+                                                                    defaultValue={i.description}
+                                                                    id={`edit_idesc_${i.id}`}
+                                                                />
+                                                            </div>
+                                                            <div className="col-span-2">
+                                                                <input
+                                                                    type="number"
+                                                                    className="w-full text-xs p-1 border rounded"
+                                                                    defaultValue={i.value}
+                                                                    placeholder="Valor"
+                                                                    id={`edit_ival_${i.id}`}
+                                                                />
+                                                            </div>
+                                                            <div className="col-span-1 flex gap-1 justify-end">
+                                                                <button
+                                                                    onClick={() => {
+                                                                        const newCat = (document.getElementById(`edit_icat_${i.id}`) as HTMLInputElement).value;
+                                                                        const newDesc = (document.getElementById(`edit_idesc_${i.id}`) as HTMLInputElement).value;
+                                                                        const newVal = parseFloat((document.getElementById(`edit_ival_${i.id}`) as HTMLInputElement).value) || 0;
+
+                                                                        const updated = indirects.map(item => item.id === i.id ? {
+                                                                            ...item,
+                                                                            category: newCat,
+                                                                            description: newDesc,
+                                                                            value: newVal
+                                                                        } : item);
+                                                                        setIndirects(updated);
+                                                                        setEditingId(null);
+                                                                    }}
+                                                                    className="text-green-600 hover:bg-green-50 p-1 rounded"
+                                                                >
+                                                                    <Check size={16} />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => setEditingId(null)}
+                                                                    className="text-red-500 hover:bg-red-50 p-1 rounded"
+                                                                >
+                                                                    <X size={16} />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            <span>[{i.category}] <b>{i.description}</b></span>
+                                                            <div className="flex items-center gap-4">
+                                                                <span className="font-bold">R$ {i.value.toFixed(2)}</span>
+                                                                <Pencil size={14} className="cursor-pointer text-blue-400 hover:text-blue-600" onClick={() => setEditingId(i.id)} />
+                                                                <Trash2 size={14} className="cursor-pointer text-slate-400 hover:text-red-500" onClick={() => setIndirects(indirects.filter(x => x.id !== i.id))} />
+                                                            </div>
+                                                        </>
+                                                    )}
                                                 </div>
                                             ))}
                                         </div>
