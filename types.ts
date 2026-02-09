@@ -281,3 +281,46 @@ export interface WorkHeader {
   total_indirect_cost?: number;
   total_real_cost?: number;
 }
+
+// --- NEW MODULE: SINAPI Integration ---
+
+export interface SinapiInsumo {
+  codigo: string;
+  descricao: string;
+  unidade: string;
+  precoMedio: number;
+}
+
+export interface SinapiComposicao {
+  codigo: string;
+  descricao: string;
+  unidade: string;
+  tipo: string;
+  itens: SinapiItemComposicao[];
+}
+
+export interface SinapiItemComposicao {
+  classe: 'INSUMO' | 'COMPOSICAO';
+  codigo: string;
+  descricao: string;
+  unidade: string;
+  coeficiente: number;
+  precoUnitario: number;
+  total: number;
+}
+
+export interface BdiConfig {
+  id: string;
+  name: string;
+  ac: number; // Administração Central (%)
+  s: number;  // Seguro (%)
+  g: number;  // Garantia (%)
+  r: number;  // Risco (%)
+  df: number; // Despesas Financeiras (%)
+  l: number;  // Lucro (%)
+  iss: number; // ISS (%)
+  pis: number; // PIS (%)
+  cofins: number; // COFINS (%)
+  cprb: number; // CPRB (%)
+  total: number; // BDI (%)
+}
