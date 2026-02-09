@@ -188,5 +188,33 @@ export const sinapiDb = {
         }
 
         return 0;
+    },
+
+    async updateInsumoPrice(id: string, newPrice: number) {
+        const db = await this.getDb();
+        const record = await db.get('sinapi_insumos', id);
+        if (record) {
+            record.preco_unitario = newPrice;
+            await db.put('sinapi_insumos', record);
+        }
+    },
+
+    async updateComposicaoPrice(id: string, newPrice: number) {
+        const db = await this.getDb();
+        const record = await db.get('sinapi_composicoes', id);
+        if (record) {
+            record.custo_unitario = newPrice;
+            await db.put('sinapi_composicoes', record);
+        }
+    },
+
+    async updateComposicaoItemPrice(id: string, newPrice: number) {
+        const db = await this.getDb();
+        const record = await db.get('sinapi_composicao_itens', id);
+        if (record) {
+            record.custo_unitario = newPrice;
+            record.custo_total = record.coeficiente * newPrice;
+            await db.put('sinapi_composicao_itens', record);
+        }
     }
 };

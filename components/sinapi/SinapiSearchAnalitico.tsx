@@ -1,8 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
-import { Search, Loader2, Table, Plus, ChevronRight, Calculator, ExternalLink } from 'lucide-react';
+import { Search, Loader2, Table, Plus, ChevronRight, Calculator, ExternalLink, Pencil, Check, X } from 'lucide-react';
 import { sinapiAnalitico, AnaliticoResult } from '../../services/sinapiAnalitico';
 import { sinapiDb } from '../../services/sinapiDb';
+import { useNotify } from '../ToastProvider';
 
 interface Props {
     onCopyComposition: (result: AnaliticoResult) => void;
@@ -15,6 +16,9 @@ const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
     const [ans, setAns] = useState<AnaliticoResult | null>(null);
+    const [editingItemId, setEditingItemId] = useState<string | null>(null);
+    const [editValue, setEditValue] = useState<string>('');
+    const { notify } = useNotify();
     const containerRef = React.useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -46,12 +50,52 @@ const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
         if (!code) return;
         setIsSearching(true);
         setShowSuggestions(false);
+        setEditingItemId(null);
         try {
             const result = await sinapiAnalitico.build(config.mes_ref, config.uf, config.modo, code);
             setAns(result);
             if (forcedCode) setSearchTerm(forcedCode);
         } finally {
             setIsSearching(false);
+        }
+    };
+
+    const handleUpdatePrice = async (item: any) => {
+        const newPrice = parseFloat(editValue.replace(',', '.'));
+        if (isNaN(newPrice)) return;
+
+        try {
+            // Update the main source tables (Insumo or Composição)
+            if (item.tipo_item === 'INSUMO') {
+                const id = `${config.mes_ref}_${config.uf}_${config.modo}_INS_${item.codigo_item}`;
+                await sinapiDb.updateInsumoPrice(id, newPrice);
+            } else if (item.tipo_item === 'COMPOSICAO') {
+                const id = `${config.mes_ref}_${config.uf}_${config.modo}_COMP_${item.codigo_item}`;
+                await sinapiDb.updateComposicaoPrice(id, newPrice);
+            }
+
+            // Update the snapshot table (Analítico)
+            const anaId = `${config.mes_ref}_${config.uf}_${config.modo}_ANA_${searchTerm}_${item.tipo_item}_${item.codigo_item}`;
+            await sinapiDb.updateComposicaoItemPrice(anaId, newPrice);
+
+            // Refresh the local result (ans) to update calculations
+            if (ans) {
+                const newItens = ans.itens.map(it => {
+                    if (it.codigo_item === item.codigo_item) {
+                        const updated = { ...it, custo_unitario: newPrice, custo_total: it.coeficiente * newPrice };
+                        return updated;
+                    }
+                    return it;
+                });
+                const newTotal = newItens.reduce((acc, it) => acc + (it.custo_total || 0), 0);
+                setAns({ ...ans, itens: newItens, total: newTotal });
+            }
+
+            setEditingItemId(null);
+            notify('Preço atualizado com sucesso!');
+        } catch (err) {
+            console.error(err);
+            notify('Erro ao atualizar preço.', 'error');
         }
     };
 
@@ -194,8 +238,32 @@ const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
                                         <td className="px-8 py-4 text-[11px] font-bold text-slate-900 leading-tight max-w-xs">{item.descricao_item}</td>
                                         <td className="px-8 py-4 text-[10px] font-black text-slate-400 text-center uppercase">{item.unidade_item}</td>
                                         <td className="px-8 py-4 text-right text-[11px] font-bold text-slate-600">{item.coeficiente.toLocaleString('pt-BR', { minimumFractionDigits: 4 })}</td>
-                                        <td className="px-8 py-4 text-right text-[11px] font-black text-slate-900">
-                                            R$ {item.custo_unitario.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        <td className="px-8 py-4 text-right text-[11px] font-black group-hover:bg-indigo-50/50 transition-all cursor-pointer min-w-[120px]"
+                                            onClick={() => {
+                                                setEditingItemId(item.codigo_item);
+                                                setEditValue(item.custo_unitario.toFixed(2));
+                                            }}
+                                        >
+                                            {editingItemId === item.codigo_item ? (
+                                                <input
+                                                    autoFocus
+                                                    type="text"
+                                                    className="w-full bg-white border border-indigo-300 rounded px-2 py-1 text-right text-[11px] font-black text-indigo-600 outline-none"
+                                                    value={editValue}
+                                                    onChange={e => setEditValue(e.target.value)}
+                                                    onKeyDown={e => {
+                                                        if (e.key === 'Enter') handleUpdatePrice(item);
+                                                        if (e.key === 'Escape') setEditingItemId(null);
+                                                    }}
+                                                    onClick={e => e.stopPropagation()}
+                                                    onBlur={() => setEditingItemId(null)}
+                                                />
+                                            ) : (
+                                                <div className="flex items-center justify-end gap-1 group/price">
+                                                    <Pencil className="w-3 h-3 text-slate-300 opacity-0 group-hover/price:opacity-100 transition-opacity" />
+                                                    <span className="text-slate-900">R$ {item.custo_unitario.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                                </div>
+                                            )}
                                         </td>
                                         <td className="px-8 py-4 text-right pr-10 text-[11px] font-black text-indigo-600">
                                             R$ {item.custo_total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
