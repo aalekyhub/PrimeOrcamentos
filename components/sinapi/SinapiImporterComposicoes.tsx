@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Upload, Loader2, Database } from 'lucide-react';
+import { Upload, Loader2, CheckCircle, Database, Trash2 } from 'lucide-react';
 import { sinapiParsers } from '../../services/sinapiParsers';
 import { sinapiDb } from '../../services/sinapiDb';
 import { useNotify } from '../ToastProvider';
@@ -8,7 +8,21 @@ import { useNotify } from '../ToastProvider';
 const SinapiImporterComposicoes: React.FC = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [config, setConfig] = useState({ uf: 'DF', mes_ref: '2025/08', modo: 'SE' });
+    const [count, setCount] = useState<number | null>(null);
     const { notify } = useNotify();
+
+    const refreshCount = React.useCallback(async () => {
+        try {
+            const val = await sinapiDb.getStoreStats('sinapi_composicoes', config.mes_ref, config.uf, config.modo);
+            setCount(val);
+        } catch (err) {
+            console.error('Error fetching count:', err);
+        }
+    }, [config]);
+
+    React.useEffect(() => {
+        refreshCount();
+    }, [refreshCount]);
 
     const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -20,6 +34,7 @@ const SinapiImporterComposicoes: React.FC = () => {
             await sinapiDb.clearDataset('sinapi_composicoes', config.mes_ref, config.uf, config.modo);
             await sinapiDb.saveBatch('sinapi_composicoes', records);
             notify(`Sucesso: ${records.length} composições importadas para ${config.uf} (${config.mes_ref})`);
+            refreshCount();
         } catch (err: any) {
             notify(err.message || 'Erro ao importar composições', 'error');
         } finally {
@@ -27,11 +42,46 @@ const SinapiImporterComposicoes: React.FC = () => {
         }
     };
 
+    const handleClear = async () => {
+        if (!confirm(`Deseja limpar os dados de COMPOSIÇÕES de ${config.uf} (${config.mes_ref})?`)) return;
+        setIsProcessing(true);
+        try {
+            await sinapiDb.clearDataset('sinapi_composicoes', config.mes_ref, config.uf, config.modo);
+            notify(`Dados de composições limpos para ${config.uf} (${config.mes_ref})`);
+            refreshCount();
+        } catch (err: any) {
+            notify('Erro ao limpar dados', 'error');
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
     return (
         <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-4 shadow-sm">
-            <div className="flex items-center gap-3 mb-2">
-                <Database className="w-5 h-5 text-indigo-600" />
-                <h4 className="font-black text-slate-900 uppercase tracking-tighter">Importar Composições (Custos)</h4>
+            <div className="flex items-center justify-between gap-3 mb-2">
+                <div className="flex items-center gap-3">
+                    <Database className="w-5 h-5 text-indigo-600" />
+                    <h4 className="font-black text-slate-900 uppercase tracking-tighter">Importar Composições (Custos)</h4>
+                </div>
+                {count !== null && count > 0 && (
+                    <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 px-2 py-1 rounded-lg border border-emerald-100 animate-in fade-in zoom-in duration-300">
+                        <CheckCircle className="w-3 h-3" />
+                        <span className="text-[10px] font-black">{count.toLocaleString()} DISPONÍVEIS</span>
+                    </div>
+                )}
+                {count === 0 && (
+                    <div className="flex items-center gap-1.5 bg-slate-50 text-slate-400 px-2 py-1 rounded-lg border border-slate-100">
+                        <span className="text-[10px] font-black uppercase tracking-widest">Vazio</span>
+                    </div>
+                )}
+                <button
+                    onClick={handleClear}
+                    disabled={isProcessing}
+                    className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                    title="Limpar este conjunto de dados"
+                >
+                    <Trash2 className="w-4 h-4" />
+                </button>
             </div>
 
             <div className="grid grid-cols-3 gap-3">

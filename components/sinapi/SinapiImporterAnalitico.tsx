@@ -8,7 +8,21 @@ import { useNotify } from '../ToastProvider';
 const SinapiImporterAnalitico: React.FC = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [config, setConfig] = useState({ uf: 'DF', mes_ref: '2025/08', modo: 'SE' });
+    const [count, setCount] = useState<number | null>(null);
     const { notify } = useNotify();
+
+    const refreshCount = React.useCallback(async () => {
+        try {
+            const val = await sinapiDb.getStoreStats('sinapi_composicao_itens', config.mes_ref, config.uf, config.modo);
+            setCount(val);
+        } catch (err) {
+            console.error('Error fetching count:', err);
+        }
+    }, [config]);
+
+    React.useEffect(() => {
+        refreshCount();
+    }, [refreshCount]);
 
     const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -22,6 +36,7 @@ const SinapiImporterAnalitico: React.FC = () => {
             await sinapiDb.clearDataset('sinapi_composicao_itens', config.mes_ref, config.uf, config.modo);
             await sinapiDb.saveBatch('sinapi_composicao_itens', records);
             notify(`Sucesso: ${records.length} itens analíticos importados para ${config.uf} (${config.mes_ref})`);
+            refreshCount();
         } catch (err: any) {
             notify(err.message || 'Erro ao importar itens analíticos', 'error');
         } finally {
@@ -37,6 +52,7 @@ const SinapiImporterAnalitico: React.FC = () => {
         try {
             await sinapiDb.clearDataset('sinapi_composicao_itens', config.mes_ref, config.uf, config.modo);
             notify(`Dados analíticos limpos para ${config.uf} (${config.mes_ref})`);
+            refreshCount();
         } catch (err: any) {
             notify('Erro ao limpar dados', 'error');
         } finally {
@@ -51,6 +67,17 @@ const SinapiImporterAnalitico: React.FC = () => {
                     <Database className="w-5 h-5 text-blue-600" />
                     <h4 className="font-black text-slate-900 uppercase tracking-tighter">Importar Analítico (Composições -- Itens)</h4>
                 </div>
+                {count !== null && count > 0 && (
+                    <div className="flex items-center gap-1.5 bg-blue-50 text-blue-600 px-2 py-1 rounded-lg border border-blue-100 animate-in fade-in zoom-in duration-300">
+                        <CheckCircle className="w-3 h-3" />
+                        <span className="text-[10px] font-black">{count.toLocaleString()} DISPONÍVEIS</span>
+                    </div>
+                )}
+                {count === 0 && (
+                    <div className="flex items-center gap-1.5 bg-slate-50 text-slate-400 px-2 py-1 rounded-lg border border-slate-100">
+                        <span className="text-[10px] font-black uppercase">Vazio</span>
+                    </div>
+                )}
                 <button
                     onClick={handleClear}
                     disabled={isProcessing}

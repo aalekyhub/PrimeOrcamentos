@@ -150,6 +150,26 @@ export const sinapiDb = {
         };
     },
 
+    async getStoreStats(storeName: 'sinapi_insumos' | 'sinapi_composicoes' | 'sinapi_composicao_itens', mes_ref: string, uf: string, modo: string) {
+        const db = await this.getDb();
+        const tx = db.transaction(storeName, 'readonly');
+        const store = tx.objectStore(storeName);
+        const index = store.index('query');
+
+        let count = 0;
+        // count() with index range
+        if (storeName === 'sinapi_composicao_itens') {
+            // For items, the index 'query' might have more fields or the structure might be different
+            // Let's use a simpler check for records matching the prefix or use count()
+            const all = await db.getAllFromIndex(storeName, 'query', IDBKeyRange.bound([mes_ref, uf, modo], [mes_ref, uf, modo, '\uffff']));
+            count = all.length;
+        } else {
+            count = await index.count(IDBKeyRange.only([mes_ref, uf, modo]));
+        }
+
+        return count;
+    },
+
     async getItemPrice(mes_ref: string, uf: string, modo: string, tipo: string, codigo: string): Promise<number> {
         if (tipo === 'COMPOSICAO') {
             const comp = await this.findComposicao(mes_ref, uf, modo, codigo);
