@@ -11,15 +11,45 @@ interface Props {
 const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
     const [config, setConfig] = useState({ uf: 'DF', mes_ref: '2025/08', modo: 'SE' });
     const [searchTerm, setSearchTerm] = useState('');
+    const [suggestions, setSuggestions] = useState<any[]>([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
     const [ans, setAns] = useState<AnaliticoResult | null>(null);
+    const containerRef = React.useRef<HTMLDivElement>(null);
 
-    const handleSearch = async () => {
-        if (!searchTerm) return;
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+                setShowSuggestions(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    useEffect(() => {
+        const timer = setTimeout(async () => {
+            if (searchTerm.length > 2) {
+                const results = await sinapiDb.searchComposicoes(searchTerm, config);
+                setSuggestions(results);
+                setShowSuggestions(true);
+            } else {
+                setSuggestions([]);
+                setShowSuggestions(false);
+            }
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [searchTerm, config]);
+
+    const handleSearch = async (forcedCode?: string) => {
+        const code = forcedCode || searchTerm;
+        if (!code) return;
         setIsSearching(true);
+        setShowSuggestions(false);
         try {
-            const result = await sinapiAnalitico.build(config.mes_ref, config.uf, config.modo, searchTerm);
+            const result = await sinapiAnalitico.build(config.mes_ref, config.uf, config.modo, code);
             setAns(result);
+            if (forcedCode) setSearchTerm(forcedCode);
         } finally {
             setIsSearching(false);
         }
@@ -28,7 +58,7 @@ const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
     return (
         <div className="space-y-6">
             {/* Config Bar */}
-            <div className="bg-slate-100 p-2 rounded-2xl flex flex-wrap gap-2 items-center">
+            <div ref={containerRef} className="bg-slate-100 p-2 rounded-2xl flex flex-wrap gap-2 items-center">
                 <select
                     className="bg-white border-none rounded-xl px-4 py-2 text-[10px] font-black uppercase outline-none"
                     value={config.uf} onChange={e => setConfig({ ...config, uf: e.target.value })}
@@ -53,14 +83,43 @@ const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
 
                 <div className="flex-1 min-w-[200px] relative">
                     <input
-                        type="text" placeholder="Digite o Código da Composição..."
+                        type="text" placeholder="Digite o Código ou Nome da Composição..."
                         className="w-full bg-white border-none rounded-xl pl-4 pr-10 py-2 text-xs font-bold outline-none"
-                        value={searchTerm} onChange={e => setSearchTerm(e.target.value)}
-                        onKeyDown={e => e.key === 'Enter' && handleSearch()}
+                        value={searchTerm}
+                        onChange={e => setSearchTerm(e.target.value)}
+                        onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                        onKeyDown={e => {
+                            if (e.key === 'Enter') handleSearch();
+                            if (e.key === 'Escape') setShowSuggestions(false);
+                        }}
                     />
-                    <button onClick={handleSearch} className="absolute right-2 top-1.5 p-1 bg-indigo-50 text-indigo-600 rounded-lg">
+                    <button onClick={() => handleSearch()} className="absolute right-2 top-1.5 p-1 bg-indigo-50 text-indigo-600 rounded-lg">
                         <Search className="w-4 h-4" />
                     </button>
+
+                    {/* Suggestions Dropdown */}
+                    {showSuggestions && suggestions.length > 0 && (
+                        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 max-h-[400px] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
+                            {suggestions.map(s => (
+                                <button
+                                    key={s.id}
+                                    onClick={() => handleSearch(s.codigo)}
+                                    className="w-full text-left px-5 py-4 hover:bg-slate-50 border-b border-slate-50 last:border-none group transition-colors"
+                                >
+                                    <div className="flex items-start justify-between gap-4">
+                                        <div className="flex-1">
+                                            <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">{s.codigo}</p>
+                                            <p className="text-[11px] font-bold text-slate-800 uppercase leading-tight group-hover:text-indigo-600 transition-colors">{s.descricao}</p>
+                                        </div>
+                                        <div className="text-right shrink-0">
+                                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{s.unidade}</p>
+                                            <p className="text-[11px] font-black text-slate-900">R$ {s.custo_unitario?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                        </div>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 
