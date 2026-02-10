@@ -24,13 +24,12 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
       const total = item.quantity * item.unitPrice;
       return `
       <tr style="border-bottom: 1px solid #f1f5f9;">
-        <td style="padding: 10px 0; text-align: left; vertical-align: middle;">
+        <td style="padding: 10px 10px 10px 0; text-align: left; vertical-align: middle; width: 60%;">
             <div style="font-weight: 700; text-transform: uppercase; font-size: ${itemFontBase}px; color: #0f172a;">${item.description}</div>
         </td>
-        <td style="padding: 10px 0; text-align: center; vertical-align: middle; color: #64748b; font-size: ${Math.max(8, itemFontBase - 1)}px; font-weight: 700; text-transform: uppercase;">${item.type || 'SERV'}</td>
-        <td style="padding: 10px 0; text-align: center; vertical-align: middle; color: #0f172a; font-size: ${itemFontBase}px; font-weight: 700;">${item.quantity} ${item.unit || 'un'}</td>
-        <td style="padding: 10px 0; text-align: right; vertical-align: middle; color: #64748b; font-size: ${itemFontBase}px; font-weight: 700;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-        <td style="padding: 10px 0; text-align: right; vertical-align: middle; font-weight: 800; font-size: ${itemFontBase + 1}px; color: #0f172a;">R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        <td style="padding: 10px 10px; text-align: center; vertical-align: middle; color: #0f172a; font-size: ${itemFontBase}px; font-weight: 700; width: 10%;">${item.quantity} ${item.unit || 'un'}</td>
+        <td style="padding: 10px 10px; text-align: right; vertical-align: middle; color: #64748b; font-size: ${itemFontBase}px; font-weight: 700; width: 15%;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        <td style="padding: 10px 0 10px 10px; text-align: right; vertical-align: middle; font-weight: 800; font-size: ${itemFontBase + 1}px; color: #0f172a; width: 15%;">R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
       </tr>`;
     }).join('');
 
@@ -45,14 +44,14 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
            * { box-sizing: border-box; }
            body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
            @page { size: A4; margin: 0 !important; }
-           .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
+           .a4-container { width: 100%; margin: 0; background: white; padding-left: 20mm !important; padding-right: 20mm !important; }
            .avoid-break { break-inside: avoid; page-break-inside: avoid; }
            .info-box { background: #f8fafc; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; }
            .info-label { font-size: 9px; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; display: block; }
            .info-value { font-size: 11px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.3; }
            .info-sub { font-size: 10px; color: #64748b; font-weight: 600; }
            .section-title { font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 6px; border-bottom: 2px solid #e2e8f0; margin-bottom: 12px; }
-           @media screen { body { background: #f1f5f9; padding: 40px 0; } .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; } }
+           @media screen { body { background: #f1f5f9; padding: 40px 0; } .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding-left: 20mm !important; padding-right: 20mm !important; } }
            @media print { 
              body { background: white !important; margin: 0 !important; } 
              .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; width: 100% !important; padding-left: 20mm !important; padding-right: 20mm !important; } 
@@ -171,9 +170,8 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
                     <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                         <thead>
                             <tr style="border-bottom: 2px solid #0f172a;">
-                                <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; width: 45%;">Item / Descrição</th>
-                                <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800; width: 10%;">Tipo</th>
-                                <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800; width: 15%;">Qtd</th>
+                                <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; width: 60%;">Item / Descrição</th>
+                                <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800; width: 10%;">Qtd</th>
                                 <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 15%;">Unitário</th>
                                 <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 15%;">Subtotal</th>
                             </tr>

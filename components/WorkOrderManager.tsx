@@ -203,9 +203,9 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                 <script src="https://cdn.tailwindcss.com"></script>
                 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
                     <style>
-                        * {box - sizing: border-box; }
-                        body {font - family: 'Inter', sans-serif; margin: 0; padding: 0; }
-                        .a4-container {width: 100%; background: white; }
+                        * {box-sizing: border-box; }
+                        body {font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
+                        .a4-container {width: 100%; background: white; padding-left: 20mm !important; padding-right: 20mm !important; }
                         .avoid-break { break-inside: avoid; page-break-inside: avoid; }
                     </style>
             </head>
@@ -322,7 +322,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
         // PDF Generation Options
         const opt = {
-            margin: 15,
+            margin: [0, 0, 0, 0], // Margins managed by .a4-container padding
             filename: `Contrato - ${order.id.replace('OS-', 'OS')} - ${order.description || 'Proposta'}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 3, useCORS: true },

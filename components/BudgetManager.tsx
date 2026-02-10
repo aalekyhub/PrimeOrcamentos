@@ -144,11 +144,10 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     const itemFontBase = company.itemsFontSize || 12;
     const itemsHtml = budget.items.map((item: ServiceItem) => `
       <tr style="border-bottom: 1px solid #f1f5f9;">
-        <td style="padding: 12px 0; font-weight: 500; text-transform: uppercase; font-size: ${itemFontBase}px; color: #0f172a;">${item.description}</td>
-        <td style="padding: 12px 0; text-align: center; color: #475569; font-size: ${Math.max(8, itemFontBase - 1)}px; font-weight: 500; text-transform: uppercase;">${item.type === 'Material' ? 'MAT' : 'SERV'}</td>
-        <td style="padding: 12px 0; text-align: center; font-weight: 500; color: #0f172a; font-size: ${itemFontBase}px;">${item.quantity} ${item.unit || ''}</td>
-        <td style="padding: 12px 0; text-align: right; color: #475569; font-size: ${itemFontBase}px;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-        <td style="padding: 12px 0; text-align: right; font-weight: 500; font-size: ${itemFontBase + 1}px; color: #0f172a;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        <td style="padding: 12px 10px 12px 0; font-weight: 500; text-transform: uppercase; font-size: ${itemFontBase}px; color: #0f172a; width: 60%;">${item.description}</td>
+        <td style="padding: 12px 10px; text-align: center; font-weight: 500; color: #0f172a; font-size: ${itemFontBase}px; width: 10%;">${item.quantity} ${item.unit || ''}</td>
+        <td style="padding: 12px 10px; text-align: right; color: #475569; font-size: ${itemFontBase}px; width: 15%;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        <td style="padding: 12px 0 12px 10px; text-align: right; font-weight: 500; font-size: ${itemFontBase + 1}px; color: #0f172a; width: 15%;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
       </tr>`).join('');
 
     const html = `
@@ -162,7 +161,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
            * { box-sizing: border-box; }
            body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
            @page { size: A4; margin: 0 !important; }
-           .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
+           .a4-container { width: 100%; margin: 0; background: white; padding-left: 20mm !important; padding-right: 20mm !important; }
             .avoid-break { break-inside: avoid; page-break-inside: avoid; }
             .break-after-avoid { break-after: avoid !important; page-break-after: avoid !important; }
              .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
@@ -301,11 +300,10 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                     <table style="width: 100%; border-collapse: collapse;">
                        <thead>
                            <tr style="border-bottom: 2px solid #0f172a;">
-                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: left; font-weight: 700; letter-spacing: 0.05em;">Item / Descrição</th>
-                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: center; font-weight: 700; letter-spacing: 0.05em;">Tipo</th>
-                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: center; font-weight: 700; letter-spacing: 0.05em;">Qtd</th>
-                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: right; font-weight: 700; letter-spacing: 0.05em;">Unitário</th>
-                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: right; font-weight: 700; letter-spacing: 0.05em;">Subtotal</th>
+                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: left; font-weight: 700; letter-spacing: 0.05em; width: 60%;">Item / Descrição</th>
+                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: center; font-weight: 700; letter-spacing: 0.05em; width: 10%;">Qtd</th>
+                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: right; font-weight: 700; letter-spacing: 0.05em; width: 15%;">Unitário</th>
+                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: right; font-weight: 700; letter-spacing: 0.05em; width: 15%;">Subtotal</th>
                            </tr>
                        </thead>
                        <tbody>${itemsHtml}</tbody>
@@ -464,7 +462,8 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
              width: 100% !important; 
              height: auto !important; 
              margin: 0 !important; 
-             padding: 0mm !important; 
+             padding-left: 20mm !important; 
+             padding-right: 20mm !important; 
              box-shadow: none !important; 
              border: none !important; 
              background: white !important;
@@ -499,7 +498,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           iframe.style.height = (contentHeight + 100) + 'px';
 
           const opt = {
-            margin: [15, 10, 15, 10], // Reduced margins to 15mm as requested for more space
+            margin: [0, 0, 0, 0], // Margins managed by .a4-container padding to match print exactly
             filename: `Orçamento - ${budget.id} - ${budget.description || 'Proposta'}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: {
