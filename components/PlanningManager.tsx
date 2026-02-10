@@ -424,47 +424,50 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                 </div>
             ) : (
                 <div className="bg-white rounded-2xl shadow-xl min-h-[80vh] flex flex-col">
-                    {/* Editor Header */}
-                    <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50 rounded-t-2xl">
-                        <div className="flex items-center gap-4">
-                            {!embeddedPlanId && (
-                                <button onClick={() => setActivePlanId(null)} className="text-slate-400 hover:text-slate-600">
-                                    <ArrowRight className="rotate-180" />
+                    {/* Fixed Editor Header & Tabs */}
+                    <div className="sticky top-0 z-20 bg-white border-b border-slate-200 shadow-sm">
+                        {/* Editor Header */}
+                        <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50 rounded-t-2xl">
+                            <div className="flex items-center gap-4">
+                                {!embeddedPlanId && (
+                                    <button onClick={() => setActivePlanId(null)} className="text-slate-400 hover:text-slate-600">
+                                        <ArrowRight className="rotate-180" />
+                                    </button>
+                                )}
+                                <div>
+                                    <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                        <HardHat className="text-blue-600" />
+                                        {currentPlan?.name}
+                                    </h2>
+                                    <p className="text-xs text-slate-500 uppercase tracking-widest font-semibold">{currentPlan?.type} • CUSTO PREVISTO</p>
+                                </div>
+                            </div>
+                            <div className="flex gap-2">
+                                <button onClick={handleSave} className="px-4 py-2 bg-slate-800 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-slate-900 shadow-md">
+                                    <Save size={16} /> Salvar
                                 </button>
-                            )}
-                            <div>
-                                <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                    <HardHat className="text-blue-600" />
-                                    {currentPlan?.name}
-                                </h2>
-                                <p className="text-xs text-slate-500 uppercase tracking-widest font-semibold">{currentPlan?.type} • CUSTO REAL</p>
                             </div>
                         </div>
-                        <div className="flex gap-2">
-                            <button onClick={handleSave} className="px-4 py-2 bg-slate-800 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-slate-900">
-                                <Save size={16} /> Salvar
-                            </button>
-                        </div>
-                    </div>
 
-                    {/* Tabs */}
-                    <div className="flex border-b border-slate-200 px-6">
-                        {[
-                            { id: 'dados', label: 'Dados da Obra', icon: FileText },
-                            { id: 'servicos', label: 'Serviços', icon: Building2 },
-                            { id: 'recursos', label: 'Gastos Detalhados', icon: Truck },
-                            { id: 'resumo', label: 'Resumo de Custo', icon: PieChart },
-                        ].map(tab => (
-                            <button
-                                key={tab.id}
-                                type="button"
-                                onClick={() => setActiveTab(tab.id as any)}
-                                className={`px-6 py-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors ${activeTab === tab.id ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'
-                                    }`}
-                            >
-                                <tab.icon size={16} /> {tab.label}
-                            </button>
-                        ))}
+                        {/* Tabs */}
+                        <div className="flex px-6 bg-white overflow-x-auto">
+                            {[
+                                { id: 'dados', label: 'Dados da Obra', icon: FileText },
+                                { id: 'servicos', label: 'Serviços', icon: Building2 },
+                                { id: 'recursos', label: 'Gastos Detalhados', icon: Truck },
+                                { id: 'resumo', label: 'Resumo de Custo', icon: PieChart },
+                            ].map(tab => (
+                                <button
+                                    key={tab.id}
+                                    type="button"
+                                    onClick={() => setActiveTab(tab.id as any)}
+                                    className={`px-6 py-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'
+                                        }`}
+                                >
+                                    <tab.icon size={16} /> {tab.label}
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
                     {/* Content */}
@@ -882,9 +885,13 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                         <option value="Empreitada">Empreitada</option>
                                                     </select>
                                                 </div>
-                                                <div className="md:col-span-2">
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Qtd (Dias/H)</label>
+                                                <div className="md:col-span-1">
+                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Qtd</label>
                                                     <input type="number" id="mo_qty" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="0" />
+                                                </div>
+                                                <div className="md:col-span-1">
+                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">UN</label>
+                                                    <input type="text" id="mo_unit" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="un" />
                                                 </div>
                                                 <div className="md:col-span-2">
                                                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Custo Unit.</label>
@@ -897,6 +904,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             const role = (document.getElementById('mo_role') as HTMLInputElement).value;
                                                             const type = (document.getElementById('mo_type') as HTMLInputElement).value as any;
                                                             const qty = parseFloat((document.getElementById('mo_qty') as HTMLInputElement).value) || 0;
+                                                            const unit = (document.getElementById('mo_unit') as HTMLInputElement).value || 'un';
                                                             const cost = parseFloat((document.getElementById('mo_cost') as HTMLInputElement).value) || 0;
                                                             if (!role) return notify("Função obrigatória", "error");
 
@@ -905,6 +913,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                 plan_id: currentPlan?.id,
                                                                 role: role.toUpperCase(),
                                                                 cost_type: type,
+                                                                unit: unit,
                                                                 quantity: qty,
                                                                 unit_cost: cost,
                                                                 charges_percent: 0,
@@ -912,6 +921,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             }]);
                                                             (document.getElementById('mo_role') as HTMLInputElement).value = '';
                                                             (document.getElementById('mo_qty') as HTMLInputElement).value = '';
+                                                            (document.getElementById('mo_unit') as HTMLInputElement).value = '';
                                                             (document.getElementById('mo_cost') as HTMLInputElement).value = '';
                                                         }}
                                                         className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-bold text-sm"
@@ -936,8 +946,11 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             </div>
                                                             <div className="md:col-span-2">
                                                                 <select
-                                                                    value={editUnit}
-                                                                    onChange={e => setEditUnit(e.target.value)}
+                                                                    value={l.cost_type}
+                                                                    onChange={e => {
+                                                                        const updated = labor.map(item => item.id === l.id ? { ...item, cost_type: e.target.value as any } : item);
+                                                                        setLabor(updated);
+                                                                    }}
                                                                     className="w-full p-2 border border-slate-200 rounded text-xs"
                                                                 >
                                                                     <option value="Diária">Diária</option>
@@ -945,7 +958,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                     <option value="Empreitada">Empreitada</option>
                                                                 </select>
                                                             </div>
-                                                            <div className="md:col-span-2">
+                                                            <div className="md:col-span-1">
                                                                 <input
                                                                     type="number"
                                                                     value={editQty}
@@ -953,7 +966,16 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                     className="w-full p-2 border border-slate-200 rounded text-xs"
                                                                 />
                                                             </div>
-                                                            <div className="md:col-span-3">
+                                                            <div className="md:col-span-1">
+                                                                <input
+                                                                    type="text"
+                                                                    value={editUnit}
+                                                                    onChange={e => setEditUnit(e.target.value)}
+                                                                    placeholder="un"
+                                                                    className="w-full p-2 border border-slate-200 rounded text-xs"
+                                                                />
+                                                            </div>
+                                                            <div className="md:col-span-2">
                                                                 <input
                                                                     type="number"
                                                                     value={editPrice1}
@@ -967,7 +989,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                         const updated = labor.map(item => item.id === l.id ? {
                                                                             ...item,
                                                                             role: editDesc,
-                                                                            cost_type: editUnit as any,
+                                                                            unit: editUnit,
                                                                             quantity: editQty,
                                                                             unit_cost: editPrice1,
                                                                             total_cost: editQty * editPrice1
@@ -989,7 +1011,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                         </div>
                                                     ) : (
                                                         <>
-                                                            <span>{l.quantity} {l.cost_type}(s) de <b>{l.role}</b></span>
+                                                            <span>{l.quantity}{l.unit || 'un'} de <b>{l.role}</b> ({l.cost_type})</span>
                                                             <div className="flex items-center gap-4">
                                                                 <span className="font-bold">R$ {l.total_cost.toFixed(2)}</span>
                                                                 <div className="flex gap-2">
@@ -999,7 +1021,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                         onClick={() => {
                                                                             setEditingId(l.id);
                                                                             setEditDesc(l.role);
-                                                                            setEditUnit(l.cost_type);
+                                                                            setEditUnit(l.unit || 'un'); // Now editUnit is the UN field
                                                                             setEditQty(l.quantity);
                                                                             setEditPrice1(l.unit_cost);
                                                                         }}

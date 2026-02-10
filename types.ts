@@ -168,6 +168,7 @@ export interface PlannedLabor {
   plan_services_id?: string; // Optional link
   role: string;
   cost_type: 'Hora' | 'Diária' | 'Empreitada';
+  unit?: string; // Adicionado para paridade com materiais
   unit_cost: number;
   quantity: number;
   charges_percent: number;
@@ -236,6 +237,7 @@ export interface WorkLabor {
   role: string;
   worker_name?: string;
   cost_type: 'Hora' | 'Diária' | 'Empreitada';
+  unit?: string; // Adicionado para paridade com materiais
   unit_cost: number;
   quantity: number;
   charges_percent?: number; // Optional in realized

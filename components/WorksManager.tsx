@@ -641,58 +641,61 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                 </div>
             ) : (
                 <div className="bg-white rounded-2xl shadow-xl min-h-[80vh] flex flex-col">
-                    {/* Editor Header */}
-                    <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-emerald-50 rounded-t-2xl">
-                        <div className="flex items-center gap-4">
-                            {!embeddedPlanId && (
-                                <button onClick={() => setActiveWorkId(null)} className="text-emerald-400 hover:text-emerald-600">
-                                    <ArrowRight className="rotate-180" />
+                    {/* Fixed Editor Header & Tabs */}
+                    <div className="sticky top-0 z-20 bg-white border-b border-slate-200 shadow-sm">
+                        {/* Editor Header */}
+                        <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-emerald-50 rounded-t-2xl">
+                            <div className="flex items-center gap-4">
+                                {!embeddedPlanId && (
+                                    <button onClick={() => setActiveWorkId(null)} className="text-emerald-400 hover:text-emerald-600">
+                                        <ArrowRight className="rotate-180" />
+                                    </button>
+                                )}
+                                <div>
+                                    <h2 className="text-xl font-bold text-emerald-900 flex items-center gap-2">
+                                        <HardHat className="text-emerald-600" />
+                                        {currentWork?.name}
+                                    </h2>
+                                    <p className="text-xs text-emerald-600 uppercase tracking-widest font-semibold flex items-center gap-1">
+                                        <Calendar size={12} /> Início: {new Date(currentWork?.start_date || '').toLocaleDateString()}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex gap-2">
+                                {/* MANUAL IMPORT BUTTON */}
+                                {currentWork?.plan_id && (services.length === 0 || materials.length === 0 || labor.length === 0) && (
+                                    <button
+                                        onClick={() => importPlanItems(currentWork.plan_id!, currentWork.id)}
+                                        className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-blue-700 shadow-md animate-pulse"
+                                    >
+                                        <ArrowRight size={16} /> Importar/Sincronizar Planejamento
+                                    </button>
+                                )}
+
+                                <button onClick={handleSave} className="px-4 py-2 bg-emerald-700 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-emerald-800 shadow-md">
+                                    <Save size={16} /> Salvar
                                 </button>
-                            )}
-                            <div>
-                                <h2 className="text-xl font-bold text-emerald-900 flex items-center gap-2">
-                                    <HardHat className="text-emerald-600" />
-                                    {currentWork?.name}
-                                </h2>
-                                <p className="text-xs text-emerald-600 uppercase tracking-widest font-semibold flex items-center gap-1">
-                                    <Calendar size={12} /> Início: {new Date(currentWork?.start_date || '').toLocaleDateString()}
-                                </p>
                             </div>
                         </div>
-                        <div className="flex gap-2">
-                            {/* MANUAL IMPORT BUTTON */}
-                            {currentWork?.plan_id && (services.length === 0 || materials.length === 0 || labor.length === 0) && (
+
+                        {/* Tabs */}
+                        <div className="flex px-6 bg-white overflow-x-auto">
+                            {[
+                                { id: 'dados', label: 'Dados da Obra', icon: FileText },
+                                { id: 'servicos', label: 'Serviços', icon: Building2 },
+                                { id: 'recursos', label: 'Gastos Detalhados', icon: Truck },
+                                { id: 'resumo', label: 'Resumo de Custo', icon: PieChart },
+                            ].map(tab => (
                                 <button
-                                    onClick={() => importPlanItems(currentWork.plan_id!, currentWork.id)}
-                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-blue-700 shadow-md animate-pulse"
+                                    key={tab.id}
+                                    type="button"
+                                    onClick={() => setActiveTab(tab.id as any)}
+                                    className={`px-6 py-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
                                 >
-                                    <ArrowRight size={16} /> Importar/Sincronizar Planejamento
+                                    <tab.icon size={16} /> {tab.label}
                                 </button>
-                            )}
-
-                            <button onClick={handleSave} className="px-4 py-2 bg-emerald-700 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-emerald-800 shadow-md">
-                                <Save size={16} /> Salvar
-                            </button>
+                            ))}
                         </div>
-                    </div>
-
-                    {/* Tabs */}
-                    <div className="flex border-b border-slate-200 px-6">
-                        {[
-                            { id: 'dados', label: 'Dados da Obra', icon: FileText },
-                            { id: 'servicos', label: 'Serviços', icon: Building2 },
-                            { id: 'recursos', label: 'Gastos Detalhados', icon: Truck },
-                            { id: 'resumo', label: 'Resumo de Custo', icon: PieChart },
-                        ].map(tab => (
-                            <button
-                                key={tab.id}
-                                type="button"
-                                onClick={() => setActiveTab(tab.id as any)}
-                                className={`px-6 py-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors ${activeTab === tab.id ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
-                            >
-                                <tab.icon size={16} /> {tab.label}
-                            </button>
-                        ))}
                     </div>
 
                     {/* Content */}
@@ -1101,9 +1104,13 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         <option value="Empreitada">Empreitada</option>
                                                     </select>
                                                 </div>
-                                                <div className="md:col-span-2">
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Qtd (Dias/H)</label>
+                                                <div className="md:col-span-1">
+                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Qtd</label>
                                                     <input type="number" id="mo_qty" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="0" />
+                                                </div>
+                                                <div className="md:col-span-1">
+                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">UN</label>
+                                                    <input type="text" id="mo_un" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="un" />
                                                 </div>
                                                 <div className="md:col-span-2">
                                                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Custo Unit.</label>
@@ -1115,6 +1122,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             const role = (document.getElementById('mo_role') as HTMLInputElement).value;
                                                             const type = (document.getElementById('mo_type') as HTMLInputElement).value as any;
                                                             const qty = parseFloat((document.getElementById('mo_qty') as HTMLInputElement).value) || 0;
+                                                            const unit = (document.getElementById('mo_un') as HTMLInputElement).value || 'un';
                                                             const cost = parseFloat((document.getElementById('mo_cost') as HTMLInputElement).value) || 0;
                                                             if (!role) return notify("Função obrigatória", "error");
 
@@ -1123,6 +1131,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                 work_id: currentWork?.id || '',
                                                                 role: role.toUpperCase(),
                                                                 cost_type: type,
+                                                                unit: unit,
                                                                 quantity: qty,
                                                                 unit_cost: cost,
                                                                 charges_percent: 0,
@@ -1130,6 +1139,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             }]);
                                                             (document.getElementById('mo_role') as HTMLInputElement).value = '';
                                                             (document.getElementById('mo_qty') as HTMLInputElement).value = '';
+                                                            (document.getElementById('mo_un') as HTMLInputElement).value = '';
                                                             (document.getElementById('mo_cost') as HTMLInputElement).value = '';
                                                         }}
                                                         className="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 font-bold text-sm"
@@ -1148,27 +1158,34 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                 <input
                                                                     className="w-full text-xs p-1 border rounded"
                                                                     defaultValue={l.role}
-                                                                    id={`edit_lrole_${l.id} `}
+                                                                    id={`edit_lrole_${l.id}`}
                                                                 />
                                                             </div>
                                                             <div className="col-span-2">
                                                                 <select
                                                                     className="w-full text-xs p-1 border rounded"
                                                                     defaultValue={l.cost_type}
-                                                                    id={`edit_ltype_${l.id} `}
+                                                                    id={`edit_ltype_${l.id}`}
                                                                 >
                                                                     <option value="Diária">Diária</option>
                                                                     <option value="Hora">Hora</option>
                                                                     <option value="Empreitada">Empreitada</option>
                                                                 </select>
                                                             </div>
-                                                            <div className="col-span-2">
+                                                            <div className="col-span-1">
                                                                 <input
                                                                     type="number"
                                                                     className="w-full text-xs p-1 border rounded"
                                                                     defaultValue={l.quantity}
-                                                                    placeholder="Qtd"
-                                                                    id={`edit_lqty_${l.id} `}
+                                                                    id={`edit_lqty_${l.id}`}
+                                                                />
+                                                            </div>
+                                                            <div className="col-span-1">
+                                                                <input
+                                                                    type="text"
+                                                                    className="w-full text-xs p-1 border rounded"
+                                                                    defaultValue={l.unit || 'un'}
+                                                                    id={`edit_lunit_${l.id}`}
                                                                 />
                                                             </div>
                                                             <div className="col-span-2">
@@ -1176,25 +1193,26 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                     type="number"
                                                                     className="w-full text-xs p-1 border rounded"
                                                                     defaultValue={l.unit_cost}
-                                                                    placeholder="Unit"
-                                                                    id={`edit_lcost_${l.id} `}
+                                                                    id={`edit_lcost_${l.id}`}
                                                                 />
                                                             </div>
                                                             <div className="col-span-2 flex gap-1 justify-end">
                                                                 <button
                                                                     onClick={() => {
-                                                                        const newRole = (document.getElementById(`edit_lrole_${l.id} `) as HTMLInputElement).value;
-                                                                        const newType = (document.getElementById(`edit_ltype_${l.id} `) as HTMLInputElement).value as any;
-                                                                        const newQty = parseFloat((document.getElementById(`edit_lqty_${l.id} `) as HTMLInputElement).value) || 0;
-                                                                        const newCost = parseFloat((document.getElementById(`edit_lcost_${l.id} `) as HTMLInputElement).value) || 0;
+                                                                        const role = (document.getElementById(`edit_lrole_${l.id}`) as HTMLInputElement).value;
+                                                                        const type = (document.getElementById(`edit_ltype_${l.id}`) as HTMLSelectElement).value as any;
+                                                                        const qty = parseFloat((document.getElementById(`edit_lqty_${l.id}`) as HTMLInputElement).value) || 0;
+                                                                        const unit = (document.getElementById(`edit_lunit_${l.id}`) as HTMLInputElement).value || 'un';
+                                                                        const cost = parseFloat((document.getElementById(`edit_lcost_${l.id}`) as HTMLInputElement).value) || 0;
 
                                                                         const updated = labor.map(item => item.id === l.id ? {
                                                                             ...item,
-                                                                            role: newRole.toUpperCase(),
-                                                                            cost_type: newType,
-                                                                            quantity: newQty,
-                                                                            unit_cost: newCost,
-                                                                            total_cost: newQty * newCost
+                                                                            role: role.toUpperCase(),
+                                                                            cost_type: type,
+                                                                            unit: unit,
+                                                                            quantity: qty,
+                                                                            unit_cost: cost,
+                                                                            total_cost: qty * cost
                                                                         } : item);
                                                                         setLabor(updated);
                                                                         setEditingId(null);
@@ -1203,17 +1221,20 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                 >
                                                                     <Check size={16} />
                                                                 </button>
-                                                                <button
-                                                                    onClick={() => setEditingId(null)}
-                                                                    className="text-red-500 hover:bg-red-50 p-1 rounded"
-                                                                >
+                                                                <button onClick={() => setEditingId(null)} className="text-red-500 hover:bg-red-50 p-1 rounded">
                                                                     <X size={16} />
                                                                 </button>
                                                             </div>
                                                         </div>
                                                     ) : (
                                                         <>
-                                                            <span>{l.quantity} {l.cost_type}(s) de <b>{l.role}</b></span>
+                                                            <span className="flex items-center gap-1">
+                                                                <b>{l.quantity}{l.unit || 'un'}</b>
+                                                                <span className="text-slate-400 mx-1">|</span>
+                                                                <span>{l.role}</span>
+                                                                <span className="text-[10px] text-slate-400 ml-2 uppercase">({l.cost_type})</span>
+                                                                <span className="text-[10px] text-slate-400 ml-2">(R$ {l.unit_cost.toFixed(2)})</span>
+                                                            </span>
                                                             <div className="flex items-center gap-4">
                                                                 <span className="font-bold">R$ {l.total_cost.toFixed(2)}</span>
                                                                 <Pencil size={14} className="cursor-pointer text-blue-400 hover:text-blue-600" onClick={() => setEditingId(l.id)} />
@@ -1354,50 +1375,53 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     </div>
                                 )}
                             </div>
-                        )}
+                        )
+                        }
 
-                        {activeTab === 'resumo' && (
-                            <div className="max-w-4xl mx-auto space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                                        <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Materiais</span>
-                                        <span className="text-2xl font-bold text-slate-800">R$ {totalMaterial.toFixed(2)}</span>
+                        {
+                            activeTab === 'resumo' && (
+                                <div className="max-w-4xl mx-auto space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                                            <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Materiais</span>
+                                            <span className="text-2xl font-bold text-slate-800">R$ {totalMaterial.toFixed(2)}</span>
+                                        </div>
+                                        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                                            <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Mão de Obra</span>
+                                            <span className="text-2xl font-bold text-slate-800">R$ {totalLabor.toFixed(2)}</span>
+                                        </div>
+                                        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                                            <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Indiretos</span>
+                                            <span className="text-2xl font-bold text-slate-800">R$ {totalIndirect.toFixed(2)}</span>
+                                        </div>
                                     </div>
-                                    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                                        <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Mão de Obra</span>
-                                        <span className="text-2xl font-bold text-slate-800">R$ {totalLabor.toFixed(2)}</span>
+
+                                    <div className="flex justify-end gap-2">
+                                        <button
+                                            onClick={handlePrintFull}
+                                            className="bg-white border border-slate-200 text-slate-600 px-6 py-3 rounded-xl text-sm font-bold flex items-center gap-3 hover:bg-slate-50 transition-all shadow-sm group"
+                                        >
+                                            <Printer size={20} className="text-emerald-600 group-hover:scale-110 transition-transform" />
+                                            Imprimir Relatório Completo da Obra
+                                        </button>
                                     </div>
-                                    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                                        <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Indiretos</span>
-                                        <span className="text-2xl font-bold text-slate-800">R$ {totalIndirect.toFixed(2)}</span>
+
+                                    <div className="bg-emerald-900 text-white p-8 rounded-2xl flex justify-between items-center shadow-xl">
+                                        <div>
+                                            <p className="text-emerald-200 text-sm font-bold uppercase tracking-widest mb-1">Custo Total Realizado</p>
+                                            <p className="text-4xl font-bold">R$ {totalGeneral.toFixed(2)}</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-xs text-emerald-300">Valores consolidados da execução</p>
+                                        </div>
                                     </div>
                                 </div>
-
-                                <div className="flex justify-end gap-2">
-                                    <button
-                                        onClick={handlePrintFull}
-                                        className="bg-white border border-slate-200 text-slate-600 px-6 py-3 rounded-xl text-sm font-bold flex items-center gap-3 hover:bg-slate-50 transition-all shadow-sm group"
-                                    >
-                                        <Printer size={20} className="text-emerald-600 group-hover:scale-110 transition-transform" />
-                                        Imprimir Relatório Completo da Obra
-                                    </button>
-                                </div>
-
-                                <div className="bg-emerald-900 text-white p-8 rounded-2xl flex justify-between items-center shadow-xl">
-                                    <div>
-                                        <p className="text-emerald-200 text-sm font-bold uppercase tracking-widest mb-1">Custo Total Realizado</p>
-                                        <p className="text-4xl font-bold">R$ {totalGeneral.toFixed(2)}</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-xs text-emerald-300">Valores consolidados da execução</p>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
+                            )
+                        }
+                    </div >
+                </div >
             )}
-        </div>
+        </div >
     );
 };
 
