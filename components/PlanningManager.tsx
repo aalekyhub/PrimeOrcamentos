@@ -424,7 +424,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                 </div>
             ) : (
                 <div className="bg-white rounded-2xl shadow-xl min-h-[80vh] flex flex-col">
-                    {/* Fixed Editor Header & Tabs */}
+                    {/* Fixed Editor Header & Tabs & Forms */}
                     <div className="sticky top-0 z-20 bg-white border-b border-slate-200 shadow-sm">
                         {/* Editor Header */}
                         <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50 rounded-t-2xl">
@@ -439,7 +439,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                         <HardHat className="text-blue-600" />
                                         {currentPlan?.name}
                                     </h2>
-                                    <p className="text-xs text-slate-500 uppercase tracking-widest font-semibold">{currentPlan?.type} • CUSTO PREVISTO</p>
+                                    <p className="text-xs text-slate-500 uppercase tracking-widest font-semibold">{currentPlan?.type} • PLANEJAMENTO DE CUSTO</p>
                                 </div>
                             </div>
                             <div className="flex gap-2">
@@ -468,7 +468,253 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                 </button>
                             ))}
                         </div>
+
+                        {/* Sub-Header forms for Add (Fixed) */}
+                        {activeTab === 'servicos' && (
+                            <div className="p-6 border-t border-slate-100 bg-white">
+                                <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider"><Building2 size={16} /> Adicionar Serviço</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                                    <div className="md:col-span-4">
+                                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Descrição</label>
+                                        <input type="text" id="svc_desc" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none" placeholder="Ex: Pintura de Parede" />
+                                    </div>
+                                    <div className="md:col-span-1">
+                                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Un</label>
+                                        <input type="text" id="svc_unit" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none" placeholder="m²" />
+                                    </div>
+                                    <div className="md:col-span-1">
+                                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Qtd</label>
+                                        <input type="number" id="svc_qty" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none" placeholder="0" />
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Unit. Mat.</label>
+                                        <input type="number" id="svc_mat" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none" placeholder="0.00" />
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Unit. M.O.</label>
+                                        <input type="number" id="svc_lab" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none" placeholder="0.00" />
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <button
+                                            onClick={() => {
+                                                const desc = (document.getElementById('svc_desc') as HTMLInputElement).value;
+                                                const unit = (document.getElementById('svc_unit') as HTMLInputElement).value;
+                                                const qty = parseFloat((document.getElementById('svc_qty') as HTMLInputElement).value) || 0;
+                                                const mat = parseFloat((document.getElementById('svc_mat') as HTMLInputElement).value) || 0;
+                                                const lab = parseFloat((document.getElementById('svc_lab') as HTMLInputElement).value) || 0;
+
+                                                if (!desc) return notify("Descrição obrigatória", "error");
+
+                                                const newSvc: PlannedService = {
+                                                    id: db.generateId('SVC'),
+                                                    plan_id: currentPlan?.id || '',
+                                                    description: desc.toUpperCase(),
+                                                    unit,
+                                                    quantity: qty,
+                                                    unit_material_cost: mat,
+                                                    unit_labor_cost: lab,
+                                                    unit_indirect_cost: 0,
+                                                    total_cost: qty * (mat + lab)
+                                                };
+                                                setServices([...services, newSvc]);
+
+                                                // Reset fields
+                                                (document.getElementById('svc_desc') as HTMLInputElement).value = '';
+                                                (document.getElementById('svc_unit') as HTMLInputElement).value = '';
+                                                (document.getElementById('svc_qty') as HTMLInputElement).value = '';
+                                                (document.getElementById('svc_mat') as HTMLInputElement).value = '';
+                                                (document.getElementById('svc_lab') as HTMLInputElement).value = '';
+                                            }}
+                                            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-bold text-xs h-9 flex items-center justify-center gap-1 shadow-sm"
+                                        >
+                                            <Plus size={14} /> ADICIONAR
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'recursos' && (
+                            <div className="px-6 pb-4 border-t border-slate-100 bg-white">
+                                <div className="flex gap-1.5 my-3 justify-center">
+                                    {[{ id: 'material', label: 'Materiais' }, { id: 'mo', label: 'Mão de Obra' }, { id: 'indireto', label: 'Indiretos' }].map(r => (
+                                        <button
+                                            key={r.id}
+                                            type="button"
+                                            onClick={() => setResourceTab(r.id as any)}
+                                            className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all uppercase tracking-wider ${resourceTab === r.id ? 'bg-slate-800 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-100'
+                                                }`}
+                                        >
+                                            {r.label}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                    {resourceTab === 'material' && (
+                                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                                            <div className="md:col-span-5">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Material</label>
+                                                <input type="text" id="mat_name" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none" placeholder="Ex: Cimento CP-II" />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Qtd</label>
+                                                <input type="number" id="mat_qty" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none" placeholder="0" />
+                                            </div>
+                                            <div className="md:col-span-1">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Und</label>
+                                                <input type="text" id="mat_unit" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none" placeholder="un" />
+                                            </div>
+                                            <div className="md:col-span-1">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Custo Unit.</label>
+                                                <input type="number" id="mat_cost" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none" placeholder="0.00" />
+                                            </div>
+                                            <div className="md:col-span-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const name = (document.getElementById('mat_name') as HTMLInputElement).value;
+                                                        const qty = parseFloat((document.getElementById('mat_qty') as HTMLInputElement).value) || 0;
+                                                        const unit = (document.getElementById('mat_unit') as HTMLInputElement).value || 'un';
+                                                        const cost = parseFloat((document.getElementById('mat_cost') as HTMLInputElement).value) || 0;
+                                                        if (!name) return notify("Nome obrigatório", "error");
+
+                                                        setMaterials([...materials, {
+                                                            id: db.generateId('MAT'),
+                                                            plan_id: currentPlan?.id,
+                                                            material_name: name.toUpperCase(),
+                                                            unit: unit,
+                                                            quantity: qty,
+                                                            unit_cost: cost,
+                                                            total_cost: qty * cost
+                                                        }]);
+                                                        (document.getElementById('mat_name') as HTMLInputElement).value = '';
+                                                        (document.getElementById('mat_qty') as HTMLInputElement).value = '';
+                                                        (document.getElementById('mat_unit') as HTMLInputElement).value = '';
+                                                        (document.getElementById('mat_cost') as HTMLInputElement).value = '';
+                                                    }}
+                                                    className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-bold text-xs h-9 shadow-sm"
+                                                >
+                                                    ADICIONAR MATERIAL
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {resourceTab === 'mo' && (
+                                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                                            <div className="md:col-span-4">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Função</label>
+                                                <input type="text" id="mo_role" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none" placeholder="Ex: Pedreiro" />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Tipo</label>
+                                                <select id="mo_type" className="w-full p-2 border border-slate-200 rounded text-sm h-9 outline-none">
+                                                    <option value="Diária">Diária</option>
+                                                    <option value="Hora">Hora</option>
+                                                    <option value="Empreitada">Empreitada</option>
+                                                </select>
+                                            </div>
+                                            <div className="md:col-span-1">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Qtd</label>
+                                                <input type="number" id="mo_qty" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none" placeholder="0" />
+                                            </div>
+                                            <div className="md:col-span-1">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">UN</label>
+                                                <input type="text" id="mo_unit" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none" placeholder="un" />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Custo Unit.</label>
+                                                <input type="number" id="mo_cost" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none" placeholder="0.00" />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const role = (document.getElementById('mo_role') as HTMLInputElement).value;
+                                                        const type = (document.getElementById('mo_type') as HTMLSelectElement).value;
+                                                        const qty = parseFloat((document.getElementById('mo_qty') as HTMLInputElement).value) || 0;
+                                                        const unit = (document.getElementById('mo_unit') as HTMLInputElement).value || 'un';
+                                                        const cost = parseFloat((document.getElementById('mo_cost') as HTMLInputElement).value) || 0;
+                                                        if (!role) return notify("Função obrigatória", "error");
+
+                                                        setLabor([...labor, {
+                                                            id: db.generateId('LBR'),
+                                                            plan_id: currentPlan?.id,
+                                                            role: role.toUpperCase(),
+                                                            cost_type: type as any,
+                                                            unit: unit,
+                                                            quantity: qty,
+                                                            unit_cost: cost,
+                                                            charges_percent: 0,
+                                                            total_cost: qty * cost
+                                                        }]);
+                                                        (document.getElementById('mo_role') as HTMLInputElement).value = '';
+                                                        (document.getElementById('mo_qty') as HTMLInputElement).value = '';
+                                                        (document.getElementById('mo_unit') as HTMLInputElement).value = '';
+                                                        (document.getElementById('mo_cost') as HTMLInputElement).value = '';
+                                                    }}
+                                                    className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-bold text-xs h-9 shadow-sm"
+                                                >
+                                                    ADICIONAR M.O.
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {resourceTab === 'indireto' && (
+                                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                                            <div className="md:col-span-3">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Categoria</label>
+                                                <select id="ind_cat" className="w-full p-2 border border-slate-200 rounded text-sm h-9 outline-none">
+                                                    <option>Transporte</option>
+                                                    <option>Alimentação</option>
+                                                    <option>EPI</option>
+                                                    <option>Equipamentos</option>
+                                                    <option>Taxas</option>
+                                                    <option>Outros</option>
+                                                </select>
+                                            </div>
+                                            <div className="md:col-span-6">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Descrição</label>
+                                                <input type="text" id="ind_desc" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none" placeholder="Ex: Combustível ida/volta" />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Valor</label>
+                                                <input type="number" id="ind_val" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none" placeholder="0.00" />
+                                            </div>
+                                            <div className="md:col-span-1">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const cat = (document.getElementById('ind_cat') as HTMLInputElement).value;
+                                                        const desc = (document.getElementById('ind_desc') as HTMLInputElement).value;
+                                                        const val = parseFloat((document.getElementById('ind_val') as HTMLInputElement).value) || 0;
+
+                                                        if (!desc) return notify("Descrição obrigatória", "error");
+
+                                                        setIndirects([...indirects, {
+                                                            id: db.generateId('IND'),
+                                                            plan_id: currentPlan?.id,
+                                                            category: cat,
+                                                            description: desc.toUpperCase(),
+                                                            value: val
+                                                        }]);
+                                                        (document.getElementById('ind_desc') as HTMLInputElement).value = '';
+                                                        (document.getElementById('ind_val') as HTMLInputElement).value = '';
+                                                    }}
+                                                    className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-bold text-xs h-9 shadow-sm flex items-center justify-center"
+                                                >
+                                                    <Plus size={16} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
+
 
                     {/* Content */}
                     <div className="p-8 flex-1 bg-slate-50/50">
@@ -526,66 +772,6 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
 
                         {activeTab === 'servicos' && (
                             <div className="max-w-4xl mx-auto">
-                                <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-6">
-                                    <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><Building2 size={18} /> Adicionar Serviço</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                                        <div className="md:col-span-4">
-                                            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Descrição</label>
-                                            <input type="text" id="svc_desc" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="Ex: Pintura de Parede" />
-                                        </div>
-                                        <div className="md:col-span-1">
-                                            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Un</label>
-                                            <input type="text" id="svc_unit" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="m²" />
-                                        </div>
-                                        <div className="md:col-span-1">
-                                            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Qtd</label>
-                                            <input type="number" id="svc_qty" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="0" />
-                                        </div>
-                                        <div className="md:col-span-2">
-                                            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Unit. Material</label>
-                                            <input type="number" id="svc_mat" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="0.00" />
-                                        </div>
-                                        <div className="md:col-span-2">
-                                            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Unit. M.O.</label>
-                                            <input type="number" id="svc_lab" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="0.00" />
-                                        </div>
-                                        <div className="md:col-span-2">
-                                            <button
-                                                onClick={() => {
-                                                    const desc = (document.getElementById('svc_desc') as HTMLInputElement).value;
-                                                    const unit = (document.getElementById('svc_unit') as HTMLInputElement).value;
-                                                    const qty = parseFloat((document.getElementById('svc_qty') as HTMLInputElement).value) || 0;
-                                                    const mat = parseFloat((document.getElementById('svc_mat') as HTMLInputElement).value) || 0;
-                                                    const lab = parseFloat((document.getElementById('svc_lab') as HTMLInputElement).value) || 0;
-
-                                                    if (!desc) return notify("Descrição obrigatória", "error");
-
-                                                    const newSvc: PlannedService = {
-                                                        id: db.generateId('SVC'),
-                                                        plan_id: currentPlan?.id || '',
-                                                        description: desc.toUpperCase(),
-                                                        unit,
-                                                        quantity: qty,
-                                                        unit_material_cost: mat,
-                                                        unit_labor_cost: lab,
-                                                        unit_indirect_cost: 0,
-                                                        total_cost: qty * (mat + lab)
-                                                    };
-                                                    setServices([...services, newSvc]);
-
-                                                    // Reset fields
-                                                    (document.getElementById('svc_desc') as HTMLInputElement).value = '';
-                                                    (document.getElementById('svc_qty') as HTMLInputElement).value = '';
-                                                    (document.getElementById('svc_mat') as HTMLInputElement).value = '';
-                                                    (document.getElementById('svc_lab') as HTMLInputElement).value = '';
-                                                }}
-                                                className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-bold text-sm flex items-center justify-center gap-1"
-                                            >
-                                                <Plus size={16} /> Adicionar
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
 
                                 <div className="space-y-2">
                                     {services.map(svc => (
@@ -705,482 +891,305 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                         )}
 
                         {activeTab === 'recursos' && (
-                            <div>
-                                <div className="flex gap-2 mb-6 justify-center">
-                                    {[{ id: 'material', label: 'Materiais' }, { id: 'mo', label: 'Mão de Obra' }, { id: 'indireto', label: 'Indiretos' }].map(r => (
-                                        <button
-                                            key={r.id}
-                                            type="button"
-                                            onClick={() => setResourceTab(r.id as any)}
-                                            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${resourceTab === r.id ? 'bg-slate-800 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
-                                                }`}
-                                        >
-                                            {r.label}
-                                        </button>
-                                    ))}
-                                </div>
-
-                                {/* MATERIALS TAB */}
+                            <div className="max-w-4xl mx-auto space-y-6">
                                 {resourceTab === 'material' && (
-                                    <div>
-                                        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-6">
-                                            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                                                <div className="md:col-span-5">
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Material</label>
-                                                    <input type="text" id="mat_name" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="Ex: Cimento CP-II" />
-                                                </div>
-                                                <div className="md:col-span-2">
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Qtd</label>
-                                                    <input type="number" id="mat_qty" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="0" />
-                                                </div>
-                                                <div className="md:col-span-1">
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Und</label>
-                                                    <input type="text" id="mat_unit" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="un" />
-                                                </div>
-                                                <div className="md:col-span-1">
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Custo Unit.</label>
-                                                    <input type="number" id="mat_cost" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="0.00" />
-                                                </div>
-                                                <div className="md:col-span-3">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            const name = (document.getElementById('mat_name') as HTMLInputElement).value;
-                                                            const qty = parseFloat((document.getElementById('mat_qty') as HTMLInputElement).value) || 0;
-                                                            const unit = (document.getElementById('mat_unit') as HTMLInputElement).value || 'un';
-                                                            const cost = parseFloat((document.getElementById('mat_cost') as HTMLInputElement).value) || 0;
-                                                            if (!name) return notify("Nome obrigatório", "error");
-
-                                                            setMaterials([...materials, {
-                                                                id: db.generateId('MAT'),
-                                                                plan_id: currentPlan?.id,
-                                                                material_name: name.toUpperCase(),
-                                                                unit: unit,
-                                                                quantity: qty,
-                                                                unit_cost: cost,
-                                                                total_cost: qty * cost
-                                                            }]);
-                                                            (document.getElementById('mat_name') as HTMLInputElement).value = '';
-                                                            (document.getElementById('mat_qty') as HTMLInputElement).value = '';
-                                                            (document.getElementById('mat_unit') as HTMLInputElement).value = '';
-                                                            (document.getElementById('mat_cost') as HTMLInputElement).value = '';
-                                                        }}
-                                                        className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-bold text-sm"
-                                                    >
-                                                        Adicionar Material
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            {materials.map(m => (
-                                                <div key={m.id} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center text-sm">
-                                                    {editingId === m.id ? (
-                                                        <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center mr-2">
-                                                            <div className="md:col-span-5">
-                                                                <input
-                                                                    type="text"
-                                                                    value={editDesc}
-                                                                    onChange={e => setEditDesc(e.target.value.toUpperCase())}
-                                                                    className="w-full p-2 border border-slate-200 rounded text-xs font-bold"
-                                                                />
-                                                            </div>
-                                                            <div className="md:col-span-2">
-                                                                <input
-                                                                    type="number"
-                                                                    value={editQty}
-                                                                    onChange={e => setEditQty(parseFloat(e.target.value) || 0)}
-                                                                    className="w-full p-2 border border-slate-200 rounded text-xs"
-                                                                />
-                                                            </div>
-                                                            <div className="md:col-span-1">
-                                                                <input
-                                                                    type="text"
-                                                                    value={editUnit}
-                                                                    onChange={e => setEditUnit(e.target.value)}
-                                                                    className="w-full p-2 border border-slate-200 rounded text-xs"
-                                                                />
-                                                            </div>
-                                                            <div className="md:col-span-3">
-                                                                <input
-                                                                    type="number"
-                                                                    value={editPrice1}
-                                                                    onChange={e => setEditPrice1(parseFloat(e.target.value) || 0)}
-                                                                    className="w-full p-2 border border-slate-200 rounded text-xs font-bold"
-                                                                    placeholder="Custo Unit."
-                                                                />
-                                                            </div>
-                                                            <div className="md:col-span-1 flex gap-1">
-                                                                <button
+                                    <div className="space-y-2">
+                                        {materials.map(m => (
+                                            <div key={m.id} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center text-sm">
+                                                {editingId === m.id ? (
+                                                    <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center mr-2">
+                                                        <div className="md:col-span-5">
+                                                            <input
+                                                                type="text"
+                                                                value={editDesc}
+                                                                onChange={e => setEditDesc(e.target.value.toUpperCase())}
+                                                                className="w-full p-2 border border-slate-200 rounded text-xs font-bold"
+                                                            />
+                                                        </div>
+                                                        <div className="md:col-span-2">
+                                                            <input
+                                                                type="number"
+                                                                value={editQty}
+                                                                onChange={e => setEditQty(parseFloat(e.target.value) || 0)}
+                                                                className="w-full p-2 border border-slate-200 rounded text-xs"
+                                                            />
+                                                        </div>
+                                                        <div className="md:col-span-1">
+                                                            <input
+                                                                type="text"
+                                                                value={editUnit}
+                                                                onChange={e => setEditUnit(e.target.value)}
+                                                                className="w-full p-2 border border-slate-200 rounded text-xs"
+                                                            />
+                                                        </div>
+                                                        <div className="md:col-span-3">
+                                                            <input
+                                                                type="number"
+                                                                value={editPrice1}
+                                                                onChange={e => setEditPrice1(parseFloat(e.target.value) || 0)}
+                                                                className="w-full p-2 border border-slate-200 rounded text-xs font-bold"
+                                                                placeholder="Custo Unit."
+                                                            />
+                                                        </div>
+                                                        <div className="md:col-span-1 flex gap-1">
+                                                            <button
+                                                                onClick={() => {
+                                                                    const updated = materials.map(item => item.id === m.id ? {
+                                                                        ...item,
+                                                                        material_name: editDesc,
+                                                                        quantity: editQty,
+                                                                        unit: editUnit,
+                                                                        unit_cost: editPrice1,
+                                                                        total_cost: editQty * editPrice1
+                                                                    } : item);
+                                                                    setMaterials(updated);
+                                                                    setEditingId(null);
+                                                                }}
+                                                                className="text-green-600 p-1 hover:bg-green-50 rounded"
+                                                            >
+                                                                <Check size={16} />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setEditingId(null)}
+                                                                className="text-red-600 p-1 hover:bg-red-50 rounded"
+                                                            >
+                                                                <X size={16} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <span><b>{m.material_name}</b> | (R$ {m.unit_cost.toFixed(2)}) {m.quantity}{m.unit}</span>
+                                                        <div className="flex items-center gap-4">
+                                                            <span className="font-bold">R$ {m.total_cost.toFixed(2)}</span>
+                                                            <div className="flex gap-2">
+                                                                <Pencil
+                                                                    size={14}
+                                                                    className="cursor-pointer text-slate-400 hover:text-blue-500"
                                                                     onClick={() => {
-                                                                        const updated = materials.map(item => item.id === m.id ? {
-                                                                            ...item,
-                                                                            material_name: editDesc,
-                                                                            quantity: editQty,
-                                                                            unit: editUnit,
-                                                                            unit_cost: editPrice1,
-                                                                            total_cost: editQty * editPrice1
-                                                                        } : item);
-                                                                        setMaterials(updated);
-                                                                        setEditingId(null);
+                                                                        setEditingId(m.id);
+                                                                        setEditDesc(m.material_name);
+                                                                        setEditQty(m.quantity);
+                                                                        setEditUnit(m.unit);
+                                                                        setEditPrice1(m.unit_cost);
                                                                     }}
-                                                                    className="text-green-600 p-1 hover:bg-green-50 rounded"
-                                                                >
-                                                                    <Check size={16} />
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => setEditingId(null)}
-                                                                    className="text-red-600 p-1 hover:bg-red-50 rounded"
-                                                                >
-                                                                    <X size={16} />
-                                                                </button>
+                                                                />
+                                                                <Trash2
+                                                                    size={14}
+                                                                    className="cursor-pointer text-slate-400 hover:text-red-500"
+                                                                    onClick={() => setMaterials(materials.filter(x => x.id !== m.id))}
+                                                                />
                                                             </div>
                                                         </div>
-                                                    ) : (
-                                                        <>
-                                                            <span><b>{m.material_name}</b> | (R$ {m.unit_cost.toFixed(2)}) {m.quantity}{m.unit}</span>
-                                                            <div className="flex items-center gap-4">
-                                                                <span className="font-bold">R$ {m.total_cost.toFixed(2)}</span>
-                                                                <div className="flex gap-2">
-                                                                    <Pencil
-                                                                        size={14}
-                                                                        className="cursor-pointer text-slate-400 hover:text-blue-500"
-                                                                        onClick={() => {
-                                                                            setEditingId(m.id);
-                                                                            setEditDesc(m.material_name);
-                                                                            setEditQty(m.quantity);
-                                                                            setEditUnit(m.unit);
-                                                                            setEditPrice1(m.unit_cost);
-                                                                        }}
-                                                                    />
-                                                                    <Trash2
-                                                                        size={14}
-                                                                        className="cursor-pointer text-slate-400 hover:text-red-500"
-                                                                        onClick={() => setMaterials(materials.filter(x => x.id !== m.id))}
-                                                                    />
-                                                                </div>
-                                                            </div>
-                                                        </>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
+                                                    </>
+                                                )}
+                                            </div>
+                                        ))}
                                     </div>
                                 )}
 
-                                {/* LABOR TAB */}
                                 {resourceTab === 'mo' && (
-                                    <div>
-                                        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-6">
-                                            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                                                <div className="md:col-span-4">
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Função</label>
-                                                    <input type="text" id="mo_role" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="Ex: Pedreiro" />
-                                                </div>
-                                                <div className="md:col-span-2">
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Tipo</label>
-                                                    <select id="mo_type" className="w-full p-2 border border-slate-200 rounded text-sm">
-                                                        <option value="Diária">Diária</option>
-                                                        <option value="Hora">Hora</option>
-                                                        <option value="Empreitada">Empreitada</option>
-                                                    </select>
-                                                </div>
-                                                <div className="md:col-span-1">
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Qtd</label>
-                                                    <input type="number" id="mo_qty" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="0" />
-                                                </div>
-                                                <div className="md:col-span-1">
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">UN</label>
-                                                    <input type="text" id="mo_unit" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="un" />
-                                                </div>
-                                                <div className="md:col-span-2">
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Custo Unit.</label>
-                                                    <input type="number" id="mo_cost" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="0.00" />
-                                                </div>
-                                                <div className="md:col-span-2">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            const role = (document.getElementById('mo_role') as HTMLInputElement).value;
-                                                            const type = (document.getElementById('mo_type') as HTMLInputElement).value as any;
-                                                            const qty = parseFloat((document.getElementById('mo_qty') as HTMLInputElement).value) || 0;
-                                                            const unit = (document.getElementById('mo_unit') as HTMLInputElement).value || 'un';
-                                                            const cost = parseFloat((document.getElementById('mo_cost') as HTMLInputElement).value) || 0;
-                                                            if (!role) return notify("Função obrigatória", "error");
-
-                                                            setLabor([...labor, {
-                                                                id: db.generateId('LBR'),
-                                                                plan_id: currentPlan?.id,
-                                                                role: role.toUpperCase(),
-                                                                cost_type: type,
-                                                                unit: unit,
-                                                                quantity: qty,
-                                                                unit_cost: cost,
-                                                                charges_percent: 0,
-                                                                total_cost: qty * cost
-                                                            }]);
-                                                            (document.getElementById('mo_role') as HTMLInputElement).value = '';
-                                                            (document.getElementById('mo_qty') as HTMLInputElement).value = '';
-                                                            (document.getElementById('mo_unit') as HTMLInputElement).value = '';
-                                                            (document.getElementById('mo_cost') as HTMLInputElement).value = '';
-                                                        }}
-                                                        className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-bold text-sm"
-                                                    >
-                                                        Adicionar
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            {labor.map(l => (
-                                                <div key={l.id} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center text-sm">
-                                                    {editingId === l.id ? (
-                                                        <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center mr-2">
-                                                            <div className="md:col-span-4">
-                                                                <input
-                                                                    type="text"
-                                                                    value={editDesc}
-                                                                    onChange={e => setEditDesc(e.target.value.toUpperCase())}
-                                                                    className="w-full p-2 border border-slate-200 rounded text-xs font-bold"
-                                                                />
-                                                            </div>
-                                                            <div className="md:col-span-2">
-                                                                <select
-                                                                    value={l.cost_type}
-                                                                    onChange={e => {
-                                                                        const updated = labor.map(item => item.id === l.id ? { ...item, cost_type: e.target.value as any } : item);
-                                                                        setLabor(updated);
-                                                                    }}
-                                                                    className="w-full p-2 border border-slate-200 rounded text-xs"
-                                                                >
-                                                                    <option value="Diária">Diária</option>
-                                                                    <option value="Hora">Hora</option>
-                                                                    <option value="Empreitada">Empreitada</option>
-                                                                </select>
-                                                            </div>
-                                                            <div className="md:col-span-1">
-                                                                <input
-                                                                    type="number"
-                                                                    value={editQty}
-                                                                    onChange={e => setEditQty(parseFloat(e.target.value) || 0)}
-                                                                    className="w-full p-2 border border-slate-200 rounded text-xs"
-                                                                />
-                                                            </div>
-                                                            <div className="md:col-span-1">
-                                                                <input
-                                                                    type="text"
-                                                                    value={editUnit}
-                                                                    onChange={e => setEditUnit(e.target.value)}
-                                                                    placeholder="un"
-                                                                    className="w-full p-2 border border-slate-200 rounded text-xs"
-                                                                />
-                                                            </div>
-                                                            <div className="md:col-span-2">
-                                                                <input
-                                                                    type="number"
-                                                                    value={editPrice1}
-                                                                    onChange={e => setEditPrice1(parseFloat(e.target.value) || 0)}
-                                                                    className="w-full p-2 border border-slate-200 rounded text-xs font-bold"
-                                                                />
-                                                            </div>
-                                                            <div className="md:col-span-1 flex gap-1">
-                                                                <button
+                                    <div className="space-y-2">
+                                        {labor.map(l => (
+                                            <div key={l.id} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center text-sm">
+                                                {editingId === l.id ? (
+                                                    <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center mr-2">
+                                                        <div className="md:col-span-4">
+                                                            <input
+                                                                type="text"
+                                                                value={editDesc}
+                                                                onChange={e => setEditDesc(e.target.value.toUpperCase())}
+                                                                className="w-full p-2 border border-slate-200 rounded text-xs font-bold"
+                                                            />
+                                                        </div>
+                                                        <div className="md:col-span-2">
+                                                            <select
+                                                                value={l.cost_type}
+                                                                onChange={e => {
+                                                                    const updated = labor.map(item => item.id === l.id ? { ...item, cost_type: e.target.value as any } : item);
+                                                                    setLabor(updated);
+                                                                }}
+                                                                className="w-full p-2 border border-slate-200 rounded text-xs"
+                                                            >
+                                                                <option value="Diária">Diária</option>
+                                                                <option value="Hora">Hora</option>
+                                                                <option value="Empreitada">Empreitada</option>
+                                                            </select>
+                                                        </div>
+                                                        <div className="md:col-span-1">
+                                                            <input
+                                                                type="number"
+                                                                value={editQty}
+                                                                onChange={e => setEditQty(parseFloat(e.target.value) || 0)}
+                                                                className="w-full p-2 border border-slate-200 rounded text-xs"
+                                                            />
+                                                        </div>
+                                                        <div className="md:col-span-1">
+                                                            <input
+                                                                type="text"
+                                                                value={editUnit}
+                                                                onChange={e => setEditUnit(e.target.value)}
+                                                                placeholder="un"
+                                                                className="w-full p-2 border border-slate-200 rounded text-xs"
+                                                            />
+                                                        </div>
+                                                        <div className="md:col-span-2">
+                                                            <input
+                                                                type="number"
+                                                                value={editPrice1}
+                                                                onChange={e => setEditPrice1(parseFloat(e.target.value) || 0)}
+                                                                className="w-full p-2 border border-slate-200 rounded text-xs font-bold"
+                                                            />
+                                                        </div>
+                                                        <div className="md:col-span-1 flex gap-1">
+                                                            <button
+                                                                onClick={() => {
+                                                                    const updated = labor.map(item => item.id === l.id ? {
+                                                                        ...item,
+                                                                        role: editDesc,
+                                                                        unit: editUnit,
+                                                                        quantity: editQty,
+                                                                        unit_cost: editPrice1,
+                                                                        total_cost: editQty * editPrice1
+                                                                    } : item);
+                                                                    setLabor(updated);
+                                                                    setEditingId(null);
+                                                                }}
+                                                                className="text-green-600 p-1 hover:bg-green-50 rounded"
+                                                            >
+                                                                <Check size={16} />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setEditingId(null)}
+                                                                className="text-red-600 p-1 hover:bg-red-50 rounded"
+                                                            >
+                                                                <X size={16} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <span><b>{l.role}</b> | ({l.cost_type}) {l.quantity}{l.unit || 'un'}</span>
+                                                        <div className="flex items-center gap-4">
+                                                            <span className="font-bold">R$ {l.total_cost.toFixed(2)}</span>
+                                                            <div className="flex gap-2">
+                                                                <Pencil
+                                                                    size={14}
+                                                                    className="cursor-pointer text-slate-400 hover:text-blue-500"
                                                                     onClick={() => {
-                                                                        const updated = labor.map(item => item.id === l.id ? {
-                                                                            ...item,
-                                                                            role: editDesc,
-                                                                            unit: editUnit,
-                                                                            quantity: editQty,
-                                                                            unit_cost: editPrice1,
-                                                                            total_cost: editQty * editPrice1
-                                                                        } : item);
-                                                                        setLabor(updated);
-                                                                        setEditingId(null);
+                                                                        setEditingId(l.id);
+                                                                        setEditDesc(l.role);
+                                                                        setEditUnit(l.unit || 'un'); // Now editUnit is the UN field
+                                                                        setEditQty(l.quantity);
+                                                                        setEditPrice1(l.unit_cost);
                                                                     }}
-                                                                    className="text-green-600 p-1 hover:bg-green-50 rounded"
-                                                                >
-                                                                    <Check size={16} />
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => setEditingId(null)}
-                                                                    className="text-red-600 p-1 hover:bg-red-50 rounded"
-                                                                >
-                                                                    <X size={16} />
-                                                                </button>
+                                                                />
+                                                                <Trash2
+                                                                    size={14}
+                                                                    className="cursor-pointer text-slate-400 hover:text-red-500"
+                                                                    onClick={() => setLabor(labor.filter(x => x.id !== l.id))}
+                                                                />
                                                             </div>
                                                         </div>
-                                                    ) : (
-                                                        <>
-                                                            <span><b>{l.role}</b> | ({l.cost_type}) {l.quantity}{l.unit || 'un'}</span>
-                                                            <div className="flex items-center gap-4">
-                                                                <span className="font-bold">R$ {l.total_cost.toFixed(2)}</span>
-                                                                <div className="flex gap-2">
-                                                                    <Pencil
-                                                                        size={14}
-                                                                        className="cursor-pointer text-slate-400 hover:text-blue-500"
-                                                                        onClick={() => {
-                                                                            setEditingId(l.id);
-                                                                            setEditDesc(l.role);
-                                                                            setEditUnit(l.unit || 'un'); // Now editUnit is the UN field
-                                                                            setEditQty(l.quantity);
-                                                                            setEditPrice1(l.unit_cost);
-                                                                        }}
-                                                                    />
-                                                                    <Trash2
-                                                                        size={14}
-                                                                        className="cursor-pointer text-slate-400 hover:text-red-500"
-                                                                        onClick={() => setLabor(labor.filter(x => x.id !== l.id))}
-                                                                    />
-                                                                </div>
-                                                            </div>
-                                                        </>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
+                                                    </>
+                                                )}
+                                            </div>
+                                        ))}
                                     </div>
                                 )}
 
-                                {/* INDIRECTS TAB */}
                                 {resourceTab === 'indireto' && (
-                                    <div>
-                                        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-6">
-                                            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                                                <div className="md:col-span-3">
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Categoria</label>
-                                                    <select id="ind_cat" className="w-full p-2 border border-slate-200 rounded text-sm">
-                                                        <option>Transporte</option>
-                                                        <option>Alimentação</option>
-                                                        <option>EPI</option>
-                                                        <option>Equipamentos</option>
-                                                        <option>Taxas</option>
-                                                        <option>Outros</option>
-                                                    </select>
-                                                </div>
-                                                <div className="md:col-span-6">
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Descrição</label>
-                                                    <input type="text" id="ind_desc" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="Ex: Combustível ida/volta" />
-                                                </div>
-                                                <div className="md:col-span-2">
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Valor</label>
-                                                    <input type="number" id="ind_val" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="0.00" />
-                                                </div>
-                                                <div className="md:col-span-1">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            const cat = (document.getElementById('ind_cat') as HTMLInputElement).value;
-                                                            const desc = (document.getElementById('ind_desc') as HTMLInputElement).value;
-                                                            const val = parseFloat((document.getElementById('ind_val') as HTMLInputElement).value) || 0;
-
-                                                            setIndirects([...indirects, {
-                                                                id: db.generateId('IND'),
-                                                                plan_id: currentPlan?.id,
-                                                                category: cat,
-                                                                description: desc.toUpperCase(),
-                                                                value: val
-                                                            }]);
-                                                            (document.getElementById('ind_desc') as HTMLInputElement).value = '';
-                                                            (document.getElementById('ind_val') as HTMLInputElement).value = '';
-                                                        }}
-                                                        className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-bold text-sm flex justify-center"
-                                                    >
-                                                        <Plus size={16} />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            {indirects.map(i => (
-                                                <div key={i.id} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center text-sm">
-                                                    {editingId === i.id ? (
-                                                        <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center mr-2">
-                                                            <div className="md:col-span-3">
-                                                                <select
-                                                                    value={editUnit}
-                                                                    onChange={e => setEditUnit(e.target.value)}
-                                                                    className="w-full p-2 border border-slate-200 rounded text-xs"
-                                                                >
-                                                                    <option>Transporte</option>
-                                                                    <option>Alimentação</option>
-                                                                    <option>EPI</option>
-                                                                    <option>Equipamentos</option>
-                                                                    <option>Taxas</option>
-                                                                    <option>Outros</option>
-                                                                </select>
-                                                            </div>
-                                                            <div className="md:col-span-6">
-                                                                <input
-                                                                    type="text"
-                                                                    value={editDesc}
-                                                                    onChange={e => setEditDesc(e.target.value.toUpperCase())}
-                                                                    className="w-full p-2 border border-slate-200 rounded text-xs font-bold"
-                                                                />
-                                                            </div>
-                                                            <div className="md:col-span-2">
-                                                                <input
-                                                                    type="number"
-                                                                    value={editPrice1}
-                                                                    onChange={e => setEditPrice1(parseFloat(e.target.value) || 0)}
-                                                                    className="w-full p-2 border border-slate-200 rounded text-xs font-bold"
-                                                                />
-                                                            </div>
-                                                            <div className="md:col-span-1 flex gap-1">
-                                                                <button
+                                    <div className="space-y-2">
+                                        {indirects.map(i => (
+                                            <div key={i.id} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center text-sm">
+                                                {editingId === i.id ? (
+                                                    <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center mr-2">
+                                                        <div className="md:col-span-3">
+                                                            <select
+                                                                value={editUnit}
+                                                                onChange={e => setEditUnit(e.target.value)}
+                                                                className="w-full p-2 border border-slate-200 rounded text-xs"
+                                                            >
+                                                                <option>Transporte</option>
+                                                                <option>Alimentação</option>
+                                                                <option>EPI</option>
+                                                                <option>Equipamentos</option>
+                                                                <option>Taxas</option>
+                                                                <option>Outros</option>
+                                                            </select>
+                                                        </div>
+                                                        <div className="md:col-span-6">
+                                                            <input
+                                                                type="text"
+                                                                value={editDesc}
+                                                                onChange={e => setEditDesc(e.target.value.toUpperCase())}
+                                                                className="w-full p-2 border border-slate-200 rounded text-xs font-bold"
+                                                            />
+                                                        </div>
+                                                        <div className="md:col-span-2">
+                                                            <input
+                                                                type="number"
+                                                                value={editPrice1}
+                                                                onChange={e => setEditPrice1(parseFloat(e.target.value) || 0)}
+                                                                className="w-full p-2 border border-slate-200 rounded text-xs font-bold"
+                                                            />
+                                                        </div>
+                                                        <div className="md:col-span-1 flex gap-1">
+                                                            <button
+                                                                onClick={() => {
+                                                                    const updated = indirects.map(item => item.id === i.id ? {
+                                                                        ...item,
+                                                                        category: editUnit,
+                                                                        description: editDesc,
+                                                                        value: editPrice1
+                                                                    } : item);
+                                                                    setIndirects(updated);
+                                                                    setEditingId(null);
+                                                                }}
+                                                                className="text-green-600 p-1 hover:bg-green-50 rounded"
+                                                            >
+                                                                <Check size={16} />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setEditingId(null)}
+                                                                className="text-red-600 p-1 hover:bg-red-50 rounded"
+                                                            >
+                                                                <X size={16} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <span>[{i.category}] <b>{i.description}</b></span>
+                                                        <div className="flex items-center gap-4">
+                                                            <span className="font-bold">R$ {i.value.toFixed(2)}</span>
+                                                            <div className="flex gap-2">
+                                                                <Pencil
+                                                                    size={14}
+                                                                    className="cursor-pointer text-slate-400 hover:text-blue-500"
                                                                     onClick={() => {
-                                                                        const updated = indirects.map(item => item.id === i.id ? {
-                                                                            ...item,
-                                                                            category: editUnit,
-                                                                            description: editDesc,
-                                                                            value: editPrice1
-                                                                        } : item);
-                                                                        setIndirects(updated);
-                                                                        setEditingId(null);
+                                                                        setEditingId(i.id);
+                                                                        setEditUnit(i.category);
+                                                                        setEditDesc(i.description);
+                                                                        setEditPrice1(i.value);
                                                                     }}
-                                                                    className="text-green-600 p-1 hover:bg-green-50 rounded"
-                                                                >
-                                                                    <Check size={16} />
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => setEditingId(null)}
-                                                                    className="text-red-600 p-1 hover:bg-red-50 rounded"
-                                                                >
-                                                                    <X size={16} />
-                                                                </button>
+                                                                />
+                                                                <Trash2
+                                                                    size={14}
+                                                                    className="cursor-pointer text-slate-400 hover:text-red-500"
+                                                                    onClick={() => setIndirects(indirects.filter(x => x.id !== i.id))}
+                                                                />
                                                             </div>
                                                         </div>
-                                                    ) : (
-                                                        <>
-                                                            <span>[{i.category}] <b>{i.description}</b></span>
-                                                            <div className="flex items-center gap-4">
-                                                                <span className="font-bold">R$ {i.value.toFixed(2)}</span>
-                                                                <div className="flex gap-2">
-                                                                    <Pencil
-                                                                        size={14}
-                                                                        className="cursor-pointer text-slate-400 hover:text-blue-500"
-                                                                        onClick={() => {
-                                                                            setEditingId(i.id);
-                                                                            setEditUnit(i.category);
-                                                                            setEditDesc(i.description);
-                                                                            setEditPrice1(i.value);
-                                                                        }}
-                                                                    />
-                                                                    <Trash2
-                                                                        size={14}
-                                                                        className="cursor-pointer text-slate-400 hover:text-red-500"
-                                                                        onClick={() => setIndirects(indirects.filter(x => x.id !== i.id))}
-                                                                    />
-                                                                </div>
-                                                            </div>
-                                                        </>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
+                                                    </>
+                                                )}
+                                            </div>
+                                        ))}
                                     </div>
                                 )}
                             </div>
                         )}
+
 
                         {activeTab === 'resumo' && (
                             <div className="max-w-4xl mx-auto">
@@ -1231,9 +1240,9 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                             </div>
                         )}
                     </div>
-                </div>
+                </div >
             )}
-        </div>
+        </div >
     );
 };
 

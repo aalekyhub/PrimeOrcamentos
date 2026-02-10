@@ -696,6 +696,245 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 </button>
                             ))}
                         </div>
+
+                        {/* Sub-Header forms for Add (Fixed) */}
+                        {activeTab === 'servicos' && (
+                            <div className="p-6 border-t border-slate-100 bg-white">
+                                <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider"><Building2 size={16} /> Lançar Serviço Realizado</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                                    <div className="md:col-span-4">
+                                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Descrição</label>
+                                        <input type="text" id="svc_desc" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="Ex: Pintura Realizada" />
+                                    </div>
+                                    <div className="md:col-span-1">
+                                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Un</label>
+                                        <input type="text" id="svc_unit" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="m²" />
+                                    </div>
+                                    <div className="md:col-span-1">
+                                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Qtd</label>
+                                        <input type="number" id="svc_qty" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="0" />
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">R$ Mat (Real)</label>
+                                        <input type="number" id="svc_mat" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="0.00" />
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">R$ M.O. (Real)</label>
+                                        <input type="number" id="svc_lab" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="0.00" />
+                                    </div>
+                                    <div className="md:col-span-2">
+                                        <button
+                                            onClick={() => {
+                                                const desc = (document.getElementById('svc_desc') as HTMLInputElement).value;
+                                                const unit = (document.getElementById('svc_unit') as HTMLInputElement).value;
+                                                const qty = parseFloat((document.getElementById('svc_qty') as HTMLInputElement).value) || 0;
+                                                const mat = parseFloat((document.getElementById('svc_mat') as HTMLInputElement).value) || 0;
+                                                const lab = parseFloat((document.getElementById('svc_lab') as HTMLInputElement).value) || 0;
+
+                                                if (!desc) return notify("Descrição obrigatória", "error");
+
+                                                const newSvc: WorkService = {
+                                                    id: db.generateId('WSVC'),
+                                                    work_id: currentWork?.id || '',
+                                                    description: desc.toUpperCase(),
+                                                    unit,
+                                                    quantity: qty,
+                                                    unit_material_cost: mat,
+                                                    unit_labor_cost: lab,
+                                                    unit_indirect_cost: 0,
+                                                    total_cost: qty * (mat + lab),
+                                                    status: 'Concluído'
+                                                };
+                                                setServices([...services, newSvc]);
+
+                                                // Reset
+                                                (document.getElementById('svc_desc') as HTMLInputElement).value = '';
+                                                (document.getElementById('svc_qty') as HTMLInputElement).value = '';
+                                                (document.getElementById('svc_mat') as HTMLInputElement).value = '';
+                                                (document.getElementById('svc_lab') as HTMLInputElement).value = '';
+                                            }}
+                                            className="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 font-bold text-xs h-9 flex items-center justify-center gap-1 shadow-sm"
+                                        >
+                                            <Plus size={14} /> LANÇAR
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'recursos' && (
+                            <div className="px-6 pb-4 border-t border-slate-100 bg-white">
+                                <div className="flex gap-1.5 my-3 justify-center">
+                                    {[{ id: 'material', label: 'Materiais' }, { id: 'mo', label: 'Mão de Obra' }, { id: 'indireto', label: 'Indiretos' }].map(r => (
+                                        <button
+                                            key={r.id}
+                                            type="button"
+                                            onClick={() => setResourceTab(r.id as any)}
+                                            className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all uppercase tracking-wider ${resourceTab === r.id ? 'bg-emerald-800 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-500 hover:bg-emerald-50'}`}
+                                        >
+                                            {r.label}
+                                        </button>
+                                    ))}
+                                </div>
+                                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                    {resourceTab === 'material' && (
+                                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                                            <div className="md:col-span-5">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Material</label>
+                                                <input type="text" id="mat_name" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="Ex: Cimento CP-II" />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Qtd</label>
+                                                <input type="number" id="mat_qty" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="0" />
+                                            </div>
+                                            <div className="md:col-span-1">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Und</label>
+                                                <input type="text" id="mat_unit" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="un" />
+                                            </div>
+                                            <div className="md:col-span-1">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Custo Unit.</label>
+                                                <input type="number" id="mat_cost" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="0.00" />
+                                            </div>
+                                            <div className="md:col-span-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const name = (document.getElementById('mat_name') as HTMLInputElement).value;
+                                                        const qty = parseFloat((document.getElementById('mat_qty') as HTMLInputElement).value) || 0;
+                                                        const unit = (document.getElementById('mat_unit') as HTMLInputElement).value || 'un';
+                                                        const cost = parseFloat((document.getElementById('mat_cost') as HTMLInputElement).value) || 0;
+                                                        if (!name) return notify("Nome obrigatório", "error");
+
+                                                        setMaterials([...materials, {
+                                                            id: db.generateId('MAT'),
+                                                            work_id: currentWork?.id || '',
+                                                            material_name: name.toUpperCase(),
+                                                            unit: unit,
+                                                            quantity: qty,
+                                                            unit_cost: cost,
+                                                            total_cost: qty * cost
+                                                        }]);
+                                                        (document.getElementById('mat_name') as HTMLInputElement).value = '';
+                                                        (document.getElementById('mat_qty') as HTMLInputElement).value = '';
+                                                        (document.getElementById('mat_unit') as HTMLInputElement).value = '';
+                                                        (document.getElementById('mat_cost') as HTMLInputElement).value = '';
+                                                    }}
+                                                    className="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 font-bold text-xs h-9 shadow-sm"
+                                                >
+                                                    LANÇAR MATERIAL
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {resourceTab === 'mo' && (
+                                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                                            <div className="md:col-span-4">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Função</label>
+                                                <input type="text" id="mo_role" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="Ex: Pedreiro" />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Tipo</label>
+                                                <select id="mo_type" className="w-full p-2 border border-slate-200 rounded text-sm h-9 outline-none">
+                                                    <option value="Diária">Diária</option>
+                                                    <option value="Hora">Hora</option>
+                                                    <option value="Empreitada">Empreitada</option>
+                                                </select>
+                                            </div>
+                                            <div className="md:col-span-1">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Qtd</label>
+                                                <input type="number" id="mo_qty" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="0" />
+                                            </div>
+                                            <div className="md:col-span-1">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">UN</label>
+                                                <input type="text" id="mo_un" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="un" />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Custo Unit.</label>
+                                                <input type="number" id="mo_cost" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="0.00" />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const role = (document.getElementById('mo_role') as HTMLInputElement).value;
+                                                        const type = (document.getElementById('mo_type') as HTMLInputElement).value as any;
+                                                        const qty = parseFloat((document.getElementById('mo_qty') as HTMLInputElement).value) || 0;
+                                                        const unit = (document.getElementById('mo_un') as HTMLInputElement).value || 'un';
+                                                        const cost = parseFloat((document.getElementById('mo_cost') as HTMLInputElement).value) || 0;
+                                                        if (!role) return notify("Função obrigatória", "error");
+
+                                                        setLabor([...labor, {
+                                                            id: db.generateId('LBR'),
+                                                            work_id: currentWork?.id || '',
+                                                            role: role.toUpperCase(),
+                                                            cost_type: type,
+                                                            unit: unit,
+                                                            quantity: qty,
+                                                            unit_cost: cost,
+                                                            charges_percent: 0,
+                                                            total_cost: qty * cost
+                                                        }]);
+                                                        (document.getElementById('mo_role') as HTMLInputElement).value = '';
+                                                        (document.getElementById('mo_qty') as HTMLInputElement).value = '';
+                                                        (document.getElementById('mo_un') as HTMLInputElement).value = '';
+                                                        (document.getElementById('mo_cost') as HTMLInputElement).value = '';
+                                                    }}
+                                                    className="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 font-bold text-xs h-9 shadow-sm"
+                                                >
+                                                    LANÇAR M.O.
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {resourceTab === 'indireto' && (
+                                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                                            <div className="md:col-span-3">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Categoria</label>
+                                                <select id="ind_cat" className="w-full p-2 border border-slate-200 rounded text-sm h-9 outline-none">
+                                                    <option>Transporte</option>
+                                                    <option>Alimentação</option>
+                                                    <option>EPI</option>
+                                                    <option>Equipamentos</option>
+                                                    <option>Taxas</option>
+                                                    <option>Outros</option>
+                                                </select>
+                                            </div>
+                                            <div className="md:col-span-6">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Descrição</label>
+                                                <input type="text" id="ind_desc" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="Ex: Combustível ida/volta" />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Valor</label>
+                                                <input type="number" id="ind_val" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="0.00" />
+                                            </div>
+                                            <div className="md:col-span-1">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const cat = (document.getElementById('ind_cat') as HTMLInputElement).value;
+                                                        const desc = (document.getElementById('ind_desc') as HTMLInputElement).value;
+                                                        const val = parseFloat((document.getElementById('ind_val') as HTMLInputElement).value) || 0;
+
+                                                        setIndirects([...indirects, {
+                                                            id: db.generateId('IND'),
+                                                            work_id: currentWork?.id || '',
+                                                            category: cat,
+                                                            description: desc.toUpperCase(),
+                                                            value: val
+                                                        }]);
+                                                        (document.getElementById('ind_desc') as HTMLInputElement).value = '';
+                                                        (document.getElementById('ind_val') as HTMLInputElement).value = '';
+                                                    }}
+                                                    className="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 font-bold text-xs h-9 flex items-center justify-center shadow-sm"
+                                                >
+                                                    <Plus size={14} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Content */}
@@ -752,67 +991,6 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
                         {activeTab === 'servicos' && (
                             <div className="max-w-4xl mx-auto">
-                                <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-6">
-                                    <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><Building2 size={18} /> Lançar Serviço Realizado</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                                        <div className="md:col-span-4">
-                                            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Descrição</label>
-                                            <input type="text" id="svc_desc" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="Ex: Pintura Realizada" />
-                                        </div>
-                                        <div className="md:col-span-1">
-                                            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Un</label>
-                                            <input type="text" id="svc_unit" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="m²" />
-                                        </div>
-                                        <div className="md:col-span-1">
-                                            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Qtd</label>
-                                            <input type="number" id="svc_qty" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="0" />
-                                        </div>
-                                        <div className="md:col-span-2">
-                                            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">R$ Mat (Real)</label>
-                                            <input type="number" id="svc_mat" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="0.00" />
-                                        </div>
-                                        <div className="md:col-span-2">
-                                            <label className="block text-xs font-bold text-slate-500 uppercase mb-1">R$ M.O. (Real)</label>
-                                            <input type="number" id="svc_lab" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="0.00" />
-                                        </div>
-                                        <div className="md:col-span-2">
-                                            <button
-                                                onClick={() => {
-                                                    const desc = (document.getElementById('svc_desc') as HTMLInputElement).value;
-                                                    const unit = (document.getElementById('svc_unit') as HTMLInputElement).value;
-                                                    const qty = parseFloat((document.getElementById('svc_qty') as HTMLInputElement).value) || 0;
-                                                    const mat = parseFloat((document.getElementById('svc_mat') as HTMLInputElement).value) || 0;
-                                                    const lab = parseFloat((document.getElementById('svc_lab') as HTMLInputElement).value) || 0;
-
-                                                    if (!desc) return notify("Descrição obrigatória", "error");
-
-                                                    const newSvc: WorkService = {
-                                                        id: db.generateId('WSVC'),
-                                                        work_id: currentWork?.id || '',
-                                                        description: desc.toUpperCase(),
-                                                        unit,
-                                                        quantity: qty,
-                                                        unit_material_cost: mat, // Actual cost!
-                                                        unit_labor_cost: lab,     // Actual cost!
-                                                        unit_indirect_cost: 0,
-                                                        total_cost: qty * (mat + lab),
-                                                        status: 'Concluído'
-                                                    };
-                                                    setServices([...services, newSvc]);
-
-                                                    // Reset
-                                                    (document.getElementById('svc_desc') as HTMLInputElement).value = '';
-                                                    (document.getElementById('svc_qty') as HTMLInputElement).value = '';
-                                                    (document.getElementById('svc_mat') as HTMLInputElement).value = '';
-                                                    (document.getElementById('svc_lab') as HTMLInputElement).value = '';
-                                                }}
-                                                className="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 font-bold text-sm flex items-center justify-center gap-1"
-                                            >
-                                                <Plus size={16} /> Lançar
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
 
                                 <div className="space-y-2">
                                     {services.map(svc => (
@@ -949,54 +1127,6 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 </button>
                                             )}
                                         </div>
-                                        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-6">
-                                            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                                                <div className="md:col-span-5">
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Material</label>
-                                                    <input type="text" id="mat_name" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="Ex: Cimento CP-II" />
-                                                </div>
-                                                <div className="md:col-span-2">
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Qtd</label>
-                                                    <input type="number" id="mat_qty" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="0" />
-                                                </div>
-                                                <div className="md:col-span-1">
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Und</label>
-                                                    <input type="text" id="mat_unit" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="un" />
-                                                </div>
-                                                <div className="md:col-span-1">
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Custo Unit.</label>
-                                                    <input type="number" id="mat_cost" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="0.00" />
-                                                </div>
-                                                <div className="md:col-span-3">
-                                                    <button
-                                                        onClick={() => {
-                                                            const name = (document.getElementById('mat_name') as HTMLInputElement).value;
-                                                            const qty = parseFloat((document.getElementById('mat_qty') as HTMLInputElement).value) || 0;
-                                                            const unit = (document.getElementById('mat_unit') as HTMLInputElement).value || 'un';
-                                                            const cost = parseFloat((document.getElementById('mat_cost') as HTMLInputElement).value) || 0;
-                                                            if (!name) return notify("Nome obrigatório", "error");
-
-                                                            setMaterials([...materials, {
-                                                                id: db.generateId('MAT'),
-                                                                work_id: currentWork?.id || '',
-                                                                material_name: name.toUpperCase(),
-                                                                unit: unit,
-                                                                quantity: qty,
-                                                                unit_cost: cost,
-                                                                total_cost: qty * cost
-                                                            }]);
-                                                            (document.getElementById('mat_name') as HTMLInputElement).value = '';
-                                                            (document.getElementById('mat_qty') as HTMLInputElement).value = '';
-                                                            (document.getElementById('mat_unit') as HTMLInputElement).value = '';
-                                                            (document.getElementById('mat_cost') as HTMLInputElement).value = '';
-                                                        }}
-                                                        className="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 font-bold text-sm"
-                                                    >
-                                                        Adicionar Material
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
                                         <div className="space-y-2">
                                             {materials.map(m => (
                                                 <div key={m.id} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center text-sm">
@@ -1090,65 +1220,6 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 {/* LABOR TAB */}
                                 {resourceTab === 'mo' && (
                                     <div>
-                                        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-6">
-                                            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                                                <div className="md:col-span-4">
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Função</label>
-                                                    <input type="text" id="mo_role" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="Ex: Pedreiro" />
-                                                </div>
-                                                <div className="md:col-span-2">
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Tipo</label>
-                                                    <select id="mo_type" className="w-full p-2 border border-slate-200 rounded text-sm">
-                                                        <option value="Diária">Diária</option>
-                                                        <option value="Hora">Hora</option>
-                                                        <option value="Empreitada">Empreitada</option>
-                                                    </select>
-                                                </div>
-                                                <div className="md:col-span-1">
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Qtd</label>
-                                                    <input type="number" id="mo_qty" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="0" />
-                                                </div>
-                                                <div className="md:col-span-1">
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">UN</label>
-                                                    <input type="text" id="mo_un" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="un" />
-                                                </div>
-                                                <div className="md:col-span-2">
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Custo Unit.</label>
-                                                    <input type="number" id="mo_cost" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="0.00" />
-                                                </div>
-                                                <div className="md:col-span-2">
-                                                    <button
-                                                        onClick={() => {
-                                                            const role = (document.getElementById('mo_role') as HTMLInputElement).value;
-                                                            const type = (document.getElementById('mo_type') as HTMLInputElement).value as any;
-                                                            const qty = parseFloat((document.getElementById('mo_qty') as HTMLInputElement).value) || 0;
-                                                            const unit = (document.getElementById('mo_un') as HTMLInputElement).value || 'un';
-                                                            const cost = parseFloat((document.getElementById('mo_cost') as HTMLInputElement).value) || 0;
-                                                            if (!role) return notify("Função obrigatória", "error");
-
-                                                            setLabor([...labor, {
-                                                                id: db.generateId('LBR'),
-                                                                work_id: currentWork?.id || '',
-                                                                role: role.toUpperCase(),
-                                                                cost_type: type,
-                                                                unit: unit,
-                                                                quantity: qty,
-                                                                unit_cost: cost,
-                                                                charges_percent: 0,
-                                                                total_cost: qty * cost
-                                                            }]);
-                                                            (document.getElementById('mo_role') as HTMLInputElement).value = '';
-                                                            (document.getElementById('mo_qty') as HTMLInputElement).value = '';
-                                                            (document.getElementById('mo_un') as HTMLInputElement).value = '';
-                                                            (document.getElementById('mo_cost') as HTMLInputElement).value = '';
-                                                        }}
-                                                        className="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 font-bold text-sm"
-                                                    >
-                                                        Adicionar
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
                                         <div className="space-y-2">
                                             {labor.map(l => (
                                                 <div key={l.id} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center text-sm">
@@ -1251,51 +1322,6 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 {/* INDIRECTS TAB */}
                                 {resourceTab === 'indireto' && (
                                     <div>
-                                        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-6">
-                                            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                                                <div className="md:col-span-3">
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Categoria</label>
-                                                    <select id="ind_cat" className="w-full p-2 border border-slate-200 rounded text-sm">
-                                                        <option>Transporte</option>
-                                                        <option>Alimentação</option>
-                                                        <option>EPI</option>
-                                                        <option>Equipamentos</option>
-                                                        <option>Taxas</option>
-                                                        <option>Outros</option>
-                                                    </select>
-                                                </div>
-                                                <div className="md:col-span-6">
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Descrição</label>
-                                                    <input type="text" id="ind_desc" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="Ex: Combustível ida/volta" />
-                                                </div>
-                                                <div className="md:col-span-2">
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Valor</label>
-                                                    <input type="number" id="ind_val" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="0.00" />
-                                                </div>
-                                                <div className="md:col-span-1">
-                                                    <button
-                                                        onClick={() => {
-                                                            const cat = (document.getElementById('ind_cat') as HTMLInputElement).value;
-                                                            const desc = (document.getElementById('ind_desc') as HTMLInputElement).value;
-                                                            const val = parseFloat((document.getElementById('ind_val') as HTMLInputElement).value) || 0;
-
-                                                            setIndirects([...indirects, {
-                                                                id: db.generateId('IND'),
-                                                                work_id: currentWork?.id || '',
-                                                                category: cat,
-                                                                description: desc.toUpperCase(),
-                                                                value: val
-                                                            }]);
-                                                            (document.getElementById('ind_desc') as HTMLInputElement).value = '';
-                                                            (document.getElementById('ind_val') as HTMLInputElement).value = '';
-                                                        }}
-                                                        className="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 font-bold text-sm flex justify-center"
-                                                    >
-                                                        <Plus size={16} />
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
                                         <div className="space-y-2">
                                             {indirects.map(i => (
                                                 <div key={i.id} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center text-sm">
