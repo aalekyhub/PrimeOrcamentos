@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
     Building2, Users, Truck, HardHat, FileText,
     Plus, Trash2, Save, ChevronRight, Calculator,
-    PieChart, ArrowRight, DollarSign
+    PieChart, ArrowRight, DollarSign, Pencil, Check, X
 } from 'lucide-react';
 import { useNotify } from './ToastProvider';
 import { db } from '../services/db';
@@ -24,6 +24,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
     const [plans, setPlans] = useState<PlanningHeader[]>([]);
     const [activePlanId, setActivePlanId] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [editingId, setEditingId] = useState<string | null>(null);
     const { notify } = useNotify();
 
     // Active Plan Data
@@ -32,6 +33,13 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
     const [materials, setMaterials] = useState<PlannedMaterial[]>([]);
     const [labor, setLabor] = useState<PlannedLabor[]>([]);
     const [indirects, setIndirects] = useState<PlannedIndirect[]>([]);
+
+    // Edit Temp States
+    const [editDesc, setEditDesc] = useState('');
+    const [editUnit, setEditUnit] = useState('');
+    const [editQty, setEditQty] = useState(0);
+    const [editPrice1, setEditPrice1] = useState(0); // Material / Unit Price
+    const [editPrice2, setEditPrice2] = useState(0); // Labor / Extra
 
     // UI State
     const [activeTab, setActiveTab] = useState<'dados' | 'servicos' | 'recursos' | 'resumo'>('dados');
@@ -386,21 +394,111 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                 <div className="space-y-2">
                                     {services.map(svc => (
                                         <div key={svc.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex justify-between items-center group hover:border-blue-300">
-                                            <div className="flex-1">
-                                                <p className="font-bold text-slate-800">{svc.description}</p>
-                                                <p className="text-xs text-slate-500">
-                                                    {svc.quantity} {svc.unit} x (Mat: {svc.unit_material_cost.toFixed(2)} + MO: {svc.unit_labor_cost.toFixed(2)})
-                                                </p>
-                                            </div>
-                                            <div className="text-right mr-4">
-                                                <p className="text-sm font-bold text-slate-800">R$ {svc.total_cost.toFixed(2)}</p>
-                                            </div>
-                                            <button
-                                                onClick={() => setServices(services.filter(s => s.id !== svc.id))}
-                                                className="text-slate-300 hover:text-red-500 p-2"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
+                                            {editingId === svc.id ? (
+                                                <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center">
+                                                    <div className="md:col-span-4">
+                                                        <input
+                                                            type="text"
+                                                            value={editDesc}
+                                                            onChange={e => setEditDesc(e.target.value.toUpperCase())}
+                                                            className="w-full p-2 border border-slate-200 rounded text-sm font-bold"
+                                                        />
+                                                    </div>
+                                                    <div className="md:col-span-1">
+                                                        <input
+                                                            type="text"
+                                                            value={editUnit}
+                                                            onChange={e => setEditUnit(e.target.value)}
+                                                            className="w-full p-2 border border-slate-200 rounded text-sm"
+                                                        />
+                                                    </div>
+                                                    <div className="md:col-span-2">
+                                                        <input
+                                                            type="number"
+                                                            value={editQty}
+                                                            onChange={e => setEditQty(parseFloat(e.target.value) || 0)}
+                                                            className="w-full p-2 border border-slate-200 rounded text-sm"
+                                                        />
+                                                    </div>
+                                                    <div className="md:col-span-2">
+                                                        <input
+                                                            type="number"
+                                                            value={editPrice1}
+                                                            onChange={e => setEditPrice1(parseFloat(e.target.value) || 0)}
+                                                            className="w-full p-2 border border-slate-200 rounded text-sm"
+                                                            placeholder="Mat."
+                                                        />
+                                                    </div>
+                                                    <div className="md:col-span-2">
+                                                        <input
+                                                            type="number"
+                                                            value={editPrice2}
+                                                            onChange={e => setEditPrice2(parseFloat(e.target.value) || 0)}
+                                                            className="w-full p-2 border border-slate-200 rounded text-sm"
+                                                            placeholder="M.O."
+                                                        />
+                                                    </div>
+                                                    <div className="md:col-span-1 flex gap-1">
+                                                        <button
+                                                            onClick={() => {
+                                                                const updated = services.map(s => s.id === svc.id ? {
+                                                                    ...s,
+                                                                    description: editDesc,
+                                                                    unit: editUnit,
+                                                                    quantity: editQty,
+                                                                    unit_material_cost: editPrice1,
+                                                                    unit_labor_cost: editPrice2,
+                                                                    total_cost: editQty * (editPrice1 + editPrice2)
+                                                                } : s);
+                                                                setServices(updated);
+                                                                setEditingId(null);
+                                                            }}
+                                                            className="text-green-600 p-1 hover:bg-green-50 rounded"
+                                                        >
+                                                            <Check size={18} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setEditingId(null)}
+                                                            className="text-red-600 p-1 hover:bg-red-50 rounded"
+                                                        >
+                                                            <X size={18} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <div className="flex-1">
+                                                        <p className="font-bold text-slate-800">{svc.description}</p>
+                                                        <p className="text-xs text-slate-500">
+                                                            {svc.quantity} {svc.unit} x (Mat: {svc.unit_material_cost.toFixed(2)} + MO: {svc.unit_labor_cost.toFixed(2)})
+                                                        </p>
+                                                    </div>
+                                                    <div className="text-right mr-4">
+                                                        <p className="text-sm font-bold text-slate-800">R$ {svc.total_cost.toFixed(2)}</p>
+                                                    </div>
+                                                    <div className="flex gap-1">
+                                                        <button
+                                                            onClick={() => {
+                                                                setEditingId(svc.id);
+                                                                setEditDesc(svc.description);
+                                                                setEditUnit(svc.unit);
+                                                                setEditQty(svc.quantity);
+                                                                setEditPrice1(svc.unit_material_cost);
+                                                                setEditPrice2(svc.unit_labor_cost);
+                                                            }}
+                                                            className="text-slate-300 hover:text-blue-500 p-2"
+                                                        >
+                                                            <Pencil size={16} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setServices(services.filter(s => s.id !== svc.id))}
+                                                            className="text-slate-300 hover:text-red-500 p-2"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    </div>
+                                                </>
+                                            )}
                                         </div>
                                     ))}
                                     {services.length === 0 && (
@@ -481,11 +579,93 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                         <div className="space-y-2">
                                             {materials.map(m => (
                                                 <div key={m.id} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center text-sm">
-                                                    <span>{m.quantity}{m.unit} <b>{m.material_name}</b> (R$ {m.unit_cost.toFixed(2)})</span>
-                                                    <div className="flex items-center gap-4">
-                                                        <span className="font-bold">R$ {m.total_cost.toFixed(2)}</span>
-                                                        <Trash2 size={14} className="cursor-pointer text-slate-400 hover:text-red-500" onClick={() => setMaterials(materials.filter(x => x.id !== m.id))} />
-                                                    </div>
+                                                    {editingId === m.id ? (
+                                                        <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center mr-2">
+                                                            <div className="md:col-span-5">
+                                                                <input
+                                                                    type="text"
+                                                                    value={editDesc}
+                                                                    onChange={e => setEditDesc(e.target.value.toUpperCase())}
+                                                                    className="w-full p-2 border border-slate-200 rounded text-xs font-bold"
+                                                                />
+                                                            </div>
+                                                            <div className="md:col-span-2">
+                                                                <input
+                                                                    type="number"
+                                                                    value={editQty}
+                                                                    onChange={e => setEditQty(parseFloat(e.target.value) || 0)}
+                                                                    className="w-full p-2 border border-slate-200 rounded text-xs"
+                                                                />
+                                                            </div>
+                                                            <div className="md:col-span-1">
+                                                                <input
+                                                                    type="text"
+                                                                    value={editUnit}
+                                                                    onChange={e => setEditUnit(e.target.value)}
+                                                                    className="w-full p-2 border border-slate-200 rounded text-xs"
+                                                                />
+                                                            </div>
+                                                            <div className="md:col-span-3">
+                                                                <input
+                                                                    type="number"
+                                                                    value={editPrice1}
+                                                                    onChange={e => setEditPrice1(parseFloat(e.target.value) || 0)}
+                                                                    className="w-full p-2 border border-slate-200 rounded text-xs font-bold"
+                                                                    placeholder="Custo Unit."
+                                                                />
+                                                            </div>
+                                                            <div className="md:col-span-1 flex gap-1">
+                                                                <button
+                                                                    onClick={() => {
+                                                                        const updated = materials.map(item => item.id === m.id ? {
+                                                                            ...item,
+                                                                            material_name: editDesc,
+                                                                            quantity: editQty,
+                                                                            unit: editUnit,
+                                                                            unit_cost: editPrice1,
+                                                                            total_cost: editQty * editPrice1
+                                                                        } : item);
+                                                                        setMaterials(updated);
+                                                                        setEditingId(null);
+                                                                    }}
+                                                                    className="text-green-600 p-1 hover:bg-green-50 rounded"
+                                                                >
+                                                                    <Check size={16} />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => setEditingId(null)}
+                                                                    className="text-red-600 p-1 hover:bg-red-50 rounded"
+                                                                >
+                                                                    <X size={16} />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            <span>{m.quantity}{m.unit} <b>{m.material_name}</b> (R$ {m.unit_cost.toFixed(2)})</span>
+                                                            <div className="flex items-center gap-4">
+                                                                <span className="font-bold">R$ {m.total_cost.toFixed(2)}</span>
+                                                                <div className="flex gap-2">
+                                                                    <Pencil
+                                                                        size={14}
+                                                                        className="cursor-pointer text-slate-400 hover:text-blue-500"
+                                                                        onClick={() => {
+                                                                            setEditingId(m.id);
+                                                                            setEditDesc(m.material_name);
+                                                                            setEditQty(m.quantity);
+                                                                            setEditUnit(m.unit);
+                                                                            setEditPrice1(m.unit_cost);
+                                                                        }}
+                                                                    />
+                                                                    <Trash2
+                                                                        size={14}
+                                                                        className="cursor-pointer text-slate-400 hover:text-red-500"
+                                                                        onClick={() => setMaterials(materials.filter(x => x.id !== m.id))}
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        </>
+                                                    )}
                                                 </div>
                                             ))}
                                         </div>
@@ -551,11 +731,95 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                         <div className="space-y-2">
                                             {labor.map(l => (
                                                 <div key={l.id} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center text-sm">
-                                                    <span>{l.quantity} {l.cost_type}(s) de <b>{l.role}</b></span>
-                                                    <div className="flex items-center gap-4">
-                                                        <span className="font-bold">R$ {l.total_cost.toFixed(2)}</span>
-                                                        <Trash2 size={14} className="cursor-pointer text-slate-400 hover:text-red-500" onClick={() => setLabor(labor.filter(x => x.id !== l.id))} />
-                                                    </div>
+                                                    {editingId === l.id ? (
+                                                        <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center mr-2">
+                                                            <div className="md:col-span-4">
+                                                                <input
+                                                                    type="text"
+                                                                    value={editDesc}
+                                                                    onChange={e => setEditDesc(e.target.value.toUpperCase())}
+                                                                    className="w-full p-2 border border-slate-200 rounded text-xs font-bold"
+                                                                />
+                                                            </div>
+                                                            <div className="md:col-span-2">
+                                                                <select
+                                                                    value={editUnit}
+                                                                    onChange={e => setEditUnit(e.target.value)}
+                                                                    className="w-full p-2 border border-slate-200 rounded text-xs"
+                                                                >
+                                                                    <option value="Diária">Diária</option>
+                                                                    <option value="Hora">Hora</option>
+                                                                    <option value="Empreitada">Empreitada</option>
+                                                                </select>
+                                                            </div>
+                                                            <div className="md:col-span-2">
+                                                                <input
+                                                                    type="number"
+                                                                    value={editQty}
+                                                                    onChange={e => setEditQty(parseFloat(e.target.value) || 0)}
+                                                                    className="w-full p-2 border border-slate-200 rounded text-xs"
+                                                                />
+                                                            </div>
+                                                            <div className="md:col-span-3">
+                                                                <input
+                                                                    type="number"
+                                                                    value={editPrice1}
+                                                                    onChange={e => setEditPrice1(parseFloat(e.target.value) || 0)}
+                                                                    className="w-full p-2 border border-slate-200 rounded text-xs font-bold"
+                                                                />
+                                                            </div>
+                                                            <div className="md:col-span-1 flex gap-1">
+                                                                <button
+                                                                    onClick={() => {
+                                                                        const updated = labor.map(item => item.id === l.id ? {
+                                                                            ...item,
+                                                                            role: editDesc,
+                                                                            cost_type: editUnit as any,
+                                                                            quantity: editQty,
+                                                                            unit_cost: editPrice1,
+                                                                            total_cost: editQty * editPrice1
+                                                                        } : item);
+                                                                        setLabor(updated);
+                                                                        setEditingId(null);
+                                                                    }}
+                                                                    className="text-green-600 p-1 hover:bg-green-50 rounded"
+                                                                >
+                                                                    <Check size={16} />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => setEditingId(null)}
+                                                                    className="text-red-600 p-1 hover:bg-red-50 rounded"
+                                                                >
+                                                                    <X size={16} />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            <span>{l.quantity} {l.cost_type}(s) de <b>{l.role}</b></span>
+                                                            <div className="flex items-center gap-4">
+                                                                <span className="font-bold">R$ {l.total_cost.toFixed(2)}</span>
+                                                                <div className="flex gap-2">
+                                                                    <Pencil
+                                                                        size={14}
+                                                                        className="cursor-pointer text-slate-400 hover:text-blue-500"
+                                                                        onClick={() => {
+                                                                            setEditingId(l.id);
+                                                                            setEditDesc(l.role);
+                                                                            setEditUnit(l.cost_type);
+                                                                            setEditQty(l.quantity);
+                                                                            setEditPrice1(l.unit_cost);
+                                                                        }}
+                                                                    />
+                                                                    <Trash2
+                                                                        size={14}
+                                                                        className="cursor-pointer text-slate-400 hover:text-red-500"
+                                                                        onClick={() => setLabor(labor.filter(x => x.id !== l.id))}
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        </>
+                                                    )}
                                                 </div>
                                             ))}
                                         </div>
@@ -614,11 +878,87 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                         <div className="space-y-2">
                                             {indirects.map(i => (
                                                 <div key={i.id} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center text-sm">
-                                                    <span>[{i.category}] <b>{i.description}</b></span>
-                                                    <div className="flex items-center gap-4">
-                                                        <span className="font-bold">R$ {i.value.toFixed(2)}</span>
-                                                        <Trash2 size={14} className="cursor-pointer text-slate-400 hover:text-red-500" onClick={() => setIndirects(indirects.filter(x => x.id !== i.id))} />
-                                                    </div>
+                                                    {editingId === i.id ? (
+                                                        <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center mr-2">
+                                                            <div className="md:col-span-3">
+                                                                <select
+                                                                    value={editUnit}
+                                                                    onChange={e => setEditUnit(e.target.value)}
+                                                                    className="w-full p-2 border border-slate-200 rounded text-xs"
+                                                                >
+                                                                    <option>Transporte</option>
+                                                                    <option>Alimentação</option>
+                                                                    <option>EPI</option>
+                                                                    <option>Equipamentos</option>
+                                                                    <option>Taxas</option>
+                                                                    <option>Outros</option>
+                                                                </select>
+                                                            </div>
+                                                            <div className="md:col-span-6">
+                                                                <input
+                                                                    type="text"
+                                                                    value={editDesc}
+                                                                    onChange={e => setEditDesc(e.target.value.toUpperCase())}
+                                                                    className="w-full p-2 border border-slate-200 rounded text-xs font-bold"
+                                                                />
+                                                            </div>
+                                                            <div className="md:col-span-2">
+                                                                <input
+                                                                    type="number"
+                                                                    value={editPrice1}
+                                                                    onChange={e => setEditPrice1(parseFloat(e.target.value) || 0)}
+                                                                    className="w-full p-2 border border-slate-200 rounded text-xs font-bold"
+                                                                />
+                                                            </div>
+                                                            <div className="md:col-span-1 flex gap-1">
+                                                                <button
+                                                                    onClick={() => {
+                                                                        const updated = indirects.map(item => item.id === i.id ? {
+                                                                            ...item,
+                                                                            category: editUnit,
+                                                                            description: editDesc,
+                                                                            value: editPrice1
+                                                                        } : item);
+                                                                        setIndirects(updated);
+                                                                        setEditingId(null);
+                                                                    }}
+                                                                    className="text-green-600 p-1 hover:bg-green-50 rounded"
+                                                                >
+                                                                    <Check size={16} />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => setEditingId(null)}
+                                                                    className="text-red-600 p-1 hover:bg-red-50 rounded"
+                                                                >
+                                                                    <X size={16} />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            <span>[{i.category}] <b>{i.description}</b></span>
+                                                            <div className="flex items-center gap-4">
+                                                                <span className="font-bold">R$ {i.value.toFixed(2)}</span>
+                                                                <div className="flex gap-2">
+                                                                    <Pencil
+                                                                        size={14}
+                                                                        className="cursor-pointer text-slate-400 hover:text-blue-500"
+                                                                        onClick={() => {
+                                                                            setEditingId(i.id);
+                                                                            setEditUnit(i.category);
+                                                                            setEditDesc(i.description);
+                                                                            setEditPrice1(i.value);
+                                                                        }}
+                                                                    />
+                                                                    <Trash2
+                                                                        size={14}
+                                                                        className="cursor-pointer text-slate-400 hover:text-red-500"
+                                                                        onClick={() => setIndirects(indirects.filter(x => x.id !== i.id))}
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        </>
+                                                    )}
                                                 </div>
                                             ))}
                                         </div>
