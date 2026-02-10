@@ -101,17 +101,18 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
         // But usually we save on "Save".
         // Let's keep it local for now, but update the parent.
 
-        setPlans([newPlan, ...plans]);
+        if (onPlanCreated) {
+            onPlanCreated(newPlan);
+        }
+
+        // Use functional state update to prevent race conditions
+        setPlans(prev => [newPlan, ...prev]);
         setActivePlanId(newPlan.id);
         setCurrentPlan(newPlan);
         setServices([]);
         setMaterials([]);
         setLabor([]);
         setIndirects([]);
-
-        if (onPlanCreated) {
-            onPlanCreated(newPlan);
-        }
         setActiveTab('dados');
     };
 
@@ -123,10 +124,15 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
         const totalMat = materials.reduce((acc, m) => acc + (m.total_cost || 0), 0) +
             services.reduce((acc, s) => acc + (s.unit_material_cost * s.quantity), 0); // Simplified aggregation
 
-        // Update the current plan object with new totals (optional, but good for summary)
-        // For now just saving the header info
+        // DANGER: Loading list from state 'plans' might be outdated if we just created a new plan 
+        // or if multiple tabs are open. Load FRESH from DB before merging.
+        const currentLocalPlans = db.load('serviflow_plans', []) as PlanningHeader[];
+        const updatedPlans = currentLocalPlans.map(p => p.id === currentPlan.id ? currentPlan : p);
 
-        const updatedPlans = plans.map(p => p.id === currentPlan.id ? currentPlan : p);
+        // If it's a new plan not yet in the DB list, append it
+        if (!currentLocalPlans.find(p => p.id === currentPlan.id)) {
+            updatedPlans.unshift(currentPlan);
+        }
 
         // Save to DB
         await db.save('serviflow_plans', updatedPlans);

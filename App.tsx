@@ -159,6 +159,41 @@ const AppContent: React.FC = () => {
         if (cloudData.loans) {
           setLoans(cloudData.loans as Loan[]);
         }
+
+        // Merge Plans (Planning)
+        if (cloudData.plans) {
+          const localPlans = db.load('serviflow_plans', []) as any[];
+          const planMap = new Map(localPlans.map(p => [p.id, p]));
+          (cloudData.plans as any[]).forEach(p => {
+            planMap.set(p.id, p);
+          });
+          const mergedPlans = Array.from(planMap.values());
+          db.save('serviflow_plans', mergedPlans);
+        }
+
+        // Merge Works (Execution)
+        if (cloudData.works) {
+          const localWorks = db.load('serviflow_works', []) as any[];
+          const workMap = new Map(localWorks.map(w => [w.id, w]));
+          (cloudData.works as any[]).forEach(w => {
+            workMap.set(w.id, w);
+          });
+          const mergedWorks = Array.from(workMap.values());
+          db.save('serviflow_works', mergedWorks);
+        }
+
+        // Sub-items for Plan/Work (Services, Materials, etc.)
+        const subTables = [
+          'plan_services', 'plan_materials', 'plan_labor', 'plan_indirects',
+          'work_services', 'work_materials', 'work_labor', 'work_indirects'
+        ];
+
+        subTables.forEach(tableName => {
+          if (cloudData[tableName]) {
+            db.save(`serviflow_${tableName}`, cloudData[tableName]);
+          }
+        });
+
         notify("Sincronização concluída (Dados mesclados)");
       } else {
         notify("Falha ao baixar dados da nuvem.", "error");

@@ -250,7 +250,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             status: 'Em Andamento',
             start_date: new Date().toISOString()
         };
-        setWorks([newWork, ...works]);
+        // Use functional state update to prevent race conditions
+        setWorks(prev => [newWork, ...prev]);
         setActiveWorkId(newWork.id);
         setCurrentWork(newWork);
         setServices([]);
@@ -279,7 +280,15 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             // In a real app we'd update other totals too
         };
 
-        const updatedWorks = works.map(w => w.id === currentWork.id ? updatedWork : w);
+        // DANGER: Loading list from state 'works' might be outdated if we just created a new work 
+        // or if multiple tabs are open. Load FRESH from DB before merging.
+        const currentLocalWorks = db.load('serviflow_works', []) as WorkHeader[];
+        const updatedWorks = currentLocalWorks.map(w => w.id === currentWork.id ? updatedWork : w);
+
+        // If it's a new work not yet in the DB list, append it
+        if (!currentLocalWorks.find(w => w.id === currentWork.id)) {
+            updatedWorks.unshift(updatedWork);
+        }
 
         // Save to DB
         await db.save('serviflow_works', updatedWorks);
