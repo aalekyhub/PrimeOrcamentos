@@ -1229,9 +1229,9 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                     ) : (
                                                         <>
                                                             <span className="flex items-center gap-1">
-                                                                <b>{l.quantity}{l.unit || 'un'}</b>
+                                                                <b>{l.role}</b>
                                                                 <span className="text-slate-400 mx-1">|</span>
-                                                                <span>{l.role}</span>
+                                                                <span>{l.quantity}{l.unit || 'un'}</span>
                                                                 <span className="text-[10px] text-slate-400 ml-2 uppercase">({l.cost_type})</span>
                                                                 <span className="text-[10px] text-slate-400 ml-2">(R$ {l.unit_cost.toFixed(2)})</span>
                                                             </span>
