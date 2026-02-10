@@ -4,7 +4,7 @@ import html2pdf from 'html2pdf.js';
 import {
   Plus, Search, X, Trash2, Pencil, Printer, Save,
   UserPlus, Package, Type, Image as ImageIcon,
-  FileText, Upload, CheckCircle, Zap, FileDown
+  FileText, Upload, CheckCircle, Zap, FileDown, Copy, Database
 } from 'lucide-react';
 import RichTextEditor from './ui/RichTextEditor';
 import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock } from '../types';
@@ -48,6 +48,8 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
   const [taxRate, setTaxRate] = useState<string | number>(0);
   const [bdiRate, setBdiRate] = useState<string | number>(0);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importSearch, setImportSearch] = useState('');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedCatalogId, setSelectedCatalogId] = useState('');
 
@@ -602,12 +604,16 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
   };
 
   // Helper to load existing budget data into form
-  const loadBudgetToForm = (budget: ServiceOrder) => {
-    setEditingBudgetId(budget.id);
+  const loadBudgetToForm = (budget: ServiceOrder, isClone = false) => {
+    setShowImportModal(false);
+    setEditingBudgetId(isClone ? null : budget.id);
     setSelectedCustomerId(budget.customerId);
-    setItems(budget.items);
-    setProposalTitle(budget.description);
-    setDescriptionBlocks(budget.descriptionBlocks && budget.descriptionBlocks.length > 0 ? budget.descriptionBlocks : []);
+    setItems(budget.items.map(item => ({ ...item, id: db.generateId('ITEM') })));
+    setProposalTitle(isClone ? `${budget.description} (CÓPIA)` : budget.description || '');
+    setDescriptionBlocks(budget.descriptionBlocks && budget.descriptionBlocks.length > 0
+      ? budget.descriptionBlocks.map(block => ({ ...block, id: Math.random().toString(36).substr(2, 9) }))
+      : []);
+
     if (budget.paymentTerms) setPaymentTerms(budget.paymentTerms);
     if (budget.deliveryTime) setDeliveryTime(budget.deliveryTime);
     setPaymentEntryPercent(budget.paymentEntryPercent ?? 30);
@@ -617,13 +623,11 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     const t = b.taxRate ?? b.taxrate ?? b.tax_rate ?? 0;
     const d = b.bdiRate ?? b.bdirate ?? b.bdi_rate ?? 0;
 
-    // Alert to confirm Values
-    // alert(`Carregando Orçamento: ${budget.id}\nImposto encontrado: ${t}\nBDI encontrado: ${d}`);
-
     setTaxRate(t);
     setBdiRate(d);
 
     setShowForm(true);
+    if (isClone) notify("Orçamento clonado! Você está editando uma nova cópia.");
   };
 
 
@@ -739,7 +743,8 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                       <CheckCircle className="w-4 h-4" />
                     </button>
                   )}
-                  <button onClick={() => loadBudgetToForm(budget)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors"><Pencil className="w-4 h-4" /></button>
+                  <button onClick={() => loadBudgetToForm(budget, true)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Duplicar"><Copy className="w-4 h-4" /></button>
+                  <button onClick={() => loadBudgetToForm(budget)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Editar"><Pencil className="w-4 h-4" /></button>
                   <button onClick={() => handlePrintPDF(budget, 'print')} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Imprimir"><Printer className="w-4 h-4" /></button>
                   <button onClick={() => handlePrintPDF(budget, 'pdf')} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Baixar PDF"><FileDown className="w-4 h-4" /></button>
                   <button onClick={async () => {
@@ -769,7 +774,14 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                   <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em]">Configuração de Documento Comercial</p>
                 </div>
               </div>
-              <button onClick={() => setShowForm(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X className="w-6 h-6 text-slate-300" /></button>
+              <div className="flex items-center gap-4">
+                {!editingBudgetId && (
+                  <button onClick={() => setShowImportModal(true)} className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase flex items-center gap-2 transition-all">
+                    <Database className="w-4 h-4" /> Importar de Existente
+                  </button>
+                )}
+                <button onClick={() => setShowForm(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X className="w-6 h-6 text-slate-300" /></button>
+              </div>
             </div>
             <div className="flex-1 flex flex-col lg:flex-row overflow-hidden overflow-y-auto lg:overflow-y-hidden relative">
               <div className="flex-1 lg:overflow-y-auto p-6 bg-[#f8fafc] space-y-6 no-scrollbar">
@@ -996,6 +1008,62 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           totalValue={totalAmount}
           initialPercent={paymentEntryPercent}
         />
+      )}
+      {showImportModal && (
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[70] flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 flex flex-col max-h-[80vh]">
+            <div className="p-6 border-b flex justify-between items-center bg-slate-50">
+              <div>
+                <h3 className="font-black text-slate-800 uppercase tracking-tight">Importar Dados de Orçamento</h3>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Selecione um orçamento para copiar itens e descrição</p>
+              </div>
+              <button onClick={() => setShowImportModal(false)}><X className="w-5 h-5 text-slate-400 hover:text-rose-500" /></button>
+            </div>
+
+            <div className="p-4 bg-white border-b">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Pesquisar por cliente ou título..."
+                  className="w-full bg-slate-100 border-none rounded-2xl py-3 pl-12 pr-4 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500"
+                  value={importSearch}
+                  onChange={e => setImportSearch(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 space-y-2 no-scrollbar">
+              {orders
+                .filter(o =>
+                  (o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED) &&
+                  (o.customerName.toLowerCase().includes(importSearch.toLowerCase()) ||
+                    o.description.toLowerCase().includes(importSearch.toLowerCase()))
+                )
+                .map(budget => (
+                  <button
+                    key={budget.id}
+                    onClick={() => loadBudgetToForm(budget, true)}
+                    className="w-full text-left p-4 rounded-2xl border border-slate-100 hover:border-blue-400 hover:bg-blue-50 transition-all group flex justify-between items-center"
+                  >
+                    <div>
+                      <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1">{budget.id}</p>
+                      <p className="font-bold text-slate-900">{budget.description}</p>
+                      <p className="text-xs text-slate-500 font-medium">{budget.customerName}</p>
+                    </div>
+                    <Plus className="w-5 h-5 text-slate-300 group-hover:text-blue-600 transition-colors" />
+                  </button>
+                ))
+              }
+              {orders.filter(o => (o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED)).length === 0 && (
+                <div className="text-center py-12">
+                  <Database className="w-12 h-12 text-slate-200 mx-auto mb-4" />
+                  <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Nenhum orçamento disponível para importação</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
