@@ -67,7 +67,11 @@ export const db = {
   async syncFromCloud() {
     if (!supabase) return null;
 
-    const tables = ['customers', 'catalog', 'orders', 'transactions', 'users', 'loans', 'plans', 'plan_services', 'plan_materials', 'plan_labor', 'plan_indirects'];
+    const tables = [
+      'customers', 'catalog', 'orders', 'transactions', 'users', 'loans',
+      'plans', 'plan_services', 'plan_materials', 'plan_labor', 'plan_indirects',
+      'works', 'work_services', 'work_materials', 'work_labor', 'work_indirects'
+    ];
     const results: any = {};
 
     try {
