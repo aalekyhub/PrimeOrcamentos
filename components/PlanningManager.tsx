@@ -277,7 +277,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                         <input
                                             type="text"
                                             value={currentPlan.name}
-                                            onChange={e => setCurrentPlan({ ...currentPlan, name: e.target.value })}
+                                            onChange={e => setCurrentPlan({ ...currentPlan, name: e.target.value.toUpperCase() })}
                                             className="w-full p-2 border border-slate-200 rounded-lg font-semibold text-slate-700"
                                         />
                                     </div>
@@ -360,7 +360,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                     const newSvc: PlannedService = {
                                                         id: db.generateId('SVC'),
                                                         plan_id: currentPlan?.id || '',
-                                                        description: desc,
+                                                        description: desc.toUpperCase(),
                                                         unit,
                                                         quantity: qty,
                                                         unit_material_cost: mat,
@@ -461,7 +461,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             setMaterials([...materials, {
                                                                 id: db.generateId('MAT'),
                                                                 plan_id: currentPlan?.id,
-                                                                material_name: name,
+                                                                material_name: name.toUpperCase(),
                                                                 unit: unit,
                                                                 quantity: qty,
                                                                 unit_cost: cost,
@@ -531,7 +531,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             setLabor([...labor, {
                                                                 id: db.generateId('LBR'),
                                                                 plan_id: currentPlan?.id,
-                                                                role,
+                                                                role: role.toUpperCase(),
                                                                 cost_type: type,
                                                                 quantity: qty,
                                                                 unit_cost: cost,
@@ -599,7 +599,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                 id: db.generateId('IND'),
                                                                 plan_id: currentPlan?.id,
                                                                 category: cat,
-                                                                description: desc,
+                                                                description: desc.toUpperCase(),
                                                                 value: val
                                                             }]);
                                                             (document.getElementById('ind_desc') as HTMLInputElement).value = '';

@@ -477,7 +477,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         <input
                                             type="text"
                                             value={currentWork.name}
-                                            onChange={e => setCurrentWork({ ...currentWork, name: e.target.value })}
+                                            onChange={e => setCurrentWork({ ...currentWork, name: e.target.value.toUpperCase() })}
                                             className="w-full p-2 border border-slate-200 rounded-lg font-semibold text-slate-700 focus:ring-2 focus:ring-emerald-200 outline-none"
                                         />
                                     </div>
@@ -558,7 +558,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                     const newSvc: WorkService = {
                                                         id: db.generateId('WSVC'),
                                                         work_id: currentWork?.id || '',
-                                                        description: desc,
+                                                        description: desc.toUpperCase(),
                                                         unit,
                                                         quantity: qty,
                                                         unit_material_cost: mat, // Actual cost!
@@ -632,7 +632,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
                                                                 const updated = services.map(s => s.id === svc.id ? {
                                                                     ...s,
-                                                                    description: newDesc,
+                                                                    description: newDesc.toUpperCase(),
                                                                     quantity: newQty,
                                                                     unit_material_cost: newMat,
                                                                     unit_labor_cost: newLab,
@@ -748,7 +748,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             setMaterials([...materials, {
                                                                 id: db.generateId('MAT'),
                                                                 work_id: currentWork?.id || '',
-                                                                material_name: name,
+                                                                material_name: name.toUpperCase(),
                                                                 unit: unit,
                                                                 quantity: qty,
                                                                 unit_cost: cost,
@@ -814,7 +814,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
                                                                         const updated = materials.map(item => item.id === m.id ? {
                                                                             ...item,
-                                                                            material_name: newName,
+                                                                            material_name: newName.toUpperCase(),
                                                                             unit: newUnit,
                                                                             quantity: newQty,
                                                                             unit_cost: newCost,
@@ -893,7 +893,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             setLabor([...labor, {
                                                                 id: db.generateId('LBR'),
                                                                 work_id: currentWork?.id || '',
-                                                                role,
+                                                                role: role.toUpperCase(),
                                                                 cost_type: type,
                                                                 quantity: qty,
                                                                 unit_cost: cost,
@@ -962,7 +962,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
                                                                         const updated = labor.map(item => item.id === l.id ? {
                                                                             ...item,
-                                                                            role: newRole,
+                                                                            role: newRole.toUpperCase(),
                                                                             cost_type: newType,
                                                                             quantity: newQty,
                                                                             unit_cost: newCost,
@@ -1034,7 +1034,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                 id: db.generateId('IND'),
                                                                 work_id: currentWork?.id || '',
                                                                 category: cat,
-                                                                description: desc,
+                                                                description: desc.toUpperCase(),
                                                                 value: val
                                                             }]);
                                                             (document.getElementById('ind_desc') as HTMLInputElement).value = '';
@@ -1092,7 +1092,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                         const updated = indirects.map(item => item.id === i.id ? {
                                                                             ...item,
                                                                             category: newCat,
-                                                                            description: newDesc,
+                                                                            description: newDesc.toUpperCase(),
                                                                             value: newVal
                                                                         } : item);
                                                                         setIndirects(updated);
