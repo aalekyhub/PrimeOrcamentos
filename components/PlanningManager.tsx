@@ -1011,7 +1011,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                         </div>
                                                     ) : (
                                                         <>
-                                                            <span><b>{l.role}</b> | {l.quantity}{l.unit || 'un'} ({l.cost_type})</span>
+                                                            <span><b>{l.role}</b> | {l.quantity}{l.unit || 'un'}({l.cost_type})</span>
                                                             <div className="flex items-center gap-4">
                                                                 <span className="font-bold">R$ {l.total_cost.toFixed(2)}</span>
                                                                 <div className="flex gap-2">
