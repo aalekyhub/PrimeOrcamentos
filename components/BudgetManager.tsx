@@ -454,17 +454,18 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
            /* Force white background everywhere */
            html, body { background: white !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; height: auto !important; }
            
-           /* Specific overrides for PDF to ensure visibility */
-           thead { display: table-header-group !important; }
-           tfoot { display: table-footer-group !important; }
+           /* Specific overrides for PDF to ensure visibility and 25mm margins */
+           thead, tfoot { display: none !important; }
            
-           /* Reset container styles for PDF generation - using 15mm for safety */
+           /* Reset container styles for PDF generation - using 15mm for side padding */
            .a4-container { 
              width: 100% !important; 
              height: auto !important; 
              margin: 0 !important; 
              padding-left: 15mm !important; 
              padding-right: 15mm !important; 
+             padding-top: 0 !important;
+             padding-bottom: 0 !important;
              box-shadow: none !important; 
              border: none !important; 
              background: white !important;
@@ -502,7 +503,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           iframe.style.height = (contentHeight + 100) + 'px';
 
           const opt = {
-            margin: [0, 0, 0, 0], // Margins managed by .a4-container padding to match print exactly
+            margin: [25, 0, 25, 0], // Margens físicas de 25mm no PDF (Topo e Base)
             filename: `Orçamento - ${budget.id} - ${budget.description || 'Proposta'}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: {
@@ -528,7 +529,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                 pdf.setTextColor(150);
                 pdf.setFontSize(9);
                 pdf.setTextColor(150);
-                pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 8, { align: 'center' });
+                pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 15, { align: 'center' });
               }
               pdf.save(opt.filename);
             } catch (e) {

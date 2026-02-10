@@ -207,6 +207,11 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         body {font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
                         .a4-container {width: 100%; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
                         .avoid-break { break-inside: avoid; page-break-inside: avoid; }
+                        
+                        /* PDF Specific Styles (for html2pdf engine) */
+                        @media print {
+                          .a4-container { padding-top: 0 !important; padding-bottom: 0 !important; }
+                        }
                     </style>
             </head>
             <body class="no-scrollbar">
@@ -322,7 +327,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
         // PDF Generation Options
         const opt = {
-            margin: [0, 0, 0, 0], // Margins managed by .a4-container padding
+            margin: [25, 0, 25, 0], // Margens físicas no PDF para proteger cabeçalho e rodapé
             filename: `Contrato - ${order.id.replace('OS-', 'OS')} - ${order.description || 'Proposta'}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 3, useCORS: true },
@@ -336,6 +341,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         worker.style.left = '-9999px';
         worker.style.top = '0';
         worker.style.width = '210mm';
+        worker.style.height = '297mm'; // Set initial height for A4
         worker.innerHTML = html;
         document.body.appendChild(worker);
 
@@ -385,7 +391,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                 pdf.setPage(i);
                 pdf.setFontSize(10);
                 pdf.setTextColor(148, 163, 184); // #94a3b8
-                pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
+                pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 15, { align: 'center' });
             }
             pdf.save(opt.filename);
             document.body.removeChild(worker);
