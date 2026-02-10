@@ -328,7 +328,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
         const printWindow = document.createElement('div');
         printWindow.innerHTML = `
-    < div style = "font-family: sans-serif; padding: 40px; color: #334155;" >
+            <div style="font-family: sans-serif; padding: 40px; color: #334155;">
                 <div style="display: flex; justify-content: space-between; align-items: start; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 30px;">
                     <div>
                         <h1 style="margin: 0; color: #0f172a; font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.025em;">Lista de Materiais</h1>
@@ -373,8 +373,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                 <div style="margin-top: 80px; border-top: 1px dashed #e2e8f0; padding-top: 20px; text-align: center;">
                     <p style="font-size: 8px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.3em; font-weight: 800;">Gerado por Prime Orçamentos - Gestão de Obras</p>
                 </div>
-            </div >
-    `;
+            </div>
+        `;
 
         const opt = {
             margin: [10, 10, 10, 10] as [number, number, number, number],
@@ -386,8 +386,214 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
         html2pdf().set(opt).from(printWindow).save();
     };
-    const totalMaterial = useMemo(() => materials.reduce((acc, i) => acc + i.total_cost, 0), [materials]);
-    const totalLabor = useMemo(() => labor.reduce((acc, i) => acc + i.total_cost, 0), [labor]);
+
+    const handlePrintFull = () => {
+        if (!currentWork) return;
+
+        const customer = customers.find(c => c.id === currentWork.client_id);
+        const totalServices = services.reduce((acc, s) => acc + s.total_cost, 0);
+
+        const printWindow = document.createElement('div');
+        printWindow.innerHTML = `
+            <div style="font-family: sans-serif; padding: 30px; color: #1e293b; max-width: 800px; margin: 0 auto; background: white;">
+                <!-- HEADER -->
+                <div style="display: flex; justify-content: space-between; align-items: start; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 30px;">
+                    <div>
+                        <h1 style="margin: 0; color: #0f172a; font-size: 26px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.025em;">Relatório Executivo de Obra</h1>
+                        <p style="margin: 5px 0 0 0; color: #059669; font-size: 16px; font-weight: 700;">${currentWork.name.toUpperCase()}</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <p style="margin: 0; color: #94a3b8; font-size: 10px; font-weight: 800; text-transform: uppercase;">Emissão: ${new Date().toLocaleDateString('pt-BR')}</p>
+                        <p style="margin: 5px 0 0 0; color: #475569; font-size: 11px;">ID: ${currentWork.id}</p>
+                    </div>
+                </div>
+
+                <!-- INFO GRID -->
+                <div style="display: grid; grid-template-cols: 1fr 1fr; gap: 20px; margin-bottom: 30px; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                    <div>
+                        <p style="margin: 0 0 5px 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Cliente</p>
+                        <p style="margin: 0; font-size: 14px; color: #0f172a; font-weight: 600;">${customer?.name || 'Não Informado'}</p>
+                    </div>
+                    <div>
+                        <p style="margin: 0 0 5px 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Status da Obra</p>
+                        <p style="margin: 0; font-size: 14px; color: #0f172a; font-weight: 600;">${currentWork.status}</p>
+                    </div>
+                    <div style="grid-column: span 2;">
+                        <p style="margin: 0 0 5px 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Endereço da Execução</p>
+                        <p style="margin: 0; font-size: 14px; color: #0f172a; font-weight: 600;">${currentWork.address || 'Não Informado'}</p>
+                    </div>
+                </div>
+
+                <!-- SEÇÃO SERVIÇOS -->
+                ${services.length > 0 ? `
+                <div style="margin-bottom: 30px;">
+                    <h3 style="font-size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; border-left: 4px solid #10b981; padding-left: 10px; margin-bottom: 15px;">1. Serviços Executados</h3>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f1f5f9; border-bottom: 1px solid #e2e8f0;">
+                                <th style="padding: 10px; text-align: left; font-size: 10px; color: #64748b;">DESCRIÇÃO</th>
+                                <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 60px;">QTD</th>
+                                <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 40px;">UND</th>
+                                <th style="padding: 10px; text-align: right; font-size: 10px; color: #64748b; width: 100px;">TOTAL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${services.map(s => `
+                                <tr style="border-bottom: 1px solid #f1f5f9;">
+                                    <td style="padding: 10px; font-size: 11px; font-weight: 600;">${s.description}</td>
+                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${s.quantity}</td>
+                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${s.unit}</td>
+                                    <td style="padding: 10px; font-size: 11px; text-align: right; font-weight: 700;">R$ ${s.total_cost.toFixed(2)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                ` : ''}
+
+                <!-- SEÇÃO MATERIAIS -->
+                ${materials.length > 0 ? `
+                <div style="margin-bottom: 30px;">
+                    <h3 style="font-size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; border-left: 4px solid #3b82f6; padding-left: 10px; margin-bottom: 15px;">2. Insumos e Materiais</h3>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f1f5f9; border-bottom: 1px solid #e2e8f0;">
+                                <th style="padding: 10px; text-align: left; font-size: 10px; color: #64748b;">MATERIAL</th>
+                                <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 60px;">QTD</th>
+                                <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 40px;">UND</th>
+                                <th style="padding: 10px; text-align: right; font-size: 10px; color: #64748b; width: 100px;">VALOR</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${materials.map(m => `
+                                <tr style="border-bottom: 1px solid #f1f5f9;">
+                                    <td style="padding: 10px; font-size: 11px; font-weight: 600;">${m.material_name}</td>
+                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${m.quantity}</td>
+                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${m.unit}</td>
+                                    <td style="padding: 10px; font-size: 11px; text-align: right; font-weight: 700;">R$ ${m.total_cost.toFixed(2)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                ` : ''}
+
+                <!-- SEÇÃO MÃO DE OBRA -->
+                ${labor.length > 0 ? `
+                <div style="margin-bottom: 30px;">
+                    <h3 style="font-size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; border-left: 4px solid #f59e0b; padding-left: 10px; margin-bottom: 15px;">3. Recursos Humanos / Mão de Obra</h3>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f1f5f9; border-bottom: 1px solid #e2e8f0;">
+                                <th style="padding: 10px; text-align: left; font-size: 10px; color: #64748b;">FUNÇÃO / TIPO</th>
+                                <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 100px;">CARGA</th>
+                                <th style="padding: 10px; text-align: right; font-size: 10px; color: #64748b; width: 100px;">CUSTO TOTAL</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${labor.map(l => `
+                                <tr style="border-bottom: 1px solid #f1f5f9;">
+                                    <td style="padding: 10px; font-size: 11px; font-weight: 600;">${l.role}</td>
+                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${l.quantity} ${l.cost_type}</td>
+                                    <td style="padding: 10px; font-size: 11px; text-align: right; font-weight: 700;">R$ ${l.total_cost.toFixed(2)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                ` : ''}
+
+                <!-- SEÇÃO CUSTOS INDIRETOS -->
+                ${indirects.length > 0 ? `
+                <div style="margin-bottom: 30px;">
+                    <h3 style="font-size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; border-left: 4px solid #6366f1; padding-left: 10px; margin-bottom: 15px;">4. Custos Indiretos e Operacionais</h3>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f1f5f9; border-bottom: 1px solid #e2e8f0;">
+                                <th style="padding: 10px; text-align: left; font-size: 10px; color: #64748b;">CATEGORIA</th>
+                                <th style="padding: 10px; text-align: left; font-size: 10px; color: #64748b;">DESCRIÇÃO</th>
+                                <th style="padding: 10px; text-align: right; font-size: 10px; color: #64748b; width: 120px;">VALOR</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${indirects.map(i => `
+                                <tr style="border-bottom: 1px solid #f1f5f9;">
+                                    <td style="padding: 10px; font-size: 11px; font-weight: 600;">${i.category}</td>
+                                    <td style="padding: 10px; font-size: 11px;">${i.description}</td>
+                                    <td style="padding: 10px; font-size: 11px; text-align: right; font-weight: 700;">R$ ${i.value.toFixed(2)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                ` : ''}
+
+                <!-- PAGE BREAK FOR SUMMARY IF NEEDED -->
+                <div style="page-break-before: always;"></div>
+
+                <!-- RESUMO FINANCEIRO FINAL -->
+                <div style="margin-top: 20px;">
+                    <h3 style="font-size: 14px; font-weight: 800; color: #0f172a; text-transform: uppercase; margin-bottom: 20px; text-align: center;">Resumo Financeiro Consolidado</h3>
+                    
+                    <div style="background: #0f172a; color: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
+                        <div style="display: grid; grid-template-cols: 1fr 1fr; gap: 20px; border-bottom: 1px solid #334155; padding-bottom: 20px; margin-bottom: 20px;">
+                            <div>
+                                <p style="margin: 0; font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">Total em Serviços</p>
+                                <p style="margin: 5px 0 0 0; font-size: 18px; font-weight: 700;">R$ ${totalServices.toFixed(2)}</p>
+                            </div>
+                            <div>
+                                <p style="margin: 0; font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">Materiais (Adicionais)</p>
+                                <p style="margin: 5px 0 0 0; font-size: 18px; font-weight: 700;">R$ ${materials.reduce((acc, m) => acc + m.total_cost, 0).toFixed(2)}</p>
+                            </div>
+                            <div>
+                                <p style="margin: 0; font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">Mão de Obra (Adicional)</p>
+                                <p style="margin: 5px 0 0 0; font-size: 18px; font-weight: 700;">R$ ${labor.reduce((acc, l) => acc + l.total_cost, 0).toFixed(2)}</p>
+                            </div>
+                            <div>
+                                <p style="margin: 0; font-size: 10px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">Custos Indiretos</p>
+                                <p style="margin: 5px 0 0 0; font-size: 18px; font-weight: 700;">R$ ${totalIndirect.toFixed(2)}</p>
+                            </div>
+                        </div>
+                        
+                        <div style="text-align: right;">
+                            <p style="margin: 0; font-size: 12px; color: #10b981; font-weight: 800; text-transform: uppercase;">Investimento Total Realizado</p>
+                            <p style="margin: 5px 0 0 0; font-size: 36px; font-weight: 800; color: #10b981;">R$ ${(totalServices + materials.reduce((acc, m) => acc + m.total_cost, 0) + labor.reduce((acc, l) => acc + l.total_cost, 0) + totalIndirect).toFixed(2)}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FOOTER -->
+                <div style="margin-top: 100px; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 20px;">
+                    <p style="margin: 0; font-size: 9px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.2em; font-weight: 700;">Este documento é um registro de custos parciais da execução da obra.</p>
+                    <p style="margin: 10px 0 0 0; font-size: 10px; color: #64748b; font-weight: 800;">PRIME ORÇAMENTOS - GESTÃO DE OBRAS</p>
+                </div>
+            </div>
+        `;
+
+        const opt = {
+            margin: [10, 10, 10, 10] as [number, number, number, number],
+            filename: `Relatorio_Obra_${currentWork.name.replace(/\s+/g, '_')}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 } as any,
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } as any,
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        };
+
+        html2pdf().set(opt).from(printWindow).save();
+    };
+
+    const totalMaterial = useMemo(() => {
+        const fromMats = materials.reduce((acc, i) => acc + i.total_cost, 0);
+        const fromSvcs = services.reduce((acc, s) => acc + (s.unit_material_cost * s.quantity), 0);
+        return fromMats + fromSvcs;
+    }, [materials, services]);
+
+    const totalLabor = useMemo(() => {
+        const fromLabor = labor.reduce((acc, i) => acc + i.total_cost, 0);
+        const fromSvcs = services.reduce((acc, s) => acc + (s.unit_labor_cost * s.quantity), 0);
+        return fromLabor + fromSvcs;
+    }, [labor, services]);
+
     const totalIndirect = useMemo(() => indirects.reduce((acc, i) => acc + i.value, 0), [indirects]);
     const totalGeneral = totalMaterial + totalLabor + totalIndirect;
 
@@ -1166,6 +1372,16 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Custos Indiretos</span>
                                         <span className="text-2xl font-bold text-slate-800">R$ {totalIndirect.toFixed(2)}</span>
                                     </div>
+                                </div>
+
+                                <div className="flex justify-end gap-2">
+                                    <button
+                                        onClick={handlePrintFull}
+                                        className="bg-white border border-slate-200 text-slate-600 px-6 py-3 rounded-xl text-sm font-bold flex items-center gap-3 hover:bg-slate-50 transition-all shadow-sm group"
+                                    >
+                                        <Printer size={20} className="text-emerald-600 group-hover:scale-110 transition-transform" />
+                                        Imprimir Relatório Completo da Obra
+                                    </button>
                                 </div>
 
                                 <div className="bg-emerald-900 text-white p-8 rounded-2xl flex justify-between items-center shadow-xl">
