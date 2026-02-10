@@ -1189,7 +1189,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
 
                                 <div className="bg-slate-900 text-white p-8 rounded-2xl flex justify-between items-center shadow-xl">
                                     <div>
-                                        <p className="text-slate-400 text-sm font-bold uppercase tracking-widest mb-1">Custo Real Total</p>
+                                        <p className="text-slate-400 text-sm font-bold uppercase tracking-widest mb-1">Custo Previsto Total</p>
                                         <p className="text-4xl font-bold">R$ {totalGeneral.toFixed(2)}</p>
                                     </div>
                                     <button

@@ -618,7 +618,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-emerald-400 transition-all group relative">
                                 <div className="flex justify-between items-start mb-2">
                                     <span className="font-bold text-lg text-slate-800">{work.name}</span>
-                                    <span className={`px - 2 py - 1 rounded text - xs font - bold ${work.status === 'Concluída' ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-50 text-orange-700'} `}>
+                                    <span className={`px-2 py-1 rounded text-xs font-bold ${work.status === 'Concluída' ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-50 text-orange-700'}`}>
                                         {work.status}
                                     </span>
                                 </div>
@@ -680,7 +680,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                     <div className="flex border-b border-slate-200 px-6">
                         {[
                             { id: 'dados', label: 'Dados da Obra', icon: FileText },
-                            { id: 'servicos', label: 'Serviços Realizados', icon: Building2 },
+                            { id: 'servicos', label: 'Serviços', icon: Building2 },
                             { id: 'recursos', label: 'Gastos Detalhados', icon: Truck },
                             { id: 'resumo', label: 'Resumo de Custo', icon: PieChart },
                         ].map(tab => (
@@ -688,8 +688,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 key={tab.id}
                                 type="button"
                                 onClick={() => setActiveTab(tab.id as any)}
-                                className={`px - 6 py - 4 text - sm font - bold flex items - center gap - 2 border - b - 2 transition - colors ${activeTab === tab.id ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-500 hover:text-slate-700'
-                                    } `}
+                                className={`px-6 py-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors ${activeTab === tab.id ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
                             >
                                 <tab.icon size={16} /> {tab.label}
                             </button>
@@ -1361,15 +1360,15 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                             <div className="max-w-4xl mx-auto space-y-6">
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                                        <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Gasto com Materiais</span>
+                                        <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Materiais</span>
                                         <span className="text-2xl font-bold text-slate-800">R$ {totalMaterial.toFixed(2)}</span>
                                     </div>
                                     <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                                        <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Gasto com Mão de Obra</span>
+                                        <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Mão de Obra</span>
                                         <span className="text-2xl font-bold text-slate-800">R$ {totalLabor.toFixed(2)}</span>
                                     </div>
                                     <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                                        <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Custos Indiretos</span>
+                                        <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Indiretos</span>
                                         <span className="text-2xl font-bold text-slate-800">R$ {totalIndirect.toFixed(2)}</span>
                                     </div>
                                 </div>
