@@ -434,7 +434,11 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Qtd</label>
                                                     <input type="number" id="mat_qty" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="0" />
                                                 </div>
-                                                <div className="md:col-span-2">
+                                                <div className="md:col-span-1">
+                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Und</label>
+                                                    <input type="text" id="mat_unit" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="un" />
+                                                </div>
+                                                <div className="md:col-span-1">
                                                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Custo Unit.</label>
                                                     <input type="number" id="mat_cost" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="0.00" />
                                                 </div>
@@ -444,6 +448,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                         onClick={() => {
                                                             const name = (document.getElementById('mat_name') as HTMLInputElement).value;
                                                             const qty = parseFloat((document.getElementById('mat_qty') as HTMLInputElement).value) || 0;
+                                                            const unit = (document.getElementById('mat_unit') as HTMLInputElement).value || 'un';
                                                             const cost = parseFloat((document.getElementById('mat_cost') as HTMLInputElement).value) || 0;
                                                             if (!name) return notify("Nome obrigatório", "error");
 
@@ -451,12 +456,14 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                 id: db.generateId('MAT'),
                                                                 plan_id: currentPlan?.id,
                                                                 material_name: name,
+                                                                unit: unit,
                                                                 quantity: qty,
                                                                 unit_cost: cost,
                                                                 total_cost: qty * cost
                                                             }]);
                                                             (document.getElementById('mat_name') as HTMLInputElement).value = '';
                                                             (document.getElementById('mat_qty') as HTMLInputElement).value = '';
+                                                            (document.getElementById('mat_unit') as HTMLInputElement).value = '';
                                                             (document.getElementById('mat_cost') as HTMLInputElement).value = '';
                                                         }}
                                                         className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-bold text-sm"
@@ -469,7 +476,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                         <div className="space-y-2">
                                             {materials.map(m => (
                                                 <div key={m.id} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center text-sm">
-                                                    <span>{m.quantity}x <b>{m.material_name}</b> (R$ {m.unit_cost.toFixed(2)})</span>
+                                                    <span>{m.quantity}{m.unit} <b>{m.material_name}</b> (R$ {m.unit_cost.toFixed(2)})</span>
                                                     <div className="flex items-center gap-4">
                                                         <span className="font-bold">R$ {m.total_cost.toFixed(2)}</span>
                                                         <Trash2 size={14} className="cursor-pointer text-slate-400 hover:text-red-500" onClick={() => setMaterials(materials.filter(x => x.id !== m.id))} />

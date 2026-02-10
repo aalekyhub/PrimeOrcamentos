@@ -155,6 +155,7 @@ export interface PlannedMaterial {
   plan_id?: string; // Link to plan
   plan_services_id?: string; // Optional link to a specific service
   material_name: string;
+  unit: string; // Adicionado
   quantity: number;
   unit_cost: number;
   supplier?: string;
@@ -219,6 +220,7 @@ export interface WorkMaterial {
   work_id?: string; // Link to Work
   work_services_id?: string;
   material_name: string;
+  unit: string; // Adicionado
   quantity: number;
   unit_cost: number;
   supplier?: string;

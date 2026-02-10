@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import html2pdf from 'html2pdf.js';
 import {
     Building2, Users, Truck, HardHat, FileText,
     Plus, Trash2, Save, ChevronRight, Calculator,
-    PieChart, ArrowRight, DollarSign, Calendar, Pencil, Check, X
+    PieChart, ArrowRight, DollarSign, Calendar, Pencil, Check, X, Printer
 } from 'lucide-react';
 import { useNotify } from './ToastProvider';
 import { db } from '../services/db';
@@ -159,6 +160,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                 id: db.generateId('WMAT'),
                 work_id: workId,
                 material_name: m.material_name,
+                unit: m.unit || 'un',
                 quantity: 0,
                 unit_cost: 0,
                 total_cost: 0
@@ -289,7 +291,69 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         setLoading(false);
     };
 
-    // Calculations
+    const handlePrintMaterials = () => {
+        if (!currentWork || materials.length === 0) return;
+
+        const printWindow = document.createElement('div');
+        printWindow.innerHTML = `
+    < div style = "font-family: sans-serif; padding: 40px; color: #334155;" >
+                <div style="display: flex; justify-content: space-between; align-items: start; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 30px;">
+                    <div>
+                        <h1 style="margin: 0; color: #0f172a; font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.025em;">Lista de Materiais</h1>
+                        <p style="margin: 5px 0 0 0; color: #64748b; font-size: 14px; font-weight: 700;">OBRA: ${currentWork.name.toUpperCase()}</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <p style="margin: 0; color: #94a3b8; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">Documento de Obra</p>
+                        <p style="margin: 5px 0 0 0; color: #475569; font-size: 12px; font-weight: 600;">Data: ${new Date().toLocaleDateString('pt-BR')}</p>
+                    </div>
+                </div>
+
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                    <thead>
+                        <tr style="background-color: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+                            <th style="padding: 12px; text-align: left; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; width: 60px;">Qtd</th>
+                            <th style="padding: 12px; text-align: left; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; width: 60px;">Und</th>
+                            <th style="padding: 12px; text-align: left; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Descrição do Material</th>
+                            <th style="padding: 12px; text-align: right; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; width: 100px;">Unitário</th>
+                            <th style="padding: 12px; text-align: right; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; width: 120px;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${materials.map(m => `
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 12px; font-size: 12px; color: #334155; font-weight: 600;">${m.quantity}</td>
+                                <td style="padding: 12px; font-size: 12px; color: #64748b;">${m.unit}</td>
+                                <td style="padding: 12px; font-size: 12px; color: #0f172a; font-weight: 700;">${m.material_name}</td>
+                                <td style="padding: 12px; font-size: 12px; color: #64748b; text-align: right;">R$ ${m.unit_cost.toFixed(2)}</td>
+                                <td style="padding: 12px; font-size: 12px; color: #0f172a; font-weight: 700; text-align: right;">R$ ${m.total_cost.toFixed(2)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+
+                <div style="display: flex; justify-content: flex-end;">
+                    <div style="background-color: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; min-width: 250px; text-align: right;">
+                        <p style="margin: 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 0.05em;">Total Investido em Materiais</p>
+                        <p style="margin: 0; font-size: 24px; font-weight: 800; color: #059669;">R$ ${totalMaterial.toFixed(2)}</p>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 80px; border-top: 1px dashed #e2e8f0; padding-top: 20px; text-align: center;">
+                    <p style="font-size: 8px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.3em; font-weight: 800;">Gerado por Prime Orçamentos - Gestão de Obras</p>
+                </div>
+            </div >
+    `;
+
+        const opt = {
+            margin: [10, 10, 10, 10] as [number, number, number, number],
+            filename: `Material_Obra_${currentWork.name.replace(/\s+/g, '_')}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 } as any,
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } as any
+        };
+
+        html2pdf().set(opt).from(printWindow).save();
+    };
     const totalMaterial = useMemo(() => materials.reduce((acc, i) => acc + i.total_cost, 0), [materials]);
     const totalLabor = useMemo(() => labor.reduce((acc, i) => acc + i.total_cost, 0), [labor]);
     const totalIndirect = useMemo(() => indirects.reduce((acc, i) => acc + i.value, 0), [indirects]);
@@ -316,7 +380,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-emerald-400 transition-all group relative">
                                 <div className="flex justify-between items-start mb-2">
                                     <span className="font-bold text-lg text-slate-800">{work.name}</span>
-                                    <span className={`px-2 py-1 rounded text-xs font-bold ${work.status === 'Concluída' ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-50 text-orange-700'}`}>
+                                    <span className={`px - 2 py - 1 rounded text - xs font - bold ${work.status === 'Concluída' ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-50 text-orange-700'} `}>
                                         {work.status}
                                     </span>
                                 </div>
@@ -386,8 +450,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 key={tab.id}
                                 type="button"
                                 onClick={() => setActiveTab(tab.id as any)}
-                                className={`px-6 py-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors ${activeTab === tab.id ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-500 hover:text-slate-700'
-                                    }`}
+                                className={`px - 6 py - 4 text - sm font - bold flex items - center gap - 2 border - b - 2 transition - colors ${activeTab === tab.id ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-500 hover:text-slate-700'
+                                    } `}
                             >
                                 <tab.icon size={16} /> {tab.label}
                             </button>
@@ -519,7 +583,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         <input
                                                             className="w-full text-xs p-1 border rounded"
                                                             defaultValue={svc.description}
-                                                            id={`edit_desc_${svc.id}`}
+                                                            id={`edit_desc_${svc.id} `}
                                                         />
                                                     </div>
                                                     <div className="col-span-2">
@@ -528,7 +592,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             className="w-full text-xs p-1 border rounded"
                                                             defaultValue={svc.quantity}
                                                             placeholder="Qtd"
-                                                            id={`edit_qty_${svc.id}`}
+                                                            id={`edit_qty_${svc.id} `}
                                                         />
                                                     </div>
                                                     <div className="col-span-2">
@@ -537,7 +601,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             className="w-full text-xs p-1 border rounded"
                                                             defaultValue={svc.unit_material_cost}
                                                             placeholder="Mat"
-                                                            id={`edit_mat_${svc.id}`}
+                                                            id={`edit_mat_${svc.id} `}
                                                         />
                                                     </div>
                                                     <div className="col-span-2">
@@ -546,16 +610,16 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             className="w-full text-xs p-1 border rounded"
                                                             defaultValue={svc.unit_labor_cost}
                                                             placeholder="M.O."
-                                                            id={`edit_lab_${svc.id}`}
+                                                            id={`edit_lab_${svc.id} `}
                                                         />
                                                     </div>
                                                     <div className="col-span-2 flex gap-1 justify-end">
                                                         <button
                                                             onClick={() => {
-                                                                const newDesc = (document.getElementById(`edit_desc_${svc.id}`) as HTMLInputElement).value;
-                                                                const newQty = parseFloat((document.getElementById(`edit_qty_${svc.id}`) as HTMLInputElement).value) || 0;
-                                                                const newMat = parseFloat((document.getElementById(`edit_mat_${svc.id}`) as HTMLInputElement).value) || 0;
-                                                                const newLab = parseFloat((document.getElementById(`edit_lab_${svc.id}`) as HTMLInputElement).value) || 0;
+                                                                const newDesc = (document.getElementById(`edit_desc_${svc.id} `) as HTMLInputElement).value;
+                                                                const newQty = parseFloat((document.getElementById(`edit_qty_${svc.id} `) as HTMLInputElement).value) || 0;
+                                                                const newMat = parseFloat((document.getElementById(`edit_mat_${svc.id} `) as HTMLInputElement).value) || 0;
+                                                                const newLab = parseFloat((document.getElementById(`edit_lab_${svc.id} `) as HTMLInputElement).value) || 0;
 
                                                                 const updated = services.map(s => s.id === svc.id ? {
                                                                     ...s,
@@ -626,14 +690,25 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         {activeTab === 'recursos' && (
                             <div className="max-w-4xl mx-auto">
                                 <div className="flex gap-2 mb-6 justify-center">
-                                    <button onClick={() => setResourceTab('material')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${resourceTab === 'material' ? 'bg-emerald-800 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-emerald-50'}`}>Materiais</button>
-                                    <button onClick={() => setResourceTab('mo')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${resourceTab === 'mo' ? 'bg-emerald-800 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-emerald-50'}`}>Mão de Obra</button>
-                                    <button onClick={() => setResourceTab('indireto')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${resourceTab === 'indireto' ? 'bg-emerald-800 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-emerald-50'}`}>Indiretos</button>
+                                    <button onClick={() => setResourceTab('material')} className={`px - 4 py - 1.5 rounded - full text - xs font - bold transition - all ${resourceTab === 'material' ? 'bg-emerald-800 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-emerald-50'} `}>Materiais</button>
+                                    <button onClick={() => setResourceTab('mo')} className={`px - 4 py - 1.5 rounded - full text - xs font - bold transition - all ${resourceTab === 'mo' ? 'bg-emerald-800 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-emerald-50'} `}>Mão de Obra</button>
+                                    <button onClick={() => setResourceTab('indireto')} className={`px - 4 py - 1.5 rounded - full text - xs font - bold transition - all ${resourceTab === 'indireto' ? 'bg-emerald-800 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-emerald-50'} `}>Indiretos</button>
                                 </div>
 
-                                {/* MATERIAL TAB */}
+                                {/* MATERIAIS CABEÇALHO COM BOTÃO IMPRIMIR */}
                                 {resourceTab === 'material' && (
                                     <div>
+                                        <div className="flex justify-between items-center mb-4">
+                                            <h3 className="font-bold text-slate-800 flex items-center gap-2"><Truck size={18} /> Materiais da Obra</h3>
+                                            {materials.length > 0 && (
+                                                <button
+                                                    onClick={handlePrintMaterials}
+                                                    className="bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 hover:bg-slate-50 transition-all shadow-sm"
+                                                >
+                                                    <Printer size={16} /> Imprimir Lista
+                                                </button>
+                                            )}
+                                        </div>
                                         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-6">
                                             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                                 <div className="md:col-span-5">
@@ -644,7 +719,11 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Qtd</label>
                                                     <input type="number" id="mat_qty" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="0" />
                                                 </div>
-                                                <div className="md:col-span-2">
+                                                <div className="md:col-span-1">
+                                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Und</label>
+                                                    <input type="text" id="mat_unit" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="un" />
+                                                </div>
+                                                <div className="md:col-span-1">
                                                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Custo Unit.</label>
                                                     <input type="number" id="mat_cost" className="w-full p-2 border border-slate-200 rounded text-sm" placeholder="0.00" />
                                                 </div>
@@ -653,6 +732,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         onClick={() => {
                                                             const name = (document.getElementById('mat_name') as HTMLInputElement).value;
                                                             const qty = parseFloat((document.getElementById('mat_qty') as HTMLInputElement).value) || 0;
+                                                            const unit = (document.getElementById('mat_unit') as HTMLInputElement).value || 'un';
                                                             const cost = parseFloat((document.getElementById('mat_cost') as HTMLInputElement).value) || 0;
                                                             if (!name) return notify("Nome obrigatório", "error");
 
@@ -660,12 +740,14 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                 id: db.generateId('MAT'),
                                                                 work_id: currentWork?.id || '',
                                                                 material_name: name,
+                                                                unit: unit,
                                                                 quantity: qty,
                                                                 unit_cost: cost,
                                                                 total_cost: qty * cost
                                                             }]);
                                                             (document.getElementById('mat_name') as HTMLInputElement).value = '';
                                                             (document.getElementById('mat_qty') as HTMLInputElement).value = '';
+                                                            (document.getElementById('mat_unit') as HTMLInputElement).value = '';
                                                             (document.getElementById('mat_cost') as HTMLInputElement).value = '';
                                                         }}
                                                         className="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 font-bold text-sm"
@@ -684,7 +766,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                 <input
                                                                     className="w-full text-xs p-1 border rounded"
                                                                     defaultValue={m.material_name}
-                                                                    id={`edit_mname_${m.id}`}
+                                                                    id={`edit_mname_${m.id} `}
                                                                 />
                                                             </div>
                                                             <div className="col-span-2">
@@ -693,28 +775,38 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                     className="w-full text-xs p-1 border rounded"
                                                                     defaultValue={m.quantity}
                                                                     placeholder="Qtd"
-                                                                    id={`edit_mqty_${m.id}`}
+                                                                    id={`edit_mqty_${m.id} `}
                                                                 />
                                                             </div>
                                                             <div className="col-span-2">
+                                                                <input
+                                                                    className="w-full text-xs p-1 border rounded"
+                                                                    defaultValue={m.unit}
+                                                                    placeholder="Und"
+                                                                    id={`edit_munit_${m.id} `}
+                                                                />
+                                                            </div>
+                                                            <div className="col-span-1">
                                                                 <input
                                                                     type="number"
                                                                     className="w-full text-xs p-1 border rounded"
                                                                     defaultValue={m.unit_cost}
                                                                     placeholder="Unit"
-                                                                    id={`edit_mcost_${m.id}`}
+                                                                    id={`edit_mcost_${m.id} `}
                                                                 />
                                                             </div>
-                                                            <div className="col-span-3 flex gap-1 justify-end">
+                                                            <div className="col-span-2 flex gap-1 justify-end">
                                                                 <button
                                                                     onClick={() => {
-                                                                        const newName = (document.getElementById(`edit_mname_${m.id}`) as HTMLInputElement).value;
-                                                                        const newQty = parseFloat((document.getElementById(`edit_mqty_${m.id}`) as HTMLInputElement).value) || 0;
-                                                                        const newCost = parseFloat((document.getElementById(`edit_mcost_${m.id}`) as HTMLInputElement).value) || 0;
+                                                                        const newName = (document.getElementById(`edit_mname_${m.id} `) as HTMLInputElement).value;
+                                                                        const newQty = parseFloat((document.getElementById(`edit_mqty_${m.id} `) as HTMLInputElement).value) || 0;
+                                                                        const newUnit = (document.getElementById(`edit_munit_${m.id} `) as HTMLInputElement).value || 'un';
+                                                                        const newCost = parseFloat((document.getElementById(`edit_mcost_${m.id} `) as HTMLInputElement).value) || 0;
 
                                                                         const updated = materials.map(item => item.id === m.id ? {
                                                                             ...item,
                                                                             material_name: newName,
+                                                                            unit: newUnit,
                                                                             quantity: newQty,
                                                                             unit_cost: newCost,
                                                                             total_cost: newQty * newCost
@@ -736,7 +828,12 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         </div>
                                                     ) : (
                                                         <>
-                                                            <span>{m.quantity}x <b>{m.material_name}</b> (R$ {m.unit_cost.toFixed(2)})</span>
+                                                            <span className="flex items-center gap-1">
+                                                                <b>{m.quantity}{m.unit}</b>
+                                                                <span className="text-slate-400 mx-1">|</span>
+                                                                <span>{m.material_name}</span>
+                                                                <span className="text-[10px] text-slate-400 ml-2">(R$ {m.unit_cost.toFixed(2)})</span>
+                                                            </span>
                                                             <div className="flex items-center gap-4">
                                                                 <span className="font-bold">R$ {m.total_cost.toFixed(2)}</span>
                                                                 <Pencil size={14} className="cursor-pointer text-blue-400 hover:text-blue-600" onClick={() => setEditingId(m.id)} />
@@ -814,14 +911,14 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                 <input
                                                                     className="w-full text-xs p-1 border rounded"
                                                                     defaultValue={l.role}
-                                                                    id={`edit_lrole_${l.id}`}
+                                                                    id={`edit_lrole_${l.id} `}
                                                                 />
                                                             </div>
                                                             <div className="col-span-2">
                                                                 <select
                                                                     className="w-full text-xs p-1 border rounded"
                                                                     defaultValue={l.cost_type}
-                                                                    id={`edit_ltype_${l.id}`}
+                                                                    id={`edit_ltype_${l.id} `}
                                                                 >
                                                                     <option value="Diária">Diária</option>
                                                                     <option value="Hora">Hora</option>
@@ -834,7 +931,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                     className="w-full text-xs p-1 border rounded"
                                                                     defaultValue={l.quantity}
                                                                     placeholder="Qtd"
-                                                                    id={`edit_lqty_${l.id}`}
+                                                                    id={`edit_lqty_${l.id} `}
                                                                 />
                                                             </div>
                                                             <div className="col-span-2">
@@ -843,16 +940,16 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                     className="w-full text-xs p-1 border rounded"
                                                                     defaultValue={l.unit_cost}
                                                                     placeholder="Unit"
-                                                                    id={`edit_lcost_${l.id}`}
+                                                                    id={`edit_lcost_${l.id} `}
                                                                 />
                                                             </div>
                                                             <div className="col-span-2 flex gap-1 justify-end">
                                                                 <button
                                                                     onClick={() => {
-                                                                        const newRole = (document.getElementById(`edit_lrole_${l.id}`) as HTMLInputElement).value;
-                                                                        const newType = (document.getElementById(`edit_ltype_${l.id}`) as HTMLInputElement).value as any;
-                                                                        const newQty = parseFloat((document.getElementById(`edit_lqty_${l.id}`) as HTMLInputElement).value) || 0;
-                                                                        const newCost = parseFloat((document.getElementById(`edit_lcost_${l.id}`) as HTMLInputElement).value) || 0;
+                                                                        const newRole = (document.getElementById(`edit_lrole_${l.id} `) as HTMLInputElement).value;
+                                                                        const newType = (document.getElementById(`edit_ltype_${l.id} `) as HTMLInputElement).value as any;
+                                                                        const newQty = parseFloat((document.getElementById(`edit_lqty_${l.id} `) as HTMLInputElement).value) || 0;
+                                                                        const newCost = parseFloat((document.getElementById(`edit_lcost_${l.id} `) as HTMLInputElement).value) || 0;
 
                                                                         const updated = labor.map(item => item.id === l.id ? {
                                                                             ...item,
@@ -950,7 +1047,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                 <select
                                                                     className="w-full text-xs p-1 border rounded"
                                                                     defaultValue={i.category}
-                                                                    id={`edit_icat_${i.id}`}
+                                                                    id={`edit_icat_${i.id} `}
                                                                 >
                                                                     <option>Transporte</option>
                                                                     <option>Alimentação</option>
@@ -964,7 +1061,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                 <input
                                                                     className="w-full text-xs p-1 border rounded"
                                                                     defaultValue={i.description}
-                                                                    id={`edit_idesc_${i.id}`}
+                                                                    id={`edit_idesc_${i.id} `}
                                                                 />
                                                             </div>
                                                             <div className="col-span-2">
@@ -973,15 +1070,15 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                     className="w-full text-xs p-1 border rounded"
                                                                     defaultValue={i.value}
                                                                     placeholder="Valor"
-                                                                    id={`edit_ival_${i.id}`}
+                                                                    id={`edit_ival_${i.id} `}
                                                                 />
                                                             </div>
                                                             <div className="col-span-1 flex gap-1 justify-end">
                                                                 <button
                                                                     onClick={() => {
-                                                                        const newCat = (document.getElementById(`edit_icat_${i.id}`) as HTMLInputElement).value;
-                                                                        const newDesc = (document.getElementById(`edit_idesc_${i.id}`) as HTMLInputElement).value;
-                                                                        const newVal = parseFloat((document.getElementById(`edit_ival_${i.id}`) as HTMLInputElement).value) || 0;
+                                                                        const newCat = (document.getElementById(`edit_icat_${i.id} `) as HTMLInputElement).value;
+                                                                        const newDesc = (document.getElementById(`edit_idesc_${i.id} `) as HTMLInputElement).value;
+                                                                        const newVal = parseFloat((document.getElementById(`edit_ival_${i.id} `) as HTMLInputElement).value) || 0;
 
                                                                         const updated = indirects.map(item => item.id === i.id ? {
                                                                             ...item,
