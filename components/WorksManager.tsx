@@ -1068,11 +1068,11 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         </div>
                                                     ) : (
                                                         <>
-                                                            <span className="flex items-center gap-1">
+                                                            <span className="flex items-center">
                                                                 <b>{m.material_name}</b>
-                                                                <span className="text-slate-400 mx-1">|</span>
+                                                                <span className="text-slate-400 mx-2">|</span>
+                                                                <span className="text-[10px] text-slate-400 mr-2">(R$ {m.unit_cost.toFixed(2)})</span>
                                                                 <span>{m.quantity}{m.unit}</span>
-                                                                <span className="text-[10px] text-slate-400 ml-2">(R$ {m.unit_cost.toFixed(2)})</span>
                                                             </span>
                                                             <div className="flex items-center gap-4">
                                                                 <span className="font-bold">R$ {m.total_cost.toFixed(2)}</span>
@@ -1231,7 +1231,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             <span className="flex items-center">
                                                                 <b>{l.role}</b>
                                                                 <span className="text-slate-400 mx-2">|</span>
-                                                                <span>{l.quantity}{l.unit || 'un'}({l.cost_type})</span>
+                                                                <span className="text-[10px] text-slate-400 mr-2">({l.cost_type})</span>
+                                                                <span>{l.quantity}{l.unit || 'un'}</span>
                                                                 <span className="text-[10px] text-slate-400 ml-2">(R$ {l.unit_cost.toFixed(2)})</span>
                                                             </span>
                                                             <div className="flex items-center gap-4">
