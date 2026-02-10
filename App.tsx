@@ -189,8 +189,14 @@ const AppContent: React.FC = () => {
         ];
 
         subTables.forEach(tableName => {
-          if (cloudData[tableName]) {
-            db.save(`serviflow_${tableName}`, cloudData[tableName]);
+          if (cloudData[tableName] && (cloudData[tableName] as any[]).length > 0) {
+            const localData = db.load(`serviflow_${tableName}`, []) as any[];
+            const itemMap = new Map<string, any>(localData.map(item => [item.id, item]));
+            (cloudData[tableName] as any[]).forEach(item => {
+              itemMap.set(item.id, item);
+            });
+            const merged = Array.from(itemMap.values());
+            db.save(`serviflow_${tableName}`, merged);
           }
         });
 

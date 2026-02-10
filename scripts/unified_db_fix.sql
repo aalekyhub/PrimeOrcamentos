@@ -1,20 +1,21 @@
--- SCRIPT UNIFICADO PARA CORREÇÃO DO BANCO DE DADOS
--- Este script recria as tabelas de Planejamento e Obras com suporte a IDs de texto (ex: PLAN-1234)
+-- SCRIPT DEFINITIVO DE CORREÇÃO DO BANCO (RESET DAS TABELAS DE OBRAS)
+-- ATENÇÃO: Este script irá APAGAR os dados locais problemáticos nessas tabelas para recriá-las com os tipos corretos.
+-- Use apenas se os dados atuais estiverem "em branco" ou dando erro no Supabase.
 
--- 1. LIMPEZA (OPCIONAL - APENAS SE QUISER RESETAR DADOS QUE NÃO ESTÃO SALVANDO)
--- drop table if exists work_indirects cascade;
--- drop table if exists work_labor cascade;
--- drop table if exists work_materials cascade;
--- drop table if exists work_services cascade;
--- drop table if exists works cascade;
--- drop table if exists plan_indirects cascade;
--- drop table if exists plan_labor cascade;
--- drop table if exists plan_materials cascade;
--- drop table if exists plan_services cascade;
--- drop table if exists plans cascade;
+-- 1. LIMPEZA TOTAL (FORÇA A RECRIÇÃO COM TIPOS DE ID TEXTO)
+drop table if exists work_indirects cascade;
+drop table if exists work_labor cascade;
+drop table if exists work_materials cascade;
+drop table if exists work_services cascade;
+drop table if exists works cascade;
+drop table if exists plan_indirects cascade;
+drop table if exists plan_labor cascade;
+drop table if exists plan_materials cascade;
+drop table if exists plan_services cascade;
+drop table if exists plans cascade;
 
--- 2. TABELAS DE PLANEJAMENTO
-create table if not exists plans (
+-- 2. TABELAS DE PLANEJAMENTO (IDs como TEXT para aceitar PLAN-1234)
+create table plans (
   id text primary key,
   name text not null,
   client_id text,
@@ -28,7 +29,7 @@ create table if not exists plans (
   total_real_cost numeric default 0
 );
 
-create table if not exists plan_services (
+create table plan_services (
   id text primary key,
   plan_id text references plans(id) on delete cascade,
   description text not null,
@@ -40,7 +41,7 @@ create table if not exists plan_services (
   total_cost numeric default 0
 );
 
-create table if not exists plan_materials (
+create table plan_materials (
   id text primary key,
   plan_id text references plans(id) on delete cascade,
   plan_services_id text references plan_services(id) on delete cascade,
@@ -52,7 +53,7 @@ create table if not exists plan_materials (
   total_cost numeric default 0
 );
 
-create table if not exists plan_labor (
+create table plan_labor (
   id text primary key,
   plan_id text references plans(id) on delete cascade,
   plan_services_id text references plan_services(id) on delete cascade,
@@ -64,7 +65,7 @@ create table if not exists plan_labor (
   total_cost numeric default 0
 );
 
-create table if not exists plan_indirects (
+create table plan_indirects (
   id text primary key,
   plan_id text references plans(id) on delete cascade,
   category text,
@@ -73,7 +74,7 @@ create table if not exists plan_indirects (
 );
 
 -- 3. TABELAS DE GESTÃO DE OBRAS (REALIZADO)
-create table if not exists works (
+create table works (
   id text primary key,
   plan_id text references plans(id) on delete set null,
   name text not null,
@@ -89,10 +90,10 @@ create table if not exists works (
   total_real_cost numeric default 0
 );
 
-create table if not exists work_services (
+create table work_services (
   id text primary key,
   work_id text references works(id) on delete cascade,
-  plan_service_id text, -- ID do serviço original no planejamento
+  plan_service_id text,
   description text,
   unit text,
   quantity numeric default 0,
@@ -103,7 +104,7 @@ create table if not exists work_services (
   status text default 'Pendente'
 );
 
-create table if not exists work_materials (
+create table work_materials (
   id text primary key,
   work_id text references works(id) on delete cascade,
   work_services_id text references work_services(id) on delete cascade,
@@ -117,7 +118,7 @@ create table if not exists work_materials (
   total_cost numeric default 0
 );
 
-create table if not exists work_labor (
+create table work_labor (
   id text primary key,
   work_id text references works(id) on delete cascade,
   work_services_id text references work_services(id) on delete cascade,
@@ -130,7 +131,7 @@ create table if not exists work_labor (
   total_cost numeric default 0
 );
 
-create table if not exists work_indirects (
+create table work_indirects (
   id text primary key,
   work_id text references works(id) on delete cascade,
   category text,
