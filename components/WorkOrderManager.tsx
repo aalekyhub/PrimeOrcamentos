@@ -205,7 +205,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     <style>
                         * {box-sizing: border-box; }
                         body {font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
-                        .a4-container {width: 100%; background: white; padding-left: 20mm !important; padding-right: 20mm !important; }
+                        .a4-container {width: 100%; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
                         .avoid-break { break-inside: avoid; page-break-inside: avoid; }
                     </style>
             </head>
@@ -414,7 +414,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         @media screen {body {background: #f1f5f9; padding: 40px 0; } .a4-container {width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; } }
                          @media print {
                              body { background: white !important; margin: 0 !important; } 
-                             .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; width: 100% !important; padding-left: 20mm !important; padding-right: 20mm !important; } 
+                             .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; width: 100% !important; padding-left: 15mm !important; padding-right: 15mm !important; } 
                              .no-print { display: none !important; } 
                              * { box-shadow: none !important; } 
                              .print-footer { display: none !important; color: white !important; } 
@@ -684,7 +684,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         .card-summary { padding: 12px; border-radius: 12px; border: 1px solid transparent; }
                         @media print {
                             body { background: white !important; margin: 0 !important; }
-                            .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; width: 100% !important; padding-left: 20mm !important; padding-right: 20mm !important; }
+                            .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; width: 100% !important; padding-left: 15mm !important; padding-right: 15mm !important; }
                             .no-print { display: none !important; }
                             .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; } 
                             .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }

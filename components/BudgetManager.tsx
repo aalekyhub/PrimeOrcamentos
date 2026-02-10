@@ -161,7 +161,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
            * { box-sizing: border-box; }
            body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
            @page { size: A4; margin: 0 !important; }
-           .a4-container { width: 100%; margin: 0; background: white; padding-left: 20mm !important; padding-right: 20mm !important; }
+           .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
             .avoid-break { break-inside: avoid; page-break-inside: avoid; }
             .break-after-avoid { break-after: avoid !important; page-break-after: avoid !important; }
              .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
@@ -177,7 +177,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
            @media screen { body { background: #f1f5f9; padding: 40px 0; } .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; } }
            @media print { 
              body { background: white !important; margin: 0 !important; } 
-             .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; width: 100% !important; padding-left: 20mm !important; padding-right: 20mm !important; } 
+             .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; width: 100% !important; padding-left: 15mm !important; padding-right: 15mm !important; } 
              .no-screen { display: block !important; }
              .no-print { display: none !important; }
              .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: white !important; text-transform: uppercase; }
@@ -454,16 +454,17 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
            /* Force white background everywhere */
            html, body { background: white !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; height: auto !important; }
            
-           /* Hide table spacers in PDF to prevent double margin */
-           thead, tfoot { display: none !important; height: 0 !important; margin: 0 !important; padding: 0 !important; }
-
-           /* Reset container styles for PDF generation */
+           /* Specific overrides for PDF to ensure visibility */
+           thead { display: table-header-group !important; }
+           tfoot { display: table-footer-group !important; }
+           
+           /* Reset container styles for PDF generation - using 15mm for safety */
            .a4-container { 
              width: 100% !important; 
              height: auto !important; 
              margin: 0 !important; 
-             padding-left: 20mm !important; 
-             padding-right: 20mm !important; 
+             padding-left: 15mm !important; 
+             padding-right: 15mm !important; 
              box-shadow: none !important; 
              border: none !important; 
              background: white !important;
@@ -475,9 +476,12 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
            /* Ensure text colors are dark for print */
            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
            
-           /* Ensure table fits */
-           table { width: 100% !important; }
-        </style>
+           /* Ensure table fits and headers are bold */
+           table { width: 100% !important; border-collapse: collapse !important; }
+           th { font-weight: 800 !important; color: #0f172a !important; }
+           .ql-editor-print strong, .ql-editor-print b { font-weight: 800 !important; }
+           .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4 { font-weight: 900 !important; color: #0f172a !important; }
+         </style>
       `;
       pdfHtml = pdfHtml.replace('</head>', `${pdfOverrideStyles}</head>`);
 
