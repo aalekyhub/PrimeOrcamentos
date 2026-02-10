@@ -682,7 +682,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                             { id: 'dados', label: 'Dados da Obra', icon: FileText },
                             { id: 'servicos', label: 'Serviços Realizados', icon: Building2 },
                             { id: 'recursos', label: 'Gastos Detalhados', icon: Truck },
-                            { id: 'resumo', label: 'Resumo Financeiro', icon: PieChart },
+                            { id: 'resumo', label: 'Resumo de Custo', icon: PieChart },
                         ].map(tab => (
                             <button
                                 key={tab.id}
