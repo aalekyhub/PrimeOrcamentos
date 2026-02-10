@@ -292,7 +292,30 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
         // Save to DB
         await db.save('serviflow_works', updatedWorks);
-        // Note: Save sub-lists separately in real app
+
+        // 1. Services
+        const allServices = db.load('serviflow_work_services', []) as WorkService[];
+        const otherServices = allServices.filter(s => s.work_id !== currentWork.id);
+        const servicesToSave = [...otherServices, ...services.map(s => ({ ...s, work_id: currentWork.id }))];
+        await db.save('serviflow_work_services', servicesToSave);
+
+        // 2. Materials
+        const allMaterials = db.load('serviflow_work_materials', []) as WorkMaterial[];
+        const otherMaterials = allMaterials.filter(m => m.work_id !== currentWork.id);
+        const materialsToSave = [...otherMaterials, ...materials.map(m => ({ ...m, work_id: currentWork.id }))];
+        await db.save('serviflow_work_materials', materialsToSave);
+
+        // 3. Labor
+        const allLabor = db.load('serviflow_work_labor', []) as WorkLabor[];
+        const otherLabor = allLabor.filter(l => l.work_id !== currentWork.id);
+        const laborToSave = [...otherLabor, ...labor.map(l => ({ ...l, work_id: currentWork.id }))];
+        await db.save('serviflow_work_labor', laborToSave);
+
+        // 4. Indirects
+        const allIndirects = db.load('serviflow_work_indirects', []) as WorkIndirect[];
+        const otherIndirects = allIndirects.filter(i => i.work_id !== currentWork.id);
+        const indirectsToSave = [...otherIndirects, ...indirects.map(i => ({ ...i, work_id: currentWork.id }))];
+        await db.save('serviflow_work_indirects', indirectsToSave);
 
         setWorks(updatedWorks);
 

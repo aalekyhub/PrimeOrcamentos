@@ -136,7 +136,6 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
 
         // Save to DB
         await db.save('serviflow_plans', updatedPlans);
-        await db.save('serviflow_plan_services', services);
 
         // Save sub-lists (materials, labor, indirects)
         // Need to load existing ones and merge/replace? 
