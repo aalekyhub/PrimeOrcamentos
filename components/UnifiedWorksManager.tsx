@@ -10,9 +10,10 @@ import WorksManager from './WorksManager';
 
 interface Props {
     customers: Customer[];
+    onGenerateBudget?: (plan: any, services: any[], totalMaterial: number, totalLabor: number, totalIndirect: number) => void;
 }
 
-const UnifiedWorksManager: React.FC<Props> = ({ customers }) => {
+const UnifiedWorksManager: React.FC<Props> = ({ customers, onGenerateBudget }) => {
     const [view, setView] = useState<'list' | 'detail'>('list');
     const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
     const [activeModule, setActiveModule] = useState<'planning' | 'execution'>('planning');
@@ -89,6 +90,7 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers }) => {
                                     setSelectedPlanId(newPlan.id);
                                     loadPlans(); // Refresh the list
                                 }}
+                                onGenerateBudget={onGenerateBudget}
                             />
                         </div>
                     ) : (

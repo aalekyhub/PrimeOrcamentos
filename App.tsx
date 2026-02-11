@@ -79,6 +79,7 @@ const AppContent: React.FC = () => {
   const [catalog, setCatalog] = useState<CatalogService[]>(() => db.load(STORAGE_KEYS.CATALOG, []));
   const [company, setCompany] = useState<CompanyProfile>(() => db.load(STORAGE_KEYS.COMPANY, INITIAL_COMPANY));
   const [loans, setLoans] = useState<Loan[]>(() => db.load(STORAGE_KEYS.LOANS, []));
+  const [prefilledBudgetData, setPrefilledBudgetData] = useState<any>(null);
 
   const handleManualSync = async () => {
     if (!db.isConnected()) {
@@ -249,6 +250,21 @@ const AppContent: React.FC = () => {
       pendingOrders: pend
     };
   }, [orders, transactions]);
+
+  const handleGenerateBudget = (plan: any, services: any[], totalMaterial: number, totalLabor: number, totalIndirect: number) => {
+    setPrefilledBudgetData({
+      plan,
+      services,
+      totalMaterial,
+      totalLabor,
+      totalIndirect
+    });
+
+    if (!openTabs.includes('budgets')) {
+      setOpenTabs([...openTabs, 'budgets']);
+    }
+    setActiveTab('budgets');
+  };
 
   if (!currentUser) {
     return <Login users={users} onLogin={(u) => { setCurrentUser(u); db.save(STORAGE_KEYS.SESSION, u); }} company={company} onSync={handleManualSync} isSyncing={isSyncing} isConnected={db.isConnected()} />;
@@ -422,10 +438,10 @@ const AppContent: React.FC = () => {
                   }} />}
                   {item.id === 'customers' && <CustomerManager customers={customers} setCustomers={setCustomers} orders={orders} />}
                   {item.id === 'catalog' && <ServiceCatalog services={catalog} setServices={setCatalog} company={company} />}
-                  {item.id === 'budgets' && <BudgetManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} />}
+                  {item.id === 'budgets' && <BudgetManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} prefilledData={prefilledBudgetData} onPrefilledDataConsumed={() => setPrefilledBudgetData(null)} />}
                   {item.id === 'orders' && <ServiceOrderManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} />}
                   {item.id === 'works' && <WorkOrderManager orders={orders} setOrders={setOrders} customers={customers} setCustomers={setCustomers} catalogServices={catalog} setCatalogServices={setCatalog} company={company} transactions={transactions} setTransactions={setTransactions} />}
-                  {item.id === 'construction' && <UnifiedWorksManager customers={customers} />}
+                  {item.id === 'construction' && <UnifiedWorksManager customers={customers} onGenerateBudget={handleGenerateBudget} />}
                   {item.id === 'search' && <BudgetSearch orders={orders} setOrders={setOrders} customers={customers} company={company} catalogServices={catalog} setCatalogServices={setCatalog} isLoading={isSyncing} />}
                   {item.id === 'financials' && <FinancialControl transactions={transactions} setTransactions={setTransactions} loans={loans} setLoans={setLoans} currentUser={currentUser} />}
                   {item.id === 'users' && <UserManager users={users} setUsers={setUsers} />}

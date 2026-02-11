@@ -22,9 +22,14 @@ interface Props {
   catalogServices: CatalogService[];
   setCatalogServices: React.Dispatch<React.SetStateAction<CatalogService[]>>;
   company: CompanyProfile;
+  prefilledData?: any;
+  onPrefilledDataConsumed?: () => void;
 }
 
-const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCustomers, catalogServices, setCatalogServices, company }) => {
+const BudgetManager: React.FC<Props> = ({
+  orders, setOrders, customers, setCustomers, catalogServices, setCatalogServices, company,
+  prefilledData, onPrefilledDataConsumed
+}) => {
   const [showForm, setShowForm] = useState(false);
   const [showFullClientForm, setShowFullClientForm] = useState(false);
   const [showFullServiceForm, setShowFullServiceForm] = useState(false);
@@ -56,6 +61,52 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
   const budgets = useMemo(() => orders.filter(o =>
     (o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED) && (o.customerName.toLowerCase().includes(searchTerm.toLowerCase()) || o.id.includes(searchTerm))
   ), [orders, searchTerm]);
+
+  // Effect to handle pre-filled data from Planning
+  React.useEffect(() => {
+    if (prefilledData && onPrefilledDataConsumed) {
+      const { plan, totalMaterial, totalLabor } = prefilledData;
+
+      // Reset form first
+      setEditingBudgetId(null);
+      setProposalTitle(`Orçamento: ${plan.name}`);
+      setSelectedCustomerId(plan.client_id || '');
+
+      const newItems: ServiceItem[] = [];
+
+      if (totalMaterial > 0) {
+        newItems.push({
+          id: db.generateId('ITEM'),
+          description: `Total Materiais - ${plan.name}`,
+          quantity: 1,
+          unitPrice: totalMaterial,
+          unit: 'un',
+          type: 'Material'
+        });
+      }
+
+      if (totalLabor > 0) {
+        newItems.push({
+          id: db.generateId('ITEM'),
+          description: `Total Mão de Obra - ${plan.name}`,
+          quantity: 1,
+          unitPrice: totalLabor,
+          unit: 'un',
+          type: 'Serviço'
+        });
+      }
+
+      setItems(newItems);
+      setTaxRate(0);
+      setBdiRate(0);
+      setShowForm(true);
+
+      // Notify parent that data was consumed to avoid re-triggering
+      onPrefilledDataConsumed();
+
+      notify("Dados da obra importados com sucesso!", "success");
+    }
+  }, [prefilledData, onPrefilledDataConsumed]);
 
   const subtotal = useMemo(() => items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0), [items]);
   const totalAmount = useMemo(() => {
