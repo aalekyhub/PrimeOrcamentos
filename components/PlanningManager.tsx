@@ -377,7 +377,8 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                         <thead>
                             <tr style="background: #f1f5f9; border-bottom: 1px solid #e2e8f0;">
                                 <th style="padding: 10px; text-align: left; font-size: 10px; color: #64748b;">FUNÇÃO / TIPO</th>
-                                <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 100px;">CARGA</th>
+                                <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 60px;">QTD</th>
+                                <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 80px;">UND</th>
                                 <th style="padding: 10px; text-align: right; font-size: 10px; color: #64748b; width: 100px;">CUSTO TOTAL</th>
                             </tr>
                         </thead>
@@ -385,7 +386,8 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                             ${labor.map(l => `
                                 <tr style="border-bottom: 1px solid #f1f5f9;">
                                     <td style="padding: 10px; font-size: 11px; font-weight: 600;">${l.role}</td>
-                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${l.quantity} ${l.cost_type}</td>
+                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${l.quantity}</td>
+                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${l.cost_type}</td>
                                     <td style="padding: 10px; font-size: 11px; text-align: right; font-weight: 700;">R$ ${l.total_cost.toFixed(2)}</td>
                                 </tr>
                             `).join('')}
