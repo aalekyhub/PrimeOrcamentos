@@ -185,30 +185,32 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
              .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: white !important; text-transform: uppercase; }
               .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
              
-             /* Styles for Rich Text (Quill) */
-             .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
-             .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
-             .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
-             .ql-editor-print strong { font-weight: bold !important; }
-             .ql-editor-print em { font-style: italic !important; }
-             .ql-editor-print .ql-align-center { text-align: center !important; }
-             .ql-editor-print .ql-align-right { text-align: right !important; }
-              .ql-editor-print .ql-align-justify { text-align: justify !important; }
-              
               /* Prevent widowed headings */
-              .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4, .ql-editor-print h5, .ql-editor-print h6 { 
-                break-after: avoid-page !important; 
-                page-break-after: avoid !important; 
-                font-weight: 800 !important;
-                color: #0f172a !important;
-                margin-top: 24px !important;
-                margin-bottom: 8px !important;
-              }
-              .ql-editor-print h1 { font-size: 22px !important; }
-              .ql-editor-print h2 { font-size: 19px !important; }
-              .ql-editor-print h3 { font-size: 17px !important; }
-              .ql-editor-print h3 { font-size: 17px !important; }
-              .ql-editor-print h4 { font-size: 14px !important; }
+              .ql-editor-print p { orphans: 3; widows: 3; }
+            }
+
+            /* Shared Rich Text / Quill Styles for all media (Treated specially by PDF engine) */
+            .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; display: block !important; }
+            .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; display: block !important; }
+            .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; list-style-position: outside !important; }
+            .ql-editor-print strong, .ql-editor-print b { font-weight: bold !important; color: #000 !important; }
+            .ql-editor-print em { font-style: italic !important; }
+            .ql-editor-print .ql-align-center { text-align: center !important; }
+            .ql-editor-print .ql-align-right { text-align: right !important; }
+            .ql-editor-print .ql-align-justify { text-align: justify !important; }
+            
+            .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4, .ql-editor-print h5, .ql-editor-print h6 { 
+              break-after: avoid-page !important; 
+              page-break-after: avoid !important; 
+              font-weight: 800 !important;
+              color: #0f172a !important;
+              margin-top: 24px !important;
+              margin-bottom: 8px !important;
+            }
+            .ql-editor-print h1 { font-size: 22px !important; }
+            .ql-editor-print h2 { font-size: 19px !important; }
+            .ql-editor-print h3 { font-size: 17px !important; }
+            .ql-editor-print h4 { font-size: 14px !important; }
 
               /* Font Classes for Print */
               .ql-font-inter { font-family: 'Inter', sans-serif !important; }
@@ -233,7 +235,6 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
               .ql-size-20px { font-size: 20px !important; }
               .ql-size-24px { font-size: 24px !important; }
               .ql-size-32px { font-size: 32px !important; }
-              .ql-editor-print p { orphans: 3; widows: 3; }
             }
         </style>
       </head>
@@ -479,12 +480,15 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
            /* Ensure text colors are dark for print */
            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
            
-           /* Ensure table fits and headers are bold */
-           table { width: 100% !important; border-collapse: collapse !important; }
-           th { font-weight: 800 !important; color: #0f172a !important; }
-           .ql-editor-print strong, .ql-editor-print b { font-weight: 800 !important; }
-           .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4 { font-weight: 900 !important; color: #0f172a !important; }
-         </style>
+            /* Ensure table fits and headers are bold */
+            table { width: 100% !important; border-collapse: collapse !important; }
+            th { font-weight: 800 !important; color: #0f172a !important; }
+            .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; }
+            .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; }
+            .ql-editor-print li { display: list-item !important; list-style-position: outside !important; }
+            .ql-editor-print strong, .ql-editor-print b { font-weight: 800 !important; color: #000 !important; }
+            .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4 { font-weight: 900 !important; color: #0f172a !important; }
+          </style>
       `;
       pdfHtml = pdfHtml.replace('</head>', `${pdfOverrideStyles}</head>`);
 

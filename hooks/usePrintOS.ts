@@ -60,16 +60,6 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
              .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: white !important; text-transform: uppercase; } 
               .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; } 
              
-             /* Styles for Rich Text (Quill) */
-             .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
-             .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
-             .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
-             .ql-editor-print strong { font-weight: bold !important; }
-             .ql-editor-print em { font-style: italic !important; }
-             .ql-editor-print .ql-align-center { text-align: center !important; }
-             .ql-editor-print .ql-align-right { text-align: right !important; }
-             .ql-editor-print .ql-align-justify { text-align: justify !important; }
- 
               /* Prevent widowed headings */
               .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4, .ql-editor-print h5, .ql-editor-print h6 { 
                 break-after: avoid-page !important; 
@@ -110,6 +100,16 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
               .ql-size-32px { font-size: 32px !important; }
               .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
            }
+
+            /* Shared Rich Text / Quill Styles for all media */
+            .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; display: block !important; }
+            .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; display: block !important; }
+            .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; list-style-position: outside !important; }
+            .ql-editor-print strong, .ql-editor-print b { font-weight: bold !important; color: #000 !important; }
+            .ql-editor-print em { font-style: italic !important; }
+            .ql-editor-print .ql-align-center { text-align: center !important; }
+            .ql-editor-print .ql-align-right { text-align: right !important; }
+            .ql-editor-print .ql-align-justify { text-align: justify !important; }
         </style>
       </head>
       <body class="no-scrollbar">
@@ -251,8 +251,7 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
                
                if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
                else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
-                 const text = el.innerText.trim();
-                   const text = el.innerText.trim();
+                  const text = el.innerText.trim();
                   const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text);
                   const hasBoldStyle = el.querySelector('strong, b, [style*="font-weight: bold"], [style*="font-weight: 700"], [style*="font-weight: 800"], [style*="font-weight: 900"]');
                   const isBold = hasBoldStyle || (el.style && parseInt(el.style.fontWeight) > 600) || el.tagName === 'STRONG';
