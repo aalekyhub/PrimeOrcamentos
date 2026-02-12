@@ -56,19 +56,19 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
             <div class="a4-container">
                <div class="flex justify-between items-start mb-8 border-b-[3px] border-slate-900 pb-6">
                    <div class="flex gap-6 items-center">
-                       <div style="width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;">
-                           ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:28px; color:#2563eb;">PO</div>'}
+                       <div style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                           ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>'}
                        </div>
                        <div>
-                           <h1 class="text-2xl font-black text-slate-900 leading-none mb-2 uppercase tracking-tight">${company.name}</h1>
-                           <p class="text-[10px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">Ordem de Serviço de Obra / Reforma</p>
-                           <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tight">${company.cnpj || ''} | ${company.phone || ''}</p>
+                           <h1 class="text-3xl font-black text-slate-900 leading-none mb-2 uppercase tracking-tight">${company.name}</h1>
+                           <p class="text-[11px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">Ordem de Serviço de Obra / Reforma</p>
+                           <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tight">${company.cnpj || ''} | ${company.phone || ''}</p>
                        </div>
                    </div>
                    <div class="text-right">
-                       <div class="bg-blue-600 text-white px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest mb-2 shadow-md inline-block">ORDEM DE SERVIÇO</div>
-                       <p class="text-xl font-black text-[#0f172a] tracking-tighter mb-1 whitespace-nowrap">${order.id}</p>
-                       <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest text-right">ABERTURA: ${formatDate(order.createdAt)}</p>
+                       <div class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest mb-2 shadow-md inline-block">ORDEM DE SERVIÇO</div>
+                       <p class="text-2xl font-black text-[#0f172a] tracking-tighter mb-1 whitespace-nowrap">${order.id}</p>
+                       <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">ABERTURA: ${formatDate(order.createdAt)}</p>
                    </div>
                </div>
 

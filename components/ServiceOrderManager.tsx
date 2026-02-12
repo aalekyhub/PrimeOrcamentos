@@ -182,26 +182,35 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
           <thead><tr><td style="height: ${company.printMarginTop || 15}mm;">&nbsp;</td></tr></thead>
           <tbody><tr><td>
             <div class="a4-container">
-               <div class="flex justify-between items-start mb-12 border-b-2 border-slate-900 pb-8">
+               <div class="flex justify-between items-start mb-10 border-b-[3px] border-slate-900 pb-8">
                    <div class="flex gap-6 items-center">
-                       <div style="width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;">
-                           ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:700; font-size:30px; color:#2563eb;">PO</div>'}
+                       <div style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                           ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>'}
                        </div>
                        <div>
-                           <h1 style="font-size: ${company.nameFontSize || 24}px;" class="font-bold text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
-                           <p class="text-[9px] font-bold text-blue-600 uppercase tracking-widest leading-none">Soluções em Gestão Profissional</p>
-                           <p class="text-[8px] text-slate-400 font-medium uppercase tracking-tight mt-2">${company.cnpj || ''} | ${company.phone || ''}</p>
+                           <h1 class="text-3xl font-black text-slate-900 leading-none mb-2 uppercase tracking-tight">${company.name}</h1>
+                           <p class="text-[11px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">Ordem de Serviço (Mecânica / Elétrica / Refrigeração)</p>
+                           <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tight">${company.cnpj || ''} | ${company.phone || ''}</p>
                        </div>
                    </div>
                    <div class="text-right">
-                       <div class="bg-slate-900 text-white px-3 py-1 rounded text-[8px] font-bold uppercase tracking-widest mb-2 inline-block">Ordem de Serviço</div>
-                       <p class="text-3xl font-bold text-slate-900 tracking-tighter mb-1">${order.id}</p>
-                       <p class="text-[8px] font-medium text-slate-400 uppercase tracking-widest">ABERTURA: ${formatDate(order.createdAt)}</p>
+                       <div class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest mb-2 shadow-md inline-block">ORDEM DE SERVIÇO</div>
+                       <p class="text-3xl font-black text-[#0f172a] tracking-tighter mb-1">${order.id}</p>
+                       <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">ABERTURA: ${formatDate(order.createdAt)}</p>
                    </div>
                </div>
-               <div class="grid grid-cols-2 gap-6 mb-12">
-                   <div class="info-box"><span class="info-label">Cliente / Solicitante</span><div class="info-value">${customer.name}</div><div class="info-sub mt-1">DOC: ${customer.document || 'N/A'}</div></div>
-                   <div class="info-box"><span class="info-label">Dados do Equipamento / Objeto</span><div class="info-value">${order.equipmentBrand || ''} ${order.equipmentModel || 'Não especificado'}</div><div class="info-sub mt-1">SÉRIE: ${order.equipmentSerialNumber || 'N/A'}</div></div>
+
+               <div class="grid grid-cols-2 gap-4 mb-8">
+                   <div class="info-box">
+                       <span class="info-label">Contratante / Solicitante</span>
+                       <div class="info-value">${customer.name}</div>
+                       <div class="text-[11px] text-slate-400 font-bold mt-1.5 uppercase">${customer.document || 'DOC NÃO INF.'}</div>
+                   </div>
+                   <div class="info-box">
+                       <span class="info-label">Equipamento / Objeto</span>
+                       <div class="info-value">${order.equipmentBrand || ''} ${order.equipmentModel || 'NÃO ESPECIFICADO'}</div>
+                       <div class="text-[11px] text-slate-400 font-bold mt-1.5 uppercase">SÉRIE: ${order.equipmentSerialNumber || 'N/A'}</div>
+                   </div>
                </div>
                <div class="avoid-break mb-12">
                    <div class="section-title">Relatório Técnico / Diagnóstico</div>

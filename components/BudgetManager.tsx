@@ -203,76 +203,116 @@ const BudgetManager: React.FC<Props> = ({
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Orçamento - ${budget.id}</title>
+        <title>Orçamento - ${budget.id} - ${budget.description || 'Proposta'}</title>
         <script src="https://cdn.tailwindcss.com"></script>
         ${PRINT_FONTS}
         ${commonPrintStyles(company)}
+        <style>
+            .info-box { padding: 16px; }
+            .info-label { font-size: 9px; }
+            .info-value { font-size: 11px; }
+            .section-title { font-size: 9px; margin-top: 24px; }
+        </style>
       </head>
-      <body>
+      <body class="no-scrollbar">
         <table style="width: 100%;">
-          <thead><tr><td style="height: ${company.printMarginTop || 15}mm;">&nbsp;</td></tr></thead>
+          <thead><tr><td style="height: ${company.printMarginTop || 15}mm;"><div style="height: ${company.printMarginTop || 15}mm; display: block;">&nbsp;</div></td></tr></thead>
           <tbody><tr><td>
             <div class="a4-container">
-               <div class="flex justify-between items-start mb-6 border-b-2 border-slate-900 pb-4">
+               <div class="flex justify-between items-start mb-10 border-b-[3px] border-slate-900 pb-8">
                    <div class="flex gap-6 items-center">
-                       <div style="width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;">
-                           ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:700; font-size:30px; color:#2563eb;">PO</div>'}
+                       <div style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                           ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>'}
                        </div>
                        <div>
-                           <h1 style="font-size: ${company.nameFontSize || 24}px;" class="font-bold text-slate-900 tracking-tight">${company.name}</h1>
-                           <p class="text-[9px] font-bold text-blue-600 uppercase tracking-widest mt-1">Soluções em Gestão Profissional</p>
+                           <h1 class="text-3xl font-black text-slate-900 leading-none mb-2 uppercase tracking-tight">${company.name}</h1>
+                           <p class="text-[11px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">Proposta Comercial de Engenharia / Reforma</p>
+                           <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tight">${company.cnpj || ''} | ${company.phone || ''}</p>
                        </div>
                    </div>
                    <div class="text-right">
-                       <p class="text-2xl font-bold text-blue-600 tracking-tighter mb-1">${budget.id}</p>
-                       <p class="text-[8px] font-semibold text-slate-600 uppercase">EMISSÃO: ${emissionDate} | VALIDADE: ${validityDate}</p>
+                       <div class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest mb-2 shadow-md inline-block">ORÇAMENTO</div>
+                       <p class="text-2xl font-black text-[#0f172a] tracking-tighter mb-1">${budget.id}</p>
+                       <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">EMISSÃO: ${emissionDate} | VALD: ${validityDate}</p>
                    </div>
                </div>
-               <div class="grid grid-cols-2 gap-6 mb-6">
-                   <div class="info-box"><span class="info-label">Cliente</span><div class="info-value">${customer.name}</div></div>
-                   <div class="info-box"><span class="info-label">Referência</span><div class="info-value">${budget.description || 'Proposta'}</div></div>
+
+               <div class="grid grid-cols-2 gap-4 mb-8">
+                   <div class="info-box">
+                       <span class="info-label">Contratante / Cliente</span>
+                       <div class="info-value">${customer.name}</div>
+                       <div class="text-[11px] text-slate-400 font-bold mt-1.5 uppercase">${customer.document || 'DOC NÃO INF.'}</div>
+                   </div>
+                   <div class="info-box">
+                       <span class="info-label">Identificação do Objeto</span>
+                       <div class="info-value">${budget.description || 'PROPOSTA COMERCIAL'}</div>
+                       <div class="text-[11px] text-slate-400 font-bold mt-1.5 uppercase">VALOR TOTAL DA PROPOSTA: R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                   </div>
                </div>
+
                ${budget.descriptionBlocks && budget.descriptionBlocks.length > 0 ? `
                 <div class="mb-10 print-description-content">
-                  <div class="section-title">DESCRIÇÃO DOS SERVIÇOS</div>
+                  <div class="section-title">DESCRIÇÃO TÉCNICA E ESCOPO DOS SERVIÇOS</div>
                   <div class="space-y-6">
                     ${budget.descriptionBlocks.map(block => {
-      if (block.type === 'text') return `<div class="text-slate-700 text-justify ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px;">${block.content}</div>`;
-      if (block.type === 'image') return `<div class="avoid-break" style="margin: 20px 0;"><img src="${block.content}" style="width: 100%; border-radius: 12px; border: 1px solid #e2e8f0; display: block; object-fit: contain;"></div>`;
-      if (block.type === 'page-break') return `<div style="page-break-after: always; height: 0;"></div>`;
+      if (block.type === 'text') return `<div class="text-slate-800 leading-relaxed text-justify font-medium ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px;">${block.content}</div>`;
+      if (block.type === 'image') return `<div class="avoid-break" style="margin: 20px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; object-fit: contain; display: block;"></div>`;
+      if (block.type === 'page-break') return `<div style="page-break-after: always; break-after: page; height: 0; margin: 0; padding: 0;"></div>`;
       return '';
     }).join('')}
                   </div>
                 </div>` : ''}
-                <div class="avoid-break mb-8" style="page-break-before: always;">
-                    <div class="section-title">Detalhamento Financeiro</div>
-                    <table style="width: 100%; border-collapse: collapse;">
-                       <thead><tr style="border-bottom: 2px solid #0f172a;">
-                       <th style="padding-bottom:12px; font-size:7px; text-transform:uppercase; text-align:left; width:60%;">Item</th>
-                       <th style="padding-bottom:12px; font-size:7px; text-transform:uppercase; text-align:center; width:10%;">Qtd</th>
-                       <th style="padding-bottom:12px; font-size:7px; text-transform:uppercase; text-align:right; width:15%;">Unit.</th>
-                       <th style="padding-bottom:12px; font-size:7px; text-transform:uppercase; text-align:right; width:15%;">Total</th>
-                       </tr></thead>
+
+                <div class="avoid-break mb-8 overflow-hidden">
+                    <div class="section-title">Detalhamento Financeiro dos Itens</div>
+                    <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+                       <thead>
+                            <tr style="border-bottom: 2px solid #0f172a;">
+                                <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; width: 60%;">Item / Descrição</th>
+                                <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800; width: 10%;">Qtd</th>
+                                <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 15%;">Unitário</th>
+                                <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 15%;">Subtotal</th>
+                            </tr>
+                       </thead>
                        <tbody>${itemsHtml}</tbody>
                    </table>
                 </div>
-                <div class="avoid-break mb-6">
-                   <div class="bg-slate-900 text-white py-3 px-6 rounded-xl flex justify-between items-center shadow-xl">
-                       <span class="text-[12px] font-bold uppercase tracking-widest">Investimento Total:</span>
-                       <span class="text-3xl font-bold tracking-tighter">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+
+                <div class="avoid-break mb-8">
+                    <div class="bg-[#0f172a] text-white p-6 rounded-2xl shadow-xl flex justify-between items-center">
+                        <p class="text-[12px] font-black uppercase tracking-[0.2em] mb-0 opacity-80">INVESTIMENTO TOTAL:</p>
+                        <p class="text-4xl font-black tracking-tighter mb-0">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                    </div>
+                </div>
+
+                <div class="avoid-break mb-8 grid grid-cols-2 gap-4">
+                   <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5">
+                       <p class="text-blue-600 font-black text-[10px] uppercase tracking-widest mb-2">Forma de Pagamento</p>
+                       <p class="text-slate-700 text-[13px] font-bold leading-relaxed">${budget.paymentTerms || 'A combinar com o cliente.'}</p>
+                   </div>
+                   <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5">
+                       <p class="text-blue-600 font-black text-[10px] uppercase tracking-widest mb-2">Prazo de Execução</p>
+                       <p class="text-slate-700 text-[13px] font-bold leading-relaxed">${budget.deliveryTime || 'Conforme cronograma da obra.'}</p>
                    </div>
                 </div>
-                <div class="grid grid-cols-2 gap-6 mb-6 avoid-break">
-                   <div class="info-box"><span class="info-label">Pagamento</span><p class="mt-2 text-slate-700 font-medium">${budget.paymentTerms || 'A combinar'}</p></div>
-                   <div class="info-box"><span class="info-label">Prazo</span><p class="mt-2 text-slate-700 font-medium">${budget.deliveryTime || 'A combinar'}</p></div>
-                </div>
-                <div style="margin-top: 120px;" class="avoid-break space-y-2">
-                   <div style="border-bottom: 2px solid #cbd5e1; width: 40%;"></div>
-                   <p class="text-[11px] font-bold text-slate-600 uppercase">Assinatura do Cliente / Aceite</p>
+
+                <div style="margin-top: 120px;" class="avoid-break pt-12">
+                   <div class="grid grid-cols-2 gap-16 px-10">
+                       <div class="text-center">
+                           <div style="border-top: 1px solid #cbd5e1; margin-bottom: 8px;"></div>
+                           <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Responsável Técnico</p>
+                           <p class="text-[11px] font-black uppercase text-slate-900">${company.name}</p>
+                       </div>
+                       <div class="text-center">
+                           <div style="border-top: 1px solid #cbd5e1; margin-bottom: 8px;"></div>
+                           <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Aceite do Cliente</p>
+                           <p class="text-[11px] font-black uppercase text-slate-900">${customer.name}</p>
+                       </div>
+                   </div>
                 </div>
             </div>
           </td></tr></tbody>
-          <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;">&nbsp;</td></tr></tfoot>
+          <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;"><div style="height: ${company.printMarginBottom || 15}mm; display: block;">&nbsp;</div></td></tr></tfoot>
         </table>
         <script>
           ${getOptimizePageBreaksScript()}
