@@ -852,7 +852,8 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             const defaults = [
                                                                 { name: 'ISS', rate: 5 },
                                                                 { name: 'PIS', rate: 0.65 },
-                                                                { name: 'COFINS', rate: 3 }
+                                                                { name: 'COFINS', rate: 3 },
+                                                                { name: 'INSS', rate: 3.5 }
                                                             ];
 
                                                             let newTaxes = [...taxes];
@@ -875,16 +876,17 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                         }}
                                                         className="text-[10px] font-bold text-blue-600 hover:text-blue-800 uppercase tracking-tighter bg-blue-50 px-2 py-1 rounded"
                                                     >
-                                                        Carregar Padrão (ISS/PIS/COFINS)
+                                                        Carregar Padrão (ISS/PIS/COF/INS)
                                                     </button>
                                                 </div>
 
-                                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                                                     {[
                                                         { name: 'BDI', label: 'BDI (%)', color: 'bg-indigo-50 text-indigo-700 border-indigo-100' },
                                                         { name: 'ISS', label: 'ISS (%)', color: 'bg-blue-50 text-blue-700 border-blue-100' },
                                                         { name: 'PIS', label: 'PIS (%)', color: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
-                                                        { name: 'COFINS', label: 'COFINS (%)', color: 'bg-slate-50 text-slate-700 border-slate-100' }
+                                                        { name: 'COFINS', label: 'COFINS (%)', color: 'bg-slate-50 text-slate-700 border-slate-100' },
+                                                        { name: 'INSS', label: 'INSS (%)', color: 'bg-orange-50 text-orange-700 border-orange-100' }
                                                     ].map(tax => (
                                                         <div key={tax.name} className={`p-3 rounded-lg border ${tax.color}`}>
                                                             <label className="block text-[10px] font-bold uppercase mb-1 opacity-70">{tax.label}</label>
