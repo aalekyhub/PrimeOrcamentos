@@ -112,10 +112,13 @@ const BudgetManager: React.FC<Props> = ({
   const totalAmount = useMemo(() => {
     const bdi = Number(bdiRate) || 0;
     const tax = Number(taxRate) || 0;
+
     const bdiValue = subtotal * (bdi / 100);
-    const subtotalWithBDI = subtotal + bdiValue;
-    const taxValue = subtotalWithBDI * (tax / 100);
-    return subtotalWithBDI + taxValue;
+    const desiredLiquid = subtotal + bdiValue;
+
+    // Gross Up Calculation (Inside Tax)
+    const taxFactor = Math.max(0.01, 1 - (tax / 100));
+    return desiredLiquid / taxFactor;
   }, [subtotal, taxRate, bdiRate]);
 
   const handleAddItem = () => {
@@ -184,15 +187,16 @@ const BudgetManager: React.FC<Props> = ({
 
     const subTotal = budget.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0);
 
-    // Logic: BDI first, then Tax on (Subtotal + BDI)
+    // Standard Logic: Gross Up (Inside Tax)
     const bdiR = budget.bdiRate || 0;
     const taxR = budget.taxRate || 0;
 
     const bdiValue = subTotal * (bdiR / 100);
-    const subTotalWithBDI = subTotal + bdiValue; // Accumulated base for tax
-    const taxValue = subTotalWithBDI * (taxR / 100);
+    const desiredLiquid = subTotal + bdiValue;
+    const taxFactor = Math.max(0.01, 1 - (taxR / 100));
 
-    const finalTotal = subTotalWithBDI + taxValue;
+    const finalTotal = desiredLiquid / taxFactor;
+    const taxValue = finalTotal - desiredLiquid;
 
     const itemFontBase = company.itemsFontSize || 12;
     const itemsHtml = budget.items.map((item: ServiceItem) => `
@@ -998,8 +1002,13 @@ const BudgetManager: React.FC<Props> = ({
 
                   <div className="space-y-1 mb-4 text-[10px] text-slate-400">
                     <div className="flex justify-between"><span>Subtotal:</span> <span>R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
-                    {bdiRate > 0 && <div className="flex justify-between text-emerald-400"><span>+ BDI:</span> <span>R$ {(subtotal * (bdiRate / 100)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>}
-                    {taxRate > 0 && <div className="flex justify-between text-blue-400"><span>+ Impostos:</span> <span>R$ {((subtotal + (subtotal * (bdiRate / 100))) * (taxRate / 100)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>}
+                    {Number(bdiRate) > 0 && <div className="flex justify-between text-emerald-400"><span>+ BDI ({bdiRate}%):</span> <span>R$ {(subtotal * (Number(bdiRate) / 100)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>}
+                    {Number(taxRate) > 0 && (
+                      <div className="flex justify-between text-blue-400">
+                        <span>+ Impostos ({taxRate}%):</span>
+                        <span>R$ {(totalAmount - (subtotal + (subtotal * (Number(bdiRate) / 100)))).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex justify-between items-baseline border-b border-slate-800 pb-4">
