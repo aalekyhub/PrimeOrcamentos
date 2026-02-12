@@ -1709,7 +1709,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         {
                             activeTab === 'resumo' && (
                                 <div className="max-w-4xl mx-auto space-y-6">
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                                         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                                             <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Materiais</span>
                                             <span className="text-2xl font-bold text-slate-800">R$ {totalMaterial.toFixed(2)}</span>

@@ -1479,7 +1479,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
 
                         {activeTab === 'resumo' && (
                             <div className="max-w-4xl mx-auto">
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-8">
                                     <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                                         <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Materiais</span>
                                         <span className="text-2xl font-bold text-slate-800">R$ {totalMaterial.toFixed(2)}</span>
@@ -1491,6 +1491,10 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                     <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                                         <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Indiretos</span>
                                         <span className="text-2xl font-bold text-slate-800">R$ {totalIndirect.toFixed(2)}</span>
+                                    </div>
+                                    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-blue-500">
+                                        <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Impostos</span>
+                                        <span className="text-2xl font-bold text-slate-800">R$ {totalTaxes.toFixed(2)}</span>
                                     </div>
                                 </div>
 
