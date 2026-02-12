@@ -1680,9 +1680,9 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         <div className="bg-slate-100 p-4 rounded-xl border border-slate-200">
                                             <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Outras Taxas / Impostos Personalizados</h4>
                                             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                                                <div className="md:col-span-4">
+                                                <div className="md:col-span-7">
                                                     <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nome do Item</label>
-                                                    <input type="text" id="tax_name" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="Ex: Taxa Administrativa" />
+                                                    <input type="text" id="tax_name" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="Ex: BDI ou ISS" />
                                                 </div>
                                                 <div className="md:col-span-3">
                                                     <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Taxa (%)</label>
@@ -1691,42 +1691,20 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         id="tax_rate"
                                                         className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none"
                                                         placeholder="0.00"
-                                                        onChange={(e) => {
-                                                            const val = parseFloat(e.target.value) || 0;
-                                                            const valInput = document.getElementById('tax_val') as HTMLInputElement;
-                                                            if (val > 0) {
-                                                                const calc = totalDirect * (val / 100);
-                                                                valInput.value = calc.toFixed(2);
-                                                                valInput.disabled = true;
-                                                                valInput.classList.add('bg-slate-100', 'text-slate-500');
-                                                            } else {
-                                                                valInput.disabled = false;
-                                                                valInput.classList.remove('bg-slate-100', 'text-slate-500');
-                                                            }
-                                                        }}
                                                     />
-                                                </div>
-                                                <div className="md:col-span-3">
-                                                    <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Valor Fixo (R$)</label>
-                                                    <input type="number" id="tax_val" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="0.00" />
                                                 </div>
                                                 <div className="md:col-span-2">
                                                     <button
                                                         onClick={() => {
                                                             const name = (document.getElementById('tax_name') as HTMLInputElement).value;
                                                             const rate = parseFloat((document.getElementById('tax_rate') as HTMLInputElement).value) || 0;
-                                                            const val = parseFloat((document.getElementById('tax_val') as HTMLInputElement).value) || 0;
 
                                                             if (!name) return notify("Nome obrigatório", "error");
 
-                                                            handleAddTax(name.toUpperCase(), rate, val);
+                                                            handleAddTax(name.toUpperCase(), rate, 0);
 
                                                             (document.getElementById('tax_name') as HTMLInputElement).value = '';
                                                             (document.getElementById('tax_rate') as HTMLInputElement).value = '';
-                                                            (document.getElementById('tax_val') as HTMLInputElement).value = '';
-                                                            const valInput = document.getElementById('tax_val') as HTMLInputElement;
-                                                            valInput.disabled = false;
-                                                            valInput.classList.remove('bg-slate-100', 'text-slate-500');
                                                         }}
                                                         className="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 font-bold text-xs h-9 shadow-sm flex items-center justify-center gap-2"
                                                     >
@@ -1734,7 +1712,6 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                     </button>
                                                 </div>
                                             </div>
-                                            <p className="text-[10px] text-slate-400 mt-2">* BDI sobre o Custo Direto (R$ {totalDirect.toFixed(2)}). Demais taxas aplicadas via Gross Up sobre a NF (R$ {totalGeneral.toFixed(2)}).</p>
                                         </div>
 
                                         <div className="col-span-full mt-2">
