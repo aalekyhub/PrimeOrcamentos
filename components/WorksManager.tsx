@@ -619,9 +619,9 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         <tbody>
                             ${labor.map(l => `
                                 <tr style="border-bottom: 1px solid #f1f5f9;">
-                                    <td style="padding: 10px; font-size: 11px; font-weight: 600;">${l.role}</td>
+                                    <td style="padding: 10px; font-size: 11px; font-weight: 600;">${l.role} | (${l.cost_type})</td>
                                     <td style="padding: 10px; font-size: 11px; text-align: center;">${l.quantity}</td>
-                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${l.cost_type}</td>
+                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${l.unit || '-'}</td>
                                     <td style="padding: 10px; font-size: 11px; text-align: right; font-weight: 700;">R$ ${l.total_cost.toFixed(2)}</td>
                                 </tr>
                             `).join('')}
