@@ -286,6 +286,14 @@ export interface WorkHeader {
   total_real_cost?: number;
 }
 
+export interface WorkTax {
+  id: string;
+  work_id: string;
+  name: string;
+  rate: number;
+  value: number;
+}
+
 // --- NEW MODULE: SINAPI Integration ---
 
 export interface SinapiInsumo {

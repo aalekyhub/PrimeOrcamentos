@@ -11,7 +11,7 @@ import {
     WorkHeader, WorkService, WorkMaterial,
     WorkLabor, WorkIndirect, Customer,
     PlannedService, PlannedMaterial,
-    PlannedLabor, PlannedIndirect
+    PlannedLabor, PlannedIndirect, WorkTax
 } from '../types';
 
 interface Props {
@@ -33,12 +33,13 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
     const [materials, setMaterials] = useState<WorkMaterial[]>([]);
     const [labor, setLabor] = useState<WorkLabor[]>([]);
     const [indirects, setIndirects] = useState<WorkIndirect[]>([]);
+    const [taxes, setTaxes] = useState<WorkTax[]>([]);
 
     // Edit State
     const [editingId, setEditingId] = useState<string | null>(null);
 
     // UI State
-    const [activeTab, setActiveTab] = useState<'dados' | 'servicos' | 'recursos' | 'resumo'>('dados');
+    const [activeTab, setActiveTab] = useState<'dados' | 'servicos' | 'recursos' | 'impostos' | 'resumo'>('dados');
     const [resourceTab, setResourceTab] = useState<'material' | 'mo' | 'indireto'>('material');
     // Ref to prevent infinite loop on creation
     const creationAttemptedRef = useRef<{ [key: string]: boolean }>({});
@@ -239,6 +240,9 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
         const allIndirects = db.load('serviflow_work_indirects', []) as WorkIndirect[];
         setIndirects(allIndirects.filter(i => i.work_id === workId));
+
+        const allTaxes = db.load('serviflow_work_taxes', []) as WorkTax[];
+        setTaxes(allTaxes.filter(t => t.work_id === workId));
     };
 
     const handleCreateWork = () => {
@@ -258,6 +262,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         setMaterials([]);
         setLabor([]);
         setIndirects([]);
+        setTaxes([]);
         setActiveTab('dados');
     };
 
@@ -271,7 +276,11 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
         const currentTotal = totalMat +
             labor.reduce((acc, i) => acc + i.total_cost, 0) +
-            indirects.reduce((acc, i) => acc + i.value, 0);
+            indirects.reduce((acc, i) => acc + i.value, 0) +
+            taxes.reduce((acc, t) => {
+                const base = totalMat + labor.reduce((a, l) => a + l.total_cost, 0) + indirects.reduce((a, i) => a + i.value, 0);
+                return acc + (t.rate > 0 ? base * (t.rate / 100) : t.value);
+            }, 0);
 
         const updatedWork = {
             ...currentWork,
@@ -315,7 +324,14 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         const allIndirects = db.load('serviflow_work_indirects', []) as WorkIndirect[];
         const otherIndirects = allIndirects.filter(i => i.work_id !== currentWork.id);
         const indirectsToSave = [...otherIndirects, ...indirects.map(i => ({ ...i, work_id: currentWork.id }))];
+
         await db.save('serviflow_work_indirects', indirectsToSave);
+
+        // 5. Taxes
+        const allTaxes = db.load('serviflow_work_taxes', []) as WorkTax[];
+        const otherTaxes = allTaxes.filter(t => t.work_id !== currentWork.id);
+        const taxesToSave = [...otherTaxes, ...taxes.map(t => ({ ...t, work_id: currentWork.id }))];
+        await db.save('serviflow_work_taxes', taxesToSave);
 
         setWorks(updatedWorks);
 
@@ -395,6 +411,41 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             await db.save('serviflow_work_indirects', indirectsToSave);
         }
         notify("Custo indireto excluído", "success");
+    };
+
+    const handleDeleteTax = async (id: string) => {
+        if (!confirm('Tem certeza que deseja excluir este imposto?')) return;
+
+        const updatedTaxes = taxes.filter(t => t.id !== id);
+        setTaxes(updatedTaxes);
+
+        await db.remove('serviflow_work_taxes', id);
+
+        if (currentWork) {
+            const allTaxes = db.load('serviflow_work_taxes', []) as WorkTax[];
+            const otherTaxes = allTaxes.filter(t => t.work_id !== currentWork.id);
+            const taxesToSave = [...otherTaxes, ...updatedTaxes];
+            await db.save('serviflow_work_taxes', taxesToSave);
+        }
+        notify("Imposto excluído", "success");
+    };
+
+    const handleAddTax = (name: string, rate: number, value: number) => {
+        if (!currentWork) return;
+        const newTax: WorkTax = {
+            id: db.generateId('WTAX'),
+            work_id: currentWork.id,
+            name,
+            rate,
+            value: rate > 0 ? 0 : value
+        };
+        const newTaxes = [...taxes, newTax];
+        setTaxes(newTaxes);
+
+        // Immediate persistence for adding? Or wait for save?
+        // To be consistent with others (except delete), we wait for save. But usually tabs items are added locally.
+        // However, deletions are immediate.
+        notify("Imposto adicionado (lembre-se de salvar)", "success");
     };
 
 
@@ -670,7 +721,18 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
     }, [labor, services]);
 
     const totalIndirect = useMemo(() => indirects.reduce((acc, i) => acc + i.value, 0), [indirects]);
-    const totalGeneral = totalMaterial + totalLabor + totalIndirect;
+
+    // Total Direct Costs (Base for Taxes)
+    const totalDirect = useMemo(() => totalMaterial + totalLabor + totalIndirect, [totalMaterial, totalLabor, totalIndirect]);
+
+    const totalTaxes = useMemo(() => {
+        return taxes.reduce((acc, t) => {
+            const val = t.rate > 0 ? totalDirect * (t.rate / 100) : t.value;
+            return acc + val;
+        }, 0);
+    }, [taxes, totalDirect]);
+
+    const totalGeneral = totalDirect + totalTaxes;
 
     if (embeddedPlanId && !currentWork) {
         return <div className="p-10 text-center text-slate-500">Preparando ambiente de execução...</div>;
@@ -759,6 +821,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 { id: 'dados', label: 'Dados da Obra', icon: FileText },
                                 { id: 'servicos', label: 'Serviços', icon: Building2 },
                                 { id: 'recursos', label: 'Gastos Detalhados', icon: Truck },
+                                { id: 'impostos', label: 'Impostos', icon: DollarSign },
                                 { id: 'resumo', label: 'Resumo de Custo', icon: PieChart },
                             ].map(tab => (
                                 <button
@@ -1479,6 +1542,94 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         )
                         }
 
+                        {activeTab === 'impostos' && (
+                            <div className="max-w-4xl mx-auto">
+                                <div className="bg-white p-6 rounded-xl border border-slate-200 mb-6">
+                                    <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider"><DollarSign size={16} /> Configurar Impostos e Taxas</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                                        <div className="md:col-span-5">
+                                            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nome do Imposto</label>
+                                            <input type="text" id="tax_name" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="Ex: BDI, ISS, Imposto..." />
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Taxa (%)</label>
+                                            <input
+                                                type="number"
+                                                id="tax_rate"
+                                                className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none"
+                                                placeholder="0.00"
+                                                onChange={(e) => {
+                                                    const val = parseFloat(e.target.value) || 0;
+                                                    const valInput = document.getElementById('tax_val') as HTMLInputElement;
+                                                    if (val > 0) {
+                                                        const calc = totalDirect * (val / 100);
+                                                        valInput.value = calc.toFixed(2);
+                                                        valInput.disabled = true;
+                                                        valInput.classList.add('bg-slate-100', 'text-slate-500');
+                                                    } else {
+                                                        valInput.disabled = false;
+                                                        valInput.classList.remove('bg-slate-100', 'text-slate-500');
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="md:col-span-3">
+                                            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Valor (R$)</label>
+                                            <input type="number" id="tax_val" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="0.00" />
+                                        </div>
+                                        <div className="md:col-span-2">
+                                            <button
+                                                onClick={() => {
+                                                    const name = (document.getElementById('tax_name') as HTMLInputElement).value;
+                                                    const rate = parseFloat((document.getElementById('tax_rate') as HTMLInputElement).value) || 0;
+                                                    const val = parseFloat((document.getElementById('tax_val') as HTMLInputElement).value) || 0;
+
+                                                    if (!name) return notify("Nome obrigatório", "error");
+
+                                                    handleAddTax(name.toUpperCase(), rate, val);
+
+                                                    (document.getElementById('tax_name') as HTMLInputElement).value = '';
+                                                    (document.getElementById('tax_rate') as HTMLInputElement).value = '';
+                                                    (document.getElementById('tax_val') as HTMLInputElement).value = '';
+                                                    const valInput = document.getElementById('tax_val') as HTMLInputElement;
+                                                    valInput.disabled = false;
+                                                    valInput.classList.remove('bg-slate-100', 'text-slate-500');
+                                                }}
+                                                className="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 font-bold text-xs h-9 shadow-sm"
+                                            >
+                                                ADICIONAR
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <p className="text-[10px] text-slate-400 mt-2">* Taxas em % são calculadas sobre a soma de Materiais + Mão de Obra + Indiretos (Base: R$ {totalDirect.toFixed(2)})</p>
+                                </div>
+
+                                <div className="space-y-2">
+                                    {taxes.map(t => (
+                                        <div key={t.id} className="bg-white p-4 rounded-lg shadow-sm border border-slate-100 flex justify-between items-center group">
+                                            <div>
+                                                <p className="font-bold text-slate-800">{t.name}</p>
+                                                <p className="text-xs text-slate-500">
+                                                    {t.rate > 0 ? `${t.rate}% sobre Base` : 'Valor Fixo'}
+                                                </p>
+                                            </div>
+                                            <div className="flex items-center gap-4">
+                                                <p className="font-bold text-emerald-600">
+                                                    R$ {(t.rate > 0 ? totalDirect * (t.rate / 100) : t.value).toFixed(2)}
+                                                </p>
+                                                <button onClick={() => handleDeleteTax(t.id)} className="text-slate-300 hover:text-red-500 transition-colors">
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {taxes.length === 0 && (
+                                        <div className="text-center py-8 text-slate-400">Nenhum imposto ou taxa configurado.</div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
                         {
                             activeTab === 'resumo' && (
                                 <div className="max-w-4xl mx-auto space-y-6">
@@ -1494,6 +1645,10 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                                             <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Indiretos</span>
                                             <span className="text-2xl font-bold text-slate-800">R$ {totalIndirect.toFixed(2)}</span>
+                                        </div>
+                                        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-blue-500">
+                                            <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Impostos</span>
+                                            <span className="text-2xl font-bold text-slate-800">R$ {totalTaxes.toFixed(2)}</span>
                                         </div>
                                     </div>
 
