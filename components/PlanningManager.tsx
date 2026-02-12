@@ -3,7 +3,7 @@ import html2pdf from 'html2pdf.js';
 import {
     Building2, Users, Truck, HardHat, FileText,
     Plus, Trash2, Save, ChevronRight, Calculator,
-    PieChart, ArrowRight, DollarSign, Pencil, Check, X, Printer
+    PieChart, ArrowRight, DollarSign, Pencil, Check, X, Printer, Percent
 } from 'lucide-react';
 import { useNotify } from './ToastProvider';
 import { db } from '../services/db';
