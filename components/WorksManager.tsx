@@ -605,14 +605,14 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                 ` : ''}
 
                 <!-- SEÇÃO MÃO DE OBRA -->
-                ${labor.length > 0 ? `
                 <div style="margin-bottom: 30px;">
-                    <h3 style="font-size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; border-left: 4px solid #f59e0b; padding-left: 10px; margin-bottom: 15px;">3. Recursos Humanos / Mão de Obra</h3>
+                    <h3 style="font-size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; border-left: 4px solid #3b82f6; padding-left: 10px; margin-bottom: 15px;">3. Recursos Humanos / Mão de Obra</h3>
                     <table style="width: 100%; border-collapse: collapse;">
                         <thead>
                             <tr style="background: #f1f5f9; border-bottom: 1px solid #e2e8f0;">
                                 <th style="padding: 10px; text-align: left; font-size: 10px; color: #64748b;">FUNÇÃO / TIPO</th>
-                                <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 100px;">CARGA</th>
+                                <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 60px;">QTD</th>
+                                <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 80px;">UND</th>
                                 <th style="padding: 10px; text-align: right; font-size: 10px; color: #64748b; width: 100px;">CUSTO TOTAL</th>
                             </tr>
                         </thead>
@@ -620,14 +620,14 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                             ${labor.map(l => `
                                 <tr style="border-bottom: 1px solid #f1f5f9;">
                                     <td style="padding: 10px; font-size: 11px; font-weight: 600;">${l.role}</td>
-                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${l.quantity} ${l.cost_type}</td>
+                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${l.quantity}</td>
+                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${l.cost_type}</td>
                                     <td style="padding: 10px; font-size: 11px; text-align: right; font-weight: 700;">R$ ${l.total_cost.toFixed(2)}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
                     </table>
                 </div>
-                ` : ''}
 
                 <!-- SEÇÃO CUSTOS INDIRETOS -->
                 ${indirects.length > 0 ? `
@@ -1601,7 +1601,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         <div className="bg-white p-4 rounded-xl border border-slate-200">
                                             <div className="flex justify-between items-center mb-4">
                                                 <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                                    <Percent size={14} className="text-emerald-500" /> Impostos e BDI
+                                                    <Percent size={14} className="text-blue-500" /> Impostos e BDI Padronizados
                                                 </h4>
                                                 <button
                                                     type="button"
@@ -1631,7 +1631,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         setTaxes(newTaxes);
                                                         notify("Impostos padrão carregados!", "success");
                                                     }}
-                                                    className="text-[10px] font-bold text-emerald-600 hover:text-emerald-800 uppercase tracking-tighter bg-emerald-50 px-2 py-1 rounded"
+                                                    className="text-[10px] font-bold text-blue-600 hover:text-blue-800 uppercase tracking-tighter bg-blue-50 px-2 py-1 rounded"
                                                 >
                                                     Carregar Padrão (ISS/PIS/COF/INS)
                                                 </button>
@@ -1639,9 +1639,9 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
                                             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                                                 {[
-                                                    { name: 'BDI', label: 'BDI (%)', color: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
+                                                    { name: 'BDI', label: 'BDI (%)', color: 'bg-indigo-50 text-indigo-700 border-indigo-100' },
                                                     { name: 'ISS', label: 'ISS (%)', color: 'bg-blue-50 text-blue-700 border-blue-100' },
-                                                    { name: 'PIS', label: 'PIS (%)', color: 'bg-indigo-50 text-indigo-700 border-indigo-100' },
+                                                    { name: 'PIS', label: 'PIS (%)', color: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
                                                     { name: 'COFINS', label: 'COFINS (%)', color: 'bg-slate-50 text-slate-700 border-slate-100' },
                                                     { name: 'INSS', label: 'INSS (%)', color: 'bg-orange-50 text-orange-700 border-orange-100' }
                                                 ].map(tax => (
@@ -1682,14 +1682,14 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                                 <div className="md:col-span-7">
                                                     <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nome do Item</label>
-                                                    <input type="text" id="tax_name" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="Ex: BDI ou ISS" />
+                                                    <input type="text" id="tax_name" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none" placeholder="Ex: Taxa Administrativa" />
                                                 </div>
                                                 <div className="md:col-span-3">
                                                     <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Taxa (%)</label>
                                                     <input
                                                         type="number"
                                                         id="tax_rate"
-                                                        className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none"
+                                                        className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none"
                                                         placeholder="0.00"
                                                     />
                                                 </div>
@@ -1706,7 +1706,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             (document.getElementById('tax_name') as HTMLInputElement).value = '';
                                                             (document.getElementById('tax_rate') as HTMLInputElement).value = '';
                                                         }}
-                                                        className="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 font-bold text-xs h-9 shadow-sm flex items-center justify-center gap-2"
+                                                        className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-bold text-xs h-9 shadow-sm flex items-center justify-center gap-2"
                                                     >
                                                         <Plus size={16} /> ADICIONAR
                                                     </button>
@@ -1720,17 +1720,17 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 {taxes.filter(t => (t.rate > 0 || t.value > 0)).map(t => (
                                                     <div key={t.id} className="bg-white p-3 rounded-lg border border-slate-100 flex justify-between items-center shadow-sm">
                                                         <div>
-                                                            <span className="font-black text-xs text-slate-800">{t.name}</span>
+                                                            <span className="font-black text-xs text-slate-700">{t.name}</span>
                                                             <span className="text-[10px] font-bold text-slate-400 ml-2">
                                                                 {t.rate > 0 ? `${t.rate}%` : `R$ ${t.value.toFixed(2)}`}
                                                             </span>
                                                         </div>
                                                         <div className="flex items-center gap-4">
-                                                            <span className="font-bold text-xs text-emerald-600">
+                                                            <span className="font-bold text-xs text-blue-600">
                                                                 R$ {(t.rate > 0 ? (t.name === 'BDI' ? totalDirect : totalGeneral) * (t.rate / 100) : t.value).toFixed(2)}
                                                             </span>
                                                             <button onClick={() => handleDeleteTax(t.id)} className="text-slate-300 hover:text-red-500 transition-colors">
-                                                                <Trash2 size={16} />
+                                                                <Trash2 size={14} />
                                                             </button>
                                                         </div>
                                                     </div>
@@ -1787,8 +1787,9 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         )}
                     </div>
                 </div>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 };
 
