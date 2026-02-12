@@ -1245,11 +1245,6 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
                         {activeTab === 'recursos' && (
                             <div className="max-w-4xl mx-auto">
-                                <div className="flex gap-2 mb-6 justify-center">
-                                    <button onClick={() => setResourceTab('material')} className={`px - 4 py - 1.5 rounded - full text - xs font - bold transition - all ${resourceTab === 'material' ? 'bg-emerald-800 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-emerald-50'} `}>Materiais</button>
-                                    <button onClick={() => setResourceTab('mo')} className={`px - 4 py - 1.5 rounded - full text - xs font - bold transition - all ${resourceTab === 'mo' ? 'bg-emerald-800 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-emerald-50'} `}>Mão de Obra</button>
-                                    <button onClick={() => setResourceTab('indireto')} className={`px - 4 py - 1.5 rounded - full text - xs font - bold transition - all ${resourceTab === 'indireto' ? 'bg-emerald-800 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-emerald-50'} `}>Indiretos</button>
-                                </div>
 
                                 {/* MATERIAIS CABEÇALHO COM BOTÃO IMPRIMIR */}
                                 {resourceTab === 'material' && (
