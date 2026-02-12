@@ -3,10 +3,11 @@ import html2pdf from 'html2pdf.js';
 import {
     Building2, Users, Truck, HardHat, FileText,
     Plus, Trash2, Save, ChevronRight, Calculator,
-    PieChart, ArrowRight, DollarSign, Calendar, Pencil, Check, X, Printer, Percent
+    PieChart, ArrowRight, DollarSign, Calendar, Pencil, Check, X, Printer, Percent, Eye
 } from 'lucide-react';
 import { useNotify } from './ToastProvider';
 import { db } from '../services/db';
+import ReportPreview from './ReportPreview';
 import {
     WorkHeader, WorkService, WorkMaterial,
     WorkLabor, WorkIndirect, Customer,
@@ -40,6 +41,10 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
     const [activeTab, setActiveTab] = useState<'dados' | 'servicos' | 'recursos' | 'resumo'>('dados');
     const [resourceTab, setResourceTab] = useState<'material' | 'mo' | 'indireto' | 'impostos'>('material');
+
+    // Preview UI State
+    const [showPreview, setShowPreview] = useState(false);
+    const [previewContent, setPreviewContent] = useState({ title: '', html: '', filename: '' });
 
     // Ref to prevent infinite loop on creation
     const creationAttemptedRef = useRef<{ [key: string]: boolean }>({});
@@ -720,6 +725,26 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         html2pdf().set(opt).from(element).save();
     };
 
+    const handlePreviewMaterials = () => {
+        if (!currentWork || materials.length === 0) return;
+        setPreviewContent({
+            title: 'Lista de Materiais',
+            html: generateMaterialsReportHtml(),
+            filename: `Material_Obra_${currentWork.name.replace(/\s+/g, '_')}.pdf`
+        });
+        setShowPreview(true);
+    };
+
+    const handlePreviewFull = () => {
+        if (!currentWork) return;
+        setPreviewContent({
+            title: 'Relatório Executivo de Obra',
+            html: generateFullReportHtml(),
+            filename: `Relatorio_Obra_${currentWork.name.replace(/\s+/g, '_')}.pdf`
+        });
+        setShowPreview(true);
+    };
+
     const totalMaterial = useMemo(() => {
         const fromMats = materials.reduce((acc, i) => acc + i.total_cost, 0);
         const fromSvcs = services.reduce((acc, s) => acc + (s.unit_material_cost * s.quantity), 0);
@@ -1325,10 +1350,10 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             <h3 className="font-bold text-slate-800 flex items-center gap-2"><Truck size={18} /> Materiais da Obra</h3>
                                             {materials.length > 0 && (
                                                 <button
-                                                    onClick={handlePrintMaterials}
+                                                    onClick={handlePreviewMaterials}
                                                     className="bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 hover:bg-slate-50 transition-all shadow-sm"
                                                 >
-                                                    <Printer size={16} /> Imprimir Lista
+                                                    <Eye size={16} className="text-emerald-600" /> Visualizar Lista
                                                 </button>
                                             )}
                                         </div>
@@ -1777,11 +1802,16 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
                                 <div className="flex justify-end gap-2">
                                     <button
-                                        onClick={handlePrintFull}
-                                        className="bg-white border border-slate-200 text-slate-600 px-6 py-3 rounded-xl text-sm font-bold flex items-center gap-3 hover:bg-slate-50 transition-all shadow-sm group"
+                                        onClick={handlePreviewFull}
+                                        className="bg-white border border-slate-200 text-slate-600 px-6 py-4 rounded-2xl text-base font-black flex items-center gap-4 hover:bg-slate-50 transition-all shadow-md group border-b-4 border-b-emerald-600 active:border-b-0 active:translate-y-1"
                                     >
-                                        <Printer size={20} className="text-emerald-600 group-hover:scale-110 transition-transform" />
-                                        Imprimir Relatório Completo da Obra
+                                        <div className="bg-emerald-100 p-2 rounded-xl group-hover:scale-110 transition-transform">
+                                            <Eye size={24} className="text-emerald-600" />
+                                        </div>
+                                        <div className="text-left">
+                                            <span className="block text-slate-800 leading-none">Visualizar e Gerar PDF</span>
+                                            <span className="text-[10px] text-slate-400 uppercase tracking-widest leading-none font-bold">Relatório Completo da Obra</span>
+                                        </div>
                                     </button>
                                 </div>
 
@@ -1800,6 +1830,13 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                 </div>
             )
             }
+            <ReportPreview
+                isOpen={showPreview}
+                onClose={() => setShowPreview(false)}
+                title={previewContent.title}
+                htmlContent={previewContent.html}
+                filename={previewContent.filename}
+            />
         </div >
     );
 };

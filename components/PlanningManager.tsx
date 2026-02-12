@@ -3,10 +3,11 @@ import html2pdf from 'html2pdf.js';
 import {
     Building2, Users, Truck, HardHat, FileText,
     Plus, Trash2, Save, ChevronRight, Calculator,
-    PieChart, ArrowRight, DollarSign, Pencil, Check, X, Printer, Percent
+    PieChart, ArrowRight, DollarSign, Pencil, Check, X, Printer, Percent, Eye
 } from 'lucide-react';
 import { useNotify } from './ToastProvider';
 import { db } from '../services/db';
+import ReportPreview from './ReportPreview';
 import {
     PlanningHeader, PlannedService, PlannedMaterial,
     PlannedLabor, PlannedIndirect, PlanTax, Customer
@@ -45,6 +46,10 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
 
     const [activeTab, setActiveTab] = useState<'dados' | 'servicos' | 'recursos' | 'resumo'>('dados');
     const [resourceTab, setResourceTab] = useState<'material' | 'mo' | 'indireto' | 'impostos'>('material');
+
+    // Preview UI State
+    const [showPreview, setShowPreview] = useState(false);
+    const [previewContent, setPreviewContent] = useState({ title: '', html: '', filename: '' });
 
     // Ref to prevent infinite loop on creation
     const creationAttemptedRef = useRef(false);
@@ -479,6 +484,16 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
         };
 
         html2pdf().set(opt).from(element).save();
+    };
+
+    const handlePreviewFull = () => {
+        if (!currentPlan) return;
+        setPreviewContent({
+            title: 'Planejamento Executivo de Obra',
+            html: generateFullReportHtml(),
+            filename: `Planejamento_Obra_${currentPlan.name.replace(/\s+/g, '_')}.pdf`
+        });
+        setShowPreview(true);
     };
 
     // Calculations
@@ -1503,11 +1518,16 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
 
                                 <div className="flex justify-end gap-2 mb-6">
                                     <button
-                                        onClick={handlePrintFull}
-                                        className="bg-white border border-slate-200 text-slate-600 px-6 py-3 rounded-xl text-sm font-bold flex items-center gap-3 hover:bg-slate-50 transition-all shadow-sm group"
+                                        onClick={handlePreviewFull}
+                                        className="bg-white border border-slate-200 text-slate-600 px-6 py-4 rounded-2xl text-base font-black flex items-center gap-4 hover:bg-slate-50 transition-all shadow-md group border-b-4 border-b-blue-600 active:border-b-0 active:translate-y-1"
                                     >
-                                        <Printer size={20} className="text-blue-600 group-hover:scale-110 transition-transform" />
-                                        Imprimir Planejamento Completo
+                                        <div className="bg-blue-100 p-2 rounded-xl group-hover:scale-110 transition-transform">
+                                            <Eye size={24} className="text-blue-600" />
+                                        </div>
+                                        <div className="text-left">
+                                            <span className="block text-slate-800 leading-none">Visualizar e Gerar PDF</span>
+                                            <span className="text-[10px] text-slate-400 uppercase tracking-widest leading-none font-bold">Relatório Completo</span>
+                                        </div>
                                     </button>
                                 </div>
 
@@ -1536,6 +1556,13 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                 </div >
             )
             }
+            <ReportPreview
+                isOpen={showPreview}
+                onClose={() => setShowPreview(false)}
+                title={previewContent.title}
+                htmlContent={previewContent.html}
+                filename={previewContent.filename}
+            />
         </div >
     );
 };
