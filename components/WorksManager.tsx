@@ -744,7 +744,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             {(!activeWorkId && !embeddedPlanId) ? (
                 <div>
                     <div className="flex justify-between items-center mb-6">
-                        <h1 className="text-2xl font-bold text-emerald-800">Gestão de Obras (Realizado)</h1>
+                        <h1 className="text-2xl font-bold text-emerald-800">Gestão de Obras</h1>
                         <button onClick={handleCreateWork} className="bg-emerald-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-emerald-700">
                             <Plus size={20} /> Nova Obra
                         </button>
@@ -793,9 +793,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         <HardHat className="text-emerald-600" />
                                         {currentWork?.name}
                                     </h2>
-                                    <p className="text-xs text-emerald-600 uppercase tracking-widest font-semibold flex items-center gap-1">
-                                        <Calendar size={12} /> Início: {new Date(currentWork?.start_date || '').toLocaleDateString()}
-                                    </p>
+                                    <p className="text-xs text-emerald-600 uppercase tracking-widest font-semibold">{currentWork?.type} • GESTÃO DE CUSTO REALIZADO</p>
                                 </div>
                             </div>
                             <div className="flex gap-2">
@@ -838,7 +836,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         {/* Sub-Header forms for Add (Fixed) */}
                         {activeTab === 'servicos' && (
                             <div className="p-6 border-t border-slate-100 bg-white">
-                                <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider"><Building2 size={16} /> Lançar Serviço Realizado</h3>
+                                <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider"><Building2 size={16} /> Adicionar Serviço</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                     <div className="md:col-span-4">
                                         <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Descrição</label>
@@ -893,7 +891,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             }}
                                             className="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 font-bold text-xs h-9 flex items-center justify-center gap-1 shadow-sm"
                                         >
-                                            <Plus size={14} /> LANÇAR
+                                            <Plus size={14} /> ADICIONAR
                                         </button>
                                     </div>
                                 </div>
@@ -959,7 +957,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                     }}
                                                     className="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 font-bold text-xs h-9 shadow-sm"
                                                 >
-                                                    LANÇAR MATERIAL
+                                                    <Plus size={14} /> ADICIONAR
                                                 </button>
                                             </div>
                                         </div>
@@ -1019,7 +1017,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                     }}
                                                     className="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 font-bold text-xs h-9 shadow-sm"
                                                 >
-                                                    LANÇAR M.O.
+                                                    <Plus size={14} /> ADICIONAR
                                                 </button>
                                             </div>
                                         </div>
@@ -1539,7 +1537,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         {/* Predefined Taxes Grid */}
                                         <div className="bg-white p-4 rounded-xl border border-slate-200">
                                             <div className="flex justify-between items-center mb-4">
-                                                <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                                                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
                                                     <Percent size={14} className="text-emerald-500" /> Impostos e BDI Padronizados
                                                 </h4>
                                                 <button
@@ -1618,11 +1616,11 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Outras Taxas / Impostos Personalizados</h4>
                                             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                                 <div className="md:col-span-4">
-                                                    <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nome Taxa/Imposto</label>
+                                                    <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nome do Item</label>
                                                     <input type="text" id="tax_name" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="Ex: Taxa Administrativa" />
                                                 </div>
                                                 <div className="md:col-span-3">
-                                                    <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Taxa (%) sobre Base</label>
+                                                    <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Taxa (%)</label>
                                                     <input
                                                         type="number"
                                                         id="tax_rate"
@@ -1675,7 +1673,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         </div>
 
                                         <div className="col-span-full mt-2">
-                                            <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Detalhamento dos Custos Indiretos / BDI Realizado</h4>
+                                            <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Detalhamento dos Custos Indiretos / BDI</h4>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                                 {taxes.filter(t => (t.rate > 0 || t.value > 0)).map(t => (
                                                     <div key={t.id} className="bg-white p-3 rounded-lg border border-slate-100 flex justify-between items-center shadow-sm">
@@ -1740,7 +1738,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
                                     <div className="bg-emerald-900 text-white p-8 rounded-2xl flex justify-between items-center shadow-xl">
                                         <div>
-                                            <p className="text-emerald-200 text-sm font-bold uppercase tracking-widest mb-1">Custo Total Realizado</p>
+                                            <p className="text-emerald-200 text-sm font-bold uppercase tracking-widest mb-1">Custo Realizado Total</p>
                                             <p className="text-4xl font-bold">R$ {totalGeneral.toFixed(2)}</p>
                                         </div>
                                         <div className="text-right">
