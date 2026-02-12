@@ -3,8 +3,9 @@ import html2pdf from 'html2pdf.js';
 import {
     Building2, Users, Truck, HardHat, FileText,
     Plus, Trash2, Save, ChevronRight, Calculator,
-    PieChart, ArrowRight, DollarSign, Pencil, Check, X, Printer, Percent
+    PieChart, ArrowRight, DollarSign, Pencil, Check, X, Printer, Percent, Eye
 } from 'lucide-react';
+import ReportPreview from './ReportPreview';
 import { useNotify } from './ToastProvider';
 import { db } from '../services/db';
 import {
@@ -43,9 +44,12 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
     const [editPrice1, setEditPrice1] = useState(0); // Material / Unit Price
     const [editPrice2, setEditPrice2] = useState(0); // Labor / Extra
 
-    // UI State
     const [activeTab, setActiveTab] = useState<'dados' | 'servicos' | 'recursos' | 'resumo'>('dados');
     const [resourceTab, setResourceTab] = useState<'material' | 'mo' | 'indireto' | 'impostos'>('material');
+
+    // Preview UI State
+    const [showPreview, setShowPreview] = useState(false);
+    const [previewContent, setPreviewContent] = useState({ title: '', html: '', filename: '' });
 
     // Ref to prevent infinite loop on creation
     const creationAttemptedRef = useRef(false);
@@ -278,14 +282,13 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
     };
 
 
-    const handlePrintFull = () => {
-        if (!currentPlan) return;
+    const generateFullReportHtml = () => {
+        if (!currentPlan) return '';
 
         const customer = customers.find(c => c.id === currentPlan.client_id);
         const totalServices = services.reduce((acc, s) => acc + s.total_cost, 0);
 
-        const printWindow = document.createElement('div');
-        printWindow.innerHTML = `
+        return `
             <div style="font-family: sans-serif; padding: 30px; color: #1e293b; max-width: 800px; margin: 0 auto; background: white;">
                 <!-- HEADER -->
                 <div style="display: flex; justify-content: space-between; align-items: start; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 30px;">
@@ -463,6 +466,13 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                 </div>
             </div>
         `;
+    };
+
+    const handlePrintFull = () => {
+        if (!currentPlan) return;
+        const html = generateFullReportHtml();
+        const element = document.createElement('div');
+        element.innerHTML = html;
 
         const opt = {
             margin: [10, 10, 10, 10] as [number, number, number, number],
@@ -473,7 +483,17 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
             pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
         };
 
-        html2pdf().set(opt).from(printWindow).save();
+        html2pdf().set(opt).from(element).save();
+    };
+
+    const handlePreviewFull = () => {
+        if (!currentPlan) return;
+        setPreviewContent({
+            title: 'Planejamento Executivo de Obra',
+            html: generateFullReportHtml(),
+            filename: `Planejamento_Obra_${currentPlan.name.replace(/\s+/g, '_')}.pdf`
+        });
+        setShowPreview(true);
     };
 
     // Calculations
