@@ -47,12 +47,18 @@ const Dashboard: React.FC<DashboardProps> = ({ stats, orders, transactions, curr
     { name: 'Serviços Ativos', value: safeOrders.filter(o => o.status === OrderStatus.IN_PROGRESS).length },
     { name: 'Finalizados', value: safeOrders.filter(o => o.status === OrderStatus.COMPLETED).length },
   ].filter(v => v.value > 0);
+  const greeting = useMemo(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Bom dia';
+    if (hour < 18) return 'Boa tarde';
+    return 'Boa noite';
+  }, []);
 
   return (
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div>
         <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tighter">Painel de Controle</h2>
-        <p className="text-slate-400 dark:text-slate-500 font-normal text-lg mt-2 font-mono">Bom dia, {company.name}! Aqui está o resumo do seu negócio hoje.</p>
+        <p className="text-slate-400 dark:text-slate-500 font-normal text-lg mt-2 font-mono">{greeting}, {company.name}! Aqui está o resumo do seu negócio hoje.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
