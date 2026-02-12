@@ -482,14 +482,28 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
 
     // Calculate Taxes
     const totalDirect = totalServices + totalMaterial + totalLabor + totalIndirect;
+
+    // Separate BDI as the first layer of calculation
+    const bdiTax = useMemo(() => taxes.find(t => t.name === 'BDI'), [taxes]);
+    const otherTaxes = useMemo(() => taxes.filter(t => t.name !== 'BDI'), [taxes]);
+
+    const bdiValue = useMemo(() => {
+        if (!bdiTax) return 0;
+        return bdiTax.rate > 0 ? (totalDirect * (bdiTax.rate / 100)) : bdiTax.value;
+    }, [bdiTax, totalDirect]);
+
+    // Subtotal (Base for other taxes) = Direct Cost + BDI
+    const subtotalWithBDI = totalDirect + bdiValue;
+
     const totalTaxes = useMemo(() => {
-        return taxes.reduce((acc, t) => {
+        const otherTaxesValue = otherTaxes.reduce((acc, t) => {
             if (t.rate > 0) {
-                return acc + (totalDirect * (t.rate / 100));
+                return acc + (subtotalWithBDI * (t.rate / 100));
             }
             return acc + t.value;
         }, 0);
-    }, [taxes, totalDirect]);
+        return bdiValue + otherTaxesValue;
+    }, [otherTaxes, subtotalWithBDI, bdiValue]);
 
     const totalGeneral = totalDirect + totalTaxes;
 
@@ -965,6 +979,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             <Plus size={16} /> ADICIONAR
                                                         </button>
                                                     </div>
+                                                    <p className="text-[10px] text-slate-400 mt-2">* BDI calculado sobre o Custo Direto (R$ {totalDirect.toFixed(2)}). Demais taxas sobre Custo Direto + BDI (R$ {subtotalWithBDI.toFixed(2)}).</p>
                                                 </div>
                                             </div>
 
@@ -981,9 +996,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             </div>
                                                             <div className="flex items-center gap-4">
                                                                 <span className="font-bold text-xs text-blue-600">
-                                                                    R$ {t.rate > 0
-                                                                        ? ((totalMaterial + totalLabor + totalIndirect + (services.reduce((acc, s) => acc + s.total_cost, 0))) * (t.rate / 100)).toFixed(2)
-                                                                        : t.value.toFixed(2)}
+                                                                    R$ {(t.rate > 0 ? (t.name === 'BDI' ? totalDirect : subtotalWithBDI) * (t.rate / 100) : t.value).toFixed(2)}
                                                                 </span>
                                                                 <button onClick={() => handleDeleteTax(t.id)} className="text-slate-300 hover:text-red-500 transition-colors">
                                                                     <Trash2 size={14} />

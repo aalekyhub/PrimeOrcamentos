@@ -725,12 +725,25 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
     // Total Direct Costs (Base for Taxes)
     const totalDirect = useMemo(() => totalMaterial + totalLabor + totalIndirect, [totalMaterial, totalLabor, totalIndirect]);
 
+    // Separate BDI as the first layer of calculation
+    const bdiTax = useMemo(() => taxes.find(t => t.name === 'BDI'), [taxes]);
+    const otherTaxes = useMemo(() => taxes.filter(t => t.name !== 'BDI'), [taxes]);
+
+    const bdiValue = useMemo(() => {
+        if (!bdiTax) return 0;
+        return bdiTax.rate > 0 ? (totalDirect * (bdiTax.rate / 100)) : bdiTax.value;
+    }, [bdiTax, totalDirect]);
+
+    // Subtotal (Base for other taxes) = Direct Cost + BDI
+    const subtotalWithBDI = useMemo(() => totalDirect + bdiValue, [totalDirect, bdiValue]);
+
     const totalTaxes = useMemo(() => {
-        return taxes.reduce((acc, t) => {
-            const val = t.rate > 0 ? totalDirect * (t.rate / 100) : t.value;
+        const otherTaxesValue = otherTaxes.reduce((acc, t) => {
+            const val = t.rate > 0 ? subtotalWithBDI * (t.rate / 100) : t.value;
             return acc + val;
         }, 0);
-    }, [taxes, totalDirect]);
+        return bdiValue + otherTaxesValue;
+    }, [otherTaxes, subtotalWithBDI, bdiValue]);
 
     const totalGeneral = totalDirect + totalTaxes;
 
@@ -1756,7 +1769,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                     </button>
                                                 </div>
                                             </div>
-                                            <p className="text-[10px] text-slate-400 mt-2">* Taxas em % são calculadas sobre a soma de Materiais + Mão de Obra + Indiretos (Base: R$ {totalDirect.toFixed(2)})</p>
+                                            <p className="text-[10px] text-slate-400 mt-2">* BDI calculado sobre o Custo Direto (R$ {totalDirect.toFixed(2)}). Demais taxas sobre Custo Direto + BDI (R$ {subtotalWithBDI.toFixed(2)}).</p>
                                         </div>
 
                                         <div className="col-span-full mt-2">
@@ -1772,7 +1785,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         </div>
                                                         <div className="flex items-center gap-4">
                                                             <span className="font-bold text-xs text-emerald-600">
-                                                                R$ {(t.rate > 0 ? totalDirect * (t.rate / 100) : t.value).toFixed(2)}
+                                                                R$ {(t.rate > 0 ? (t.name === 'BDI' ? totalDirect : subtotalWithBDI) * (t.rate / 100) : t.value).toFixed(2)}
                                                             </span>
                                                             <button onClick={() => handleDeleteTax(t.id)} className="text-slate-300 hover:text-red-500 transition-colors">
                                                                 <Trash2 size={16} />
