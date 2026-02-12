@@ -3,9 +3,8 @@ import html2pdf from 'html2pdf.js';
 import {
     Building2, Users, Truck, HardHat, FileText,
     Plus, Trash2, Save, ChevronRight, Calculator,
-    PieChart, ArrowRight, DollarSign, Calendar, Pencil, Check, X, Printer, Percent, Eye
+    PieChart, ArrowRight, DollarSign, Calendar, Pencil, Check, X, Printer, Percent
 } from 'lucide-react';
-import ReportPreview from './ReportPreview';
 import { useNotify } from './ToastProvider';
 import { db } from '../services/db';
 import {
@@ -42,9 +41,6 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
     const [activeTab, setActiveTab] = useState<'dados' | 'servicos' | 'recursos' | 'resumo'>('dados');
     const [resourceTab, setResourceTab] = useState<'material' | 'mo' | 'indireto' | 'impostos'>('material');
 
-    // Preview UI State
-    const [showPreview, setShowPreview] = useState(false);
-    const [previewContent, setPreviewContent] = useState({ title: '', html: '', filename: '' });
     // Ref to prevent infinite loop on creation
     const creationAttemptedRef = useRef<{ [key: string]: boolean }>({});
 
@@ -523,16 +519,6 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         html2pdf().set(opt).from(element).save();
     };
 
-    const handlePreviewMaterials = () => {
-        if (!currentWork || materials.length === 0) return;
-        setPreviewContent({
-            title: 'Lista de Materiais',
-            html: generateMaterialsReportHtml(),
-            filename: `Material_Obra_${currentWork.name.replace(/\s+/g, '_')}.pdf`
-        });
-        setShowPreview(true);
-    };
-
     const generateFullReportHtml = () => {
         if (!currentWork) return '';
 
@@ -734,16 +720,6 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         html2pdf().set(opt).from(element).save();
     };
 
-    const handlePreviewFull = () => {
-        if (!currentWork) return;
-        setPreviewContent({
-            title: 'Relatório Executivo de Obra',
-            html: generateFullReportHtml(),
-            filename: `Relatorio_Obra_${currentWork.name.replace(/\s+/g, '_')}.pdf`
-        });
-        setShowPreview(true);
-    };
-
     const totalMaterial = useMemo(() => {
         const fromMats = materials.reduce((acc, i) => acc + i.total_cost, 0);
         const fromSvcs = services.reduce((acc, s) => acc + (s.unit_material_cost * s.quantity), 0);
@@ -859,14 +835,6 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         <ArrowRight size={16} /> Importar/Sincronizar Planejamento
                                     </button>
                                 )}
-                                <div className="flex gap-2">
-                                    <button onClick={handlePreviewMaterials} className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-slate-200 transition-all border border-slate-200 shadow-sm">
-                                        <Eye size={16} /> Visualizar
-                                    </button>
-                                    <button onClick={handlePrintMaterials} disabled={materials.length === 0} className="px-4 py-2 bg-slate-800 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-slate-900 shadow-md disabled:bg-slate-200 transition-all">
-                                        <Printer size={16} /> Imprimir Materiais
-                                    </button>
-                                </div>
                                 <button onClick={handleSave} className="px-4 py-2 bg-emerald-700 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-emerald-800 shadow-md">
                                     <Save size={16} /> Salvar
                                 </button>

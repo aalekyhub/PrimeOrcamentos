@@ -3,9 +3,8 @@ import html2pdf from 'html2pdf.js';
 import {
     Building2, Users, Truck, HardHat, FileText,
     Plus, Trash2, Save, ChevronRight, Calculator,
-    PieChart, ArrowRight, DollarSign, Pencil, Check, X, Printer, Percent, Eye
+    PieChart, ArrowRight, DollarSign, Pencil, Check, X, Printer, Percent
 } from 'lucide-react';
-import ReportPreview from './ReportPreview';
 import { useNotify } from './ToastProvider';
 import { db } from '../services/db';
 import {
@@ -46,10 +45,6 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
 
     const [activeTab, setActiveTab] = useState<'dados' | 'servicos' | 'recursos' | 'resumo'>('dados');
     const [resourceTab, setResourceTab] = useState<'material' | 'mo' | 'indireto' | 'impostos'>('material');
-
-    // Preview UI State
-    const [showPreview, setShowPreview] = useState(false);
-    const [previewContent, setPreviewContent] = useState({ title: '', html: '', filename: '' });
 
     // Ref to prevent infinite loop on creation
     const creationAttemptedRef = useRef(false);
@@ -484,16 +479,6 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
         };
 
         html2pdf().set(opt).from(element).save();
-    };
-
-    const handlePreviewFull = () => {
-        if (!currentPlan) return;
-        setPreviewContent({
-            title: 'Planejamento Executivo de Obra',
-            html: generateFullReportHtml(),
-            filename: `Planejamento_Obra_${currentPlan.name.replace(/\s+/g, '_')}.pdf`
-        });
-        setShowPreview(true);
     };
 
     // Calculations
