@@ -12,7 +12,6 @@ import CustomerManager from './CustomerManager';
 import ServiceCatalog from './ServiceCatalog';
 import { db } from '../services/db';
 import { compressImage } from '../services/imageUtils';
-import { PRINT_FONTS, commonPrintStyles, getOptimizePageBreaksScript, handleGeneratePDF } from '../services/printUtils';
 
 interface Props {
   orders: ServiceOrder[];
@@ -139,7 +138,9 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
   };
   // NEXT_PrintOS
   const handlePrintOS = (order: ServiceOrder, mode: 'print' | 'pdf' = 'print') => {
-    const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, address: 'Não informado', document: 'N/A' };
+    const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, address: 'Nào informado', document: 'N/A' };
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
 
     const formatDate = (dateStr: string) => {
       try {
@@ -150,11 +151,12 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
       }
     };
 
+    // Logic: BDI first, then Tax on (Subtotal + BDI)
     const subTotal = order.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0);
     const bdiValue = order.bdiRate ? subTotal * (order.bdiRate / 100) : 0;
     const subTotalWithBDI = subTotal + bdiValue;
     const taxValue = order.taxRate ? subTotalWithBDI * (order.taxRate / 100) : 0;
-    const finalTotal = subTotalWithBDI + taxValue;
+    const finalTotal = subTotalWithBDI + taxValue; // Calculate proactively, though order.totalAmount might be used if trusted
 
     const itemsHtml = order.items.map((item: ServiceItem) => `
       <tr style="border-bottom: 1px solid #f1f5f9;">
@@ -171,101 +173,192 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
       <head>
         <title>Ordem de Serviço - ${order.id}</title>
         <script src="https://cdn.tailwindcss.com"></script>
-        ${PRINT_FONTS}
-        ${commonPrintStyles(company)}
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&family=Roboto:wght@400;700&family=Montserrat:wght@400;700&family=Open+Sans:wght@400;700&family=Lato:wght@400;700&family=Poppins:wght@400;700&family=Oswald:wght@400;700&family=Playfair+Display:wght@400;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
         <style>
-          .print-description-content .space-y-6 > * { margin-bottom: 1.5rem; }
+           * { box-sizing: border-box; }
+           body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
+           @page { size: A4; margin: 0 !important; }
+           .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
+           .avoid-break { break-inside: avoid; page-break-inside: avoid; }
+           .break-after-avoid { break-after: avoid !important; page-break-after: avoid !important; }
+           .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
+           
+           /* Premium Box Styles */
+           .info-box { background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
+           .info-label { font-size: 9px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block; }
+           .info-value { font-size: 11px; font-weight: 700; color: #0f172a; text-transform: uppercase; line-height: 1.4; }
+           .info-sub { font-size: 10px; color: #64748b; font-weight: 500; }
+           
+           .section-title { font-size: 9px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; margin-bottom: 16px; }
+ 
+           @media screen { body { background: #f1f5f9; padding: 40px 0; } .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; } }
+           @media print { 
+             body { background: white !important; margin: 0 !important; } 
+             .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; width: 100% !important; padding-left: 15mm !important; padding-right: 15mm !important; } 
+             .no-screen { display: block !important; }
+             .no-print { display: none !important; }
+             .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: white !important; text-transform: uppercase; }
+             .ql-editor-print .ql-align-justify { text-align: justify !important; }
+             .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
+
+             /* Prevent widowed headings */
+             .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4, .ql-editor-print h5, .ql-editor-print h6 { 
+               break-after: avoid-page !important; 
+               page-break-after: avoid !important; 
+             }
+
+              /* Font Classes for Print */
+              .ql-font-inter { font-family: 'Inter', sans-serif !important; }
+              .ql-font-arial { font-family: Arial, sans-serif !important; }
+              .ql-font-roboto { font-family: 'Roboto', sans-serif !important; }
+              .ql-font-serif { font-family: serif !important; }
+              .ql-font-monospace { font-family: monospace !important; }
+              .ql-font-montserrat { font-family: 'Montserrat', sans-serif !important; }
+              .ql-font-opensans { font-family: 'Open Sans', sans-serif !important; }
+              .ql-font-lato { font-family: 'Lato', sans-serif !important; }
+              .ql-font-poppins { font-family: 'Poppins', sans-serif !important; }
+              .ql-font-oswald { font-family: 'Oswald', sans-serif !important; }
+              .ql-font-playfair { font-family: 'Playfair Display', serif !important; }
+              .ql-font-nunito { font-family: 'Nunito', sans-serif !important; }
+
+              /* Size Classes for Print */
+              .ql-size-10px { font-size: 10px !important; }
+              .ql-size-12px { font-size: 12px !important; }
+              .ql-size-14px { font-size: 14px !important; }
+              .ql-size-16px { font-size: 16px !important; }
+              .ql-size-18px { font-size: 18px !important; }
+              .ql-size-20px { font-size: 20px !important; }
+              .ql-size-24px { font-size: 24px !important; }
+              .ql-size-32px { font-size: 32px !important; }
+             .ql-editor-print p { orphans: 3; widows: 3; }
+           }
         </style>
       </head>
-      <body>
+      <body class="no-scrollbar">
         <table style="width: 100%;">
-          <thead><tr><td style="height: ${company.printMarginTop || 15}mm;">&nbsp;</td></tr></thead>
+          <thead><tr><td style="height: ${company.printMarginTop || 15}mm;"><div style="height: ${company.printMarginTop || 15}mm; display: block;">&nbsp;</div></td></tr></thead>
           <tbody><tr><td>
             <div class="a4-container">
-               <div class="flex justify-between items-start mb-10 border-b-[3px] border-slate-900 pb-8">
+               <!-- Header -->
+               <div class="flex justify-between items-start mb-12 border-b-2 border-slate-900 pb-8">
                    <div class="flex gap-6 items-center">
-                       <div style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
-                           ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>'}
+                       <div style="width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;">
+                           ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:700; font-size:30px; color:#2563eb;">PO</div>'}
                        </div>
                        <div>
-                           <h1 class="text-3xl font-black text-slate-900 leading-none mb-2 uppercase tracking-tight">${company.name}</h1>
-                           <p class="text-[11px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">Ordem de Serviço (Mecânica / Elétrica / Refrigeração)</p>
-                           <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tight">${company.cnpj || ''} | ${company.phone || ''}</p>
+                           <h1 class="text-2xl font-bold text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
+                           <p class="text-[9px] font-bold text-blue-600 uppercase tracking-widest leading-none">Soluções em Gestào Profissional</p>
+                           <p class="text-[8px] text-slate-400 font-medium uppercase tracking-tight mt-2">${company.cnpj || ''} | ${company.phone || ''}</p>
                        </div>
                    </div>
                    <div class="text-right">
-                       <div class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest mb-2 shadow-md inline-block">ORDEM DE SERVIÇO</div>
-                       <p class="text-3xl font-black text-[#0f172a] tracking-tighter mb-1">${order.id}</p>
-                       <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">ABERTURA: ${formatDate(order.createdAt)}</p>
+                       <div class="bg-slate-900 text-white px-3 py-1 rounded text-[8px] font-bold uppercase tracking-widest mb-2 inline-block">Ordem de Serviço</div>
+                       <p class="text-3xl font-bold text-slate-900 tracking-tighter mb-1">${order.id}</p>
+                       <p class="text-[8px] font-medium text-slate-400 uppercase tracking-widest text-right">ABERTURA: ${formatDate(order.createdAt)}</p>
                    </div>
                </div>
 
-               <div class="grid grid-cols-2 gap-4 mb-8">
+               <!-- Boxes Grid (Customer & Equipment) -->
+               <div class="grid grid-cols-2 gap-6 mb-12">
                    <div class="info-box">
-                       <span class="info-label">Contratante / Solicitante</span>
+                       <span class="info-label">Cliente / Solicitante</span>
                        <div class="info-value">${customer.name}</div>
-                       <div class="text-[11px] text-slate-400 font-bold mt-1.5 uppercase">${customer.document || 'DOC NÃO INF.'}</div>
+                       <div class="info-sub mt-1">${customer.document || 'Documento não inf.'}</div>
                    </div>
                    <div class="info-box">
-                       <span class="info-label">Equipamento / Objeto</span>
-                       <div class="info-value">${order.equipmentBrand || ''} ${order.equipmentModel || 'NÃO ESPECIFICADO'}</div>
-                       <div class="text-[11px] text-slate-400 font-bold mt-1.5 uppercase">SÉRIE: ${order.equipmentSerialNumber || 'N/A'}</div>
+                       <span class="info-label">Dados do Equipamento / Objeto</span>
+                       <div class="info-value">${order.equipmentBrand || ''} ${order.equipmentModel || 'Nào especificado'}</div>
+                       <div class="info-sub mt-1">Sà‰RIE: ${order.equipmentSerialNumber || 'N/A'}</div>
                    </div>
                </div>
-               <div class="avoid-break mb-12">
+
+               <!-- Technical Report -->
+               <div class="mb-12">
                    <div class="section-title">Relatório Técnico / Diagnóstico</div>
-                   <div class="info-box bg-slate-50 border-slate-100">
+                   <div class="info-box bg-slate-50 border border-slate-100">
                        <p class="text-[14px] text-slate-800 leading-relaxed font-medium whitespace-pre-wrap">${order.serviceDescription || 'Nenhum laudo técnico registrado.'}</p>
                    </div>
                </div>
+
                ${order.descriptionBlocks && order.descriptionBlocks.length > 0 ? `
                <div class="mb-10 print-description-content">
                    <div class="section-title">DESCRIÇÃO TÉCNICA E ESCOPO</div>
                    <div class="space-y-6">
                        ${order.descriptionBlocks.map(block => {
-      if (block.type === 'text') return `<div class="text-slate-700 leading-relaxed text-justify ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px;">${block.content}</div>`;
-      if (block.type === 'image') return `<div class="avoid-break" style="margin: 20px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; border: 1px solid #e2e8f0; display: block; object-fit: contain;"></div>`;
-      if (block.type === 'page-break') return `<div style="page-break-after: always; break-after: page; height: 0;"></div>`;
+      if (block.type === 'text') {
+        return `<div class="text-slate-700 leading-relaxed text-justify ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px;">${block.content}</div>`;
+      } else if (block.type === 'image') {
+        return `<div class="avoid-break" style="margin: 20px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; border: 1px solid #e2e8f0; display: block; object-fit: contain;"></div>`;
+      } else if (block.type === 'page-break') {
+        return `<div style="page-break-after: always; break-after: page; height: 0; margin: 0; padding: 0;"></div>`;
+      }
       return '';
     }).join('')}
                    </div>
                </div>` : ''}
-               <div class="avoid-break mb-8">
+
+               <!-- Items Table -->
+               <div class="mb-8">
                    <div class="section-title">Peças, Materiais e Serviços</div>
                    <table style="width: 100%; border-collapse: collapse;">
-                       <thead><tr style="border-bottom: 2px solid #0f172a;">
-                           <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 700;">Descrição</th>
-                           <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 700;">UN</th>
-                           <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 700;">Qtd</th>
-                           <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 700;">Unitário</th>
-                           <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 700;">Total</th>
-                       </tr></thead>
+                       <thead>
+                           <tr style="border-bottom: 2px solid #0f172a;">
+                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 700; letter-spacing: 0.05em;">Descriçào</th>
+                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 700; letter-spacing: 0.05em;">UN</th>
+                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 700; letter-spacing: 0.05em;">Qtd</th>
+                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 700; letter-spacing: 0.05em;">Unitário</th>
+                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 700; letter-spacing: 0.05em;">Total</th>
+                           </tr>
+                       </thead>
                        <tbody>${itemsHtml}</tbody>
                    </table>
                </div>
+
+               <!-- Total Bar (Dark) -->
                <div class="avoid-break mb-12">
+                   <!-- Breakdown ABOVE the bar (Per user request) -->
                    <div class="flex justify-end mb-2 gap-6 px-2">
-                        <div class="text-right"><span class="text-[8px] font-medium text-slate-400 uppercase block">Subtotal</span><span class="text-[10px] font-bold text-slate-600 block">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
-                        ${order.bdiRate ? `<div class="text-right"><span class="text-[8px] font-medium text-slate-400 uppercase block">BDI (${order.bdiRate}%)</span><span class="text-[10px] font-bold text-emerald-600 block">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>` : ''}
-                        ${order.taxRate ? `<div class="text-right"><span class="text-[8px] font-medium text-slate-400 uppercase block">Impostos (${order.taxRate}%)</span><span class="text-[10px] font-bold text-blue-600 block">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>` : ''}
+                        <div class="text-right">
+                           <span class="text-[8px] font-medium text-slate-400 uppercase block">Subtotal</span>
+                           <span class="text-[10px] font-bold text-slate-600 block">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                        </div>
+                        ${order.bdiRate ? `
+                        <div class="text-right">
+                           <span class="text-[8px] font-medium text-slate-400 uppercase block">BDI (${order.bdiRate}%)</span>
+                           <span class="text-[10px] font-bold text-emerald-600 block">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                        </div>` : ''}
+                        ${order.taxRate ? `
+                        <div class="text-right">
+                           <span class="text-[8px] font-medium text-slate-400 uppercase block">Impostos (${order.taxRate}%)</span>
+                           <span class="text-[10px] font-bold text-blue-600 block">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                        </div>` : ''}
                    </div>
                    <div class="bg-slate-900 text-white p-6 rounded-xl flex justify-between items-center shadow-xl">
                        <span class="text-[12px] font-bold uppercase tracking-widest">Valor Total:</span>
-                       <span class="text-3xl font-bold tracking-tighter text-right">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                       <span class="text-3xl font-bold text-white tracking-tighter text-right">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                    </div>
                </div>
+
+               <!-- Legal / Guarantee -->
                <div class="avoid-break mb-12">
                    <div class="border-l-4 border-blue-600 bg-blue-50/40 p-6 rounded-xl">
                        <h5 class="text-[14px] font-bold text-blue-600 uppercase tracking-widest mb-2">Garantia e Notas Legais</h5>
-                       <p class="text-[13px] text-slate-700 leading-tight mb-2"><b>• GARANTIA TÉCNICA:</b> 90 dias para os serviços executados (Art. 26 CDC).</p>
-                       <p class="text-[13px] text-rose-600 font-bold uppercase leading-tight"><b>• ATENÇÃO:</b> Equipamentos não retirados em até 30 dias após aviso de conclusão estarão sujeitos a taxas de armazenamento ou descarte legal.</p>
+                       <p class="text-[13px] text-slate-700 leading-tight mb-2"><b>â€¢ GARANTIA Tà‰CNICA:</b> 90 dias para os serviços executados (Art. 26 CDC).</p>
+                       <p class="text-[13px] text-rose-600 font-bold uppercase leading-tight"><b>â€¢ ATENà‡àƒO:</b> Equipamentos não retirados em até 30 dias após aviso de conclusào estarào sujeitos a taxas de armazenamento ou descarte legal.</p>
                    </div>
                </div>
-               <div style="margin-top: 100px !important;" class="avoid-break">
+
+               <!-- Signatures -->
+               <div style="margin-top: 120px !important;" class="avoid-break pt-32">
                    <div class="grid grid-cols-2 gap-16 px-10">
-                       <div class="text-center border-t border-slate-300 pt-3"><p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Responsável Técnico</p><p class="text-[10px] font-bold uppercase text-slate-900">${company.name}</p></div>
-                       <div class="text-center border-t border-slate-300 pt-3 relative">
+                       <div class="text-center">
+                           <div style="border-top: 1px solid #cbd5e1; margin-bottom: 8px;"></div>
+                           <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Responsável Técnico</p>
+                           <p class="text-[10px] font-bold uppercase text-slate-900">${company.name}</p>
+                       </div>
+                       <div class="text-center relative">
                            ${order.signature ? `<img src="${order.signature}" style="max-height: 50px; position: absolute; top: -45px; left: 50%; transform: translateX(-50%);">` : ''}
+                           <div style="border-top: 1px solid #cbd5e1; margin-bottom: 8px;"></div>
                            <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Assinatura do Cliente</p>
                            <p class="text-[10px] font-bold uppercase text-slate-900">${order.customerName}</p>
                        </div>
@@ -273,28 +366,76 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                </div>
             </div>
           </td></tr></tbody>
-          <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;">&nbsp;</td></tr></tfoot>
+          <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;"><div style="height: ${company.printMarginBottom || 15}mm; display: block;">&nbsp;</div></td></tr></tfoot>
         </table>
         <script>
-           ${getOptimizePageBreaksScript()}
+           function optimizePageBreaks() {
+             const root = document.querySelector('.print-description-content .space-y-6');
+             if (!root) return;
+
+             const allNodes = [];
+             Array.from(root.children).forEach(block => {
+               if (block.classList.contains('ql-editor-print')) {
+                  allNodes.push(...Array.from(block.children));
+               } else {
+                  allNodes.push(block);
+               }
+             });
+
+             for (let i = 0; i < allNodes.length - 1; i++) {
+               const el = allNodes[i];
+               let isTitle = false;
+               
+               if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
+               else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
+                 const text = el.innerText.trim();
+                 const isNumbered = /^\d+[\.\)]/.test(text);
+                 const isBold = el.querySelector('strong, b') || (el.style && parseInt(el.style.fontWeight) > 500) || el.tagName === 'STRONG';
+                 const isShort = text.length < 150;
+                 if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
+                   isTitle = true;
+                 }
+               }
+
+               if (isTitle) {
+                 const nodesToWrap = [el];
+                 let j = i + 1;
+                 while (j < allNodes.length && nodesToWrap.length < 3) {
+                   const next = allNodes[j];
+                   const nText = next.innerText.trim();
+                   const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') || 
+                                       (/^\d+[\.\)]/.test(nText) && (next.querySelector('strong, b') || nText === nText.toUpperCase()));
+                   if (nextIsTitle) break;
+                   nodesToWrap.push(next);
+                   j++;
+                 }
+
+                 if (nodesToWrap.length > 1) {
+                   const wrapper = document.createElement('div');
+                   wrapper.className = 'keep-together';
+                   el.parentNode.insertBefore(wrapper, el);
+                   nodesToWrap.forEach(node => wrapper.appendChild(node));
+                   i = j - 1;
+                 }
+               }
+             }
+           }
            window.onload = function() { 
-             optimizePageBreaks(); 
-             ${mode === 'print' ? 'setTimeout(() => { window.print(); window.close(); }, 2000);' : ''}
+             optimizePageBreaks();
+             setTimeout(() => { window.print(); window.close(); }, 2000); 
            }
         </script>
-      </body></html>`;
-
-    if (mode === 'pdf') {
-      handleGeneratePDF(html, `OS - ${order.id}.pdf`, notify);
-    } else {
-      const printWindow = window.open('', '_blank');
-      if (printWindow) { printWindow.document.write(html); printWindow.document.close(); }
-    }
+      </body>
+      </html>`;
+    printWindow.document.write(html);
+    printWindow.document.close();
   };
 
   // NEXT_Contract
   const handlePrintContract = (order: ServiceOrder) => {
     const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', address: 'Endereço não informado', city: '', state: '', cep: '' };
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
 
     const html = `
     <!DOCTYPE html>
@@ -302,29 +443,64 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
     <head>
       <title>Contrato - ${order.id}</title>
       <script src="https://cdn.tailwindcss.com"></script>
-      ${PRINT_FONTS}
-      ${commonPrintStyles(company)}
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
+      <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; counter-reset: page 1; }
+        @page { size: A4; margin: 0 !important; }
+        .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
+        .avoid-break { break-inside: avoid; page-break-inside: avoid; }
+        @media screen { body { background: #f1f5f9; padding: 40px 0; } .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; } }
+        @media print { 
+          body { background: white !important; margin: 0 !important; } 
+          .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; width: 100% !important; padding-left: 15mm !important; padding-right: 15mm !important; } 
+          .no-print { display: none !important; } 
+          * { box-shadow: none !important; } 
+          .print-footer { position: fixed; bottom: 0; left: 0; right: 0; height: 15mm; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: bold; color: #94a3b8; text-transform: uppercase; background: white; } 
+          .print-footer::after { content: "Página " counter(page); } 
+          .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; } 
+          
+          /* Styles for Rich Text (Quill) */
+          .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4, .ql-editor-print h5, .ql-editor-print h6 { 
+              break-after: avoid-page !important; 
+              page-break-after: avoid !important; 
+              font-weight: 800 !important;
+              color: #0f172a !important;
+              margin-top: 24px !important;
+              margin-bottom: 8px !important;
+          }
+          .ql-editor-print h1 { font-size: 22px !important; }
+          .ql-editor-print h2 { font-size: 19px !important; }
+          .ql-editor-print h3 { font-size: 17px !important; }
+          .ql-editor-print h3 { font-size: 17px !important; }
+          .ql-editor-print h4 { font-size: 14px !important; }
+          
+          .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
+          .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
+          .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
+        }
+      </style>
     </head>
     <body class="no-scrollbar">
       <table style="width: 100%;">
-        <thead><tr><td style="height: ${company.printMarginTop || 15}mm;">&nbsp;</td></tr></thead>
+        <thead><tr><td style="height: ${company.printMarginTop || 15}mm;"><div style="height: ${company.printMarginTop || 15}mm; display: block;">&nbsp;</div></td></tr></thead>
         <tbody><tr><td>
           <div class="a4-container">
             <div class="flex justify-between items-start mb-8">
                 <div class="flex gap-4">
                     <div class="w-16 h-16 shrink-0 flex items-center justify-center overflow-hidden">
-                        ${company.logo ? `<img src="${company.logo}" style="height: 100%; object-fit: contain;">` : '<div style="font-weight:700; font-size:30px; color:#2563eb;">PO</div>'}
+                        ${company.logo ? `<img src="${company.logo}" style="height: 100%; object-fit: contain;">` : `<div style="width: 64px; height: 64px; background: #2563eb; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white;"><svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></div>`}
                     </div>
                     <div>
                         <h1 class="text-xl font-black text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
-                        <p class="text-[9px] font-black text-blue-600 uppercase tracking-widest">${company.tagline || 'Soluções em Gestão e Manutenção Profissional'}</p>
+                        <p class="text-[9px] font-black text-blue-600 uppercase tracking-widest">${company.tagline || 'Soluções em Gestào e Manutençào Profissional'}</p>
                         <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tight mt-1">${company.cnpj || ''} | ${company.phone || ''}</p>
                     </div>
                 </div>
                 <div class="text-right">
                     <div class="bg-blue-600 text-white px-4 py-1 rounded text-[8px] font-bold uppercase tracking-widest mb-1 inline-block">CONTRATO</div>
                     <h2 class="text-3xl font-bold text-slate-900 tracking-tighter">${order.id}</h2>
-                    <div class="mt-2 space-y-0.5"><p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest text-right">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p></div>
+                    <div class="mt-2 space-y-0.5"><p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest text-right">EMISSàƒO: ${new Date().toLocaleDateString('pt-BR')}</p></div>
                 </div>
             </div>
 
@@ -351,19 +527,56 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
             </div>
           </div>
         </td></tr></tbody>
-        <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;">&nbsp;</td></tr></tfoot>
+        <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;"><div style="height: ${company.printMarginBottom || 15}mm; display: block;">&nbsp;</div></td></tr></tfoot>
       </table>
       <script>
-          ${getOptimizePageBreaksScript()}
+          function optimizePageBreaks() {
+              const root = document.querySelector('.ql-editor-print');
+              if (!root) return;
+              const allNodes = Array.from(root.children);
+              for (let i = 0; i < allNodes.length - 1; i++) {
+                  const el = allNodes[i];
+                  let isTitle = false;
+                  
+                  if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
+                  else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
+                      const text = el.innerText.trim();
+                      const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text);
+                      const hasBoldStyle = el.querySelector('strong, b, [style*="font-weight: bold"], [style*="font-weight: 700"], [style*="font-weight: 800"], [style*="font-weight: 900"]');
+                      const isBold = hasBoldStyle || (el.style && parseInt(el.style.fontWeight) > 600) || el.tagName === 'STRONG';
+                      const isShort = text.length < 150;
+                      if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
+                          isTitle = true;
+                      }
+                  }
+
+                  if (isTitle) {
+                      const nodesToWrap = [el];
+                      let j = i + 1;
+                      while (j < allNodes.length && nodesToWrap.length < 3) {
+                          const next = allNodes[j];
+                          const nText = next.innerText.trim();
+                          const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(nText);
+                          if (next.matches('h1, h2, h3, h4, h5, h6') || (isNumbered && next.querySelector('strong, b'))) break;
+                          nodesToWrap.push(next);
+                          j++;
+                      }
+                      if (nodesToWrap.length > 1) {
+                          const wrapper = document.createElement('div');
+                          wrapper.className = 'keep-together';
+                          el.parentNode.insertBefore(wrapper, el);
+                          nodesToWrap.forEach(node => wrapper.appendChild(node));
+                          i = j - 1;
+                      }
+                  }
+              }
+          }
           window.onload = function() { optimizePageBreaks(); setTimeout(() => { window.print(); window.close(); }, 800); }
       </script>
     </body>
     </html>`;
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(html);
-      printWindow.document.close();
-    }
+    printWindow.document.write(html);
+    printWindow.document.close();
   };
 
   // NEXT_InitCanvas

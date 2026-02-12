@@ -1,6 +1,5 @@
 import { ServiceOrder, CompanyProfile, Customer } from '../types';
 import { financeUtils } from '../services/financeUtils';
-import { PRINT_FONTS, commonPrintStyles, getOptimizePageBreaksScript } from '../services/printUtils';
 
 export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
   const handlePrintOS = (order: ServiceOrder) => {
@@ -40,14 +39,78 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
       <head>
         <title>OS - ${order.id.replace('OS-', '')} - ${order.description || 'Obra'}</title>
          <script src="https://cdn.tailwindcss.com"></script>
-         ${PRINT_FONTS}
-         ${commonPrintStyles(company)}
-         <style>
-             .info-box { padding: 16px; }
-             .info-label { font-size: 9px; }
-             .info-value { font-size: 11px; }
-             .section-title { font-size: 9px; margin-top: 24px; }
-         </style>
+              <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&family=Roboto:wght@400;700&family=Montserrat:wght@400;700&family=Open+Sans:wght@400;700&family=Lato:wght@400;700&family=Poppins:wght@400;700&family=Oswald:wght@400;700&family=Playfair+Display:wght@400;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+        <style>
+           * { box-sizing: border-box; }
+           body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
+           @page { size: A4; margin: 0 !important; }
+           .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
+           .avoid-break { break-inside: avoid; page-break-inside: avoid; }
+           .info-box { background: #f8fafc; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; }
+           .info-label { font-size: 9px; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; display: block; }
+           .info-value { font-size: 11px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.3; }
+           .info-sub { font-size: 10px; color: #64748b; font-weight: 600; }
+           .section-title { font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 6px; border-bottom: 2px solid #e2e8f0; margin-bottom: 12px; }
+           @media screen { body { background: #f1f5f9; padding: 40px 0; } .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding-left: 15mm !important; padding-right: 15mm !important; } }
+           @media print { 
+             body { background: white !important; margin: 0 !important; } 
+             .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; width: 100% !important; padding-left: 15mm !important; padding-right: 15mm !important; } 
+             .no-screen { display: block !important; } 
+             .no-print { display: none !important; } 
+             .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: white !important; text-transform: uppercase; } 
+              .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; } 
+             
+             /* Styles for Rich Text (Quill) */
+             .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
+             .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
+             .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
+             .ql-editor-print strong { font-weight: bold !important; }
+             .ql-editor-print em { font-style: italic !important; }
+             .ql-editor-print .ql-align-center { text-align: center !important; }
+             .ql-editor-print .ql-align-right { text-align: right !important; }
+             .ql-editor-print .ql-align-justify { text-align: justify !important; }
+ 
+              /* Prevent widowed headings */
+              .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4, .ql-editor-print h5, .ql-editor-print h6 { 
+                break-after: avoid-page !important; 
+                page-break-after: avoid !important; 
+                font-weight: 800 !important;
+                color: #0f172a !important;
+                margin-top: 24px !important;
+                margin-bottom: 8px !important;
+              }
+              .ql-editor-print h1 { font-size: 22px !important; }
+              .ql-editor-print h2 { font-size: 19px !important; }
+              .ql-editor-print h3 { font-size: 17px !important; }
+              .ql-editor-print h3 { font-size: 17px !important; }
+              .ql-editor-print h4 { font-size: 14px !important; }
+
+              /* Font Classes for Print */
+              .ql-font-inter { font-family: 'Inter', sans-serif !important; }
+              .ql-font-arial { font-family: Arial, sans-serif !important; }
+              .ql-font-roboto { font-family: 'Roboto', sans-serif !important; }
+              .ql-font-serif { font-family: serif !important; }
+              .ql-font-monospace { font-family: monospace !important; }
+              .ql-font-montserrat { font-family: 'Montserrat', sans-serif !important; }
+              .ql-font-opensans { font-family: 'Open Sans', sans-serif !important; }
+              .ql-font-lato { font-family: 'Lato', sans-serif !important; }
+              .ql-font-poppins { font-family: 'Poppins', sans-serif !important; }
+              .ql-font-oswald { font-family: 'Oswald', sans-serif !important; }
+              .ql-font-playfair { font-family: 'Playfair Display', serif !important; }
+              .ql-font-nunito { font-family: 'Nunito', sans-serif !important; }
+
+              /* Size Classes for Print */
+              .ql-size-10px { font-size: 10px !important; }
+              .ql-size-12px { font-size: 12px !important; }
+              .ql-size-14px { font-size: 14px !important; }
+              .ql-size-16px { font-size: 16px !important; }
+              .ql-size-18px { font-size: 18px !important; }
+              .ql-size-20px { font-size: 20px !important; }
+              .ql-size-24px { font-size: 24px !important; }
+              .ql-size-32px { font-size: 32px !important; }
+              .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
+           }
+        </style>
       </head>
       <body class="no-scrollbar">
         <table style="width: 100%;">
@@ -56,19 +119,19 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
             <div class="a4-container">
                <div class="flex justify-between items-start mb-8 border-b-[3px] border-slate-900 pb-6">
                    <div class="flex gap-6 items-center">
-                       <div style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
-                           ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>'}
+                       <div style="width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;">
+                           ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:28px; color:#2563eb;">PO</div>'}
                        </div>
                        <div>
-                           <h1 class="text-3xl font-black text-slate-900 leading-none mb-2 uppercase tracking-tight">${company.name}</h1>
-                           <p class="text-[11px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">Ordem de Serviço de Obra / Reforma</p>
-                           <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tight">${company.cnpj || ''} | ${company.phone || ''}</p>
+                           <h1 class="text-2xl font-black text-slate-900 leading-none mb-2 uppercase tracking-tight">${company.name}</h1>
+                           <p class="text-[10px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">Ordem de Serviço de Obra / Reforma</p>
+                           <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tight">${company.cnpj || ''} | ${company.phone || ''}</p>
                        </div>
                    </div>
                    <div class="text-right">
-                       <div class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest mb-2 shadow-md inline-block">ORDEM DE SERVIÇO</div>
-                       <p class="text-2xl font-black text-[#0f172a] tracking-tighter mb-1 whitespace-nowrap">${order.id}</p>
-                       <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">ABERTURA: ${formatDate(order.createdAt)}</p>
+                       <div class="bg-blue-600 text-white px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest mb-2 shadow-md inline-block">ORDEM DE SERVIÇO</div>
+                       <p class="text-xl font-black text-[#0f172a] tracking-tighter mb-1 whitespace-nowrap">${order.id}</p>
+                       <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest text-right">ABERTURA: ${formatDate(order.createdAt)}</p>
                    </div>
                </div>
 
@@ -169,7 +232,59 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
           <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;"><div style="height: ${company.printMarginBottom || 15}mm; display: block;">&nbsp;</div></td></tr></tfoot>
         </table>
         <script>
-           ${getOptimizePageBreaksScript()}
+           function optimizePageBreaks() {
+             const root = document.querySelector('.print-description-content .space-y-6');
+             if (!root) return;
+
+             const allNodes = [];
+             Array.from(root.children).forEach(block => {
+               if (block.classList.contains('ql-editor-print')) {
+                  allNodes.push(...Array.from(block.children));
+               } else {
+                  allNodes.push(block);
+               }
+             });
+
+             for (let i = 0; i < allNodes.length - 1; i++) {
+               const el = allNodes[i];
+               let isTitle = false;
+               
+               if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
+               else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
+                 const text = el.innerText.trim();
+                   const text = el.innerText.trim();
+                  const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text);
+                  const hasBoldStyle = el.querySelector('strong, b, [style*="font-weight: bold"], [style*="font-weight: 700"], [style*="font-weight: 800"], [style*="font-weight: 900"]');
+                  const isBold = hasBoldStyle || (el.style && parseInt(el.style.fontWeight) > 600) || el.tagName === 'STRONG';
+                 const isShort = text.length < 150;
+                 if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
+                   isTitle = true;
+                 }
+               }
+
+               if (isTitle) {
+                 const nodesToWrap = [el];
+                 let j = i + 1;
+                 while (j < allNodes.length && nodesToWrap.length < 3) {
+                   const next = allNodes[j];
+                   const nText = next.innerText.trim();
+                   const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') || 
+                                        (/^\d+(\.\d+)*[\.\s\)]/.test(nText) && (next.querySelector('strong, b') || nText === nText.toUpperCase()));
+                   if (nextIsTitle) break;
+                   nodesToWrap.push(next);
+                   j++;
+                 }
+
+                 if (nodesToWrap.length > 1) {
+                   const wrapper = document.createElement('div');
+                   wrapper.className = 'keep-together';
+                   el.parentNode.insertBefore(wrapper, el);
+                   nodesToWrap.forEach(node => wrapper.appendChild(node));
+                   i = j - 1;
+                 }
+               }
+             }
+           }
            window.onload = function() { 
              optimizePageBreaks();
               setTimeout(() => { window.print(); window.close(); }, 2000); 

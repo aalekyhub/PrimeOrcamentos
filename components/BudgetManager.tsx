@@ -13,7 +13,6 @@ import CustomerManager from './CustomerManager';
 import ServiceCatalog from './ServiceCatalog';
 import { db } from '../services/db';
 import { compressImage } from '../services/imageUtils';
-import { PRINT_FONTS, commonPrintStyles, getOptimizePageBreaksScript, handleGeneratePDF } from '../services/printUtils';
 
 interface Props {
   orders: ServiceOrder[];
@@ -23,14 +22,9 @@ interface Props {
   catalogServices: CatalogService[];
   setCatalogServices: React.Dispatch<React.SetStateAction<CatalogService[]>>;
   company: CompanyProfile;
-  prefilledData?: any;
-  onPrefilledDataConsumed?: () => void;
 }
 
-const BudgetManager: React.FC<Props> = ({
-  orders, setOrders, customers, setCustomers, catalogServices, setCatalogServices, company,
-  prefilledData, onPrefilledDataConsumed
-}) => {
+const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCustomers, catalogServices, setCatalogServices, company }) => {
   const [showForm, setShowForm] = useState(false);
   const [showFullClientForm, setShowFullClientForm] = useState(false);
   const [showFullServiceForm, setShowFullServiceForm] = useState(false);
@@ -63,63 +57,14 @@ const BudgetManager: React.FC<Props> = ({
     (o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED) && (o.customerName.toLowerCase().includes(searchTerm.toLowerCase()) || o.id.includes(searchTerm))
   ), [orders, searchTerm]);
 
-  // Effect to handle pre-filled data from Planning
-  React.useEffect(() => {
-    if (prefilledData && onPrefilledDataConsumed) {
-      const { plan, totalMaterial, totalLabor } = prefilledData;
-
-      // Reset form first
-      setEditingBudgetId(null);
-      setProposalTitle(`Orçamento: ${plan.name}`);
-      setSelectedCustomerId(plan.client_id || '');
-
-      const newItems: ServiceItem[] = [];
-
-      if (totalMaterial > 0) {
-        newItems.push({
-          id: db.generateId('ITEM'),
-          description: `Total Materiais - ${plan.name}`,
-          quantity: 1,
-          unitPrice: totalMaterial,
-          unit: 'un',
-          type: 'Material'
-        });
-      }
-
-      if (totalLabor > 0) {
-        newItems.push({
-          id: db.generateId('ITEM'),
-          description: `Total Mão de Obra - ${plan.name}`,
-          quantity: 1,
-          unitPrice: totalLabor,
-          unit: 'un',
-          type: 'Serviço'
-        });
-      }
-
-      setItems(newItems);
-      setTaxRate(0);
-      setBdiRate(0);
-      setShowForm(true);
-
-      // Notify parent that data was consumed to avoid re-triggering
-      onPrefilledDataConsumed();
-
-      notify("Dados da obra importados com sucesso!", "success");
-    }
-  }, [prefilledData, onPrefilledDataConsumed]);
-
   const subtotal = useMemo(() => items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0), [items]);
   const totalAmount = useMemo(() => {
     const bdi = Number(bdiRate) || 0;
     const tax = Number(taxRate) || 0;
-
     const bdiValue = subtotal * (bdi / 100);
-    const desiredLiquid = subtotal + bdiValue;
-
-    // Gross Up Calculation (Inside Tax)
-    const taxFactor = Math.max(0.01, 1 - (tax / 100));
-    return desiredLiquid / taxFactor;
+    const subtotalWithBDI = subtotal + bdiValue;
+    const taxValue = subtotalWithBDI * (tax / 100);
+    return subtotalWithBDI + taxValue;
   }, [subtotal, taxRate, bdiRate]);
 
   const handleAddItem = () => {
@@ -171,6 +116,7 @@ const BudgetManager: React.FC<Props> = ({
 
   const handlePrintPDF = (budget: ServiceOrder, mode: 'print' | 'pdf' = 'print') => {
     const customer = customers.find(c => c.id === budget.customerId) || { name: budget.customerName, address: 'Não informado', document: 'Documento não informado' };
+    // window.open moved to the end to support PDF mode without popup
 
     const formatDate = (dateStr: string) => {
       try {
@@ -186,32 +132,109 @@ const BudgetManager: React.FC<Props> = ({
     const validityDate = budget.dueDate ? formatDate(budget.dueDate) : formatDate(new Date(new Date(budget.createdAt || Date.now()).getTime() + validityDays * 24 * 60 * 60 * 1000).toISOString());
 
     const subTotal = budget.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0);
-    const bdiValue = subTotal * ((budget.bdiRate || 0) / 100);
-    const desiredLiquid = subTotal + bdiValue;
-    const taxFactor = Math.max(0.01, 1 - ((budget.taxRate || 0) / 100));
-    const finalTotal = desiredLiquid / taxFactor;
 
+    // Logic: BDI first, then Tax on (Subtotal + BDI)
+    const bdiR = budget.bdiRate || 0;
+    const taxR = budget.taxRate || 0;
+
+    const bdiValue = subTotal * (bdiR / 100);
+    const subTotalWithBDI = subTotal + bdiValue; // Accumulated base for tax
+    const taxValue = subTotalWithBDI * (taxR / 100);
+
+    const finalTotal = subTotalWithBDI + taxValue;
+
+    const itemFontBase = company.itemsFontSize || 12;
     const itemsHtml = budget.items.map((item: ServiceItem) => `
       <tr style="border-bottom: 1px solid #f1f5f9;">
-        <td style="padding: 12px 10px 12px 0; font-weight: 500; text-transform: uppercase; font-size: ${company.itemsFontSize || 12}px; color: #0f172a; width: 60%;">${item.description}</td>
-        <td style="padding: 12px 10px; text-align: center; color: #0f172a; font-size: ${company.itemsFontSize || 12}px; width: 10%;">${item.quantity} ${item.unit || ''}</td>
-        <td style="padding: 12px 10px; text-align: right; color: #475569; font-size: ${company.itemsFontSize || 12}px; width: 15%;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-        <td style="padding: 12px 0 12px 10px; text-align: right; font-weight: 500; font-size: ${company.itemsFontSize || 12}px; color: #0f172a; width: 15%;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        <td style="padding: 12px 10px 12px 0; font-weight: 500; text-transform: uppercase; font-size: ${itemFontBase}px; color: #0f172a; width: 60%;">${item.description}</td>
+        <td style="padding: 12px 10px; text-align: center; font-weight: 500; color: #0f172a; font-size: ${itemFontBase}px; width: 10%;">${item.quantity} ${item.unit || ''}</td>
+        <td style="padding: 12px 10px; text-align: right; color: #475569; font-size: ${itemFontBase}px; width: 15%;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        <td style="padding: 12px 0 12px 10px; text-align: right; font-weight: 500; font-size: ${itemFontBase + 1}px; color: #0f172a; width: 15%;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
       </tr>`).join('');
 
     const html = `
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Orçamento - ${budget.id} - ${budget.description || 'Proposta'}</title>
+        <title>Orçamento - ${budget.id}</title>
         <script src="https://cdn.tailwindcss.com"></script>
-        ${PRINT_FONTS}
-        ${commonPrintStyles(company)}
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&family=Roboto:wght@400;700&family=Montserrat:wght@400;700&family=Open+Sans:wght@400;700&family=Lato:wght@400;700&family=Poppins:wght@400;700&family=Oswald:wght@400;700&family=Playfair+Display:wght@400;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
         <style>
-            .info-box { padding: 16px; }
-            .info-label { font-size: 9px; }
-            .info-value { font-size: 11px; }
-            .section-title { font-size: 9px; margin-top: 24px; }
+           * { box-sizing: border-box; }
+           body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
+           @page { size: A4; margin: 0 !important; }
+           .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
+            .avoid-break { break-inside: avoid; page-break-inside: avoid; }
+            .break-after-avoid { break-after: avoid !important; page-break-after: avoid !important; }
+             .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
+           
+           /* Premium Box Styles */
+           .info-box { background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
+           .info-label { font-size: ${Math.max(10, (company.descriptionFontSize || 12))}px; font-weight: 600; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block; }
+           .info-value { font-size: 11px; font-weight: 700; color: #0f172a; text-transform: uppercase; line-height: 1.4; }
+           .info-sub { font-size: 10px; color: #475569; font-weight: 500; }
+           
+           .section-title { font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; margin-bottom: 16px; }
+ 
+           @media screen { body { background: #f1f5f9; padding: 40px 0; } .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; } }
+           @media print { 
+             body { background: white !important; margin: 0 !important; } 
+             .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; width: 100% !important; padding-left: 15mm !important; padding-right: 15mm !important; } 
+             .no-screen { display: block !important; }
+             .no-print { display: none !important; }
+             .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: white !important; text-transform: uppercase; }
+              .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
+             
+             /* Styles for Rich Text (Quill) */
+             .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
+             .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
+             .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
+             .ql-editor-print strong { font-weight: bold !important; }
+             .ql-editor-print em { font-style: italic !important; }
+             .ql-editor-print .ql-align-center { text-align: center !important; }
+             .ql-editor-print .ql-align-right { text-align: right !important; }
+              .ql-editor-print .ql-align-justify { text-align: justify !important; }
+              
+              /* Prevent widowed headings */
+              .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4, .ql-editor-print h5, .ql-editor-print h6 { 
+                break-after: avoid-page !important; 
+                page-break-after: avoid !important; 
+                font-weight: 800 !important;
+                color: #0f172a !important;
+                margin-top: 24px !important;
+                margin-bottom: 8px !important;
+              }
+              .ql-editor-print h1 { font-size: 22px !important; }
+              .ql-editor-print h2 { font-size: 19px !important; }
+              .ql-editor-print h3 { font-size: 17px !important; }
+              .ql-editor-print h3 { font-size: 17px !important; }
+              .ql-editor-print h4 { font-size: 14px !important; }
+
+              /* Font Classes for Print */
+              .ql-font-inter { font-family: 'Inter', sans-serif !important; }
+              .ql-font-arial { font-family: Arial, sans-serif !important; }
+              .ql-font-roboto { font-family: 'Roboto', sans-serif !important; }
+              .ql-font-serif { font-family: serif !important; }
+              .ql-font-monospace { font-family: monospace !important; }
+              .ql-font-montserrat { font-family: 'Montserrat', sans-serif !important; }
+              .ql-font-opensans { font-family: 'Open Sans', sans-serif !important; }
+              .ql-font-lato { font-family: 'Lato', sans-serif !important; }
+              .ql-font-poppins { font-family: 'Poppins', sans-serif !important; }
+              .ql-font-oswald { font-family: 'Oswald', sans-serif !important; }
+              .ql-font-playfair { font-family: 'Playfair Display', serif !important; }
+              .ql-font-nunito { font-family: 'Nunito', sans-serif !important; }
+
+              /* Size Classes for Print */
+              .ql-size-10px { font-size: 10px !important; }
+              .ql-size-12px { font-size: 12px !important; }
+              .ql-size-14px { font-size: 14px !important; }
+              .ql-size-16px { font-size: 16px !important; }
+              .ql-size-18px { font-size: 18px !important; }
+              .ql-size-20px { font-size: 20px !important; }
+              .ql-size-24px { font-size: 24px !important; }
+              .ql-size-32px { font-size: 32px !important; }
+              .ql-editor-print p { orphans: 3; widows: 3; }
+            }
         </style>
       </head>
       <body class="no-scrollbar">
@@ -219,119 +242,326 @@ const BudgetManager: React.FC<Props> = ({
           <thead><tr><td style="height: ${company.printMarginTop || 15}mm;"><div style="height: ${company.printMarginTop || 15}mm; display: block;">&nbsp;</div></td></tr></thead>
           <tbody><tr><td>
             <div class="a4-container">
-               <div class="flex justify-between items-start mb-10 border-b-[3px] border-slate-900 pb-8">
+               <!-- Header -->
+               <div class="flex justify-between items-start mb-6 border-b-2 border-slate-900 pb-4">
                    <div class="flex gap-6 items-center">
-                       <div style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
-                           ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>'}
+                       <div style="width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;">
+                           ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:700; font-size:30px; color:#2563eb;">PO</div>'}
                        </div>
                        <div>
-                           <h1 class="text-3xl font-black text-slate-900 leading-none mb-2 uppercase tracking-tight">${company.name}</h1>
-                           <p class="text-[11px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">Proposta Comercial de Engenharia / Reforma</p>
-                           <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tight">${company.cnpj || ''} | ${company.phone || ''}</p>
+                           <h1 style="font-size: ${company.nameFontSize || 24}px;" class="font-bold text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
+                           <p class="text-[9px] font-bold text-blue-600 uppercase tracking-widest leading-none">Soluções em Gestão Profissional</p>
+                            <p class="text-[8px] text-slate-600 font-medium uppercase tracking-tight mt-1">${company.cnpj || ''}</p>
+                            <p class="text-[8px] text-slate-600 font-medium uppercase tracking-tight">${company.phone || ''}</p>
                        </div>
                    </div>
                    <div class="text-right">
-                       <div class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest mb-2 shadow-md inline-block">ORÇAMENTO</div>
-                       <p class="text-2xl font-black text-[#0f172a] tracking-tighter mb-1">${budget.id}</p>
-                       <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">EMISSÃO: ${emissionDate} | VALD: ${validityDate}</p>
+                       <p class="text-2xl font-bold text-blue-600 tracking-tighter mb-1">${budget.id}</p>
+                       <p class="text-[8px] font-semibold text-slate-600 uppercase tracking-widest text-right">EMISSÃO: ${emissionDate} <br> VALIDADE: ${validityDate}</p>
                    </div>
                </div>
 
-               <div class="grid grid-cols-2 gap-4 mb-8">
+               <!-- Boxes Grid -->
+               <div class="grid grid-cols-2 gap-6 mb-6">
                    <div class="info-box">
-                       <span class="info-label">Contratante / Cliente</span>
+                       <span class="info-label">Cliente / Destinatário</span>
                        <div class="info-value">${customer.name}</div>
-                       <div class="text-[11px] text-slate-400 font-bold mt-1.5 uppercase">${customer.document || 'DOC NÃO INF.'}</div>
+                       <div class="info-sub mt-1">${customer.document || 'CPF/CNPJ não informado'}</div>
                    </div>
                    <div class="info-box">
-                       <span class="info-label">Identificação do Objeto</span>
-                       <div class="info-value">${budget.description || 'PROPOSTA COMERCIAL'}</div>
-                       <div class="text-[11px] text-slate-400 font-bold mt-1.5 uppercase">VALOR TOTAL DA PROPOSTA: R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                       <span class="info-label">Referência do Orçamento</span>
+                       <div class="info-value">${budget.description || 'Proposta de Prestação de Serviços'}</div>
                    </div>
                </div>
 
+               <!-- Description Blocks (Optional) -->
+               <div class="mb-4">
+                    <h2 class="text-sm font-bold text-slate-900 tracking-tight uppercase leading-none mb-0.5">Proposta Comercial</h2>
+                    <p class="text-xl font-bold text-blue-600 uppercase leading-none tracking-tight">${budget.description}</p>
+               </div>
                ${budget.descriptionBlocks && budget.descriptionBlocks.length > 0 ? `
                 <div class="mb-10 print-description-content">
-                  <div class="section-title">DESCRIÇÃO TÉCNICA E ESCOPO DOS SERVIÇOS</div>
+                  <div class="section-title">DESCRIÇÃO DOS SERVIÇOS</div>
                   <div class="space-y-6">
                     ${budget.descriptionBlocks.map(block => {
-      if (block.type === 'text') return `<div class="text-slate-800 leading-relaxed text-justify font-medium ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px;">${block.content}</div>`;
-      if (block.type === 'image') return `<div class="avoid-break" style="margin: 20px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; object-fit: contain; display: block;"></div>`;
-      if (block.type === 'page-break') return `<div style="page-break-after: always; break-after: page; height: 0; margin: 0; padding: 0;"></div>`;
+      if (block.type === 'text') {
+        return `<div class="text-slate-700 leading-relaxed text-justify ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px;">${block.content}</div>`;
+      } else if (block.type === 'image') {
+        return `<div class="avoid-break" style="margin: 20px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; border: 1px solid #e2e8f0; display: block; object-fit: contain;"></div>`;
+      } else if (block.type === 'page-break') {
+        return `<div style="page-break-after: always; break-after: page; height: 0; margin: 0; padding: 0;"></div>`;
+      }
       return '';
     }).join('')}
                   </div>
                 </div>` : ''}
 
-                <div class="avoid-break mb-8 overflow-hidden">
-                    <div class="section-title">Detalhamento Financeiro dos Itens</div>
-                    <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+               <!-- Items Table -->
+                <div class="mb-8 avoid-break" style="page-break-before: always; break-before: page;">
+                    <div class="section-title">Detalhamento Financeiro</div>
+                    <table style="width: 100%; border-collapse: collapse;">
                        <thead>
-                            <tr style="border-bottom: 2px solid #0f172a;">
-                                <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; width: 60%;">Item / Descrição</th>
-                                <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800; width: 10%;">Qtd</th>
-                                <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 15%;">Unitário</th>
-                                <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 15%;">Subtotal</th>
-                            </tr>
+                           <tr style="border-bottom: 2px solid #0f172a;">
+                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: left; font-weight: 700; letter-spacing: 0.05em; width: 60%;">Item / Descrição</th>
+                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: center; font-weight: 700; letter-spacing: 0.05em; width: 10%;">Qtd</th>
+                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: right; font-weight: 700; letter-spacing: 0.05em; width: 15%;">Unitário</th>
+                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: right; font-weight: 700; letter-spacing: 0.05em; width: 15%;">Subtotal</th>
+                           </tr>
                        </thead>
                        <tbody>${itemsHtml}</tbody>
                    </table>
-                </div>
+               </div>
 
-                <div class="avoid-break mb-8">
-                    <div class="bg-[#0f172a] text-white p-6 rounded-2xl shadow-xl flex justify-between items-center">
-                        <p class="text-[12px] font-black uppercase tracking-[0.2em] mb-0 opacity-80">INVESTIMENTO TOTAL:</p>
-                        <p class="text-4xl font-black tracking-tighter mb-0">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                    </div>
-                </div>
-
-                <div class="avoid-break mb-8 grid grid-cols-2 gap-4">
-                   <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5">
-                       <p class="text-blue-600 font-black text-[10px] uppercase tracking-widest mb-2">Forma de Pagamento</p>
-                       <p class="text-slate-700 text-[13px] font-bold leading-relaxed">${budget.paymentTerms || 'A combinar com o cliente.'}</p>
+               <!-- Total Bar (Dark) -->
+               <div class="avoid-break mb-6">
+                   <!-- Breakdown above bar -->
+                   <div class="flex justify-end mb-2 gap-6 px-2">
+                        <div class="text-right">
+                           <span class="text-[8px] font-semibold text-slate-600 uppercase block">Subtotal</span>
+                           <span class="text-[10px] font-bold text-slate-700 block">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                        </div>
+                        ${bdiR > 0 ? `
+                        <div class="text-right">
+                           <span class="text-[8px] font-semibold text-slate-600 uppercase block">BDI (${bdiR}%)</span>
+                           <span class="text-[10px] font-bold text-emerald-600 block">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                        </div>` : ''}
+                        ${taxR > 0 ? `
+                        <div class="text-right">
+                           <span class="text-[8px] font-semibold text-slate-600 uppercase block">Impostos (${taxR}%)</span>
+                           <span class="text-[10px] font-bold text-blue-600 block">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                        </div>` : ''}
                    </div>
-                   <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5">
-                       <p class="text-blue-600 font-black text-[10px] uppercase tracking-widest mb-2">Prazo de Execução</p>
-                       <p class="text-slate-700 text-[13px] font-bold leading-relaxed">${budget.deliveryTime || 'Conforme cronograma da obra.'}</p>
+                   <div class="bg-slate-900 text-white py-3 px-6 rounded-xl flex justify-between items-center shadow-xl">
+                       <span class="text-[12px] font-bold uppercase tracking-widest">Investimento Total:</span>
+                       <span class="text-3xl font-bold text-white tracking-tighter text-right">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                    </div>
-                </div>
+               </div>
 
-                <div style="margin-top: 120px;" class="avoid-break pt-12">
-                   <div class="grid grid-cols-2 gap-16 px-10">
-                       <div class="text-center">
-                           <div style="border-top: 1px solid #cbd5e1; margin-bottom: 8px;"></div>
-                           <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Responsável Técnico</p>
-                           <p class="text-[11px] font-black uppercase text-slate-900">${company.name}</p>
+               <!-- Terms & Payment -->
+               <div class="avoid-break mb-6">
+                   <div class="grid grid-cols-2 gap-6">
+                       <div class="info-box">
+                           <span class="info-label">Forma de Pagamento</span>
+                           <p style="font-size: ${company.descriptionFontSize || 12}px;" class="font-medium text-slate-700 leading-relaxed mt-2">${budget.paymentTerms || 'A combinar'}</p>
                        </div>
-                       <div class="text-center">
-                           <div style="border-top: 1px solid #cbd5e1; margin-bottom: 8px;"></div>
-                           <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Aceite do Cliente</p>
-                           <p class="text-[11px] font-black uppercase text-slate-900">${customer.name}</p>
+                       <div class="info-box">
+                           <span class="info-label">Prazo de Entrega / Execução</span>
+                           <p style="font-size: ${company.descriptionFontSize || 12}px;" class="font-medium text-slate-700 leading-relaxed mt-2">${budget.deliveryTime || 'A combinar'}</p>
                        </div>
                    </div>
-                </div>
+               </div>
+
+               <!-- Acceptance Box -->
+               <div class="avoid-break mb-6">
+                   <div class="border border-blue-100 bg-blue-50/50 rounded-2xl p-6">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="bg-blue-600 rounded-full p-1"><svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>
+                            <span style="font-size: 14px;" class="font-bold text-blue-700 uppercase tracking-widest">Termo de Aceite e Autorização Profissional</span>
+                        </div>
+                        <p style="font-size: ${Math.max(13, (company.descriptionFontSize || 14) - 1)}px;" class="text-slate-700 leading-relaxed text-justify italic">
+                            "Este documento constitui uma proposta comercial formal. Ao assinar abaixo, o cliente declara estar ciente e de pleno acordo com os valores, prazos e especificações técnicas descritas. Esta aceitação autoriza o início imediato dos trabalhos sob as condições estabelecidas. A contratada reserva-se o direito de renegociar valores caso a aprovação ocorra após o prazo de validade de ${validityDays} dias. Eventuais alterações de escopo solicitadas após o aceite estarão sujeitas a nova análise de custos."
+                        </p>
+                   </div>
+               </div>
+
+               <!-- Signature Lines -->
+                <div style="margin-top: 120px !important;" class="avoid-break space-y-2">
+                   <div style="border-bottom: 2px solid #cbd5e1; width: 40%;"></div>
+                   <p class="text-[11px] font-bold text-slate-600 uppercase tracking-widest mt-2">Assinatura do Cliente / Aceite</p>
+               </div>
             </div>
           </td></tr></tbody>
           <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;"><div style="height: ${company.printMarginBottom || 15}mm; display: block;">&nbsp;</div></td></tr></tfoot>
         </table>
+        <div class="print-footer no-screen"><span></span></div>
         <script>
-          ${getOptimizePageBreaksScript()}
-          window.onload = function() { 
-            optimizePageBreaks();
-            ${mode === 'print' ? 'setTimeout(() => { window.print(); window.close(); }, 2000);' : ''}
-          }
-        </script>
-      </body></html>`;
+           function optimizePageBreaks() {
+             const root = document.querySelector('.print-description-content');
+             if (!root) return;
+             const allNodes = [];
+             Array.from(root.children).forEach(block => {
+               if (block.classList.contains('ql-editor-print')) {
+                 allNodes.push(...Array.from(block.children));
+               } else {
+                 allNodes.push(block);
+               }
+             });
 
+             for (let i = 0; i < allNodes.length - 1; i++) {
+               const el = allNodes[i];
+               let isTitle = false;
+               
+               if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
+               else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
+                 const text = el.innerText.trim();
+                 const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text);
+                 const hasBoldStyle = el.querySelector('strong, b, [style*="font-weight: bold"], [style*="font-weight: 700"], [style*="font-weight: 800"], [style*="font-weight: 900"]');
+                 const isBold = hasBoldStyle || (el.style && parseInt(el.style.fontWeight) > 600) || el.tagName === 'STRONG';
+                 const isShort = text.length < 150;
+                 if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
+                   isTitle = true;
+                 }
+               }
+
+               if (isTitle) {
+                 const nodesToWrap = [el];
+                 let j = i + 1;
+                 while (j < allNodes.length && nodesToWrap.length < 3) {
+                   const next = allNodes[j];
+                   const nText = next.innerText.trim();
+                   const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(nText);
+                   if (next.matches('h1, h2, h3, h4, h5, h6') || (isNumbered && next.querySelector('strong, b'))) break;
+                   nodesToWrap.push(next);
+                   j++;
+                 }
+
+                 if (nodesToWrap.length > 1) {
+                   const wrapper = document.createElement('div');
+                   wrapper.className = 'keep-together';
+                   el.parentNode.insertBefore(wrapper, el);
+                   nodesToWrap.forEach(node => wrapper.appendChild(node));
+                   i = j - 1;
+                 }
+               }
+             }
+           }
+           window.onload = function() { 
+             optimizePageBreaks();
+                         setTimeout(() => { window.print(); window.close(); }, 2000); 
+           }
+        </script>
+      </body>
+      </html>`;
     if (mode === 'pdf') {
-      handleGeneratePDF(html, `Orçamento - ${budget.id}.pdf`, notify);
+      // Use a hidden div to process HTML for PDF (must be in DOM and visible for layout)
+      const iframe = document.createElement('iframe');
+      iframe.style.position = 'fixed';
+      iframe.style.left = '0';
+      iframe.style.top = '0';
+      iframe.style.width = '210mm';
+      iframe.style.height = '297mm'; // Initial height
+      iframe.style.border = 'none';
+      iframe.style.zIndex = '-9999';
+      iframe.style.opacity = '0';
+      iframe.style.pointerEvents = 'none';
+      iframe.style.background = 'white';
+      document.body.appendChild(iframe);
+
+      // Remove the auto-print command but keep optimization
+      let pdfHtml = html.replace(/window\.onload\s*=\s*function\(\)\s*\{[\s\S]*?window\.print\(\);[\s\S]*?\}/, 'window.onload = function() { optimizePageBreaks(); }');
+
+      // Inject robust PDF-specific styles to override "screen" styles
+      const pdfOverrideStyles = `
+        <style>
+           /* Force white background everywhere */
+           html, body { background: white !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; height: auto !important; }
+           
+           /* Specific overrides for PDF to ensure visibility and 25mm margins */
+           thead, tfoot { display: none !important; }
+           
+           /* Reset container styles for PDF generation - using 15mm for side padding */
+           .a4-container { 
+             width: 100% !important; 
+             height: auto !important; 
+             margin: 0 !important; 
+             padding-left: 15mm !important; 
+             padding-right: 15mm !important; 
+             padding-top: 0 !important;
+             padding-bottom: 0 !important;
+             box-shadow: none !important; 
+             border: none !important; 
+             background: white !important;
+           }
+           /* Hide screen-only, show print-only */
+           .no-screen { display: block !important; }
+           .no-print { display: none !important; }
+           
+           /* Ensure text colors are dark for print */
+           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+           
+           /* Ensure table fits and headers are bold */
+           table { width: 100% !important; border-collapse: collapse !important; }
+           th { font-weight: 800 !important; color: #0f172a !important; }
+           .ql-editor-print strong, .ql-editor-print b { font-weight: 800 !important; }
+           .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4 { font-weight: 900 !important; color: #0f172a !important; }
+         </style>
+      `;
+      pdfHtml = pdfHtml.replace('</head>', `${pdfOverrideStyles}</head>`);
+
+      iframe.onload = () => {
+        // Wait for resources
+        setTimeout(() => {
+          const doc = iframe.contentDocument;
+          const body = doc?.body;
+
+          if (!doc || !body) {
+            notify("Erro ao gerar PDF: Conteúdo vazio.", "error");
+            if (document.body.contains(iframe)) document.body.removeChild(iframe);
+            return;
+          }
+
+          // Dynamic height adjustment: Set iframe height to full content height to prevent cropping
+          const contentHeight = Math.max(body.scrollHeight, body.offsetHeight, doc.documentElement.scrollHeight);
+          iframe.style.height = (contentHeight + 100) + 'px';
+
+          const opt = {
+            margin: [25, 0, 25, 0], // Margens físicas de 25mm no PDF (Topo e Base)
+            filename: `Orçamento - ${budget.id} - ${budget.description || 'Proposta'}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: {
+              scale: 2,
+              useCORS: true,
+              scrollY: 0,
+              window: iframe.contentWindow as Window,
+              background: '#ffffff'
+            },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak: { mode: ['css', 'legacy'] }
+          };
+
+
+          // @ts-ignore
+          html2pdf().set(opt).from(doc.documentElement).toPdf().get('pdf').then(function (pdf: any) {
+            // Add page numbers
+            try {
+              var totalPages = pdf.internal.getNumberOfPages();
+              for (var i = 1; i <= totalPages; i++) {
+                pdf.setPage(i);
+                pdf.setFontSize(9);
+                pdf.setTextColor(150);
+                pdf.setFontSize(9);
+                pdf.setTextColor(150);
+                pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 15, { align: 'center' });
+              }
+              pdf.save(opt.filename);
+            } catch (e) {
+              console.error("PDF Post-process error", e);
+            }
+            if (document.body.contains(iframe)) document.body.removeChild(iframe);
+          }).catch((err: any) => {
+            console.error("PDF Error:", err);
+            notify("Erro ao gerar PDF.", "error");
+            if (document.body.contains(iframe)) {
+              document.body.removeChild(iframe);
+            }
+          });
+        }, 1500); // Wait 1.5s for Tailwind and layout
+      };
+
+      const doc = iframe.contentDocument;
+      if (doc) {
+        doc.open();
+        doc.write(pdfHtml);
+        doc.close();
+      }
     } else {
       const printWindow = window.open('', '_blank');
-      if (printWindow) { printWindow.document.write(html); printWindow.document.close(); }
+      if (printWindow) {
+        printWindow.document.write(html);
+        printWindow.document.close();
+      }
     }
   };
-
-
 
   const handleSave = async () => {
     if (isSaving) return;
@@ -367,7 +597,7 @@ const BudgetManager: React.FC<Props> = ({
       } else if (result?.error === 'quota_exceeded') {
         notify("ERRO DE ARMAZENAMENTO: Limite excedido.", "error");
       } else {
-        notify(`Salvo localmente.Erro Sync: ${result?.error?.message || JSON.stringify(result?.error)} `, "warning");
+        notify(`Salvo localmente. Erro Sync: ${result?.error?.message || JSON.stringify(result?.error)}`, "warning");
         setShowForm(false);
       }
     } finally { setIsSaving(false); }
@@ -717,13 +947,8 @@ const BudgetManager: React.FC<Props> = ({
 
                   <div className="space-y-1 mb-4 text-[10px] text-slate-400">
                     <div className="flex justify-between"><span>Subtotal:</span> <span>R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
-                    {Number(bdiRate) > 0 && <div className="flex justify-between text-emerald-400"><span>+ BDI ({bdiRate}%):</span> <span>R$ {(subtotal * (Number(bdiRate) / 100)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>}
-                    {Number(taxRate) > 0 && (
-                      <div className="flex justify-between text-blue-400">
-                        <span>+ Impostos ({taxRate}%):</span>
-                        <span>R$ {(totalAmount - (subtotal + (subtotal * (Number(bdiRate) / 100)))).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                      </div>
-                    )}
+                    {bdiRate > 0 && <div className="flex justify-between text-emerald-400"><span>+ BDI:</span> <span>R$ {(subtotal * (bdiRate / 100)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>}
+                    {taxRate > 0 && <div className="flex justify-between text-blue-400"><span>+ Impostos:</span> <span>R$ {((subtotal + (subtotal * (bdiRate / 100))) * (taxRate / 100)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>}
                   </div>
 
                   <div className="flex justify-between items-baseline border-b border-slate-800 pb-4">
@@ -872,7 +1097,7 @@ const PaymentTypeModal: React.FC<{
     const currency = (val: number) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
     if (type === 'vista') {
-      text = `Pagamento à vista com desconto na aprovação do orçamento.Total: ${currency(totalValue)}.`;
+      text = `Pagamento à vista com desconto na aprovação do orçamento. Total: ${currency(totalValue)}.`;
     } else if (type === 'conclusao') {
       text = `Pagamento integral ${currency(totalValue)} a ser realizado após entrega técnica e aprovação dos serviços.`;
     } else if (type === 'parcelado') {
@@ -881,7 +1106,7 @@ const PaymentTypeModal: React.FC<{
 
       text = `Entrada de ${currency(entryValue)} na aprovação.`;
       if (installments > 0) {
-        text += `\nSaldo restante de ${currency(remainder)} dividido em ${installments}x de ${currency(parcValue)} (30 / ${installments > 1 ? '60/90...' : ' dias'}).`;
+        text += `\nSaldo restante de ${currency(remainder)} dividido em ${installments}x de ${currency(parcValue)} (30/${installments > 1 ? '60/90...' : ' dias'}).`;
       }
     }
     setPreview(text);
@@ -899,9 +1124,9 @@ const PaymentTypeModal: React.FC<{
           <div>
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Tipo de Negociação</label>
             <div className="grid grid-cols-3 gap-2">
-              <button onClick={() => setType('vista')} className={`p - 3 rounded - xl border text - xs font - bold uppercase transition - all ${type === 'vista' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'} `}>À Vista</button>
-              <button onClick={() => setType('parcelado')} className={`p - 3 rounded - xl border text - xs font - bold uppercase transition - all ${type === 'parcelado' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'} `}>Parcelado</button>
-              <button onClick={() => setType('conclusao')} className={`p - 3 rounded - xl border text - xs font - bold uppercase transition - all ${type === 'conclusao' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'} `}>Entrega</button>
+              <button onClick={() => setType('vista')} className={`p-3 rounded-xl border text-xs font-bold uppercase transition-all ${type === 'vista' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>À Vista</button>
+              <button onClick={() => setType('parcelado')} className={`p-3 rounded-xl border text-xs font-bold uppercase transition-all ${type === 'parcelado' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>Parcelado</button>
+              <button onClick={() => setType('conclusao')} className={`p-3 rounded-xl border text-xs font-bold uppercase transition-all ${type === 'conclusao' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>Entrega</button>
             </div>
           </div>
 
@@ -909,7 +1134,7 @@ const PaymentTypeModal: React.FC<{
             <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
               <div className="col-span-2">
                 <div className="flex justify-between mb-1"><span className="text-[10px] font-bold text-slate-400 uppercase">Valor Total</span> <span className="text-[10px] font-black text-slate-900">{totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span></div>
-                <div className="h-1 w-full bg-slate-200 rounded-full overflow-hidden"><div className="h-full bg-blue-500" style={{ width: `${Math.min(100, (entryValue / totalValue) * 100)}% ` }}></div></div>
+                <div className="h-1 w-full bg-slate-200 rounded-full overflow-hidden"><div className="h-full bg-blue-500" style={{ width: `${Math.min(100, (entryValue / totalValue) * 100)}%` }}></div></div>
               </div>
               <div className="grid grid-cols-2 gap-2 col-span-2">
                 <div>
