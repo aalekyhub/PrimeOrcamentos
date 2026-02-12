@@ -124,20 +124,20 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Fluxo de Caixa Profissional</h2>
-          <p className="text-slate-500 text-sm">Gestão completa de receitas, despesas e compromissos.</p>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Fluxo de Caixa Profissional</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">Gestão completa de receitas, despesas e compromissos.</p>
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowForm(!showForm)}
-            className="bg-slate-900 text-white px-6 py-2.5 rounded-xl flex items-center gap-2 hover:bg-slate-800 transition-all font-bold shadow-lg shadow-slate-200"
+            className="bg-slate-900 dark:bg-blue-600 text-white px-6 py-2.5 rounded-xl flex items-center gap-2 hover:bg-slate-800 dark:hover:bg-blue-700 transition-all font-bold shadow-lg shadow-slate-200 dark:shadow-none"
           >
             {showForm ? 'Cancelar' : <><Plus className="w-4 h-4" /> Novo Lançamento</>}
           </button>
         </div>
       </div>
 
-      <div className="flex bg-slate-100 p-1.5 rounded-[1.5rem] self-start mb-8 gap-2 overflow-x-auto no-scrollbar">
+      <div className="flex bg-slate-100 dark:bg-slate-800/50 p-1.5 rounded-[1.5rem] self-start mb-8 gap-2 overflow-x-auto no-scrollbar">
         {[
           { id: 'geral', label: 'LANÇAMENTOS' },
           { id: 'recorrencia', label: 'MENSAL/RECORRENTE' },
@@ -147,7 +147,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
           <button
             key={tab.id}
             onClick={() => { setActiveSubTab(tab.id as any); setShowForm(false); }}
-            className={`px-8 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest whitespace-nowrap transition-all ${activeSubTab === tab.id ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+            className={`px-8 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest whitespace-nowrap transition-all ${activeSubTab === tab.id ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
           >
             {tab.label}
           </button>
@@ -155,28 +155,28 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Saldo Realizado (Hoje)</p>
-          <h3 className="text-2xl font-black text-slate-900">R$ {(totalIncome - totalExpense).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-2">Saldo Realizado (Hoje)</p>
+          <h3 className="text-2xl font-black text-slate-900 dark:text-white">R$ {(totalIncome - totalExpense).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
           <p className="text-[9px] text-slate-400 mt-2 font-bold uppercase tracking-widest">
-            Projetado: <span className={projectedBalance >= 0 ? 'text-emerald-600' : 'text-rose-600'}>R$ {projectedBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+            Projetado: <span className={projectedBalance >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}>R$ {projectedBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
           </p>
         </div>
-        <div className="bg-emerald-50 p-6 rounded-3xl border border-emerald-100 shadow-sm group">
+        <div className="bg-emerald-50 dark:bg-emerald-900/20 p-6 rounded-3xl border border-emerald-100 dark:border-emerald-900/30 shadow-sm group">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em]">Faturamento Realizado</p>
-            <ArrowUpRight className="w-4 h-4 text-emerald-600 group-hover:scale-125 transition-transform" />
+            <p className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.2em]">Faturamento Realizado</p>
+            <ArrowUpRight className="w-4 h-4 text-emerald-600 dark:text-emerald-400 group-hover:scale-125 transition-transform" />
           </div>
-          <h3 className="text-2xl font-black text-emerald-700">R$ {totalIncome.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+          <h3 className="text-2xl font-black text-emerald-700 dark:text-emerald-400">R$ {totalIncome.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
         </div>
-        <div className="bg-rose-50 p-6 rounded-3xl border border-rose-100 shadow-sm group">
+        <div className="bg-rose-50 dark:bg-rose-900/20 p-6 rounded-3xl border border-rose-100 dark:border-rose-900/30 shadow-sm group">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] font-black text-rose-600 uppercase tracking-[0.2em]">Gastos Realizados</p>
-            <ArrowDownLeft className="w-4 h-4 text-rose-600 group-hover:scale-125 transition-transform" />
+            <p className="text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-[0.2em]">Gastos Realizados</p>
+            <ArrowDownLeft className="w-4 h-4 text-rose-600 dark:text-rose-400 group-hover:scale-125 transition-transform" />
           </div>
-          <h3 className="text-2xl font-black text-rose-700">R$ {totalExpense.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+          <h3 className="text-2xl font-black text-rose-700 dark:text-rose-400">R$ {totalExpense.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
         </div>
-        <div className="bg-blue-600 p-6 rounded-3xl border border-blue-700 shadow-xl shadow-blue-100 group">
+        <div className="bg-blue-600 p-6 rounded-3xl border border-blue-700 shadow-xl shadow-blue-100 dark:shadow-none group">
           <div className="flex items-center justify-between mb-2">
             <p className="text-[10px] font-black text-blue-100 uppercase tracking-[0.2em]">Projeção de Saídas</p>
             <Calendar className="w-4 h-4 text-white group-hover:rotate-12 transition-transform" />
@@ -187,16 +187,16 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
       </div>
 
       {activeSubTab === 'historico' ? (
-        <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-xl space-y-8 animate-in slide-in-from-top-4 duration-300">
-          <div className="flex items-center justify-between border-b pb-6">
+        <div className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-xl space-y-8 animate-in slide-in-from-top-4 duration-300">
+          <div className="flex items-center justify-between border-b dark:border-slate-700 pb-6">
             <div>
-              <h4 className="font-black text-slate-900 text-lg uppercase tracking-tight">Extrato Financeiro Completo</h4>
-              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mt-1">Todas as entradas e saídas registradas</p>
+              <h4 className="font-black text-slate-900 dark:text-white text-lg uppercase tracking-tight">Extrato Financeiro Completo</h4>
+              <p className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mt-1">Todas as entradas e saídas registradas</p>
             </div>
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-xl border border-slate-100">
+              <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-100 dark:border-slate-700">
                 <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                <span className="text-[10px] font-black text-slate-500 uppercase">{transactions.length} Lançamentos</span>
+                <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase">{transactions.length} Lançamentos</span>
               </div>
             </div>
           </div>
@@ -205,15 +205,15 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
             {transactions
               .sort((a, b) => b.date.localeCompare(a.date))
               .map(t => (
-                <div key={t.id} className="group py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-50/50 transition-all rounded-2xl px-4 -mx-4">
+                <div key={t.id} className="group py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-all rounded-2xl px-4 -mx-4">
                   <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${t.type === 'RECEITA' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${t.type === 'RECEITA' ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400'}`}>
                       {t.type === 'RECEITA' ? <ArrowUpRight className="w-5 h-5" /> : <ArrowDownLeft className="w-5 h-5" />}
                     </div>
                     <div>
-                      <p className="text-sm font-black text-slate-900 leading-tight uppercase">{t.category}</p>
+                      <p className="text-sm font-black text-slate-900 dark:text-white leading-tight uppercase">{t.category}</p>
                       <div className="flex items-center gap-2 mt-1">
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{t.date.split('-').reverse().join('/')}</p>
+                        <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">{t.date.split('-').reverse().join('/')}</p>
                         {t.date > today && (
                           <span className="text-[8px] bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded-md font-black uppercase tracking-tighter">
                             Agendado
@@ -258,12 +258,12 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
         </div>
       ) : showForm ? (
         activeSubTab === 'emprestimos' ? (
-          <form onSubmit={handleAddLoan} className="bg-white p-8 rounded-[2.5rem] border-2 border-blue-100 shadow-xl space-y-6 animate-in slide-in-from-top-4 duration-300">
-            <h4 className="font-bold text-slate-800 text-sm border-b pb-4">Registrar Novo Empréstimo</h4>
+          <form onSubmit={handleAddLoan} className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border-2 border-blue-100 dark:border-blue-900 shadow-xl space-y-6 animate-in slide-in-from-top-4 duration-300">
+            <h4 className="font-bold text-slate-800 dark:text-white text-sm border-b dark:border-slate-700 pb-4">Registrar Novo Empréstimo</h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1">Instituição / Banco</label>
-                <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Instituição / Banco</label>
+                <input type="text" className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-900 dark:text-white"
                   required value={loanFormData.bankName} onChange={e => setLoanFormData({ ...loanFormData, bankName: e.target.value })} />
               </div>
               <div>
@@ -299,27 +299,27 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
             </div>
           </form>
         ) : (
-          <form onSubmit={handleAdd} className="bg-white p-8 rounded-[2.5rem] border-2 border-blue-100 shadow-xl space-y-6 animate-in slide-in-from-top-4 duration-300">
-            <h4 className="font-bold text-slate-800 text-sm border-b pb-4 uppercase tracking-widest">
+          <form onSubmit={handleAdd} className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border-2 border-blue-100 dark:border-blue-900 shadow-xl space-y-6 animate-in slide-in-from-top-4 duration-300">
+            <h4 className="font-bold text-slate-800 dark:text-white text-sm border-b dark:border-slate-700 pb-4 uppercase tracking-widest">
               {activeSubTab === 'recorrencia' ? 'Novo Item Recorrente (Fixo)' : 'Lançamento Único'}
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1">Tipo</label>
-                <select className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Tipo</label>
+                <select className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-900 dark:text-white"
                   value={formData.type} onChange={e => setFormData({ ...formData, type: e.target.value as any })}>
                   <option value="RECEITA">Receita (+)</option>
                   <option value="DESPESA">Despesa (-)</option>
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1">Valor (R$)</label>
-                <input type="number" step="0.01" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Valor (R$)</label>
+                <input type="number" step="0.01" className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-900 dark:text-white"
                   required value={formData.amount || ''} onChange={e => setFormData({ ...formData, amount: Number(e.target.value) })} />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1">Categoria / Descrição</label>
-                <input type="text" placeholder="ex: Aluguel, Venda..." className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Categoria / Descrição</label>
+                <input type="text" placeholder="ex: Aluguel, Venda..." className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-900 dark:text-white"
                   required value={formData.category || ''} onChange={e => setFormData({ ...formData, category: e.target.value })} />
               </div>
               <div>
@@ -353,15 +353,15 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
       ) : activeSubTab === 'emprestimos' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loans.map(loan => (
-            <div key={loan.id} className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm space-y-4">
+            <div key={loan.id} className="bg-white dark:bg-slate-800 p-6 rounded-[2rem] border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center font-black">
+                  <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center font-black">
                     $
                   </div>
                   <div>
-                    <h4 className="text-sm font-black text-slate-900">{loan.bankName}</h4>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{loan.startDate}</p>
+                    <h4 className="text-sm font-black text-slate-900 dark:text-white">{loan.bankName}</h4>
+                    <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">{loan.startDate}</p>
                   </div>
                 </div>
                 <button onClick={async () => {
