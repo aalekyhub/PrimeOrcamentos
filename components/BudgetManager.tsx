@@ -488,6 +488,15 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
             .ql-editor-print li { display: list-item !important; list-style-position: outside !important; }
             .ql-editor-print strong, .ql-editor-print b { font-weight: 800 !important; color: #000 !important; }
             .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4 { font-weight: 900 !important; color: #0f172a !important; }
+            
+            /* Enforce no-break for grouped elements in PDF */
+            .keep-together { 
+              display: block !important; 
+              break-inside: avoid !important; 
+              page-break-inside: avoid !important; 
+              width: 100% !important;
+              position: relative !important;
+            }
           </style>
       `;
       pdfHtml = pdfHtml.replace('</head>', `${pdfOverrideStyles}</head>`);
@@ -520,7 +529,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
               background: '#ffffff'
             },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-            pagebreak: { mode: ['css', 'legacy'] }
+            pagebreak: { mode: ['css', 'legacy'], avoid: '.keep-together' }
           };
 
 
@@ -549,7 +558,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
               document.body.removeChild(iframe);
             }
           });
-        }, 1500); // Wait 1.5s for Tailwind and layout
+        }, 2000); // Wait 2s for layout and styles to stabilize
       };
 
       const doc = iframe.contentDocument;

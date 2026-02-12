@@ -356,7 +356,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 3, useCORS: true },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+            pagebreak: { mode: ['css', 'legacy'], avoid: '.keep-together' }
         };
 
         // Use a hidden div to process HTML for PDF (must be in DOM and visible for layout)
@@ -463,7 +463,13 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                              * { box-shadow: none !important; } 
                              .print-footer { display: none !important; color: white !important; } 
                              .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; overflow: hidden !important; } 
-                             .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; }
+                             .keep-together { 
+                               break-inside: avoid !important; 
+                               page-break-inside: avoid !important; 
+                               display: block !important; 
+                               width: 100% !important; 
+                               position: relative !important;
+                             }
                          }
 
                         /* Shared Rich Text / Quill Styles for all media */
