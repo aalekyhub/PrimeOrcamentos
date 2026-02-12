@@ -793,7 +793,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         <HardHat className="text-emerald-600" />
                                         {currentWork?.name}
                                     </h2>
-                                    <p className="text-xs text-emerald-600 uppercase tracking-widest font-semibold">{currentWork?.type} • GESTÃO DE CUSTO REALIZADO</p>
+                                    <p className="text-xs text-emerald-600 uppercase tracking-widest font-semibold">{currentWork?.type} • PLANEJAMENTO DE CUSTO</p>
                                 </div>
                             </div>
                             <div className="flex gap-2">
@@ -891,7 +891,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             }}
                                             className="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 font-bold text-xs h-9 flex items-center justify-center gap-1 shadow-sm"
                                         >
-                                            <Plus size={14} /> ADICIONAR
+                                            <Plus size={14} /> ADICIONAR SERVIÇO
                                         </button>
                                     </div>
                                 </div>
@@ -912,6 +912,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         </button>
                                     ))}
                                 </div>
+
                                 <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
                                     {resourceTab === 'material' && (
                                         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
@@ -957,11 +958,12 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                     }}
                                                     className="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 font-bold text-xs h-9 shadow-sm"
                                                 >
-                                                    <Plus size={14} /> ADICIONAR
+                                                    ADICIONAR MATERIAL
                                                 </button>
                                             </div>
                                         </div>
                                     )}
+
                                     {resourceTab === 'mo' && (
                                         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                             <div className="md:col-span-4">
@@ -1017,11 +1019,12 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                     }}
                                                     className="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 font-bold text-xs h-9 shadow-sm"
                                                 >
-                                                    <Plus size={14} /> ADICIONAR
+                                                    ADICIONAR M.O.
                                                 </button>
                                             </div>
                                         </div>
                                     )}
+
                                     {resourceTab === 'indireto' && (
                                         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                             <div className="md:col-span-3">
@@ -1068,12 +1071,96 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             </div>
                                         </div>
                                     )}
+
+                                    {resourceTab === 'impostos' && (
+                                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                                            <div className="md:col-span-4">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Imposto / Taxa</label>
+                                                <input type="text" id="tax_name" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="Ex: BDI ou ISS" />
+                                            </div>
+                                            <div className="md:col-span-3">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Valor (%)</label>
+                                                <input
+                                                    type="number"
+                                                    id="tax_rate"
+                                                    className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none"
+                                                    placeholder="0.00"
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        const valInput = document.getElementById('tax_val') as HTMLInputElement;
+                                                        if (val && parseFloat(val) > 0) {
+                                                            valInput.value = '';
+                                                            valInput.disabled = true;
+                                                            valInput.classList.add('bg-slate-100', 'text-slate-500');
+                                                        } else {
+                                                            valInput.disabled = false;
+                                                            valInput.classList.remove('bg-slate-100', 'text-slate-500');
+                                                        }
+                                                    }}
+                                                />
+                                            </div>
+                                            <div className="md:col-span-3">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Ou Valor Fixo (R$)</label>
+                                                <input
+                                                    type="number"
+                                                    id="tax_val"
+                                                    className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none"
+                                                    placeholder="0.00"
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        const rateInput = document.getElementById('tax_rate') as HTMLInputElement;
+                                                        if (val && parseFloat(val) > 0) {
+                                                            rateInput.value = '';
+                                                            rateInput.disabled = true;
+                                                            rateInput.classList.add('bg-slate-100', 'text-slate-500');
+                                                        } else {
+                                                            rateInput.disabled = false;
+                                                            rateInput.classList.remove('bg-slate-100', 'text-slate-500');
+                                                        }
+                                                    }}
+                                                />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const name = (document.getElementById('tax_name') as HTMLInputElement).value;
+                                                        const rate = parseFloat((document.getElementById('tax_rate') as HTMLInputElement).value) || 0;
+                                                        const val = parseFloat((document.getElementById('tax_val') as HTMLInputElement).value) || 0;
+
+                                                        if (!name) return notify("Nome da taxa obrigatório", "error");
+
+                                                        const newTax: WorkTax = {
+                                                            id: db.generateId('TAX'),
+                                                            work_id: currentWork?.id || '',
+                                                            name: name.toUpperCase(),
+                                                            rate: rate,
+                                                            value: val
+                                                        };
+
+                                                        setTaxes([...taxes, newTax]);
+
+                                                        (document.getElementById('tax_name') as HTMLInputElement).value = '';
+                                                        (document.getElementById('tax_rate') as HTMLInputElement).value = '';
+                                                        (document.getElementById('tax_val') as HTMLInputElement).value = '';
+                                                        const valInput = document.getElementById('tax_val') as HTMLInputElement;
+                                                        valInput.disabled = false;
+                                                        valInput.classList.remove('bg-slate-100', 'text-slate-500');
+                                                        const rateInput = document.getElementById('tax_rate') as HTMLInputElement;
+                                                        rateInput.disabled = false;
+                                                        rateInput.classList.remove('bg-slate-100', 'text-slate-500');
+                                                    }}
+                                                    className="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 font-bold text-xs h-9 shadow-sm flex items-center justify-center gap-2"
+                                                >
+                                                    <Plus size={16} /> ADICIONAR
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}
                     </div>
-
-                    {/* Content */}
                     <div className="p-8 flex-1 bg-slate-50/50">
                         {activeTab === 'dados' && currentWork && (
                             <div className="max-w-2xl mx-auto space-y-6">
@@ -1538,7 +1625,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         <div className="bg-white p-4 rounded-xl border border-slate-200">
                                             <div className="flex justify-between items-center mb-4">
                                                 <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                                    <Percent size={14} className="text-emerald-500" /> Impostos e BDI Padronizados
+                                                    <Percent size={14} className="text-emerald-500" /> Impostos e BDI
                                                 </h4>
                                                 <button
                                                     type="button"
@@ -1663,9 +1750,9 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             valInput.disabled = false;
                                                             valInput.classList.remove('bg-slate-100', 'text-slate-500');
                                                         }}
-                                                        className="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 font-bold text-xs h-9 shadow-sm"
+                                                        className="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 font-bold text-xs h-9 shadow-sm flex items-center justify-center gap-2"
                                                     >
-                                                        ADICIONAR
+                                                        <Plus size={16} /> ADICIONAR
                                                     </button>
                                                 </div>
                                             </div>
@@ -1699,59 +1786,54 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     </div>
                                 )}
                             </div>
-                        )
-                        }
+                        )}
 
-
-
-                        {
-                            activeTab === 'resumo' && (
-                                <div className="max-w-4xl mx-auto space-y-6">
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-                                        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                                            <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Materiais</span>
-                                            <span className="text-2xl font-bold text-slate-800">R$ {totalMaterial.toFixed(2)}</span>
-                                        </div>
-                                        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                                            <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Mão de Obra</span>
-                                            <span className="text-2xl font-bold text-slate-800">R$ {totalLabor.toFixed(2)}</span>
-                                        </div>
-                                        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                                            <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Indiretos</span>
-                                            <span className="text-2xl font-bold text-slate-800">R$ {totalIndirect.toFixed(2)}</span>
-                                        </div>
-                                        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-blue-500">
-                                            <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Impostos</span>
-                                            <span className="text-2xl font-bold text-slate-800">R$ {totalTaxes.toFixed(2)}</span>
-                                        </div>
+                        {activeTab === 'resumo' && (
+                            <div className="max-w-4xl mx-auto space-y-6">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                                    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                                        <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Materiais</span>
+                                        <span className="text-2xl font-bold text-slate-800">R$ {totalMaterial.toFixed(2)}</span>
                                     </div>
-
-                                    <div className="flex justify-end gap-2">
-                                        <button
-                                            onClick={handlePrintFull}
-                                            className="bg-white border border-slate-200 text-slate-600 px-6 py-3 rounded-xl text-sm font-bold flex items-center gap-3 hover:bg-slate-50 transition-all shadow-sm group"
-                                        >
-                                            <Printer size={20} className="text-emerald-600 group-hover:scale-110 transition-transform" />
-                                            Imprimir Relatório Completo da Obra
-                                        </button>
+                                    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                                        <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Mão de Obra</span>
+                                        <span className="text-2xl font-bold text-slate-800">R$ {totalLabor.toFixed(2)}</span>
                                     </div>
-
-                                    <div className="bg-emerald-900 text-white p-8 rounded-2xl flex justify-between items-center shadow-xl">
-                                        <div>
-                                            <p className="text-emerald-200 text-sm font-bold uppercase tracking-widest mb-1">Custo Realizado Total</p>
-                                            <p className="text-4xl font-bold">R$ {totalGeneral.toFixed(2)}</p>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-xs text-emerald-300">Valores consolidados da execução</p>
-                                        </div>
+                                    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                                        <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Indiretos</span>
+                                        <span className="text-2xl font-bold text-slate-800">R$ {totalIndirect.toFixed(2)}</span>
+                                    </div>
+                                    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-blue-500">
+                                        <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Impostos</span>
+                                        <span className="text-2xl font-bold text-slate-800">R$ {totalTaxes.toFixed(2)}</span>
                                     </div>
                                 </div>
-                            )
-                        }
-                    </div >
-                </div >
+
+                                <div className="flex justify-end gap-2">
+                                    <button
+                                        onClick={handlePrintFull}
+                                        className="bg-white border border-slate-200 text-slate-600 px-6 py-3 rounded-xl text-sm font-bold flex items-center gap-3 hover:bg-slate-50 transition-all shadow-sm group"
+                                    >
+                                        <Printer size={20} className="text-emerald-600 group-hover:scale-110 transition-transform" />
+                                        Imprimir Relatório Completo da Obra
+                                    </button>
+                                </div>
+
+                                <div className="bg-emerald-900 text-white p-8 rounded-2xl flex justify-between items-center shadow-xl">
+                                    <div>
+                                        <p className="text-emerald-200 text-sm font-bold uppercase tracking-widest mb-1">Custo Realizado Total</p>
+                                        <p className="text-4xl font-bold">R$ {totalGeneral.toFixed(2)}</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-xs text-emerald-300">Valores consolidados da execução</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
             )}
-        </div >
+        </div>
     );
 };
 
