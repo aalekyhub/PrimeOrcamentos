@@ -1091,7 +1091,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
                                     {resourceTab === 'impostos' && (
                                         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                                            <div className="md:col-span-4">
+                                            <div className="md:col-span-7">
                                                 <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Imposto / Taxa</label>
                                                 <input type="text" id="tax_name" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="Ex: BDI ou ISS" />
                                             </div>
@@ -1102,39 +1102,6 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                     id="tax_rate"
                                                     className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none"
                                                     placeholder="0.00"
-                                                    onChange={(e) => {
-                                                        const val = e.target.value;
-                                                        const valInput = document.getElementById('tax_val') as HTMLInputElement;
-                                                        if (val && parseFloat(val) > 0) {
-                                                            valInput.value = '';
-                                                            valInput.disabled = true;
-                                                            valInput.classList.add('bg-slate-100', 'text-slate-500');
-                                                        } else {
-                                                            valInput.disabled = false;
-                                                            valInput.classList.remove('bg-slate-100', 'text-slate-500');
-                                                        }
-                                                    }}
-                                                />
-                                            </div>
-                                            <div className="md:col-span-3">
-                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Ou Valor Fixo (R$)</label>
-                                                <input
-                                                    type="number"
-                                                    id="tax_val"
-                                                    className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none"
-                                                    placeholder="0.00"
-                                                    onChange={(e) => {
-                                                        const val = e.target.value;
-                                                        const rateInput = document.getElementById('tax_rate') as HTMLInputElement;
-                                                        if (val && parseFloat(val) > 0) {
-                                                            rateInput.value = '';
-                                                            rateInput.disabled = true;
-                                                            rateInput.classList.add('bg-slate-100', 'text-slate-500');
-                                                        } else {
-                                                            rateInput.disabled = false;
-                                                            rateInput.classList.remove('bg-slate-100', 'text-slate-500');
-                                                        }
-                                                    }}
                                                 />
                                             </div>
                                             <div className="md:col-span-2">
@@ -1143,7 +1110,6 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                     onClick={() => {
                                                         const name = (document.getElementById('tax_name') as HTMLInputElement).value;
                                                         const rate = parseFloat((document.getElementById('tax_rate') as HTMLInputElement).value) || 0;
-                                                        const val = parseFloat((document.getElementById('tax_val') as HTMLInputElement).value) || 0;
 
                                                         if (!name) return notify("Nome da taxa obrigatório", "error");
 
@@ -1152,20 +1118,13 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             work_id: currentWork?.id || '',
                                                             name: name.toUpperCase(),
                                                             rate: rate,
-                                                            value: val
+                                                            value: 0
                                                         };
 
                                                         setTaxes([...taxes, newTax]);
 
                                                         (document.getElementById('tax_name') as HTMLInputElement).value = '';
                                                         (document.getElementById('tax_rate') as HTMLInputElement).value = '';
-                                                        (document.getElementById('tax_val') as HTMLInputElement).value = '';
-                                                        const valInput = document.getElementById('tax_val') as HTMLInputElement;
-                                                        valInput.disabled = false;
-                                                        valInput.classList.remove('bg-slate-100', 'text-slate-500');
-                                                        const rateInput = document.getElementById('tax_rate') as HTMLInputElement;
-                                                        rateInput.disabled = false;
-                                                        rateInput.classList.remove('bg-slate-100', 'text-slate-500');
                                                     }}
                                                     className="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 font-bold text-xs h-9 shadow-sm flex items-center justify-center gap-2"
                                                 >
