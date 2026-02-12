@@ -182,6 +182,75 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
         setLoading(false);
     };
 
+    const handleDeleteService = async (id: string) => {
+        if (!confirm('Tem certeza que deseja excluir este serviço?')) return;
+
+        const updatedServices = services.filter(s => s.id !== id);
+        setServices(updatedServices);
+
+        await db.remove('serviflow_plan_services', id);
+
+        if (currentPlan) {
+            const allServices = db.load('serviflow_plan_services', []) as PlannedService[];
+            const otherServices = allServices.filter(s => s.plan_id !== currentPlan.id);
+            const servicesToSave = [...otherServices, ...updatedServices];
+            await db.save('serviflow_plan_services', servicesToSave);
+        }
+        notify("Serviço excluído", "success");
+    };
+
+    const handleDeleteMaterial = async (id: string) => {
+        if (!confirm('Tem certeza que deseja excluir este material?')) return;
+
+        const updatedMaterials = materials.filter(m => m.id !== id);
+        setMaterials(updatedMaterials);
+
+        await db.remove('serviflow_plan_materials', id);
+
+        if (currentPlan) {
+            const allMaterials = db.load('serviflow_plan_materials', []) as PlannedMaterial[];
+            const otherMaterials = allMaterials.filter(m => m.plan_id !== currentPlan.id);
+            const materialsToSave = [...otherMaterials, ...updatedMaterials];
+            await db.save('serviflow_plan_materials', materialsToSave);
+        }
+        notify("Material excluído", "success");
+    };
+
+    const handleDeleteLabor = async (id: string) => {
+        if (!confirm('Tem certeza que deseja excluir este item de mão de obra?')) return;
+
+        const updatedLabor = labor.filter(l => l.id !== id);
+        setLabor(updatedLabor);
+
+        await db.remove('serviflow_plan_labor', id);
+
+        if (currentPlan) {
+            const allLabor = db.load('serviflow_plan_labor', []) as PlannedLabor[];
+            const otherLabor = allLabor.filter(l => l.plan_id !== currentPlan.id);
+            const laborToSave = [...otherLabor, ...updatedLabor];
+            await db.save('serviflow_plan_labor', laborToSave);
+        }
+        notify("Mão de obra excluída", "success");
+    };
+
+    const handleDeleteIndirect = async (id: string) => {
+        if (!confirm('Tem certeza que deseja excluir este custo indireto?')) return;
+
+        const updatedIndirects = indirects.filter(i => i.id !== id);
+        setIndirects(updatedIndirects);
+
+        await db.remove('serviflow_plan_indirects', id);
+
+        if (currentPlan) {
+            const allIndirects = db.load('serviflow_plan_indirects', []) as PlannedIndirect[];
+            const otherIndirects = allIndirects.filter(i => i.plan_id !== currentPlan.id);
+            const indirectsToSave = [...otherIndirects, ...updatedIndirects];
+            await db.save('serviflow_plan_indirects', indirectsToSave);
+        }
+        notify("Custo indireto excluído", "success");
+    };
+
+
     const handlePrintFull = () => {
         if (!currentPlan) return;
 
@@ -873,7 +942,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             <Pencil size={16} />
                                                         </button>
                                                         <button
-                                                            onClick={() => setServices(services.filter(s => s.id !== svc.id))}
+                                                            onClick={() => handleDeleteService(svc.id)}
                                                             className="text-slate-300 hover:text-red-500 p-2"
                                                         >
                                                             <Trash2 size={16} />
@@ -977,7 +1046,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                 <Trash2
                                                                     size={14}
                                                                     className="cursor-pointer text-slate-400 hover:text-red-500"
-                                                                    onClick={() => setMaterials(materials.filter(x => x.id !== m.id))}
+                                                                    onClick={() => handleDeleteMaterial(m.id)}
                                                                 />
                                                             </div>
                                                         </div>
@@ -1087,7 +1156,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                 <Trash2
                                                                     size={14}
                                                                     className="cursor-pointer text-slate-400 hover:text-red-500"
-                                                                    onClick={() => setLabor(labor.filter(x => x.id !== l.id))}
+                                                                    onClick={() => handleDeleteLabor(l.id)}
                                                                 />
                                                             </div>
                                                         </div>
@@ -1177,7 +1246,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                 <Trash2
                                                                     size={14}
                                                                     className="cursor-pointer text-slate-400 hover:text-red-500"
-                                                                    onClick={() => setIndirects(indirects.filter(x => x.id !== i.id))}
+                                                                    onClick={() => handleDeleteIndirect(i.id)}
                                                                 />
                                                             </div>
                                                         </div>

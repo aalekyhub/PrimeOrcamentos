@@ -323,6 +323,81 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         setLoading(false);
     };
 
+    const handleDeleteService = async (id: string) => {
+        if (!confirm('Tem certeza que deseja excluir este serviço?')) return;
+
+        // 1. Remove from state
+        const updatedServices = services.filter(s => s.id !== id);
+        setServices(updatedServices);
+
+        // 2. Remove from Supabase
+        await db.remove('serviflow_work_services', id);
+
+        // 3. Update Local Storage (via save)
+        if (currentWork) {
+            const allServices = db.load('serviflow_work_services', []) as WorkService[];
+            const otherServices = allServices.filter(s => s.work_id !== currentWork.id);
+            const servicesToSave = [...otherServices, ...updatedServices];
+            await db.save('serviflow_work_services', servicesToSave);
+        }
+        notify("Serviço excluído", "success");
+    };
+
+    const handleDeleteMaterial = async (id: string) => {
+        if (!confirm('Tem certeza que deseja excluir este material?')) return;
+
+        // 1. Remove from state
+        const updatedMaterials = materials.filter(m => m.id !== id);
+        setMaterials(updatedMaterials);
+
+        // 2. Remove from Supabase
+        await db.remove('serviflow_work_materials', id);
+
+        // 3. Update Local Storage
+        if (currentWork) {
+            const allMaterials = db.load('serviflow_work_materials', []) as WorkMaterial[];
+            const otherMaterials = allMaterials.filter(m => m.work_id !== currentWork.id);
+            const materialsToSave = [...otherMaterials, ...updatedMaterials];
+            await db.save('serviflow_work_materials', materialsToSave);
+        }
+        notify("Material excluído", "success");
+    };
+
+    const handleDeleteLabor = async (id: string) => {
+        if (!confirm('Tem certeza que deseja excluir este item de mão de obra?')) return;
+
+        const updatedLabor = labor.filter(l => l.id !== id);
+        setLabor(updatedLabor);
+
+        await db.remove('serviflow_work_labor', id);
+
+        if (currentWork) {
+            const allLabor = db.load('serviflow_work_labor', []) as WorkLabor[];
+            const otherLabor = allLabor.filter(l => l.work_id !== currentWork.id);
+            const laborToSave = [...otherLabor, ...updatedLabor];
+            await db.save('serviflow_work_labor', laborToSave);
+        }
+        notify("Mão de obra excluída", "success");
+    };
+
+    const handleDeleteIndirect = async (id: string) => {
+        if (!confirm('Tem certeza que deseja excluir este custo indireto?')) return;
+
+        const updatedIndirects = indirects.filter(i => i.id !== id);
+        setIndirects(updatedIndirects);
+
+        await db.remove('serviflow_work_indirects', id);
+
+        if (currentWork) {
+            const allIndirects = db.load('serviflow_work_indirects', []) as WorkIndirect[];
+            const otherIndirects = allIndirects.filter(i => i.work_id !== currentWork.id);
+            const indirectsToSave = [...otherIndirects, ...updatedIndirects];
+            await db.save('serviflow_work_indirects', indirectsToSave);
+        }
+        notify("Custo indireto excluído", "success");
+    };
+
+
     const handlePrintMaterials = () => {
         if (!currentWork || materials.length === 0) return;
 
@@ -1079,7 +1154,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         <button onClick={() => setEditingId(svc.id)} className="text-blue-400 hover:text-blue-600">
                                                             <Pencil size={16} />
                                                         </button>
-                                                        <button onClick={() => setServices(services.filter(s => s.id !== svc.id))} className="text-slate-300 hover:text-red-500">
+                                                        <button onClick={() => handleDeleteService(svc.id)} className="text-slate-300 hover:text-red-500">
                                                             <Trash2 size={16} />
                                                         </button>
                                                     </div>
@@ -1207,7 +1282,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             <div className="flex items-center gap-4">
                                                                 <span className="font-bold">R$ {m.total_cost.toFixed(2)}</span>
                                                                 <Pencil size={14} className="cursor-pointer text-blue-400 hover:text-blue-600" onClick={() => setEditingId(m.id)} />
-                                                                <Trash2 size={14} className="cursor-pointer text-slate-400 hover:text-red-500" onClick={() => setMaterials(materials.filter(x => x.id !== m.id))} />
+                                                                <Trash2 size={14} className="cursor-pointer text-slate-400 hover:text-red-500" onClick={() => handleDeleteMaterial(m.id)} />
                                                             </div>
                                                         </>
                                                     )}
@@ -1309,7 +1384,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             <div className="flex items-center gap-4">
                                                                 <span className="font-bold">R$ {l.total_cost.toFixed(2)}</span>
                                                                 <Pencil size={14} className="cursor-pointer text-blue-400 hover:text-blue-600" onClick={() => setEditingId(l.id)} />
-                                                                <Trash2 size={14} className="cursor-pointer text-slate-400 hover:text-red-500" onClick={() => setLabor(labor.filter(x => x.id !== l.id))} />
+                                                                <Trash2 size={14} className="cursor-pointer text-slate-400 hover:text-red-500" onClick={() => handleDeleteLabor(l.id)} />
                                                             </div>
                                                         </>
                                                     )}
@@ -1391,7 +1466,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             <div className="flex items-center gap-4">
                                                                 <span className="font-bold">R$ {i.value.toFixed(2)}</span>
                                                                 <Pencil size={14} className="cursor-pointer text-blue-400 hover:text-blue-600" onClick={() => setEditingId(i.id)} />
-                                                                <Trash2 size={14} className="cursor-pointer text-slate-400 hover:text-red-500" onClick={() => setIndirects(indirects.filter(x => x.id !== i.id))} />
+                                                                <Trash2 size={14} className="cursor-pointer text-slate-400 hover:text-red-500" onClick={() => handleDeleteIndirect(i.id)} />
                                                             </div>
                                                         </>
                                                     )}
