@@ -196,7 +196,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', address: 'Endereço não informado', city: '', state: '', cep: '' };
 
         const html = `
-    < !DOCTYPE html >
+        <!DOCTYPE html>
         <html>
             <head>
                 <title>Contrato - ${order.id}</title>
@@ -215,7 +215,10 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     </style>
             </head>
             <body class="no-scrollbar">
-                <div id="contract-content">
+                <table style="width: 100%;">
+                    <thead><tr><td style="height: ${company.printMarginTop || 15}mm;"><div style="height: ${company.printMarginTop || 15}mm;">&nbsp;</div></td></tr></thead>
+                    <tbody><tr><td>
+                        <div id="contract-content">
                     <div class="a4-container">
                         <div class="flex justify-between items-start mb-10 border-b-[3px] border-slate-900 pb-8">
                             <div class="flex gap-6 items-center">
@@ -319,9 +322,11 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                 <div class="text-center border-t border-slate-300 pt-3" style="page-break-inside: avoid; break-inside: avoid;"><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</p><p class="text-sm font-bold uppercase text-slate-900">${company.name}</p></div>
                                 <div class="text-center border-t border-slate-300 pt-3 relative" style="page-break-inside: avoid; break-inside: avoid;"><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</p><p class="text-sm font-bold uppercase text-slate-900">${customer.name}</p></div>
                             </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
+                    </td></tr></tbody>
+                    <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;"><div style="height: ${company.printMarginBottom || 15}mm;">&nbsp;</div></td></tr></tfoot>
+                </table>
             </body>
         </html>`;
 
@@ -404,7 +409,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         if (!printWindow) return;
 
         const html = `
-    < !DOCTYPE html >
+        <!DOCTYPE html>
         <html>
             <head>
                 <title>Contrato - ${order.id.replace('OS-', 'OS')} - ${order.description || 'Proposta'}</title>
@@ -671,7 +676,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         }).join('');
 
         const html = `
-    < !DOCTYPE html >
+        <!DOCTYPE html>
         <html>
             <head>
                 <title>Relatório de Obra - ${order.id} - ${order.description || 'Obra'}</title>
