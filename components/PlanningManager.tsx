@@ -492,20 +492,22 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
         return bdiTax.rate > 0 ? (totalDirect * (bdiTax.rate / 100)) : bdiTax.value;
     }, [bdiTax, totalDirect]);
 
-    // Subtotal (Base for other taxes) = Direct Cost + BDI
-    const subtotalWithBDI = totalDirect + bdiValue;
+    // Líquido Desejado = Custo Direto + BDI
+    const desiredLiquid = totalDirect + bdiValue;
 
-    const totalTaxes = useMemo(() => {
-        const otherTaxesValue = otherTaxes.reduce((acc, t) => {
-            if (t.rate > 0) {
-                return acc + (subtotalWithBDI * (t.rate / 100));
-            }
-            return acc + t.value;
-        }, 0);
-        return bdiValue + otherTaxesValue;
-    }, [otherTaxes, subtotalWithBDI, bdiValue]);
+    // Fator de Gross Up (1 - soma das alíquotas das outras taxas)
+    const taxFactor = useMemo(() => {
+        const sumRates = otherTaxes.reduce((acc, t) => acc + (t.rate > 0 ? (t.rate / 100) : 0), 0);
+        return Math.max(0.01, 1 - sumRates); // Evita divisão por zero
+    }, [otherTaxes]);
 
-    const totalGeneral = totalDirect + totalTaxes;
+    // Total Geral (Nota Fiscal) = (Líquido + Taxas Fixas) / Fator
+    const totalGeneral = useMemo(() => {
+        const sumFixed = otherTaxes.reduce((acc, t) => acc + (t.rate > 0 ? 0 : t.value), 0);
+        return (desiredLiquid + sumFixed) / taxFactor;
+    }, [desiredLiquid, otherTaxes, taxFactor]);
+
+    const totalTaxes = useMemo(() => totalGeneral - totalDirect, [totalGeneral, totalDirect]);
 
     if (embeddedPlanId && !currentPlan) {
         return <div className="p-10 text-center text-slate-500">Carregando planejamento...</div>;
@@ -981,7 +983,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             <Plus size={16} /> ADICIONAR
                                                         </button>
                                                     </div>
-                                                    <p className="text-[10px] text-slate-400 mt-2">* BDI calculado sobre o Custo Direto (R$ {totalDirect.toFixed(2)}). Demais taxas sobre Custo Direto + BDI (R$ {subtotalWithBDI.toFixed(2)}).</p>
+                                                    <p className="text-[10px] text-slate-400 mt-2">* BDI sobre o Custo Direto (R$ {totalDirect.toFixed(2)}). Demais taxas aplicadas via Gross Up sobre a NF (R$ {totalGeneral.toFixed(2)}).</p>
                                                 </div>
                                             </div>
 
@@ -998,7 +1000,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             </div>
                                                             <div className="flex items-center gap-4">
                                                                 <span className="font-bold text-xs text-blue-600">
-                                                                    R$ {(t.rate > 0 ? (t.name === 'BDI' ? totalDirect : subtotalWithBDI) * (t.rate / 100) : t.value).toFixed(2)}
+                                                                    R$ {(t.rate > 0 ? (t.name === 'BDI' ? totalDirect : totalGeneral) * (t.rate / 100) : t.value).toFixed(2)}
                                                                 </span>
                                                                 <button onClick={() => handleDeleteTax(t.id)} className="text-slate-300 hover:text-red-500 transition-colors">
                                                                     <Trash2 size={14} />
