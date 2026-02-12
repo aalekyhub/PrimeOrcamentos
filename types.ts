@@ -294,6 +294,14 @@ export interface WorkTax {
   value: number;
 }
 
+export interface PlanTax {
+  id: string;
+  plan_id: string;
+  name: string;
+  rate: number;
+  value: number;
+}
+
 // --- NEW MODULE: SINAPI Integration ---
 
 export interface SinapiInsumo {

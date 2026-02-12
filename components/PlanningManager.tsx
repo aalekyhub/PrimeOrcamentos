@@ -9,7 +9,7 @@ import { useNotify } from './ToastProvider';
 import { db } from '../services/db';
 import {
     PlanningHeader, PlannedService, PlannedMaterial,
-    PlannedLabor, PlannedIndirect, Customer
+    PlannedLabor, PlannedIndirect, PlanTax, Customer
 } from '../types';
 
 interface Props {
@@ -34,6 +34,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
     const [materials, setMaterials] = useState<PlannedMaterial[]>([]);
     const [labor, setLabor] = useState<PlannedLabor[]>([]);
     const [indirects, setIndirects] = useState<PlannedIndirect[]>([]);
+    const [taxes, setTaxes] = useState<PlanTax[]>([]);
 
     // Edit Temp States
     const [editDesc, setEditDesc] = useState('');
@@ -44,7 +45,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
 
     // UI State
     const [activeTab, setActiveTab] = useState<'dados' | 'servicos' | 'recursos' | 'resumo'>('dados');
-    const [resourceTab, setResourceTab] = useState<'material' | 'mo' | 'indireto'>('material');
+    const [resourceTab, setResourceTab] = useState<'material' | 'mo' | 'indireto' | 'impostos'>('material');
 
     // Ref to prevent infinite loop on creation
     const creationAttemptedRef = useRef(false);
@@ -93,6 +94,8 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
         setLabor(allLabor.filter(l => l.plan_id === planId));
         const allIndirects = db.load('serviflow_plan_indirects', []) as PlannedIndirect[];
         setIndirects(allIndirects.filter(i => i.plan_id === planId));
+        const allTaxes = db.load('serviflow_plan_taxes', []) as PlanTax[];
+        setTaxes(allTaxes.filter(t => t.plan_id === planId));
     };
 
     const handleCreatePlan = () => {
@@ -122,6 +125,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
         setMaterials([]);
         setLabor([]);
         setIndirects([]);
+        setTaxes([]);
         setActiveTab('dados');
     };
 
@@ -168,6 +172,12 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
         const otherIndirects = allIndirects.filter(i => i.plan_id !== currentPlan.id);
         const indirectsToSave = [...otherIndirects, ...indirects.map(i => ({ ...i, plan_id: currentPlan.id }))];
         await db.save('serviflow_plan_indirects', indirectsToSave);
+
+        // 4. Taxes
+        const allTaxes = db.load('serviflow_plan_taxes', []) as PlanTax[];
+        const otherTaxes = allTaxes.filter(t => t.plan_id !== currentPlan.id);
+        const taxesToSave = [...otherTaxes, ...taxes.map(t => ({ ...t, plan_id: currentPlan.id }))];
+        await db.save('serviflow_plan_taxes', taxesToSave);
 
         // Also update Services correctly (filter out old, add new)
         const allServices = db.load('serviflow_plan_services', []) as PlannedService[];
@@ -248,6 +258,23 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
             await db.save('serviflow_plan_indirects', indirectsToSave);
         }
         notify("Custo indireto excluído", "success");
+    };
+
+    const handleDeleteTax = async (id: string) => {
+        if (!confirm('Tem certeza que deseja excluir este imposto?')) return;
+
+        const updatedTaxes = taxes.filter(t => t.id !== id);
+        setTaxes(updatedTaxes);
+
+        await db.remove('serviflow_plan_taxes', id);
+
+        if (currentPlan) {
+            const allTaxes = db.load('serviflow_plan_taxes', []) as PlanTax[];
+            const otherTaxes = allTaxes.filter(t => t.plan_id !== currentPlan.id);
+            const taxesToSave = [...otherTaxes, ...updatedTaxes];
+            await db.save('serviflow_plan_taxes', taxesToSave);
+        }
+        notify("Imposto excluído", "success");
     };
 
 
@@ -414,11 +441,15 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                 <p style="margin: 0; font-size: 10px; color: #bfdbfe; text-transform: uppercase; letter-spacing: 0.05em;">Custos Indiretos</p>
                                 <p style="margin: 5px 0 0 0; font-size: 18px; font-weight: 700;">R$ ${totalIndirect.toFixed(2)}</p>
                             </div>
+                            <div style="grid-column: span 2; border-top: 1px dashed #3b82f6; pt-4; mt-4">
+                                <p style="margin: 0; font-size: 10px; color: #bfdbfe; text-transform: uppercase; letter-spacing: 0.05em;">Impostos / Taxas</p>
+                                <p style="margin: 5px 0 0 0; font-size: 18px; font-weight: 700;">R$ ${totalTaxes.toFixed(2)}</p>
+                            </div>
                         </div>
                         
                         <div style="text-align: right;">
                             <p style="margin: 0; font-size: 12px; color: #93c5fd; font-weight: 800; text-transform: uppercase;">Custo Total Previsto</p>
-                            <p style="margin: 5px 0 0 0; font-size: 36px; font-weight: 800; color: white;">R$ ${(totalServices + materials.reduce((acc, m) => acc + m.total_cost, 0) + labor.reduce((acc, l) => acc + l.total_cost, 0) + totalIndirect).toFixed(2)}</p>
+                            <p style="margin: 5px 0 0 0; font-size: 36px; font-weight: 800; color: white;">R$ ${totalGeneral.toFixed(2)}</p>
                         </div>
                     </div>
                 </div>
@@ -444,10 +475,23 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
     };
 
     // Calculations
+    const totalServices = useMemo(() => services.reduce((acc, s) => acc + s.total_cost, 0), [services]);
     const totalMaterial = useMemo(() => materials.reduce((acc, i) => acc + i.total_cost, 0), [materials]);
     const totalLabor = useMemo(() => labor.reduce((acc, i) => acc + i.total_cost, 0), [labor]);
     const totalIndirect = useMemo(() => indirects.reduce((acc, i) => acc + i.value, 0), [indirects]);
-    const totalGeneral = totalMaterial + totalLabor + totalIndirect;
+
+    // Calculate Taxes
+    const totalDirect = totalServices + totalMaterial + totalLabor + totalIndirect;
+    const totalTaxes = useMemo(() => {
+        return taxes.reduce((acc, t) => {
+            if (t.rate > 0) {
+                return acc + (totalDirect * (t.rate / 100));
+            }
+            return acc + t.value;
+        }, 0);
+    }, [taxes, totalDirect]);
+
+    const totalGeneral = totalDirect + totalTaxes;
 
     if (embeddedPlanId && !currentPlan) {
         return <div className="p-10 text-center text-slate-500">Carregando planejamento...</div>;
@@ -606,7 +650,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                         {activeTab === 'recursos' && (
                             <div className="px-6 pb-4 border-t border-slate-100 bg-white">
                                 <div className="flex gap-1.5 my-3 justify-center">
-                                    {[{ id: 'material', label: 'Materiais' }, { id: 'mo', label: 'Mão de Obra' }, { id: 'indireto', label: 'Indiretos' }].map(r => (
+                                    {[{ id: 'material', label: 'Materiais' }, { id: 'mo', label: 'Mão de Obra' }, { id: 'indireto', label: 'Indiretos' }, { id: 'impostos', label: 'Impostos' }].map(r => (
                                         <button
                                             key={r.id}
                                             type="button"
@@ -776,6 +820,95 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 >
                                                     <Plus size={16} />
                                                 </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {resourceTab === 'impostos' && (
+                                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                                            <div className="md:col-span-5">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nome do Imposto</label>
+                                                <input type="text" id="tax_name" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none" placeholder="Ex: BDI, ISS" />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Taxa (%)</label>
+                                                <input
+                                                    type="number"
+                                                    id="tax_rate"
+                                                    className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none"
+                                                    placeholder="0"
+                                                    onChange={(e) => {
+                                                        const valInput = document.getElementById('tax_val') as HTMLInputElement;
+                                                        if (parseFloat(e.target.value) > 0) {
+                                                            valInput.disabled = true;
+                                                            valInput.value = '';
+                                                            valInput.placeholder = 'Calculado auto';
+                                                        } else {
+                                                            valInput.disabled = false;
+                                                            valInput.placeholder = '0.00';
+                                                        }
+                                                    }}
+                                                />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Valor Fixo (R$)</label>
+                                                <input type="number" id="tax_val" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none" placeholder="0.00" />
+                                            </div>
+                                            <div className="md:col-span-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const name = (document.getElementById('tax_name') as HTMLInputElement).value;
+                                                        const rate = parseFloat((document.getElementById('tax_rate') as HTMLInputElement).value) || 0;
+                                                        const val = parseFloat((document.getElementById('tax_val') as HTMLInputElement).value) || 0;
+
+                                                        if (!name) return notify("Nome obrigatório", "error");
+
+                                                        setTaxes([...taxes, {
+                                                            id: db.generateId('TAX'),
+                                                            plan_id: currentPlan?.id || '',
+                                                            name: name.toUpperCase(),
+                                                            rate: rate,
+                                                            value: rate > 0 ? 0 : val
+                                                        }]);
+
+                                                        (document.getElementById('tax_name') as HTMLInputElement).value = '';
+                                                        (document.getElementById('tax_rate') as HTMLInputElement).value = '';
+                                                        const valInput = (document.getElementById('tax_val') as HTMLInputElement);
+                                                        valInput.value = '';
+                                                        valInput.disabled = false;
+                                                        valInput.placeholder = '0.00';
+                                                    }}
+                                                    className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-bold text-xs h-9 shadow-sm flex items-center justify-center gap-2"
+                                                >
+                                                    <Plus size={16} /> ADICIONAR
+                                                </button>
+                                            </div>
+                                            <div className="col-span-full mt-4">
+                                                <h4 className="text-xs font-bold text-slate-400 uppercase mb-2">Impostos Adicionados</h4>
+                                                <div className="space-y-2">
+                                                    {taxes.map(t => (
+                                                        <div key={t.id} className="bg-slate-50 p-2 rounded border border-slate-200 flex justify-between items-center">
+                                                            <div>
+                                                                <span className="font-bold text-xs text-slate-700">{t.name}</span>
+                                                                <span className="text-[10px] text-slate-500 ml-2">
+                                                                    {t.rate > 0 ? `${t.rate}%` : 'Valor Fixo'}
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex items-center gap-4">
+                                                                <span className="font-bold text-xs text-slate-700">
+                                                                    R$ {t.rate > 0
+                                                                        ? ((totalMaterial + totalLabor + totalIndirect + (services.reduce((acc, s) => acc + s.total_cost, 0))) * (t.rate / 100)).toFixed(2)
+                                                                        : t.value.toFixed(2)}
+                                                                </span>
+                                                                <button onClick={() => handleDeleteTax(t.id)} className="text-red-500 hover:text-red-700">
+                                                                    <Trash2 size={14} />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    {taxes.length === 0 && <p className="text-xs text-slate-400 italic">Nenhum imposto adicionado.</p>}
+                                                </div>
                                             </div>
                                         </div>
                                     )}
@@ -1310,7 +1443,8 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                         )}
                     </div>
                 </div >
-            )}
+            )
+            }
         </div >
     );
 };

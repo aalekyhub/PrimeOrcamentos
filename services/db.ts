@@ -69,7 +69,7 @@ export const db = {
 
     const tables = [
       'customers', 'catalog', 'orders', 'transactions', 'users', 'loans',
-      'plans', 'plan_services', 'plan_materials', 'plan_labor', 'plan_indirects',
+      'plans', 'plan_services', 'plan_materials', 'plan_labor', 'plan_indirects', 'plan_taxes',
       'works', 'work_services', 'work_materials', 'work_labor', 'work_indirects', 'work_taxes'
     ];
     const results: any = {};
