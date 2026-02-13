@@ -574,20 +574,20 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
                 <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 4ª – DAS OBRIGAÇÕES DA CONTRATADA</h4>
-                <ul style="list-style-type: disc; padding-left: 20px; font-size: 14px; color: #475569; line-height: 1.6; margin: 0;">
-                    <li style="margin-bottom: 4px;">4.1. Executar os serviços conforme o escopo contratado e normas técnicas aplicáveis.</li>
-                    <li style="margin-bottom: 4px;">4.2. Responsabilizar-se integralmente por seus empregados, prepostos ou subcontratados, inclusive quanto a encargos trabalhistas, previdenciários, fiscais e securitários.</li>
-                    <li style="margin-bottom: 4px;">4.3. Manter seus tributos, contribuições e obrigações legais em dia.</li>
-                    <li>4.4. Responder por danos eventualmente causados ao imóvel durante a execução dos serviços.</li>
+                <ul style="list-style-type: disc; list-style-position: outside; padding-left: 20px; font-size: 14px; color: #475569; line-height: 1.6; margin: 0;">
+                    <li style="margin-bottom: 4px; padding-left: 5px;">4.1. Executar os serviços conforme o escopo contratado e normas técnicas aplicáveis.</li>
+                    <li style="margin-bottom: 4px; padding-left: 5px;">4.2. Responsabilizar-se integralmente por seus empregados, prepostos ou subcontratados, inclusive quanto a encargos trabalhistas, previdenciários, fiscais e securitários.</li>
+                    <li style="margin-bottom: 4px; padding-left: 5px;">4.3. Manter seus tributos, contribuições e obrigações legais em dia.</li>
+                    <li style="padding-left: 5px;">4.4. Responder por danos eventualmente causados ao imóvel durante a execução dos serviços.</li>
                 </ul>
             </div>
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
                 <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 5ª – DAS OBRIGAÇÕES DO CONTRANTE</h4>
-                <ul style="list-style-type: disc; padding-left: 20px; font-size: 14px; color: #475569; line-height: 1.6; margin: 0;">
-                    <li style="margin-bottom: 4px;">5.1. Garantir o acesso da CONTRATADA ao local da obra.</li>
-                    <li style="margin-bottom: 4px;">5.2. Efetuar os pagamentos conforme acordado.</li>
-                    <li>5.3. Fornecer, quando necessário, autorizações do condomínio para execução dos serviços.</li>
+                <ul style="list-style-type: disc; list-style-position: outside; padding-left: 20px; font-size: 14px; color: #475569; line-height: 1.6; margin: 0;">
+                    <li style="margin-bottom: 4px; padding-left: 5px;">5.1. Garantir o acesso da CONTRATADA ao local da obra.</li>
+                    <li style="margin-bottom: 4px; padding-left: 5px;">5.2. Efetuar os pagamentos conforme acordado.</li>
+                    <li style="padding-left: 5px;">5.3. Fornecer, quando necessário, autorizações do condomínio para execução dos serviços.</li>
                 </ul>
             </div>
 
@@ -701,6 +701,9 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                 
                 .pdf-header { margin-bottom: 25px; }
                 .pdf-footer { margin-top: 32px; }
+
+                ul, ol { margin: 0; padding-left: 20px !important; }
+                li { padding-left: 5px !important; margin-bottom: 4px !important; line-height: 1.6 !important; }
 
                 .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
                 .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
@@ -826,6 +829,9 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                
                .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; padding-top: 15mm !important; padding-bottom: 15mm !important; }
                .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
+               
+               ul, ol { margin: 0; padding-left: 20px !important; }
+               li { padding-left: 5px !important; margin-bottom: 4px !important; line-height: 1.6 !important; }
                
                @media screen { 
                  body { background: #f1f5f9; padding: 40px 0; } 
