@@ -297,21 +297,21 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                   </div>
                 </div>` : ''}
 
-               <!-- Items Table -->
-                <div class="mb-8 avoid-break" style="page-break-before: always; break-before: page;">
-                    <div class="section-title">Detalhamento Financeiro</div>
-                    <table style="width: 100%; border-collapse: collapse;">
-                       <thead>
-                           <tr style="border-bottom: 2px solid #0f172a;">
-                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: left; font-weight: 700; letter-spacing: 0.05em; width: 60%;">Item / Descrição</th>
-                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: center; font-weight: 700; letter-spacing: 0.05em; width: 10%;">Qtd</th>
-                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: right; font-weight: 700; letter-spacing: 0.05em; width: 15%;">Unitário</th>
-                               <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: right; font-weight: 700; letter-spacing: 0.05em; width: 15%;">Subtotal</th>
-                           </tr>
-                       </thead>
-                       <tbody>${itemsHtml}</tbody>
-                   </table>
-               </div>
+                <!-- Items Table -->
+                 <div class="mb-8 avoid-break">
+                     <div class="section-title">Detalhamento Financeiro</div>
+                     <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid #0f172a;">
+                                <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: left; font-weight: 700; letter-spacing: 0.05em; width: 60%;">Item / Descrição</th>
+                                <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: center; font-weight: 700; letter-spacing: 0.05em; width: 10%;">Qtd</th>
+                                <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: right; font-weight: 700; letter-spacing: 0.05em; width: 15%;">Unitário</th>
+                                <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: right; font-weight: 700; letter-spacing: 0.05em; width: 15%;">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>${itemsHtml}</tbody>
+                    </table>
+                </div>
 
                <!-- Total Bar (Dark) -->
                <div class="avoid-break mb-6">
@@ -449,7 +449,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       document.body.appendChild(iframe);
 
       // Remove the auto-print command but keep optimization
-      let pdfHtml = html.replace(/window\.onload\s*=\s*function\(\)\s*\{[\s\S]*?window\.print\(\);[\s\S]*?\}/, 'window.onload = function() { optimizePageBreaks(); }');
+      let pdfHtml = html.replace(/window\.onload\s*=\s*function\(\)\s*\{[\s\S]*?\};?\s*\}/, 'window.onload = function() { optimizePageBreaks(); }');
 
       // Inject robust PDF-specific styles to override "screen" styles
       const pdfOverrideStyles = `
