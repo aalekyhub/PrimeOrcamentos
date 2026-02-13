@@ -538,12 +538,12 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                     filename: `Material_Obra_${currentWork.name.replace(/\s+/g, '_')}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 } as any,
                     html2canvas: {
-                        scale: 2,
+                        scale: 3,
                         useCORS: true,
                         letterRendering: true,
                         scrollX: 0,
                         scrollY: 0,
-                        windowWidth: 1120,
+                        windowWidth: 794,
                         windowHeight: element.scrollHeight
                     },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } as any
@@ -770,12 +770,12 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                     filename: `Relatorio_Obra_${currentWork.name.replace(/\s+/g, '_')}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 } as any,
                     html2canvas: {
-                        scale: 2,
+                        scale: 3,
                         useCORS: true,
                         letterRendering: true,
                         scrollX: 0,
                         scrollY: 0,
-                        windowWidth: 1120,
+                        windowWidth: 794,
                         windowHeight: element.scrollHeight
                     },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } as any,

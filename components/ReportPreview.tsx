@@ -34,12 +34,12 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                     filename: filename,
                     image: { type: 'jpeg' as const, quality: 0.98 },
                     html2canvas: {
-                        scale: 2,
+                        scale: 3,
                         useCORS: true,
                         letterRendering: true,
                         scrollX: 0,
                         scrollY: 0,
-                        windowWidth: 1120
+                        windowWidth: 794
                     },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const },
                     pagebreak: { mode: ['avoid-all' as const, 'css', 'legacy'] }
