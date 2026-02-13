@@ -115,101 +115,107 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     }
   };
 
-  const getBudgetHtml = (budget: ServiceOrder) => {
-    const customer = customers.find(c => c.id === budget.customerId) || { name: budget.customerName, address: 'Não informado', document: 'Documento não informado' };
+  const formatDate = (dateStr: string) => {
+    try {
+      const d = new Date(dateStr);
+      return isNaN(d.getTime()) ? new Date().toLocaleDateString('pt-BR') : d.toLocaleDateString('pt-BR');
+    } catch {
+      return new Date().toLocaleDateString('pt-BR');
+    }
+  };
 
-    const formatDate = (dateStr: string) => {
-      try {
-        const d = new Date(dateStr);
-        return isNaN(d.getTime()) ? new Date().toLocaleDateString('pt-BR') : d.toLocaleDateString('pt-BR');
-      } catch {
-        return new Date().toLocaleDateString('pt-BR');
-      }
-    };
+  const getHeaderHtml = (b: ServiceOrder) => {
+    const eDate = formatDate(b.createdAt);
+    const vDays = company.defaultProposalValidity || 15;
+    const vDate = b.dueDate ? formatDate(b.dueDate) : formatDate(new Date(new Date(b.createdAt || Date.now()).getTime() + vDays * 24 * 60 * 60 * 1000).toISOString());
 
-    const emissionDate = formatDate(budget.createdAt);
-    const validityDays = company.defaultProposalValidity || 15;
-    const validityDate = budget.dueDate ? formatDate(budget.dueDate) : formatDate(new Date(new Date(budget.createdAt || Date.now()).getTime() + validityDays * 24 * 60 * 60 * 1000).toISOString());
+    return `
+      <div style="padding-bottom: 25px !important; border-bottom: 3px solid #000; margin-bottom: 40px;">
+         <div style="display: flex; justify-content: space-between; align-items: center;">
+             <div style="display: flex; gap: 24px; align-items: center;">
+                 <div style="width: 80px; display: flex; align-items: center; justify: flex-start;">
+                     ${company.logo ? `<img src="${company.logo}" style="max-height: 80px; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#1e3a8a;">PRIME</div>'}
+                 </div>
+                 <div>
+                     <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 0 0 2px 0; text-transform: uppercase;">${company.name}</h1>
+                     <p style="margin: 0; font-size: 11px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.02em;">Soluções em Gestão Profissional</p>
+                      <p style="margin: 4px 0 0 0; font-size: 10px; color: #64748b; font-weight: 500;">${company.cnpj || ''} | ${company.phone || ''}</p>
+                 </div>
+             </div>
+             <div style="text-align: right;">
+                 <p style="margin: 0; font-size: 24px; font-weight: 800; color: #2563eb;">${b.id}</p>
+                 <p style="margin: 4px 0 0 0; font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase;">EMISSÃO: ${eDate}</p>
+                 <p style="margin: 2px 0 0 0; font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase;">VALIDADE: ${vDate}</p>
+             </div>
+         </div>
+      </div>`;
+  };
 
-    const subTotal = budget.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0);
-    const bdiR = budget.bdiRate || 0;
-    const taxR = budget.taxRate || 0;
-    const bdiValue = subTotal * (bdiR / 100);
-    const subTotalWithBDI = subTotal + bdiValue;
-    const taxValue = subTotalWithBDI * (taxR / 100);
-    const finalTotal = subTotalWithBDI + taxValue;
+  const getFooterHtml = (b: ServiceOrder) => {
+    const vDays = company.defaultProposalValidity || 15;
+    return `
+      <div style="margin-top: 32px; break-inside: avoid;">
+          <div style="border: 1px solid #bfdbfe; background: #eff6ff; border-radius: 16px; padding: 32px;">
+               <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                   <div style="background: #2563eb; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold;">✓</div>
+                   <span style="font-size: 13px; font-weight: 800; color: #1e40af; text-transform: uppercase; letter-spacing: 0.05em;">TERMO DE ACEITE E AUTORIZAÇÃO PROFISSIONAL</span>
+               </div>
+               <p style="margin: 0; font-size: 12px; color: #1e3a8a; line-height: 1.6; text-align: justify; font-weight: 500;">
+                   "Ao assinar abaixo, o cliente declara estar ciente e de pleno acordo com os valores, prazos e especificações descritas. Esta aceitação autoriza o início imediato dos trabalhos sob as condições estabelecidas. Validade: ${vDays} dias."
+               </p>
+          </div>
+          <div style="margin-top: 60px; break-inside: avoid;">
+              <div style="border-bottom: 2px solid #cbd5e1; width: 400px; max-width: 100%;"></div>
+              <p style="margin: 12px 0 0 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">ASSINATURA DO CLIENTE / ACEITE</p>
+          </div>
+      </div>`;
+  };
 
-    const itemFontBase = company.itemsFontSize || 12; // Slightly smaller base for print fit
-    const itemsHtml = budget.items.map((item: ServiceItem) => `
+  const getBodyHtml = (b: ServiceOrder) => {
+    // Re-calculate context for the body if needed or assume budget is passed
+    const cust = customers.find(c => c.id === b.customerId) || { name: b.customerName, address: 'Não informado', document: 'Documento não informado' };
+    const subT = b.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0);
+    const bdiR = b.bdiRate || 0;
+    const taxR = b.taxRate || 0;
+    const bdiV = subT * (bdiR / 100);
+    const subTWithBDI = subT + bdiV;
+    const taxV = subTWithBDI * (taxR / 100);
+    const finalT = subTWithBDI + taxV;
+    const itemFBase = company.itemsFontSize || 12;
+
+    const itemsH = b.items.map((item: ServiceItem) => `
       <tr style="border-bottom: 1px solid #e2e8f0;">
-        <td style="padding: 16px 0; font-weight: 600; text-transform: uppercase; font-size: ${itemFontBase}px; color: #334155; width: 55%; vertical-align: top;">${item.description}</td>
-        <td style="padding: 16px 0; text-align: center; font-weight: 600; color: #475569; font-size: ${itemFontBase}px; width: 10%; vertical-align: top;">${item.quantity} ${item.unit || ''}</td>
-        <td style="padding: 16px 0; text-align: right; color: #475569; font-size: ${itemFontBase}px; width: 17.5%; vertical-align: top;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-        <td style="padding: 16px 0; text-align: right; font-weight: 700; font-size: ${itemFontBase}px; color: #0f172a; width: 17.5%; vertical-align: top;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        <td style="padding: 16px 0; font-weight: 600; text-transform: uppercase; font-size: ${itemFBase}px; color: #334155; width: 55%; vertical-align: top;">${item.description}</td>
+        <td style="padding: 16px 0; text-align: center; font-weight: 600; color: #475569; font-size: ${itemFBase}px; width: 10%; vertical-align: top;">${item.quantity} ${item.unit || ''}</td>
+        <td style="padding: 16px 0; text-align: right; color: #475569; font-size: ${itemFBase}px; width: 17.5%; vertical-align: top;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        <td style="padding: 16px 0; text-align: right; font-weight: 700; font-size: ${itemFBase}px; color: #0f172a; width: 17.5%; vertical-align: top;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
       </tr>`).join('');
 
     return `
-      <table style="width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif;">
-        <thead>
-            <tr>
-                <td style="height: 20mm; border: none; padding: 0;"><div style="height: 20mm;">&nbsp;</div></td>
-            </tr>
-        </thead>
-        <tfoot>
-            <tr>
-                <td style="height: 15mm; border: none; padding: 0;"><div style="height: 15mm;">&nbsp;</div></td>
-            </tr>
-        </tfoot>
-        <tbody>
-          <tr>
-            <td style="padding: 0;">
-              <div class="a4-container">
-                  <!-- Header Content (First Page Only - positioned absolutely or relatively within the first page flow) -->
-                  <!-- Since we have a thead spacer, this header will appear AFTER the 20mm spacer on the first page, which is correct. -->
-                  <div style="padding-bottom: 25px !important; border-bottom: 3px solid #000; margin-bottom: 40px;">
-                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                         <div style="display: flex; gap: 24px; align-items: center;">
-                             <div style="width: 80px; display: flex; align-items: center; justify: flex-start;">
-                                 ${company.logo ? `<img src="${company.logo}" style="max-height: 80px; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#1e3a8a;">PRIME</div>'}
-                             </div>
-                             <div>
-                                 <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 0 0 2px 0; text-transform: uppercase;">${company.name}</h1>
-                                 <p style="margin: 0; font-size: 11px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.02em;">Soluções em Gestão Profissional</p>
-                                  <p style="margin: 4px 0 0 0; font-size: 10px; color: #64748b; font-weight: 500;">${company.cnpj || ''} | ${company.phone || ''}</p>
-                             </div>
-                         </div>
-                         <div style="text-align: right;">
-                             <p style="margin: 0; font-size: 24px; font-weight: 800; color: #2563eb;">${budget.id}</p>
-                             <p style="margin: 4px 0 0 0; font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase;">EMISSÃO: ${emissionDate}</p>
-                             <p style="margin: 2px 0 0 0; font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase;">VALIDADE: ${validityDate}</p>
-                         </div>
-                     </div>
-                  </div>
-
                  <!-- Boxes Grid -->
                  <div style="display: flex; gap: 24px; margin-bottom: 40px;">
                      <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
                          <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">CLIENTE / DESTINATÁRIO</span>
-                         <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${customer.name}</div>
-                         <div style="font-size: 11px; color: #64748b; font-weight: 500; margin-top: 4px;">${customer.document || 'CPF/CNPJ não informado'}</div>
+                         <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${cust.name}</div>
+                         <div style="font-size: 11px; color: #64748b; font-weight: 500; margin-top: 4px;">${cust.document || 'CPF/CNPJ não informado'}</div>
                      </div>
                      <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
                          <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">REFERÊNCIA DO ORÇAMENTO</span>
-                         <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${budget.description || 'PROPOSTA COMERCIAL'}</div>
+                         <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${b.description || 'PROPOSTA COMERCIAL'}</div>
                      </div>
                  </div>
   
                  <!-- Description Blocks -->
                  <div style="margin-bottom: 32px;">
                        <h2 style="margin: 0 0 8px 0; font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase; letter-spacing: 0.02em;">PROPOSTA COMERCIAL</h2>
-                       <p style="margin: 0; font-size: 20px; font-weight: 800; color: #2563eb; text-transform: uppercase; line-height: 1.3;">${budget.description}</p>
+                       <p style="margin: 0; font-size: 20px; font-weight: 800; color: #2563eb; text-transform: uppercase; line-height: 1.3;">${b.description}</p>
                  </div>
                  
-                 ${budget.descriptionBlocks && budget.descriptionBlocks.length > 0 ? `
+                 ${b.descriptionBlocks && b.descriptionBlocks.length > 0 ? `
                   <div style="margin-bottom: 48px;" class="print-description-content">
                     <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0; margin-bottom: 24px;">DESCRIÇÃO DOS SERVIÇOS</div>
                     <div style="display: flex; flex-direction: column; gap: 16px;">
-                      ${budget.descriptionBlocks.map(block => {
+                      ${b.descriptionBlocks.map(block => {
       if (block.type === 'text') {
         return `<div class="ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px; color: #334155; line-height: 1.6; text-align: justify;">${block.content}</div>`;
       } else if (block.type === 'image') {
@@ -234,7 +240,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                                   <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: right; font-weight: 800; width: 17.5%; letter-spacing: 0.05em;">SUBTOTAL</th>
                               </tr>
                           </thead>
-                          <tbody>${itemsHtml}</tbody>
+                          <tbody>${itemsH}</tbody>
                       </table>
                   </div>
   
@@ -243,22 +249,22 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                        <div style="display: flex; justify-content: flex-end; margin-bottom: 12px; gap: 40px;">
                            <div style="text-align: right;">
                               <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px;">SUBTOTAL</span>
-                              <span style="font-size: 14px; font-weight: 700; color: #334155; display: block;">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                              <span style="font-size: 14px; font-weight: 700; color: #334155; display: block;">R$ ${subT.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                            </div>
                            ${bdiR > 0 ? `
                            <div style="text-align: right;">
                               <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px;">BDI (${bdiR}%)</span>
-                              <span style="font-size: 14px; font-weight: 700; color: #10b981; display: block;">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                              <span style="font-size: 14px; font-weight: 700; color: #10b981; display: block;">+ R$ ${bdiV.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                            </div>` : ''}
                            ${taxR > 0 ? `
                            <div style="text-align: right;">
                               <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px;">IMPOSTOS (${taxR}%)</span>
-                              <span style="font-size: 14px; font-weight: 700; color: #3b82f6; display: block;">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                              <span style="font-size: 14px; font-weight: 700; color: #3b82f6; display: block;">+ R$ ${taxV.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                            </div>` : ''}
                        </div>
                        <div style="background: #0f172a; color: white; padding: 24px 32px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center;">
                            <span style="font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">INVESTIMENTO TOTAL:</span>
-                           <span style="font-size: 36px; font-weight: 800; letter-spacing: -0.05em; line-height: 1;">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                           <span style="font-size: 36px; font-weight: 800; letter-spacing: -0.05em; line-height: 1;">R$ ${finalT.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                        </div>
                  </div>
   
@@ -267,33 +273,38 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                      <div style="display: flex; gap: 24px;">
                          <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
                              <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">FORMA DE PAGAMENTO</span>
-                             <p style="margin: 0; font-size: 12px; font-weight: 600; color: #334155; line-height: 1.5;">${budget.paymentTerms || 'A combinar'}</p>
+                             <p style="margin: 0; font-size: 12px; font-weight: 600; color: #334155; line-height: 1.5;">${b.paymentTerms || 'A combinar'}</p>
                          </div>
                          <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
                              <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">PRAZO DE ENTREGA / EXECUÇÃO</span>
-                             <p style="margin: 0; font-size: 12px; font-weight: 600; color: #334155; line-height: 1.5;">${budget.deliveryTime || 'A combinar'}</p>
+                             <p style="margin: 0; font-size: 12px; font-weight: 600; color: #334155; line-height: 1.5;">${b.deliveryTime || 'A combinar'}</p>
                          </div>
                      </div>
-                 </div>
-  
-                 <!-- Acceptance Box -->
-                 <div style="margin-bottom: 32px; break-inside: avoid;">
-                     <div style="border: 1px solid #bfdbfe; background: #eff6ff; border-radius: 16px; padding: 32px;">
-                          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-                              <div style="background: #2563eb; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold;">✓</div>
-                              <span style="font-size: 13px; font-weight: 800; color: #1e40af; text-transform: uppercase; letter-spacing: 0.05em;">TERMO DE ACEITE E AUTORIZAÇÃO PROFISSIONAL</span>
-                          </div>
-                          <p style="margin: 0; font-size: 12px; color: #1e3a8a; line-height: 1.6; text-align: justify; font-weight: 500;">
-                              "Ao assinar abaixo, o cliente declara estar ciente e de pleno acordo com os valores, prazos e especificações descritas. Esta aceitação autoriza o início imediato dos trabalhos sob as condições estabelecidas. Validade: ${validityDays} dias."
-                          </p>
-                     </div>
-                 </div>
-  
-                 <!-- Signature Lines -->
-                  <div style="margin-top: 60px; break-inside: avoid;">
-                     <div style="border-bottom: 2px solid #cbd5e1; width: 400px; max-width: 100%;"></div>
-                     <p style="margin: 12px 0 0 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">ASSINATURA DO CLIENTE / ACEITE</p>
-                 </div>
+                 </div>`;
+  };
+
+  const getBudgetHtml = (budget: ServiceOrder) => {
+    return `
+      <table style="width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif;">
+        <thead>
+            <tr>
+                <td style="height: 20mm; border: none; padding: 0;"><div style="height: 20mm;">&nbsp;</div></td>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <td style="height: 15mm; border: none; padding: 0;"><div style="height: 15mm;">&nbsp;</div></td>
+            </tr>
+        </tfoot>
+        <tbody>
+          <tr>
+            <td style="padding: 0;">
+              <div class="a4-container">
+                  <div style="margin-bottom: 20px;">
+                    ${getHeaderHtml(budget)}
+                  </div>
+                  ${getBodyHtml(budget)}
+                  ${getFooterHtml(budget)}
               </div>
             </td>
           </tr>
@@ -433,7 +444,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     try {
       notify("Gerando PDF...");
 
-      const htmlContent = getBudgetHtml(budget);
+      const htmlContent = getBodyHtml(budget);
 
       // 1) Container visível (mas invisível) para evitar captura em branco
       container = document.createElement("div");
@@ -457,13 +468,15 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         <style>
           * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background: white; color: #000; }
+          .pdf-page { width: 210mm; background: white; padding: 15mm; }
           .pdf-content-wrapper { width: 210mm; background: white; }
-          .a4-container { width: 210mm; background: white; padding: 15mm; margin: 0; }
+          .a4-container { width: 210mm; background: white; margin: 0; }
           .avoid-break, .keep-together { break-inside: avoid; page-break-inside: avoid; }
           table { width: 100%; border-collapse: collapse; table-layout: fixed; }
           tr { break-inside: avoid; }
-          /* Evite esconder thead/tfoot se isso impacta altura; se precisar, comente estas duas linhas */
-          /* thead, tfoot { display: none !important; } */
+          
+          .pdf-header { margin-bottom: 20px; }
+          .pdf-footer { margin-top: 20px; }
 
           .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
           .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
@@ -479,8 +492,18 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
       container.innerHTML = `
         ${head}
-        <div class="pdf-content-wrapper">
-          ${htmlContent}
+        <div class="pdf-page">
+          <div class="pdf-header">
+            ${getHeaderHtml(budget)}
+          </div>
+
+          <div class="pdf-body">
+            ${htmlContent}
+          </div>
+
+          <div class="pdf-footer">
+            ${getFooterHtml(budget)}
+          </div>
         </div>
       `;
 
