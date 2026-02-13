@@ -150,15 +150,26 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
     return `
       <table style="width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif;">
+        <thead>
+            <tr>
+                <td style="height: 20mm; border: none; padding: 0;"><div style="height: 20mm;">&nbsp;</div></td>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <td style="height: 15mm; border: none; padding: 0;"><div style="height: 15mm;">&nbsp;</div></td>
+            </tr>
+        </tfoot>
         <tbody>
           <tr>
             <td style="padding: 0;">
               <div class="a4-container">
-                  <!-- Header Content (First Page Only) -->
-                  <div style="padding-top: 10px; padding-bottom: 25px !important; border-bottom: 3px solid #000; margin-bottom: 40px;">
+                  <!-- Header Content (First Page Only - positioned absolutely or relatively within the first page flow) -->
+                  <!-- Since we have a thead spacer, this header will appear AFTER the 20mm spacer on the first page, which is correct. -->
+                  <div style="padding-bottom: 25px !important; border-bottom: 3px solid #000; margin-bottom: 40px;">
                      <div style="display: flex; justify-content: space-between; align-items: center;">
                          <div style="display: flex; gap: 24px; align-items: center;">
-                             <div style="width: 80px; display: flex; align-items: center; justify-content: flex-start;">
+                             <div style="width: 80px; display: flex; align-items: center; justify: flex-start;">
                                  ${company.logo ? `<img src="${company.logo}" style="max-height: 80px; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#1e3a8a;">PRIME</div>'}
                              </div>
                              <div>
@@ -174,6 +185,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                          </div>
                      </div>
                   </div>
+
                  <!-- Boxes Grid -->
                  <div style="display: flex; gap: 24px; margin-bottom: 40px;">
                      <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
@@ -201,7 +213,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       if (block.type === 'text') {
         return `<div class="ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px; color: #334155; line-height: 1.6; text-align: justify;">${block.content}</div>`;
       } else if (block.type === 'image') {
-        return `<div style="margin: 24px 0; break-inside: avoid;"><img src="${block.content}" style="width: 100%; border-radius: 8px; display: block; object-fit: contain;"></div>`;
+        return `<div style="margin: 24px 0; break-inside: avoid; page-break-inside: avoid; display: block; text-align: center;"><img src="${block.content}" style="width: auto; max-width: 100%; border-radius: 8px; display: block; margin: 0 auto; object-fit: contain; max-height: 250mm;"></div>`;
       } else if (block.type === 'page-break') {
         return `<div style="page-break-after: always; break-after: page; height: 0;"></div>`;
       }
@@ -286,18 +298,6 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
             </td>
           </tr>
         </tbody>
-        <tfoot>
-          <tr>
-            <td style="padding: 0;">
-              <div class="a4-container" style="padding-top: 24px !important; border-top: 1px solid #e2e8f0; margin-top: 30px;">
-                  <div style="display: flex; justify-content: space-between; align-items: center;">
-                      <p style="font-size: 9px; font-weight: 700; color: #94a3b8; text-transform: uppercase;">${company.name} - ${company.cnpj || ''}</p>
-                      <p style="font-size: 9px; font-weight: 700; color: #94a3b8; text-transform: uppercase;">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p>
-                  </div>
-              </div>
-            </td>
-          </tr>
-        </tfoot>
       </table>
     `;
   };
@@ -331,13 +331,13 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
            @media print { 
              @page { margin: 0; size: A4; } /* Reset page margin to give full control to container */
              body { background: white !important; margin: 0 !important; padding: 0 !important; } 
-             .a4-container { 
-                 box-shadow: none !important; 
-                 border: none !important; 
-                 width: 100% !important; 
-                 padding: 20mm 15mm !important; /* Enforce visual margins directly on content */
-                 margin: 0 !important; 
-             }
+              .a4-container { 
+                  box-shadow: none !important; 
+                  border: none !important; 
+                  width: 100% !important; 
+                  padding: 0 15mm !important; /* Side margins only. Vertical margins handled by thead/tfoot spacers */
+                  margin: 0 !important; 
+              }
              table { break-inside: auto; width: 100%; }
              tr { break-inside: avoid; break-after: auto; }
              thead { display: table-header-group; } 

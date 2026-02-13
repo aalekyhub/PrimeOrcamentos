@@ -44,7 +44,7 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                     #report-preview-content {
                         width: 100% !important;
                         margin: 0 !important;
-                        padding: 20mm 15mm !important;
+                        padding: 0 15mm !important; /* Vertical margins handled by WorksManager table spacers */
                         border: none !important;
                         box-shadow: none !important;
                     }

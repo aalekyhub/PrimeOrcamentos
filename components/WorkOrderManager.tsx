@@ -667,7 +667,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                      box-shadow: none !important; 
                      border: none !important; 
                      width: 100% !important; 
-                     padding: 20mm 15mm !important; 
+                     padding: 0 15mm !important; 
                      margin: 0 !important; 
                  }
                  table { break-inside: auto; width: 100%; }
