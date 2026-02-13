@@ -448,79 +448,88 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       worker.innerHTML = bodyContent;
       document.body.appendChild(worker);
 
-      // Run optimization directly on the local worker content
-      const descriptionRoot = worker.querySelector('.print-description-content .space-y-6');
-      if (descriptionRoot) {
-        const allNodes: Element[] = [];
-        Array.from(descriptionRoot.children).forEach(block => {
-          if (block.classList.contains('ql-editor-print')) {
-            allNodes.push(...Array.from(block.children));
-          } else {
-            allNodes.push(block);
+      // Give browser time to settle the layout
+      setTimeout(() => {
+        // Run optimization directly on the local worker content
+        const descriptionRoot = worker.querySelector('.print-description-content .space-y-6');
+        if (descriptionRoot) {
+          const allNodes: Element[] = [];
+          Array.from(descriptionRoot.children).forEach(block => {
+            if (block.classList.contains('ql-editor-print')) {
+              allNodes.push(...Array.from(block.children));
+            } else {
+              allNodes.push(block);
+            }
+          });
+
+          for (let i = 0; i < allNodes.length - 1; i++) {
+            const el = allNodes[i] as HTMLElement;
+            let isTitle = false;
+            if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
+            else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
+              const text = el.innerText.trim();
+              const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text);
+              const hasBoldStyle = el.querySelector('strong, b, [style*="font-weight: bold"], [style*="font-weight: 700"], [style*="font-weight: 800"], [style*="font-weight: 900"]');
+              const isBold = hasBoldStyle || (el.style && parseInt(el.style.fontWeight) > 600) || el.tagName === 'STRONG';
+              if ((isNumbered && isBold && text.length < 150) || (isBold && text.length < 150 && text === text.toUpperCase() && text.length > 4)) {
+                isTitle = true;
+              }
+            }
+
+            if (isTitle) {
+              const nodesToWrap = [el];
+              let j = i + 1;
+              while (j < allNodes.length && nodesToWrap.length < 3) {
+                const next = allNodes[j] as HTMLElement;
+                const nText = next.innerText.trim();
+                const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(nText);
+                if (next.matches('h1, h2, h3, h4, h5, h6') || (isNumbered && next.querySelector('strong, b'))) break;
+                nodesToWrap.push(next);
+                j++;
+              }
+              if (nodesToWrap.length > 1) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'keep-together';
+                el.parentNode?.insertBefore(wrapper, el);
+                nodesToWrap.forEach(node => wrapper.appendChild(node));
+                i = j - 1;
+              }
+            }
           }
+        }
+
+        const opt = {
+          margin: [25, 0, 25, 0],
+          filename: `Orçamento - ${budget.id} - ${budget.description || 'Proposta'}.pdf`,
+          image: { type: 'jpeg', quality: 1 },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            letterRendering: true,
+            backgroundColor: '#ffffff',
+            logging: true // Enabled for debugging
+          },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: ['css', 'legacy'], avoid: '.keep-together' }
+        };
+
+        // @ts-ignore
+        html2pdf().set(opt).from(worker).toPdf().get('pdf').then(function (pdf: any) {
+          var totalPages = pdf.internal.getNumberOfPages();
+          for (var i = 1; i <= totalPages; i++) {
+            pdf.setPage(i);
+            pdf.setFontSize(9);
+            pdf.setTextColor(150);
+            pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 15, { align: 'center' });
+          }
+          pdf.save(opt.filename);
+          document.body.removeChild(worker);
+        }).catch((err: any) => {
+          console.error("PDF Error:", err);
+          notify("Erro ao gerar PDF.", "error");
+          if (document.body.contains(worker)) document.body.removeChild(worker);
         });
-
-        for (let i = 0; i < allNodes.length - 1; i++) {
-          const el = allNodes[i] as HTMLElement;
-          let isTitle = false;
-          if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
-          else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
-            const text = el.innerText.trim();
-            const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text);
-            const hasBoldStyle = el.querySelector('strong, b, [style*="font-weight: bold"], [style*="font-weight: 700"], [style*="font-weight: 800"], [style*="font-weight: 900"]');
-            const isBold = hasBoldStyle || (el.style && parseInt(el.style.fontWeight) > 600) || el.tagName === 'STRONG';
-            if ((isNumbered && isBold && text.length < 150) || (isBold && text.length < 150 && text === text.toUpperCase() && text.length > 4)) {
-              isTitle = true;
-            }
-          }
-
-          if (isTitle) {
-            const nodesToWrap = [el];
-            let j = i + 1;
-            while (j < allNodes.length && nodesToWrap.length < 3) {
-              const next = allNodes[j] as HTMLElement;
-              const nText = next.innerText.trim();
-              const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(nText);
-              if (next.matches('h1, h2, h3, h4, h5, h6') || (isNumbered && next.querySelector('strong, b'))) break;
-              nodesToWrap.push(next);
-              j++;
-            }
-            if (nodesToWrap.length > 1) {
-              const wrapper = document.createElement('div');
-              wrapper.className = 'keep-together';
-              el.parentNode?.insertBefore(wrapper, el);
-              nodesToWrap.forEach(node => wrapper.appendChild(node));
-              i = j - 1;
-            }
-          }
-        }
-      }
-
-      const opt = {
-        margin: [25, 0, 25, 0],
-        filename: `Orçamento - ${budget.id} - ${budget.description || 'Proposta'}.pdf`,
-        image: { type: 'jpeg', quality: 1 },
-        html2canvas: { scale: 2, useCORS: true, letterRendering: true, backgroundColor: '#ffffff' },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['css', 'legacy'], avoid: '.keep-together' }
-      };
-
-      // @ts-ignore
-      html2pdf().set(opt).from(worker).toPdf().get('pdf').then(function (pdf: any) {
-        var totalPages = pdf.internal.getNumberOfPages();
-        for (var i = 1; i <= totalPages; i++) {
-          pdf.setPage(i);
-          pdf.setFontSize(9);
-          pdf.setTextColor(150);
-          pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 15, { align: 'center' });
-        }
-        pdf.save(opt.filename);
-        document.body.removeChild(worker);
-      }).catch((err: any) => {
-        console.error("PDF Error:", err);
-        notify("Erro ao gerar PDF.", "error");
-        if (document.body.contains(worker)) document.body.removeChild(worker);
-      });
+      }, 1000); // 1s delay for maximum stability
     } else {
       const printWindow = window.open('', '_blank');
       if (printWindow) {

@@ -362,84 +362,93 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         worker.innerHTML = bodyContent;
         document.body.appendChild(worker);
 
-        // Apply optimizations manually (scripts in innerHTML don't run)
-        const root = worker.querySelector('.print-description-content .space-y-6');
-        if (root) {
-            const allNodes: Element[] = [];
-            Array.from(root.children).forEach(block => {
-                if (block.classList.contains('ql-editor-print')) {
-                    allNodes.push(...Array.from(block.children));
-                } else {
-                    allNodes.push(block);
+        // Wait for styles and layout to stabilize
+        setTimeout(() => {
+            // Apply optimizations manually (scripts in innerHTML don't run)
+            const root = worker.querySelector('.print-description-content .space-y-6');
+            if (root) {
+                const allNodes: Element[] = [];
+                Array.from(root.children).forEach(block => {
+                    if (block.classList.contains('ql-editor-print')) {
+                        allNodes.push(...Array.from(block.children));
+                    } else {
+                        allNodes.push(block);
+                    }
+                });
+
+                for (let i = 0; i < allNodes.length - 1; i++) {
+                    const el = allNodes[i] as HTMLElement;
+                    let isTitle = false;
+
+                    if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
+                    else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
+                        const text = el.innerText.trim();
+                        const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text);
+                        const hasBoldStyle = el.querySelector('strong, b, [style*="font-weight: bold"], [style*="font-weight: 700"], [style*="font-weight: 800"], [style*="font-weight: 900"]');
+                        const isBold = hasBoldStyle || (el.style && parseInt(el.style.fontWeight) > 600) || el.tagName === 'STRONG';
+                        const isShort = text.length < 150;
+                        if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
+                            isTitle = true;
+                        }
+                    }
+
+                    if (isTitle) {
+                        const nodesToWrap = [el];
+                        let j = i + 1;
+                        while (j < allNodes.length && nodesToWrap.length < 3) {
+                            const next = allNodes[j] as HTMLElement;
+                            const nText = next.innerText.trim();
+                            const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') ||
+                                (/@^\d+(\.\d+)*[\.\s\)]/.test(nText) && (next.querySelector('strong, b') || nText === nText.toUpperCase()));
+                            if (nextIsTitle) break;
+                            nodesToWrap.push(next);
+                            j++;
+                        }
+
+                        if (nodesToWrap.length > 1) {
+                            const wrapper = document.createElement('div');
+                            wrapper.className = 'keep-together';
+                            el.parentNode?.insertBefore(wrapper, el);
+                            nodesToWrap.forEach(node => wrapper.appendChild(node));
+                            i = j - 1;
+                        }
+                    }
                 }
+            }
+
+            // PDF Generation Options
+            const opt = {
+                margin: [25, 0, 25, 0],
+                filename: `Contrato - ${order.id.replace('OS-', 'OS')} - ${order.description || 'Proposta'}.pdf`,
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true,
+                    letterRendering: true,
+                    backgroundColor: '#ffffff',
+                    logging: true
+                },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['css', 'legacy'], avoid: '.keep-together' }
+            };
+
+            // @ts-ignore
+            html2pdf().set(opt).from(worker).toPdf().get('pdf').then(function (pdf: any) {
+                var totalPages = pdf.internal.getNumberOfPages();
+                for (var i = 1; i <= totalPages; i++) {
+                    pdf.setPage(i);
+                    pdf.setFontSize(10);
+                    pdf.setTextColor(148, 163, 184); // #94a3b8
+                    pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 15, { align: 'center' });
+                }
+                pdf.save(opt.filename);
+                document.body.removeChild(worker);
+            }).catch((err: any) => {
+                console.error("PDF Error:", err);
+                notify("Erro ao gerar PDF.", "error");
+                if (document.body.contains(worker)) document.body.removeChild(worker);
             });
-
-            for (let i = 0; i < allNodes.length - 1; i++) {
-                const el = allNodes[i] as HTMLElement;
-                let isTitle = false;
-
-                if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
-                else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
-                    const text = el.innerText.trim();
-                    const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text);
-                    const hasBoldStyle = el.querySelector('strong, b, [style*="font-weight: bold"], [style*="font-weight: 700"], [style*="font-weight: 800"], [style*="font-weight: 900"]');
-                    const isBold = hasBoldStyle || (el.style && parseInt(el.style.fontWeight) > 600) || el.tagName === 'STRONG';
-                    const isShort = text.length < 150;
-                    if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
-                        isTitle = true;
-                    }
-                }
-
-                if (isTitle) {
-                    const nodesToWrap = [el];
-                    let j = i + 1;
-                    while (j < allNodes.length && nodesToWrap.length < 3) {
-                        const next = allNodes[j] as HTMLElement;
-                        const nText = next.innerText.trim();
-                        const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') ||
-                            (/^\d+(\.\d+)*[\.\s\)]/.test(nText) && (next.querySelector('strong, b') || nText === nText.toUpperCase()));
-                        if (nextIsTitle) break;
-                        nodesToWrap.push(next);
-                        j++;
-                    }
-
-                    if (nodesToWrap.length > 1) {
-                        const wrapper = document.createElement('div');
-                        wrapper.className = 'keep-together';
-                        el.parentNode?.insertBefore(wrapper, el);
-                        nodesToWrap.forEach(node => wrapper.appendChild(node));
-                        i = j - 1;
-                    }
-                }
-            }
-        }
-
-        // PDF Generation Options
-        const opt = {
-            margin: [25, 0, 25, 0],
-            filename: `Contrato - ${order.id.replace('OS-', 'OS')} - ${order.description || 'Proposta'}.pdf`,
-            image: { type: 'jpeg', quality: 1 },
-            html2canvas: { scale: 2, useCORS: true, letterRendering: true, backgroundColor: '#ffffff' },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-            pagebreak: { mode: ['css', 'legacy'], avoid: '.keep-together' }
-        };
-
-        // @ts-ignore
-        html2pdf().set(opt).from(worker).toPdf().get('pdf').then(function (pdf: any) {
-            var totalPages = pdf.internal.getNumberOfPages();
-            for (var i = 1; i <= totalPages; i++) {
-                pdf.setPage(i);
-                pdf.setFontSize(10);
-                pdf.setTextColor(148, 163, 184); // #94a3b8
-                pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 15, { align: 'center' });
-            }
-            pdf.save(opt.filename);
-            document.body.removeChild(worker);
-        }).catch((err: any) => {
-            console.error("PDF Error:", err);
-            notify("Erro ao gerar PDF.", "error");
-            if (document.body.contains(worker)) document.body.removeChild(worker);
-        });
+        }, 1000); // 1s delay for maximum stability
     };
 
     const handlePrintContract = (order: ServiceOrder) => {
