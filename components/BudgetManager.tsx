@@ -815,14 +815,13 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           </div>
         </div>
       )}
-      {showPreview && (
-        <ReportPreview
-          title={previewContent.title}
-          html={previewContent.html}
-          filename={previewContent.filename}
-          onClose={() => setShowPreview(false)}
-        />
-      )}
+      <ReportPreview
+        isOpen={showPreview}
+        onClose={() => setShowPreview(false)}
+        title={previewContent.title}
+        htmlContent={previewContent.html}
+        filename={previewContent.filename}
+      />
     </div>
   );
 };

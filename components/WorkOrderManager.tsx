@@ -913,7 +913,14 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     </div>
                 )
             }
-        </div >
+            <ReportPreview
+                isOpen={showPreview}
+                onClose={() => setShowPreview(false)}
+                title={previewContent.title}
+                htmlContent={previewContent.html}
+                filename={previewContent.filename}
+            />
+        </div>
     );
 };
 
