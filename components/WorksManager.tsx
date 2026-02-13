@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import html2pdf from 'html2pdf.js';
 import {
     Building2, Users, Truck, HardHat, FileText,
     Plus, Trash2, Save, ChevronRight, Calculator,
@@ -507,54 +506,6 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         `;
     };
 
-    const handlePrintMaterials = () => {
-        if (!currentWork || materials.length === 0) return;
-        const html = generateMaterialsReportHtml();
-        const element = document.createElement('div');
-        element.style.position = 'absolute';
-        element.style.left = '-10000px';
-        element.style.top = '0';
-        element.style.width = '210mm';
-        element.style.background = 'white';
-        element.style.zIndex = '1';
-        element.style.opacity = '1';
-        element.innerHTML = html;
-        document.body.appendChild(element);
-
-        // Ensure all images are loaded
-        const images = Array.from(element.querySelectorAll('img'));
-        const imagePromises = images.map(img => {
-            if (img.complete) return Promise.resolve();
-            return new Promise(resolve => {
-                img.onload = resolve;
-                img.onerror = resolve;
-            });
-        });
-
-        Promise.all(imagePromises).finally(() => {
-            setTimeout(() => {
-                const opt = {
-                    margin: [10, 10, 10, 10] as [number, number, number, number],
-                    filename: `Material_Obra_${currentWork.name.replace(/\s+/g, '_')}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 } as any,
-                    html2canvas: {
-                        scale: 3,
-                        useCORS: true,
-                        letterRendering: true,
-                        scrollX: 0,
-                        scrollY: 0,
-                        windowWidth: 794,
-                        windowHeight: element.scrollHeight
-                    },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } as any
-                };
-
-                html2pdf().set(opt).from(element).save().then(() => {
-                    if (document.body.contains(element)) document.body.removeChild(element);
-                });
-            }, 1000);
-        });
-    };
 
     const generateFullReportHtml = () => {
         if (!currentWork) return '';
@@ -563,7 +514,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         const totalServices = services.reduce((acc, s) => acc + s.total_cost, 0);
 
         return `
-            <div style="font-family: sans-serif; padding: 30px; color: #1e293b; max-width: 800px; margin: 0 auto; background: white;">
+            <div style="font-family: sans-serif; padding: 30px; color: #1e293b; width: 100%; margin: 0 auto; background: white;">
                 <!-- HEADER -->
                 <div style="display: flex; justify-content: space-between; align-items: start; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 30px;">
                     <div>
@@ -739,55 +690,6 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         `;
     };
 
-    const handlePrintFull = () => {
-        if (!currentWork) return;
-        const html = generateFullReportHtml();
-        const element = document.createElement('div');
-        element.style.position = 'absolute';
-        element.style.left = '-10000px';
-        element.style.top = '0';
-        element.style.width = '210mm';
-        element.style.background = 'white';
-        element.style.zIndex = '1';
-        element.style.opacity = '1';
-        element.innerHTML = html;
-        document.body.appendChild(element);
-
-        // Ensure all images are loaded
-        const images = Array.from(element.querySelectorAll('img'));
-        const imagePromises = images.map(img => {
-            if (img.complete) return Promise.resolve();
-            return new Promise(resolve => {
-                img.onload = resolve;
-                img.onerror = resolve;
-            });
-        });
-
-        Promise.all(imagePromises).finally(() => {
-            setTimeout(() => {
-                const opt = {
-                    margin: [10, 10, 10, 10] as [number, number, number, number],
-                    filename: `Relatorio_Obra_${currentWork.name.replace(/\s+/g, '_')}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 } as any,
-                    html2canvas: {
-                        scale: 3,
-                        useCORS: true,
-                        letterRendering: true,
-                        scrollX: 0,
-                        scrollY: 0,
-                        windowWidth: 794,
-                        windowHeight: element.scrollHeight
-                    },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } as any,
-                    pagebreak: { mode: ['css', 'legacy'] }
-                };
-
-                html2pdf().set(opt).from(element).save().then(() => {
-                    if (document.body.contains(element)) document.body.removeChild(element);
-                });
-            }, 1000);
-        });
-    };
 
     const handlePreviewMaterials = () => {
         if (!currentWork || materials.length === 0) return;

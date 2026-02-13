@@ -1,6 +1,5 @@
 import React from 'react';
 import { X, Printer, Download } from 'lucide-react';
-import html2pdf from 'html2pdf.js';
 
 interface Props {
     isOpen: boolean;
@@ -14,47 +13,50 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
     if (!isOpen) return null;
 
     const handlePrint = () => {
-        const element = document.getElementById('report-preview-content');
-        if (!element) return;
-
-        // Ensure all images are loaded first
-        const images = Array.from(element.querySelectorAll('img'));
-        const imagePromises = images.map(img => {
-            if (img.complete) return Promise.resolve();
-            return new Promise(resolve => {
-                img.onload = resolve;
-                img.onerror = resolve;
-            });
-        });
-
-        Promise.all(imagePromises).finally(() => {
-            setTimeout(() => {
-                const opt = {
-                    margin: [10, 10, 10, 10] as [number, number, number, number],
-                    filename: filename,
-                    image: { type: 'jpeg' as const, quality: 0.98 },
-                    html2canvas: {
-                        scale: 3,
-                        useCORS: true,
-                        letterRendering: true,
-                        scrollX: 0,
-                        scrollY: 0,
-                        windowWidth: 794
-                    },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const },
-                    pagebreak: { mode: ['css', 'legacy'] }
-                };
-
-                html2pdf().set(opt).from(element).save();
-            }, 2000); // 1s buffer for layout
-        });
+        if (filename) document.title = filename;
+        window.print();
     };
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+            <style>{`
+                @media print {
+                    body * {
+                        visibility: hidden;
+                    }
+                    #report-preview-wrapper, #report-preview-wrapper * {
+                        visibility: visible;
+                    }
+                    #report-preview-wrapper {
+                        position: fixed;
+                        left: 0;
+                        top: 0;
+                        width: 100%;
+                        height: 100%;
+                        z-index: 9999;
+                        background: white;
+                        display: block !important;
+                    }
+                    #report-preview-content {
+                        width: 100% !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        border: none !important;
+                        box-shadow: none !important;
+                    }
+                    @page {
+                        margin: 20mm 15mm;
+                        size: A4;
+                    }
+                    /* Ensure content breaks correctly */
+                    tr { break-inside: avoid; }
+                    thead { display: table-header-group; }
+                    tfoot { display: table-footer-group; }
+                }
+            `}</style>
+            <div id="report-preview-wrapper" className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
                 {/* Header */}
-                <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10">
+                <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10 no-print">
                     <div>
                         <h3 className="text-xl font-bold text-slate-800">{title}</h3>
                         <p className="text-sm text-slate-500">Visualize as informações antes de gerar o PDF</p>
@@ -64,8 +66,8 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                             onClick={handlePrint}
                             className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all font-bold shadow-md hover:shadow-lg active:scale-95"
                         >
-                            <Download size={18} />
-                            BAIXAR PDF
+                            <Printer size={18} />
+                            IMPRIMIR
                         </button>
                         <button
                             onClick={onClose}
@@ -86,7 +88,7 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                 </div>
 
                 {/* Footer Controls */}
-                <div className="px-6 py-4 border-t border-slate-100 bg-white flex justify-end gap-3 z-10">
+                <div className="px-6 py-4 border-t border-slate-100 bg-white flex justify-end gap-3 z-10 no-print">
                     <button
                         onClick={onClose}
                         className="px-6 py-2 text-slate-600 font-bold hover:bg-slate-100 rounded-lg transition-all"
@@ -98,7 +100,7 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                         className="flex items-center gap-2 px-8 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all font-bold shadow-md hover:shadow-lg active:scale-95"
                     >
                         <Printer size={18} />
-                        GERAR PDF / IMPRIMIR
+                        IMPRIMIR
                     </button>
                 </div>
             </div>
