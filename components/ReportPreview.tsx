@@ -179,6 +179,8 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                     font-family: 'Inter', system-ui, -apple-system, sans-serif;
                     color: #1e293b;
                     line-height: 1.5;
+                    print-color-adjust: exact !important;
+                    -webkit-print-color-adjust: exact !important;
                 }
 
                 #report-preview-content table { 

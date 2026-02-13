@@ -336,7 +336,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                             </div>
                             <div class="a4-container">
                                 <!-- INFO GRID -->
-                                <div style="display: flex; flex-wrap: wrap; gap: 24px; margin-bottom: 32px; background: #f1f5f9; padding: 24px; border-radius: 8px; border-bottom: 2px solid #cbd5e1;">
+                                <div style="display: flex; flex-wrap: wrap; gap: 24px; margin-bottom: 32px; background: #f1f5f9; padding: 24px; border-radius: 8px; border-bottom: 2px solid #cbd5e1; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
                                     <div style="flex: 1; min-width: 200px;">
                                         <p style="margin: 0 0 6px 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Cliente</p>
                                         <p style="margin: 0; font-size: 14px; color: #0f172a; font-weight: 700;">${customer?.name || 'Não Informado'}</p>
@@ -355,7 +355,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                 <div style="display: flex; gap: 16px; margin-bottom: 20px;">
                                     <!-- Materials (Green) -->
                                     ${totalMaterials > 0 ? `
-                                    <div style="flex: 1; min-width: 140px; background: #ecfdf5; border-bottom: 3px solid #10b981; border-radius: 8px; padding: 16px;">
+                                    <div style="flex: 1; min-width: 140px; background: #ecfdf5; border-bottom: 3px solid #10b981; border-radius: 8px; padding: 16px; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
                                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                             <span style="font-size: 9px; font-weight: 700; color: #059669; text-transform: uppercase; letter-spacing: 0.05em;">Materiais</span>
                                             <div style="background: #d1fae5; padding: 4px; border-radius: 4px;">
@@ -368,7 +368,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
 
                                     <!-- Labor (Amber) -->
                                     ${totalLabor > 0 ? `
-                                    <div style="flex: 1; min-width: 140px; background: #fffbeb; border-bottom: 3px solid #f59e0b; border-radius: 8px; padding: 16px;">
+                                    <div style="flex: 1; min-width: 140px; background: #fffbeb; border-bottom: 3px solid #f59e0b; border-radius: 8px; padding: 16px; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
                                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                             <span style="font-size: 9px; font-weight: 700; color: #d97706; text-transform: uppercase; letter-spacing: 0.05em;">Mão de Obra</span>
                                             <div style="background: #fef3c7; padding: 4px; border-radius: 4px;">
@@ -381,7 +381,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
 
                                     <!-- Indirects (Slate) -->
                                     ${totalIndirect > 0 ? `
-                                    <div style="flex: 1; min-width: 140px; background: #f8fafc; border-bottom: 3px solid #94a3b8; border-radius: 8px; padding: 16px;">
+                                    <div style="flex: 1; min-width: 140px; background: #f8fafc; border-bottom: 3px solid #94a3b8; border-radius: 8px; padding: 16px; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
                                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                             <span style="font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Indiretos</span>
                                             <div style="background: #e2e8f0; padding: 4px; border-radius: 4px;">
@@ -394,7 +394,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
 
                                     <!-- Taxes (Blue) - Conditional Render -->
                                     ${totalTaxes > 0 ? `
-                                    <div style="flex: 1; min-width: 140px; background: #eff6ff; border-bottom: 3px solid #3b82f6; border-radius: 8px; padding: 16px;">
+                                    <div style="flex: 1; min-width: 140px; background: #eff6ff; border-bottom: 3px solid #3b82f6; border-radius: 8px; padding: 16px; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
                                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                             <span style="font-size: 9px; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: 0.05em;">Impostos</span>
                                             <div style="background: #dbeafe; padding: 4px; border-radius: 4px;">
@@ -407,7 +407,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                 </div>
 
                                 <!-- TOTAL COST FOOTER CARD -->
-                                <div style="margin-bottom: 32px; background: #064e3b; color: white; padding: 12px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                                <div style="margin-bottom: 32px; background: #064e3b; color: white; padding: 12px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); -webkit-print-color-adjust: exact; print-color-adjust: exact;">
                                     <p style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin: 0; color: #a7f3d0;">CUSTO TOTAL PREVISTO</p>
                                     <p style="font-size: 22px; font-weight: 800; margin: 0;">R$ ${totalGeneral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                                 </div>
