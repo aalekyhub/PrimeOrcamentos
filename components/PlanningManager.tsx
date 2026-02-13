@@ -333,24 +333,61 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                     </div>
                                 </div>
 
-                                <!-- OVERVIEW CARDS (Planning Style) -->
-                                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 30px;">
-                                    <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0;">
-                                        <p style="font-size: 9px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 4px 0;">CUSTO TOTAL</p>
-                                        <p style="font-size: 20px; font-weight: 900; color: #1e3a8a; margin: 0;">R$ ${totalGeneral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                <!-- COLORFUL UI CARDS (Print Version) -->
+                                <div style="display: flex; gap: 16px; margin-bottom: 20px;">
+                                    <!-- Materials (Green) -->
+                                    <div style="flex: 1; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 16px;">
+                                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                            <span style="font-size: 10px; font-weight: 700; color: #059669; text-transform: uppercase; letter-spacing: 0.05em;">Total Materiais</span>
+                                            <div style="background: #d1fae5; padding: 4px; border-radius: 6px;">
+                                                <span style="color: #059669; font-size: 12px; font-weight: 900;">M</span>
+                                            </div>
+                                        </div>
+                                        <span style="font-size: 20px; font-weight: 900; color: #064e3b; display: block;">R$ ${totalMaterials.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                        <p style="font-size: 8px; color: #059669; margin: 4px 0 0 0; font-weight: 500;">Insumos + Serv.</p>
                                     </div>
-                                    <div style="background: #eff6ff; padding: 16px; border-radius: 12px; border: 1px solid #dbeafe;">
-                                        <p style="font-size: 9px; font-weight: 700; color: #60a5fa; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 4px 0;">SERVIÇOS</p>
-                                        <p style="font-size: 18px; font-weight: 900; color: #1e40af; margin: 0;">R$ ${totalServices.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+
+                                    <!-- Labor (Amber) -->
+                                    <div style="flex: 1; background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 16px;">
+                                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                            <span style="font-size: 10px; font-weight: 700; color: #d97706; text-transform: uppercase; letter-spacing: 0.05em;">Total Mão de Obra</span>
+                                            <div style="background: #fef3c7; padding: 4px; border-radius: 6px;">
+                                                <span style="color: #d97706; font-size: 12px; font-weight: 900;">MO</span>
+                                            </div>
+                                        </div>
+                                        <span style="font-size: 20px; font-weight: 900; color: #78350f; display: block;">R$ ${totalLabor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                        <p style="font-size: 8px; color: #d97706; margin: 4px 0 0 0; font-weight: 500;">Própria + Terc.</p>
                                     </div>
-                                    <div style="background: #ecfdf5; padding: 16px; border-radius: 12px; border: 1px solid #d1fae5;">
-                                        <p style="font-size: 9px; font-weight: 700; color: #34d399; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 4px 0;">MATERIAIS</p>
-                                        <p style="font-size: 18px; font-weight: 900; color: #065f46; margin: 0;">R$ ${totalMaterials.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+
+                                    <!-- Indirects (Slate) -->
+                                    <div style="flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">
+                                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                            <span style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Total Indiretos</span>
+                                            <div style="background: #e2e8f0; padding: 4px; border-radius: 6px;">
+                                                <span style="color: #475569; font-size: 12px; font-weight: 900;">I</span>
+                                            </div>
+                                        </div>
+                                        <span style="font-size: 20px; font-weight: 900; color: #1e293b; display: block;">R$ ${totalIndirect.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                        <p style="font-size: 8px; color: #64748b; margin: 4px 0 0 0; font-weight: 500;">Custos Adm.</p>
                                     </div>
-                                    <div style="background: #fffbeb; padding: 16px; border-radius: 12px; border: 1px solid #fef3c7;">
-                                        <p style="font-size: 9px; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 4px 0;">MÃO DE OBRA</p>
-                                        <p style="font-size: 18px; font-weight: 900; color: #92400e; margin: 0;">R$ ${totalLabor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+
+                                    <!-- Taxes (Blue) -->
+                                    <div style="flex: 1; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 16px;">
+                                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                            <span style="font-size: 10px; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: 0.05em;">Total Impostos</span>
+                                            <div style="background: #dbeafe; padding: 4px; border-radius: 6px;">
+                                                <span style="color: #2563eb; font-size: 12px; font-weight: 900;">%</span>
+                                            </div>
+                                        </div>
+                                        <span style="font-size: 20px; font-weight: 900; color: #1e3a8a; display: block;">R$ ${totalTaxes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                        <p style="font-size: 8px; color: #2563eb; margin: 4px 0 0 0; font-weight: 500;">BDI e Taxas</p>
                                     </div>
+                                </div>
+
+                                <!-- TOTAL COST FOOTER CARD -->
+                                <div style="margin-bottom: 32px; background: #064e3b; color: white; padding: 12px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                                    <p style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin: 0; color: #a7f3d0;">CUSTO TOTAL PREVISTO</p>
+                                    <p style="font-size: 22px; font-weight: 900; margin: 0;">R$ ${totalGeneral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                                 </div>
                 
                                 <!-- SEÇÃO SERVIÇOS -->
