@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
     Building2, Users, Truck, HardHat, FileText,
     Plus, Trash2, Save, ChevronRight, Calculator,
-    PieChart, ArrowRight, DollarSign, Calendar, Pencil, Check, X, Printer, Percent, Eye
+    PieChart, ArrowRight, DollarSign, Calendar, Pencil, Check, X, Printer, Percent, Eye, Archive
 } from 'lucide-react';
 import { useNotify } from './ToastProvider';
 import { db } from '../services/db';

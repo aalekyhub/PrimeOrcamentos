@@ -507,40 +507,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                 </div>
                                 ` : ''}
                 
-                                <!-- RESUMO FINANCEIRO FINAL -->
-                                <div style="margin-top: 20px; page-break-inside: avoid;">
-                                    <h3 style="font-size: 14px; font-weight: 800; color: #0f172a; text-transform: uppercase; margin-bottom: 20px; text-align: center;">Estimativa de Custo Consolidada</h3>
-                                    
-                                    <div style="background: #1e3a8a; color: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
-                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; border-bottom: 1px solid #3b82f6; padding-bottom: 20px; margin-bottom: 20px;">
-                                            <div>
-                                                <p style="margin: 0; font-size: 10px; color: #bfdbfe; text-transform: uppercase; letter-spacing: 0.05em;">Total em Serviços</p>
-                                                <p style="margin: 5px 0 0 0; font-size: 18px; font-weight: 700;">R$ ${totalServices.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                                            </div>
-                                            <div>
-                                                <p style="margin: 0; font-size: 10px; color: #bfdbfe; text-transform: uppercase; letter-spacing: 0.05em;">Materiais (Adicionais)</p>
-                                                <p style="margin: 5px 0 0 0; font-size: 18px; font-weight: 700;">R$ ${totalMaterials.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                                            </div>
-                                            <div>
-                                                <p style="margin: 0; font-size: 10px; color: #bfdbfe; text-transform: uppercase; letter-spacing: 0.05em;">Mão de Obra (Adicional)</p>
-                                                <p style="margin: 5px 0 0 0; font-size: 18px; font-weight: 700;">R$ ${totalLabor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                                            </div>
-                                            <div>
-                                                <p style="margin: 0; font-size: 10px; color: #bfdbfe; text-transform: uppercase; letter-spacing: 0.05em;">Custos Indiretos</p>
-                                                <p style="margin: 5px 0 0 0; font-size: 18px; font-weight: 700;">R$ ${totalIndirect.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                                            </div>
-                                            <div style="grid-column: span 2; border-top: 1px dashed #3b82f6; padding-top: 16px; margin-top: 16px;">
-                                                <p style="margin: 0; font-size: 10px; color: #bfdbfe; text-transform: uppercase; letter-spacing: 0.05em;">Impostos / Taxas</p>
-                                                <p style="margin: 5px 0 0 0; font-size: 18px; font-weight: 700;">R$ ${totalTaxes.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                                            </div>
-                                        </div>
-                                        
-                                        <div style="text-align: right;">
-                                            <p style="margin: 0; font-size: 12px; color: #93c5fd; font-weight: 800; text-transform: uppercase;">Custo Total Previsto</p>
-                                            <p style="margin: 5px 0 0 0; font-size: 36px; font-weight: 800; color: white;">R$ ${totalGeneral.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                                        </div>
-                                    </div>
-                                </div>
+
                             </div>
                         </td>
                     </tr>
