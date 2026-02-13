@@ -155,22 +155,22 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
             <td style="padding: 0;">
               <div class="a4-container">
                   <!-- Header Content (First Page Only) -->
-                  <div style="padding-bottom: 15px !important; border-bottom: 3px solid #000; margin-bottom: 35px;">
+                  <div style="padding-top: 10px; padding-bottom: 25px !important; border-bottom: 3px solid #000; margin-bottom: 40px;">
                      <div style="display: flex; justify-content: space-between; align-items: center;">
-                         <div style="display: flex; gap: 20px; align-items: center;">
-                             <div style="width: 70px; display: flex; align-items: center; justify-content: flex-start;">
-                                 ${company.logo ? `<img src="${company.logo}" style="max-height: 70px; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#1e3a8a;">PRIME</div>'}
+                         <div style="display: flex; gap: 24px; align-items: center;">
+                             <div style="width: 80px; display: flex; align-items: center; justify-content: flex-start;">
+                                 ${company.logo ? `<img src="${company.logo}" style="max-height: 80px; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#1e3a8a;">PRIME</div>'}
                              </div>
                              <div>
-                                 <h1 style="font-size: 16px; font-weight: 900; color: #0f172a; line-height: 1.1; margin: 0 0 2px 0; text-transform: uppercase;">${company.name}</h1>
-                                 <p style="margin: 0; font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.02em;">Soluções em Gestão Profissional</p>
-                                  <p style="margin: 2px 0 0 0; font-size: 9px; color: #64748b; font-weight: 500;">${company.cnpj || ''} | ${company.phone || ''}</p>
+                                 <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 0 0 2px 0; text-transform: uppercase;">${company.name}</h1>
+                                 <p style="margin: 0; font-size: 11px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.02em;">Soluções em Gestão Profissional</p>
+                                  <p style="margin: 4px 0 0 0; font-size: 10px; color: #64748b; font-weight: 500;">${company.cnpj || ''} | ${company.phone || ''}</p>
                              </div>
                          </div>
                          <div style="text-align: right;">
-                             <p style="margin: 0; font-size: 20px; font-weight: 900; color: #2563eb;">${budget.id}</p>
-                             <p style="margin: 4px 0 0 0; font-size: 9px; font-weight: 700; color: #334155; text-transform: uppercase;">EMISSÃO: ${emissionDate}</p>
-                             <p style="margin: 2px 0 0 0; font-size: 9px; font-weight: 700; color: #334155; text-transform: uppercase;">VALIDADE: ${validityDate}</p>
+                             <p style="margin: 0; font-size: 24px; font-weight: 800; color: #2563eb;">${budget.id}</p>
+                             <p style="margin: 4px 0 0 0; font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase;">EMISSÃO: ${emissionDate}</p>
+                             <p style="margin: 2px 0 0 0; font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase;">VALIDADE: ${validityDate}</p>
                          </div>
                      </div>
                   </div>
@@ -289,7 +289,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         <tfoot>
           <tr>
             <td style="padding: 0;">
-              <div class="a4-container" style="padding-top: 24px !important; border-top: 1px solid #e2e8f0; margin-top: 24px;">
+              <div class="a4-container" style="padding-top: 24px !important; border-top: 1px solid #e2e8f0; margin-top: 30px;">
                   <div style="display: flex; justify-content: space-between; align-items: center;">
                       <p style="font-size: 9px; font-weight: 700; color: #94a3b8; text-transform: uppercase;">${company.name} - ${company.cnpj || ''}</p>
                       <p style="font-size: 9px; font-weight: 700; color: #94a3b8; text-transform: uppercase;">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p>
@@ -329,7 +329,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
              .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm; } 
            }
            @media print { 
-             @page { margin: 10mm 15mm; }
+             @page { margin: 20mm 15mm; }
              body { background: white !important; margin: 0 !important; padding: 0 !important; } 
              .a4-container { box-shadow: none !important; border: none !important; width: 100% !important; padding: 0 !important; margin: 0 !important; }
              table { break-inside: auto; width: 100%; }
