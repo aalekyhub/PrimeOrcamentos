@@ -434,139 +434,114 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       </body>
       </html>`;
     if (mode === 'pdf') {
-      // Use a hidden div to process HTML for PDF (must be in DOM and visible for layout)
-      const iframe = document.createElement('iframe');
-      iframe.style.position = 'fixed';
-      iframe.style.left = '0';
-      iframe.style.top = '0';
-      iframe.style.width = '210mm';
-      iframe.style.height = '297mm'; // Initial height
-      iframe.style.border = 'none';
-      iframe.style.zIndex = '-9999';
-      iframe.style.opacity = '0';
-      iframe.style.pointerEvents = 'none';
-      iframe.style.background = 'white';
-      document.body.appendChild(iframe);
+      const worker = document.createElement('div');
+      worker.style.position = 'fixed';
+      worker.style.left = '-9999px';
+      worker.style.top = '0';
+      worker.style.width = '210mm';
+      worker.style.background = 'white';
+      worker.className = 'pdf-generation-container';
 
-      // Remove the auto-print command but keep optimization
-      let pdfHtml = html.replace(/window\.onload\s*=\s*function\(\)\s*\{[\s\S]*?\};?\s*\}/, 'window.onload = function() { optimizePageBreaks(); }');
+      // Inject the HTML directly into the main document to ensure styles are available
+      worker.innerHTML = html;
+      document.body.appendChild(worker);
 
-      // Inject robust PDF-specific styles to override "screen" styles
-      const pdfOverrideStyles = `
-        <style>
-           /* Force white background everywhere */
-           html, body { background: white !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; height: auto !important; }
-           
-           /* Specific overrides for PDF to ensure visibility and 25mm margins */
-           thead, tfoot { display: none !important; }
-           
-           /* Reset container styles for PDF generation - using 15mm for side padding */
-           .a4-container { 
-             width: 100% !important; 
-             height: auto !important; 
-             margin: 0 !important; 
-             padding-left: 15mm !important; 
-             padding-right: 15mm !important; 
-             padding-top: 0 !important;
-             padding-bottom: 0 !important;
-             box-shadow: none !important; 
-             border: none !important; 
-             background: white !important;
-           }
-           /* Hide screen-only, show print-only */
-           .no-screen { display: block !important; }
-           .no-print { display: none !important; }
-           
-           /* Ensure text colors are dark for print */
-           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-           
-            /* Ensure table fits and headers are bold */
-            table { width: 100% !important; border-collapse: collapse !important; }
-            th { font-weight: 800 !important; color: #0f172a !important; }
-            .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; }
-            .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; }
-            .ql-editor-print li { display: list-item !important; list-style-position: outside !important; }
-            .ql-editor-print strong, .ql-editor-print b { font-weight: 800 !important; color: #000 !important; }
-            .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4 { font-weight: 900 !important; color: #0f172a !important; }
-            
-            /* Enforce no-break for grouped elements in PDF */
-            .keep-together { 
-              display: block !important; 
-              break-inside: avoid !important; 
-              page-break-inside: avoid !important; 
-              width: 100% !important;
-              position: relative !important;
-            }
-          </style>
+      // Add PDF-specific overrides
+      const styleTag = document.createElement('style');
+      styleTag.innerHTML = `
+        .pdf-generation-container { background: white !important; }
+        .pdf-generation-container thead, .pdf-generation-container tfoot { display: none !important; }
+        .pdf-generation-container .a4-container { 
+          width: 100% !important; 
+          margin: 0 !important; 
+          padding: 0 15mm !important; 
+          box-shadow: none !important; 
+          border: none !important; 
+        }
+        .pdf-generation-container .no-screen { display: block !important; }
+        .pdf-generation-container .no-print { display: none !important; }
+        .pdf-generation-container .keep-together { 
+           display: block !important; 
+           break-inside: avoid !important; 
+           page-break-inside: avoid !important; 
+           width: 100% !important;
+        }
       `;
-      pdfHtml = pdfHtml.replace('</head>', `${pdfOverrideStyles}</head>`);
+      worker.appendChild(styleTag);
 
-      iframe.onload = () => {
-        // Wait for resources
-        setTimeout(() => {
-          const doc = iframe.contentDocument;
-          const body = doc?.body;
+      // Run optimization directly on the worker content
+      const descriptionRoot = worker.querySelector('.print-description-content');
+      if (descriptionRoot) {
+        const allNodes: Element[] = [];
+        Array.from(descriptionRoot.children).forEach(block => {
+          if (block.classList.contains('ql-editor-print')) {
+            allNodes.push(...Array.from(block.children));
+          } else {
+            allNodes.push(block);
+          }
+        });
 
-          if (!doc || !body) {
-            notify("Erro ao gerar PDF: Conteúdo vazio.", "error");
-            if (document.body.contains(iframe)) document.body.removeChild(iframe);
-            return;
+        for (let i = 0; i < allNodes.length - 1; i++) {
+          const el = allNodes[i] as HTMLElement;
+          let isTitle = false;
+          if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
+          else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
+            const text = el.innerText.trim();
+            const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text);
+            const hasBoldStyle = el.querySelector('strong, b, [style*="font-weight: bold"], [style*="font-weight: 700"], [style*="font-weight: 800"], [style*="font-weight: 900"]');
+            const isBold = hasBoldStyle || (el.style && parseInt(el.style.fontWeight) > 600) || el.tagName === 'STRONG';
+            if ((isNumbered && isBold && text.length < 150) || (isBold && text.length < 150 && text === text.toUpperCase() && text.length > 4)) {
+              isTitle = true;
+            }
           }
 
-          // Dynamic height adjustment: Set iframe height to full content height to prevent cropping
-          const contentHeight = Math.max(body.scrollHeight, body.offsetHeight, doc.documentElement.scrollHeight);
-          iframe.style.height = (contentHeight + 100) + 'px';
-
-          const opt = {
-            margin: [25, 0, 25, 0], // Margens físicas de 25mm no PDF (Topo e Base)
-            filename: `Orçamento - ${budget.id} - ${budget.description || 'Proposta'}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: {
-              scale: 2,
-              useCORS: true,
-              scrollY: 0,
-              window: iframe.contentWindow as Window,
-              background: '#ffffff'
-            },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-            pagebreak: { mode: ['css', 'legacy'], avoid: '.keep-together' }
-          };
-
-
-          // @ts-ignore
-          html2pdf().set(opt).from(doc.documentElement).toPdf().get('pdf').then(function (pdf: any) {
-            // Add page numbers
-            try {
-              var totalPages = pdf.internal.getNumberOfPages();
-              for (var i = 1; i <= totalPages; i++) {
-                pdf.setPage(i);
-                pdf.setFontSize(9);
-                pdf.setTextColor(150);
-                pdf.setFontSize(9);
-                pdf.setTextColor(150);
-                pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 15, { align: 'center' });
-              }
-              pdf.save(opt.filename);
-            } catch (e) {
-              console.error("PDF Post-process error", e);
+          if (isTitle) {
+            const nodesToWrap = [el];
+            let j = i + 1;
+            while (j < allNodes.length && nodesToWrap.length < 3) {
+              const next = allNodes[j] as HTMLElement;
+              const nText = next.innerText.trim();
+              const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(nText);
+              if (next.matches('h1, h2, h3, h4, h5, h6') || (isNumbered && next.querySelector('strong, b'))) break;
+              nodesToWrap.push(next);
+              j++;
             }
-            if (document.body.contains(iframe)) document.body.removeChild(iframe);
-          }).catch((err: any) => {
-            console.error("PDF Error:", err);
-            notify("Erro ao gerar PDF.", "error");
-            if (document.body.contains(iframe)) {
-              document.body.removeChild(iframe);
+            if (nodesToWrap.length > 1) {
+              const wrapper = document.createElement('div');
+              wrapper.className = 'keep-together';
+              el.parentNode?.insertBefore(wrapper, el);
+              nodesToWrap.forEach(node => wrapper.appendChild(node));
+              i = j - 1;
             }
-          });
-        }, 2000); // Wait 2s for layout and styles to stabilize
+          }
+        }
+      }
+
+      const opt = {
+        margin: [25, 0, 25, 0],
+        filename: `Orçamento - ${budget.id} - ${budget.description || 'Proposta'}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 3, useCORS: true, letterRendering: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css', 'legacy'], avoid: '.keep-together' }
       };
 
-      const doc = iframe.contentDocument;
-      if (doc) {
-        doc.open();
-        doc.write(pdfHtml);
-        doc.close();
-      }
+      // @ts-ignore
+      html2pdf().set(opt).from(worker).toPdf().get('pdf').then(function (pdf: any) {
+        var totalPages = pdf.internal.getNumberOfPages();
+        for (var i = 1; i <= totalPages; i++) {
+          pdf.setPage(i);
+          pdf.setFontSize(9);
+          pdf.setTextColor(150);
+          pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 15, { align: 'center' });
+        }
+        pdf.save(opt.filename);
+        document.body.removeChild(worker);
+      }).catch((err: any) => {
+        console.error("PDF Error:", err);
+        notify("Erro ao gerar PDF.", "error");
+        if (document.body.contains(worker)) document.body.removeChild(worker);
+      });
     } else {
       const printWindow = window.open('', '_blank');
       if (printWindow) {

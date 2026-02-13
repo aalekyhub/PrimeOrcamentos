@@ -351,10 +351,10 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
         // PDF Generation Options
         const opt = {
-            margin: [25, 0, 25, 0], // Margens físicas no PDF para proteger cabeçalho e rodapé
+            margin: [25, 0, 25, 0],
             filename: `Contrato - ${order.id.replace('OS-', 'OS')} - ${order.description || 'Proposta'}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 3, useCORS: true },
+            html2canvas: { scale: 3, useCORS: true, letterRendering: true },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
             pagebreak: { mode: ['css', 'legacy'], avoid: '.keep-together' }
         };
