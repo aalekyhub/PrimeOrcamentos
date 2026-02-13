@@ -150,38 +150,30 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
     return `
       <table style="width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif;">
-        <thead>
-          <tr>
-          <tr>
-            <td style="padding: 0;">
-              <div class="header-space" style="height: 10px;"></div>
-              <div class="a4-container" style="padding-bottom: 10px !important; border-bottom: 3px solid #000; margin-bottom: 30px;">
-                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                     <div style="display: flex; gap: 20px; align-items: center;">
-                         <div style="width: 80px; height: 60px; display: flex; align-items: center; justify-content: flex-start;">
-                             ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#1e3a8a;">PRIME</div>'}
-                         </div>
-                         <div>
-                             <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; line-height: 1.1; margin: 0 0 4px 0; text-transform: uppercase;">${company.name}</h1>
-                             <p style="margin: 0; font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase;">Soluções em Gestão Profissional</p>
-                              <p style="margin: 2px 0 0 0; font-size: 10px; color: #64748b; font-weight: 500;">${company.cnpj || ''} | ${company.phone || ''}</p>
-                         </div>
-                     </div>
-                     <div style="text-align: right;">
-                         <p style="margin: 0; font-size: 24px; font-weight: 800; color: #3b82f6;">${budget.id}</p>
-                         <p style="margin: 4px 0 0 0; font-size: 9px; font-weight: 700; color: #0f172a; text-transform: uppercase;">EMISSÃO: ${emissionDate}</p>
-                         <p style="margin: 2px 0 0 0; font-size: 9px; font-weight: 700; color: #0f172a; text-transform: uppercase;">VALIDADE: ${validityDate}</p>
-                     </div>
-                 </div>
-              </div>
-            </td>
-          </tr>
-          </tr>
-        </thead>
         <tbody>
           <tr>
             <td style="padding: 0;">
               <div class="a4-container">
+                  <!-- Header Content (First Page Only) -->
+                  <div style="padding-bottom: 15px !important; border-bottom: 3px solid #000; margin-bottom: 35px;">
+                     <div style="display: flex; justify-content: space-between; align-items: center;">
+                         <div style="display: flex; gap: 20px; align-items: center;">
+                             <div style="width: 70px; display: flex; align-items: center; justify-content: flex-start;">
+                                 ${company.logo ? `<img src="${company.logo}" style="max-height: 70px; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#1e3a8a;">PRIME</div>'}
+                             </div>
+                             <div>
+                                 <h1 style="font-size: 16px; font-weight: 900; color: #0f172a; line-height: 1.1; margin: 0 0 2px 0; text-transform: uppercase;">${company.name}</h1>
+                                 <p style="margin: 0; font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.02em;">Soluções em Gestão Profissional</p>
+                                  <p style="margin: 2px 0 0 0; font-size: 9px; color: #64748b; font-weight: 500;">${company.cnpj || ''} | ${company.phone || ''}</p>
+                             </div>
+                         </div>
+                         <div style="text-align: right;">
+                             <p style="margin: 0; font-size: 20px; font-weight: 900; color: #2563eb;">${budget.id}</p>
+                             <p style="margin: 4px 0 0 0; font-size: 9px; font-weight: 700; color: #334155; text-transform: uppercase;">EMISSÃO: ${emissionDate}</p>
+                             <p style="margin: 2px 0 0 0; font-size: 9px; font-weight: 700; color: #334155; text-transform: uppercase;">VALIDADE: ${validityDate}</p>
+                         </div>
+                     </div>
+                  </div>
                  <!-- Boxes Grid -->
                  <div style="display: flex; gap: 24px; margin-bottom: 40px;">
                      <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
