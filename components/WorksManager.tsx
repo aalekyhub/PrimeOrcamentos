@@ -576,16 +576,14 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         <h3 style="font-size: 16px; font-weight: 900; color: #1e293b; text-transform: uppercase; letter-spacing: -0.025em; margin: 0;">SERVIÇOS EXECUTADOS</h3>
                     </div>
                     <table style="width: 100%; font-size: 14px; border-collapse: separate; border-spacing: 0;">
-                        <thead style="background: #f8fafc;">
-                            <tr>
+                        <tbody style="border-top: 1px solid #f1f5f9;">
+                            <tr style="background: #f8fafc;">
                                 <th style="padding: 8px 12px; text-align: left; font-size: 10px; font-weight: 900; text-transform: uppercase; color: #64748b; border-radius: 8px 0 0 8px;">DESCRIÇÃO</th>
                                 <th style="padding: 8px 12px; text-align: center; font-size: 10px; font-weight: 900; text-transform: uppercase; color: #64748b;">QTD</th>
                                 <th style="padding: 8px 12px; text-align: right; font-size: 10px; font-weight: 900; text-transform: uppercase; color: #64748b;">MAT.</th>
                                 <th style="padding: 8px 12px; text-align: right; font-size: 10px; font-weight: 900; text-transform: uppercase; color: #64748b;">M.O.</th>
                                 <th style="padding: 8px 12px; text-align: right; font-size: 10px; font-weight: 900; text-transform: uppercase; color: #64748b; border-radius: 0 8px 8px 0;">TOTAL</th>
                             </tr>
-                        </thead>
-                        <tbody style="border-top: 1px solid #f1f5f9;">
                             ${services.map(s => `
                             <tr style="border-bottom: 1px solid #f1f5f9;">
                                 <td style="padding: 8px 12px; font-weight: 500; color: #334155; border-bottom: 1px solid #f1f5f9;">${s.description}</td>
@@ -607,15 +605,13 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         <h3 style="font-size: 16px; font-weight: 900; color: #1e293b; text-transform: uppercase; letter-spacing: -0.025em; margin: 0;">RELATÓRIO DE MATERIAIS</h3>
                     </div>
                     <table style="width: 100%; font-size: 14px; border-collapse: separate; border-spacing: 0;">
-                        <thead style="background: #f8fafc;">
-                            <tr>
+                        <tbody style="border-top: 1px solid #f1f5f9;">
+                            <tr style="background: #f8fafc;">
                                 <th style="padding: 8px 12px; text-align: left; font-size: 10px; font-weight: 900; text-transform: uppercase; color: #64748b; border-radius: 8px 0 0 8px;">ITEM</th>
                                 <th style="padding: 8px 12px; text-align: center; font-size: 10px; font-weight: 900; text-transform: uppercase; color: #64748b;">QTD</th>
                                 <th style="padding: 8px 12px; text-align: right; font-size: 10px; font-weight: 900; text-transform: uppercase; color: #64748b;">UNITÁRIO</th>
                                 <th style="padding: 8px 12px; text-align: right; font-size: 10px; font-weight: 900; text-transform: uppercase; color: #64748b; border-radius: 0 8px 8px 0;">TOTAL</th>
                             </tr>
-                        </thead>
-                        <tbody style="border-top: 1px solid #f1f5f9;">
                             ${materials.map(m => `
                             <tr style="border-bottom: 1px solid #f1f5f9;">
                                 <td style="padding: 8px 12px; font-weight: 500; color: #334155; border-bottom: 1px solid #f1f5f9;">${m.material_name}</td>
@@ -636,16 +632,14 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         <h3 style="font-size: 16px; font-weight: 900; color: #1e293b; text-transform: uppercase; letter-spacing: -0.025em; margin: 0;">RELATÓRIO DE MÃO DE OBRA</h3>
                     </div>
                     <table style="width: 100%; font-size: 14px; border-collapse: separate; border-spacing: 0;">
-                        <thead style="background: #f8fafc;">
-                            <tr>
+                        <tbody style="border-top: 1px solid #f1f5f9;">
+                            <tr style="background: #f8fafc;">
                                 <th style="padding: 8px 12px; text-align: left; font-size: 10px; font-weight: 900; text-transform: uppercase; color: #64748b; border-radius: 8px 0 0 8px;">PROFISSIONAL / FUNÇÃO</th>
                                 <th style="padding: 8px 12px; text-align: center; font-size: 10px; font-weight: 900; text-transform: uppercase; color: #64748b;">TIPO</th>
                                 <th style="padding: 8px 12px; text-align: center; font-size: 10px; font-weight: 900; text-transform: uppercase; color: #64748b;">DIAS/QTD</th>
                                 <th style="padding: 8px 12px; text-align: right; font-size: 10px; font-weight: 900; text-transform: uppercase; color: #64748b;">CUSTO</th>
                                 <th style="padding: 8px 12px; text-align: right; font-size: 10px; font-weight: 900; text-transform: uppercase; color: #64748b; border-radius: 0 8px 8px 0;">TOTAL</th>
                             </tr>
-                        </thead>
-                        <tbody style="border-top: 1px solid #f1f5f9;">
                             ${labor.map(l => `
                             <tr>
                                 <td style="padding: 8px 12px; font-weight: 500; color: #334155; border-bottom: 1px solid #f1f5f9;">${l.role} <span style="font-size: 12px; color: #94a3b8; font-weight: 400;">(${l.name})</span></td>
@@ -667,14 +661,12 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                          <h3 style="font-size: 16px; font-weight: 900; color: #1e293b; text-transform: uppercase; letter-spacing: -0.025em; margin: 0;">CUSTOS INDIRETOS</h3>
                      </div>
                      <table style="width: 100%; font-size: 14px; border-collapse: separate; border-spacing: 0;">
-                         <thead style="background: #f8fafc;">
-                             <tr>
+                         <tbody style="border-top: 1px solid #f1f5f9;">
+                             <tr style="background: #f8fafc;">
                                  <th style="padding: 8px 12px; text-align: left; font-size: 10px; font-weight: 900; text-transform: uppercase; color: #64748b; border-radius: 8px 0 0 8px;">CATEGORIA</th>
                                  <th style="padding: 8px 12px; text-align: left; font-size: 10px; font-weight: 900; text-transform: uppercase; color: #64748b;">DESCRIÇÃO</th>
                                  <th style="padding: 8px 12px; text-align: right; font-size: 10px; font-weight: 900; text-transform: uppercase; color: #64748b; border-radius: 0 8px 8px 0; width: 120px;">VALOR</th>
                              </tr>
-                         </thead>
-                         <tbody style="border-top: 1px solid #f1f5f9;">
                              ${indirects.map(i => `
                                  <tr style="border-bottom: 1px solid #f1f5f9;">
                                      <td style="padding: 8px 12px; font-size: 11px; font-weight: 600; color: #334155; border-bottom: 1px solid #f1f5f9;">${i.category}</td>

@@ -38,7 +38,7 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                         display: block !important;
                     }
                     @page {
-                        margin: 10mm;
+                        margin: 20mm 15mm;
                         size: A4;
                     }
                     #report-preview-content {

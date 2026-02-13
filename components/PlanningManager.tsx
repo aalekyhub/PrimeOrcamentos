@@ -338,15 +338,13 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                 <div style="margin-bottom: 30px;">
                                     <h3 style="font-size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; border-left: 4px solid #3b82f6; padding-left: 10px; margin-bottom: 15px;">1. Serviços Planejados</h3>
                                     <table style="width: 100%; border-collapse: collapse;">
-                                        <thead>
+                                        <tbody>
                                             <tr style="background: #f1f5f9; border-bottom: 1px solid #e2e8f0;">
                                                 <th style="padding: 10px; text-align: left; font-size: 10px; color: #64748b;">DESCRIÇÃO</th>
                                                 <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 60px;">QTD</th>
                                                 <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 40px;">UND</th>
                                                 <th style="padding: 10px; text-align: right; font-size: 10px; color: #64748b; width: 120px;">TOTAL</th>
                                             </tr>
-                                        </thead>
-                                        <tbody>
                                             ${services.map(s => `
                                                 <tr style="border-bottom: 1px solid #f1f5f9;">
                                                     <td style="padding: 10px; font-size: 11px; font-weight: 600;">${s.description}</td>
@@ -365,15 +363,13 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                 <div style="margin-bottom: 30px;">
                                     <h3 style="font-size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; border-left: 4px solid #3b82f6; padding-left: 10px; margin-bottom: 15px;">2. Insumos e Materiais (Previstos)</h3>
                                     <table style="width: 100%; border-collapse: collapse;">
-                                        <thead>
+                                        <tbody>
                                             <tr style="background: #f1f5f9; border-bottom: 1px solid #e2e8f0;">
                                                 <th style="padding: 10px; text-align: left; font-size: 10px; color: #64748b;">MATERIAL</th>
                                                 <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 60px;">QTD</th>
                                                 <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 40px;">UND</th>
                                                 <th style="padding: 10px; text-align: right; font-size: 10px; color: #64748b; width: 120px;">VALOR</th>
                                             </tr>
-                                        </thead>
-                                        <tbody>
                                             ${materials.map(m => `
                                                 <tr style="border-bottom: 1px solid #f1f5f9;">
                                                     <td style="padding: 10px; font-size: 11px; font-weight: 600;">${m.material_name}</td>
@@ -392,15 +388,13 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                 <div style="margin-bottom: 30px;">
                                     <h3 style="font-size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; border-left: 4px solid #3b82f6; padding-left: 10px; margin-bottom: 15px;">3. Recursos Humanos / Mão de Obra</h3>
                                     <table style="width: 100%; border-collapse: collapse;">
-                                        <thead>
+                                        <tbody>
                                             <tr style="background: #f1f5f9; border-bottom: 1px solid #e2e8f0;">
                                                 <th style="padding: 10px; text-align: left; font-size: 10px; color: #64748b;">FUNÇÃO / TIPO</th>
                                                 <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 60px;">QTD</th>
                                                 <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 80px;">UND</th>
                                                 <th style="padding: 10px; text-align: right; font-size: 10px; color: #64748b; width: 120px;">CUSTO TOTAL</th>
                                             </tr>
-                                        </thead>
-                                        <tbody>
                                             ${labor.map(l => `
                                                 <tr style="border-bottom: 1px solid #f1f5f9;">
                                                     <td style="padding: 10px; font-size: 11px; font-weight: 600;">${l.role} | (${l.cost_type})</td>
@@ -419,14 +413,12 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                 <div style="margin-bottom: 30px;">
                                     <h3 style="font-size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; border-left: 4px solid #3b82f6; padding-left: 10px; margin-bottom: 15px;">4. Custos Indiretos e Operacionais</h3>
                                     <table style="width: 100%; border-collapse: collapse;">
-                                        <thead>
+                                        <tbody>
                                             <tr style="background: #f1f5f9; border-bottom: 1px solid #e2e8f0;">
                                                 <th style="padding: 10px; text-align: left; font-size: 10px; color: #64748b;">CATEGORIA</th>
                                                 <th style="padding: 10px; text-align: left; font-size: 10px; color: #64748b;">DESCRIÇÃO</th>
                                                 <th style="padding: 10px; text-align: right; font-size: 10px; color: #64748b; width: 120px;">VALOR</th>
                                             </tr>
-                                        </thead>
-                                        <tbody>
                                             ${indirects.map(i => `
                                                 <tr style="border-bottom: 1px solid #f1f5f9;">
                                                     <td style="padding: 10px; font-size: 11px; font-weight: 600;">${i.category}</td>
