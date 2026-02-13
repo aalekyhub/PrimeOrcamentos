@@ -344,7 +344,6 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                             </div>
                                         </div>
                                         <span style="font-size: 18px; font-weight: 600; color: #064e3b; display: block;">R$ ${totalMaterials.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                                        <p style="font-size: 8px; color: #059669; margin: 4px 0 0 0; font-weight: 500;">Insumos + Serv.</p>
                                     </div>
 
                                     <!-- Labor (Amber) -->
@@ -356,7 +355,6 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                             </div>
                                         </div>
                                         <span style="font-size: 18px; font-weight: 600; color: #78350f; display: block;">R$ ${totalLabor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                                        <p style="font-size: 8px; color: #d97706; margin: 4px 0 0 0; font-weight: 500;">Própria + Terc.</p>
                                     </div>
 
                                     <!-- Indirects (Slate) -->
@@ -368,10 +366,10 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                             </div>
                                         </div>
                                         <span style="font-size: 18px; font-weight: 600; color: #1e293b; display: block;">R$ ${totalIndirect.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                                        <p style="font-size: 8px; color: #64748b; margin: 4px 0 0 0; font-weight: 500;">Custos Adm.</p>
                                     </div>
 
-                                    <!-- Taxes (Blue) -->
+                                    <!-- Taxes (Blue) - Conditional Render -->
+                                    ${totalTaxes > 0 ? `
                                     <div style="flex: 1; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 16px;">
                                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                             <span style="font-size: 9px; font-weight: 500; color: #2563eb; text-transform: uppercase; letter-spacing: 0.05em;">Total Impostos</span>
@@ -380,8 +378,8 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                             </div>
                                         </div>
                                         <span style="font-size: 18px; font-weight: 600; color: #1e3a8a; display: block;">R$ ${totalTaxes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                                        <p style="font-size: 8px; color: #2563eb; margin: 4px 0 0 0; font-weight: 500;">BDI e Taxas</p>
                                     </div>
+                                    ` : ''}
                                 </div>
 
                                 <!-- TOTAL COST FOOTER CARD -->
