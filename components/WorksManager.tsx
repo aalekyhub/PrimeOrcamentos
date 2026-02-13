@@ -523,12 +523,12 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             <div style="width: 100%;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; padding-bottom: 16px; border-bottom: 2px solid #0f172a;">
                     <div>
-                         <h1 style="font-size: 24px; font-weight: 900; color: #0f172a; text-transform: uppercase; letter-spacing: -0.025em; margin: 0;">RELATÓRIO DE ACOMPANHAMENTO</h1>
-                         <p style="font-size: 14px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px;">${currentWork.name}</p>
+                         <h1 style="font-size: 24px; font-weight: 900; color: #065f46; text-transform: uppercase; letter-spacing: -0.025em; margin: 0;">RELATÓRIO DE ACOMPANHAMENTO</h1>
+                         <p style="font-size: 14px; font-weight: 700; color: #059669; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px;">${currentWork.name}</p>
                     </div>
                     <div style="text-align: right;">
                         <p style="font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin: 0;">DATA EMISSÃO</p>
-                        <p style="font-size: 18px; font-weight: 900; color: #0f172a; margin: 0;">${new Date().toLocaleDateString('pt-BR')}</p>
+                        <p style="font-size: 18px; font-weight: 900; color: #334155; margin: 0;">${new Date().toLocaleDateString('pt-BR')}</p>
                     </div>
                 </div>
 
