@@ -708,20 +708,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             </div>
         `;
 
-        // WRAP IN TABLE FOR MARGINS
-        return `
-            <table style="width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif;">
-                <thead>
-                    <tr><td style="height: 20mm; border: none; padding: 0;"><div style="height: 20mm;">&nbsp;</div></td></tr>
-                </thead>
-                <tfoot>
-                    <tr><td style="height: 15mm; border: none; padding: 0;"><div style="height: 15mm;">&nbsp;</div></td></tr>
-                </tfoot>
-                <tbody>
-                    <tr><td style="padding: 0;">${reportContent}</td></tr>
-                </tbody>
-            </table>
-        `;
+        // Just return content, margins are handled by ReportPreview @page styles
+        return reportContent;
     };
 
 
