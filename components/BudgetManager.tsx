@@ -330,7 +330,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
            }
            @media print { 
              @page { margin: 0; size: A4; } /* Reset page margin to give full control to container */
-             body { background: white !important; margin: 0 !important; padding: 0 !important; } 
+             body { background: white !important; margin: 0 !important; padding: 0 !important; counter-reset: page; } 
               .a4-container { 
                   box-shadow: none !important; 
                   border: none !important; 
@@ -343,6 +343,27 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
              thead { display: table-header-group; } 
              tfoot { display: table-footer-group; }
              .no-print { display: none !important; } 
+             .page-footer {
+               position: fixed;
+               bottom: 8mm;
+               left: 0;
+               right: 0;
+               text-align: center;
+               font-size: 9px;
+               color: #94a3b8;
+               font-weight: 800;
+               text-transform: uppercase;
+               letter-spacing: 0.1em;
+               z-index: 9999;
+               display: none;
+             }
+             .page-number::after {
+               counter-increment: page;
+               content: "Página " counter(page);
+             }
+           }
+           @media print {
+             .page-footer { display: block; }
            }
 
             /* Shared Rich Text / Quill Styles */
@@ -354,6 +375,9 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         </style>
       </head>
       <body>
+        <div class="page-footer">
+          <span class="page-number"></span>
+        </div>
         ${htmlContent}
         <script>
            function optimizePageBreaks() {
