@@ -350,12 +350,12 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         </html>`;
 
         const worker = document.createElement('div');
-        worker.style.position = 'fixed';
-        worker.style.left = '0';
+        worker.style.position = 'absolute';
+        worker.style.left = '-10000px';
         worker.style.top = '0';
         worker.style.width = '210mm';
         worker.style.background = 'white';
-        worker.style.zIndex = '-9999';
+        worker.style.zIndex = '1';
         worker.style.opacity = '1';
         worker.className = 'pdf-capture-container';
 
@@ -425,13 +425,13 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                 filename: `Contrato - ${order.id.replace('OS-', 'OS')} - ${order.description || 'Proposta'}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: {
-                    scale: 3,
+                    scale: 2,
                     useCORS: true,
                     letterRendering: true,
                     backgroundColor: '#ffffff',
                     scrollX: 0,
                     scrollY: 0,
-                    windowWidth: 794,
+                    windowWidth: 1120,
                     windowHeight: worker.scrollHeight
                 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
@@ -459,7 +459,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         });
 
         Promise.all(imagePromises).finally(() => {
-            setTimeout(runCapture, 1000); // 1s delay for maximum stability
+            setTimeout(runCapture, 2000); // 2s delay for maximum stability
         });
     };
 

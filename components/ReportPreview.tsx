@@ -34,19 +34,19 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                     filename: filename,
                     image: { type: 'jpeg' as const, quality: 0.98 },
                     html2canvas: {
-                        scale: 3,
+                        scale: 2,
                         useCORS: true,
                         letterRendering: true,
                         scrollX: 0,
                         scrollY: 0,
-                        windowWidth: 794
+                        windowWidth: 1120
                     },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const },
                     pagebreak: { mode: ['avoid-all' as const, 'css', 'legacy'] }
                 };
 
                 html2pdf().set(opt).from(element).save();
-            }, 1000); // 1s buffer for layout
+            }, 2000); // 1s buffer for layout
         });
     };
 

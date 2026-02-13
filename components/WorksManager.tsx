@@ -511,8 +511,15 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         if (!currentWork || materials.length === 0) return;
         const html = generateMaterialsReportHtml();
         const element = document.createElement('div');
+        element.style.position = 'absolute';
+        element.style.left = '-10000px';
+        element.style.top = '0';
+        element.style.width = '210mm';
+        element.style.background = 'white';
+        element.style.zIndex = '1';
+        element.style.opacity = '1';
         element.innerHTML = html;
-        document.body.appendChild(element); // Append to DOM for style application
+        document.body.appendChild(element);
 
         // Ensure all images are loaded
         const images = Array.from(element.querySelectorAll('img'));
@@ -531,12 +538,12 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                     filename: `Material_Obra_${currentWork.name.replace(/\s+/g, '_')}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 } as any,
                     html2canvas: {
-                        scale: 3,
+                        scale: 2,
                         useCORS: true,
                         letterRendering: true,
                         scrollX: 0,
                         scrollY: 0,
-                        windowWidth: 794,
+                        windowWidth: 1120,
                         windowHeight: element.scrollHeight
                     },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } as any
@@ -736,6 +743,13 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         if (!currentWork) return;
         const html = generateFullReportHtml();
         const element = document.createElement('div');
+        element.style.position = 'absolute';
+        element.style.left = '-10000px';
+        element.style.top = '0';
+        element.style.width = '210mm';
+        element.style.background = 'white';
+        element.style.zIndex = '1';
+        element.style.opacity = '1';
         element.innerHTML = html;
         document.body.appendChild(element);
 
@@ -756,12 +770,12 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                     filename: `Relatorio_Obra_${currentWork.name.replace(/\s+/g, '_')}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 } as any,
                     html2canvas: {
-                        scale: 3,
+                        scale: 2,
                         useCORS: true,
                         letterRendering: true,
                         scrollX: 0,
                         scrollY: 0,
-                        windowWidth: 794,
+                        windowWidth: 1120,
                         windowHeight: element.scrollHeight
                     },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } as any,
