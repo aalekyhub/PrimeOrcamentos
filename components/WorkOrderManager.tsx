@@ -249,34 +249,35 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         return `
         <table style="width: 100%; border-collapse: collapse;">
           <thead>
-            <tr>
-              <td style="padding: 0;">
-                <div class="a4-container" style="padding-bottom: 20px !important; border-bottom: 3px solid #0f172a; margin-bottom: 20px;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <div style="display: flex; gap: 24px; align-items: center;">
-                            <div style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
-                                ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>'}
-                            </div>
-                            <div>
-                                <h1 style="font-size: 30px; font-weight: 900; color: #0f172a; line-height: 1; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: -0.025em;">${company.name}</h1>
-                                <p style="margin: 0; font-size: 11px; font-weight: 800; color: #2563eb; text-transform: uppercase; letter-spacing: 0.1em;">Relatório Gerencial de Obra - ${reportMode === 'estimated' ? 'ESTIMADO' : 'REAL'}</p>
-                                <p style="margin: 8px 0 0 0; font-size: 9px; color: #94a3b8; font-weight: 700; text-transform: uppercase;">${company.cnpj || ''} | ${company.phone || ''}</p>
-                            </div>
-                        </div>
-                        <div style="text-align: right;">
-                            <div style="background: #2563eb; color: white; padding: 6px 16px; border-radius: 8px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; display: inline-block;">CONTROLE DE OBRA</div>
-                            <p style="margin: 0; font-size: 36px; font-weight: 900; color: #0f172a; letter-spacing: -0.05em;">${order.id}</p>
-                            <p style="margin: 4px 0 0 0; font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em;">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p>
-                        </div>
-                    </div>
-                </div>
-              </td>
-            </tr>
+            <tr><td style="height: 20mm; border: none; padding: 0;"><div style="height: 20mm;">&nbsp;</div></td></tr>
           </thead>
+          <tfoot>
+            <tr><td style="height: 15mm; border: none; padding: 0;"><div style="height: 15mm;">&nbsp;</div></td></tr>
+          </tfoot>
           <tbody>
             <tr>
               <td style="padding: 0;">
                 <div class="a4-container">
+                    <!-- HEADER MOVED TO BODY (First Page Only) -->
+                     <div style="padding-bottom: 20px !important; border-bottom: 3px solid #0f172a; margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div style="display: flex; gap: 24px; align-items: center;">
+                                <div style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                                    ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>'}
+                                </div>
+                                <div>
+                                    <h1 style="font-size: 30px; font-weight: 900; color: #0f172a; line-height: 1; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: -0.025em;">${company.name}</h1>
+                                    <p style="margin: 0; font-size: 11px; font-weight: 800; color: #2563eb; text-transform: uppercase; letter-spacing: 0.1em;">Relatório Gerencial de Obra - ${reportMode === 'estimated' ? 'ESTIMADO' : 'REAL'}</p>
+                                    <p style="margin: 8px 0 0 0; font-size: 9px; color: #94a3b8; font-weight: 700; text-transform: uppercase;">${company.cnpj || ''} | ${company.phone || ''}</p>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="background: #2563eb; color: white; padding: 6px 16px; border-radius: 8px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; display: inline-block;">CONTROLE DE OBRA</div>
+                                <p style="margin: 0; font-size: 36px; font-weight: 900; color: #0f172a; letter-spacing: -0.05em;">${order.id}</p>
+                                <p style="margin: 4px 0 0 0; font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em;">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p>
+                            </div>
+                        </div>
+                    </div>
                     <div style="display: flex; gap: 24px; margin-bottom: 32px;">
                         <div style="flex: 1; background: #f8fafc; border-radius: 16px; padding: 24px; border: 1px solid #e2e8f0;">
                             <span style="font-size: 10px; font-weight: 900; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">Contratante / Cliente</span>
@@ -376,18 +377,6 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
               </td>
             </tr>
           </tbody>
-          <tfoot>
-            <tr>
-              <td style="padding: 0;">
-                <div class="a4-container" style="padding-top: 10px !important; border-top: 1px solid #f1f5f9; margin-top: 10px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; opacity: 0.6;">
-                        <p style="font-size: 8px; font-weight: bold; color: #64748b; text-transform: uppercase;">${company.name} - ${company.cnpj || ''}</p>
-                        <p style="font-size: 8px; font-weight: bold; color: #64748b; text-transform: uppercase;">Relatório ${order.id}</p>
-                    </div>
-                </div>
-              </td>
-            </tr>
-          </tfoot>
         </table>
         `;
     };
@@ -501,6 +490,12 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
         return `
         <table style="width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif;">
+          <thead>
+              <tr><td style="height: 20mm; border: none; padding: 0;"><div style="height: 20mm;">&nbsp;</div></td></tr>
+          </thead>
+          <tfoot>
+              <tr><td style="height: 15mm; border: none; padding: 0;"><div style="height: 15mm;">&nbsp;</div></td></tr>
+          </tfoot>
           <tbody>
             <tr>
               <td style="padding: 0;">
