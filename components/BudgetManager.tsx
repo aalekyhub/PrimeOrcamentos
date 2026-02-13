@@ -13,7 +13,6 @@ import CustomerManager from './CustomerManager';
 import ServiceCatalog from './ServiceCatalog';
 import { db } from '../services/db';
 import { compressImage } from '../services/imageUtils';
-import ReportPreview from './ReportPreview';
 
 interface Props {
   orders: ServiceOrder[];
@@ -54,9 +53,6 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedCatalogId, setSelectedCatalogId] = useState('');
 
-  // Preview State
-  const [showPreview, setShowPreview] = useState(false);
-  const [previewContent, setPreviewContent] = useState({ title: '', html: '', filename: '' });
 
   const budgets = useMemo(() => orders.filter(o =>
     (o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED) && (o.customerName.toLowerCase().includes(searchTerm.toLowerCase()) || o.id.includes(searchTerm))
@@ -288,28 +284,118 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     `;
   };
 
-  const handlePreviewPDF = (budget: ServiceOrder) => {
-    const html = getBudgetHtml(budget);
-    setPreviewContent({
-      title: 'Orçamento Prime',
-      html: html,
-      filename: `Orcamento_${budget.id}.pdf`
-    });
-    setShowPreview(true);
-  };
 
   const handlePrintPDF = (budget: ServiceOrder, mode: 'print' | 'pdf' = 'print') => {
-    if (mode === 'pdf') {
-      handlePreviewPDF(budget);
-      return;
-    }
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
 
-    // For print, we still need the old window behavior or we can use preview as well. 
-    // Usually 'print' means browser print. 
-    // Let's keep the window.open for legacy print if needed, but the user wants visualizer.
+    const htmlContent = getBudgetHtml(budget);
 
-    // Actually, let's just make everything go through preview if it's better.
-    handlePreviewPDF(budget);
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Orçamento - ${budget.id} - ${budget.description}</title>
+         <script src="https://cdn.tailwindcss.com"></script>
+         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
+        <style>
+           * { box-sizing: border-box; }
+           body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
+           @page { size: A4; margin: 0 !important; }
+           .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; padding-top: 15mm !important; padding-bottom: 15mm !important; }
+           .avoid-break { break-inside: avoid; page-break-inside: avoid; }
+           .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
+           
+           @media screen { 
+             body { background: #f1f5f9; padding: 40px 0; } 
+             .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; } 
+           }
+           @media print { 
+             body { background: white !important; margin: 0 !important; } 
+             .a4-container { box-shadow: none !important; border: none !important; width: 100% !important; } 
+             .no-print { display: none !important; } 
+           }
+
+            /* Shared Rich Text / Quill Styles */
+            .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
+            .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
+            .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
+            .ql-editor-print strong, .ql-editor-print b { font-weight: bold !important; color: #000 !important; }
+            .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4 { font-weight: 800 !important; color: #0f172a !important; margin-top: 20px !important; margin-bottom: 10px !important; break-after: avoid !important; }
+        </style>
+      </head>
+      <body>
+        ${htmlContent}
+        <script>
+           function optimizePageBreaks() {
+             const root = document.querySelector('.print-description-content');
+             if (!root) return;
+             const content = root.querySelector('div');
+             if (!content) return;
+
+             const allNodes = [];
+             Array.from(content.children).forEach(block => {
+               if (block.classList.contains('ql-editor-print')) {
+                  allNodes.push(...Array.from(block.children));
+               } else {
+                  allNodes.push(block);
+               }
+             });
+
+             for (let i = 0; i < allNodes.length - 1; i++) {
+               const el = allNodes[i];
+               let isTitle = false;
+               
+               if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
+               else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
+                  const text = el.innerText.trim();
+                  const isNumbered = /^\\d+(\\.\\d+)*[\\.\\s\\)]/.test(text);
+                  const isBold = el.querySelector('strong, b') || (el.style && parseInt(el.style.fontWeight) > 600) || el.tagName === 'STRONG';
+                  const isShort = text.length < 150;
+                  if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
+                    isTitle = true;
+                  }
+               }
+
+               if (isTitle) {
+                 const nodesToWrap = [el];
+                 let j = i + 1;
+                 while (j < allNodes.length && nodesToWrap.length < 3) {
+                   const next = allNodes[j];
+                   if (next.matches('h1, h2, h3, h4, h5, h6')) break;
+                   nodesToWrap.push(next);
+                   j++;
+                 }
+
+                 if (nodesToWrap.length > 1) {
+                   const wrapper = document.createElement('div');
+                   wrapper.className = 'keep-together';
+                   el.parentNode.insertBefore(wrapper, el);
+                   nodesToWrap.forEach(node => wrapper.appendChild(node));
+                   i = j - 1;
+                 }
+               }
+             }
+           }
+           window.onload = function() { 
+             optimizePageBreaks();
+             setTimeout(() => { 
+                window.print(); 
+                if (window.matchMedia) {
+                    var mediaQueryList = window.matchMedia('print');
+                    mediaQueryList.addListener(function(mql) {
+                        if (!mql.matches) {
+                            // window.close(); // Optional: close after print
+                        }
+                    });
+                }
+             }, 1000); 
+           }
+        </script>
+      </body>
+      </html>`;
+    printWindow.document.write(html);
+    printWindow.document.close();
   };
 
 
@@ -815,13 +901,6 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           </div>
         </div>
       )}
-      <ReportPreview
-        isOpen={showPreview}
-        onClose={() => setShowPreview(false)}
-        title={previewContent.title}
-        htmlContent={previewContent.html}
-        filename={previewContent.filename}
-      />
     </div>
   );
 };
