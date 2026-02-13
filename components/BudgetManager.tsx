@@ -443,13 +443,16 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       worker.style.zIndex = '-9999';
       worker.className = 'pdf-capture-container';
 
-      // We only need the inner body content for local capture to avoid nested <html> tags
+      // Inject FULL HTML to preserve <style> tags and Tailwind logic
+      // In a <div>, the browser expects <body> content, but we need the <style> from <head>
+      const styleMatch = html.match(/<style[^>]*>([\s\S]*)<\/style>/i);
+      const styleContent = styleMatch ? styleMatch[0] : '';
       const bodyContent = html.match(/<body[^>]*>([\s\S]*)<\/body>/i)?.[1] || html;
-      worker.innerHTML = bodyContent;
+
+      worker.innerHTML = styleContent + bodyContent;
       document.body.appendChild(worker);
 
-      // Give browser time to settle the layout
-      setTimeout(() => {
+      const runCapture = () => {
         // Run optimization directly on the local worker content
         const descriptionRoot = worker.querySelector('.print-description-content .space-y-6');
         if (descriptionRoot) {
@@ -501,13 +504,12 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         const opt = {
           margin: [25, 0, 25, 0],
           filename: `Orçamento - ${budget.id} - ${budget.description || 'Proposta'}.pdf`,
-          image: { type: 'jpeg', quality: 1 },
+          image: { type: 'jpeg', quality: 0.98 },
           html2canvas: {
-            scale: 2,
+            scale: 3,
             useCORS: true,
             letterRendering: true,
-            backgroundColor: '#ffffff',
-            logging: true // Enabled for debugging
+            backgroundColor: '#ffffff'
           },
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
           pagebreak: { mode: ['css', 'legacy'], avoid: '.keep-together' }
@@ -529,7 +531,21 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           notify("Erro ao gerar PDF.", "error");
           if (document.body.contains(worker)) document.body.removeChild(worker);
         });
-      }, 1000); // 1s delay for maximum stability
+      };
+
+      // Wait for all images to load
+      const images = Array.from(worker.querySelectorAll('img'));
+      const imagePromises = images.map(img => {
+        if (img.complete) return Promise.resolve();
+        return new Promise(resolve => {
+          img.onload = resolve;
+          img.onerror = resolve;
+        });
+      });
+
+      Promise.all(imagePromises).finally(() => {
+        setTimeout(runCapture, 1000); // Buffer for Tailwind layout
+      });
     } else {
       const printWindow = window.open('', '_blank');
       if (printWindow) {

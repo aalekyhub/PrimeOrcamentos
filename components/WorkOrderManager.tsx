@@ -358,12 +358,14 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         worker.style.zIndex = '-9999';
         worker.className = 'pdf-capture-container';
 
+        const styleMatch = html.match(/<style[^>]*>([\s\S]*)<\/style>/i);
+        const styleContent = styleMatch ? styleMatch[0] : '';
         const bodyContent = html.match(/<body[^>]*>([\s\S]*)<\/body>/i)?.[1] || html;
-        worker.innerHTML = bodyContent;
+
+        worker.innerHTML = styleContent + bodyContent;
         document.body.appendChild(worker);
 
-        // Wait for styles and layout to stabilize
-        setTimeout(() => {
+        const runCapture = () => {
             // Apply optimizations manually (scripts in innerHTML don't run)
             const root = worker.querySelector('.print-description-content .space-y-6');
             if (root) {
@@ -420,13 +422,12 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             const opt = {
                 margin: [25, 0, 25, 0],
                 filename: `Contrato - ${order.id.replace('OS-', 'OS')} - ${order.description || 'Proposta'}.pdf`,
-                image: { type: 'jpeg', quality: 1 },
+                image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: {
-                    scale: 2,
+                    scale: 3,
                     useCORS: true,
                     letterRendering: true,
-                    backgroundColor: '#ffffff',
-                    logging: true
+                    backgroundColor: '#ffffff'
                 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
                 pagebreak: { mode: ['css', 'legacy'], avoid: '.keep-together' }
@@ -448,7 +449,21 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                 notify("Erro ao gerar PDF.", "error");
                 if (document.body.contains(worker)) document.body.removeChild(worker);
             });
-        }, 1000); // 1s delay for maximum stability
+        };
+
+        // Wait for all images to load
+        const images = Array.from(worker.querySelectorAll('img'));
+        const imagePromises = images.map(img => {
+            if (img.complete) return Promise.resolve();
+            return new Promise(resolve => {
+                img.onload = resolve;
+                img.onerror = resolve;
+            });
+        });
+
+        Promise.all(imagePromises).finally(() => {
+            setTimeout(runCapture, 1000); // 1s delay for maximum stability
+        });
     };
 
     const handlePrintContract = (order: ServiceOrder) => {
