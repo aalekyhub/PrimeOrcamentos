@@ -511,7 +511,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         if (!currentWork) return '';
 
         // Helper to format currency
-        const formatCurrency = (val: number) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const formatCurrency = (val: number | undefined | null) => (val || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
         // Calculate totals
         const totalServices = services.reduce((acc, s) => acc + s.total_cost, 0);
