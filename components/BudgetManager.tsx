@@ -427,6 +427,54 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     printWindow.document.close();
   };
 
+  const handleGeneratePDF = async (budget: ServiceOrder) => {
+    try {
+      notify("Gerando PDF...");
+      const htmlContent = getBudgetHtml(budget);
+      const container = document.createElement('div');
+      container.style.position = 'fixed';
+      container.style.left = '-9999px';
+      container.style.top = '0';
+      container.style.width = '210mm';
+
+      const head = `
+        <style>
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap');
+          * { box-sizing: border-box; }
+          body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background: white; }
+          .a4-container { width: 210mm; background: white; padding: 15mm; }
+          .avoid-break { break-inside: avoid; }
+          .keep-together { break-inside: avoid !important; display: block !important; width: 100% !important; }
+          table { width: 100%; border-collapse: collapse; }
+          tr { break-inside: avoid; }
+          .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
+          .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
+          .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
+          .ql-editor-print strong, .ql-editor-print b { font-weight: bold !important; color: #000 !important; }
+          .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4 { font-weight: 800 !important; color: #0f172a !important; margin-top: 20px !important; margin-bottom: 10px !important; }
+        </style>
+      `;
+
+      container.innerHTML = `<div>${head}${htmlContent}</div>`;
+      document.body.appendChild(container);
+
+      const options = {
+        margin: 0,
+        filename: `${budget.id}_${budget.customerName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`,
+        image: { type: 'jpeg' as const, quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+        jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
+      };
+
+      await html2pdf().from(container).set(options).save();
+      document.body.removeChild(container);
+      notify("PDF baixado com sucesso!");
+    } catch (err) {
+      console.error("PDF Error:", err);
+      notify("Erro ao gerar PDF", "error");
+    }
+  };
+
 
   const handleSave = async () => {
     if (isSaving) return;
@@ -611,6 +659,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                   <button onClick={() => loadBudgetToForm(budget, true)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Duplicar"><Copy className="w-4 h-4" /></button>
                   <button onClick={() => loadBudgetToForm(budget)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Editar"><Pencil className="w-4 h-4" /></button>
                   <button onClick={() => handlePrint(budget)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Imprimir"><Printer className="w-4 h-4" /></button>
+                  <button onClick={() => handleGeneratePDF(budget)} className="p-2 text-slate-400 hover:text-rose-600 transition-colors" title="Baixar PDF"><FileDown className="w-4 h-4" /></button>
                   <button onClick={async () => {
                     if (confirm("Deseja excluir este orçamento? Esta ação tamb├®m removerá os dados da nuvem.")) {
                       const idToDelete = budget.id;
@@ -850,6 +899,19 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                       dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
                     })} className="bg-slate-800 hover:bg-slate-700 text-white p-4 rounded-xl font-black uppercase text-[8px] flex flex-col items-center gap-1 transition-all border border-slate-700 group">
                       <Printer className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" /> IMPRIMIR
+                    </button>
+                    <button onClick={() => handleGeneratePDF({
+                      customerId: selectedCustomerId,
+                      customerName: customers.find(c => c.id === selectedCustomerId)?.name || 'N/A',
+                      customerEmail: customers.find(c => c.id === selectedCustomerId)?.email || '',
+                      items, totalAmount, description: proposalTitle, descriptionBlocks, paymentTerms, deliveryTime,
+                      id: editingBudgetId || 'ORC-XXXX',
+                      status: OrderStatus.PENDING,
+                      taxRate, bdiRate,
+                      createdAt: new Date().toISOString(),
+                      dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+                    })} className="bg-slate-800 hover:bg-slate-700 text-white p-4 rounded-xl font-black uppercase text-[8px] flex flex-col items-center gap-1 transition-all border border-slate-700 group">
+                      <FileDown className="w-4 h-4 text-rose-400 group-hover:scale-110 transition-transform" /> BAIXAR PDF
                     </button>
                     <button onClick={handleSave} className="col-span-2 bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[11px] shadow-xl transition-all flex items-center justify-center gap-2">
                       <Save className="w-5 h-5" /> REGISTRAR
