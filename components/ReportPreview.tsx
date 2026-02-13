@@ -256,19 +256,12 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                 </div>
 
                 {/* Footer Controls */}
-                <div className="px-6 py-4 border-t border-slate-100 bg-white flex justify-end gap-3 z-10 no-print">
+                <div className="px-6 py-4 border-t border-slate-100 bg-white flex justify-end z-10 no-print">
                     <button
                         onClick={onClose}
                         className="px-6 py-2 text-slate-600 font-bold hover:bg-slate-100 rounded-lg transition-all"
                     >
                         FECHAR
-                    </button>
-                    <button
-                        onClick={handlePrint}
-                        className="flex items-center gap-2 px-8 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all font-bold shadow-md hover:shadow-lg active:scale-95"
-                    >
-                        <Printer size={18} />
-                        IMPRIMIR
                     </button>
                 </div>
             </div>
