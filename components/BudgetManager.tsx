@@ -314,6 +314,61 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
   };
 
 
+  const runOptimizePageBreaks = (container: HTMLElement) => {
+    const root = container.querySelector('.print-description-content');
+    if (!root) return;
+    const content = root.querySelector('div:last-child');
+    if (!content) return;
+
+    const allNodes: Element[] = [];
+    Array.from(content.children).forEach(block => {
+      if (block.classList.contains('ql-editor-print')) {
+        allNodes.push(...Array.from(block.children));
+      } else {
+        allNodes.push(block);
+      }
+    });
+
+    for (let i = 0; i < allNodes.length - 1; i++) {
+      const el = allNodes[i] as HTMLElement;
+      let isTitle = false;
+
+      if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
+      else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
+        const text = el.innerText.trim();
+        const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text.replace(/\\/g, ''));
+        const isBold = el.querySelector('strong, b') || (el.style && parseInt(el.style.fontWeight) > 600) || el.tagName === 'STRONG';
+        const isShort = text.length < 150;
+        if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
+          isTitle = true;
+        }
+      }
+
+      if (isTitle) {
+        const nodesToWrap = [el];
+        let j = i + 1;
+        while (j < allNodes.length && nodesToWrap.length < 3) {
+          const next = allNodes[j] as HTMLElement;
+          if (next.matches('h1, h2, h3, h4, h5, h6')) break;
+          nodesToWrap.push(next);
+          j++;
+        }
+
+        if (nodesToWrap.length > 1) {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'keep-together';
+          wrapper.style.breakInside = 'avoid';
+          wrapper.style.pageBreakInside = 'avoid';
+          wrapper.style.display = 'block';
+          wrapper.style.width = '100%';
+          el.parentNode?.insertBefore(wrapper, el);
+          nodesToWrap.forEach(node => wrapper.appendChild(node));
+          i = j - 1;
+        }
+      }
+    }
+  };
+
   const handlePrint = (budget: ServiceOrder) => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
@@ -370,7 +425,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
            function optimizePageBreaks() {
              const root = document.querySelector('.print-description-content');
              if (!root) return;
-             const content = root.querySelector('div');
+             const content = root.querySelector('div:last-child');
              if (!content) return;
 
              const allNodes = [];
@@ -527,6 +582,9 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       `;
 
       document.body.appendChild(container);
+
+      // Otimizar quebras de página antes de capturar
+      runOptimizePageBreaks(container);
 
       // 3) Pegue o elemento REAL que será capturado (não o container pai)
       const elementToPrint = container.querySelector(".pdf-page") as HTMLElement;
