@@ -301,10 +301,10 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
 
         return `
             <table style="width: 100%; border-collapse: collapse;">
-                <thead>
+                <tbody>
                     <tr>
                         <td style="padding: 0;">
-                            <div class="a4-container" style="padding-bottom: 20px !important; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px;">
+                           <div class="a4-container" style="padding-bottom: 20px !important; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px;">
                                 <div style="display: flex; justify-content: space-between; align-items: start;">
                                     <div>
                                         <h1 style="margin: 0; color: #1e40af; font-size: 26px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.025em;">Planejamento Executivo de Obra</h1>
@@ -316,12 +316,6 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                     </div>
                                 </div>
                             </div>
-                        </td>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td style="padding: 0;">
                             <div class="a4-container">
                                 <!-- INFO GRID -->
                                 <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
