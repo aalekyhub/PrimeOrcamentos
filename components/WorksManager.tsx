@@ -532,6 +532,22 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                     </div>
                 </div>
 
+                <!-- DADOS DA OBRA -->
+                <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 32px; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                    <div style="flex: 1; min-width: 45%;">
+                        <p style="margin: 0 0 5px 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Cliente</p>
+                        <p style="margin: 0; font-size: 14px; color: #0f172a; font-weight: 600;">${customers.find(c => c.id === currentWork.client_id)?.name || 'Não Informado'}</p>
+                    </div>
+                    <div style="flex: 1; min-width: 45%;">
+                        <p style="margin: 0 0 5px 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Status</p>
+                        <p style="margin: 0; font-size: 14px; color: #0f172a; font-weight: 600;">${currentWork.status}</p>
+                    </div>
+                    <div style="width: 100%;">
+                        <p style="margin: 0 0 5px 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Endereço da Obra</p>
+                        <p style="margin: 0; font-size: 14px; color: #0f172a; font-weight: 600;">${currentWork.address || 'Não Informado'}</p>
+                    </div>
+                </div>
+
                 <!-- OVERVIEW CARDS -->
                 <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px;">
                     <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0;">
