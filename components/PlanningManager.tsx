@@ -741,7 +741,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                 </div>
                             </div>
                             <div className="flex gap-2">
-                                <button onClick={handleSave} className="px-4 py-2 bg-slate-800 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-slate-900 shadow-md">
+                                <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-blue-700 shadow-md">
                                     <Save size={16} /> Salvar
                                 </button>
                             </div>
@@ -840,8 +840,8 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                             key={r.id}
                                             type="button"
                                             onClick={() => setResourceTab(r.id as any)}
-                                            className={`px - 4 py - 1.5 rounded - full text - [10px] font - bold transition - all uppercase tracking - wider ${resourceTab === r.id ? 'bg-slate-800 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-100'
-                                                } `}
+                                            className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all uppercase tracking-wider ${resourceTab === r.id ? 'bg-blue-600 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-500 hover:bg-blue-50'
+                                                }`}
                                         >
                                             {r.label}
                                         </button>
