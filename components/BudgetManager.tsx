@@ -13,6 +13,7 @@ import CustomerManager from './CustomerManager';
 import ServiceCatalog from './ServiceCatalog';
 import { db } from '../services/db';
 import { compressImage } from '../services/imageUtils';
+import ReportPreview from './ReportPreview';
 
 interface Props {
   orders: ServiceOrder[];
@@ -52,6 +53,10 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
   const [importSearch, setImportSearch] = useState('');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedCatalogId, setSelectedCatalogId] = useState('');
+
+  // Preview State
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewContent, setPreviewContent] = useState({ title: '', html: '', filename: '' });
 
   const budgets = useMemo(() => orders.filter(o =>
     (o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED) && (o.customerName.toLowerCase().includes(searchTerm.toLowerCase()) || o.id.includes(searchTerm))
@@ -114,9 +119,8 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     }
   };
 
-  const handlePrintPDF = (budget: ServiceOrder, mode: 'print' | 'pdf' = 'print') => {
+  const getBudgetHtml = (budget: ServiceOrder) => {
     const customer = customers.find(c => c.id === budget.customerId) || { name: budget.customerName, address: 'Não informado', document: 'Documento não informado' };
-    // window.open moved to the end to support PDF mode without popup
 
     const formatDate = (dateStr: string) => {
       try {
@@ -133,12 +137,11 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
     const subTotal = budget.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0);
 
-    // Logic: BDI first, then Tax on (Subtotal + BDI)
     const bdiR = budget.bdiRate || 0;
     const taxR = budget.taxRate || 0;
 
     const bdiValue = subTotal * (bdiR / 100);
-    const subTotalWithBDI = subTotal + bdiValue; // Accumulated base for tax
+    const subTotalWithBDI = subTotal + bdiValue;
     const taxValue = subTotalWithBDI * (taxR / 100);
 
     const finalTotal = subTotalWithBDI + taxValue;
@@ -152,145 +155,57 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         <td style="padding: 12px 0 12px 10px; text-align: right; font-weight: 500; font-size: ${itemFontBase + 1}px; color: #0f172a; width: 15%;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
       </tr>`).join('');
 
-    const html = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Orçamento - ${budget.id}</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&family=Roboto:wght@400;700&family=Montserrat:wght@400;700&family=Open+Sans:wght@400;700&family=Lato:wght@400;700&family=Poppins:wght@400;700&family=Oswald:wght@400;700&family=Playfair+Display:wght@400;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
-        <style>
-           * { box-sizing: border-box; }
-           body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
-           @page { size: A4; margin: 0 !important; }
-           .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
-            .avoid-break { break-inside: avoid; page-break-inside: avoid; }
-            .break-after-avoid { break-after: avoid !important; page-break-after: avoid !important; }
-             .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
-           
-           /* Premium Box Styles */
-           .info-box { background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
-           .info-label { font-size: ${Math.max(10, (company.descriptionFontSize || 12))}px; font-weight: 600; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block; }
-           .info-value { font-size: 11px; font-weight: 700; color: #0f172a; text-transform: uppercase; line-height: 1.4; }
-           .info-sub { font-size: 10px; color: #475569; font-weight: 500; }
-           
-           .section-title { font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; margin-bottom: 16px; }
- 
-           @media screen { body { background: #f1f5f9; padding: 40px 0; } .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; } }
-           @media print { 
-             body { background: white !important; margin: 0 !important; } 
-             .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; width: 100% !important; padding-left: 15mm !important; padding-right: 15mm !important; } 
-             .no-screen { display: block !important; }
-             .no-print { display: none !important; }
-             .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: white !important; text-transform: uppercase; }
-              .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
-             
-              /* Prevent widowed headings */
-              .ql-editor-print p { orphans: 3; widows: 3; }
-            }
-
-            /* Shared Rich Text / Quill Styles for all media (Treated specially by PDF engine) */
-            .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; display: block !important; }
-            .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; display: block !important; }
-            .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; list-style-position: outside !important; }
-            .ql-editor-print strong, .ql-editor-print b { font-weight: bold !important; color: #000 !important; }
-            .ql-editor-print em { font-style: italic !important; }
-            .ql-editor-print .ql-align-center { text-align: center !important; }
-            .ql-editor-print .ql-align-right { text-align: right !important; }
-            .ql-editor-print .ql-align-justify { text-align: justify !important; }
-            
-            .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4, .ql-editor-print h5, .ql-editor-print h6 { 
-              break-after: avoid-page !important; 
-              page-break-after: avoid !important; 
-              font-weight: 800 !important;
-              color: #0f172a !important;
-              margin-top: 24px !important;
-              margin-bottom: 8px !important;
-            }
-            .ql-editor-print h1 { font-size: 22px !important; }
-            .ql-editor-print h2 { font-size: 19px !important; }
-            .ql-editor-print h3 { font-size: 17px !important; }
-            .ql-editor-print h4 { font-size: 14px !important; }
-
-              /* Font Classes for Print */
-              .ql-font-inter { font-family: 'Inter', sans-serif !important; }
-              .ql-font-arial { font-family: Arial, sans-serif !important; }
-              .ql-font-roboto { font-family: 'Roboto', sans-serif !important; }
-              .ql-font-serif { font-family: serif !important; }
-              .ql-font-monospace { font-family: monospace !important; }
-              .ql-font-montserrat { font-family: 'Montserrat', sans-serif !important; }
-              .ql-font-opensans { font-family: 'Open Sans', sans-serif !important; }
-              .ql-font-lato { font-family: 'Lato', sans-serif !important; }
-              .ql-font-poppins { font-family: 'Poppins', sans-serif !important; }
-              .ql-font-oswald { font-family: 'Oswald', sans-serif !important; }
-              .ql-font-playfair { font-family: 'Playfair Display', serif !important; }
-              .ql-font-nunito { font-family: 'Nunito', sans-serif !important; }
-
-              /* Size Classes for Print */
-              .ql-size-10px { font-size: 10px !important; }
-              .ql-size-12px { font-size: 12px !important; }
-              .ql-size-14px { font-size: 14px !important; }
-              .ql-size-16px { font-size: 16px !important; }
-              .ql-size-18px { font-size: 18px !important; }
-              .ql-size-20px { font-size: 20px !important; }
-              .ql-size-24px { font-size: 24px !important; }
-              .ql-size-32px { font-size: 32px !important; }
-            }
-        </style>
-      </head>
-      <body class="no-scrollbar">
-        <table style="width: 100%;">
-          <thead><tr><td style="height: ${company.printMarginTop || 15}mm;"><div style="height: ${company.printMarginTop || 15}mm; display: block;">&nbsp;</div></td></tr></thead>
-          <tbody><tr><td>
-            <div class="a4-container">
+    return `
+      <div class="a4-container">
                <!-- Header -->
-               <div class="flex justify-between items-start mb-6 border-b-2 border-slate-900 pb-4">
-                   <div class="flex gap-6 items-center">
+               <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; border-bottom: 2px solid #0f172a; padding-bottom: 16px;">
+                   <div style="display: flex; gap: 24px; align-items: center;">
                        <div style="width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;">
                            ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:700; font-size:30px; color:#2563eb;">PO</div>'}
                        </div>
                        <div>
-                           <h1 style="font-size: ${company.nameFontSize || 24}px;" class="font-bold text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
-                           <p class="text-[9px] font-bold text-blue-600 uppercase tracking-widest leading-none">Soluções em Gestão Profissional</p>
-                            <p class="text-[8px] text-slate-600 font-medium uppercase tracking-tight mt-1">${company.cnpj || ''}</p>
-                            <p class="text-[8px] text-slate-600 font-medium uppercase tracking-tight">${company.phone || ''}</p>
+                           <h1 style="font-size: ${company.nameFontSize || 24}px; font-weight: bold; color: #0f172a; line-height: 1; margin: 0 0 4px 0; text-transform: uppercase; letter-spacing: -0.025em;">${company.name}</h1>
+                           <p style="margin: 0; font-size: 9px; font-weight: bold; color: #2563eb; text-transform: uppercase; letter-spacing: 0.1em;">Soluções em Gestão Profissional</p>
+                            <p style="margin: 4px 0 0 0; font-size: 8px; color: #475569; font-weight: 500; text-transform: uppercase;">${company.cnpj || ''}</p>
+                            <p style="margin: 0; font-size: 8px; color: #475569; font-weight: 500; text-transform: uppercase;">${company.phone || ''}</p>
                        </div>
                    </div>
-                   <div class="text-right">
-                       <p class="text-2xl font-bold text-blue-600 tracking-tighter mb-1">${budget.id}</p>
-                       <p class="text-[8px] font-semibold text-slate-600 uppercase tracking-widest text-right">EMISSÃO: ${emissionDate} <br> VALIDADE: ${validityDate}</p>
+                   <div style="text-align: right;">
+                       <p style="margin: 0; font-size: 24px; font-weight: bold; color: #2563eb; letter-spacing: -0.05em;">${budget.id}</p>
+                       <p style="margin: 4px 0 0 0; font-size: 8px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.1em; line-height: 1.4;">EMISSÃO: ${emissionDate} <br> VALIDADE: ${validityDate}</p>
                    </div>
                </div>
 
                <!-- Boxes Grid -->
-               <div class="grid grid-cols-2 gap-6 mb-6">
-                   <div class="info-box">
-                       <span class="info-label">Cliente / Destinatário</span>
-                       <div class="info-value">${customer.name}</div>
-                       <div class="info-sub mt-1">${customer.document || 'CPF/CNPJ não informado'}</div>
+               <div style="display: flex; gap: 24px; margin-bottom: 24px;">
+                   <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0;">
+                       <span style="font-size: ${Math.max(10, (company.descriptionFontSize || 12))}px; font-weight: 600; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">Cliente / Destinatário</span>
+                       <div style="font-size: 11px; font-weight: 700; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${customer.name}</div>
+                       <div style="font-size: 10px; color: #475569; font-weight: 500; margin-top: 4px;">${customer.document || 'CPF/CNPJ não informado'}</div>
                    </div>
-                   <div class="info-box">
-                       <span class="info-label">Referência do Orçamento</span>
-                       <div class="info-value">${budget.description || 'Proposta de Prestação de Serviços'}</div>
+                   <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0;">
+                       <span style="font-size: ${Math.max(10, (company.descriptionFontSize || 12))}px; font-weight: 600; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">Referência do Orçamento</span>
+                       <div style="font-size: 11px; font-weight: 700; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${budget.description || 'Proposta de Prestação de Serviços'}</div>
                    </div>
                </div>
 
-               <!-- Description Blocks (Optional) -->
-               <div class="mb-4">
-                    <h2 class="text-sm font-bold text-slate-900 tracking-tight uppercase leading-none mb-0.5">Proposta Comercial</h2>
-                    <p class="text-xl font-bold text-blue-600 uppercase leading-none tracking-tight">${budget.description}</p>
+               <!-- Description Blocks -->
+               <div style="margin-bottom: 16px;">
+                    <h2 style="margin: 0; font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.1em;">Proposta Comercial</h2>
+                    <p style="margin: 2px 0 0 0; font-size: 20px; font-weight: bold; color: #2563eb; text-transform: uppercase; letter-spacing: -0.025em;">${budget.description}</p>
                </div>
+               
                ${budget.descriptionBlocks && budget.descriptionBlocks.length > 0 ? `
-                <div class="mb-10 print-description-content">
-                  <div class="section-title">DESCRIÇÃO DOS SERVIÇOS</div>
-                  <div class="space-y-6">
+                <div style="margin-bottom: 40px;" class="print-description-content">
+                  <div style="font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; margin-bottom: 16px;">DESCRIÇÃO DOS SERVIÇOS</div>
+                  <div style="display: flex; flex-direction: column; gap: 24px;">
                     ${budget.descriptionBlocks.map(block => {
       if (block.type === 'text') {
-        return `<div class="text-slate-700 leading-relaxed text-justify ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px;">${block.content}</div>`;
+        return `<div class="ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px; color: #334155; line-height: 1.6; text-align: justify;">${block.content}</div>`;
       } else if (block.type === 'image') {
-        return `<div class="avoid-break" style="margin: 20px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; border: 1px solid #e2e8f0; display: block; object-fit: contain;"></div>`;
+        return `<div style="margin: 20px 0; break-inside: avoid;"><img src="${block.content}" style="width: 100%; border-radius: 12px; border: 1px solid #e2e8f0; display: block; object-fit: contain;"></div>`;
       } else if (block.type === 'page-break') {
-        return `<div style="page-break-after: always; break-after: page; height: 0; margin: 0; padding: 0;"></div>`;
+        return `<div style="page-break-after: always; break-after: page; height: 0;"></div>`;
       }
       return '';
     }).join('')}
@@ -298,256 +213,105 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                 </div>` : ''}
 
                 <!-- Items Table -->
-                 <div class="mb-8 avoid-break">
-                     <div class="section-title">Detalhamento Financeiro</div>
+                 <div style="margin-bottom: 32px; break-inside: avoid;">
+                     <div style="font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; margin-bottom: 16px;">Detalhamento Financeiro</div>
                      <table style="width: 100%; border-collapse: collapse;">
                         <thead>
                             <tr style="border-bottom: 2px solid #0f172a;">
-                                <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: left; font-weight: 700; letter-spacing: 0.05em; width: 60%;">Item / Descrição</th>
-                                <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: center; font-weight: 700; letter-spacing: 0.05em; width: 10%;">Qtd</th>
-                                <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: right; font-weight: 700; letter-spacing: 0.05em; width: 15%;">Unitário</th>
-                                <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: right; font-weight: 700; letter-spacing: 0.05em; width: 15%;">Subtotal</th>
+                                <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: left; font-weight: 700; width: 60%;">Item / Descrição</th>
+                                <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: center; font-weight: 700; width: 10%;">Qtd</th>
+                                <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: right; font-weight: 700; width: 15%;">Unitário</th>
+                                <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: right; font-weight: 700; width: 15%;">Subtotal</th>
                             </tr>
                         </thead>
                         <tbody>${itemsHtml}</tbody>
                     </table>
                 </div>
 
-               <!-- Total Bar (Dark) -->
-               <div class="avoid-break mb-6">
-                   <!-- Breakdown above bar -->
-                   <div class="flex justify-end mb-2 gap-6 px-2">
-                        <div class="text-right">
-                           <span class="text-[8px] font-semibold text-slate-600 uppercase block">Subtotal</span>
-                           <span class="text-[10px] font-bold text-slate-700 block">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+               <!-- Total Bar -->
+               <div style="margin-bottom: 24px; break-inside: avoid;">
+                    <div style="display: flex; justify-content: flex-end; margin-bottom: 8px; gap: 24px; padding-right: 8px;">
+                        <div style="text-align: right;">
+                           <span style="font-size: 8px; font-weight: 600; color: #64748b; text-transform: uppercase; display: block;">Subtotal</span>
+                           <span style="font-size: 10px; font-weight: 700; color: #334155; display: block;">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                         </div>
                         ${bdiR > 0 ? `
-                        <div class="text-right">
-                           <span class="text-[8px] font-semibold text-slate-600 uppercase block">BDI (${bdiR}%)</span>
-                           <span class="text-[10px] font-bold text-emerald-600 block">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                        <div style="text-align: right;">
+                           <span style="font-size: 8px; font-weight: 600; color: #64748b; text-transform: uppercase; display: block;">BDI (${bdiR}%)</span>
+                           <span style="font-size: 10px; font-weight: 700; color: #059669; display: block;">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                         </div>` : ''}
                         ${taxR > 0 ? `
-                        <div class="text-right">
-                           <span class="text-[8px] font-semibold text-slate-600 uppercase block">Impostos (${taxR}%)</span>
-                           <span class="text-[10px] font-bold text-blue-600 block">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                        <div style="text-align: right;">
+                           <span style="font-size: 8px; font-weight: 600; color: #64748b; text-transform: uppercase; display: block;">Impostos (${taxR}%)</span>
+                           <span style="font-size: 10px; font-weight: 700; color: #2563eb; display: block;">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                         </div>` : ''}
-                   </div>
-                   <div class="bg-slate-900 text-white py-3 px-6 rounded-xl flex justify-between items-center shadow-xl">
-                       <span class="text-[12px] font-bold uppercase tracking-widest">Investimento Total:</span>
-                       <span class="text-3xl font-bold text-white tracking-tighter text-right">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                   </div>
+                    </div>
+                    <div style="background: #0f172a; color: white; padding: 16px 24px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em;">Investimento Total:</span>
+                        <span style="font-size: 28px; font-weight: bold; letter-spacing: -0.05em;">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                    </div>
                </div>
 
                <!-- Terms & Payment -->
-               <div class="avoid-break mb-6">
-                   <div class="grid grid-cols-2 gap-6">
-                       <div class="info-box">
-                           <span class="info-label">Forma de Pagamento</span>
-                           <p style="font-size: ${company.descriptionFontSize || 12}px;" class="font-medium text-slate-700 leading-relaxed mt-2">${budget.paymentTerms || 'A combinar'}</p>
+               <div style="margin-bottom: 24px; break-inside: avoid;">
+                   <div style="display: flex; gap: 24px;">
+                       <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0;">
+                           <span style="font-size: 10px; font-weight: 600; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">Forma de Pagamento</span>
+                           <p style="margin: 8px 0 0 0; font-size: ${company.descriptionFontSize || 12}px; font-weight: 500; color: #334155; line-height: 1.5;">${budget.paymentTerms || 'A combinar'}</p>
                        </div>
-                       <div class="info-box">
-                           <span class="info-label">Prazo de Entrega / Execução</span>
-                           <p style="font-size: ${company.descriptionFontSize || 12}px;" class="font-medium text-slate-700 leading-relaxed mt-2">${budget.deliveryTime || 'A combinar'}</p>
+                       <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0;">
+                           <span style="font-size: 10px; font-weight: 600; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">Prazo de Entrega / Execução</span>
+                           <p style="margin: 8px 0 0 0; font-size: ${company.descriptionFontSize || 12}px; font-weight: 500; color: #334155; line-height: 1.5;">${budget.deliveryTime || 'A combinar'}</p>
                        </div>
                    </div>
                </div>
 
                <!-- Acceptance Box -->
-               <div class="avoid-break mb-6">
-                   <div class="border border-blue-100 bg-blue-50/50 rounded-2xl p-6">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="bg-blue-600 rounded-full p-1"><svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>
-                            <span style="font-size: 14px;" class="font-bold text-blue-700 uppercase tracking-widest">Termo de Aceite e Autorização Profissional</span>
+               <div style="margin-bottom: 24px; break-inside: avoid;">
+                   <div style="border: 1px solid #dbeafe; background: #eff6ff; border-radius: 16px; padding: 24px;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                            <div style="background: #2563eb; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; font-weight: bold;">✓</div>
+                            <span style="font-size: 14px; font-weight: bold; color: #1e40af; text-transform: uppercase; letter-spacing: 0.1em;">Termo de Aceite e Autorização Profissional</span>
                         </div>
-                        <p style="font-size: ${Math.max(13, (company.descriptionFontSize || 14) - 1)}px;" class="text-slate-700 leading-relaxed text-justify italic">
+                        <p style="margin: 0; font-size: ${Math.max(13, (company.descriptionFontSize || 14) - 1)}px; color: #1e3a8a; line-height: 1.6; text-align: justify; font-style: italic;">
                             "Este documento constitui uma proposta comercial formal. Ao assinar abaixo, o cliente declara estar ciente e de pleno acordo com os valores, prazos e especificações técnicas descritas. Esta aceitação autoriza o início imediato dos trabalhos sob as condições estabelecidas. A contratada reserva-se o direito de renegociar valores caso a aprovação ocorra após o prazo de validade de ${validityDays} dias. Eventuais alterações de escopo solicitadas após o aceite estarão sujeitas a nova análise de custos."
                         </p>
                    </div>
                </div>
 
                <!-- Signature Lines -->
-                <div style="margin-top: 120px !important;" class="avoid-break space-y-2">
+                <div style="margin-top: 80px; break-inside: avoid;">
                    <div style="border-bottom: 2px solid #cbd5e1; width: 40%;"></div>
-                   <p class="text-[11px] font-bold text-slate-600 uppercase tracking-widest mt-2">Assinatura do Cliente / Aceite</p>
+                   <p style="margin: 8px 0 0 0; font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em;">Assinatura do Cliente / Aceite</p>
                </div>
             </div>
-          </td></tr></tbody>
-          <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;"><div style="height: ${company.printMarginBottom || 15}mm; display: block;">&nbsp;</div></td></tr></tfoot>
-        </table>
-        <div class="print-footer no-screen"><span></span></div>
-        <script>
-           function optimizePageBreaks() {
-             const root = document.querySelector('.print-description-content');
-             if (!root) return;
-             const allNodes = [];
-             Array.from(root.children).forEach(block => {
-               if (block.classList.contains('ql-editor-print')) {
-                 allNodes.push(...Array.from(block.children));
-               } else {
-                 allNodes.push(block);
-               }
-             });
-
-             for (let i = 0; i < allNodes.length - 1; i++) {
-               const el = allNodes[i];
-               let isTitle = false;
-               
-               if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
-               else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
-                 const text = el.innerText.trim();
-                 const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text);
-                 const hasBoldStyle = el.querySelector('strong, b, [style*="font-weight: bold"], [style*="font-weight: 700"], [style*="font-weight: 800"], [style*="font-weight: 900"]');
-                 const isBold = hasBoldStyle || (el.style && parseInt(el.style.fontWeight) > 600) || el.tagName === 'STRONG';
-                 const isShort = text.length < 150;
-                 if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
-                   isTitle = true;
-                 }
-               }
-
-               if (isTitle) {
-                 const nodesToWrap = [el];
-                 let j = i + 1;
-                 while (j < allNodes.length && nodesToWrap.length < 3) {
-                   const next = allNodes[j];
-                   const nText = next.innerText.trim();
-                   const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(nText);
-                   if (next.matches('h1, h2, h3, h4, h5, h6') || (isNumbered && next.querySelector('strong, b'))) break;
-                   nodesToWrap.push(next);
-                   j++;
-                 }
-
-                 if (nodesToWrap.length > 1) {
-                   const wrapper = document.createElement('div');
-                   wrapper.className = 'keep-together';
-                   el.parentNode.insertBefore(wrapper, el);
-                   nodesToWrap.forEach(node => wrapper.appendChild(node));
-                   i = j - 1;
-                 }
-               }
-             }
-           }
-           window.onload = function() { 
-             optimizePageBreaks();
-                         setTimeout(() => { window.print(); window.close(); }, 2000); 
-           }
-        </script>
-      </body>
-      </html>`;
-    if (mode === 'pdf') {
-      const worker = document.createElement('div');
-      worker.style.position = 'absolute';
-      worker.style.left = '-10000px';
-      worker.style.top = '0';
-      worker.style.width = '210mm';
-      worker.style.background = 'white';
-      worker.style.zIndex = '1';
-      worker.style.opacity = '1';
-      worker.className = 'pdf-capture-container';
-
-      const styleMatch = html.match(/<style[^>]*>([\s\S]*)<\/style>/i);
-      const styleContent = styleMatch ? styleMatch[0] : '';
-      const bodyContent = html.match(/<body[^>]*>([\s\S]*)<\/body>/i)?.[1] || html;
-
-      worker.innerHTML = styleContent + bodyContent;
-      document.body.appendChild(worker);
-
-      const runCapture = () => {
-        const descriptionRoot = worker.querySelector('.print-description-content .space-y-6');
-        if (descriptionRoot) {
-          const allNodes: Element[] = [];
-          Array.from(descriptionRoot.children).forEach(block => {
-            if (block.classList.contains('ql-editor-print')) {
-              allNodes.push(...Array.from(block.children));
-            } else {
-              allNodes.push(block);
-            }
-          });
-
-          for (let i = 0; i < allNodes.length - 1; i++) {
-            const el = allNodes[i] as HTMLElement;
-            let isTitle = false;
-            if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
-            else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
-              const text = el.innerText.trim();
-              const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text);
-              const hasBoldStyle = el.querySelector('strong, b, [style*="font-weight: bold"], [style*="font-weight: 700"], [style*="font-weight: 800"], [style*="font-weight: 900"]');
-              const isBold = hasBoldStyle || (el.style && parseInt(el.style.fontWeight) > 600) || el.tagName === 'STRONG';
-              if ((isNumbered && isBold && text.length < 150) || (isBold && text.length < 150 && text === text.toUpperCase() && text.length > 4)) {
-                isTitle = true;
-              }
-            }
-
-            if (isTitle) {
-              const nodesToWrap = [el];
-              let j = i + 1;
-              while (j < allNodes.length && nodesToWrap.length < 3) {
-                const next = allNodes[j] as HTMLElement;
-                const nText = next.innerText.trim();
-                const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(nText);
-                if (next.matches('h1, h2, h3, h4, h5, h6') || (isNumbered && next.querySelector('strong, b'))) break;
-                nodesToWrap.push(next);
-                j++;
-              }
-              if (nodesToWrap.length > 1) {
-                const wrapper = document.createElement('div');
-                wrapper.className = 'keep-together';
-                el.parentNode?.insertBefore(wrapper, el);
-                nodesToWrap.forEach(node => wrapper.appendChild(node));
-                i = j - 1;
-              }
-            }
-          }
-        }
-
-        const opt = {
-          margin: [25, 0, 25, 0],
-          filename: `Orçamento - ${budget.id} - ${budget.description || 'Proposta'}.pdf`,
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: {
-            scale: 3,
-            useCORS: true,
-            letterRendering: true,
-            backgroundColor: '#ffffff',
-            scrollX: 0,
-            scrollY: 0,
-            windowWidth: 794,
-            windowHeight: worker.scrollHeight
-          },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-          pagebreak: { mode: ['css', 'legacy'], avoid: '.keep-together' }
-        };
-
-        // @ts-ignore
-        html2pdf().set(opt).from(worker).save().then(() => {
-          if (document.body.contains(worker)) document.body.removeChild(worker);
-        }).catch((err: any) => {
-          console.error("PDF Error:", err);
-          notify("Erro ao gerar PDF.", "error");
-          if (document.body.contains(worker)) document.body.removeChild(worker);
-        });
-      };
-
-      // Wait for all images to load
-      const images = Array.from(worker.querySelectorAll('img'));
-      const imagePromises = images.map(img => {
-        if (img.complete) return Promise.resolve();
-        return new Promise(resolve => {
-          img.onload = resolve;
-          img.onerror = resolve;
-        });
-      });
-
-      Promise.all(imagePromises).finally(() => {
-        setTimeout(runCapture, 2000); // 2s buffer for Tailwind layout
-      });
-    } else {
-      const printWindow = window.open('', '_blank');
-      if (printWindow) {
-        printWindow.document.write(html);
-        printWindow.document.close();
-      }
-    }
+    `;
   };
+
+  const handlePreviewPDF = (budget: ServiceOrder) => {
+    const html = getBudgetHtml(budget);
+    setPreviewContent({
+      title: 'Orçamento Prime',
+      html: html,
+      filename: `Orcamento_${budget.id}.pdf`
+    });
+    setShowPreview(true);
+  };
+
+  const handlePrintPDF = (budget: ServiceOrder, mode: 'print' | 'pdf' = 'print') => {
+    if (mode === 'pdf') {
+      handlePreviewPDF(budget);
+      return;
+    }
+
+    // For print, we still need the old window behavior or we can use preview as well. 
+    // Usually 'print' means browser print. 
+    // Let's keep the window.open for legacy print if needed, but the user wants visualizer.
+
+    // Actually, let's just make everything go through preview if it's better.
+    handlePreviewPDF(budget);
+  };
+
 
   const handleSave = async () => {
     if (isSaving) return;
@@ -1050,6 +814,14 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
             </div>
           </div>
         </div>
+      )}
+      {showPreview && (
+        <ReportPreview
+          title={previewContent.title}
+          html={previewContent.html}
+          filename={previewContent.filename}
+          onClose={() => setShowPreview(false)}
+        />
       )}
     </div>
   );
