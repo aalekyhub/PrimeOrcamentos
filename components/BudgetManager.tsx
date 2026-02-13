@@ -152,50 +152,59 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       </tr>`).join('');
 
     return `
-      <div class="a4-container">
-               <!-- Header -->
-               <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; border-bottom: 2px solid #0f172a; padding-bottom: 16px;">
-                   <div style="display: flex; gap: 24px; align-items: center;">
-                       <div style="width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;">
-                           ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:700; font-size:30px; color:#2563eb;">PO</div>'}
-                       </div>
-                       <div>
-                           <h1 style="font-size: ${company.nameFontSize || 24}px; font-weight: bold; color: #0f172a; line-height: 1; margin: 0 0 4px 0; text-transform: uppercase; letter-spacing: -0.025em;">${company.name}</h1>
-                           <p style="margin: 0; font-size: 9px; font-weight: bold; color: #2563eb; text-transform: uppercase; letter-spacing: 0.1em;">Soluções em Gestão Profissional</p>
-                            <p style="margin: 4px 0 0 0; font-size: 8px; color: #475569; font-weight: 500; text-transform: uppercase;">${company.cnpj || ''}</p>
-                            <p style="margin: 0; font-size: 8px; color: #475569; font-weight: 500; text-transform: uppercase;">${company.phone || ''}</p>
-                       </div>
-                   </div>
-                   <div style="text-align: right;">
-                       <p style="margin: 0; font-size: 24px; font-weight: bold; color: #2563eb; letter-spacing: -0.05em;">${budget.id}</p>
-                       <p style="margin: 4px 0 0 0; font-size: 8px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.1em; line-height: 1.4;">EMISSÃO: ${emissionDate} <br> VALIDADE: ${validityDate}</p>
-                   </div>
-               </div>
-
-               <!-- Boxes Grid -->
-               <div style="display: flex; gap: 24px; margin-bottom: 24px;">
-                   <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0;">
-                       <span style="font-size: ${Math.max(10, (company.descriptionFontSize || 12))}px; font-weight: 600; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">Cliente / Destinatário</span>
-                       <div style="font-size: 11px; font-weight: 700; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${customer.name}</div>
-                       <div style="font-size: 10px; color: #475569; font-weight: 500; margin-top: 4px;">${customer.document || 'CPF/CNPJ não informado'}</div>
-                   </div>
-                   <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0;">
-                       <span style="font-size: ${Math.max(10, (company.descriptionFontSize || 12))}px; font-weight: 600; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">Referência do Orçamento</span>
-                       <div style="font-size: 11px; font-weight: 700; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${budget.description || 'Proposta de Prestação de Serviços'}</div>
-                   </div>
-               </div>
-
-               <!-- Description Blocks -->
-               <div style="margin-bottom: 16px;">
-                    <h2 style="margin: 0; font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.1em;">Proposta Comercial</h2>
-                    <p style="margin: 2px 0 0 0; font-size: 20px; font-weight: bold; color: #2563eb; text-transform: uppercase; letter-spacing: -0.025em;">${budget.description}</p>
-               </div>
-               
-               ${budget.descriptionBlocks && budget.descriptionBlocks.length > 0 ? `
-                <div style="margin-bottom: 40px;" class="print-description-content">
-                  <div style="font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; margin-bottom: 16px;">DESCRIÇÃO DOS SERVIÇOS</div>
-                  <div style="display: flex; flex-direction: column; gap: 24px;">
-                    ${budget.descriptionBlocks.map(block => {
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr>
+            <td style="padding: 0;">
+              <div class="a4-container" style="padding-bottom: 20px !important; border-bottom: 2px solid #0f172a; margin-bottom: 20px;">
+                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                     <div style="display: flex; gap: 24px; align-items: center;">
+                         <div style="width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;">
+                             ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:700; font-size:30px; color:#2563eb;">PO</div>'}
+                         </div>
+                         <div>
+                             <h1 style="font-size: ${company.nameFontSize || 24}px; font-weight: bold; color: #0f172a; line-height: 1; margin: 0 0 4px 0; text-transform: uppercase; letter-spacing: -0.025em;">${company.name}</h1>
+                             <p style="margin: 0; font-size: 9px; font-weight: bold; color: #2563eb; text-transform: uppercase; letter-spacing: 0.1em;">Soluções em Gestão Profissional</p>
+                              <p style="margin: 4px 0 0 0; font-size: 8px; color: #475569; font-weight: 500; text-transform: uppercase;">${company.cnpj || ''} | ${company.phone || ''}</p>
+                         </div>
+                     </div>
+                     <div style="text-align: right;">
+                         <p style="margin: 0; font-size: 24px; font-weight: bold; color: #2563eb; letter-spacing: -0.05em;">${budget.id}</p>
+                         <p style="margin: 4px 0 0 0; font-size: 8px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.1em; line-height: 1.4;">EMISSÃO: ${emissionDate} <br> VALIDADE: ${validityDate}</p>
+                     </div>
+                 </div>
+              </div>
+            </td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding: 0;">
+              <div class="a4-container">
+                 <!-- Boxes Grid -->
+                 <div style="display: flex; gap: 24px; margin-bottom: 24px;">
+                     <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0;">
+                         <span style="font-size: ${Math.max(10, (company.descriptionFontSize || 12))}px; font-weight: 600; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">Cliente / Destinatário</span>
+                         <div style="font-size: 11px; font-weight: 700; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${customer.name}</div>
+                         <div style="font-size: 10px; color: #475569; font-weight: 500; margin-top: 4px;">${customer.document || 'CPF/CNPJ não informado'}</div>
+                     </div>
+                     <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0;">
+                         <span style="font-size: ${Math.max(10, (company.descriptionFontSize || 12))}px; font-weight: 600; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">Referência do Orçamento</span>
+                         <div style="font-size: 11px; font-weight: 700; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${budget.description || 'Proposta de Prestação de Serviços'}</div>
+                     </div>
+                 </div>
+  
+                 <!-- Description Blocks -->
+                 <div style="margin-bottom: 16px;">
+                      <h2 style="margin: 0; font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.1em;">Proposta Comercial</h2>
+                      <p style="margin: 2px 0 0 0; font-size: 20px; font-weight: bold; color: #2563eb; text-transform: uppercase; letter-spacing: -0.025em;">${budget.description}</p>
+                 </div>
+                 
+                 ${budget.descriptionBlocks && budget.descriptionBlocks.length > 0 ? `
+                  <div style="margin-bottom: 40px;" class="print-description-content">
+                    <div style="font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; margin-bottom: 16px;">DESCRIÇÃO DOS SERVIÇOS</div>
+                    <div style="display: flex; flex-direction: column; gap: 24px;">
+                      ${budget.descriptionBlocks.map(block => {
       if (block.type === 'text') {
         return `<div class="ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px; color: #334155; line-height: 1.6; text-align: justify;">${block.content}</div>`;
       } else if (block.type === 'image') {
@@ -205,82 +214,98 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       }
       return '';
     }).join('')}
+                    </div>
+                  </div>` : ''}
+  
+                  <!-- Items Table -->
+                   <div style="margin-bottom: 32px; break-inside: avoid;">
+                       <div style="font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; margin-bottom: 16px;">Detalhamento Financeiro</div>
+                       <table style="width: 100%; border-collapse: collapse;">
+                          <thead>
+                              <tr style="border-bottom: 2px solid #0f172a;">
+                                  <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: left; font-weight: 700; width: 60%;">Item / Descrição</th>
+                                  <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: center; font-weight: 700; width: 10%;">Qtd</th>
+                                  <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: right; font-weight: 700; width: 15%;">Unitário</th>
+                                  <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: right; font-weight: 700; width: 15%;">Subtotal</th>
+                              </tr>
+                          </thead>
+                          <tbody>${itemsHtml}</tbody>
+                      </table>
                   </div>
-                </div>` : ''}
-
-                <!-- Items Table -->
-                 <div style="margin-bottom: 32px; break-inside: avoid;">
-                     <div style="font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; margin-bottom: 16px;">Detalhamento Financeiro</div>
-                     <table style="width: 100%; border-collapse: collapse;">
-                        <thead>
-                            <tr style="border-bottom: 2px solid #0f172a;">
-                                <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: left; font-weight: 700; width: 60%;">Item / Descrição</th>
-                                <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: center; font-weight: 700; width: 10%;">Qtd</th>
-                                <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: right; font-weight: 700; width: 15%;">Unitário</th>
-                                <th style="padding-bottom: 12px; font-size: ${Math.max(7, itemFontBase - 2)}px; text-transform: uppercase; color: #475569; text-align: right; font-weight: 700; width: 15%;">Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody>${itemsHtml}</tbody>
-                    </table>
-                </div>
-
-               <!-- Total Bar -->
-               <div style="margin-bottom: 24px; break-inside: avoid;">
-                    <div style="display: flex; justify-content: flex-end; margin-bottom: 8px; gap: 24px; padding-right: 8px;">
-                        <div style="text-align: right;">
-                           <span style="font-size: 8px; font-weight: 600; color: #64748b; text-transform: uppercase; display: block;">Subtotal</span>
-                           <span style="font-size: 10px; font-weight: 700; color: #334155; display: block;">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                        </div>
-                        ${bdiR > 0 ? `
-                        <div style="text-align: right;">
-                           <span style="font-size: 8px; font-weight: 600; color: #64748b; text-transform: uppercase; display: block;">BDI (${bdiR}%)</span>
-                           <span style="font-size: 10px; font-weight: 700; color: #059669; display: block;">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                        </div>` : ''}
-                        ${taxR > 0 ? `
-                        <div style="text-align: right;">
-                           <span style="font-size: 8px; font-weight: 600; color: #64748b; text-transform: uppercase; display: block;">Impostos (${taxR}%)</span>
-                           <span style="font-size: 10px; font-weight: 700; color: #2563eb; display: block;">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                        </div>` : ''}
-                    </div>
-                    <div style="background: #0f172a; color: white; padding: 16px 24px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em;">Investimento Total:</span>
-                        <span style="font-size: 28px; font-weight: bold; letter-spacing: -0.05em;">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                    </div>
-               </div>
-
-               <!-- Terms & Payment -->
-               <div style="margin-bottom: 24px; break-inside: avoid;">
-                   <div style="display: flex; gap: 24px;">
-                       <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0;">
-                           <span style="font-size: 10px; font-weight: 600; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">Forma de Pagamento</span>
-                           <p style="margin: 8px 0 0 0; font-size: ${company.descriptionFontSize || 12}px; font-weight: 500; color: #334155; line-height: 1.5;">${budget.paymentTerms || 'A combinar'}</p>
-                       </div>
-                       <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0;">
-                           <span style="font-size: 10px; font-weight: 600; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">Prazo de Entrega / Execução</span>
-                           <p style="margin: 8px 0 0 0; font-size: ${company.descriptionFontSize || 12}px; font-weight: 500; color: #334155; line-height: 1.5;">${budget.deliveryTime || 'A combinar'}</p>
-                       </div>
-                   </div>
-               </div>
-
-               <!-- Acceptance Box -->
-               <div style="margin-bottom: 24px; break-inside: avoid;">
-                   <div style="border: 1px solid #dbeafe; background: #eff6ff; border-radius: 16px; padding: 24px;">
-                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-                            <div style="background: #2563eb; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; font-weight: bold;">✓</div>
-                            <span style="font-size: 14px; font-weight: bold; color: #1e40af; text-transform: uppercase; letter-spacing: 0.1em;">Termo de Aceite e Autorização Profissional</span>
-                        </div>
-                        <p style="margin: 0; font-size: ${Math.max(13, (company.descriptionFontSize || 14) - 1)}px; color: #1e3a8a; line-height: 1.6; text-align: justify; font-style: italic;">
-                            "Este documento constitui uma proposta comercial formal. Ao assinar abaixo, o cliente declara estar ciente e de pleno acordo com os valores, prazos e especificações técnicas descritas. Esta aceitação autoriza o início imediato dos trabalhos sob as condições estabelecidas. A contratada reserva-se o direito de renegociar valores caso a aprovação ocorra após o prazo de validade de ${validityDays} dias. Eventuais alterações de escopo solicitadas após o aceite estarão sujeitas a nova análise de custos."
-                        </p>
-                   </div>
-               </div>
-
-               <!-- Signature Lines -->
-                <div style="margin-top: 80px; break-inside: avoid;">
-                   <div style="border-bottom: 2px solid #cbd5e1; width: 40%;"></div>
-                   <p style="margin: 8px 0 0 0; font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em;">Assinatura do Cliente / Aceite</p>
-               </div>
-            </div>
+  
+                 <!-- Total Bar -->
+                 <div style="margin-bottom: 24px; break-inside: avoid;">
+                      <div style="display: flex; justify-content: flex-end; margin-bottom: 8px; gap: 24px; padding-right: 8px;">
+                          <div style="text-align: right;">
+                             <span style="font-size: 8px; font-weight: 600; color: #64748b; text-transform: uppercase; display: block;">Subtotal</span>
+                             <span style="font-size: 10px; font-weight: 700; color: #334155; display: block;">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                          </div>
+                          ${bdiR > 0 ? `
+                          <div style="text-align: right;">
+                             <span style="font-size: 8px; font-weight: 600; color: #64748b; text-transform: uppercase; display: block;">BDI (${bdiR}%)</span>
+                             <span style="font-size: 10px; font-weight: 700; color: #059669; display: block;">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                          </div>` : ''}
+                          ${taxR > 0 ? `
+                          <div style="text-align: right;">
+                             <span style="font-size: 8px; font-weight: 600; color: #64748b; text-transform: uppercase; display: block;">Impostos (${taxR}%)</span>
+                             <span style="font-size: 10px; font-weight: 700; color: #2563eb; display: block;">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                          </div>` : ''}
+                      </div>
+                      <div style="background: #0f172a; color: white; padding: 16px 24px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+                          <span style="font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.1em;">Investimento Total:</span>
+                          <span style="font-size: 28px; font-weight: bold; letter-spacing: -0.05em;">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                      </div>
+                 </div>
+  
+                 <!-- Terms & Payment -->
+                 <div style="margin-bottom: 24px; break-inside: avoid;">
+                     <div style="display: flex; gap: 24px;">
+                         <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0;">
+                             <span style="font-size: 10px; font-weight: 600; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">Forma de Pagamento</span>
+                             <p style="margin: 8px 0 0 0; font-size: ${company.descriptionFontSize || 12}px; font-weight: 500; color: #334155; line-height: 1.5;">${budget.paymentTerms || 'A combinar'}</p>
+                         </div>
+                         <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0;">
+                             <span style="font-size: 10px; font-weight: 600; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block;">Prazo de Entrega / Execução</span>
+                             <p style="margin: 8px 0 0 0; font-size: ${company.descriptionFontSize || 12}px; font-weight: 500; color: #334155; line-height: 1.5;">${budget.deliveryTime || 'A combinar'}</p>
+                         </div>
+                     </div>
+                 </div>
+  
+                 <!-- Acceptance Box -->
+                 <div style="margin-bottom: 24px; break-inside: avoid;">
+                     <div style="border: 1px solid #dbeafe; background: #eff6ff; border-radius: 16px; padding: 24px;">
+                          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                              <div style="background: #2563eb; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; font-weight: bold;">✓</div>
+                              <span style="font-size: 14px; font-weight: bold; color: #1e40af; text-transform: uppercase; letter-spacing: 0.1em;">Termo de Aceite e Autorização Profissional</span>
+                          </div>
+                          <p style="margin: 0; font-size: ${Math.max(13, (company.descriptionFontSize || 14) - 1)}px; color: #1e3a8a; line-height: 1.6; text-align: justify; font-style: italic;">
+                              "Este documento constitui uma proposta comercial formal. Ao assinar abaixo, o cliente declara estar ciente e de pleno acordo com os valores, prazos e especificações técnicas descritas. Esta aceitação autoriza o início imediato dos trabalhos sob as condições estabelecidas. A contratada reserva-se o direito de renegociar valores caso a aprovação ocorra após o prazo de validade de ${validityDays} dias. Eventuais alterações de escopo solicitadas após o aceite estarão sujeitas a nova análise de custos."
+                          </p>
+                     </div>
+                 </div>
+  
+                 <!-- Signature Lines -->
+                  <div style="margin-top: 40px; break-inside: avoid;">
+                     <div style="border-bottom: 2px solid #cbd5e1; width: 40%;"></div>
+                     <p style="margin: 8px 0 0 0; font-size: 11px; font-weight: bold; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em;">Assinatura do Cliente / Aceite</p>
+                 </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td style="padding: 0;">
+              <div class="a4-container" style="padding-top: 10px !important; border-top: 1px solid #f1f5f9; margin-top: 10px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; opacity: 0.6;">
+                      <p style="font-size: 8px; font-weight: bold; color: #64748b; text-transform: uppercase;">${company.name} - ${company.cnpj || ''}</p>
+                      <p style="font-size: 8px; font-weight: bold; color: #64748b; text-transform: uppercase;">Orçamento ${budget.id}</p>
+                  </div>
+              </div>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
     `;
   };
 

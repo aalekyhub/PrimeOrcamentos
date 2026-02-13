@@ -283,185 +283,217 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
         if (!currentPlan) return '';
 
         const customer = customers.find(c => c.id === currentPlan.client_id);
+        const company = db.load('serviflow_company', {
+            name: 'PRIME SERVIÇOS E MANUTENÇÃO LTDA',
+            logo: '',
+            cnpj: '12.345.678/0001-90',
+            phone: '',
+            email: '',
+            address: ''
+        });
+
         const totalServices = services.reduce((acc, s) => acc + s.total_cost, 0);
+        const totalMaterials = materials.reduce((acc, m) => acc + m.total_cost, 0);
+        const totalLabor = labor.reduce((acc, l) => acc + l.total_cost, 0);
+        const totalIndirect = indirects.reduce((acc, i) => acc + i.value, 0);
+        const totalTaxes = taxes.reduce((acc, t) => acc + t.value, 0);
+        const totalGeneral = totalServices + totalMaterials + totalLabor + totalIndirect + totalTaxes;
 
         return `
-            <div style="font-family: sans-serif; padding: 30px; color: #1e293b; max-width: 800px; margin: 0 auto; background: white;">
-                <!-- HEADER -->
-                <div style="display: flex; justify-content: space-between; align-items: start; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 30px;">
-                    <div>
-                        <h1 style="margin: 0; color: #1e40af; font-size: 26px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.025em;">Planejamento Executivo de Obra</h1>
-                        <p style="margin: 5px 0 0 0; color: #3b82f6; font-size: 16px; font-weight: 700;">${currentPlan.name.toUpperCase()}</p>
-                    </div>
-                    <div style="text-align: right;">
-                        <p style="margin: 0; color: #94a3b8; font-size: 10px; font-weight: 800; text-transform: uppercase;">Emissão: ${new Date().toLocaleDateString('pt-BR')}</p>
-                        <p style="margin: 5px 0 0 0; color: #475569; font-size: 11px;">ID: ${currentPlan.id}</p>
-                    </div>
-                </div>
-
-                <!-- INFO GRID -->
-                <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
-                    <div style="flex: 1; min-width: 45%;">
-                        <p style="margin: 0 0 5px 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Cliente</p>
-                        <p style="margin: 0; font-size: 14px; color: #0f172a; font-weight: 600;">${customer?.name || 'Não Informado'}</p>
-                    </div>
-                    <div style="flex: 1; min-width: 45%;">
-                        <p style="margin: 0 0 5px 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Tipo de Obra</p>
-                        <p style="margin: 0; font-size: 14px; color: #0f172a; font-weight: 600;">${currentPlan.type}</p>
-                    </div>
-                    <div style="width: 100%;">
-                        <p style="margin: 0 0 5px 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Endereço Previsto</p>
-                        <p style="margin: 0; font-size: 14px; color: #0f172a; font-weight: 600;">${currentPlan.address || 'Não Informado'}</p>
-                    </div>
-                </div>
-
-                <!-- SEÇÃO SERVIÇOS -->
-                ${services.length > 0 ? `
-                <div style="margin-bottom: 30px;">
-                    <h3 style="font-size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; border-left: 4px solid #3b82f6; padding-left: 10px; margin-bottom: 15px;">1. Serviços Planejados</h3>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <thead>
-                            <tr style="background: #f1f5f9; border-bottom: 1px solid #e2e8f0;">
-                                <th style="padding: 10px; text-align: left; font-size: 10px; color: #64748b;">DESCRIÇÃO</th>
-                                <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 60px;">QTD</th>
-                                <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 40px;">UND</th>
-                                <th style="padding: 10px; text-align: right; font-size: 10px; color: #64748b; width: 100px;">TOTAL</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${services.map(s => `
-                                <tr style="border-bottom: 1px solid #f1f5f9;">
-                                    <td style="padding: 10px; font-size: 11px; font-weight: 600;">${s.description}</td>
-                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${s.quantity}</td>
-                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${s.unit}</td>
-                                    <td style="padding: 10px; font-size: 11px; text-align: right; font-weight: 700;">R$ ${s.total_cost.toFixed(2)}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-                ` : ''}
-
-                <!-- SEÇÃO MATERIAIS -->
-                ${materials.length > 0 ? `
-                <div style="margin-bottom: 30px;">
-                    <h3 style="font-size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; border-left: 4px solid #3b82f6; padding-left: 10px; margin-bottom: 15px;">2. Insumos e Materiais (Previstos)</h3>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <thead>
-                            <tr style="background: #f1f5f9; border-bottom: 1px solid #e2e8f0;">
-                                <th style="padding: 10px; text-align: left; font-size: 10px; color: #64748b;">MATERIAL</th>
-                                <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 60px;">QTD</th>
-                                <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 40px;">UND</th>
-                                <th style="padding: 10px; text-align: right; font-size: 10px; color: #64748b; width: 100px;">VALOR</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${materials.map(m => `
-                                <tr style="border-bottom: 1px solid #f1f5f9;">
-                                    <td style="padding: 10px; font-size: 11px; font-weight: 600;">${m.material_name}</td>
-                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${m.quantity}</td>
-                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${m.unit}</td>
-                                    <td style="padding: 10px; font-size: 11px; text-align: right; font-weight: 700;">R$ ${m.total_cost.toFixed(2)}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-                ` : ''}
-
-                <!-- SEÇÃO MÃO DE OBRA -->
-                ${labor.length > 0 ? `
-                <div style="margin-bottom: 30px;">
-                    <h3 style="font-size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; border-left: 4px solid #3b82f6; padding-left: 10px; margin-bottom: 15px;">3. Recursos Humanos / Mão de Obra</h3>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <thead>
-                            <tr style="background: #f1f5f9; border-bottom: 1px solid #e2e8f0;">
-                                <th style="padding: 10px; text-align: left; font-size: 10px; color: #64748b;">FUNÇÃO / TIPO</th>
-                                <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 60px;">QTD</th>
-                                <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 80px;">UND</th>
-                                <th style="padding: 10px; text-align: right; font-size: 10px; color: #64748b; width: 100px;">CUSTO TOTAL</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${labor.map(l => `
-                                <tr style="border-bottom: 1px solid #f1f5f9;">
-                                    <td style="padding: 10px; font-size: 11px; font-weight: 600;">${l.role} | (${l.cost_type})</td>
-                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${l.quantity}</td>
-                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${l.unit || '-'}</td>
-                                    <td style="padding: 10px; font-size: 11px; text-align: right; font-weight: 700;">R$ ${l.total_cost.toFixed(2)}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-                ` : ''}
-
-                <!-- SEÇÃO CUSTOS INDIRETOS -->
-                ${indirects.length > 0 ? `
-                <div style="margin-bottom: 30px;">
-                    <h3 style="font-size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; border-left: 4px solid #3b82f6; padding-left: 10px; margin-bottom: 15px;">4. Custos Indiretos e Operacionais</h3>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <thead>
-                            <tr style="background: #f1f5f9; border-bottom: 1px solid #e2e8f0;">
-                                <th style="padding: 10px; text-align: left; font-size: 10px; color: #64748b;">CATEGORIA</th>
-                                <th style="padding: 10px; text-align: left; font-size: 10px; color: #64748b;">DESCRIÇÃO</th>
-                                <th style="padding: 10px; text-align: right; font-size: 10px; color: #64748b; width: 120px;">VALOR</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${indirects.map(i => `
-                                <tr style="border-bottom: 1px solid #f1f5f9;">
-                                    <td style="padding: 10px; font-size: 11px; font-weight: 600;">${i.category}</td>
-                                    <td style="padding: 10px; font-size: 11px;">${i.description}</td>
-                                    <td style="padding: 10px; font-size: 11px; text-align: right; font-weight: 700;">R$ ${i.value.toFixed(2)}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-                ` : ''}
-
-                <!-- RESUMO FINANCEIRO FINAL -->
-                <div style="margin-top: 20px; page-break-inside: avoid;">
-                    <h3 style="font-size: 14px; font-weight: 800; color: #0f172a; text-transform: uppercase; margin-bottom: 20px; text-align: center;">Estimativa de Custo Consolidada</h3>
-                    
-                    <div style="background: #1e3a8a; color: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
-                        <div style="display: grid; grid-template-cols: 1fr 1fr; gap: 20px; border-bottom: 1px solid #3b82f6; padding-bottom: 20px; margin-bottom: 20px;">
-                            <div>
-                                <p style="margin: 0; font-size: 10px; color: #bfdbfe; text-transform: uppercase; letter-spacing: 0.05em;">Total em Serviços</p>
-                                <p style="margin: 5px 0 0 0; font-size: 18px; font-weight: 700;">R$ ${totalServices.toFixed(2)}</p>
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <td style="padding: 0;">
+                            <div class="a4-container" style="padding-bottom: 20px !important; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px;">
+                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                    <div>
+                                        <h1 style="margin: 0; color: #1e40af; font-size: 26px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.025em;">Planejamento Executivo de Obra</h1>
+                                        <p style="margin: 5px 0 0 0; color: #3b82f6; font-size: 16px; font-weight: 700;">${currentPlan.name.toUpperCase()}</p>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <p style="margin: 0; color: #94a3b8; font-size: 10px; font-weight: 800; text-transform: uppercase;">Emissão: ${new Date().toLocaleDateString('pt-BR')}</p>
+                                        <p style="margin: 5px 0 0 0; color: #475569; font-size: 11px;">ID: ${currentPlan.id}</p>
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <p style="margin: 0; font-size: 10px; color: #bfdbfe; text-transform: uppercase; letter-spacing: 0.05em;">Materiais (Adicionais)</p>
-                                <p style="margin: 5px 0 0 0; font-size: 18px; font-weight: 700;">R$ ${materials.reduce((acc, m) => acc + m.total_cost, 0).toFixed(2)}</p>
+                        </td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 0;">
+                            <div class="a4-container">
+                                <!-- INFO GRID -->
+                                <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                                    <div style="flex: 1; min-width: 45%;">
+                                        <p style="margin: 0 0 5px 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Cliente</p>
+                                        <p style="margin: 0; font-size: 14px; color: #0f172a; font-weight: 600;">${customer?.name || 'Não Informado'}</p>
+                                    </div>
+                                    <div style="flex: 1; min-width: 45%;">
+                                        <p style="margin: 0 0 5px 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Tipo de Obra</p>
+                                        <p style="margin: 0; font-size: 14px; color: #0f172a; font-weight: 600;">${currentPlan.type}</p>
+                                    </div>
+                                    <div style="width: 100%;">
+                                        <p style="margin: 0 0 5px 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Endereço Previsto</p>
+                                        <p style="margin: 0; font-size: 14px; color: #0f172a; font-weight: 600;">${currentPlan.address || 'Não Informado'}</p>
+                                    </div>
+                                </div>
+                
+                                <!-- SEÇÃO SERVIÇOS -->
+                                ${services.length > 0 ? `
+                                <div style="margin-bottom: 30px;">
+                                    <h3 style="font-size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; border-left: 4px solid #3b82f6; padding-left: 10px; margin-bottom: 15px;">1. Serviços Planejados</h3>
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <thead>
+                                            <tr style="background: #f1f5f9; border-bottom: 1px solid #e2e8f0;">
+                                                <th style="padding: 10px; text-align: left; font-size: 10px; color: #64748b;">DESCRIÇÃO</th>
+                                                <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 60px;">QTD</th>
+                                                <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 40px;">UND</th>
+                                                <th style="padding: 10px; text-align: right; font-size: 10px; color: #64748b; width: 120px;">TOTAL</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${services.map(s => `
+                                                <tr style="border-bottom: 1px solid #f1f5f9;">
+                                                    <td style="padding: 10px; font-size: 11px; font-weight: 600;">${s.description}</td>
+                                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${s.quantity}</td>
+                                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${s.unit}</td>
+                                                    <td style="padding: 10px; font-size: 11px; text-align: right; font-weight: 700;">R$ ${s.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                ` : ''}
+                
+                                <!-- SEÇÃO MATERIAIS -->
+                                ${materials.length > 0 ? `
+                                <div style="margin-bottom: 30px;">
+                                    <h3 style="font-size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; border-left: 4px solid #3b82f6; padding-left: 10px; margin-bottom: 15px;">2. Insumos e Materiais (Previstos)</h3>
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <thead>
+                                            <tr style="background: #f1f5f9; border-bottom: 1px solid #e2e8f0;">
+                                                <th style="padding: 10px; text-align: left; font-size: 10px; color: #64748b;">MATERIAL</th>
+                                                <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 60px;">QTD</th>
+                                                <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 40px;">UND</th>
+                                                <th style="padding: 10px; text-align: right; font-size: 10px; color: #64748b; width: 120px;">VALOR</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${materials.map(m => `
+                                                <tr style="border-bottom: 1px solid #f1f5f9;">
+                                                    <td style="padding: 10px; font-size: 11px; font-weight: 600;">${m.material_name}</td>
+                                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${m.quantity}</td>
+                                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${m.unit}</td>
+                                                    <td style="padding: 10px; font-size: 11px; text-align: right; font-weight: 700;">R$ ${m.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                ` : ''}
+                
+                                <!-- SEÇÃO MÃO DE OBRA -->
+                                ${labor.length > 0 ? `
+                                <div style="margin-bottom: 30px;">
+                                    <h3 style="font-size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; border-left: 4px solid #3b82f6; padding-left: 10px; margin-bottom: 15px;">3. Recursos Humanos / Mão de Obra</h3>
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <thead>
+                                            <tr style="background: #f1f5f9; border-bottom: 1px solid #e2e8f0;">
+                                                <th style="padding: 10px; text-align: left; font-size: 10px; color: #64748b;">FUNÇÃO / TIPO</th>
+                                                <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 60px;">QTD</th>
+                                                <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 80px;">UND</th>
+                                                <th style="padding: 10px; text-align: right; font-size: 10px; color: #64748b; width: 120px;">CUSTO TOTAL</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${labor.map(l => `
+                                                <tr style="border-bottom: 1px solid #f1f5f9;">
+                                                    <td style="padding: 10px; font-size: 11px; font-weight: 600;">${l.role} | (${l.cost_type})</td>
+                                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${l.quantity}</td>
+                                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${l.unit || '-'}</td>
+                                                    <td style="padding: 10px; font-size: 11px; text-align: right; font-weight: 700;">R$ ${l.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                ` : ''}
+                
+                                <!-- SEÇÃO CUSTOS INDIRETOS -->
+                                ${indirects.length > 0 ? `
+                                <div style="margin-bottom: 30px;">
+                                    <h3 style="font-size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; border-left: 4px solid #3b82f6; padding-left: 10px; margin-bottom: 15px;">4. Custos Indiretos e Operacionais</h3>
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <thead>
+                                            <tr style="background: #f1f5f9; border-bottom: 1px solid #e2e8f0;">
+                                                <th style="padding: 10px; text-align: left; font-size: 10px; color: #64748b;">CATEGORIA</th>
+                                                <th style="padding: 10px; text-align: left; font-size: 10px; color: #64748b;">DESCRIÇÃO</th>
+                                                <th style="padding: 10px; text-align: right; font-size: 10px; color: #64748b; width: 120px;">VALOR</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${indirects.map(i => `
+                                                <tr style="border-bottom: 1px solid #f1f5f9;">
+                                                    <td style="padding: 10px; font-size: 11px; font-weight: 600;">${i.category}</td>
+                                                    <td style="padding: 10px; font-size: 11px;">${i.description}</td>
+                                                    <td style="padding: 10px; font-size: 11px; text-align: right; font-weight: 700;">R$ ${i.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                ` : ''}
+                
+                                <!-- RESUMO FINANCEIRO FINAL -->
+                                <div style="margin-top: 20px; page-break-inside: avoid;">
+                                    <h3 style="font-size: 14px; font-weight: 800; color: #0f172a; text-transform: uppercase; margin-bottom: 20px; text-align: center;">Estimativa de Custo Consolidada</h3>
+                                    
+                                    <div style="background: #1e3a8a; color: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; border-bottom: 1px solid #3b82f6; padding-bottom: 20px; margin-bottom: 20px;">
+                                            <div>
+                                                <p style="margin: 0; font-size: 10px; color: #bfdbfe; text-transform: uppercase; letter-spacing: 0.05em;">Total em Serviços</p>
+                                                <p style="margin: 5px 0 0 0; font-size: 18px; font-weight: 700;">R$ ${totalServices.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                            </div>
+                                            <div>
+                                                <p style="margin: 0; font-size: 10px; color: #bfdbfe; text-transform: uppercase; letter-spacing: 0.05em;">Materiais (Adicionais)</p>
+                                                <p style="margin: 5px 0 0 0; font-size: 18px; font-weight: 700;">R$ ${totalMaterials.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                            </div>
+                                            <div>
+                                                <p style="margin: 0; font-size: 10px; color: #bfdbfe; text-transform: uppercase; letter-spacing: 0.05em;">Mão de Obra (Adicional)</p>
+                                                <p style="margin: 5px 0 0 0; font-size: 18px; font-weight: 700;">R$ ${totalLabor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                            </div>
+                                            <div>
+                                                <p style="margin: 0; font-size: 10px; color: #bfdbfe; text-transform: uppercase; letter-spacing: 0.05em;">Custos Indiretos</p>
+                                                <p style="margin: 5px 0 0 0; font-size: 18px; font-weight: 700;">R$ ${totalIndirect.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                            </div>
+                                            <div style="grid-column: span 2; border-top: 1px dashed #3b82f6; padding-top: 16px; margin-top: 16px;">
+                                                <p style="margin: 0; font-size: 10px; color: #bfdbfe; text-transform: uppercase; letter-spacing: 0.05em;">Impostos / Taxas</p>
+                                                <p style="margin: 5px 0 0 0; font-size: 18px; font-weight: 700;">R$ ${totalTaxes.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div style="text-align: right;">
+                                            <p style="margin: 0; font-size: 12px; color: #93c5fd; font-weight: 800; text-transform: uppercase;">Custo Total Previsto</p>
+                                            <p style="margin: 5px 0 0 0; font-size: 36px; font-weight: 800; color: white;">R$ ${totalGeneral.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <p style="margin: 0; font-size: 10px; color: #bfdbfe; text-transform: uppercase; letter-spacing: 0.05em;">Mão de Obra (Adicional)</p>
-                                <p style="margin: 5px 0 0 0; font-size: 18px; font-weight: 700;">R$ ${labor.reduce((acc, l) => acc + l.total_cost, 0).toFixed(2)}</p>
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td style="padding: 0;">
+                            <div class="a4-container" style="padding-top: 20px !important; border-top: 1px solid #e2e8f0; margin-top: 20px; text-align: center;">
+                                <p style="margin: 0; font-size: 9px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.2em; font-weight: 700;">Este documento é um planejamento estimativo da execução da obra.</p>
+                                <p style="margin: 10px 0 0 0; font-size: 10px; color: #64748b; font-weight: 800;">${company.name.toUpperCase()} - PLANEJAMENTO DE OBRAS</p>
                             </div>
-                            <div>
-                                <p style="margin: 0; font-size: 10px; color: #bfdbfe; text-transform: uppercase; letter-spacing: 0.05em;">Custos Indiretos</p>
-                                <p style="margin: 5px 0 0 0; font-size: 18px; font-weight: 700;">R$ ${totalIndirect.toFixed(2)}</p>
-                            </div>
-                            <div style="grid-column: span 2; border-top: 1px dashed #3b82f6; pt-4; mt-4">
-                                <p style="margin: 0; font-size: 10px; color: #bfdbfe; text-transform: uppercase; letter-spacing: 0.05em;">Impostos / Taxas</p>
-                                <p style="margin: 5px 0 0 0; font-size: 18px; font-weight: 700;">R$ ${totalTaxes.toFixed(2)}</p>
-                            </div>
-                        </div>
-                        
-                        <div style="text-align: right;">
-                            <p style="margin: 0; font-size: 12px; color: #93c5fd; font-weight: 800; text-transform: uppercase;">Custo Total Previsto</p>
-                            <p style="margin: 5px 0 0 0; font-size: 36px; font-weight: 800; color: white;">R$ ${totalGeneral.toFixed(2)}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- FOOTER -->
-                <div style="margin-top: 60px; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 20px;">
-                    <p style="margin: 0; font-size: 9px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.2em; font-weight: 700;">Este documento é um planejamento estimativo da execução da obra.</p>
-                    <p style="margin: 10px 0 0 0; font-size: 10px; color: #64748b; font-weight: 800;">PRIME ORÇAMENTOS - PLANEJAMENTO DE OBRAS</p>
-                </div>
-            </div>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
         `;
     };
 
@@ -528,99 +560,99 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
         const title = 'Planejamento Executivo de Obra';
 
         const html = `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <title>${title}</title>
-             <script src="https://cdn.tailwindcss.com"></script>
-             <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
-            <style>
-               * { box-sizing: border-box; }
-               body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
-               @page { size: A4; margin: 0 !important; }
-               .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; padding-top: 15mm !important; padding-bottom: 15mm !important; }
-               .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
-               
-               @media screen { 
-                 body { background: #f1f5f9; padding: 40px 0; } 
-                 .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; } 
-               }
-               @media print { 
-                 body { background: white !important; margin: 0 !important; } 
-                 .a4-container { box-shadow: none !important; border: none !important; width: 100% !important; } 
-                 .no-print { display: none !important; } 
-               }
+        <!DOCTYPE html>
+        <html>
+            <head>
+                <title>${title}</title>
+                <script src="https://cdn.tailwindcss.com"></script>
+                <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
+                <style>
+                    * { box-sizing: border-box; }
+                    body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
+                    @page { size: A4; margin: 0 !important; }
+                    .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; padding-top: 15mm !important; padding-bottom: 15mm !important; }
+                    .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
 
-                /* Shared Rich Text / Quill Styles */
-                .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
-                .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
-                .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
-                .ql-editor-print strong, .ql-editor-print b { font-weight: bold !important; color: #000 !important; }
-                .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4 { font-weight: 800 !important; color: #0f172a !important; margin-top: 20px !important; margin-bottom: 10px !important; break-after: avoid !important; }
-            </style>
-          </head>
-          <body>
-            ${htmlContent}
-            <script>
-               function optimizePageBreaks() {
+                    @media screen {
+                        body { background: #f1f5f9; padding: 40px 0; }
+                        .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; }
+                    }
+                    @media print {
+                        body { background: white !important; margin: 0 !important; }
+                        .a4-container { box-shadow: none !important; border: none !important; width: 100% !important; }
+                        .no-print { display: none !important; }
+                    }
+
+                    /* Shared Rich Text / Quill Styles */
+                    .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
+                    .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
+                    .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
+                    .ql-editor-print strong, .ql-editor-print b { font-weight: bold !important; color: #000 !important; }
+                    .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4 { font-weight: 800 !important; color: #0f172a !important; margin-top: 20px !important; margin-bottom: 10px !important; break-after: avoid !important; }
+                </style>
+            </head>
+            <body>
+                ${htmlContent}
+                <script>
+                    function optimizePageBreaks() {
                  const root = document.querySelector('.print-description-content');
-                 if (!root) return;
-                 const content = root.querySelector('div');
-                 if (!content) return;
+                    if (!root) return;
+                    const content = root.querySelector('div');
+                    if (!content) return;
 
-                 const allNodes = [];
+                    const allNodes = [];
                  Array.from(content.children).forEach(block => {
                    if (block.classList.contains('ql-editor-print')) {
-                      allNodes.push(...Array.from(block.children));
+                        allNodes.push(...Array.from(block.children));
                    } else {
-                      allNodes.push(block);
+                        allNodes.push(block);
                    }
                  });
 
-                 for (let i = 0; i < allNodes.length - 1; i++) {
+                    for (let i = 0; i < allNodes.length - 1; i++) {
                    const el = allNodes[i];
-                   let isTitle = false;
-                   
-                   if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
-                   else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
+                    let isTitle = false;
+
+                    if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
+                    else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
                       const text = el.innerText.trim();
-                      const isNumbered = /^\\d+(\\.\\d+)*[\\.\\s\\)]/.test(text);
+                    const isNumbered = /^\\d+(\\.\\d+)*[\\.\\s\\)]/.test(text);
                       const isBold = el.querySelector('strong, b') || (el.style && parseInt(el.style.fontWeight) > 600) || el.tagName === 'STRONG';
-                      const isShort = text.length < 150;
+                    const isShort = text.length < 150;
                       if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
                         isTitle = true;
                       }
                    }
 
-                   if (isTitle) {
+                    if (isTitle) {
                      const nodesToWrap = [el];
-                     let j = i + 1;
-                     while (j < allNodes.length && nodesToWrap.length < 3) {
+                    let j = i + 1;
+                    while (j < allNodes.length && nodesToWrap.length < 3) {
                        const next = allNodes[j];
-                       if (next.matches('h1, h2, h3, h4, h5, h6')) break;
-                       nodesToWrap.push(next);
-                       j++;
+                    if (next.matches('h1, h2, h3, h4, h5, h6')) break;
+                    nodesToWrap.push(next);
+                    j++;
                      }
 
                      if (nodesToWrap.length > 1) {
                        const wrapper = document.createElement('div');
-                       wrapper.className = 'keep-together';
-                       el.parentNode.insertBefore(wrapper, el);
+                    wrapper.className = 'keep-together';
+                    el.parentNode.insertBefore(wrapper, el);
                        nodesToWrap.forEach(node => wrapper.appendChild(node));
-                       i = j - 1;
+                    i = j - 1;
                      }
                    }
                  }
                }
-               window.onload = function() { 
-                 optimizePageBreaks();
-                 setTimeout(() => { 
-                    window.print(); 
+                    window.onload = function() {
+                        optimizePageBreaks();
+                 setTimeout(() => {
+                        window.print(); 
                  }, 1000); 
                }
-            </script>
-          </body>
-          </html>`;
+                </script>
+            </body>
+        </html>`;
         printWindow.document.write(html);
         printWindow.document.close();
     };
@@ -681,7 +713,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                 className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-blue-400 transition-all group relative">
                                 <div className="flex justify-between items-start mb-2">
                                     <span className="font-bold text-lg text-slate-800">{plan.name}</span>
-                                    <span className={`px-2 py-1 rounded text-xs font-bold ${plan.status === 'Concluído' ? 'bg-green-100 text-green-700' : 'bg-blue-50 text-blue-700'}`}>
+                                    <span className={`px - 2 py - 1 rounded text - xs font - bold ${plan.status === 'Concluído' ? 'bg-green-100 text-green-700' : 'bg-blue-50 text-blue-700'} `}>
                                         {plan.status}
                                     </span>
                                 </div>
@@ -741,8 +773,8 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                     key={tab.id}
                                     type="button"
                                     onClick={() => setActiveTab(tab.id as any)}
-                                    className={`px-6 py-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'
-                                        }`}
+                                    className={`px - 6 py - 4 text - sm font - bold flex items - center gap - 2 border - b - 2 transition - colors whitespace - nowrap ${activeTab === tab.id ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'
+                                        } `}
                                 >
                                     <tab.icon size={16} /> {tab.label}
                                 </button>
@@ -822,8 +854,8 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                             key={r.id}
                                             type="button"
                                             onClick={() => setResourceTab(r.id as any)}
-                                            className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all uppercase tracking-wider ${resourceTab === r.id ? 'bg-slate-800 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-100'
-                                                }`}
+                                            className={`px - 4 py - 1.5 rounded - full text - [10px] font - bold transition - all uppercase tracking - wider ${resourceTab === r.id ? 'bg-slate-800 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-100'
+                                                } `}
                                         >
                                             {r.label}
                                         </button>
@@ -1041,7 +1073,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                         { name: 'COFINS', label: 'COFINS (%)', color: 'bg-slate-50 text-slate-700 border-slate-100' },
                                                         { name: 'INSS', label: 'INSS (%)', color: 'bg-orange-50 text-orange-700 border-orange-100' }
                                                     ].map(tax => (
-                                                        <div key={tax.name} className={`p-3 rounded-lg border ${tax.color}`}>
+                                                        <div key={tax.name} className={`p - 3 rounded - lg border ${tax.color} `}>
                                                             <label className="block text-[10px] font-bold uppercase mb-1 opacity-70">{tax.label}</label>
                                                             <input
                                                                 type="number"
@@ -1125,7 +1157,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             <div>
                                                                 <span className="font-black text-xs text-slate-700">{t.name}</span>
                                                                 <span className="text-[10px] font-bold text-slate-400 ml-2">
-                                                                    {t.rate > 0 ? `${t.rate}%` : `R$ ${t.value.toFixed(2)}`}
+                                                                    {t.rate > 0 ? `${t.rate}% ` : `R$ ${t.value.toFixed(2)} `}
                                                                 </span>
                                                             </div>
                                                             <div className="flex items-center gap-4">
@@ -1674,7 +1706,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 notify("Função de gerar orçamento não disponível neste modo.", "info");
                                             }
                                         }}
-                                        className={`bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg flex items-center gap-2 transition-all transform hover:scale-105 ${!onGenerateBudget ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        className={`bg - blue - 600 hover: bg - blue - 500 text - white px - 6 py - 3 rounded - xl font - bold shadow - lg flex items - center gap - 2 transition - all transform hover: scale - 105 ${!onGenerateBudget ? 'opacity-50 cursor-not-allowed' : ''} `}
                                     >
                                         <Calculator size={20} /> Gerar Orçamento
                                     </button>
