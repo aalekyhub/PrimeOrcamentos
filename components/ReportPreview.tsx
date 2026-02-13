@@ -34,36 +34,23 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
             <style>{`
                 @media print {
-                    /* Hide everything by default */
-                    body * {
+                    /* Hide everything in the body by default */
+                    body {
                         visibility: hidden !important;
+                        background: white !important;
                     }
 
-                    /* Define .no-print to hide UI elements */
-                    .no-print, .no-print * {
-                        display: none !important;
-                        visibility: hidden !important;
+                    /* Make the modal and its content visible */
+                    #report-preview-wrapper, 
+                    #report-preview-wrapper * {
+                        visibility: visible !important;
                     }
 
                     /* 
-                       Show ONLY the report content.
-                       We target the content div and all its children.
+                       Reset all positioning and overflows for the modal structure 
+                       to allow the browser to print multiple pages correctly.
                     */
-                    #report-preview-content, #report-preview-content * {
-                        visibility: visible !important;
-                        display: block; /* Reset potential hidden displays, but keep blocks */
-                        position: relative; /* Maintain relative positioning for children */
-                    }
-
-                    /* Ensure tables, flex and specific layouts inside content still work */
-                    #report-preview-content table { display: table !important; }
-                    #report-preview-content tr { display: table-row !important; }
-                    #report-preview-content td, #report-preview-content th { display: table-cell !important; }
-                    #report-preview-content div { display: block; } /* Default to block for divs */
-                    
-                    /* Force the content container to the top-left of the printed page */
-                    #report-preview-content {
-                        display: block !important;
+                    #report-preview-wrapper {
                         position: absolute !important;
                         left: 0 !important;
                         top: 0 !important;
@@ -73,31 +60,64 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                         padding: 0 !important;
                         border: none !important;
                         box-shadow: none !important;
-                        overflow: visible !important;
+                        display: block !important;
                         background: white !important;
                     }
 
-                    /* Fix for parents that might cut off content */
-                    #report-preview-wrapper, 
-                    #report-preview-wrapper > div,
-                    .fixed, .absolute {
+                    /* The overlay div (fixed inset-0) needs to not block or clip */
+                    .fixed.inset-0 {
+                        position: static !important;
+                        display: block !important;
+                        height: auto !important;
+                        width: 100% !important;
+                        padding: 0 !important;
+                        background: transparent !important;
+                    }
+
+                    /* Force parents to not clip content */
+                    html, body, #root, #__next, .flex, .grid {
                         height: auto !important;
                         overflow: visible !important;
                         position: static !important;
+                        display: block !important; /* Reset layout containers to simple blocks */
                     }
 
+                    /* Specific content structure to ensure it occupies the page */
+                    #report-preview-content {
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        width: 100% !important;
+                        max-width: none !important;
+                        background: white !important;
+                        display: block !important;
+                    }
+
+                    /* Hide the buttons and UI elements */
+                    .no-print, 
+                    .no-print *,
+                    header:not(#report-preview-wrapper header),
+                    footer:not(#report-preview-wrapper footer),
+                    button.no-print {
+                        display: none !important;
+                    }
+
+                    /* Page Settings */
                     @page {
                         margin: 15mm;
                         size: A4;
                     }
 
-                    /* Quill / Rich Text Print Specifics */
+                    /* Print-specific layout fixes for the report html */
+                    tr { page-break-inside: avoid !important; }
+                    thead { display: table-header-group !important; }
+
+                    /* Rich Text Styles */
                     .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
                     .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
                     .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
                     .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4 { 
-                        break-after: avoid !important;
                         page-break-after: avoid !important;
+                        break-after: avoid !important;
                     }
                 }
             `}</style>
