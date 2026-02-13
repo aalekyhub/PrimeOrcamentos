@@ -34,47 +34,71 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
             <style>{`
                 @media print {
-                    /* Hide EVERYTHING */
+                    /* Hide everything in the document body */
                     body * {
                         visibility: hidden !important;
                     }
 
-                    /* Show ONLY the modal and its contents */
+                    /* Make the modal components visible */
+                    .fixed.inset-0,
                     #report-preview-wrapper, 
                     #report-preview-wrapper * {
                         visibility: visible !important;
                     }
 
-                    /* Hide specific UI elements inside the modal */
-                    .no-print, .no-print * {
-                        display: none !important;
-                        visibility: hidden !important;
+                    /* Important: Reset the fixed overlay that causes clipping */
+                    .fixed.inset-0 {
+                        position: absolute !important;
+                        display: block !important;
+                        height: auto !important;
+                        width: 100% !important;
+                        top: 0 !important;
+                        left: 0 !important;
+                        padding: 0 !important;
+                        background: white !important;
+                        z-index: auto !important;
                     }
 
-                    /* Reset layouts for the printed page */
-                    html, body {
+                    /* Reset the wrapper structure */
+                    #report-preview-wrapper {
+                        position: relative !important;
+                        display: block !important;
+                        height: auto !important;
+                        width: 100% !important;
+                        max-width: none !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        border: none !important;
+                        box-shadow: none !important;
+                        border-radius: 0 !important;
+                    }
+
+                    /* Ensure the content area allows overflow for multiple pages */
+                    #report-preview-wrapper > div {
                         height: auto !important;
                         overflow: visible !important;
-                        margin: 0 !important;
+                        display: block !important;
                         padding: 0 !important;
                         background: white !important;
                     }
 
-                    #report-preview-wrapper {
-                        position: absolute !important;
-                        left: 0 !important;
-                        top: 0 !important;
+                    /* The actual report content */
+                    #report-preview-content {
+                        display: block !important;
                         width: 100% !important;
+                        height: auto !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
                         border: none !important;
                         box-shadow: none !important;
-                        display: block !important;
+                        overflow: visible !important;
                     }
 
-                    #report-preview-content {
-                        border: none !important;
-                        box-shadow: none !important;
-                        padding: 0 !important;
-                        width: 100% !important;
+                    /* Hide the UI controls */
+                    .no-print, 
+                    .no-print * {
+                        display: none !important;
+                        visibility: hidden !important;
                     }
 
                     @page {
@@ -82,17 +106,12 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                         size: A4;
                     }
 
-                    /* Content fixes */
+                    /* Page break and layout fixes */
                     tr { page-break-inside: avoid !important; }
                     thead { display: table-header-group !important; }
 
-                    /* Rich Text Styles */
                     .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; }
                     .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; }
-                    .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4 { 
-                        page-break-after: avoid !important;
-                        break-after: avoid !important;
-                    }
                 }
             `}</style>
 
