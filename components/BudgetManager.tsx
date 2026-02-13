@@ -157,7 +157,11 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         </thead>
         <tfoot>
             <tr>
-                <td style="height: 15mm; border: none; padding: 0;"><div style="height: 15mm;">&nbsp;</div></td>
+                <td style="height: 15mm; border: none; padding: 0; vertical-align: bottom; text-align: center;">
+                  <div style="height: 15mm; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 5mm;">
+                    <span class="page-number"></span>
+                  </div>
+                </td>
             </tr>
         </tfoot>
         <tbody>
@@ -343,27 +347,18 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
              thead { display: table-header-group; } 
              tfoot { display: table-footer-group; }
              .no-print { display: none !important; } 
-             .page-footer {
-               position: fixed;
-               bottom: 8mm;
-               left: 0;
-               right: 0;
-               text-align: center;
+
+             .page-number {
                font-size: 9px;
                color: #94a3b8;
                font-weight: 800;
                text-transform: uppercase;
                letter-spacing: 0.1em;
-               z-index: 9999;
-               display: none;
              }
              .page-number::after {
                counter-increment: page;
                content: "Página " counter(page);
              }
-           }
-           @media print {
-             .page-footer { display: block; }
            }
 
             /* Shared Rich Text / Quill Styles */
@@ -375,9 +370,6 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         </style>
       </head>
       <body>
-        <div class="page-footer">
-          <span class="page-number"></span>
-        </div>
         ${htmlContent}
         <script>
            function optimizePageBreaks() {
