@@ -436,15 +436,14 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     if (mode === 'pdf') {
       const worker = document.createElement('div');
       worker.style.position = 'fixed';
-      worker.style.left = '-9999px';
+      worker.style.left = '0';
       worker.style.top = '0';
       worker.style.width = '210mm';
       worker.style.background = 'white';
       worker.style.zIndex = '-9999';
+      worker.style.opacity = '1';
       worker.className = 'pdf-capture-container';
 
-      // Inject FULL HTML to preserve <style> tags and Tailwind logic
-      // In a <div>, the browser expects <body> content, but we need the <style> from <head>
       const styleMatch = html.match(/<style[^>]*>([\s\S]*)<\/style>/i);
       const styleContent = styleMatch ? styleMatch[0] : '';
       const bodyContent = html.match(/<body[^>]*>([\s\S]*)<\/body>/i)?.[1] || html;
@@ -453,7 +452,6 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       document.body.appendChild(worker);
 
       const runCapture = () => {
-        // Run optimization directly on the local worker content
         const descriptionRoot = worker.querySelector('.print-description-content .space-y-6');
         if (descriptionRoot) {
           const allNodes: Element[] = [];
@@ -509,23 +507,19 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
             scale: 3,
             useCORS: true,
             letterRendering: true,
-            backgroundColor: '#ffffff'
+            backgroundColor: '#ffffff',
+            scrollX: 0,
+            scrollY: 0,
+            windowWidth: 794,
+            windowHeight: worker.scrollHeight
           },
           jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
           pagebreak: { mode: ['css', 'legacy'], avoid: '.keep-together' }
         };
 
         // @ts-ignore
-        html2pdf().set(opt).from(worker).toPdf().get('pdf').then(function (pdf: any) {
-          var totalPages = pdf.internal.getNumberOfPages();
-          for (var i = 1; i <= totalPages; i++) {
-            pdf.setPage(i);
-            pdf.setFontSize(9);
-            pdf.setTextColor(150);
-            pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 15, { align: 'center' });
-          }
-          pdf.save(opt.filename);
-          document.body.removeChild(worker);
+        html2pdf().set(opt).from(worker).save().then(() => {
+          if (document.body.contains(worker)) document.body.removeChild(worker);
         }).catch((err: any) => {
           console.error("PDF Error:", err);
           notify("Erro ao gerar PDF.", "error");

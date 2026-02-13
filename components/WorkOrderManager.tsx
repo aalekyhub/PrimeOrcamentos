@@ -351,11 +351,12 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
         const worker = document.createElement('div');
         worker.style.position = 'fixed';
-        worker.style.left = '-9999px';
+        worker.style.left = '0';
         worker.style.top = '0';
         worker.style.width = '210mm';
         worker.style.background = 'white';
         worker.style.zIndex = '-9999';
+        worker.style.opacity = '1';
         worker.className = 'pdf-capture-container';
 
         const styleMatch = html.match(/<style[^>]*>([\s\S]*)<\/style>/i);
@@ -427,23 +428,19 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     scale: 3,
                     useCORS: true,
                     letterRendering: true,
-                    backgroundColor: '#ffffff'
+                    backgroundColor: '#ffffff',
+                    scrollX: 0,
+                    scrollY: 0,
+                    windowWidth: 794,
+                    windowHeight: worker.scrollHeight
                 },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
                 pagebreak: { mode: ['css', 'legacy'], avoid: '.keep-together' }
             };
 
             // @ts-ignore
-            html2pdf().set(opt).from(worker).toPdf().get('pdf').then(function (pdf: any) {
-                var totalPages = pdf.internal.getNumberOfPages();
-                for (var i = 1; i <= totalPages; i++) {
-                    pdf.setPage(i);
-                    pdf.setFontSize(10);
-                    pdf.setTextColor(148, 163, 184); // #94a3b8
-                    pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 15, { align: 'center' });
-                }
-                pdf.save(opt.filename);
-                document.body.removeChild(worker);
+            html2pdf().set(opt).from(worker).save().then(() => {
+                if (document.body.contains(worker)) document.body.removeChild(worker);
             }).catch((err: any) => {
                 console.error("PDF Error:", err);
                 notify("Erro ao gerar PDF.", "error");

@@ -17,16 +17,37 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
         const element = document.getElementById('report-preview-content');
         if (!element) return;
 
-        const opt = {
-            margin: [10, 10, 10, 10] as [number, number, number, number],
-            filename: filename,
-            image: { type: 'jpeg' as const, quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const },
-            pagebreak: { mode: ['avoid-all' as const, 'css', 'legacy'] }
-        };
+        // Ensure all images are loaded first
+        const images = Array.from(element.querySelectorAll('img'));
+        const imagePromises = images.map(img => {
+            if (img.complete) return Promise.resolve();
+            return new Promise(resolve => {
+                img.onload = resolve;
+                img.onerror = resolve;
+            });
+        });
 
-        html2pdf().set(opt).from(element).save();
+        Promise.all(imagePromises).finally(() => {
+            setTimeout(() => {
+                const opt = {
+                    margin: [10, 10, 10, 10] as [number, number, number, number],
+                    filename: filename,
+                    image: { type: 'jpeg' as const, quality: 0.98 },
+                    html2canvas: {
+                        scale: 3,
+                        useCORS: true,
+                        letterRendering: true,
+                        scrollX: 0,
+                        scrollY: 0,
+                        windowWidth: 794
+                    },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const },
+                    pagebreak: { mode: ['avoid-all' as const, 'css', 'legacy'] }
+                };
+
+                html2pdf().set(opt).from(element).save();
+            }, 1000); // 1s buffer for layout
+        });
     };
 
     return (

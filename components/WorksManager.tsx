@@ -512,16 +512,41 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         const html = generateMaterialsReportHtml();
         const element = document.createElement('div');
         element.innerHTML = html;
+        document.body.appendChild(element); // Append to DOM for style application
 
-        const opt = {
-            margin: [10, 10, 10, 10] as [number, number, number, number],
-            filename: `Material_Obra_${currentWork.name.replace(/\s+/g, '_')}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 } as any,
-            html2canvas: { scale: 2, useCORS: true },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } as any
-        };
+        // Ensure all images are loaded
+        const images = Array.from(element.querySelectorAll('img'));
+        const imagePromises = images.map(img => {
+            if (img.complete) return Promise.resolve();
+            return new Promise(resolve => {
+                img.onload = resolve;
+                img.onerror = resolve;
+            });
+        });
 
-        html2pdf().set(opt).from(element).save();
+        Promise.all(imagePromises).finally(() => {
+            setTimeout(() => {
+                const opt = {
+                    margin: [10, 10, 10, 10] as [number, number, number, number],
+                    filename: `Material_Obra_${currentWork.name.replace(/\s+/g, '_')}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 } as any,
+                    html2canvas: {
+                        scale: 3,
+                        useCORS: true,
+                        letterRendering: true,
+                        scrollX: 0,
+                        scrollY: 0,
+                        windowWidth: 794,
+                        windowHeight: element.scrollHeight
+                    },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } as any
+                };
+
+                html2pdf().set(opt).from(element).save().then(() => {
+                    if (document.body.contains(element)) document.body.removeChild(element);
+                });
+            }, 1000);
+        });
     };
 
     const generateFullReportHtml = () => {
@@ -712,17 +737,42 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         const html = generateFullReportHtml();
         const element = document.createElement('div');
         element.innerHTML = html;
+        document.body.appendChild(element);
 
-        const opt = {
-            margin: [10, 10, 10, 10] as [number, number, number, number],
-            filename: `Relatorio_Obra_${currentWork.name.replace(/\s+/g, '_')}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 } as any,
-            html2canvas: { scale: 2, useCORS: true },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } as any,
-            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-        };
+        // Ensure all images are loaded
+        const images = Array.from(element.querySelectorAll('img'));
+        const imagePromises = images.map(img => {
+            if (img.complete) return Promise.resolve();
+            return new Promise(resolve => {
+                img.onload = resolve;
+                img.onerror = resolve;
+            });
+        });
 
-        html2pdf().set(opt).from(element).save();
+        Promise.all(imagePromises).finally(() => {
+            setTimeout(() => {
+                const opt = {
+                    margin: [10, 10, 10, 10] as [number, number, number, number],
+                    filename: `Relatorio_Obra_${currentWork.name.replace(/\s+/g, '_')}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 } as any,
+                    html2canvas: {
+                        scale: 3,
+                        useCORS: true,
+                        letterRendering: true,
+                        scrollX: 0,
+                        scrollY: 0,
+                        windowWidth: 794,
+                        windowHeight: element.scrollHeight
+                    },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } as any,
+                    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+                };
+
+                html2pdf().set(opt).from(element).save().then(() => {
+                    if (document.body.contains(element)) document.body.removeChild(element);
+                });
+            }, 1000);
+        });
     };
 
     const handlePreviewMaterials = () => {
