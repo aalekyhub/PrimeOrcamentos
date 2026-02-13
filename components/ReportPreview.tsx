@@ -128,8 +128,9 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                 }
 
                 /* UI Styles (non-print) */
-                #report-preview-content table { border-collapse: collapse; width: 100%; }
-                #report-preview-content td, #report-preview-content th { border: 1px solid #e2e8f0; padding: 8px; }
+                #report-preview-content table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+                #report-preview-content td, #report-preview-content th { border-bottom: 1px solid #e2e8f0; padding: 12px 8px; border-left: none; border-right: none; border-top: none; }
+                #report-preview-content th { background: #f8fafc; }
             `}</style>
 
             <script dangerouslySetInnerHTML={{
@@ -222,7 +223,7 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                 <div className="flex-1 overflow-y-auto bg-slate-50 p-6 md:p-10 flex justify-center">
                     <div
                         id="report-preview-content"
-                        className="bg-white shadow-xl w-full max-w-[210mm] min-h-[297mm] p-[10mm] overflow-x-hidden border border-slate-200 rounded-sm prose prose-slate prose-sm max-w-none"
+                        className="bg-white shadow-xl w-full max-w-[210mm] min-h-[297mm] p-[10mm] overflow-x-hidden rounded-sm prose prose-slate prose-sm max-w-none"
                         dangerouslySetInnerHTML={{ __html: htmlContent }}
                     />
                 </div>

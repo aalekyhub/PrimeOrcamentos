@@ -568,7 +568,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                             </div>
                             <div class="a4-container">
                                 <!-- INFO GRID -->
-                                <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                                <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px; background: #f8fafc; padding: 20px; border-radius: 12px; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
                                     <div style="flex: 1; min-width: 45%;">
                                         <p style="margin: 0 0 5px 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Cliente</p>
                                         <p style="margin: 0; font-size: 14px; color: #0f172a; font-weight: 600;">${customer?.name || 'Não Informado'}</p>
@@ -587,7 +587,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 <div style="display: flex; gap: 16px; margin-bottom: 20px;">
                                     <!-- Materials (Green) -->
                                     ${totalMaterial > 0 ? `
-                                    <div style="flex: 1; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 16px;">
+                                    <div style="flex: 1; background: #ecfdf5; border-top: 1px solid #a7f3d0; border-bottom: 1px solid #a7f3d0; border-radius: 12px; padding: 16px;">
                                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                             <span style="font-size: 9px; font-weight: 500; color: #059669; text-transform: uppercase; letter-spacing: 0.05em;">Total Materiais</span>
                                             <div style="background: #d1fae5; padding: 4px; border-radius: 6px;">
@@ -600,7 +600,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
                                     <!-- Labor (Amber) -->
                                     ${totalLabor > 0 ? `
-                                    <div style="flex: 1; background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 16px;">
+                                    <div style="flex: 1; background: #fffbeb; border-top: 1px solid #fde68a; border-bottom: 1px solid #fde68a; border-radius: 12px; padding: 16px;">
                                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                             <span style="font-size: 9px; font-weight: 500; color: #d97706; text-transform: uppercase; letter-spacing: 0.05em;">Total Mão de Obra</span>
                                             <div style="background: #fef3c7; padding: 4px; border-radius: 6px;">
@@ -613,7 +613,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
                                     <!-- Indirects (Slate) -->
                                     ${totalIndirect > 0 ? `
-                                    <div style="flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">
+                                    <div style="flex: 1; background: #f8fafc; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">
                                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                             <span style="font-size: 9px; font-weight: 500; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Total Indiretos</span>
                                             <div style="background: #e2e8f0; padding: 4px; border-radius: 6px;">
@@ -626,7 +626,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
                                     <!-- Taxes (Blue) - Conditional Render -->
                                     ${totalTaxes > 0 ? `
-                                    <div style="flex: 1; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 16px;">
+                                    <div style="flex: 1; background: #eff6ff; border-top: 1px solid #bfdbfe; border-bottom: 1px solid #bfdbfe; border-radius: 12px; padding: 16px;">
                                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                             <span style="font-size: 9px; font-weight: 500; color: #2563eb; text-transform: uppercase; letter-spacing: 0.05em;">Total Impostos</span>
                                             <div style="background: #dbeafe; padding: 4px; border-radius: 6px;">
