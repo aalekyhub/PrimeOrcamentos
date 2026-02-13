@@ -452,6 +452,40 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         notify("Imposto adicionado (lembre-se de salvar)", "success");
     };
 
+    const handleLoadDefaultTaxes = () => {
+        if (!currentWork) return;
+        const defaults = [
+            { name: 'BDI', rate: 0 },
+            { name: 'ISS', rate: 0 },
+            { name: 'PIS', rate: 0 },
+            { name: 'COFINS', rate: 0 },
+            { name: 'INSS', rate: 0 }
+        ];
+
+        const newTaxes = [...taxes];
+        let addedCount = 0;
+
+        defaults.forEach(def => {
+            if (!newTaxes.some(t => t.name === def.name)) {
+                newTaxes.push({
+                    id: db.generateId('WTAX'),
+                    work_id: currentWork.id,
+                    name: def.name,
+                    rate: def.rate,
+                    value: 0
+                });
+                addedCount++;
+            }
+        });
+
+        if (addedCount > 0) {
+            setTaxes(newTaxes);
+            notify(`${addedCount} taxas padrão adicionadas.`, "success");
+        } else {
+            notify("Taxas padrão já configuradas.", "info");
+        }
+    };
+
 
     const generateMaterialsReportHtml = () => {
         if (!currentWork || materials.length === 0) return '';
@@ -1663,83 +1697,20 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
                                 {resourceTab === 'impostos' && (
                                     <div className="space-y-6">
-                                        {/* Predefined Taxes Grid */}
-                                        <div className="bg-white p-4 rounded-xl border border-slate-200">
-                                            <div className="flex justify-between items-center mb-4">
-                                                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                                    <Percent size={14} className="text-blue-500" /> Impostos e BDI Padronizados
-                                                </h4>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        const defaults = [
-                                                            { name: 'ISS', rate: 5 },
-                                                            { name: 'PIS', rate: 0.65 },
-                                                            { name: 'COFINS', rate: 3 },
-                                                            { name: 'INSS', rate: 3.5 }
-                                                        ];
 
-                                                        let newTaxes = [...taxes];
-                                                        defaults.forEach(def => {
-                                                            const idx = newTaxes.findIndex(t => t.name === def.name);
-                                                            if (idx !== -1) {
-                                                                newTaxes[idx] = { ...newTaxes[idx], rate: def.rate, value: 0 };
-                                                            } else {
-                                                                newTaxes.push({
-                                                                    id: db.generateId('WTAX'),
-                                                                    work_id: currentWork?.id || '',
-                                                                    name: def.name,
-                                                                    rate: def.rate,
-                                                                    value: 0
-                                                                });
-                                                            }
-                                                        });
-                                                        setTaxes(newTaxes);
-                                                        notify("Impostos padrão carregados!", "success");
-                                                    }}
-                                                    className="text-[10px] font-bold text-blue-600 hover:text-blue-800 uppercase tracking-tighter bg-blue-50 px-2 py-1 rounded"
-                                                >
-                                                    Carregar Padrão (ISS/PIS/COF/INS)
-                                                </button>
-                                            </div>
+                                        <div className="flex justify-between items-center mb-4">
+                                            <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Configuração de Impostos Padrão</h4>
+                                            <button
+                                                onClick={handleLoadDefaultTaxes}
+                                                className="text-[10px] font-bold text-blue-600 hover:text-blue-800 uppercase tracking-tighter bg-blue-50 px-2 py-1 rounded"
+                                            >
+                                                Carregar Padrão (ISS/PIS/COF/INS)
+                                            </button>
+                                        </div>
 
-                                            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                                                {[
-                                                    { name: 'BDI', label: 'BDI (%)', color: 'bg-indigo-50 text-indigo-700 border-indigo-100' },
-                                                    { name: 'ISS', label: 'ISS (%)', color: 'bg-blue-50 text-blue-700 border-blue-100' },
-                                                    { name: 'PIS', label: 'PIS (%)', color: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
-                                                    { name: 'COFINS', label: 'COFINS (%)', color: 'bg-slate-50 text-slate-700 border-slate-100' },
-                                                    { name: 'INSS', label: 'INSS (%)', color: 'bg-orange-50 text-orange-700 border-orange-100' }
-                                                ].map(tax => (
-                                                    <div key={tax.name} className={`p-3 rounded-lg border ${tax.color}`}>
-                                                        <label className="block text-[10px] font-bold uppercase mb-1 opacity-70">{tax.label}</label>
-                                                        <input
-                                                            type="number"
-                                                            step="0.01"
-                                                            className="w-full bg-white/50 border border-black/5 rounded p-1 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5"
-                                                            value={taxes.find(t => t.name === tax.name)?.rate || ''}
-                                                            placeholder="0.00"
-                                                            onChange={(e) => {
-                                                                const val = parseFloat(e.target.value) || 0;
-                                                                const newTaxes = [...taxes];
-                                                                const idx = newTaxes.findIndex(t => t.name === tax.name);
-                                                                if (idx !== -1) {
-                                                                    newTaxes[idx] = { ...newTaxes[idx], rate: val, value: 0 };
-                                                                } else {
-                                                                    newTaxes.push({
-                                                                        id: db.generateId('WTAX'),
-                                                                        work_id: currentWork?.id || '',
-                                                                        name: tax.name,
-                                                                        rate: val,
-                                                                        value: 0
-                                                                    });
-                                                                }
-                                                                setTaxes(newTaxes);
-                                                            }}
-                                                        />
-                                                    </div>
-                                                ))}
-                                            </div>
+                                        <div className="text-xs text-slate-500 mb-4 bg-yellow-50 p-3 rounded-lg border border-yellow-100">
+                                            <p className="font-bold text-yellow-700 mb-1">Nota sobre cálculo de impostos:</p>
+                                            <p>O sistema utiliza o cálculo "por dentro" (Gross Up) para determinar o valor da Nota Fiscal, garantindo que o valor líquido recebido seja exatamente o custo direto + BDI.</p>
                                         </div>
 
                                         {/* Custom Tax Form */}
@@ -1812,21 +1783,49 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         {activeTab === 'resumo' && (
                             <div className="max-w-4xl mx-auto space-y-6">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-                                    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                                        <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Materiais</span>
-                                        <span className="text-2xl font-bold text-slate-800">R$ {totalMaterial.toFixed(2)}</span>
+
+                                    <div className="bg-emerald-50 p-6 rounded-xl border border-emerald-200 shadow-sm transition-all hover:shadow-md">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Total Materiais</span>
+                                            <div className="bg-emerald-100 p-1.5 rounded-lg">
+                                                <Truck size={16} className="text-emerald-600" />
+                                            </div>
+                                        </div>
+                                        <span className="text-2xl font-black text-emerald-900">R$ {totalMaterial.toFixed(2)}</span>
+                                        <p className="text-[10px] text-emerald-600 mt-1 font-medium">Insumos + Materiais de Serviços</p>
                                     </div>
-                                    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                                        <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Mão de Obra</span>
-                                        <span className="text-2xl font-bold text-slate-800">R$ {totalLabor.toFixed(2)}</span>
+
+                                    <div className="bg-amber-50 p-6 rounded-xl border border-amber-200 shadow-sm transition-all hover:shadow-md">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <span className="text-xs font-bold text-amber-600 uppercase tracking-wider">Total Mão de Obra</span>
+                                            <div className="bg-amber-100 p-1.5 rounded-lg">
+                                                <HardHat size={16} className="text-amber-600" />
+                                            </div>
+                                        </div>
+                                        <span className="text-2xl font-black text-amber-900">R$ {totalLabor.toFixed(2)}</span>
+                                        <p className="text-[10px] text-amber-600 mt-1 font-medium">Equipe Própria + Terceirizada</p>
                                     </div>
-                                    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                                        <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Indiretos</span>
-                                        <span className="text-2xl font-bold text-slate-800">R$ {totalIndirect.toFixed(2)}</span>
+
+                                    <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Indiretos</span>
+                                            <div className="bg-slate-200 p-1.5 rounded-lg">
+                                                <Archive size={16} className="text-slate-600" />
+                                            </div>
+                                        </div>
+                                        <span className="text-2xl font-black text-slate-800">R$ {totalIndirect.toFixed(2)}</span>
+                                        <p className="text-[10px] text-slate-500 mt-1 font-medium">Custos Administrativos</p>
                                     </div>
-                                    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-blue-500">
-                                        <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Impostos</span>
-                                        <span className="text-2xl font-bold text-slate-800">R$ {totalTaxes.toFixed(2)}</span>
+
+                                    <div className="bg-blue-50 p-6 rounded-xl border border-blue-200 shadow-sm transition-all hover:shadow-md">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">Total Impostos</span>
+                                            <div className="bg-blue-100 p-1.5 rounded-lg">
+                                                <Percent size={16} className="text-blue-600" />
+                                            </div>
+                                        </div>
+                                        <span className="text-2xl font-black text-blue-900">R$ {totalTaxes.toFixed(2)}</span>
+                                        <p className="text-[10px] text-blue-600 mt-1 font-medium">Baseado no BDI e Taxas</p>
                                     </div>
                                 </div>
 
@@ -1858,8 +1857,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         )}
                     </div>
                 </div>
-            )
-            }
+            )}
             <ReportPreview
                 isOpen={showPreview}
                 onClose={() => setShowPreview(false)}
