@@ -613,7 +613,25 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         pagebreak: { mode: ["css", "legacy"] as any },
       };
 
-      await html2pdf().set(options).from(elementToPrint).save();
+      await html2pdf()
+        .set(options)
+        .from(elementToPrint)
+        .toPdf()
+        .get('pdf')
+        .then((pdf: any) => {
+          const totalPages = pdf.internal.getNumberOfPages();
+          for (let i = 1; i <= totalPages; i++) {
+            pdf.setPage(i);
+            pdf.setFontSize(8);
+            pdf.setTextColor(150);
+            pdf.text(
+              `Pág. ${i} / ${totalPages}`,
+              pdf.internal.pageSize.getWidth() - 15,
+              pdf.internal.pageSize.getHeight() - 8
+            );
+          }
+        })
+        .save();
 
       notify("PDF baixado com sucesso!");
     } catch (err) {
