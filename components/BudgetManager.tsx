@@ -302,7 +302,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           <style>
             * { box-sizing: border-box; }
             body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
-            @page { size: A4; margin: 20mm 15mm 15mm 15mm; }
+            @page { size: A4; margin: 0 !important; }
             .a4-container {width: 100%; margin: 0; background: white; padding: 0; }
             .avoid-break { break-inside: avoid; page-break-inside: avoid; }
             .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
@@ -312,8 +312,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
             .a4-container {width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm; } 
            }
             @media print { 
-              @page { margin: 20mm 15mm 15mm 15mm; size: A4; }
-              html { counter-reset: page; }
+              @page { margin: 0; size: A4; } 
               body { background: white !important; margin: 0 !important; padding: 0 !important; } 
             table { break-inside: auto; width: 100%; }
             tr { break-inside: avoid; break-after: auto; }
@@ -321,24 +320,8 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
             tfoot {display: table-footer-group; }
             .no-print {display: none !important; }
 
-            .page-footer {
-              position: fixed;
-            bottom: -10mm;
-            left: 0;
-            right: 0;
-            text-align: center;
-            display: block;
-            z-index: 9999;
-            counter-increment: page;
-             }
-            .page-footer::after {
-              content: "PÁGINA " counter(page);
-            font-size: 9px;
-            color: #94a3b8;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-             }
+
+
            }
 
             /* Shared Rich Text / Quill Styles */
@@ -350,7 +333,6 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           </style>
       </head>
       <body>
-        <div class="page-footer"></div>
         ${htmlContent}
         <script>
           function optimizePageBreaks() {
