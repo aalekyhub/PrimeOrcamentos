@@ -122,14 +122,22 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
   const getBudgetHtml = (budget: ServiceOrder) => {
     const customer = customers.find(c => c.id === budget.customerId) || { name: budget.customerName, address: 'Não informado', document: 'Documento não informado' };
+    const formatDate = (dateStr: any) => {
+      try {
+        const d = new Date(dateStr);
+        return isNaN(d.getTime()) ? new Date().toLocaleDateString('pt-BR') : d.toLocaleDateString('pt-BR');
+      } catch {
+        return new Date().toLocaleDateString('pt-BR');
+      }
+    };
 
-    const emissionDate = new Date(budget.createdAt).toLocaleDateString('pt-BR');
+    const emissionDate = formatDate(budget.createdAt);
     const validityDays = company.defaultProposalValidity || 15;
     const validityDate = budget.dueDate
-      ? new Date(budget.dueDate).toLocaleDateString('pt-BR')
-      : new Date(new Date(budget.createdAt).getTime() + validityDays * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR');
+      ? formatDate(budget.dueDate)
+      : formatDate(new Date(new Date(budget.createdAt).getTime() + validityDays * 24 * 60 * 60 * 1000).toISOString());
 
-    const subTotal = budget.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0);
+    const subTotal = (budget.items || []).reduce((acc, i) => acc + ((i.unitPrice || 0) * (i.quantity || 0)), 0);
     const bdiR = budget.bdiRate || 0;
     const taxR = budget.taxRate || 0;
     const bdiValue = subTotal * (bdiR / 100);
@@ -704,7 +712,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                       bdiRate: Number(bdiRate) || 0,
                       createdAt: new Date().toISOString(),
                       dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString()
-                    })} className="col-span-2 bg-emerald-600 hover:bg-emerald-700 text-white p-4 rounded-xl font-black uppercase text-[11px] flex items-center justify-center gap-2 transition-all shadow-xl shadow-emerald-100 group">
+                    })} className="col-span-2 bg-emerald-600 hover:bg-emerald-700 text-white p-4 rounded-xl font-black uppercase text-[11px] flex items-center justify-center gap-2 transition-all group active:scale-95 shadow-lg shadow-emerald-900/10">
                       <Eye className="w-5 h-5 group-hover:scale-110 transition-transform" /> VISUALIZAR E GERAR PDF
                     </button>
                     <button onClick={handleSave} className="col-span-2 bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[11px] shadow-xl transition-all flex items-center justify-center gap-2">
@@ -788,8 +796,10 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
       {showPreview && (
         <ReportPreview
+          isOpen={showPreview}
           title={previewContent.title}
-          html={previewContent.html}
+          htmlContent={previewContent.html}
+          filename={previewContent.filename}
           onClose={() => setShowPreview(false)}
         />
       )}
