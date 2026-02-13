@@ -304,7 +304,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                 <tbody>
                     <tr>
                         <td style="padding: 0;">
-                           <div class="a4-container" style="padding-bottom: 20px !important; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px;">
+                           <div class="a4-container" style="padding-bottom: 10px !important; border-bottom: 2px solid #e2e8f0; margin-bottom: 10px;">
                                 <div style="display: flex; justify-content: space-between; align-items: start;">
                                     <div>
                                         <h1 style="margin: 0; color: #1e40af; font-size: 26px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.025em;">Planejamento Executivo de Obra</h1>
@@ -555,17 +555,17 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                 <style>
                     * { box-sizing: border-box; }
                     body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
-                    @page { size: A4; margin: 0 !important; }
-                    .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; padding-top: 15mm !important; padding-bottom: 15mm !important; }
+                    @page { size: A4; margin: 20mm 15mm !important; }
+                    .a4-container { width: 100%; margin: 0; background: white; padding: 0 !important; }
                     .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
 
                     @media screen {
                         body { background: #f1f5f9; padding: 40px 0; }
-                        .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; }
+                        .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; }
                     }
                     @media print {
                         body { background: white !important; margin: 0 !important; }
-                        .a4-container { box-shadow: none !important; border: none !important; width: 100% !important; }
+                        .a4-container { box-shadow: none !important; border: none !important; width: 100% !important; padding: 0 !important; }
                         .no-print { display: none !important; }
                     }
 
@@ -759,8 +759,8 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                     key={tab.id}
                                     type="button"
                                     onClick={() => setActiveTab(tab.id as any)}
-                                    className={`px - 6 py - 4 text - sm font - bold flex items - center gap - 2 border - b - 2 transition - colors whitespace - nowrap ${activeTab === tab.id ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'
-                                        } `}
+                                    className={`px-6 py-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'
+                                        }`}
                                 >
                                     <tab.icon size={16} /> {tab.label}
                                 </button>
