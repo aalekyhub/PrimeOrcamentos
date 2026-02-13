@@ -303,16 +303,16 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                 </div>
 
                 <!-- INFO GRID -->
-                <div style="display: grid; grid-template-cols: 1fr 1fr; gap: 20px; margin-bottom: 30px; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
-                    <div>
+                <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                    <div style="flex: 1; min-width: 45%;">
                         <p style="margin: 0 0 5px 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Cliente</p>
                         <p style="margin: 0; font-size: 14px; color: #0f172a; font-weight: 600;">${customer?.name || 'Não Informado'}</p>
                     </div>
-                    <div>
+                    <div style="flex: 1; min-width: 45%;">
                         <p style="margin: 0 0 5px 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Tipo de Obra</p>
                         <p style="margin: 0; font-size: 14px; color: #0f172a; font-weight: 600;">${currentPlan.type}</p>
                     </div>
-                    <div style="grid-column: span 2;">
+                    <div style="width: 100%;">
                         <p style="margin: 0 0 5px 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Endereço Previsto</p>
                         <p style="margin: 0; font-size: 14px; color: #0f172a; font-weight: 600;">${currentPlan.address || 'Não Informado'}</p>
                     </div>
@@ -472,18 +472,54 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
         if (!currentPlan) return;
         const html = generateFullReportHtml();
         const element = document.createElement('div');
+        element.style.position = 'absolute';
+        element.style.left = '-10000px';
+        element.style.top = '0';
+        element.style.width = '210mm';
+        element.style.background = 'white';
+        element.style.zIndex = '1';
+        element.style.opacity = '1';
         element.innerHTML = html;
+        document.body.appendChild(element);
 
-        const opt = {
-            margin: [10, 10, 10, 10] as [number, number, number, number],
-            filename: `Planejamento_Obra_${currentPlan.name.replace(/\s+/g, '_')}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 } as any,
-            html2canvas: { scale: 2, useCORS: true },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } as any,
-            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-        };
+        // Ensure all images are loaded
+        const images = Array.from(element.querySelectorAll('img'));
+        const imagePromises = images.map(img => {
+            if (img.complete) return Promise.resolve();
+            return new Promise(resolve => {
+                img.onload = resolve;
+                img.onerror = resolve;
+            });
+        });
 
-        html2pdf().set(opt).from(element).save();
+        Promise.all(imagePromises).finally(() => {
+            setTimeout(() => {
+                const opt = {
+                    margin: [10, 10, 10, 10] as [number, number, number, number],
+                    filename: `Planejamento_Obra_${currentPlan.name.replace(/\s+/g, '_')}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 } as any,
+                    html2canvas: {
+                        scale: 3,
+                        useCORS: true,
+                        letterRendering: true,
+                        scrollX: 0,
+                        scrollY: 0,
+                        windowWidth: 794,
+                        windowHeight: element.scrollHeight
+                    },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } as any,
+                    pagebreak: { mode: ['css', 'legacy'] }
+                };
+
+                // @ts-ignore
+                html2pdf().set(opt).from(element).save().then(() => {
+                    if (document.body.contains(element)) document.body.removeChild(element);
+                }).catch((err: any) => {
+                    console.error("PDF Error:", err);
+                    if (document.body.contains(element)) document.body.removeChild(element);
+                });
+            }, 2000);
+        });
     };
 
     const handlePreviewFull = () => {

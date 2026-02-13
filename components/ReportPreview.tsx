@@ -42,7 +42,7 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                         windowWidth: 794
                     },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const },
-                    pagebreak: { mode: ['avoid-all' as const, 'css', 'legacy'] }
+                    pagebreak: { mode: ['css', 'legacy'] }
                 };
 
                 html2pdf().set(opt).from(element).save();

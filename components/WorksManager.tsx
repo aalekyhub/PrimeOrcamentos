@@ -779,7 +779,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         windowHeight: element.scrollHeight
                     },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } as any,
-                    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+                    pagebreak: { mode: ['css', 'legacy'] }
                 };
 
                 html2pdf().set(opt).from(element).save().then(() => {
