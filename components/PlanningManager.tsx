@@ -336,18 +336,18 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                             </div>
                             <div class="a4-container">
                                 <!-- INFO GRID -->
-                                <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px; background: #f8fafc; padding: 20px; border-radius: 12px; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
-                                    <div style="flex: 1; min-width: 45%;">
-                                        <p style="margin: 0 0 5px 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Cliente</p>
-                                        <p style="margin: 0; font-size: 14px; color: #0f172a; font-weight: 600;">${customer?.name || 'Não Informado'}</p>
+                                <div style="display: flex; flex-wrap: wrap; gap: 24px; margin-bottom: 32px; background: #f1f5f9; padding: 24px; border-radius: 8px; border-bottom: 2px solid #cbd5e1;">
+                                    <div style="flex: 1; min-width: 200px;">
+                                        <p style="margin: 0 0 6px 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Cliente</p>
+                                        <p style="margin: 0; font-size: 14px; color: #0f172a; font-weight: 700;">${customer?.name || 'Não Informado'}</p>
                                     </div>
-                                    <div style="flex: 1; min-width: 45%;">
-                                        <p style="margin: 0 0 5px 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Tipo de Obra</p>
-                                        <p style="margin: 0; font-size: 14px; color: #0f172a; font-weight: 600;">${currentPlan.type}</p>
+                                    <div style="flex: 1; min-width: 200px;">
+                                        <p style="margin: 0 0 6px 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Tipo de Obra</p>
+                                        <p style="margin: 0; font-size: 14px; color: #0f172a; font-weight: 700;">${currentPlan.type}</p>
                                     </div>
                                     <div style="width: 100%;">
-                                        <p style="margin: 0 0 5px 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Endereço Previsto</p>
-                                        <p style="margin: 0; font-size: 14px; color: #0f172a; font-weight: 600;">${currentPlan.address || 'Não Informado'}</p>
+                                        <p style="margin: 0 0 6px 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Endereço Previsto</p>
+                                        <p style="margin: 0; font-size: 14px; color: #0f172a; font-weight: 700;">${currentPlan.address || 'Não Informado'}</p>
                                     </div>
                                 </div>
 
@@ -355,53 +355,53 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                 <div style="display: flex; gap: 16px; margin-bottom: 20px;">
                                     <!-- Materials (Green) -->
                                     ${totalMaterials > 0 ? `
-                                    <div style="flex: 1; background: #ecfdf5; border-top: 1px solid #a7f3d0; border-bottom: 1px solid #a7f3d0; border-radius: 12px; padding: 16px;">
+                                    <div style="flex: 1; min-width: 140px; background: #ecfdf5; border-bottom: 3px solid #10b981; border-radius: 8px; padding: 16px;">
                                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                            <span style="font-size: 9px; font-weight: 500; color: #059669; text-transform: uppercase; letter-spacing: 0.05em;">Total Materiais</span>
-                                            <div style="background: #d1fae5; padding: 4px; border-radius: 6px;">
-                                                <span style="color: #059669; font-size: 11px; font-weight: 600;">M</span>
+                                            <span style="font-size: 9px; font-weight: 700; color: #059669; text-transform: uppercase; letter-spacing: 0.05em;">Materiais</span>
+                                            <div style="background: #d1fae5; padding: 4px; border-radius: 4px;">
+                                                <span style="color: #059669; font-size: 10px; font-weight: 800;">M</span>
                                             </div>
                                         </div>
-                                        <span style="font-size: 18px; font-weight: 600; color: #064e3b; display: block;">R$ ${totalMaterials.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                        <span style="font-size: 18px; font-weight: 800; color: #064e3b; display: block;">R$ ${totalMaterials.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                                     </div>
                                     ` : ''}
 
                                     <!-- Labor (Amber) -->
                                     ${totalLabor > 0 ? `
-                                    <div style="flex: 1; background: #fffbeb; border-top: 1px solid #fde68a; border-bottom: 1px solid #fde68a; border-radius: 12px; padding: 16px;">
+                                    <div style="flex: 1; min-width: 140px; background: #fffbeb; border-bottom: 3px solid #f59e0b; border-radius: 8px; padding: 16px;">
                                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                            <span style="font-size: 9px; font-weight: 500; color: #d97706; text-transform: uppercase; letter-spacing: 0.05em;">Total Mão de Obra</span>
-                                            <div style="background: #fef3c7; padding: 4px; border-radius: 6px;">
-                                                <span style="color: #d97706; font-size: 11px; font-weight: 600;">MO</span>
+                                            <span style="font-size: 9px; font-weight: 700; color: #d97706; text-transform: uppercase; letter-spacing: 0.05em;">Mão de Obra</span>
+                                            <div style="background: #fef3c7; padding: 4px; border-radius: 4px;">
+                                                <span style="color: #d97706; font-size: 10px; font-weight: 800;">MO</span>
                                             </div>
                                         </div>
-                                        <span style="font-size: 18px; font-weight: 600; color: #78350f; display: block;">R$ ${totalLabor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                        <span style="font-size: 18px; font-weight: 800; color: #78350f; display: block;">R$ ${totalLabor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                                     </div>
                                     ` : ''}
 
                                     <!-- Indirects (Slate) -->
                                     ${totalIndirect > 0 ? `
-                                    <div style="flex: 1; background: #f8fafc; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">
+                                    <div style="flex: 1; min-width: 140px; background: #f8fafc; border-bottom: 3px solid #94a3b8; border-radius: 8px; padding: 16px;">
                                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                            <span style="font-size: 9px; font-weight: 500; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Total Indiretos</span>
-                                            <div style="background: #e2e8f0; padding: 4px; border-radius: 6px;">
-                                                <span style="color: #475569; font-size: 11px; font-weight: 600;">I</span>
+                                            <span style="font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Indiretos</span>
+                                            <div style="background: #e2e8f0; padding: 4px; border-radius: 4px;">
+                                                <span style="color: #475569; font-size: 10px; font-weight: 800;">I</span>
                                             </div>
                                         </div>
-                                        <span style="font-size: 18px; font-weight: 600; color: #1e293b; display: block;">R$ ${totalIndirect.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                        <span style="font-size: 18px; font-weight: 800; color: #1e293b; display: block;">R$ ${totalIndirect.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                                     </div>
                                     ` : ''}
 
                                     <!-- Taxes (Blue) - Conditional Render -->
                                     ${totalTaxes > 0 ? `
-                                    <div style="flex: 1; background: #eff6ff; border-top: 1px solid #bfdbfe; border-bottom: 1px solid #bfdbfe; border-radius: 12px; padding: 16px;">
+                                    <div style="flex: 1; min-width: 140px; background: #eff6ff; border-bottom: 3px solid #3b82f6; border-radius: 8px; padding: 16px;">
                                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                            <span style="font-size: 9px; font-weight: 500; color: #2563eb; text-transform: uppercase; letter-spacing: 0.05em;">Total Impostos</span>
-                                            <div style="background: #dbeafe; padding: 4px; border-radius: 6px;">
-                                                <span style="color: #2563eb; font-size: 11px; font-weight: 600;">%</span>
+                                            <span style="font-size: 9px; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: 0.05em;">Impostos</span>
+                                            <div style="background: #dbeafe; padding: 4px; border-radius: 4px;">
+                                                <span style="color: #2563eb; font-size: 10px; font-weight: 800;">%</span>
                                             </div>
                                         </div>
-                                        <span style="font-size: 18px; font-weight: 600; color: #1e3a8a; display: block;">R$ ${totalTaxes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                        <span style="font-size: 18px; font-weight: 800; color: #1e3a8a; display: block;">R$ ${totalTaxes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                                     </div>
                                     ` : ''}
                                 </div>
@@ -414,22 +414,24 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                 
                                 <!-- SEÇÃO SERVIÇOS -->
                                 ${services.length > 0 ? `
-                                <div style="margin-bottom: 30px;">
-                                    <h3 style="font-size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; border-left: 4px solid #3b82f6; padding-left: 10px; margin-bottom: 15px;">1. Serviços Planejados</h3>
+                                <div style="margin-bottom: 40px;">
+                                    <h3 style="font-size: 14px; font-weight: 800; color: #1e3a8a; text-transform: uppercase; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0;">1. Serviços Planejados</h3>
                                     <table style="width: 100%; border-collapse: collapse;">
-                                        <tbody>
-                                            <tr style="background: #f1f5f9; border-bottom: 1px solid #e2e8f0;">
-                                                <th style="padding: 10px; text-align: left; font-size: 10px; color: #64748b;">DESCRIÇÃO</th>
-                                                <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 60px;">QTD</th>
-                                                <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 40px;">UND</th>
-                                                <th style="padding: 10px; text-align: right; font-size: 10px; color: #64748b; width: 120px;">TOTAL</th>
+                                        <thead>
+                                            <tr>
+                                                <th style="padding: 12px 0; text-align: left; font-size: 10px; color: #64748b; border-bottom: 2px solid #e2e8f0;">DESCRIÇÃO</th>
+                                                <th style="padding: 12px 0; text-align: center; font-size: 10px; color: #64748b; width: 60px; border-bottom: 2px solid #e2e8f0;">QTD</th>
+                                                <th style="padding: 12px 0; text-align: center; font-size: 10px; color: #64748b; width: 40px; border-bottom: 2px solid #e2e8f0;">UND</th>
+                                                <th style="padding: 12px 0; text-align: right; font-size: 10px; color: #64748b; width: 120px; border-bottom: 2px solid #e2e8f0;">TOTAL</th>
                                             </tr>
+                                        </thead>
+                                        <tbody>
                                             ${services.map(s => `
-                                                <tr style="border-bottom: 1px solid #f1f5f9;">
-                                                    <td style="padding: 10px; font-size: 11px; font-weight: 600;">${s.description}</td>
-                                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${s.quantity}</td>
-                                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${s.unit}</td>
-                                                    <td style="padding: 10px; font-size: 11px; text-align: right; font-weight: 700;">R$ ${s.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                                <tr>
+                                                    <td style="padding: 12px 0; font-size: 11px; font-weight: 600; border-bottom: 1px solid #f1f5f9;">${s.description}</td>
+                                                    <td style="padding: 12px 0; font-size: 11px; text-align: center; border-bottom: 1px solid #f1f5f9;">${s.quantity}</td>
+                                                    <td style="padding: 12px 0; font-size: 11px; text-align: center; border-bottom: 1px solid #f1f5f9;">${s.unit}</td>
+                                                    <td style="padding: 12px 0; font-size: 11px; text-align: right; font-weight: 700; border-bottom: 1px solid #f1f5f9;">R$ ${s.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                                 </tr>
                                             `).join('')}
                                         </tbody>
@@ -439,22 +441,24 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                 
                                 <!-- SEÇÃO MATERIAIS -->
                                 ${materials.length > 0 ? `
-                                <div style="margin-bottom: 30px;">
-                                    <h3 style="font-size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; border-left: 4px solid #3b82f6; padding-left: 10px; margin-bottom: 15px;">2. Insumos e Materiais (Previstos)</h3>
+                                <div style="margin-bottom: 40px;">
+                                    <h3 style="font-size: 14px; font-weight: 800; color: #1e3a8a; text-transform: uppercase; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0;">2. Insumos e Materiais</h3>
                                     <table style="width: 100%; border-collapse: collapse;">
-                                        <tbody>
-                                            <tr style="background: #f1f5f9; border-bottom: 1px solid #e2e8f0;">
-                                                <th style="padding: 10px; text-align: left; font-size: 10px; color: #64748b;">MATERIAL</th>
-                                                <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 60px;">QTD</th>
-                                                <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 40px;">UND</th>
-                                                <th style="padding: 10px; text-align: right; font-size: 10px; color: #64748b; width: 120px;">VALOR</th>
+                                        <thead>
+                                            <tr>
+                                                <th style="padding: 12px 0; text-align: left; font-size: 10px; color: #64748b; border-bottom: 2px solid #e2e8f0;">MATERIAL</th>
+                                                <th style="padding: 12px 0; text-align: center; font-size: 10px; color: #64748b; width: 60px; border-bottom: 2px solid #e2e8f0;">QTD</th>
+                                                <th style="padding: 12px 0; text-align: center; font-size: 10px; color: #64748b; width: 40px; border-bottom: 2px solid #e2e8f0;">UND</th>
+                                                <th style="padding: 12px 0; text-align: right; font-size: 10px; color: #64748b; width: 120px; border-bottom: 2px solid #e2e8f0;">VALOR</th>
                                             </tr>
+                                        </thead>
+                                        <tbody>
                                             ${materials.map(m => `
-                                                <tr style="border-bottom: 1px solid #f1f5f9;">
-                                                    <td style="padding: 10px; font-size: 11px; font-weight: 600;">${m.material_name}</td>
-                                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${m.quantity}</td>
-                                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${m.unit}</td>
-                                                    <td style="padding: 10px; font-size: 11px; text-align: right; font-weight: 700;">R$ ${m.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                                <tr>
+                                                    <td style="padding: 12px 0; font-size: 11px; font-weight: 600; border-bottom: 1px solid #f1f5f9;">${m.material_name}</td>
+                                                    <td style="padding: 12px 0; font-size: 11px; text-align: center; border-bottom: 1px solid #f1f5f9;">${m.quantity}</td>
+                                                    <td style="padding: 12px 0; font-size: 11px; text-align: center; border-bottom: 1px solid #f1f5f9;">${m.unit}</td>
+                                                    <td style="padding: 12px 0; font-size: 11px; text-align: right; font-weight: 700; border-bottom: 1px solid #f1f5f9;">R$ ${m.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                                 </tr>
                                             `).join('')}
                                         </tbody>
@@ -464,22 +468,24 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                 
                                 <!-- SEÇÃO MÃO DE OBRA -->
                                 ${labor.length > 0 ? `
-                                <div style="margin-bottom: 30px;">
-                                    <h3 style="font-size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; border-left: 4px solid #3b82f6; padding-left: 10px; margin-bottom: 15px;">3. Recursos Humanos / Mão de Obra</h3>
+                                <div style="margin-bottom: 40px;">
+                                    <h3 style="font-size: 14px; font-weight: 800; color: #1e3a8a; text-transform: uppercase; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0;">3. Recursos Humanos / Mão de Obra</h3>
                                     <table style="width: 100%; border-collapse: collapse;">
-                                        <tbody>
-                                            <tr style="background: #f1f5f9; border-bottom: 1px solid #e2e8f0;">
-                                                <th style="padding: 10px; text-align: left; font-size: 10px; color: #64748b;">FUNÇÃO / TIPO</th>
-                                                <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 60px;">QTD</th>
-                                                <th style="padding: 10px; text-align: center; font-size: 10px; color: #64748b; width: 80px;">UND</th>
-                                                <th style="padding: 10px; text-align: right; font-size: 10px; color: #64748b; width: 120px;">CUSTO TOTAL</th>
+                                        <thead>
+                                            <tr>
+                                                <th style="padding: 12px 0; text-align: left; font-size: 10px; color: #64748b; border-bottom: 2px solid #e2e8f0;">FUNÇÃO / TIPO</th>
+                                                <th style="padding: 12px 0; text-align: center; font-size: 10px; color: #64748b; width: 60px; border-bottom: 2px solid #e2e8f0;">QTD</th>
+                                                <th style="padding: 12px 0; text-align: center; font-size: 10px; color: #64748b; width: 80px; border-bottom: 2px solid #e2e8f0;">UND</th>
+                                                <th style="padding: 12px 0; text-align: right; font-size: 10px; color: #64748b; width: 120px; border-bottom: 2px solid #e2e8f0;">CUSTO TOTAL</th>
                                             </tr>
+                                        </thead>
+                                        <tbody>
                                             ${labor.map(l => `
-                                                <tr style="border-bottom: 1px solid #f1f5f9;">
-                                                    <td style="padding: 10px; font-size: 11px; font-weight: 600;">${l.role} | (${l.cost_type})</td>
-                                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${l.quantity}</td>
-                                                    <td style="padding: 10px; font-size: 11px; text-align: center;">${l.unit || '-'}</td>
-                                                    <td style="padding: 10px; font-size: 11px; text-align: right; font-weight: 700;">R$ ${l.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                                <tr>
+                                                    <td style="padding: 12px 0; font-size: 11px; font-weight: 600; border-bottom: 1px solid #f1f5f9;">${l.role} | (${l.cost_type})</td>
+                                                    <td style="padding: 12px 0; font-size: 11px; text-align: center; border-bottom: 1px solid #f1f5f9;">${l.quantity}</td>
+                                                    <td style="padding: 12px 0; font-size: 11px; text-align: center; border-bottom: 1px solid #f1f5f9;">${l.unit || '-'}</td>
+                                                    <td style="padding: 12px 0; font-size: 11px; text-align: right; font-weight: 700; border-bottom: 1px solid #f1f5f9;">R$ ${l.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                                 </tr>
                                             `).join('')}
                                         </tbody>
@@ -489,20 +495,22 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                 
                                 <!-- SEÇÃO CUSTOS INDIRETOS -->
                                 ${indirects.length > 0 ? `
-                                <div style="margin-bottom: 30px;">
-                                    <h3 style="font-size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; border-left: 4px solid #3b82f6; padding-left: 10px; margin-bottom: 15px;">4. Custos Indiretos e Operacionais</h3>
+                                <div style="margin-bottom: 40px;">
+                                    <h3 style="font-size: 14px; font-weight: 800; color: #1e3a8a; text-transform: uppercase; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0;">4. Custos Indiretos e Operacionais</h3>
                                     <table style="width: 100%; border-collapse: collapse;">
-                                        <tbody>
-                                            <tr style="background: #f1f5f9; border-bottom: 1px solid #e2e8f0;">
-                                                <th style="padding: 10px; text-align: left; font-size: 10px; color: #64748b;">CATEGORIA</th>
-                                                <th style="padding: 10px; text-align: left; font-size: 10px; color: #64748b;">DESCRIÇÃO</th>
-                                                <th style="padding: 10px; text-align: right; font-size: 10px; color: #64748b; width: 120px;">VALOR</th>
+                                        <thead>
+                                            <tr>
+                                                <th style="padding: 12px 0; text-align: left; font-size: 10px; color: #64748b; border-bottom: 2px solid #e2e8f0;">CATEGORIA</th>
+                                                <th style="padding: 12px 0; text-align: left; font-size: 10px; color: #64748b; border-bottom: 2px solid #e2e8f0;">DESCRIÇÃO</th>
+                                                <th style="padding: 12px 0; text-align: right; font-size: 10px; color: #64748b; width: 120px; border-bottom: 2px solid #e2e8f0;">VALOR</th>
                                             </tr>
+                                        </thead>
+                                        <tbody>
                                             ${indirects.map(i => `
-                                                <tr style="border-bottom: 1px solid #f1f5f9;">
-                                                    <td style="padding: 10px; font-size: 11px; font-weight: 600;">${i.category}</td>
-                                                    <td style="padding: 10px; font-size: 11px;">${i.description}</td>
-                                                    <td style="padding: 10px; font-size: 11px; text-align: right; font-weight: 700;">R$ ${i.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                                <tr>
+                                                    <td style="padding: 12px 0; font-size: 11px; font-weight: 600; color: #64748b; border-bottom: 1px solid #f1f5f9;">${i.category}</td>
+                                                    <td style="padding: 12px 0; font-size: 11px; border-bottom: 1px solid #f1f5f9;">${i.description}</td>
+                                                    <td style="padding: 12px 0; font-size: 11px; text-align: right; font-weight: 700; border-bottom: 1px solid #f1f5f9;">R$ ${i.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                                 </tr>
                                             `).join('')}
                                         </tbody>
