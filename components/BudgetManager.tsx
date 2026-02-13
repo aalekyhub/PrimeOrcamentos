@@ -549,35 +549,17 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       container.innerHTML = `
         ${head}
         <div class="pdf-page">
-          <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-                <tr>
-                    <td style="height: 20mm; border: none; padding: 0;"><div style="height: 20mm;">&nbsp;</div></td>
-                </tr>
-            </thead>
-            <tfoot>
-                <tr>
-                    <td style="height: 15mm; border: none; padding: 0;"><div style="height: 15mm;">&nbsp;</div></td>
-                </tr>
-            </tfoot>
-            <tbody>
-              <tr>
-                <td style="padding: 0;">
-                  <div class="a4-container">
-                      <div class="pdf-header">
-                        ${getHeaderHtml(budget)}
-                      </div>
-                      <div class="pdf-body">
-                        ${htmlContent}
-                      </div>
-                      <div class="pdf-footer">
-                        ${getFooterHtml(budget)}
-                      </div>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="a4-container">
+            <div class="pdf-header">
+              ${getHeaderHtml(budget)}
+            </div>
+            <div class="pdf-body">
+              ${htmlContent}
+            </div>
+            <div class="pdf-footer">
+              ${getFooterHtml(budget)}
+            </div>
+          </div>
         </div>
       `;
 
@@ -616,7 +598,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         .toLowerCase()}.pdf`;
 
       const options = {
-        margin: [0, 0, 0, 0] as [number, number, number, number],
+        margin: [15, 0, 15, 0] as [number, number, number, number], // 15mm top/bottom constants
         filename,
         image: { type: "jpeg" as const, quality: 0.98 },
         html2canvas: {
@@ -625,8 +607,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           allowTaint: false,
           backgroundColor: "#ffffff",
           logging: false,
-          // windowWidth ajuda quando o conteúdo usa width em mm
-          windowWidth: elementToPrint.scrollWidth,
+          windowWidth: 794, // 210mm fixed width at 96dpi
         },
         jsPDF: { unit: "mm" as const, format: "a4" as const, orientation: "portrait" as const },
         pagebreak: { mode: ["css", "legacy"] as any },
