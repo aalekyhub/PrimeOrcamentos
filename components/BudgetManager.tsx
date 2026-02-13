@@ -334,12 +334,13 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
            
            @media screen { 
              body { background: #f1f5f9; padding: 40px 0; } 
-             .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; } 
+             .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm; } 
            }
            @media print { 
+             @page { margin: 10mm 15mm; }
              body { background: white !important; margin: 0 !important; padding: 0 !important; } 
-             .a4-container { box-shadow: none !important; border: none !important; width: 100% !important; padding: 10mm 15mm !important; margin: 0 !important; }
-             table { break-inside: auto; }
+             .a4-container { box-shadow: none !important; border: none !important; width: 100% !important; padding: 0 !important; margin: 0 !important; }
+             table { break-inside: auto; width: 100%; }
              tr { break-inside: avoid; break-after: auto; }
              thead { display: table-header-group; } 
              tfoot { display: table-footer-group; }
