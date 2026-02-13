@@ -1,4 +1,4 @@
-
+﻿
 import React, { useState, useMemo } from 'react';
 import html2pdf from 'html2pdf.js';
 import {
@@ -35,7 +35,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
   const [proposalTitle, setProposalTitle] = useState('');
-  const [paymentTerms, setPaymentTerms] = useState('50% avista, 25% com 30 dias, 25% restante na conclusão');
+  const [paymentTerms, setPaymentTerms] = useState('50% avista, 25% com 30 dias, 25% restante na conclus├úo');
   const [paymentEntryPercent, setPaymentEntryPercent] = useState<number>(30);
   const [deliveryTime, setDeliveryTime] = useState('15 dias uteis');
   const [items, setItems] = useState<ServiceItem[]>([]);
@@ -76,7 +76,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       quantity: currentQty,
       unitPrice: currentPrice,
       unit: currentUnit,
-      type: 'Serviço'
+      type: 'Servi├ºo'
     };
     setItems([...items, newItem]);
     setCurrentDesc(''); setCurrentPrice(0); setCurrentQty(1);
@@ -116,7 +116,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
   };
 
   const getBudgetHtml = (budget: ServiceOrder) => {
-    const customer = customers.find(c => c.id === budget.customerId) || { name: budget.customerName, address: 'Não informado', document: 'Documento não informado' };
+    const customer = customers.find(c => c.id === budget.customerId) || { name: budget.customerName, address: 'N├úo informado', document: 'Documento n├úo informado' };
 
     const formatDate = (dateStr: string) => {
       try {
@@ -149,51 +149,65 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       </tr>`).join('');
 
     return `
-      <div class="a4-container">
-          <!-- Header Content (First Page Only) -->
-          <!-- Since we have a thead spacer, this header will appear AFTER the 20mm spacer on the first page, which is correct. -->
-          <div style="padding-bottom: 25px !important; border-bottom: 3px solid #000; margin-bottom: 40px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <div style="display: flex; gap: 24px; align-items: center;">
-                <div style="width: 80px; display: flex; align-items: center; justify: flex-start;">
-                  ${company.logo ? `<img src="${company.logo}" style="max-height: 80px; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#1e3a8a;">PRIME</div>'}
-                </div>
-                <div>
-                  <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 0 0 2px 0; text-transform: uppercase;">${company.name}</h1>
-                  <p style="margin: 0; font-size: 11px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.02em;">Soluções em Gestão Profissional</p>
-                  <p style="margin: 4px 0 0 0; font-size: 10px; color: #64748b; font-weight: 500;">${company.cnpj || ''} | ${company.phone || ''}</p>
-                </div>
-              </div>
-              <div style="text-align: right;">
-                <p style="margin: 0; font-size: 24px; font-weight: 800; color: #2563eb;">${budget.id}</p>
-                <p style="margin: 4px 0 0 0; font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase;">EMISSÃO: ${emissionDate}</p>
-                <p style="margin: 2px 0 0 0; font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase;">VALIDADE: ${validityDate}</p>
-              </div>
-            </div>
-          </div>
+      <table style="width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif;">
+        <thead>
+            <tr>
+                <td style="height: 20mm; border: none; padding: 0;"><div style="height: 20mm;">&nbsp;</div></td>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <td style="height: 15mm; border: none; padding: 0;"><div style="height: 15mm;">&nbsp;</div></td>
+            </tr>
+        </tfoot>
+        <tbody>
+          <tr>
+            <td style="padding: 0;">
+              <div class="a4-container">
+                  <!-- Header Content (First Page Only - positioned absolutely or relatively within the first page flow) -->
+                  <!-- Since we have a thead spacer, this header will appear AFTER the 20mm spacer on the first page, which is correct. -->
+                  <div style="padding-bottom: 25px !important; border-bottom: 3px solid #000; margin-bottom: 40px;">
+                     <div style="display: flex; justify-content: space-between; align-items: center;">
+                         <div style="display: flex; gap: 24px; align-items: center;">
+                             <div style="width: 80px; display: flex; align-items: center; justify: flex-start;">
+                                 ${company.logo ? `<img src="${company.logo}" style="max-height: 80px; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#1e3a8a;">PRIME</div>'}
+                             </div>
+                             <div>
+                                 <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 0 0 2px 0; text-transform: uppercase;">${company.name}</h1>
+                                 <p style="margin: 0; font-size: 11px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.02em;">Solu├º├Áes em Gest├úo Profissional</p>
+                                  <p style="margin: 4px 0 0 0; font-size: 10px; color: #64748b; font-weight: 500;">${company.cnpj || ''} | ${company.phone || ''}</p>
+                             </div>
+                         </div>
+                         <div style="text-align: right;">
+                             <p style="margin: 0; font-size: 24px; font-weight: 800; color: #2563eb;">${budget.id}</p>
+                             <p style="margin: 4px 0 0 0; font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase;">EMISS├âO: ${emissionDate}</p>
+                             <p style="margin: 2px 0 0 0; font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase;">VALIDADE: ${validityDate}</p>
+                         </div>
+                     </div>
+                  </div>
 
-          <!-- Boxes Grid -->
-          <div style="display: flex; gap: 24px; margin-bottom: 40px;">
-            <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
-              <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">CLIENTE / DESTINATÁRIO</span>
-              <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${customer.name}</div>
-              <div style="font-size: 11px; color: #64748b; font-weight: 500; margin-top: 4px;">${customer.document || 'CPF/CNPJ não informado'}</div>
-            </div>
-            <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
-              <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">REFERÊNCIA DO ORÇAMENTO</span>
-              <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${budget.description || 'PROPOSTA COMERCIAL'}</div>
-            </div>
-          </div>
-
-          <!-- Description Blocks -->
-          <div style="margin-bottom: 32px;">
-            <h2 style="margin: 0 0 8px 0; font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase; letter-spacing: 0.02em;">PROPOSTA COMERCIAL</h2>
-            <p style="margin: 0; font-size: 20px; font-weight: 800; color: #2563eb; text-transform: uppercase; line-height: 1.3;">${budget.description}</p>
-          </div>
-
-          ${budget.descriptionBlocks && budget.descriptionBlocks.length > 0 ? `
+                 <!-- Boxes Grid -->
+                 <div style="display: flex; gap: 24px; margin-bottom: 40px;">
+                     <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
+                         <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">CLIENTE / DESTINAT├üRIO</span>
+                         <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${customer.name}</div>
+                         <div style="font-size: 11px; color: #64748b; font-weight: 500; margin-top: 4px;">${customer.document || 'CPF/CNPJ n├úo informado'}</div>
+                     </div>
+                     <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
+                         <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">REFER├èNCIA DO OR├çAMENTO</span>
+                         <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${budget.description || 'PROPOSTA COMERCIAL'}</div>
+                     </div>
+                 </div>
+  
+                 <!-- Description Blocks -->
+                 <div style="margin-bottom: 32px;">
+                       <h2 style="margin: 0 0 8px 0; font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase; letter-spacing: 0.02em;">PROPOSTA COMERCIAL</h2>
+                       <p style="margin: 0; font-size: 20px; font-weight: 800; color: #2563eb; text-transform: uppercase; line-height: 1.3;">${budget.description}</p>
+                 </div>
+                 
+                 ${budget.descriptionBlocks && budget.descriptionBlocks.length > 0 ? `
                   <div style="margin-bottom: 48px;" class="print-description-content">
-                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0; margin-bottom: 24px;">DESCRIÇÃO DOS SERVIÇOS</div>
+                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0; margin-bottom: 24px;">DESCRI├ç├âO DOS SERVI├çOS</div>
                     <div style="display: flex; flex-direction: column; gap: 16px;">
                       ${budget.descriptionBlocks.map(block => {
       if (block.type === 'text') {
@@ -207,81 +221,84 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     }).join('')}
                     </div>
                   </div>` : ''}
-
-          <!-- Items Table -->
-          <div style="margin-bottom: 40px; break-inside: avoid;">
-            <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; padding-bottom: 12px; margin-bottom: 8px;">DETALHAMENTO FINANCEIRO</div>
-            <table style="width: 100%; border-collapse: collapse;">
-              <thead>
-                <tr style="border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
-                  <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: left; font-weight: 800; width: 55%; letter-spacing: 0.05em;">ITEM / DESCRIÇÃO</th>
-                  <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: center; font-weight: 800; width: 10%; letter-spacing: 0.05em;">QTD</th>
-                  <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: right; font-weight: 800; width: 17.5%; letter-spacing: 0.05em;">UNITÁRIO</th>
-                  <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: right; font-weight: 800; width: 17.5%; letter-spacing: 0.05em;">SUBTOTAL</th>
-                </tr>
-              </thead>
-              <tbody>${itemsHtml}</tbody>
-            </table>
-          </div>
-
-          <!-- Total Bar -->
-          <div style="margin-bottom: 32px; break-inside: avoid;">
-            <div style="display: flex; justify-content: flex-end; margin-bottom: 12px; gap: 40px;">
-              <div style="text-align: right;">
-                <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px;">SUBTOTAL</span>
-                <span style="font-size: 14px; font-weight: 700; color: #334155; display: block;">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-              </div>
-              ${bdiR > 0 ? `
+  
+                  <!-- Items Table -->
+                   <div style="margin-bottom: 40px; break-inside: avoid;">
+                       <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; padding-bottom: 12px; margin-bottom: 8px;">DETALHAMENTO FINANCEIRO</div>
+                       <table style="width: 100%; border-collapse: collapse;">
+                          <thead>
+                              <tr style="border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
+                                  <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: left; font-weight: 800; width: 55%; letter-spacing: 0.05em;">ITEM / DESCRI├ç├âO</th>
+                                  <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: center; font-weight: 800; width: 10%; letter-spacing: 0.05em;">QTD</th>
+                                  <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: right; font-weight: 800; width: 17.5%; letter-spacing: 0.05em;">UNIT├üRIO</th>
+                                  <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: right; font-weight: 800; width: 17.5%; letter-spacing: 0.05em;">SUBTOTAL</th>
+                              </tr>
+                          </thead>
+                          <tbody>${itemsHtml}</tbody>
+                      </table>
+                  </div>
+  
+                 <!-- Total Bar -->
+                 <div style="margin-bottom: 32px; break-inside: avoid;">
+                       <div style="display: flex; justify-content: flex-end; margin-bottom: 12px; gap: 40px;">
+                           <div style="text-align: right;">
+                              <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px;">SUBTOTAL</span>
+                              <span style="font-size: 14px; font-weight: 700; color: #334155; display: block;">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                           </div>
+                           ${bdiR > 0 ? `
                            <div style="text-align: right;">
                               <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px;">BDI (${bdiR}%)</span>
                               <span style="font-size: 14px; font-weight: 700; color: #10b981; display: block;">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                            </div>` : ''}
-              ${taxR > 0 ? `
+                           ${taxR > 0 ? `
                            <div style="text-align: right;">
                               <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px;">IMPOSTOS (${taxR}%)</span>
                               <span style="font-size: 14px; font-weight: 700; color: #3b82f6; display: block;">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                            </div>` : ''}
-            </div>
-            <div style="background: #0f172a; color: white; padding: 24px 32px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center;">
-              <span style="font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">INVESTIMENTO TOTAL:</span>
-              <span style="font-size: 36px; font-weight: 800; letter-spacing: -0.05em; line-height: 1;">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-            </div>
-          </div>
-
-          <!-- Terms & Payment -->
-          <div style="margin-bottom: 24px; break-inside: avoid;">
-            <div style="display: flex; gap: 24px;">
-              <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
-                <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">FORMA DE PAGAMENTO</span>
-                <p style="margin: 0; font-size: 12px; font-weight: 600; color: #334155; line-height: 1.5;">${budget.paymentTerms || 'A combinar'}</p>
+                       </div>
+                       <div style="background: #0f172a; color: white; padding: 24px 32px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center;">
+                           <span style="font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">INVESTIMENTO TOTAL:</span>
+                           <span style="font-size: 36px; font-weight: 800; letter-spacing: -0.05em; line-height: 1;">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                       </div>
+                 </div>
+  
+                 <!-- Terms & Payment -->
+                 <div style="margin-bottom: 24px; break-inside: avoid;">
+                     <div style="display: flex; gap: 24px;">
+                         <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
+                             <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">FORMA DE PAGAMENTO</span>
+                             <p style="margin: 0; font-size: 12px; font-weight: 600; color: #334155; line-height: 1.5;">${budget.paymentTerms || 'A combinar'}</p>
+                         </div>
+                         <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
+                             <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">PRAZO DE ENTREGA / EXECU├ç├âO</span>
+                             <p style="margin: 0; font-size: 12px; font-weight: 600; color: #334155; line-height: 1.5;">${budget.deliveryTime || 'A combinar'}</p>
+                         </div>
+                     </div>
+                 </div>
+  
+                 <!-- Acceptance Box -->
+                 <div style="margin-bottom: 32px; break-inside: avoid;">
+                     <div style="border: 1px solid #bfdbfe; background: #eff6ff; border-radius: 16px; padding: 32px;">
+                          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                              <div style="background: #2563eb; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold;">Ô£ô</div>
+                              <span style="font-size: 13px; font-weight: 800; color: #1e40af; text-transform: uppercase; letter-spacing: 0.05em;">TERMO DE ACEITE E AUTORIZA├ç├âO PROFISSIONAL</span>
+                          </div>
+                          <p style="margin: 0; font-size: 12px; color: #1e3a8a; line-height: 1.6; text-align: justify; font-weight: 500;">
+                              "Ao assinar abaixo, o cliente declara estar ciente e de pleno acordo com os valores, prazos e especifica├º├Áes descritas. Esta aceita├º├úo autoriza o in├¡cio imediato dos trabalhos sob as condi├º├Áes estabelecidas. Validade: ${validityDays} dias."
+                          </p>
+                     </div>
+                 </div>
+  
+                 <!-- Signature Lines -->
+                  <div style="margin-top: 60px; break-inside: avoid;">
+                     <div style="border-bottom: 2px solid #cbd5e1; width: 400px; max-width: 100%;"></div>
+                     <p style="margin: 12px 0 0 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">ASSINATURA DO CLIENTE / ACEITE</p>
+                 </div>
               </div>
-              <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
-                <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">PRAZO DE ENTREGA / EXECUÇÃO</span>
-                <p style="margin: 0; font-size: 12px; font-weight: 600; color: #334155; line-height: 1.5;">${budget.deliveryTime || 'A combinar'}</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Acceptance Box -->
-          <div style="margin-bottom: 32px; break-inside: avoid;">
-            <div style="border: 1px solid #bfdbfe; background: #eff6ff; border-radius: 16px; padding: 32px;">
-              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-                <div style="background: #2563eb; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold;">✓</div>
-                <span style="font-size: 13px; font-weight: 800; color: #1e40af; text-transform: uppercase; letter-spacing: 0.05em;">TERMO DE ACEITE E AUTORIZAÇÃO PROFISSIONAL</span>
-              </div>
-              <p style="margin: 0; font-size: 12px; color: #1e3a8a; line-height: 1.6; text-align: justify; font-weight: 500;">
-                "Ao assinar abaixo, o cliente declara estar ciente e de pleno acordo com os valores, prazos e especificações descritas. Esta aceitação autoriza o início imediato dos trabalhos sob as condições estabelecidas. Validade: ${validityDays} dias."
-              </p>
-            </div>
-          </div>
-
-          <!-- Signature Lines -->
-          <div style="margin-top: 60px; break-inside: avoid;">
-            <div style="border-bottom: 2px solid #cbd5e1; width: 400px; max-width: 100%;"></div>
-            <p style="margin: 12px 0 0 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">ASSINATURA DO CLIENTE / ACEITE</p>
-          </div>
-        </div>
-      </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     `;
   };
 
@@ -294,114 +311,118 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
     const html = `
       <!DOCTYPE html>
-    <html>
+      <html>
       <head>
-        <title>Orçamento - ${budget.id} - ${budget.description}</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
-          <style>
-            * { box-sizing: border-box; }
-            body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
-            @page { size: A4; margin: 0 !important; }
-            .a4-container {width: 100%; margin: 0; background: white; padding: 0; }
-            .avoid-break { break-inside: avoid; page-break-inside: avoid; }
-            .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
-
-            @media screen {
-              body {background: #f1f5f9; padding: 40px 0; }
-            .a4-container {width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm; } 
+        <title>Or├ºamento - ${budget.id} - ${budget.description}</title>
+         <script src="https://cdn.tailwindcss.com"></script>
+         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
+        <style>
+           * { box-sizing: border-box; }
+           body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
+           @page { size: A4; margin: 0 !important; }
+           .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; padding-top: 15mm !important; padding-bottom: 15mm !important; }
+           .avoid-break { break-inside: avoid; page-break-inside: avoid; }
+           .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
+           
+           @media screen { 
+             body { background: #f1f5f9; padding: 40px 0; } 
+             .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm; } 
            }
-            @media print { 
-              @page { margin: 0; size: A4; } 
-              body { background: white !important; margin: 0 !important; padding: 0 !important; } 
-            table { break-inside: auto; width: 100%; }
-            tr { break-inside: avoid; break-after: auto; }
-            thead {display: table-header-group; }
-            tfoot {display: table-footer-group; }
-            .no-print {display: none !important; }
-
-
-
+           @media print { 
+             @page { margin: 0; size: A4; } /* Reset page margin to give full control to container */
+             body { background: white !important; margin: 0 !important; padding: 0 !important; } 
+              .a4-container { 
+                  box-shadow: none !important; 
+                  border: none !important; 
+                  width: 100% !important; 
+                  padding: 0 15mm !important; /* Side margins only. Vertical margins handled by thead/tfoot spacers */
+                  margin: 0 !important; 
+              }
+             table { break-inside: auto; width: 100%; }
+             tr { break-inside: avoid; break-after: auto; }
+             thead { display: table-header-group; } 
+             tfoot { display: table-footer-group; }
+             .no-print { display: none !important; } 
            }
 
             /* Shared Rich Text / Quill Styles */
-            .ql-editor-print ul {list - style - type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
-            .ql-editor-print ol {list - style - type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
-            .ql-editor-print li {display: list-item !important; margin-bottom: 4px !important; }
-            .ql-editor-print strong, .ql-editor-print b {font - weight: bold !important; color: #000 !important; }
-            .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4 {font - weight: 800 !important; color: #0f172a !important; margin-top: 20px !important; margin-bottom: 10px !important; break-after: avoid !important; }
-          </style>
+            .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
+            .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
+            .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
+            .ql-editor-print strong, .ql-editor-print b { font-weight: bold !important; color: #000 !important; }
+            .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4 { font-weight: 800 !important; color: #0f172a !important; margin-top: 20px !important; margin-bottom: 10px !important; break-after: avoid !important; }
+        </style>
       </head>
       <body>
         ${htmlContent}
         <script>
-          function optimizePageBreaks() {
+           function optimizePageBreaks() {
              const root = document.querySelector('.print-description-content');
-          if (!root) return;
-          const content = root.querySelector('div');
-          if (!content) return;
+             if (!root) return;
+             const content = root.querySelector('div');
+             if (!content) return;
 
-          const allNodes = [];
+             const allNodes = [];
              Array.from(content.children).forEach(block => {
                if (block.classList.contains('ql-editor-print')) {
-            allNodes.push(...Array.from(block.children));
+                  allNodes.push(...Array.from(block.children));
                } else {
-            allNodes.push(block);
+                  allNodes.push(block);
                }
              });
 
-          for (let i = 0; i < allNodes.length - 1; i++) {
+             for (let i = 0; i < allNodes.length - 1; i++) {
                const el = allNodes[i];
-          let isTitle = false;
-
-          if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
-          else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
+               let isTitle = false;
+               
+               if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
+               else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
                   const text = el.innerText.trim();
-          const isNumbered = /^\\d+(\\.\\d+)*[\\.\\s\\)]/.test(text);
+                  const isNumbered = /^\\d+(\\.\\d+)*[\\.\\s\\)]/.test(text);
                   const isBold = el.querySelector('strong, b') || (el.style && parseInt(el.style.fontWeight) > 600) || el.tagName === 'STRONG';
-          const isShort = text.length < 150;
+                  const isShort = text.length < 150;
                   if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
-            isTitle = true;
+                    isTitle = true;
                   }
                }
 
-          if (isTitle) {
+               if (isTitle) {
                  const nodesToWrap = [el];
-          let j = i + 1;
-          while (j < allNodes.length && nodesToWrap.length < 3) {
+                 let j = i + 1;
+                 while (j < allNodes.length && nodesToWrap.length < 3) {
                    const next = allNodes[j];
-          if (next.matches('h1, h2, h3, h4, h5, h6')) break;
-          nodesToWrap.push(next);
-          j++;
+                   if (next.matches('h1, h2, h3, h4, h5, h6')) break;
+                   nodesToWrap.push(next);
+                   j++;
                  }
 
                  if (nodesToWrap.length > 1) {
                    const wrapper = document.createElement('div');
-          wrapper.className = 'keep-together';
-          el.parentNode.insertBefore(wrapper, el);
+                   wrapper.className = 'keep-together';
+                   el.parentNode.insertBefore(wrapper, el);
                    nodesToWrap.forEach(node => wrapper.appendChild(node));
-          i = j - 1;
+                   i = j - 1;
                  }
                }
              }
            }
-          window.onload = function() {
-            optimizePageBreaks();
-             setTimeout(() => {
-            window.print();
-          if (window.matchMedia) {
+           window.onload = function() { 
+             optimizePageBreaks();
+             setTimeout(() => { 
+                window.print(); 
+                if (window.matchMedia) {
                     var mediaQueryList = window.matchMedia('print');
-          mediaQueryList.addListener(function(mql) {
+                    mediaQueryList.addListener(function(mql) {
                         if (!mql.matches) {
-            // window.close(); // Optional: close after print
-          }
+                            // window.close(); // Optional: close after print
+                        }
                     });
                 }
              }, 1000); 
            }
         </script>
       </body>
-    </html>`;
+      </html>`;
     printWindow.document.write(html);
     printWindow.document.close();
   };
@@ -411,7 +432,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     if (isSaving) return;
     const customer = customers.find(c => c.id === selectedCustomerId);
     if (!customer) { notify("Selecione um cliente", "error"); return; }
-    if (items.length === 0) { notify("Adicione itens ao orçamento", "error"); return; }
+    if (items.length === 0) { notify("Adicione itens ao or├ºamento", "error"); return; }
 
     const existingBudget = editingBudgetId ? orders.find(o => o.id === editingBudgetId) : null;
 
@@ -436,12 +457,12 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     try {
       const result = await db.save('serviflow_orders', newList);
       if (result?.success) {
-        notify("Orçamento salvo e sincronizado!");
+        notify("Or├ºamento salvo e sincronizado!");
         setTimeout(() => setShowForm(false), 1500);
       } else if (result?.error === 'quota_exceeded') {
         notify("ERRO DE ARMAZENAMENTO: Limite excedido.", "error");
       } else {
-        notify(`Salvo localmente.Erro Sync: ${result?.error?.message || JSON.stringify(result?.error)} `, "warning");
+        notify(`Salvo localmente. Erro Sync: ${result?.error?.message || JSON.stringify(result?.error)}`, "warning");
         setShowForm(false);
       }
     } finally { setIsSaving(false); }
@@ -453,7 +474,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     setEditingBudgetId(isClone ? null : budget.id);
     setSelectedCustomerId(budget.customerId);
     setItems(budget.items.map(item => ({ ...item, id: db.generateId('ITEM') })));
-    setProposalTitle(isClone ? `${budget.description} (CÓPIA)` : budget.description || '');
+    setProposalTitle(isClone ? `${budget.description} (C├ôPIA)` : budget.description || '');
     setDescriptionBlocks(budget.descriptionBlocks && budget.descriptionBlocks.length > 0
       ? budget.descriptionBlocks.map(block => ({ ...block, id: Math.random().toString(36).substr(2, 9) }))
       : []);
@@ -471,7 +492,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     setBdiRate(d);
 
     setShowForm(true);
-    if (isClone) notify("Orçamento clonado! Você está editando uma nova cópia.");
+    if (isClone) notify("Or├ºamento clonado! Voc├¬ est├í editando uma nova c├│pia.");
   };
 
 
@@ -480,7 +501,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       <div className="flex flex-col md:flex-row justify-between items-center gap-4">
         <div>
           <h2 className="text-2xl font-black text-slate-900 tracking-tighter flex items-center gap-2">
-            Orçamentos <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">{orders.filter(o => o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED).length}</span>
+            Or├ºamentos <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">{orders.filter(o => o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED).length}</span>
           </h2>
           <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Gerencie suas propostas comerciais</p>
         </div>
@@ -493,7 +514,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
             setBdiRate(0);
             setShowForm(true);
           }} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-200 hover:shadow-blue-300 transition-all flex items-center gap-2 active:scale-95">
-            <Plus className="w-4 h-4" /> Novo Orçamento
+            <Plus className="w-4 h-4" /> Novo Or├ºamento
           </button>
         </div>
       </div>
@@ -501,7 +522,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       <div className="bg-white p-4 rounded-[1.5rem] border shadow-sm">
         <div className="relative">
           <Search className="absolute left-4 top-3 w-4 h-4 text-slate-400" />
-          <input type="text" placeholder="Buscar por cliente ou orçamento..." className="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 transition-all font-bold text-slate-700" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+          <input type="text" placeholder="Buscar por cliente ou or├ºamento..." className="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 transition-all font-bold text-slate-700" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
         </div>
       </div>
 
@@ -509,11 +530,11 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         <table className="w-full text-left">
           <thead className="bg-slate-50 text-[10px] font-black uppercase text-slate-400 border-b">
             <tr>
-              <th className="px-8 py-5">ORÇ #</th>
+              <th className="px-8 py-5">OR├ç #</th>
               <th className="px-8 py-5">CLIENTE</th>
-              <th className="px-8 py-5">DESCRIÇÃO</th>
+              <th className="px-8 py-5">DESCRI├ç├âO</th>
               <th className="px-8 py-5">VALOR</th>
-              <th className="px-8 py-5 text-right">AÇÕES</th>
+              <th className="px-8 py-5 text-right">A├ç├òES</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -531,7 +552,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                 <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   {budget.status !== OrderStatus.APPROVED && (
                     <button onClick={async () => {
-                      if (confirm("Deseja APROVAR este orçamento? Ele será convertido em Ordem de Serviço.")) {
+                      if (confirm("Deseja APROVAR este or├ºamento? Ele ser├í convertido em Ordem de Servi├ºo.")) {
                         const approvedBudget = { ...budget, status: OrderStatus.APPROVED };
                         const newServiceOrderId = budget.id.replace('ORC', 'OS');
 
@@ -580,7 +601,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
                         setOrders(finalList);
                         const result = await db.save('serviflow_orders', finalList);
-                        if (result?.success) notify(existingOSIndex !== -1 ? "O.S. atualizada com novos dados do orçamento!" : "Orçamento APROVADO! Cópia gerada em O.S.");
+                        if (result?.success) notify(existingOSIndex !== -1 ? "O.S. atualizada com novos dados do or├ºamento!" : "Or├ºamento APROVADO! C├│pia gerada em O.S.");
                         else notify("Erro ao sincronizar.", "error");
                       }
                     }} className="p-2 text-slate-400 hover:text-emerald-600 transition-colors" title="Aprovar">
@@ -591,11 +612,11 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                   <button onClick={() => loadBudgetToForm(budget)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Editar"><Pencil className="w-4 h-4" /></button>
                   <button onClick={() => handlePrint(budget)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Imprimir"><Printer className="w-4 h-4" /></button>
                   <button onClick={async () => {
-                    if (confirm("Deseja excluir este orçamento? Esta ação também removerá os dados da nuvem.")) {
+                    if (confirm("Deseja excluir este or├ºamento? Esta a├º├úo tamb├®m remover├í os dados da nuvem.")) {
                       const idToDelete = budget.id;
                       setOrders(prev => prev.filter(o => o.id !== idToDelete));
                       const result = await db.remove('orders', idToDelete);
-                      if (result?.success) { notify("Orçamento removido da nuvem com sucesso."); }
+                      if (result?.success) { notify("Or├ºamento removido da nuvem com sucesso."); }
                       else { notify("Removido localmente, mas houve um erro ao sincronizar com a nuvem.", "error"); }
                     }
                   }} className="p-2 text-rose-300 hover:text-rose-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
@@ -613,8 +634,8 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
               <div className="flex items-center gap-3">
                 <div className="bg-blue-600 p-2 rounded-xl text-white shadow-xl shadow-blue-100"><FileText className="w-5 h-5" /></div>
                 <div>
-                  <h3 className="text-lg font-black text-slate-900 uppercase tracking-tighter mb-0.5">Elaboração de Orçamento Prime</h3>
-                  <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em]">Configuração de Documento Comercial</p>
+                  <h3 className="text-lg font-black text-slate-900 uppercase tracking-tighter mb-0.5">Elabora├º├úo de Or├ºamento Prime</h3>
+                  <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em]">Configura├º├úo de Documento Comercial</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
@@ -643,7 +664,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                       </select>
                     </div>
                     <div>
-                      <label className="text-[11px] font-black text-blue-700 uppercase mb-2 block ml-1">Título da Proposta</label>
+                      <label className="text-[11px] font-black text-blue-700 uppercase mb-2 block ml-1">T├¡tulo da Proposta</label>
                       <input type="text" placeholder="Ex: Reforma Geral de Ar-Condicionado" className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-900 outline-none placeholder:text-slate-500" value={proposalTitle} onChange={e => setProposalTitle(e.target.value)} />
                     </div>
                   </div>
@@ -651,7 +672,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
                 <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
                   <div className="flex justify-between items-center">
-                    <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-widest border-b pb-2 grow mr-6">DESCRIÇÃO TÉCNICA</h4>
+                    <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-widest border-b pb-2 grow mr-6">DESCRI├ç├âO T├ëCNICA</h4>
                   </div>
                   <div className="space-y-3">
                     {descriptionBlocks.length === 0 && (
@@ -660,7 +681,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                           <button onClick={(e) => { e.stopPropagation(); addTextBlock(); }} className="bg-blue-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-blue-100 hover:scale-105 transition-all"><Type className="w-4 h-4" /> + Iniciar com Texto</button>
                           <button onClick={(e) => { e.stopPropagation(); addImageBlock(); }} className="bg-emerald-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-emerald-100 hover:scale-105 transition-all"><ImageIcon className="w-4 h-4" /> + Iniciar com Imagem</button>
                         </div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 animate-pulse">Comece a montar o escopo técnico acima</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 animate-pulse">Comece a montar o escopo t├®cnico acima</p>
                       </div>
                     )}
                     {descriptionBlocks.map((block) => (
@@ -673,7 +694,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                               onChange={(content) => updateBlockContent(block.id, content)}
                               onAddText={addTextBlock}
                               onAddImage={addImageBlock}
-                              placeholder="Descreva aqui os detalhes técnicos do serviço..."
+                              placeholder="Descreva aqui os detalhes t├®cnicos do servi├ºo..."
                             />
                           </div>
                         )}
@@ -694,12 +715,12 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
                 <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
                   <div className="flex justify-between items-center">
-                    <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-widest border-b pb-2 grow mr-6">ITENS DO ORÇAMENTO</h4>
-                    <button onClick={() => setShowFullServiceForm(true)} className="text-blue-600 text-[8px] font-black uppercase flex items-center gap-1 hover:underline tracking-widest"><Package className="w-3 h-3" /> CATÁLOGO</button>
+                    <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-widest border-b pb-2 grow mr-6">ITENS DO OR├çAMENTO</h4>
+                    <button onClick={() => setShowFullServiceForm(true)} className="text-blue-600 text-[8px] font-black uppercase flex items-center gap-1 hover:underline tracking-widest"><Package className="w-3 h-3" /> CAT├üLOGO</button>
                   </div>
                   <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
                     <div>
-                      <label className="text-[8px] font-black text-blue-600 uppercase tracking-widest block mb-1.5">Puxar do Catálogo</label>
+                      <label className="text-[8px] font-black text-blue-600 uppercase tracking-widest block mb-1.5">Puxar do Cat├ílogo</label>
                       <select className="w-full bg-white border-none rounded-xl p-2.5 text-[10px] font-bold text-slate-500 outline-none" value={selectedCatalogId} onChange={e => {
                         const id = e.target.value;
                         setSelectedCatalogId(id);
@@ -713,12 +734,12 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
                       <div className="md:col-span-6">
-                        <label className="text-[11px] font-black text-blue-700 uppercase mb-1.5 block ml-1">Descrição</label>
+                        <label className="text-[11px] font-black text-blue-700 uppercase mb-1.5 block ml-1">Descri├º├úo</label>
                         <input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs font-bold text-slate-900 outline-none placeholder:text-slate-500" value={currentDesc} onChange={e => setCurrentDesc(e.target.value)} />
                       </div>
                       <div className="w-24"><label className="text-[11px] font-black text-blue-700 uppercase mb-1.5 block text-center">Unit</label><input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs font-black text-center outline-none uppercase text-slate-900" value={currentUnit} onChange={e => setCurrentUnit(e.target.value)} /></div>
                       <div className="w-24"><label className="text-[11px] font-black text-blue-700 uppercase mb-1.5 block text-center">Qtd</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs font-black text-center outline-none text-slate-900" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} /></div>
-                      <div className="w-32"><label className="text-[11px] font-black text-blue-700 uppercase mb-1.5 block ml-1">Preço (R$)</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs font-black outline-none text-slate-900" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} /></div>
+                      <div className="w-32"><label className="text-[11px] font-black text-blue-700 uppercase mb-1.5 block ml-1">Pre├ºo (R$)</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs font-black outline-none text-slate-900" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} /></div>
                       <div className="md:col-span-1">
                         <button onClick={handleAddItem} className="bg-blue-600 text-white w-full h-[58px] rounded-xl flex items-center justify-center hover:scale-105 transition-all shadow-xl"><Plus className="w-6 h-6" /></button>
                       </div>
@@ -857,8 +878,8 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 flex flex-col max-h-[80vh]">
             <div className="p-6 border-b flex justify-between items-center bg-slate-50">
               <div>
-                <h3 className="font-black text-slate-800 uppercase tracking-tight">Importar Dados de Orçamento</h3>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Selecione um orçamento para copiar itens e descrição</p>
+                <h3 className="font-black text-slate-800 uppercase tracking-tight">Importar Dados de Or├ºamento</h3>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Selecione um or├ºamento para copiar itens e descri├º├úo</p>
               </div>
               <button onClick={() => setShowImportModal(false)}><X className="w-5 h-5 text-slate-400 hover:text-rose-500" /></button>
             </div>
@@ -868,7 +889,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Pesquisar por cliente ou título..."
+                  placeholder="Pesquisar por cliente ou t├¡tulo..."
                   className="w-full bg-slate-100 border-none rounded-2xl py-3 pl-12 pr-4 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500"
                   value={importSearch}
                   onChange={e => setImportSearch(e.target.value)}
@@ -901,7 +922,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
               {orders.filter(o => (o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED)).length === 0 && (
                 <div className="text-center py-12">
                   <Database className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-                  <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Nenhum orçamento disponível para importação</p>
+                  <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Nenhum or├ºamento dispon├¡vel para importa├º├úo</p>
                 </div>
               )}
             </div>
@@ -941,16 +962,16 @@ const PaymentTypeModal: React.FC<{
     const currency = (val: number) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
     if (type === 'vista') {
-      text = `Pagamento à vista com desconto na aprovação do orçamento.Total: ${currency(totalValue)}.`;
+      text = `Pagamento ├á vista com desconto na aprova├º├úo do or├ºamento. Total: ${currency(totalValue)}.`;
     } else if (type === 'conclusao') {
-      text = `Pagamento integral ${currency(totalValue)} a ser realizado após entrega técnica e aprovação dos serviços.`;
+      text = `Pagamento integral ${currency(totalValue)} a ser realizado ap├│s entrega t├®cnica e aprova├º├úo dos servi├ºos.`;
     } else if (type === 'parcelado') {
       const remainder = totalValue - entryValue;
       const parcValue = installments > 0 ? remainder / installments : 0;
 
-      text = `Entrada de ${currency(entryValue)} na aprovação.`;
+      text = `Entrada de ${currency(entryValue)} na aprova├º├úo.`;
       if (installments > 0) {
-        text += `\nSaldo restante de ${currency(remainder)} dividido em ${installments}x de ${currency(parcValue)} (30 / ${installments > 1 ? '60/90...' : ' dias'}).`;
+        text += `\nSaldo restante de ${currency(remainder)} dividido em ${installments}x de ${currency(parcValue)} (30/${installments > 1 ? '60/90...' : ' dias'}).`;
       }
     }
     setPreview(text);
@@ -960,17 +981,17 @@ const PaymentTypeModal: React.FC<{
     <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[70] flex items-center justify-center p-4">
       <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95">
         <div className="p-6 border-b flex justify-between items-center bg-slate-50">
-          <h3 className="font-black text-slate-800 uppercase tracking-tight">Condição de Pagamento</h3>
+          <h3 className="font-black text-slate-800 uppercase tracking-tight">Condi├º├úo de Pagamento</h3>
           <button onClick={onClose}><X className="w-5 h-5 text-slate-400 hover:text-rose-500" /></button>
         </div>
 
         <div className="p-6 space-y-6">
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Tipo de Negociação</label>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Tipo de Negocia├º├úo</label>
             <div className="grid grid-cols-3 gap-2">
-              <button onClick={() => setType('vista')} className={`p - 3 rounded - xl border text - xs font - bold uppercase transition - all ${type === 'vista' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'} `}>À Vista</button>
-              <button onClick={() => setType('parcelado')} className={`p - 3 rounded - xl border text - xs font - bold uppercase transition - all ${type === 'parcelado' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'} `}>Parcelado</button>
-              <button onClick={() => setType('conclusao')} className={`p - 3 rounded - xl border text - xs font - bold uppercase transition - all ${type === 'conclusao' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'} `}>Entrega</button>
+              <button onClick={() => setType('vista')} className={`p-3 rounded-xl border text-xs font-bold uppercase transition-all ${type === 'vista' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>├Ç Vista</button>
+              <button onClick={() => setType('parcelado')} className={`p-3 rounded-xl border text-xs font-bold uppercase transition-all ${type === 'parcelado' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>Parcelado</button>
+              <button onClick={() => setType('conclusao')} className={`p-3 rounded-xl border text-xs font-bold uppercase transition-all ${type === 'conclusao' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>Entrega</button>
             </div>
           </div>
 
@@ -978,7 +999,7 @@ const PaymentTypeModal: React.FC<{
             <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
               <div className="col-span-2">
                 <div className="flex justify-between mb-1"><span className="text-[10px] font-bold text-slate-400 uppercase">Valor Total</span> <span className="text-[10px] font-black text-slate-900">{totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span></div>
-                <div className="h-1 w-full bg-slate-200 rounded-full overflow-hidden"><div className="h-full bg-blue-500" style={{ width: `${Math.min(100, (entryValue / totalValue) * 100)}% ` }}></div></div>
+                <div className="h-1 w-full bg-slate-200 rounded-full overflow-hidden"><div className="h-full bg-blue-500" style={{ width: `${Math.min(100, (entryValue / totalValue) * 100)}%` }}></div></div>
               </div>
               <div className="grid grid-cols-2 gap-2 col-span-2">
                 <div>
@@ -1010,7 +1031,7 @@ const PaymentTypeModal: React.FC<{
           )}
 
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Prévia do Texto</label>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Pr├®via do Texto</label>
             <div className="bg-slate-800 text-slate-200 p-4 rounded-xl text-sm font-medium leading-relaxed border border-slate-700 min-h-[80px]">
               {preview}
             </div>
