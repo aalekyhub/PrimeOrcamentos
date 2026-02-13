@@ -1,5 +1,6 @@
 import React from 'react';
-import { X, Printer, Download } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { X, Printer } from 'lucide-react';
 
 interface Props {
     isOpen: boolean;
@@ -26,64 +27,78 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
     if (!isOpen) return null;
 
     const handlePrint = () => {
-        if (filename) document.title = filename;
-        window.print();
+        if (filename) {
+            const originalTitle = document.title;
+            document.title = filename.replace('.pdf', '');
+            window.print();
+            setTimeout(() => { document.title = originalTitle; }, 1000);
+        } else {
+            window.print();
+        }
     };
 
-    return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+    const modalContent = (
+        <div id="print-modal-portal" className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
             <style>{`
                 @media print {
-                    /* Hide everything in the document body */
-                    body * {
+                    /* Hide EVERYTHING including the app root */
+                    #root, 
+                    .no-print,
+                    #print-modal-portal header,
+                    #print-modal-portal .no-print {
+                        display: none !important;
+                    }
+
+                    /* Only show the specific content div */
+                    body {
                         visibility: hidden !important;
+                        background: white !important;
                     }
 
-                    /* Make the modal components visible */
-                    .fixed.inset-0,
-                    #report-preview-wrapper, 
-                    #report-preview-wrapper * {
-                        visibility: visible !important;
-                    }
-
-                    /* Important: Reset the fixed overlay that causes clipping */
-                    .fixed.inset-0 {
-                        position: absolute !important;
-                        display: block !important;
+                    /* Neutralize all layout shifting and heights */
+                    html, body {
                         height: auto !important;
-                        width: 100% !important;
+                        overflow: visible !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        position: static !important;
+                    }
+
+                    #print-modal-portal {
+                        position: absolute !important;
                         top: 0 !important;
                         left: 0 !important;
-                        padding: 0 !important;
+                        width: 100% !important;
                         background: white !important;
+                        visibility: visible !important;
+                        display: block !important;
+                        padding: 0 !important;
                         z-index: auto !important;
                     }
 
-                    /* Reset the wrapper structure */
                     #report-preview-wrapper {
                         position: relative !important;
-                        display: block !important;
-                        height: auto !important;
                         width: 100% !important;
                         max-width: none !important;
+                        height: auto !important;
                         margin: 0 !important;
-                        padding: 0 !important;
-                        border: none !important;
+                        display: block !important;
                         box-shadow: none !important;
-                        border-radius: 0 !important;
+                        border: none !important;
+                        visibility: visible !important;
                     }
 
-                    /* Ensure the content area allows overflow for multiple pages */
+                    /* Remove the scrollable div wrappers */
                     #report-preview-wrapper > div {
                         height: auto !important;
                         overflow: visible !important;
-                        display: block !important;
                         padding: 0 !important;
-                        background: white !important;
+                        display: block !important;
+                        visibility: visible !important;
                     }
 
-                    /* The actual report content */
                     #report-preview-content {
+                        visibility: visible !important;
                         display: block !important;
                         width: 100% !important;
                         height: auto !important;
@@ -92,13 +107,6 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                         border: none !important;
                         box-shadow: none !important;
                         overflow: visible !important;
-                    }
-
-                    /* Hide the UI controls */
-                    .no-print, 
-                    .no-print * {
-                        display: none !important;
-                        visibility: hidden !important;
                     }
 
                     @page {
@@ -106,13 +114,22 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                         size: A4;
                     }
 
-                    /* Page break and layout fixes */
+                    /* Content fixes */
                     tr { page-break-inside: avoid !important; }
                     thead { display: table-header-group !important; }
 
+                    /* Rich Text Styles for Print */
                     .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; }
                     .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; }
+                    .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4 { 
+                        page-break-after: avoid !important;
+                        break-after: avoid !important;
+                    }
                 }
+
+                /* UI Styles (non-print) */
+                #report-preview-content table { border-collapse: collapse; width: 100%; }
+                #report-preview-content td, #report-preview-content th { border: 1px solid #e2e8f0; padding: 8px; }
             `}</style>
 
             <script dangerouslySetInnerHTML={{
@@ -120,6 +137,13 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                 function optimizePageBreaks() {
                     const content = document.getElementById('report-preview-content');
                     if (!content) return;
+                    
+                    // Reset existing wrappers
+                    const wrappers = content.querySelectorAll('.keep-together');
+                    wrappers.forEach(w => {
+                        while(w.firstChild) w.parentNode.insertBefore(w.firstChild, w);
+                        w.parentNode.removeChild(w);
+                    });
 
                     const allNodes = [];
                     Array.from(content.children).forEach(block => {
@@ -168,16 +192,8 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                         }
                     }
                 }
-
-                // Call optimization when content changes
-                const observer = new MutationObserver(optimizePageBreaks);
-                const config = { childList: true, subtree: true };
-                window.addEventListener('load', () => {
-                    const target = document.getElementById('report-preview-content');
-                    if (target) observer.observe(target, config);
-                    optimizePageBreaks();
-                });
             `}} />
+
             <div id="report-preview-wrapper" className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
                 {/* Header */}
                 <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10 no-print">
@@ -230,6 +246,8 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
             </div>
         </div>
     );
+
+    return createPortal(modalContent, document.body);
 };
 
 export default ReportPreview;
