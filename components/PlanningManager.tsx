@@ -332,6 +332,26 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                         <p style="margin: 0; font-size: 14px; color: #0f172a; font-weight: 600;">${currentPlan.address || 'Não Informado'}</p>
                                     </div>
                                 </div>
+
+                                <!-- OVERVIEW CARDS (Planning Style) -->
+                                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 30px;">
+                                    <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                                        <p style="font-size: 9px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 4px 0;">CUSTO TOTAL</p>
+                                        <p style="font-size: 20px; font-weight: 900; color: #1e3a8a; margin: 0;">R$ ${totalGeneral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                    </div>
+                                    <div style="background: #eff6ff; padding: 16px; border-radius: 12px; border: 1px solid #dbeafe;">
+                                        <p style="font-size: 9px; font-weight: 700; color: #60a5fa; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 4px 0;">SERVIÇOS</p>
+                                        <p style="font-size: 18px; font-weight: 900; color: #1e40af; margin: 0;">R$ ${totalServices.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                    </div>
+                                    <div style="background: #ecfdf5; padding: 16px; border-radius: 12px; border: 1px solid #d1fae5;">
+                                        <p style="font-size: 9px; font-weight: 700; color: #34d399; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 4px 0;">MATERIAIS</p>
+                                        <p style="font-size: 18px; font-weight: 900; color: #065f46; margin: 0;">R$ ${totalMaterials.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                    </div>
+                                    <div style="background: #fffbeb; padding: 16px; border-radius: 12px; border: 1px solid #fef3c7;">
+                                        <p style="font-size: 9px; font-weight: 700; color: #fbbf24; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 4px 0;">MÃO DE OBRA</p>
+                                        <p style="font-size: 18px; font-weight: 900; color: #92400e; margin: 0;">R$ ${totalLabor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                    </div>
+                                </div>
                 
                                 <!-- SEÇÃO SERVIÇOS -->
                                 ${services.length > 0 ? `
