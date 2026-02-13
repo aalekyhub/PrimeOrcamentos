@@ -157,11 +157,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         </thead>
         <tfoot>
             <tr>
-                <td style="height: 15mm; border: none; padding: 0; vertical-align: bottom; text-align: center;">
-                  <div style="height: 15mm; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 5mm;">
-                    <span class="page-number"></span>
-                  </div>
-                </td>
+                <td style="height: 15mm; border: none; padding: 0;"><div style="height: 15mm;">&nbsp;</div></td>
             </tr>
         </tfoot>
         <tbody>
@@ -334,7 +330,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
            }
            @media print { 
              @page { margin: 0; size: A4; } /* Reset page margin to give full control to container */
-             body { background: white !important; margin: 0 !important; padding: 0 !important; counter-reset: page; } 
+             body { background: white !important; margin: 0 !important; padding: 0 !important; } html { counter-reset: page; } 
               .a4-container { 
                   box-shadow: none !important; 
                   border: none !important; 
@@ -348,16 +344,23 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
              tfoot { display: table-footer-group; }
              .no-print { display: none !important; } 
 
-             .page-number {
+             .page-footer {
+               position: fixed;
+               bottom: 7mm;
+               left: 0;
+               right: 0;
+               text-align: center;
+               display: block;
+               z-index: 9999;
+               counter-increment: page;
+             }
+             .page-footer::after {
+               content: "PÁGINA " counter(page);
                font-size: 9px;
                color: #94a3b8;
                font-weight: 800;
                text-transform: uppercase;
                letter-spacing: 0.1em;
-             }
-             .page-number::after {
-               counter-increment: page;
-               content: "Página " counter(page);
              }
            }
 
@@ -370,6 +373,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         </style>
       </head>
       <body>
+        <div class="page-footer"></div>
         ${htmlContent}
         <script>
            function optimizePageBreaks() {
