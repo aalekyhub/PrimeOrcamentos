@@ -303,7 +303,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
   };
 
 
-  const handlePrintPDF = (budget: ServiceOrder, mode: 'print' | 'pdf' = 'print') => {
+  const handlePrint = (budget: ServiceOrder) => {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
@@ -604,8 +604,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                   )}
                   <button onClick={() => loadBudgetToForm(budget, true)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Duplicar"><Copy className="w-4 h-4" /></button>
                   <button onClick={() => loadBudgetToForm(budget)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Editar"><Pencil className="w-4 h-4" /></button>
-                  <button onClick={() => handlePrintPDF(budget, 'print')} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Imprimir"><Printer className="w-4 h-4" /></button>
-                  <button onClick={() => handlePrintPDF(budget, 'pdf')} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Baixar PDF"><FileDown className="w-4 h-4" /></button>
+                  <button onClick={() => handlePrint(budget)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Imprimir"><Printer className="w-4 h-4" /></button>
                   <button onClick={async () => {
                     if (confirm("Deseja excluir este orçamento? Esta ação também removerá os dados da nuvem.")) {
                       const idToDelete = budget.id;
@@ -833,7 +832,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
                 <div className="mt-auto space-y-3 relative z-10">
                   <div className="grid grid-cols-2 gap-2">
-                    <button onClick={() => handlePrintPDF({
+                    <button onClick={() => handlePrint({
                       customerId: selectedCustomerId,
                       customerName: customers.find(c => c.id === selectedCustomerId)?.name || 'N/A',
                       customerEmail: customers.find(c => c.id === selectedCustomerId)?.email || '',
