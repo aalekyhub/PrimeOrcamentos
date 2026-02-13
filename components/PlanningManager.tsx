@@ -292,12 +292,27 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
             address: ''
         });
 
-        const totalServices = services.reduce((acc, s) => acc + s.total_cost, 0);
-        const totalMaterials = materials.reduce((acc, m) => acc + m.total_cost, 0);
-        const totalLabor = labor.reduce((acc, l) => acc + l.total_cost, 0);
-        const totalIndirect = indirects.reduce((acc, i) => acc + i.value, 0);
-        const totalTaxes = taxes.reduce((acc, t) => acc + t.value, 0);
-        const totalGeneral = totalServices + totalMaterials + totalLabor + totalIndirect + totalTaxes;
+        // Use component-level calculated values to ensure consistency with UI
+        // These values (totalServices, totalMaterial, etc.) are already calculated in the component body
+        // and include correct tax logic (BDI, Gross Up).
+        // note: variable names in component are 'totalMaterial' (singular) vs 'totalMaterials' (plural) in this function
+        // so we need to map them correctly or just use the component variables directly if they are in scope.
+
+        // However, this function shadows them with local variables. Let's REMOVE local declarations 
+        // and use the component state/memo values directly.
+
+        // The component uses:
+        // totalServices
+        // totalMaterial (singular)
+        // totalLabor
+        // totalIndirect
+        // totalTaxes (calculated with Gross Up) 
+        // totalGeneral (calculated with Gross Up)
+
+        // Let's alias them to match the function's expected names or update the usage.
+        const totalMaterials = totalMaterial; // Alias component's singular to local plural
+        // totalServices, totalLabor, totalIndirect are same/similar.
+        // totalTaxes and totalGeneral from component scope are what we want.
 
         return `
             <table style="width: 100%; border-collapse: collapse;">
