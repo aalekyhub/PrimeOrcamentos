@@ -725,19 +725,19 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                     {/* Fixed Editor Header & Tabs & Forms */}
                     <div className="sticky top-0 z-20 bg-white border-b border-slate-200 shadow-sm">
                         {/* Editor Header */}
-                        <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50 rounded-t-2xl">
+                        <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-blue-50 rounded-t-2xl">
                             <div className="flex items-center gap-4">
                                 {!embeddedPlanId && (
-                                    <button onClick={() => setActivePlanId(null)} className="text-slate-400 hover:text-slate-600">
+                                    <button onClick={() => setActivePlanId(null)} className="text-blue-400 hover:text-blue-600">
                                         <ArrowRight className="rotate-180" />
                                     </button>
                                 )}
                                 <div>
-                                    <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                    <h2 className="text-xl font-bold text-blue-900 flex items-center gap-2">
                                         <HardHat className="text-blue-600" />
                                         {currentPlan?.name}
                                     </h2>
-                                    <p className="text-xs text-slate-500 uppercase tracking-widest font-semibold">{currentPlan?.type} • PLANEJAMENTO DE CUSTO</p>
+                                    <p className="text-xs text-blue-600 uppercase tracking-widest font-semibold">{currentPlan?.type} • PLANEJAMENTO DE CUSTO</p>
                                 </div>
                             </div>
                             <div className="flex gap-2">
