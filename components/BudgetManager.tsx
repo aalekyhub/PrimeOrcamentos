@@ -468,15 +468,16 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         <style>
           * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background: white; color: #000; }
-          .pdf-page { width: 210mm; background: white; padding: 15mm; }
-          .pdf-content-wrapper { width: 210mm; background: white; }
-          .a4-container { width: 210mm; background: white; margin: 0; }
+          .pdf-page { width: 210mm; background: white; margin: 0; padding: 0; }
+          .a4-container { width: 100%; background: white; padding: 0 15mm; }
           .avoid-break, .keep-together { break-inside: avoid; page-break-inside: avoid; }
           table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+          thead { display: table-header-group; }
+          tfoot { display: table-footer-group; }
           tr { break-inside: avoid; }
           
-          .pdf-header { margin-bottom: 20px; }
-          .pdf-footer { margin-top: 20px; }
+          .pdf-header { margin-bottom: 25px; }
+          .pdf-footer { margin-top: 32px; }
 
           .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
           .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
@@ -493,17 +494,35 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       container.innerHTML = `
         ${head}
         <div class="pdf-page">
-          <div class="pdf-header">
-            ${getHeaderHtml(budget)}
-          </div>
-
-          <div class="pdf-body">
-            ${htmlContent}
-          </div>
-
-          <div class="pdf-footer">
-            ${getFooterHtml(budget)}
-          </div>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <td style="height: 20mm; border: none; padding: 0;"><div style="height: 20mm;">&nbsp;</div></td>
+                </tr>
+            </thead>
+            <tfoot>
+                <tr>
+                    <td style="height: 15mm; border: none; padding: 0;"><div style="height: 15mm;">&nbsp;</div></td>
+                </tr>
+            </tfoot>
+            <tbody>
+              <tr>
+                <td style="padding: 0;">
+                  <div class="a4-container">
+                      <div class="pdf-header">
+                        ${getHeaderHtml(budget)}
+                      </div>
+                      <div class="pdf-body">
+                        ${htmlContent}
+                      </div>
+                      <div class="pdf-footer">
+                        ${getFooterHtml(budget)}
+                      </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       `;
 
