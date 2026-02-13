@@ -10,6 +10,19 @@ interface Props {
 }
 
 const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, filename }) => {
+    React.useEffect(() => {
+        if (isOpen) {
+            // Give the browser a moment to render the content before optimizing
+            const timer = setTimeout(() => {
+                const optimizePageBreaks = (window as any).optimizePageBreaks;
+                if (typeof optimizePageBreaks === 'function') {
+                    optimizePageBreaks();
+                }
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [isOpen, htmlContent]);
+
     if (!isOpen) return null;
 
     const handlePrint = () => {
@@ -52,8 +65,79 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                     tr { break-inside: avoid; }
                     thead { display: table-header-group; }
                     tfoot { display: table-footer-group; }
+
+                    /* Shared Rich Text / Quill Styles */
+                    .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
+                    .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
+                    .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
+                    .ql-editor-print strong, .ql-editor-print b { font-weight: bold !important; color: #000 !important; }
+                    .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4 { font-weight: 800 !important; color: #0f172a !important; margin-top: 20px !important; margin-bottom: 10px !important; break-after: avoid !important; }
                 }
             `}</style>
+
+            <script dangerouslySetInnerHTML={{
+                __html: `
+                function optimizePageBreaks() {
+                    const content = document.getElementById('report-preview-content');
+                    if (!content) return;
+
+                    const allNodes = [];
+                    Array.from(content.children).forEach(block => {
+                        if (block.classList.contains('ql-editor-print')) {
+                            allNodes.push(...Array.from(block.children));
+                        } else {
+                            allNodes.push(block);
+                        }
+                    });
+
+                    for (let i = 0; i < allNodes.length - 1; i++) {
+                        const el = allNodes[i];
+                        let isTitle = false;
+
+                        if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
+                        else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
+                            const text = el.innerText.trim();
+                            const isNumbered = /^\\d+(\\.\\d+)*[\\.\\s\\)]/.test(text);
+                            const isBold = el.querySelector('strong, b') || (el.style && parseInt(el.style.fontWeight) > 600) || el.tagName === 'STRONG';
+                            const isShort = text.length < 150;
+                            if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
+                                isTitle = true;
+                            }
+                        }
+
+                        if (isTitle) {
+                            const nodesToWrap = [el];
+                            let j = i + 1;
+                            while (j < allNodes.length && nodesToWrap.length < 3) {
+                                const next = allNodes[j];
+                                if (next.matches('h1, h2, h3, h4, h5, h6')) break;
+                                nodesToWrap.push(next);
+                                j++;
+                            }
+
+                            if (nodesToWrap.length > 1) {
+                                const wrapper = document.createElement('div');
+                                wrapper.className = 'keep-together';
+                                wrapper.style.breakInside = 'avoid';
+                                wrapper.style.pageBreakInside = 'avoid';
+                                wrapper.style.display = 'block';
+                                el.parentNode.insertBefore(wrapper, el);
+                                nodesToWrap.forEach(node => wrapper.appendChild(node));
+                                i = j - 1;
+                            }
+                        }
+                    }
+                }
+
+                // Call optimization when content changes
+                const observer = new MutationObserver(optimizePageBreaks);
+                const config = { childList: true, subtree: true };
+                window.addEventListener('load', () => {
+                    const target = document.getElementById('report-preview-content');
+                    if (target) observer.observe(target, config);
+                    optimizePageBreaks();
+                });
+            `}} />
             <div id="report-preview-wrapper" className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
                 {/* Header */}
                 <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10 no-print">
