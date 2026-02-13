@@ -510,7 +510,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       document.body.appendChild(container);
 
       // 3) Pegue o elemento REAL que será capturado (não o container pai)
-      const elementToPrint = container.querySelector(".pdf-content-wrapper") as HTMLElement;
+      const elementToPrint = container.querySelector(".pdf-page") as HTMLElement;
       if (!elementToPrint) throw new Error("Elemento de impressão não encontrado.");
 
       // 4) Aguarde imagens (inclui casos com cache)
