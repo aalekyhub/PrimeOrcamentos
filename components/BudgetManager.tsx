@@ -432,37 +432,55 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       notify("Gerando PDF...");
       const htmlContent = getBudgetHtml(budget);
       const container = document.createElement('div');
-      container.style.position = 'fixed';
-      container.style.left = '-9999px';
+      container.style.position = 'absolute';
+      container.style.left = '-10000px';
       container.style.top = '0';
       container.style.width = '210mm';
+      container.style.background = 'white';
 
       const head = `
         <style>
           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap');
-          * { box-sizing: border-box; }
-          body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background: white; }
-          .a4-container { width: 210mm; background: white; padding: 15mm; }
-          .avoid-break { break-inside: avoid; }
-          .keep-together { break-inside: avoid !important; display: block !important; width: 100% !important; }
-          table { width: 100%; border-collapse: collapse; }
+          * { box-sizing: border-box; -webkit-print-color-adjust: exact; }
+          body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background: white; color: #000; }
+          .pdf-content-wrapper { width: 210mm; background: white; }
+          .a4-container { width: 210mm; background: white; padding: 15mm; margin: 0; }
+          .avoid-break { break-inside: avoid; page-break-inside: avoid; }
+          .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
+          table { width: 100%; border-collapse: collapse; table-layout: fixed; }
           tr { break-inside: avoid; }
+          /* Desabilita thead/tfoot repetido para o PDF pois html2canvas buga */
+          thead, tfoot { display: none !important; }
           .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
           .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
           .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
           .ql-editor-print strong, .ql-editor-print b { font-weight: bold !important; color: #000 !important; }
-          .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4 { font-weight: 800 !important; color: #0f172a !important; margin-top: 20px !important; margin-bottom: 10px !important; }
+          .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4 { font-weight: 800 !important; color: #0f172a !important; margin-top: 20px !important; margin-bottom: 10px !important; break-after: avoid !important; }
         </style>
       `;
 
-      container.innerHTML = `<div>${head}${htmlContent}</div>`;
+      container.innerHTML = `<div class="pdf-content-wrapper">${head}${htmlContent}</div>`;
       document.body.appendChild(container);
+
+      // Aguarda imagens carregarem
+      const images = container.getElementsByTagName('img');
+      const imagePromises = Array.from(images).map(img => {
+        if (img.complete) return Promise.resolve();
+        return new Promise(resolve => {
+          img.onload = resolve;
+          img.onerror = resolve;
+        });
+      });
+      await Promise.all(imagePromises);
+
+      // Pequeno delay para garantir renderização de fontes/layout
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       const options = {
         margin: 0,
         filename: `${budget.id}_${budget.customerName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`,
         image: { type: 'jpeg' as const, quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+        html2canvas: { scale: 2, useCORS: true, letterRendering: true, logging: false },
         jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const }
       };
 
