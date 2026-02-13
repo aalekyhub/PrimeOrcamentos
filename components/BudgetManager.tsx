@@ -434,114 +434,60 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       </body>
       </html>`;
     if (mode === 'pdf') {
-      const worker = document.createElement('div');
-      worker.style.position = 'fixed';
-      worker.style.left = '-9999px';
-      worker.style.top = '0';
-      worker.style.width = '210mm';
-      worker.style.background = 'white';
-      worker.className = 'pdf-generation-container';
+      const iframe = document.createElement('iframe');
+      iframe.style.position = 'fixed';
+      iframe.style.left = '-9999px';
+      iframe.style.top = '0';
+      iframe.style.width = '210mm';
+      iframe.style.height = '297mm';
+      iframe.style.border = 'none';
+      iframe.style.zIndex = '-9999';
+      iframe.style.opacity = '0';
+      iframe.style.pointerEvents = 'none';
+      iframe.style.background = 'white';
+      document.body.appendChild(iframe);
 
-      // Inject the HTML directly into the main document to ensure styles are available
-      worker.innerHTML = html;
-      document.body.appendChild(worker);
-
-      // Add PDF-specific overrides
-      const styleTag = document.createElement('style');
-      styleTag.innerHTML = `
-        .pdf-generation-container { background: white !important; }
-        .pdf-generation-container thead, .pdf-generation-container tfoot { display: none !important; }
-        .pdf-generation-container .a4-container { 
-          width: 100% !important; 
-          margin: 0 !important; 
-          padding: 0 15mm !important; 
-          box-shadow: none !important; 
-          border: none !important; 
-        }
-        .pdf-generation-container .no-screen { display: block !important; }
-        .pdf-generation-container .no-print { display: none !important; }
-        .pdf-generation-container .keep-together { 
-           display: block !important; 
-           break-inside: avoid !important; 
-           page-break-inside: avoid !important; 
-           width: 100% !important;
-        }
-      `;
-      worker.appendChild(styleTag);
-
-      // Run optimization directly on the worker content
-      const descriptionRoot = worker.querySelector('.print-description-content');
-      if (descriptionRoot) {
-        const allNodes: Element[] = [];
-        Array.from(descriptionRoot.children).forEach(block => {
-          if (block.classList.contains('ql-editor-print')) {
-            allNodes.push(...Array.from(block.children));
-          } else {
-            allNodes.push(block);
-          }
-        });
-
-        for (let i = 0; i < allNodes.length - 1; i++) {
-          const el = allNodes[i] as HTMLElement;
-          let isTitle = false;
-          if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
-          else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
-            const text = el.innerText.trim();
-            const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text);
-            const hasBoldStyle = el.querySelector('strong, b, [style*="font-weight: bold"], [style*="font-weight: 700"], [style*="font-weight: 800"], [style*="font-weight: 900"]');
-            const isBold = hasBoldStyle || (el.style && parseInt(el.style.fontWeight) > 600) || el.tagName === 'STRONG';
-            if ((isNumbered && isBold && text.length < 150) || (isBold && text.length < 150 && text === text.toUpperCase() && text.length > 4)) {
-              isTitle = true;
-            }
-          }
-
-          if (isTitle) {
-            const nodesToWrap = [el];
-            let j = i + 1;
-            while (j < allNodes.length && nodesToWrap.length < 3) {
-              const next = allNodes[j] as HTMLElement;
-              const nText = next.innerText.trim();
-              const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(nText);
-              if (next.matches('h1, h2, h3, h4, h5, h6') || (isNumbered && next.querySelector('strong, b'))) break;
-              nodesToWrap.push(next);
-              j++;
-            }
-            if (nodesToWrap.length > 1) {
-              const wrapper = document.createElement('div');
-              wrapper.className = 'keep-together';
-              el.parentNode?.insertBefore(wrapper, el);
-              nodesToWrap.forEach(node => wrapper.appendChild(node));
-              i = j - 1;
-            }
-          }
-        }
+      const doc = iframe.contentDocument;
+      if (!doc) {
+        notify("Erro ao preparar PDF.", "error");
+        document.body.removeChild(iframe);
+        return;
       }
 
-      const opt = {
-        margin: [25, 0, 25, 0],
-        filename: `Orçamento - ${budget.id} - ${budget.description || 'Proposta'}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 3, useCORS: true, letterRendering: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['css', 'legacy'], avoid: '.keep-together' }
-      };
+      doc.open();
+      doc.write(html);
+      doc.close();
 
-      // @ts-ignore
-      html2pdf().set(opt).from(worker).toPdf().get('pdf').then(function (pdf: any) {
-        var totalPages = pdf.internal.getNumberOfPages();
-        for (var i = 1; i <= totalPages; i++) {
-          pdf.setPage(i);
-          pdf.setFontSize(9);
-          pdf.setTextColor(150);
-          pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 15, { align: 'center' });
-        }
-        pdf.save(opt.filename);
-        document.body.removeChild(worker);
-      }).catch((err: any) => {
-        console.error("PDF Error:", err);
-        notify("Erro ao gerar PDF.", "error");
-        if (document.body.contains(worker)) document.body.removeChild(worker);
-      });
+      setTimeout(() => {
+        const frameDoc = iframe.contentDocument;
+        if (!frameDoc) return;
+
+        const opt = {
+          margin: [25, 0, 25, 0],
+          filename: `Orçamento - ${budget.id} - ${budget.description || 'Proposta'}.pdf`,
+          image: { type: 'jpeg', quality: 1 },
+          html2canvas: { scale: 3, useCORS: true, letterRendering: true, backgroundColor: '#ffffff' },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: ['css', 'legacy'], avoid: '.keep-together' }
+        };
+
+        // @ts-ignore
+        html2pdf().set(opt).from(frameDoc.documentElement).toPdf().get('pdf').then(function (pdf: any) {
+          var totalPages = pdf.internal.getNumberOfPages();
+          for (var i = 1; i <= totalPages; i++) {
+            pdf.setPage(i);
+            pdf.setFontSize(9);
+            pdf.setTextColor(150);
+            pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 15, { align: 'center' });
+          }
+          pdf.save(opt.filename);
+          document.body.removeChild(iframe);
+        }).catch((err: any) => {
+          console.error("PDF Error:", err);
+          notify("Erro ao gerar PDF.", "error");
+          if (document.body.contains(iframe)) document.body.removeChild(iframe);
+        });
+      }, 2500);
     } else {
       const printWindow = window.open('', '_blank');
       if (printWindow) {

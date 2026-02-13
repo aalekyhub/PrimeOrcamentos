@@ -353,87 +353,57 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         const opt = {
             margin: [25, 0, 25, 0],
             filename: `Contrato - ${order.id.replace('OS-', 'OS')} - ${order.description || 'Proposta'}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 3, useCORS: true, letterRendering: true },
+            image: { type: 'jpeg', quality: 1 },
+            html2canvas: { scale: 3, useCORS: true, letterRendering: true, backgroundColor: '#ffffff' },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
             pagebreak: { mode: ['css', 'legacy'], avoid: '.keep-together' }
         };
 
-        // Use a hidden div to process HTML for PDF (must be in DOM and visible for layout)
-        const worker = document.createElement('div');
-        worker.style.position = 'absolute';
-        worker.style.left = '-9999px';
-        worker.style.top = '0';
-        worker.style.width = '210mm';
-        worker.style.height = '297mm'; // Set initial height for A4
-        worker.innerHTML = html;
-        document.body.appendChild(worker);
+        const iframe = document.createElement('iframe');
+        iframe.style.position = 'fixed';
+        iframe.style.left = '-9999px';
+        iframe.style.top = '0';
+        iframe.style.width = '210mm';
+        iframe.style.height = '297mm';
+        iframe.style.border = 'none';
+        iframe.style.background = 'white';
+        document.body.appendChild(iframe);
 
-        // Apply optimizations manually (scripts in innerHTML don't run)
-        // Apply optimizations manually
-        const root = worker.querySelector('.print-description-content .space-y-6');
-        if (root) {
-            const allNodes: any[] = [];
-            Array.from(root.children).forEach(block => {
-                if (block.classList.contains('ql-editor-print')) {
-                    allNodes.push(...Array.from(block.children));
-                } else {
-                    allNodes.push(block);
-                }
-            });
-
-            for (let i = 0; i < allNodes.length - 1; i++) {
-                const el = allNodes[i] as HTMLElement;
-                let isTitle = false;
-
-                if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
-                else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
-                    const text = el.innerText.trim();
-                    const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text);
-                    const hasBoldStyle = el.querySelector('strong, b, [style*="font-weight: bold"], [style*="font-weight: 700"], [style*="font-weight: 800"], [style*="font-weight: 900"]');
-                    const isBold = hasBoldStyle || (el.style && parseInt(el.style.fontWeight) > 600) || el.tagName === 'STRONG';
-                    const isShort = text.length < 150;
-                    if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
-                        isTitle = true;
-                    }
-                }
-
-                if (isTitle) {
-                    const nodesToWrap = [el];
-                    let j = i + 1;
-                    while (j < allNodes.length && nodesToWrap.length < 3) {
-                        const next = allNodes[j];
-                        const nText = next.innerText.trim();
-                        const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') ||
-                            (/^\d+(\.\d+)*[\.\s\)]/.test(nText) && (next.querySelector('strong, b') || nText === nText.toUpperCase()));
-                        if (nextIsTitle) break;
-                        nodesToWrap.push(next);
-                        j++;
-                    }
-
-                    if (nodesToWrap.length > 1) {
-                        const wrapper = document.createElement('div');
-                        wrapper.className = 'keep-together';
-                        el.parentNode?.insertBefore(wrapper, el);
-                        nodesToWrap.forEach(node => wrapper.appendChild(node));
-                        i = j - 1;
-                    }
-                }
-            }
+        const doc = iframe.contentDocument;
+        if (!doc) {
+            notify("Erro ao preparar PDF.", "error");
+            document.body.removeChild(iframe);
+            return;
         }
 
-        // @ts-ignore
-        html2pdf().set(opt).from(worker).toPdf().get('pdf').then(function (pdf: any) {
-            var totalPages = pdf.internal.getNumberOfPages();
-            for (var i = 1; i <= totalPages; i++) {
-                pdf.setPage(i);
-                pdf.setFontSize(10);
-                pdf.setTextColor(148, 163, 184); // #94a3b8
-                pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 15, { align: 'center' });
-            }
-            pdf.save(opt.filename);
-            document.body.removeChild(worker);
-        });
+        doc.open();
+        doc.write(html);
+        doc.close();
+
+        // Wait for resources and layout
+        setTimeout(() => {
+            const frameDoc = iframe.contentDocument;
+            if (!frameDoc) return;
+
+            // Apply optimizations manually (scripts in innerHTML don't run)
+            // Apply optimizations manually
+            // @ts-ignore
+            html2pdf().set(opt).from(frameDoc.documentElement).toPdf().get('pdf').then(function (pdf: any) {
+                var totalPages = pdf.internal.getNumberOfPages();
+                for (var i = 1; i <= totalPages; i++) {
+                    pdf.setPage(i);
+                    pdf.setFontSize(10);
+                    pdf.setTextColor(148, 163, 184); // #94a3b8
+                    pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 15, { align: 'center' });
+                }
+                pdf.save(opt.filename);
+                document.body.removeChild(iframe);
+            }).catch((err: any) => {
+                console.error("PDF Error:", err);
+                notify("Erro ao gerar PDF.", "error");
+                if (document.body.contains(iframe)) document.body.removeChild(iframe);
+            });
+        }, 2500);
     };
 
     const handlePrintContract = (order: ServiceOrder) => {
