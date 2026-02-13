@@ -3,7 +3,7 @@ import html2pdf from 'html2pdf.js';
 import {
     Building2, Users, Truck, HardHat, FileText,
     Plus, Trash2, Save, ChevronRight, Calculator,
-    PieChart, ArrowRight, DollarSign, Pencil, Check, X, Printer, Percent, Eye
+    PieChart, ArrowRight, DollarSign, Pencil, Check, X, Printer, Percent, Eye, Archive
 } from 'lucide-react';
 import { useNotify } from './ToastProvider';
 import { db } from '../services/db';
@@ -1645,21 +1645,49 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                         {activeTab === 'resumo' && (
                             <div className="max-w-4xl mx-auto">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-                                    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                                        <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Materiais</span>
-                                        <span className="text-2xl font-bold text-slate-800">R$ {totalMaterial.toFixed(2)}</span>
+
+                                    <div className="bg-emerald-50 p-6 rounded-xl border border-emerald-200 shadow-sm transition-all hover:shadow-md">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Total Materiais</span>
+                                            <div className="bg-emerald-100 p-1.5 rounded-lg">
+                                                <Truck size={16} className="text-emerald-600" />
+                                            </div>
+                                        </div>
+                                        <span className="text-2xl font-black text-emerald-900">R$ {totalMaterial.toFixed(2)}</span>
+                                        <p className="text-[10px] text-emerald-600 mt-1 font-medium">Insumos + Materiais de Serviços</p>
                                     </div>
-                                    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                                        <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Mão de Obra</span>
-                                        <span className="text-2xl font-bold text-slate-800">R$ {totalLabor.toFixed(2)}</span>
+
+                                    <div className="bg-amber-50 p-6 rounded-xl border border-amber-200 shadow-sm transition-all hover:shadow-md">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <span className="text-xs font-bold text-amber-600 uppercase tracking-wider">Total Mão de Obra</span>
+                                            <div className="bg-amber-100 p-1.5 rounded-lg">
+                                                <HardHat size={16} className="text-amber-600" />
+                                            </div>
+                                        </div>
+                                        <span className="text-2xl font-black text-amber-900">R$ {totalLabor.toFixed(2)}</span>
+                                        <p className="text-[10px] text-amber-600 mt-1 font-medium">Equipe Própria + Terceirizada</p>
                                     </div>
-                                    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                                        <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Indiretos</span>
-                                        <span className="text-2xl font-bold text-slate-800">R$ {totalIndirect.toFixed(2)}</span>
+
+                                    <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Indiretos</span>
+                                            <div className="bg-slate-200 p-1.5 rounded-lg">
+                                                <Archive size={16} className="text-slate-600" />
+                                            </div>
+                                        </div>
+                                        <span className="text-2xl font-black text-slate-800">R$ {totalIndirect.toFixed(2)}</span>
+                                        <p className="text-[10px] text-slate-500 mt-1 font-medium">Custos Administrativos</p>
                                     </div>
-                                    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-blue-500">
-                                        <span className="text-xs font-bold text-slate-400 uppercase block mb-1">Total Impostos</span>
-                                        <span className="text-2xl font-bold text-slate-800">R$ {totalTaxes.toFixed(2)}</span>
+
+                                    <div className="bg-blue-50 p-6 rounded-xl border border-blue-200 shadow-sm transition-all hover:shadow-md">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">Total Impostos</span>
+                                            <div className="bg-blue-100 p-1.5 rounded-lg">
+                                                <Percent size={16} className="text-blue-600" />
+                                            </div>
+                                        </div>
+                                        <span className="text-2xl font-black text-blue-900">R$ {totalTaxes.toFixed(2)}</span>
+                                        <p className="text-[10px] text-blue-600 mt-1 font-medium">Baseado no BDI e Taxas</p>
                                     </div>
                                 </div>
 
