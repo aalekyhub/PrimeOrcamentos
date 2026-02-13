@@ -37,16 +37,16 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                         background: white;
                         display: block !important;
                     }
+                    @page {
+                        margin: 0;
+                        size: A4;
+                    }
                     #report-preview-content {
                         width: 100% !important;
                         margin: 0 !important;
-                        padding: 0 !important;
+                        padding: 20mm 15mm !important;
                         border: none !important;
                         box-shadow: none !important;
-                    }
-                    @page {
-                        margin: 20mm 15mm;
-                        size: A4;
                     }
                     /* Ensure content breaks correctly */
                     tr { break-inside: avoid; }

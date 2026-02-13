@@ -329,9 +329,15 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
              .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm; } 
            }
            @media print { 
-             @page { margin: 20mm 15mm; }
+             @page { margin: 0; size: A4; } /* Reset page margin to give full control to container */
              body { background: white !important; margin: 0 !important; padding: 0 !important; } 
-             .a4-container { box-shadow: none !important; border: none !important; width: 100% !important; padding: 0 !important; margin: 0 !important; }
+             .a4-container { 
+                 box-shadow: none !important; 
+                 border: none !important; 
+                 width: 100% !important; 
+                 padding: 20mm 15mm !important; /* Enforce visual margins directly on content */
+                 margin: 0 !important; 
+             }
              table { break-inside: auto; width: 100%; }
              tr { break-inside: avoid; break-after: auto; }
              thead { display: table-header-group; } 
