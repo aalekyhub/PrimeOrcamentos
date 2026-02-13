@@ -351,6 +351,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                 <!-- COLORFUL UI CARDS (Print Version) -->
                                 <div style="display: flex; gap: 16px; margin-bottom: 20px;">
                                     <!-- Materials (Green) -->
+                                    ${totalMaterials > 0 ? `
                                     <div style="flex: 1; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 16px;">
                                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                             <span style="font-size: 9px; font-weight: 500; color: #059669; text-transform: uppercase; letter-spacing: 0.05em;">Total Materiais</span>
@@ -360,8 +361,10 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                         </div>
                                         <span style="font-size: 18px; font-weight: 600; color: #064e3b; display: block;">R$ ${totalMaterials.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                                     </div>
+                                    ` : ''}
 
                                     <!-- Labor (Amber) -->
+                                    ${totalLabor > 0 ? `
                                     <div style="flex: 1; background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 16px;">
                                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                             <span style="font-size: 9px; font-weight: 500; color: #d97706; text-transform: uppercase; letter-spacing: 0.05em;">Total Mão de Obra</span>
@@ -371,8 +374,10 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                         </div>
                                         <span style="font-size: 18px; font-weight: 600; color: #78350f; display: block;">R$ ${totalLabor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                                     </div>
+                                    ` : ''}
 
                                     <!-- Indirects (Slate) -->
+                                    ${totalIndirect > 0 ? `
                                     <div style="flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">
                                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                             <span style="font-size: 9px; font-weight: 500; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Total Indiretos</span>
@@ -382,6 +387,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                         </div>
                                         <span style="font-size: 18px; font-weight: 600; color: #1e293b; display: block;">R$ ${totalIndirect.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                                     </div>
+                                    ` : ''}
 
                                     <!-- Taxes (Blue) - Conditional Render -->
                                     ${totalTaxes > 0 ? `
