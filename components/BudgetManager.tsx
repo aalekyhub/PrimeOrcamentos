@@ -1,4 +1,4 @@
-Ôªø
+
 import React, { useState, useMemo } from 'react';
 import html2pdf from 'html2pdf.js';
 import {
@@ -35,7 +35,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
   const [proposalTitle, setProposalTitle] = useState('');
-  const [paymentTerms, setPaymentTerms] = useState('50% avista, 25% com 30 dias, 25% restante na conclus√£o');
+  const [paymentTerms, setPaymentTerms] = useState('50% avista, 25% com 30 dias, 25% restante na conclus„o');
   const [paymentEntryPercent, setPaymentEntryPercent] = useState<number>(30);
   const [deliveryTime, setDeliveryTime] = useState('15 dias uteis');
   const [items, setItems] = useState<ServiceItem[]>([]);
@@ -76,7 +76,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       quantity: currentQty,
       unitPrice: currentPrice,
       unit: currentUnit,
-      type: 'Servi√ßo'
+      type: 'ServiÁo'
     };
     setItems([...items, newItem]);
     setCurrentDesc(''); setCurrentPrice(0); setCurrentQty(1);
@@ -138,13 +138,13 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                  </div>
                  <div>
                      <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 0 0 2px 0; text-transform: uppercase;">${company.name}</h1>
-                     <p style="margin: 0; font-size: 11px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.02em;">Solu√ß√µes em Gest√£o Profissional</p>
+                     <p style="margin: 0; font-size: 11px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.02em;">SoluÁıes em Gest„o Profissional</p>
                       <p style="margin: 4px 0 0 0; font-size: 10px; color: #64748b; font-weight: 500;">${company.cnpj || ''} | ${company.phone || ''}</p>
                  </div>
              </div>
              <div style="text-align: right;">
                  <p style="margin: 0; font-size: 24px; font-weight: 800; color: #2563eb;">${b.id}</p>
-                 <p style="margin: 4px 0 0 0; font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase;">EMISS√ÉO: ${eDate}</p>
+                 <p style="margin: 4px 0 0 0; font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase;">EMISS√O: ${eDate}</p>
                  <p style="margin: 2px 0 0 0; font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase;">VALIDADE: ${vDate}</p>
              </div>
          </div>
@@ -157,11 +157,11 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       <div style="margin-top: 32px; break-inside: avoid;">
           <div style="border: 1px solid #bfdbfe; background: #eff6ff; border-radius: 16px; padding: 32px;">
                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-                   <div style="background: #2563eb; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold;">‚úì</div>
-                   <span style="font-size: 13px; font-weight: 800; color: #1e40af; text-transform: uppercase; letter-spacing: 0.05em;">TERMO DE ACEITE E AUTORIZA√á√ÉO PROFISSIONAL</span>
+                   <div style="background: #2563eb; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold;">?</div>
+                   <span style="font-size: 13px; font-weight: 800; color: #1e40af; text-transform: uppercase; letter-spacing: 0.05em;">TERMO DE ACEITE E AUTORIZA«√O PROFISSIONAL</span>
                </div>
                <p style="margin: 0; font-size: 12px; color: #1e3a8a; line-height: 1.6; text-align: justify; font-weight: 500;">
-                   "Ao assinar abaixo, o cliente declara estar ciente e de pleno acordo com os valores, prazos e especifica√ß√µes descritas. Esta aceita√ß√£o autoriza o in√≠cio imediato dos trabalhos sob as condi√ß√µes estabelecidas. Validade: ${vDays} dias."
+                   "Ao assinar abaixo, o cliente declara estar ciente e de pleno acordo com os valores, prazos e especificaÁıes descritas. Esta aceitaÁ„o autoriza o inÌcio imediato dos trabalhos sob as condiÁıes estabelecidas. Validade: ${vDays} dias."
                </p>
           </div>
           <div style="margin-top: 60px; break-inside: avoid;">
@@ -173,7 +173,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
   const getBodyHtml = (b: ServiceOrder) => {
     // Re-calculate context for the body if needed or assume budget is passed
-    const cust = customers.find(c => c.id === b.customerId) || { name: b.customerName, address: 'N√£o informado', document: 'Documento n√£o informado' };
+    const cust = customers.find(c => c.id === b.customerId) || { name: b.customerName, address: 'N„o informado', document: 'Documento n„o informado' };
     const subT = b.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0);
     const bdiR = b.bdiRate || 0;
     const taxR = b.taxRate || 0;
@@ -195,12 +195,12 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                  <!-- Boxes Grid -->
                  <div style="display: flex; gap: 24px; margin-bottom: 40px;">
                      <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
-                         <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">CLIENTE / DESTINAT√ÅRIO</span>
+                         <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">CLIENTE / DESTINAT¡RIO</span>
                          <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${cust.name}</div>
-                         <div style="font-size: 11px; color: #64748b; font-weight: 500; margin-top: 4px;">${cust.document || 'CPF/CNPJ n√£o informado'}</div>
+                         <div style="font-size: 11px; color: #64748b; font-weight: 500; margin-top: 4px;">${cust.document || 'CPF/CNPJ n„o informado'}</div>
                      </div>
                      <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
-                         <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">REFER√äNCIA DO OR√áAMENTO</span>
+                         <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">REFER NCIA DO OR«AMENTO</span>
                          <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${b.description || 'PROPOSTA COMERCIAL'}</div>
                      </div>
                  </div>
@@ -213,11 +213,11 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                  
                  ${b.descriptionBlocks && b.descriptionBlocks.length > 0 ? `
                   <div style="margin-bottom: 48px;" class="print-description-content">
-                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0; margin-bottom: 24px;">DESCRI√á√ÉO DOS SERVI√áOS</div>
-                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0; margin-bottom: 24px;">DESCRI«√O DOS SERVI«OS</div>
+                    <div style="display: block;">
                       ${b.descriptionBlocks.map(block => {
       if (block.type === 'text') {
-        return `<div class="ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px; color: #334155; line-height: 1.6; text-align: justify;">${block.content}</div>`;
+        return `<div class="ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px; color: #334155; line-height: 1.6; text-align: justify; margin-bottom: 24px;">${block.content}</div>`;
       } else if (block.type === 'image') {
         return `<div style="margin: 24px 0; break-inside: avoid; page-break-inside: avoid; display: block; text-align: center;"><img src="${block.content}" style="width: auto; max-width: 100%; border-radius: 8px; display: block; margin: 0 auto; object-fit: contain; max-height: 250mm;"></div>`;
       } else if (block.type === 'page-break') {
@@ -234,9 +234,9 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                        <table style="width: 100%; border-collapse: collapse;">
                           <thead>
                               <tr style="border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
-                                  <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: left; font-weight: 800; width: 55%; letter-spacing: 0.05em;">ITEM / DESCRI√á√ÉO</th>
+                                  <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: left; font-weight: 800; width: 55%; letter-spacing: 0.05em;">ITEM / DESCRI«√O</th>
                                   <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: center; font-weight: 800; width: 10%; letter-spacing: 0.05em;">QTD</th>
-                                  <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: right; font-weight: 800; width: 17.5%; letter-spacing: 0.05em;">UNIT√ÅRIO</th>
+                                  <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: right; font-weight: 800; width: 17.5%; letter-spacing: 0.05em;">UNIT¡RIO</th>
                                   <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: right; font-weight: 800; width: 17.5%; letter-spacing: 0.05em;">SUBTOTAL</th>
                               </tr>
                           </thead>
@@ -276,7 +276,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                              <p style="margin: 0; font-size: 12px; font-weight: 600; color: #334155; line-height: 1.5;">${b.paymentTerms || 'A combinar'}</p>
                          </div>
                          <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
-                             <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">PRAZO DE ENTREGA / EXECU√á√ÉO</span>
+                             <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">PRAZO DE ENTREGA / EXECU«√O</span>
                              <p style="margin: 0; font-size: 12px; font-weight: 600; color: #334155; line-height: 1.5;">${b.deliveryTime || 'A combinar'}</p>
                          </div>
                      </div>
@@ -379,7 +379,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Or√ßamento - ${budget.id} - ${budget.description}</title>
+        <title>OrÁamento - ${budget.id} - ${budget.description}</title>
          <script src="https://cdn.tailwindcss.com"></script>
          <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
         <style>
@@ -405,7 +405,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                   margin: 0 !important; 
               }
              table { break-inside: auto; width: 100%; }
-             tr { break-inside: avoid; break-after: auto; }
+             tr { break-inside: auto !important; break-after: auto; }
              thead { display: table-header-group; } 
              tfoot { display: table-footer-group; }
              .no-print { display: none !important; } 
@@ -501,7 +501,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
       const htmlContent = getBodyHtml(budget);
 
-      // 1) Container vis√≠vel (mas invis√≠vel) para evitar captura em branco
+      // 1) Container visÌvel (mas invisÌvel) para evitar captura em branco
       container = document.createElement("div");
       container.id = "pdf-temp-root";
       Object.assign(container.style, {
@@ -515,7 +515,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         zIndex: "999999",
       });
 
-      // 2) Preferir <link> ao inv√©s de @import (menos bug com html2canvas)
+      // 2) Preferir <link> ao invÈs de @import (menos bug com html2canvas)
       const head = `
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -529,7 +529,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           table { width: 100%; border-collapse: collapse; table-layout: fixed; }
           thead { display: table-header-group; }
           tfoot { display: table-footer-group; }
-          tr { break-inside: avoid; }
+          tr { break-inside: auto !important; }
           
           .pdf-header { margin-bottom: 25px; }
           .pdf-footer { margin-top: 32px; }
@@ -565,12 +565,12 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
       document.body.appendChild(container);
 
-      // Otimizar quebras de p√°gina antes de capturar
+      // Otimizar quebras de p·gina antes de capturar
       runOptimizePageBreaks(container);
 
-      // 3) Pegue o elemento REAL que ser√° capturado (n√£o o container pai)
+      // 3) Pegue o elemento REAL que ser· capturado (n„o o container pai)
       const elementToPrint = container.querySelector(".pdf-page") as HTMLElement;
-      if (!elementToPrint) throw new Error("Elemento de impress√£o n√£o encontrado.");
+      if (!elementToPrint) throw new Error("Elemento de impress„o n„o encontrado.");
 
       // 4) Aguarde imagens (inclui casos com cache)
       const imgs = Array.from(container.querySelectorAll("img"));
@@ -625,7 +625,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
             pdf.setFontSize(8);
             pdf.setTextColor(150);
             pdf.text(
-              `P√°g. ${i} / ${totalPages}`,
+              `P·g. ${i} / ${totalPages}`,
               pdf.internal.pageSize.getWidth() - 15,
               pdf.internal.pageSize.getHeight() - 8
             );
@@ -647,7 +647,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     if (isSaving) return;
     const customer = customers.find(c => c.id === selectedCustomerId);
     if (!customer) { notify("Selecione um cliente", "error"); return; }
-    if (items.length === 0) { notify("Adicione itens ao or√ßamento", "error"); return; }
+    if (items.length === 0) { notify("Adicione itens ao orÁamento", "error"); return; }
 
     const existingBudget = editingBudgetId ? orders.find(o => o.id === editingBudgetId) : null;
 
@@ -672,7 +672,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     try {
       const result = await db.save('serviflow_orders', newList);
       if (result?.success) {
-        notify("Or√ßamento salvo e sincronizado!");
+        notify("OrÁamento salvo e sincronizado!");
         setTimeout(() => setShowForm(false), 1500);
       } else if (result?.error === 'quota_exceeded') {
         notify("ERRO DE ARMAZENAMENTO: Limite excedido.", "error");
@@ -689,7 +689,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     setEditingBudgetId(isClone ? null : budget.id);
     setSelectedCustomerId(budget.customerId);
     setItems(budget.items.map(item => ({ ...item, id: db.generateId('ITEM') })));
-    setProposalTitle(isClone ? `${budget.description} (C‚îú√¥PIA)` : budget.description || '');
+    setProposalTitle(isClone ? `${budget.description} (C+ÙPIA)` : budget.description || '');
     setDescriptionBlocks(budget.descriptionBlocks && budget.descriptionBlocks.length > 0
       ? budget.descriptionBlocks.map(block => ({ ...block, id: Math.random().toString(36).substr(2, 9) }))
       : []);
@@ -707,7 +707,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     setBdiRate(d);
 
     setShowForm(true);
-    if (isClone) notify("Or√ßamento clonado! Voc‚îú¬¨ est√° editando uma nova c√≥pia.");
+    if (isClone) notify("OrÁamento clonado! Voc+¨ est· editando uma nova cÛpia.");
   };
 
 
@@ -716,7 +716,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       <div className="flex flex-col md:flex-row justify-between items-center gap-4">
         <div>
           <h2 className="text-2xl font-black text-slate-900 tracking-tighter flex items-center gap-2">
-            Or√ßamentos <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">{orders.filter(o => o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED).length}</span>
+            OrÁamentos <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">{orders.filter(o => o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED).length}</span>
           </h2>
           <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Gerencie suas propostas comerciais</p>
         </div>
@@ -729,7 +729,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
             setBdiRate(0);
             setShowForm(true);
           }} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-200 hover:shadow-blue-300 transition-all flex items-center gap-2 active:scale-95">
-            <Plus className="w-4 h-4" /> Novo Or√ßamento
+            <Plus className="w-4 h-4" /> Novo OrÁamento
           </button>
         </div>
       </div>
@@ -737,7 +737,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       <div className="bg-white p-4 rounded-[1.5rem] border shadow-sm">
         <div className="relative">
           <Search className="absolute left-4 top-3 w-4 h-4 text-slate-400" />
-          <input type="text" placeholder="Buscar por cliente ou or√ßamento..." className="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 transition-all font-bold text-slate-700" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+          <input type="text" placeholder="Buscar por cliente ou orÁamento..." className="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 transition-all font-bold text-slate-700" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
         </div>
       </div>
 
@@ -745,11 +745,11 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         <table className="w-full text-left">
           <thead className="bg-slate-50 text-[10px] font-black uppercase text-slate-400 border-b">
             <tr>
-              <th className="px-8 py-5">OR√á #</th>
+              <th className="px-8 py-5">OR« #</th>
               <th className="px-8 py-5">CLIENTE</th>
-              <th className="px-8 py-5">DESCRI√á√ÉO</th>
+              <th className="px-8 py-5">DESCRI«√O</th>
               <th className="px-8 py-5">VALOR</th>
-              <th className="px-8 py-5 text-right">A√á‚îú√≤ES</th>
+              <th className="px-8 py-5 text-right">A«+ÚES</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -767,7 +767,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                 <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   {budget.status !== OrderStatus.APPROVED && (
                     <button onClick={async () => {
-                      if (confirm("Deseja APROVAR este or√ßamento? Ele ser√° convertido em Ordem de Servi√ßo.")) {
+                      if (confirm("Deseja APROVAR este orÁamento? Ele ser· convertido em Ordem de ServiÁo.")) {
                         const approvedBudget = { ...budget, status: OrderStatus.APPROVED };
                         const newServiceOrderId = budget.id.replace('ORC', 'OS');
 
@@ -816,7 +816,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
                         setOrders(finalList);
                         const result = await db.save('serviflow_orders', finalList);
-                        if (result?.success) notify(existingOSIndex !== -1 ? "O.S. atualizada com novos dados do or√ßamento!" : "Or√ßamento APROVADO! C√≥pia gerada em O.S.");
+                        if (result?.success) notify(existingOSIndex !== -1 ? "O.S. atualizada com novos dados do orÁamento!" : "OrÁamento APROVADO! CÛpia gerada em O.S.");
                         else notify("Erro ao sincronizar.", "error");
                       }
                     }} className="p-2 text-slate-400 hover:text-emerald-600 transition-colors" title="Aprovar">
@@ -828,11 +828,11 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                   <button onClick={() => handlePrint(budget)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Imprimir"><Printer className="w-4 h-4" /></button>
                   <button onClick={() => handleGeneratePDF(budget)} className="p-2 text-slate-400 hover:text-rose-600 transition-colors" title="Baixar PDF"><FileDown className="w-4 h-4" /></button>
                   <button onClick={async () => {
-                    if (confirm("Deseja excluir este or√ßamento? Esta a√ß√£o tamb‚îú¬Æm remover√° os dados da nuvem.")) {
+                    if (confirm("Deseja excluir este orÁamento? Esta aÁ„o tamb+Æm remover· os dados da nuvem.")) {
                       const idToDelete = budget.id;
                       setOrders(prev => prev.filter(o => o.id !== idToDelete));
                       const result = await db.remove('orders', idToDelete);
-                      if (result?.success) { notify("Or√ßamento removido da nuvem com sucesso."); }
+                      if (result?.success) { notify("OrÁamento removido da nuvem com sucesso."); }
                       else { notify("Removido localmente, mas houve um erro ao sincronizar com a nuvem.", "error"); }
                     }
                   }} className="p-2 text-rose-300 hover:text-rose-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
@@ -850,8 +850,8 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
               <div className="flex items-center gap-3">
                 <div className="bg-blue-600 p-2 rounded-xl text-white shadow-xl shadow-blue-100"><FileText className="w-5 h-5" /></div>
                 <div>
-                  <h3 className="text-lg font-black text-slate-900 uppercase tracking-tighter mb-0.5">Elabora√ß√£o de Or√ßamento Prime</h3>
-                  <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em]">Configura√ß√£o de Documento Comercial</p>
+                  <h3 className="text-lg font-black text-slate-900 uppercase tracking-tighter mb-0.5">ElaboraÁ„o de OrÁamento Prime</h3>
+                  <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em]">ConfiguraÁ„o de Documento Comercial</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
@@ -880,7 +880,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                       </select>
                     </div>
                     <div>
-                      <label className="text-[11px] font-black text-blue-700 uppercase mb-2 block ml-1">T‚îú¬°tulo da Proposta</label>
+                      <label className="text-[11px] font-black text-blue-700 uppercase mb-2 block ml-1">T+°tulo da Proposta</label>
                       <input type="text" placeholder="Ex: Reforma Geral de Ar-Condicionado" className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-900 outline-none placeholder:text-slate-500" value={proposalTitle} onChange={e => setProposalTitle(e.target.value)} />
                     </div>
                   </div>
@@ -888,7 +888,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
                 <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
                   <div className="flex justify-between items-center">
-                    <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-widest border-b pb-2 grow mr-6">DESCRI√á√ÉO T√âCNICA</h4>
+                    <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-widest border-b pb-2 grow mr-6">DESCRI«√O T…CNICA</h4>
                   </div>
                   <div className="space-y-3">
                     {descriptionBlocks.length === 0 && (
@@ -897,7 +897,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                           <button onClick={(e) => { e.stopPropagation(); addTextBlock(); }} className="bg-blue-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-blue-100 hover:scale-105 transition-all"><Type className="w-4 h-4" /> + Iniciar com Texto</button>
                           <button onClick={(e) => { e.stopPropagation(); addImageBlock(); }} className="bg-emerald-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-emerald-100 hover:scale-105 transition-all"><ImageIcon className="w-4 h-4" /> + Iniciar com Imagem</button>
                         </div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 animate-pulse">Comece a montar o escopo t‚îú¬Æcnico acima</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 animate-pulse">Comece a montar o escopo t+Æcnico acima</p>
                       </div>
                     )}
                     {descriptionBlocks.map((block) => (
@@ -910,7 +910,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                               onChange={(content) => updateBlockContent(block.id, content)}
                               onAddText={addTextBlock}
                               onAddImage={addImageBlock}
-                              placeholder="Descreva aqui os detalhes t‚îú¬Æcnicos do servi√ßo..."
+                              placeholder="Descreva aqui os detalhes t+Æcnicos do serviÁo..."
                             />
                           </div>
                         )}
@@ -931,12 +931,12 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
                 <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
                   <div className="flex justify-between items-center">
-                    <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-widest border-b pb-2 grow mr-6">ITENS DO OR√áAMENTO</h4>
-                    <button onClick={() => setShowFullServiceForm(true)} className="text-blue-600 text-[8px] font-black uppercase flex items-center gap-1 hover:underline tracking-widest"><Package className="w-3 h-3" /> CAT√ÅLOGO</button>
+                    <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-widest border-b pb-2 grow mr-6">ITENS DO OR«AMENTO</h4>
+                    <button onClick={() => setShowFullServiceForm(true)} className="text-blue-600 text-[8px] font-black uppercase flex items-center gap-1 hover:underline tracking-widest"><Package className="w-3 h-3" /> CAT¡LOGO</button>
                   </div>
                   <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
                     <div>
-                      <label className="text-[8px] font-black text-blue-600 uppercase tracking-widest block mb-1.5">Puxar do Cat√°logo</label>
+                      <label className="text-[8px] font-black text-blue-600 uppercase tracking-widest block mb-1.5">Puxar do Cat·logo</label>
                       <select className="w-full bg-white border-none rounded-xl p-2.5 text-[10px] font-bold text-slate-500 outline-none" value={selectedCatalogId} onChange={e => {
                         const id = e.target.value;
                         setSelectedCatalogId(id);
@@ -950,12 +950,12 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
                       <div className="md:col-span-6">
-                        <label className="text-[11px] font-black text-blue-700 uppercase mb-1.5 block ml-1">Descri√ß√£o</label>
+                        <label className="text-[11px] font-black text-blue-700 uppercase mb-1.5 block ml-1">DescriÁ„o</label>
                         <input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs font-bold text-slate-900 outline-none placeholder:text-slate-500" value={currentDesc} onChange={e => setCurrentDesc(e.target.value)} />
                       </div>
                       <div className="w-24"><label className="text-[11px] font-black text-blue-700 uppercase mb-1.5 block text-center">Unit</label><input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs font-black text-center outline-none uppercase text-slate-900" value={currentUnit} onChange={e => setCurrentUnit(e.target.value)} /></div>
                       <div className="w-24"><label className="text-[11px] font-black text-blue-700 uppercase mb-1.5 block text-center">Qtd</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs font-black text-center outline-none text-slate-900" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} /></div>
-                      <div className="w-32"><label className="text-[11px] font-black text-blue-700 uppercase mb-1.5 block ml-1">Pre√ßo (R$)</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs font-black outline-none text-slate-900" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} /></div>
+                      <div className="w-32"><label className="text-[11px] font-black text-blue-700 uppercase mb-1.5 block ml-1">PreÁo (R$)</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs font-black outline-none text-slate-900" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} /></div>
                       <div className="md:col-span-1">
                         <button onClick={handleAddItem} className="bg-blue-600 text-white w-full h-[58px] rounded-xl flex items-center justify-center hover:scale-105 transition-all shadow-xl"><Plus className="w-6 h-6" /></button>
                       </div>
@@ -1107,8 +1107,8 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 flex flex-col max-h-[80vh]">
             <div className="p-6 border-b flex justify-between items-center bg-slate-50">
               <div>
-                <h3 className="font-black text-slate-800 uppercase tracking-tight">Importar Dados de Or√ßamento</h3>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Selecione um or√ßamento para copiar itens e descri√ß√£o</p>
+                <h3 className="font-black text-slate-800 uppercase tracking-tight">Importar Dados de OrÁamento</h3>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Selecione um orÁamento para copiar itens e descriÁ„o</p>
               </div>
               <button onClick={() => setShowImportModal(false)}><X className="w-5 h-5 text-slate-400 hover:text-rose-500" /></button>
             </div>
@@ -1118,7 +1118,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Pesquisar por cliente ou t‚îú¬°tulo..."
+                  placeholder="Pesquisar por cliente ou t+°tulo..."
                   className="w-full bg-slate-100 border-none rounded-2xl py-3 pl-12 pr-4 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500"
                   value={importSearch}
                   onChange={e => setImportSearch(e.target.value)}
@@ -1151,7 +1151,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
               {orders.filter(o => (o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED)).length === 0 && (
                 <div className="text-center py-12">
                   <Database className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-                  <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Nenhum or√ßamento dispon‚îú¬°vel para importa√ß√£o</p>
+                  <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Nenhum orÁamento dispon+°vel para importaÁ„o</p>
                 </div>
               )}
             </div>
@@ -1191,14 +1191,14 @@ const PaymentTypeModal: React.FC<{
     const currency = (val: number) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
     if (type === 'vista') {
-      text = `Pagamento ‚îú√° vista com desconto na aprova√ß√£o do or√ßamento. Total: ${currency(totalValue)}.`;
+      text = `Pagamento +· vista com desconto na aprovaÁ„o do orÁamento. Total: ${currency(totalValue)}.`;
     } else if (type === 'conclusao') {
-      text = `Pagamento integral ${currency(totalValue)} a ser realizado ap√≥s entrega t‚îú¬Æcnica e aprova√ß√£o dos servi√ßos.`;
+      text = `Pagamento integral ${currency(totalValue)} a ser realizado apÛs entrega t+Æcnica e aprovaÁ„o dos serviÁos.`;
     } else if (type === 'parcelado') {
       const remainder = totalValue - entryValue;
       const parcValue = installments > 0 ? remainder / installments : 0;
 
-      text = `Entrada de ${currency(entryValue)} na aprova√ß√£o.`;
+      text = `Entrada de ${currency(entryValue)} na aprovaÁ„o.`;
       if (installments > 0) {
         text += `\nSaldo restante de ${currency(remainder)} dividido em ${installments}x de ${currency(parcValue)} (30/${installments > 1 ? '60/90...' : ' dias'}).`;
       }
@@ -1210,15 +1210,15 @@ const PaymentTypeModal: React.FC<{
     <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[70] flex items-center justify-center p-4">
       <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95">
         <div className="p-6 border-b flex justify-between items-center bg-slate-50">
-          <h3 className="font-black text-slate-800 uppercase tracking-tight">Condi√ß√£o de Pagamento</h3>
+          <h3 className="font-black text-slate-800 uppercase tracking-tight">CondiÁ„o de Pagamento</h3>
           <button onClick={onClose}><X className="w-5 h-5 text-slate-400 hover:text-rose-500" /></button>
         </div>
 
         <div className="p-6 space-y-6">
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Tipo de Negocia√ß√£o</label>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Tipo de NegociaÁ„o</label>
             <div className="grid grid-cols-3 gap-2">
-              <button onClick={() => setType('vista')} className={`p-3 rounded-xl border text-xs font-bold uppercase transition-all ${type === 'vista' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>‚îú√á Vista</button>
+              <button onClick={() => setType('vista')} className={`p-3 rounded-xl border text-xs font-bold uppercase transition-all ${type === 'vista' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>+« Vista</button>
               <button onClick={() => setType('parcelado')} className={`p-3 rounded-xl border text-xs font-bold uppercase transition-all ${type === 'parcelado' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>Parcelado</button>
               <button onClick={() => setType('conclusao')} className={`p-3 rounded-xl border text-xs font-bold uppercase transition-all ${type === 'conclusao' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>Entrega</button>
             </div>
@@ -1260,7 +1260,7 @@ const PaymentTypeModal: React.FC<{
           )}
 
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Pr‚îú¬Ævia do Texto</label>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Pr+Ævia do Texto</label>
             <div className="bg-slate-800 text-slate-200 p-4 rounded-xl text-sm font-medium leading-relaxed border border-slate-700 min-h-[80px]">
               {preview}
             </div>
