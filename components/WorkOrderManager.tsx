@@ -511,7 +511,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     const getContractFooterHtml = (order: ServiceOrder) => {
         const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName };
         return `
-        <div style="margin-top: 60px; break-inside: avoid;">
+        <div style="margin-top: 100px; break-inside: avoid;">
             <div style="display: flex; gap: 40px; justify-content: space-around; padding: 0 20px;">
                 <div style="text-align: center; border-top: 1px solid #64748b; padding-top: 8px; flex: 1;">
                     <p style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 2px 0;">CONTRATADA</p>
@@ -574,20 +574,20 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
                 <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 4ª – DAS OBRIGAÇÕES DA CONTRATADA</h4>
-                <ul style="list-style-type: disc; list-style-position: outside; padding-left: 20px; font-size: 14px; color: #475569; line-height: 1.6; margin: 0;">
-                    <li style="margin-bottom: 4px; padding-left: 5px;">4.1. Executar os serviços conforme o escopo contratado e normas técnicas aplicáveis.</li>
-                    <li style="margin-bottom: 4px; padding-left: 5px;">4.2. Responsabilizar-se integralmente por seus empregados, prepostos ou subcontratados, inclusive quanto a encargos trabalhistas, previdenciários, fiscais e securitários.</li>
-                    <li style="margin-bottom: 4px; padding-left: 5px;">4.3. Manter seus tributos, contribuições e obrigações legais em dia.</li>
-                    <li style="padding-left: 5px;">4.4. Responder por danos eventualmente causados ao imóvel durante a execução dos serviços.</li>
+                <ul style="list-style-type: none; padding-left: 0 !important; font-size: 14px; color: #475569; line-height: 1.6; margin: 0;">
+                    <li style="margin-bottom: 4px; padding-left: 0 !important;">4.1. Executar os serviços conforme o escopo contratado e normas técnicas aplicáveis.</li>
+                    <li style="margin-bottom: 4px; padding-left: 0 !important;">4.2. Responsabilizar-se integralmente por seus empregados, prepostos ou subcontratados, inclusive quanto a encargos trabalhistas, previdenciários, fiscais e securitários.</li>
+                    <li style="margin-bottom: 4px; padding-left: 0 !important;">4.3. Manter seus tributos, contribuições e obrigações legais em dia.</li>
+                    <li style="padding-left: 0 !important;">4.4. Responder por danos eventualmente causados ao imóvel durante a execução dos serviços.</li>
                 </ul>
             </div>
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
                 <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 5ª – DAS OBRIGAÇÕES DO CONTRANTE</h4>
-                <ul style="list-style-type: disc; list-style-position: outside; padding-left: 20px; font-size: 14px; color: #475569; line-height: 1.6; margin: 0;">
-                    <li style="margin-bottom: 4px; padding-left: 5px;">5.1. Garantir o acesso da CONTRATADA ao local da obra.</li>
-                    <li style="margin-bottom: 4px; padding-left: 5px;">5.2. Efetuar os pagamentos conforme acordado.</li>
-                    <li style="padding-left: 5px;">5.3. Fornecer, quando necessário, autorizações do condomínio para execução dos serviços.</li>
+                <ul style="list-style-type: none; padding-left: 0 !important; font-size: 14px; color: #475569; line-height: 1.6; margin: 0;">
+                    <li style="margin-bottom: 4px; padding-left: 0 !important;">5.1. Garantir o acesso da CONTRATADA ao local da obra.</li>
+                    <li style="margin-bottom: 4px; padding-left: 0 !important;">5.2. Efetuar os pagamentos conforme acordado.</li>
+                    <li style="padding-left: 0 !important;">5.3. Fornecer, quando necessário, autorizações do condomínio para execução dos serviços.</li>
                 </ul>
             </div>
 
