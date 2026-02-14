@@ -268,14 +268,14 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                 </div>
                                 <div>
                                     <h1 style="font-size: 30px; font-weight: 900; color: #0f172a; line-height: 1; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: -0.025em;">${company.name}</h1>
-                                    <p style="margin: 0; font-size: 11px; font-weight: 800; color: #2563eb; text-transform: uppercase; letter-spacing: 0.1em;">Relat�rio Gerencial de Obra - ${reportMode === 'estimated' ? 'ESTIMADO' : 'REAL'}</p>
+                                    <p style="margin: 0; font-size: 11px; font-weight: 800; color: #2563eb; text-transform: uppercase; letter-spacing: 0.1em;">Relatório Gerencial de Obra - ${reportMode === 'estimated' ? 'ESTIMADO' : 'REAL'}</p>
                                     <p style="margin: 8px 0 0 0; font-size: 9px; color: #94a3b8; font-weight: 700; text-transform: uppercase;">${company.cnpj || ''} | ${company.phone || ''}</p>
                                 </div>
                             </div>
                             <div style="text-align: right;">
                                 <div style="background: #2563eb; color: white; padding: 6px 16px; border-radius: 8px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; display: inline-block;">CONTROLE DE OBRA</div>
                                 <p style="margin: 0; font-size: 36px; font-weight: 900; color: #0f172a; letter-spacing: -0.05em;">${order.id}</p>
-                                <p style="margin: 4px 0 0 0; font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em;">EMISS�O: ${new Date().toLocaleDateString('pt-BR')}</p>
+                                <p style="margin: 4px 0 0 0; font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em;">EMISSão: ${new Date().toLocaleDateString('pt-BR')}</p>
                             </div>
                         </div>
                     </div>
@@ -283,19 +283,19 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         <div style="flex: 1; background: #f8fafc; border-radius: 16px; padding: 24px; border: 1px solid #e2e8f0;">
                             <span style="font-size: 10px; font-weight: 900; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">Contratante / Cliente</span>
                             <div style="font-size: 16px; font-weight: 700; color: #0f172a; text-transform: uppercase; line-height: 1.2;">${customer.name}</div>
-                            <div style="font-size: 11px; text-slate-400 font-bold mt-4 uppercase;">${customer.document || 'DOC N�O INF.'}</div>
+                            <div style="font-size: 11px; text-slate-400 font-bold mt-4 uppercase;">${customer.document || 'DOC não INF.'}</div>
                         </div>
                         <div style="flex: 1; background: #f8fafc; border-radius: 16px; padding: 24px; border: 1px solid #e2e8f0;">
                             <span style="font-size: 10px; font-weight: 900; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">Identifica��o da Obra</span>
                             <div style="font-size: 16px; font-weight: 700; color: #0f172a; text-transform: uppercase; line-height: 1.2;">${order.description}</div>
-                            <div style="font-size: 11px; text-slate-400 font-bold mt-4 uppercase;">In�cio: ${formatDate(order.createdAt)} | Entrega: ${order.dueDate ? formatDate(order.dueDate) : 'A COMBINAR'}</div>
+                            <div style="font-size: 11px; text-slate-400 font-bold mt-4 uppercase;">Inºcio: ${formatDate(order.createdAt)} | Entrega: ${order.dueDate ? formatDate(order.dueDate) : 'A COMBINAR'}</div>
                         </div>
                     </div>
         
                     <div style="font-size: 14px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 2px solid #f1f5f9; margin-bottom: 16px; margin-top: 32px;">Resumo Financeiro da Obra</div>
                     <div style="display: flex; gap: 16px; margin-bottom: 40px;">
                         <div style="flex: 1; background: rgba(37, 99, 235, 0.05); border-radius: 12px; padding: 16px; border: 1px solid #dbeafe;">
-                            <span style="font-size: 10px; font-weight: 900; text-transform: uppercase; color: #2563eb; display: block; margin-bottom: 4px;">Valor do Or�amento</span>
+                            <span style="font-size: 10px; font-weight: 900; text-transform: uppercase; color: #2563eb; display: block; margin-bottom: 4px;">Valor do Orçamento</span>
                             <span style="font-size: 20px; font-weight: 900; color: #1e40af;">R$ ${revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                         </div>
                         <div style="flex: 1; background: rgba(225, 29, 72, 0.05); border-radius: 12px; padding: 16px; border: 1px solid #fecdd3;">
@@ -323,7 +323,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                             <tbody>
                                 ${itemsHtml}
                                 <tr style="border-top: 1px solid #f1f5f9; background: #fafafa;">
-                                    <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Subtotal dos Itens (Or�amento):</td>
+                                    <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Subtotal dos Itens (Orçamento):</td>
                                     <td style="padding: 12px 10px; text-align: right; font-size: 12px; font-weight: 800; color: #0f172a;">R$ ${budgetSubTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
                                 </tr>
                                 ${order.bdiRate ? `
@@ -337,7 +337,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                     <td style="padding: 8px 10px; text-align: right; font-size: 12px; font-weight: 800; color: #0f172a;">R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
                                 </tr>` : ''}
                                 <tr style="border-top: 1px solid #cbd5e1; background: #f8fafc;">
-                                    <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 12px; font-weight: 900; color: #334155; text-transform: uppercase;">Total do Or�amento (Arrecada��o):</td>
+                                    <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 12px; font-weight: 900; color: #334155; text-transform: uppercase;">Total do Orçamento (Arrecada��o):</td>
                                     <td style="padding: 12px 10px; text-align: right; font-size: 13px; font-weight: 900; color: #1e40af;">R$ ${revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
                                 </tr>
                                 <tr style="border-top: 3px solid #0f172a; background: #f1f5f9;">
@@ -350,7 +350,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         
                     ${order.descriptionBlocks && order.descriptionBlocks.length > 0 ? `
                     <div style="margin-top: 40px;" class="print-description-content">
-                        <div style="font-size: 14px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 2px solid #f1f5f9; margin-bottom: 16px;">Descrição T�cnica / Escopo</div>
+                        <div style="font-size: 14px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 2px solid #f1f5f9; margin-bottom: 16px;">Descrição TÉCNICA / Escopo</div>
                         <div style="display: flex; flex-direction: column; gap: 24px;">
                             ${order.descriptionBlocks.map(block => {
             if (block.type === 'text') {
@@ -369,7 +369,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         <div style="display: flex; justify-content: center;">
                             <div style="text-align: center; width: 320px;">
                                 <div style="border-top: 1px solid #cbd5e1; margin-bottom: 12px;"></div>
-                                <p style="font-size: 9px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 4px 0;">Respons�vel T�cnico</p>
+                                <p style="font-size: 9px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 4px 0;">responsável T�cnico</p>
                                 <p style="font-size: 14px; font-weight: 800; color: #0f172a; text-transform: uppercase; margin: 0;">${company.name}</p>
                             </div>
                         </div>
@@ -387,7 +387,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         if (!printWindow) return;
 
         const htmlContent = getWorkReportHtml(order, reportMode);
-        const title = `Relat�rio de Obra - ${order.id}`;
+        const title = `Relatório de Obra - ${order.id}`;
 
         const html = `
           <!DOCTYPE html>
@@ -502,7 +502,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                 </div>
                 <div style="text-align: right;">
                     <p style="margin: 0; font-size: 24px; font-weight: 800; color: #2563eb;">${order.id}</p>
-                    <p style="margin: 4px 0 0 0; font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase;">EMISS�O: ${new Date().toLocaleDateString('pt-BR')}</p>
+                    <p style="margin: 4px 0 0 0; font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase;">EMISSão: ${new Date().toLocaleDateString('pt-BR')}</p>
                 </div>
             </div>
         </div>`;
@@ -526,7 +526,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     };
 
     const getContractBodyHtml = (order: ServiceOrder) => {
-        const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', address: 'Endere�o n�o informado', city: '', state: '', cep: '' };
+        const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', address: 'Endere�o não informado', city: '', state: '', cep: '' };
 
         return `
         <div class="print-description-content">
@@ -546,75 +546,75 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             </div>
 
             <div style="margin-bottom: 40px;">
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 0;">As partes acima identificadas resolvem firmar o presente Contrato de Presta��o de Serviços por Empreitada Global, nos termos da legisla��o civil e previdenci�ria vigente, mediante as cl�usulas e condi��es seguintes:</p>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 0;">As partes acima identificadas resolvem firmar o presente Contrato de Presta��o de Serviços por Empreitada Global, nos termos da legislação civil e previdenci�ria vigente, mediante as CLÁUSULAs e condi��es seguintes:</p>
             </div>
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CL�USULA 1� � DO OBJETO</h4>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">1.1. O presente contrato tem por objeto a execu��o de reforma em unidade residencial, situada no endere�o do CONTRATANTE, compreendendo os serviços descritos abaixo, os quais ser�o executados por empreitada global, com responsabilidade t�cnica, administrativa e operacional integral da CONTRATADA.</p>
+                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 1� � DO OBJETO</h4>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">1.1. O presente contrato tem por objeto a execução de reforma em unidade residencial, situada no endere�o do CONTRATANTE, compreendendo os serviços descritos abaixo, os quais ser�o executados por empreitada global, com responsabilidade TÉCNICA, administrativa e operacional integral da CONTRATADA.</p>
                 <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border-left: 4px solid #3b82f6; margin-top: 12px;">
                     <p style="font-size: 14px; font-weight: 700; color: #1e3a8a; text-transform: uppercase; line-height: 1.4; margin: 0;">${order.description}</p>
                 </div>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 12px 0 0 0;">1.2. A execu��o dos serviços ser� realizada por obra certa, com pre�o previamente ajustado, n�o se caracterizando, em hip�tese alguma, cess�o ou loca��o de m�o de obra.</p>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 12px 0 0 0;">1.2. A execução dos serviços ser� realizada por obra certa, com pre�o previamente ajustado, não se caracterizando, em hip�tese alguma, cesSão ou loca��o de mão de obra.</p>
             </div>
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CL�USULA 2� � DA FORMA DE EXECU��O (EMPREITADA GLOBAL)</h4>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">2.1. A CONTRATADA executar� os serviços com autonomia t�cnica e gerencial, utilizando meios pr�prios, inclusive pessoal, ferramentas, equipamentos e m�todos de trabalho.</p>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 8px 0 0 0;">2.2. N�o haver� qualquer tipo de subordina��o, exclusividade, controle de jornada ou disponibiliza��o de trabalhadores ao CONTRATANTE.</p>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 8px 0 0 0;">2.3. A CONTRATADA assume total responsabilidade pela execu��o da obra, respondendo integralmente pelos serviços contratados.</p>
+                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 2� � DA FORMA DE execução (EMPREITADA GLOBAL)</h4>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">2.1. A CONTRATADA executar� os serviços com autonomia TÉCNICA e gerencial, utilizando meios pr�prios, inclusive pessoal, ferramentas, equipamentos e m�todos de trabalho.</p>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 8px 0 0 0;">2.2. não haver� qualquer tipo de subordina��o, exclusividade, controle de jornada ou disponibiliza��o de trabalhadores ao CONTRATANTE.</p>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 8px 0 0 0;">2.3. A CONTRATADA assume total responsabilidade pela execução da obra, respondendo integralmente pelos serviços contratados.</p>
             </div>
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CL�USULA 3� � DO PRE�O E DA FORMA DE PAGAMENTO</h4>
+                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 3� � DO PRE�O E DA FORMA DE PAGAMENTO</h4>
                 <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">3.1. Pelos serviços objeto deste contrato, o CONTRATANTE pagar� � CONTRATADA o valor global de <b style="color: #0f172a;">R$ ${order.contractPrice && order.contractPrice > 0 ? order.contractPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>.</p>
                 <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 8px 0 0 0;">3.2. O pagamento ser� efetuado da seguinte forma: <b style="color: #0f172a;">${order.paymentTerms || 'Conforme combinado'}</b>.</p>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 8px 0 0 0;">3.3. O valor contratado corresponde ao pre�o fechado da obra, n�o estando vinculado a horas trabalhadas, n�mero de funcion�rios ou fornecimento de m�o de obra.</p>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 8px 0 0 0;">3.3. O valor contratado corresponde ao pre�o fechado da obra, não estando vinculado a horas trabalhadas, nºmero de funcionºrios ou fornecimento de mão de obra.</p>
             </div>
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CL�USULA 4� � DAS OBRIGAÇÕES DA CONTRATADA</h4>
+                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 4ª � DAS OBRIGAÇÕES DA CONTRATADA</h4>
                 <ul style="list-style-type: none; padding-left: 0 !important; font-size: 14px; color: #475569; line-height: 1.6; margin: 0;">
-                    <li style="margin-bottom: 4px; padding-left: 0 !important;">4.1. Executar os serviços conforme o escopo contratado e normas t�cnicas aplic�veis.</li>
-                    <li style="margin-bottom: 4px; padding-left: 0 !important;">4.2. Responsabilizar-se integralmente por seus empregados, prepostos ou subcontratados, inclusive quanto a encargos trabalhistas, previdenci�rios, fiscais e securit�rios.</li>
-                    <li style="margin-bottom: 4px; padding-left: 0 !important;">4.3. Manter seus tributos, contribui��es e obriga��es legais em dia.</li>
-                    <li style="padding-left: 0 !important;">4.4. Responder por danos eventualmente causados ao im�vel durante a execu��o dos serviços.</li>
+                    <li style="margin-bottom: 4px; padding-left: 0 !important;">4.1. Executar os serviços conforme o escopo contratado e normas TÉCNICAs aplic�veis.</li>
+                    <li style="margin-bottom: 4px; padding-left: 0 !important;">4.2. Responsabilizar-se integralmente por seus empregados, prepostos ou subcontratados, inclusive quanto a encargos trabalhistas, previdenciários, fiscais e securitários.</li>
+                    <li style="margin-bottom: 4px; padding-left: 0 !important;">4.3. Manter seus tributos, contribuições e obrigações legais em dia.</li>
+                    <li style="padding-left: 0 !important;">4.4. Responder por danos eventualmente causados ao im�vel durante a execução dos serviços.</li>
                 </ul>
             </div>
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CL�USULA 5� � DAS OBRIGAÇÕES DO CONTRANTE</h4>
+                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 5ª � DAS OBRIGAÇÕES DO CONTRANTE</h4>
                 <ul style="list-style-type: none; padding-left: 0 !important; font-size: 14px; color: #475569; line-height: 1.6; margin: 0;">
                     <li style="margin-bottom: 4px; padding-left: 0 !important;">5.1. Garantir o acesso da CONTRATADA ao local da obra.</li>
                     <li style="margin-bottom: 4px; padding-left: 0 !important;">5.2. Efetuar os pagamentos conforme acordado.</li>
-                    <li style="padding-left: 0 !important;">5.3. Fornecer, quando necess�rio, autoriza��es do condom�nio para execu��o dos serviços.</li>
+                    <li style="padding-left: 0 !important;">5.3. Fornecer, quando necess�rio, autorizAções do condom�nio para execução dos serviços.</li>
                 </ul>
             </div>
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CL�USULA 6� � DAS RESPONSABILIDADES PREVIDENCI�RIAS E FISCAIS</h4>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">6.1. As partes reconhecem que o presente contrato caracteriza empreitada global de obra, nos termos da legisla��o vigente, n�o se aplicando a retenção de 11% (onze por cento) de INSS, conforme disposto na Lei n� 8.212/91 e Instru��o Normativa RFB n� 971/2009.</p>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 8px 0 0 0;">6.2. A CONTRATADA � a �nica respons�vel pelo recolhimento de seus tributos e contribui��es incidentes sobre suas atividades.</p>
+                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 6ª � DAS RESPONSABILIDADES PREVIDENCI�RIAS E FISCAIS</h4>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">6.1. As partes reconhecem que o presente contrato caracteriza empreitada global de obra, nos termos da legislação vigente, não se aplicando a retenção de 11% (onze por cento) de INSS, conforme disposto na Lei nº 8.212/91 e Instrução Normativa RFB nº 971/2009.</p>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 8px 0 0 0;">6.2. A CONTRATADA � a única responsável pelo recolhimento de seus tributos e contribuições incidentes sobre suas atividades.</p>
             </div>
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CL�USULA 7� � DO PRAZO</h4>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">7.1. O prazo estimado para execu��o da obra � de <b style="color: #0f172a;">${order.deliveryTime || 'A combinar'}</b>, contado a partir do in�cio efetivo dos serviços, podendo ser ajustado mediante comum acordo entre as partes.</p>
+                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 7ª � DO PRAZO</h4>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">7.1. O prazo estimado para execução da obra � de <b style="color: #0f172a;">${order.deliveryTime || 'A combinar'}</b>, contado a partir do inºcio efetivo dos serviços, podendo ser ajustado mediante comum acordo entre as partes.</p>
             </div>
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CL�USULA 8� � DA RESPONSABILIDADE T�CNICA</h4>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">8.1. Quando aplic�vel, a CONTRATADA providenciar� a emissão de ART/RRT, assumindo a responsabilidade t�cnica pela execu��o dos serviços.</p>
+                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 8ª � DA RESPONSABILIDADE TÉCNICA</h4>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">8.1. Quando aplicável, a CONTRATADA providenciará a emissão de ART/RRT, assumindo a responsabilidade TÉCNICA pela execução dos serviços.</p>
             </div>
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CL�USULA 9� � DA RESCIS�O</h4>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">9.1. O descumprimento de qualquer cl�usula ensejar� a rescis�o deste instrumento, sem preju�zo de perdas e danos.</p>
+                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 9ª � DA RECISÃO</h4>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">9.1. O descumprimento de qualquer CLÁUSULA ensejará a RECISÃO deste instrumento, sem prejuízo de perdas e danos.</p>
             </div>
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CL�USULA 10� � DO FORO</h4>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">10.1. Fica eleito o foro da comarca de <b style="color: #0f172a;">${customer.city || 'S�o Paulo'} - ${customer.state || 'SP'}</b>, para dirimir quaisquer controv�rsias oriundas deste contrato, renunciando as partes a qualquer outro, por mais privilegiado que seja.</p>
+                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 10ª � DO FORO</h4>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">10.1. Fica eleito o foro da comarca de <b style="color: #0f172a;">${customer.city || 'São Paulo'} - ${customer.state || 'SP'}</b>, para dirimir quaisquer controvérsias oriundas deste contrato, renunciando as partes a qualquer outro, por mais privilegiado que seja.</p>
             </div>
         </div>`;
     };
@@ -755,7 +755,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             runOptimizePageBreaks(container);
 
             const elementToPrint = container.querySelector(".pdf-page") as HTMLElement;
-            if (!elementToPrint) throw new Error("Elemento de impress�o n�o encontrado.");
+            if (!elementToPrint) throw new Error("Elemento de impresSão não encontrado.");
 
             const imgs = Array.from(container.querySelectorAll("img"));
             await Promise.all(
@@ -1028,7 +1028,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                 <div>
                                     <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter mb-0.5">{editingOrderId ? `Editando Obra ${editingOrderId} ` : 'Nova OS de Obra'}</h3>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-[10px] font-black uppercase tracking-widest bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md">Constru��o Civil</span>
+                                        <span className="text-[10px] font-black uppercase tracking-widest bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md">construção Civil</span>
                                     </div>
                                 </div>
                             </div>
@@ -1047,13 +1047,13 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                     <select className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all custom-select" value={selectedCustomerId} onChange={e => setSelectedCustomerId(e.target.value)}><option value="">Selecione...</option>{customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
                                                 </div>
                                                 <div><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-2 block ml-1">Valor Fechado do Contrato (Receita)</label><input type="number" placeholder="R$ 0,00" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400" value={contractPrice} onChange={e => setContractPrice(Number(e.target.value))} /></div>
-                                                <div className="md:col-span-2"><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-2 block ml-1">T�tulo da Obra</label><input type="text" placeholder="Ex: Reforma da Cozinha" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400" value={osTitle} onChange={e => setOsTitle(e.target.value)} /></div>
+                                                <div className="md:col-span-2"><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-2 block ml-1">Título da Obra</label><input type="text" placeholder="Ex: Reforma da Cozinha" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400" value={osTitle} onChange={e => setOsTitle(e.target.value)} /></div>
                                             </div>
                                         </div>
 
                                         <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
                                             <div>
-                                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Observações T�cnicas e Escopo Detalhado</label>
+                                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Observações TÉCNICAs e Escopo Detalhado</label>
                                                 <RichTextEditor
                                                     value={diagnosis}
                                                     onChange={setDiagnosis}
@@ -1072,7 +1072,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                         <button onClick={(e) => { e.stopPropagation(); addTextBlock(); }} className="bg-blue-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-blue-100 hover:scale-105 transition-all"><Type className="w-4 h-4" /> + Iniciar com Texto</button>
                                                         <button onClick={(e) => { e.stopPropagation(); addImageBlock(); }} className="bg-emerald-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-emerald-100 hover:scale-105 transition-all"><ImageIcon className="w-4 h-4" /> + Iniciar com Imagem</button>
                                                     </div>
-                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 animate-pulse">Comece a montar o relat�rio da obra acima</p>
+                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 animate-pulse">Comece a montar o Relatório da obra acima</p>
                                                 </div>
                                             )}
                                             {descriptionBlocks.map((block) => (
@@ -1108,7 +1108,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                     <div className="space-y-6">
                                         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
                                             <InfoCard
-                                                label="Valor do Or�amento"
+                                                label="Valor do Orçamento"
                                                 value={`R$ ${contractPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} `}
                                                 className="bg-white"
                                                 icon={<div className="absolute top-0 left-0 w-full h-1 bg-blue-500"></div>}
@@ -1288,7 +1288,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl p-8 transform animate-in zoom-in-95 duration-200">
                             <div className="flex justify-between items-start mb-6">
                                 <div>
-                                    <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase">Tipo de Relat�rio</h3>
+                                    <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase">Tipo de Relatório</h3>
                                     <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">Selecione para imprimir</p>
                                 </div>
                                 <button onClick={() => setShowReportTypeModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X className="w-5 h-5 text-slate-400" /></button>
@@ -1303,8 +1303,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                         <ScrollText className="w-6 h-6" />
                                     </div>
                                     <div>
-                                        <h4 className="font-black text-blue-900 group-hover:text-white uppercase text-sm tracking-tight">RELAT�RIO DO ESTIMADO</h4>
-                                        <p className="text-blue-600/70 group-hover:text-white/80 text-[10px] font-bold uppercase">Apenas planejamento e custos or�ados</p>
+                                        <h4 className="font-black text-blue-900 group-hover:text-white uppercase text-sm tracking-tight">Relatório DO ESTIMADO</h4>
+                                        <p className="text-blue-600/70 group-hover:text-white/80 text-[10px] font-bold uppercase">Apenas planejamento e custos orçados</p>
                                     </div>
                                 </button>
 
@@ -1316,8 +1316,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                         <CheckCircle className="w-6 h-6" />
                                     </div>
                                     <div>
-                                        <h4 className="font-black text-emerald-900 group-hover:text-white uppercase text-sm tracking-tight">RELAT�RIO DO REAL</h4>
-                                        <p className="text-emerald-600/70 group-hover:text-white/80 text-[10px] font-bold uppercase">Custos or�ados vs Realizados e Resultado</p>
+                                        <h4 className="font-black text-emerald-900 group-hover:text-white uppercase text-sm tracking-tight">Relatório DO REAL</h4>
+                                        <p className="text-emerald-600/70 group-hover:text-white/80 text-[10px] font-bold uppercase">Custos orçados vs Realizados e Resultado</p>
                                     </div>
                                 </button>
                             </div>
