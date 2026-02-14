@@ -592,6 +592,22 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             </div>
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
+                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 6ª – DAS RESPONSABILIDADES PREVIDENCIÁRIAS E FISCAIS</h4>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">6.1. As partes reconhecem que o presente contrato caracteriza empreitada global de obra, nos termos da legislação vigente, não se aplicando a retenção de 11% (onze por cento) de INSS, conforme disposto na Lei nº 8.212/91 e Instrução Normativa RFB nº 971/2009.</p>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 8px 0 0 0;">6.2. A CONTRATADA é a única responsável pelo recolhimento de seus tributos e contribuições incidentes sobre suas atividades.</p>
+            </div>
+
+            <div style="margin-bottom: 32px; break-inside: avoid;">
+                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 7ª – DO PRAZO</h4>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">7.1. O prazo estimado para execução da obra é de <b style="color: #0f172a;">${order.deliveryTime || 'A combinar'}</b>, contado a partir do início efetivo dos serviços, podendo ser ajustado mediante comum acordo entre as partes.</p>
+            </div>
+
+            <div style="margin-bottom: 32px; break-inside: avoid;">
+                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 8ª – DA RESPONSABILIDADE TÉCNICA</h4>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">8.1. Quando aplicável, a CONTRATADA providenciará a emissão de ART/RRT, assumindo a responsabilidade técnica pela execução dos serviços.</p>
+            </div>
+
+            <div style="margin-bottom: 32px; break-inside: avoid;">
                 <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 9ª – DA RESCISÃO</h4>
                 <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">9.1. O descumprimento de qualquer cláusula ensejará a rescisão deste instrumento, sem prejuízo de perdas e danos.</p>
             </div>
@@ -779,22 +795,25 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                 pagebreak: { mode: ["css", "legacy"] as any },
             };
 
-            const pdfWorker = html2pdf().set(options).from(elementToPrint).toPdf().get('pdf');
-
-            await pdfWorker.then((pdf: any) => {
-                const totalPages = pdf.internal.getNumberOfPages();
-                for (let i = 1; i <= totalPages; i++) {
-                    pdf.setPage(i);
-                    pdf.setFontSize(8);
-                    pdf.setTextColor(150);
-                    pdf.text(
-                        `Pág. ${i} / ${totalPages}`,
-                        pdf.internal.pageSize.getWidth() - 15,
-                        pdf.internal.pageSize.getHeight() - 8
-                    );
-                }
-                return pdf;
-            }).save();
+            await (html2pdf()
+                .set(options)
+                .from(elementToPrint)
+                .toPdf()
+                .get('pdf')
+                .then((pdf: any) => {
+                    const totalPages = pdf.internal.getNumberOfPages();
+                    for (let i = 1; i <= totalPages; i++) {
+                        pdf.setPage(i);
+                        pdf.setFontSize(8);
+                        pdf.setTextColor(150);
+                        pdf.text(
+                            `Pág. ${i} / ${totalPages}`,
+                            pdf.internal.pageSize.getWidth() - 15,
+                            pdf.internal.pageSize.getHeight() - 8
+                        );
+                    }
+                }) as any)
+                .save();
 
             notify("PDF do Contrato baixado com sucesso!");
         } catch (err) {
