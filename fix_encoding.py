@@ -20,6 +20,27 @@ replacements = {
     'PÃ GINA': 'PÁGINA',
     'PÃGINA': 'PÁGINA',
     'PÃ G': 'PÁG',
+    'nÃ£o': 'não',
+    'serviÃ§os': 'serviços',
+    'orÃ§amento': 'orçamento',
+    'gestÃ£o': 'gestão',
+    'emissÃ£o': 'emissão',
+    'descriÃ§Ã£o': 'descrição',
+    'SOLUES': 'SOLUÇÕES',
+    'GESTO': 'GESTÃO',
+    'EMISSO': 'EMISSÃO',
+    'Oramentos': 'Orçamentos',
+    'Oramento': 'Orçamento',
+    'Servios': 'Serviços',
+    'DescriÃ£o': 'Descrição',
+    'Descrio': 'Descrição',
+    'Configuraes': 'Configurações',
+    'Aponsentadoria': 'Aposentadoria',
+    'Endereo': 'Endereço',
+    'Observaes': 'Observações',
+    'Previso': 'Previsão',
+    'Condio': 'Condição',
+    'Padro': 'Padrão'
 }
 
 def fix_file(path):
@@ -36,7 +57,7 @@ def fix_file(path):
     
     if content != original:
         try:
-            with open(path, 'w', encoding='utf-8') as f:
+            with open(path, 'w', encoding='utf-8', newline='\n') as f:
                 f.write(content)
             return True
         except Exception as e:
@@ -44,14 +65,24 @@ def fix_file(path):
             return False
     return False
 
-components_dir = 'components'
+targets = ['components', 'hooks', 'services']
 fixed_count = 0
-for root, dirs, files in os.walk(components_dir):
-    for file in files:
-        if file.endswith(('.tsx', '.ts')):
-            path = os.path.join(root, file)
-            if fix_file(path):
-                print(f"Fixed: {path}")
-                fixed_count += 1
+
+for target in targets:
+    if os.path.exists(target):
+        for root, dirs, files in os.walk(target):
+            for file in files:
+                if file.endswith(('.tsx', '.ts', '.html', '.css')):
+                    path = os.path.join(root, file)
+                    if fix_file(path):
+                        print(f"Fixed: {path}")
+                        fixed_count += 1
+
+# Root files
+for file in os.listdir('.'):
+    if file.endswith(('.tsx', '.ts', '.html', '.css')):
+        if fix_file(file):
+            print(f"Fixed: {file}")
+            fixed_count += 1
 
 print(f"Finished! Fixed {fixed_count} files.")

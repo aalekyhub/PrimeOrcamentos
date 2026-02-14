@@ -973,7 +973,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                             <div className="bg-white p-4 rounded-xl border border-slate-200">
                                                 <div className="flex justify-between items-center mb-4">
                                                     <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                                        <Percent size={14} className="text-blue-500" /> Impostos e BDI Padronizados
+                                                        <Percent size={14} className="text-blue-500" /> Impostos e BDI Padrãonizados
                                                     </h4>
                                                     <button
                                                         type="button"

@@ -12,7 +12,7 @@ interface Props {
 
 const BdiCalculator: React.FC<Props> = ({ initialConfig, onSave }) => {
     const [config, setConfig] = useState<Omit<BdiConfig, 'id' | 'total'>>(initialConfig || {
-        name: 'BDI Padronizado',
+        name: 'BDI Padrãonizado',
         ac: 4.00,
         s: 0.80,
         g: 0.20,
