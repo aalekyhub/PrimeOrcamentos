@@ -716,7 +716,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       <div className="flex flex-col md:flex-row justify-between items-center gap-4">
         <div>
           <h2 className="text-2xl font-black text-slate-900 tracking-tighter flex items-center gap-2">
-            Or�amentos <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">{orders.filter(o => o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED).length}</span>
+            Orçamentos <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">{orders.filter(o => o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED).length}</span>
           </h2>
           <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Gerencie suas propostas comerciais</p>
         </div>
@@ -950,7 +950,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
                       <div className="md:col-span-6">
-                        <label className="text-[11px] font-black text-blue-700 uppercase mb-1.5 block ml-1">Descri��o</label>
+                        <label className="text-[11px] font-black text-blue-700 uppercase mb-1.5 block ml-1">Descrição</label>
                         <input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs font-bold text-slate-900 outline-none placeholder:text-slate-500" value={currentDesc} onChange={e => setCurrentDesc(e.target.value)} />
                       </div>
                       <div className="w-24"><label className="text-[11px] font-black text-blue-700 uppercase mb-1.5 block text-center">Unit</label><input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs font-black text-center outline-none uppercase text-slate-900" value={currentUnit} onChange={e => setCurrentUnit(e.target.value)} /></div>
@@ -1108,7 +1108,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
             <div className="p-6 border-b flex justify-between items-center bg-slate-50">
               <div>
                 <h3 className="font-black text-slate-800 uppercase tracking-tight">Importar Dados de Or�amento</h3>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Selecione um or�amento para copiar itens e descri��o</p>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Selecione um or�amento para copiar itens e descrição</p>
               </div>
               <button onClick={() => setShowImportModal(false)}><X className="w-5 h-5 text-slate-400 hover:text-rose-500" /></button>
             </div>
@@ -1193,7 +1193,7 @@ const PaymentTypeModal: React.FC<{
     if (type === 'vista') {
       text = `Pagamento +� vista com desconto na aprova��o do or�amento. Total: ${currency(totalValue)}.`;
     } else if (type === 'conclusao') {
-      text = `Pagamento integral ${currency(totalValue)} a ser realizado ap�s entrega t+�cnica e aprova��o dos servi�os.`;
+      text = `Pagamento integral ${currency(totalValue)} a ser realizado ap�s entrega t+�cnica e aprova��o dos serviços.`;
     } else if (type === 'parcelado') {
       const remainder = totalValue - entryValue;
       const parcValue = installments > 0 ? remainder / installments : 0;
@@ -1210,7 +1210,7 @@ const PaymentTypeModal: React.FC<{
     <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[70] flex items-center justify-center p-4">
       <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95">
         <div className="p-6 border-b flex justify-between items-center bg-slate-50">
-          <h3 className="font-black text-slate-800 uppercase tracking-tight">Condi��o de Pagamento</h3>
+          <h3 className="font-black text-slate-800 uppercase tracking-tight">Condição de Pagamento</h3>
           <button onClick={onClose}><X className="w-5 h-5 text-slate-400 hover:text-rose-500" /></button>
         </div>
 

@@ -6,6 +6,32 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const replacements = {
+    // Unicode Replacement Character (caused by data loss during previous conversion)
+    'Or\uFFFDamentos': 'Orçamentos',
+    'SOLU\uFFFD\uFFFDES': 'SOLUÇÕES',
+    'SOLU\uFFFDES': 'SOLUÇÕES',
+    'GEST\uFFFD\uFFFDO': 'GESTÃO',
+    'GEST\uFFFDO': 'GESTÃO',
+    'MANUTEN\uFFFD\uFFFDO': 'MANUTENÇÃO',
+    'MANUTEN\uFFFDO': 'MANUTENÇÃO',
+    'servi\uFFFDos': 'serviços',
+    'Servi\uFFFDos': 'Serviços',
+    'descri\uFFFD\uFFFDo': 'descrição',
+    'Descri\uFFFD\uFFFDo': 'Descrição',
+    'Configura\uFFFD\uFFFDes': 'Configurações',
+    'Configura\uFFFDes': 'Configurações',
+    'Previs\uFFFD\uFFFDo': 'Previsão',
+    'Previs\uFFFDo': 'Previsão',
+    'Condi\uFFFD\uFFFDo': 'Condição',
+    'Condi\uFFFDo': 'Condição',
+    'Padr\uFFFD\uFFFDo': 'Padrão',
+    'Padr\uFFFDo': 'Padrão',
+    'Opera\uFFFD\uFFFDo': 'Operação',
+    'Situa\uFFFD\uFFFDo': 'Situação',
+    'Observa\uFFFD\uFFFDes': 'Observações',
+    'Aponsentadoria': 'Aposentadoria',
+
+    // Broken encodings (CP850/Latin1 mixed up)
     '├º': 'ç',
     '├Á': 'õ',
     '├ú': 'ã',
@@ -30,22 +56,7 @@ const replacements = {
     'orÃ§amento': 'orçamento',
     'gestÃ£o': 'gestão',
     'emissÃ£o': 'emissão',
-    'descriÃ§Ã£o': 'descrição',
-    'SOLUES': 'SOLUÇÕES',
-    'GESTO': 'GESTÃO',
-    'EMISSO': 'EMISSÃO',
-    'Oramentos': 'Orçamentos',
-    'Oramento': 'Orçamento',
-    'Servios': 'Serviços',
-    'DescriÃ£o': 'Descrição',
-    'Descrio': 'Descrição',
-    'Configuraes': 'Configurações',
-    'Aponsentadoria': 'Aposentadoria',
-    'Endereo': 'Endereço',
-    'Observaes': 'Observações',
-    'Previso': 'Previsão',
-    'Condio': 'Condição',
-    'Padro': 'Padrão'
+    'descriÃ§Ã£o': 'descrição'
 };
 
 function fixFile(filePath) {
