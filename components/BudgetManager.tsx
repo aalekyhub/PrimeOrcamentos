@@ -76,7 +76,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       quantity: currentQty,
       unitPrice: currentPrice,
       unit: currentUnit,
-      type: 'Servi�o'
+      type: 'Serviço'
     };
     setItems([...items, newItem]);
     setCurrentDesc(''); setCurrentPrice(0); setCurrentQty(1);
@@ -138,7 +138,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                  </div>
                  <div>
                      <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 0 0 2px 0; text-transform: uppercase;">${company.name}</h1>
-                     <p style="margin: 0; font-size: 11px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.02em;">Solu��es em Gest�o Profissional</p>
+                     <p style="margin: 0; font-size: 11px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.02em;">Solu��es em Gestão Profissional</p>
                       <p style="margin: 4px 0 0 0; font-size: 10px; color: #64748b; font-weight: 500;">${company.cnpj || ''} | ${company.phone || ''}</p>
                  </div>
              </div>
@@ -161,7 +161,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                    <span style="font-size: 13px; font-weight: 800; color: #1e40af; text-transform: uppercase; letter-spacing: 0.05em;">TERMO DE ACEITE E AUTORIZA��O PROFISSIONAL</span>
                </div>
                <p style="margin: 0; font-size: 12px; color: #1e3a8a; line-height: 1.6; text-align: justify; font-weight: 500;">
-                   "Ao assinar abaixo, o cliente declara estar ciente e de pleno acordo com os valores, prazos e especifica��es descritas. Esta aceita��o autoriza o in�cio imediato dos trabalhos sob as condi��es estabelecidas. Validade: ${vDays} dias."
+                   "Ao assinar abaixo, o cliente declara estar ciente e de pleno acordo com os valores, prazos e especificações descritas. Esta aceita��o autoriza o in�cio imediato dos trabalhos sob as condi��es estabelecidas. Validade: ${vDays} dias."
                </p>
           </div>
           <div style="margin-top: 60px; break-inside: avoid;">
@@ -213,7 +213,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                  
                  ${b.descriptionBlocks && b.descriptionBlocks.length > 0 ? `
                   <div style="margin-bottom: 48px;" class="print-description-content">
-                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0; margin-bottom: 24px;">DESCRI��O DOS SERVI�OS</div>
+                    <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0; margin-bottom: 24px;">DESCRIÇÃO DOS SERVI�OS</div>
                     <div style="display: block;">
                       ${b.descriptionBlocks.map(block => {
       if (block.type === 'text') {
@@ -234,7 +234,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                        <table style="width: 100%; border-collapse: collapse;">
                           <thead>
                               <tr style="border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
-                                  <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: left; font-weight: 800; width: 55%; letter-spacing: 0.05em;">ITEM / DESCRI��O</th>
+                                  <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: left; font-weight: 800; width: 55%; letter-spacing: 0.05em;">ITEM / DESCRIÇÃO</th>
                                   <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: center; font-weight: 800; width: 10%; letter-spacing: 0.05em;">QTD</th>
                                   <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: right; font-weight: 800; width: 17.5%; letter-spacing: 0.05em;">UNIT�RIO</th>
                                   <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: right; font-weight: 800; width: 17.5%; letter-spacing: 0.05em;">SUBTOTAL</th>
@@ -625,7 +625,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
             pdf.setFontSize(8);
             pdf.setTextColor(150);
             pdf.text(
-              `P�g. ${i} / ${totalPages}`,
+              `Pág. ${i} / ${totalPages}`,
               pdf.internal.pageSize.getWidth() - 15,
               pdf.internal.pageSize.getHeight() - 8
             );
@@ -747,7 +747,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
             <tr>
               <th className="px-8 py-5">OR� #</th>
               <th className="px-8 py-5">CLIENTE</th>
-              <th className="px-8 py-5">DESCRI��O</th>
+              <th className="px-8 py-5">DESCRIÇÃO</th>
               <th className="px-8 py-5">VALOR</th>
               <th className="px-8 py-5 text-right">A�+�ES</th>
             </tr>
@@ -767,7 +767,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                 <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   {budget.status !== OrderStatus.APPROVED && (
                     <button onClick={async () => {
-                      if (confirm("Deseja APROVAR este or�amento? Ele ser� convertido em Ordem de Servi�o.")) {
+                      if (confirm("Deseja APROVAR este or�amento? Ele ser� convertido em Ordem de Serviço.")) {
                         const approvedBudget = { ...budget, status: OrderStatus.APPROVED };
                         const newServiceOrderId = budget.id.replace('ORC', 'OS');
 
@@ -888,7 +888,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
                 <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
                   <div className="flex justify-between items-center">
-                    <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-widest border-b pb-2 grow mr-6">DESCRI��O T�CNICA</h4>
+                    <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-widest border-b pb-2 grow mr-6">DESCRIÇÃO T�CNICA</h4>
                   </div>
                   <div className="space-y-3">
                     {descriptionBlocks.length === 0 && (

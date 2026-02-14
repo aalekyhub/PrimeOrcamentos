@@ -39,7 +39,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     const { handlePrintOS } = usePrintOS(customers, company);
 
     const [selectedCustomerId, setSelectedCustomerId] = useState('');
-    const [osTitle, setOsTitle] = useState('Execu��o de Obra');
+    const [osTitle, setOsTitle] = useState('Execução de Obra');
     const [diagnosis, setDiagnosis] = useState(''); // description of work
     const [descriptionBlocks, setDescriptionBlocks] = useState<DescriptionBlock[]>([]);
     const [paymentTerms, setPaymentTerms] = useState('');
@@ -126,7 +126,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             description: currentDesc,
             quantity: currentQty || 1,
             unitPrice: currentPrice || 0,
-            type: 'Servi�o',
+            type: 'Serviço',
             unit: currentUnit || 'un',
             actualValue: (currentActual === '' ? 0 : currentActual) || ((currentActualQty || 0) * (currentActualPrice || 0)),
             actualQuantity: currentActualQty || 0,
@@ -573,7 +573,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             </div>
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CL�USULA 4� � DAS OBRIGA��ES DA CONTRATADA</h4>
+                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CL�USULA 4� � DAS OBRIGAÇÕES DA CONTRATADA</h4>
                 <ul style="list-style-type: none; padding-left: 0 !important; font-size: 14px; color: #475569; line-height: 1.6; margin: 0;">
                     <li style="margin-bottom: 4px; padding-left: 0 !important;">4.1. Executar os serviços conforme o escopo contratado e normas t�cnicas aplic�veis.</li>
                     <li style="margin-bottom: 4px; padding-left: 0 !important;">4.2. Responsabilizar-se integralmente por seus empregados, prepostos ou subcontratados, inclusive quanto a encargos trabalhistas, previdenci�rios, fiscais e securit�rios.</li>
@@ -583,7 +583,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             </div>
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CL�USULA 5� � DAS OBRIGA��ES DO CONTRANTE</h4>
+                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CL�USULA 5� � DAS OBRIGAÇÕES DO CONTRANTE</h4>
                 <ul style="list-style-type: none; padding-left: 0 !important; font-size: 14px; color: #475569; line-height: 1.6; margin: 0;">
                     <li style="margin-bottom: 4px; padding-left: 0 !important;">5.1. Garantir o acesso da CONTRATADA ao local da obra.</li>
                     <li style="margin-bottom: 4px; padding-left: 0 !important;">5.2. Efetuar os pagamentos conforme acordado.</li>
@@ -593,7 +593,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
                 <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CL�USULA 6� � DAS RESPONSABILIDADES PREVIDENCI�RIAS E FISCAIS</h4>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">6.1. As partes reconhecem que o presente contrato caracteriza empreitada global de obra, nos termos da legisla��o vigente, n�o se aplicando a reten��o de 11% (onze por cento) de INSS, conforme disposto na Lei n� 8.212/91 e Instru��o Normativa RFB n� 971/2009.</p>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">6.1. As partes reconhecem que o presente contrato caracteriza empreitada global de obra, nos termos da legisla��o vigente, n�o se aplicando a retenção de 11% (onze por cento) de INSS, conforme disposto na Lei n� 8.212/91 e Instru��o Normativa RFB n� 971/2009.</p>
                 <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 8px 0 0 0;">6.2. A CONTRATADA � a �nica respons�vel pelo recolhimento de seus tributos e contribui��es incidentes sobre suas atividades.</p>
             </div>
 
@@ -604,7 +604,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
                 <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CL�USULA 8� � DA RESPONSABILIDADE T�CNICA</h4>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">8.1. Quando aplic�vel, a CONTRATADA providenciar� a emiss�o de ART/RRT, assumindo a responsabilidade t�cnica pela execu��o dos serviços.</p>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">8.1. Quando aplic�vel, a CONTRATADA providenciar� a emissão de ART/RRT, assumindo a responsabilidade t�cnica pela execu��o dos serviços.</p>
             </div>
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
@@ -807,7 +807,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         pdf.setFontSize(8);
                         pdf.setTextColor(150);
                         pdf.text(
-                            `P�g. ${i} / ${totalPages}`,
+                            `Pág. ${i} / ${totalPages}`,
                             pdf.internal.pageSize.getWidth() - 15,
                             pdf.internal.pageSize.getHeight() - 8
                         );
@@ -880,7 +880,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             </div>
             <script>
                window.onload = function() { 
-                 // Aplicar otimiza��o de quebras
+                 // Aplicar otimização de quebras
                  const content = document.querySelector('.print-description-content');
                  if (content) {
                     const allNodes = [];
@@ -947,7 +947,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             <div className="flex justify-between items-center">
                 <div>
                     <h2 className="text-2xl font-bold text-slate-900 tracking-tight">OS de Obra</h2>
-                    <p className="text-slate-500 text-sm">Gest�o de reformas e constru��es.</p>
+                    <p className="text-slate-500 text-sm">Gestão de reformas e construções.</p>
                 </div>
                 <button onClick={() => {
                     setShowForm(true);
@@ -977,7 +977,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             <div className="bg-white rounded-[2rem] border overflow-hidden shadow-sm overflow-x-auto">
                 <table className="w-full text-left">
                     <thead className="bg-slate-50 text-[10px] font-black uppercase text-slate-400 border-b">
-                        <tr><th className="px-8 py-5">OS #</th><th className="px-8 py-5">CLIENTE</th><th className="px-8 py-5">OBRA / DESCRI��O</th><th className="px-8 py-5 text-right">A��ES</th></tr>
+                        <tr><th className="px-8 py-5">OS #</th><th className="px-8 py-5">CLIENTE</th><th className="px-8 py-5">OBRA / DESCRIÇÃO</th><th className="px-8 py-5 text-right">AÇÕES</th></tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                         {activeOrders.map(order => (
@@ -1163,7 +1163,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                 <div className="col-span-1"></div>
                                             </div>
                                             <div className="mb-2 grid grid-cols-12 gap-1 px-3">
-                                                <div className="col-span-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">DESCRI��O</span></div>
+                                                <div className="col-span-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">DESCRIÇÃO</span></div>
                                                 <div className="col-span-1 text-center"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">QTD</span></div>
                                                 <div className="col-span-1 text-center"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">UN</span></div>
                                                 <div className="col-span-1 text-right pr-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">VL. PROJ</span></div>
