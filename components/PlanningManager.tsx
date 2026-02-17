@@ -147,16 +147,31 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
 
         // Calculate Totals
         const totalMat = materials.reduce((acc, m) => acc + (m.total_cost || 0), 0) +
-            services.reduce((acc, s) => acc + (s.unit_material_cost * s.quantity), 0); // Simplified aggregation
+            services.reduce((acc, s) => acc + (s.unit_material_cost * s.quantity), 0);
+
+        const totalLab = labor.reduce((acc, l) => acc + (l.total_cost || 0), 0) +
+            services.reduce((acc, s) => acc + (s.unit_labor_cost * s.quantity), 0);
+
+        const totalInd = indirects.reduce((acc, i) => acc + (i.value || 0), 0);
+
+        const baseTotal = totalMat + totalLab + totalInd;
+        const totalTax = taxes.reduce((acc, t) => acc + (t.rate > 0 ? baseTotal * (t.rate / 100) : (t.value || 0)), 0);
+
+        const finalTotal = baseTotal + totalTax;
+
+        const updatedPlanHeader = {
+            ...currentPlan,
+            total_real_cost: finalTotal
+        };
 
         // DANGER: Loading list from state 'plans' might be outdated if we just created a new plan 
         // or if multiple tabs are open. Load FRESH from DB before merging.
         const currentLocalPlans = db.load('serviflow_plans', []) as PlanningHeader[];
-        const updatedPlans = currentLocalPlans.map(p => p.id === currentPlan.id ? currentPlan : p);
+        const updatedPlans = currentLocalPlans.map(p => p.id === updatedPlanHeader.id ? updatedPlanHeader : p);
 
         // If it's a new plan not yet in the DB list, append it
-        if (!currentLocalPlans.find(p => p.id === currentPlan.id)) {
-            updatedPlans.unshift(currentPlan);
+        if (!currentLocalPlans.find(p => p.id === updatedPlanHeader.id)) {
+            updatedPlans.unshift(updatedPlanHeader);
         }
 
         // Save to DB

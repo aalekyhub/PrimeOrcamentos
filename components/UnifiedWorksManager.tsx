@@ -134,6 +134,36 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, onGenerateBudget }) =
         }
     };
 
+    const getBudgetedTotal = (plan: PlanningHeader) => {
+        if (plan.total_real_cost && plan.total_real_cost > 0) return plan.total_real_cost;
+
+        // Fallback: Manually sum items if header is 0
+        const services = db.load('serviflow_plan_services', []) as any[];
+        const materials = db.load('serviflow_plan_materials', []) as any[];
+        const labor = db.load('serviflow_plan_labor', []) as any[];
+        const indirects = db.load('serviflow_plan_indirects', []) as any[];
+        const taxes = db.load('serviflow_plan_taxes', []) as any[];
+
+        const planServices = services.filter(s => s.plan_id === plan.id);
+        const planMaterials = materials.filter(m => m.plan_id === plan.id);
+        const planLabor = labor.filter(l => l.plan_id === plan.id);
+        const planIndirects = indirects.filter(i => i.plan_id === plan.id);
+        const planTaxes = taxes.filter(t => t.plan_id === plan.id);
+
+        const totalMat = planMaterials.reduce((acc, m) => acc + (m.total_cost || 0), 0) +
+            planServices.reduce((acc, s) => acc + (s.unit_material_cost * s.quantity), 0);
+
+        const totalLab = planLabor.reduce((acc, l) => acc + (l.total_cost || 0), 0) +
+            planServices.reduce((acc, s) => acc + (s.unit_labor_cost * s.quantity), 0);
+
+        const totalInd = planIndirects.reduce((acc, i) => acc + (i.value || 0), 0);
+
+        const baseTotal = totalMat + totalLab + totalInd;
+        const totalTax = planTaxes.reduce((acc, t) => acc + (t.rate > 0 ? baseTotal * (t.rate / 100) : (t.value || 0)), 0);
+
+        return baseTotal + totalTax;
+    };
+
     if (view === 'detail' && selectedPlanId) {
         return (
             <div className="h-full flex flex-col">
@@ -307,7 +337,7 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, onGenerateBudget }) =
                                         </td>
                                         <td className="px-6 py-5 text-right whitespace-nowrap">
                                             <span className="font-black text-slate-800 text-sm">
-                                                R$ {(plan.total_real_cost || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                R$ {getBudgetedTotal(plan).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                             </span>
                                         </td>
                                         <td className="px-6 py-5">
@@ -397,7 +427,7 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, onGenerateBudget }) =
                             <div className="pl-3 border-t border-slate-100 pt-4 flex justify-between items-center text-sm">
                                 <div className="flex flex-col">
                                     <span className="text-xs font-bold text-slate-400 uppercase">Orçado</span>
-                                    <span className="font-bold text-slate-700">R$ {(plan.total_real_cost || 0).toFixed(2)}</span>
+                                    <span className="font-bold text-slate-700">R$ {getBudgetedTotal(plan).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                 </div>
                                 {/* Future: Show Realized Cost here too if we link it */}
                                 <div className="flex items-center text-emerald-600 font-bold group-hover:translate-x-1 transition-transform">
