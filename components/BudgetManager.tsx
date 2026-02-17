@@ -339,6 +339,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text);
         const isBold = el.querySelector('strong, b') ||
           (el.style && (parseInt(el.style.fontWeight) >= 600 || el.style.fontWeight === 'bold')) ||
+          el.classList.contains('font-bold') ||
           el.tagName === 'STRONG';
         const isShort = text.length < 150;
 
@@ -350,11 +351,12 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       if (isTitle) {
         const nodesToWrap = [el];
         let j = i + 1;
-        while (j < allNodes.length && nodesToWrap.length < 3) {
+        // Reduzido para 2 para ser menos agressivo (Título + 1 bloco)
+        while (j < allNodes.length && nodesToWrap.length < 2) {
           const next = allNodes[j] as HTMLElement;
           const nextText = next.innerText.trim();
           const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') ||
-            (/^\d+(\.\d+)*[\.\s\)]/.test(nextText) && (next.querySelector('strong, b') || nextText === nextText.toUpperCase()));
+            (/^\d+(\.\d+)*[\.\s\)]/.test(nextText) && (next.querySelector('strong, b') || nextText === nextText.toUpperCase() || (next.style && next.style.fontWeight === 'bold')));
 
           if (nextIsTitle) break;
           nodesToWrap.push(next);
@@ -442,9 +444,9 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
                   const text = el.innerText.trim();
                   const isNumbered = /^\\d+(\\.\\d+)*[\\.\\s\\)]/.test(text);
-                  const isBold = el.querySelector('strong, b') || (el.style && parseInt(el.style.fontWeight) > 600) || el.tagName === 'STRONG';
+                  const isBold = el.querySelector('strong, b') || (el.style && (parseInt(el.style.fontWeight) >= 600 || el.style.fontWeight === 'bold')) || el.classList.contains('font-bold') || el.tagName === 'STRONG';
                   const isShort = text.length < 150;
-                  if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
+                  if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 3)) {
                     isTitle = true;
                   }
                }
@@ -452,9 +454,13 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                if (isTitle) {
                  const nodesToWrap = [el];
                  let j = i + 1;
-                 while (j < allNodes.length && nodesToWrap.length < 3) {
+                 // Agrupar apenas com o próximo elemento para ser menos agressivo
+                 while (j < allNodes.length && nodesToWrap.length < 2) {
                    const next = allNodes[j];
-                   if (next.matches('h1, h2, h3, h4, h5, h6')) break;
+                   const nextText = next.innerText.trim();
+                   const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') || 
+                                     (/^\\d+(\\.\\d+)*[\\.\\s\\)]/.test(nextText) && (next.querySelector('strong, b') || nextText === nextText.toUpperCase() || (next.style && next.style.fontWeight === 'bold')));
+                   if (nextIsTitle) break;
                    nodesToWrap.push(next);
                    j++;
                  }
@@ -462,6 +468,10 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                  if (nodesToWrap.length > 1) {
                    const wrapper = document.createElement('div');
                    wrapper.className = 'keep-together';
+                   wrapper.style.breakInside = 'avoid';
+                   wrapper.style.pageBreakInside = 'avoid';
+                   wrapper.style.display = 'block';
+                   wrapper.style.width = '100%';
                    el.parentNode.insertBefore(wrapper, el);
                    nodesToWrap.forEach(node => wrapper.appendChild(node));
                    i = j - 1;
