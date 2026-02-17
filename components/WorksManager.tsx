@@ -48,6 +48,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
     const [draggedLabIndex, setDraggedLabIndex] = useState<number | null>(null);
     const [draggedIndIndex, setDraggedIndIndex] = useState<number | null>(null);
 
+    const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
+
     // Preview UI State
     const [showPreview, setShowPreview] = useState(false);
     const [previewContent, setPreviewContent] = useState({ title: '', html: '', filename: '' });
@@ -1423,15 +1425,67 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     <div>
                                         <div className="flex justify-between items-center mb-4">
                                             <h3 className="font-bold text-slate-800 flex items-center gap-2"><Truck size={18} /> Materiais da Obra</h3>
-                                            {materials.length > 0 && (
-                                                <button
-                                                    onClick={handlePreviewMaterials}
-                                                    className="bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 hover:bg-slate-50 transition-all shadow-sm"
-                                                >
-                                                    <Eye size={16} className="text-emerald-600" /> Visualizar Lista
-                                                </button>
-                                            )}
+                                            <div className="flex gap-2">
+                                                {materials.length > 0 && (
+                                                    <button
+                                                        onClick={handlePreviewMaterials}
+                                                        className="bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 hover:bg-slate-50 transition-all shadow-sm"
+                                                    >
+                                                        <Eye size={16} className="text-emerald-600" /> Visualizar Lista
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
+
+                                        {materials.length > 0 && (
+                                            <div className="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-200 mb-2">
+                                                <div className="flex items-center gap-3">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                                        checked={selectedMaterials.length === materials.length && materials.length > 0}
+                                                        onChange={(e) => {
+                                                            if (e.target.checked) {
+                                                                setSelectedMaterials(materials.map(m => m.id));
+                                                            } else {
+                                                                setSelectedMaterials([]);
+                                                            }
+                                                        }}
+                                                    />
+                                                    <span className="text-xs font-semibold text-slate-600">
+                                                        {selectedMaterials.length} selecionado(s)
+                                                    </span>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    {selectedMaterials.length > 0 && (
+                                                        <button
+                                                            onClick={() => {
+                                                                if (window.confirm(`Excluir ${selectedMaterials.length} materiais selecionados?`)) {
+                                                                    setMaterials(materials.filter(m => !selectedMaterials.includes(m.id)));
+                                                                    setSelectedMaterials([]);
+                                                                    notify("Materiais removidos!");
+                                                                }
+                                                            }}
+                                                            className="flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 rounded text-[10px] font-bold hover:bg-red-100 transition-colors border border-red-100"
+                                                        >
+                                                            <Trash2 size={12} /> Excluir Selecionados
+                                                        </button>
+                                                    )}
+                                                    <button
+                                                        onClick={() => {
+                                                            if (window.confirm("Deseja realmente excluir TODOS os materiais desta lista?")) {
+                                                                setMaterials([]);
+                                                                setSelectedMaterials([]);
+                                                                notify("Lista de materiais limpa!");
+                                                            }
+                                                        }}
+                                                        className="flex items-center gap-1 px-2 py-1 bg-slate-200 text-slate-700 rounded text-[10px] font-bold hover:bg-slate-300 transition-colors"
+                                                    >
+                                                        <Archive size={12} /> Limpar Lista
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
                                         <div className="space-y-2">
                                             {materials.map((m, index) => (
                                                 <div
@@ -1440,18 +1494,26 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                     onDragStart={() => setDraggedMatIndex(index)}
                                                     onDragOver={(e) => (window as any).handleDragOver(e, index, draggedMatIndex, materials, setMaterials, setDraggedMatIndex)}
                                                     onDragEnd={() => setDraggedMatIndex(null)}
-                                                    className={`bg-white p-3 rounded-lg border flex justify-between items-center text-sm transition-all ${draggedMatIndex === index ? 'opacity-50 bg-blue-50 border-blue-200 shadow-inner' : 'border-slate-200'}`}
+                                                    className={`bg-white p-3 rounded-lg border flex justify-between items-center text-sm transition-all ${draggedMatIndex === index ? 'opacity-50 bg-blue-50 border-blue-200 shadow-inner' : (selectedMaterials.includes(m.id) ? 'border-blue-300 bg-blue-50/30' : 'border-slate-200 shadow-sm')}`}
                                                 >
                                                     {editingId === m.id ? (
                                                         <div className="flex-1 grid grid-cols-12 gap-2 items-center">
-                                                            <div className="col-span-5">
+                                                            <div className="col-span-1">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    disabled
+                                                                    className="w-4 h-4 rounded border-slate-300 text-blue-600 opacity-30"
+                                                                    checked={selectedMaterials.includes(m.id)}
+                                                                />
+                                                            </div>
+                                                            <div className="col-span-4">
                                                                 <input
                                                                     className="w-full text-xs p-1 border rounded"
                                                                     defaultValue={m.material_name}
                                                                     id={`edit_mname_${m.id} `}
                                                                 />
                                                             </div>
-                                                            <div className="col-span-2">
+                                                            <div className="col-span-1">
                                                                 <input
                                                                     type="number"
                                                                     className="w-full text-xs p-1 border rounded"
@@ -1460,7 +1522,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                     id={`edit_mqty_${m.id} `}
                                                                 />
                                                             </div>
-                                                            <div className="col-span-2">
+                                                            <div className="col-span-1">
                                                                 <input
                                                                     className="w-full text-xs p-1 border rounded"
                                                                     defaultValue={m.unit}
@@ -1468,7 +1530,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                     id={`edit_munit_${m.id} `}
                                                                 />
                                                             </div>
-                                                            <div className="col-span-1">
+                                                            <div className="col-span-2">
                                                                 <input
                                                                     type="number"
                                                                     className="w-full text-xs p-1 border rounded"
@@ -1477,7 +1539,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                     id={`edit_mcost_${m.id} `}
                                                                 />
                                                             </div>
-                                                            <div className="col-span-2 flex gap-1 justify-end">
+                                                            <div className="col-span-3 flex gap-1 justify-end">
                                                                 <button
                                                                     onClick={() => {
                                                                         const newName = (document.getElementById(`edit_mname_${m.id} `) as HTMLInputElement).value;
@@ -1510,7 +1572,19 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         </div>
                                                     ) : (
                                                         <>
-                                                            <div className="flex items-center gap-2 grow">
+                                                            <div className="flex items-center gap-3 grow">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                                                    checked={selectedMaterials.includes(m.id)}
+                                                                    onChange={(e) => {
+                                                                        if (e.target.checked) {
+                                                                            setSelectedMaterials([...selectedMaterials, m.id]);
+                                                                        } else {
+                                                                            setSelectedMaterials(selectedMaterials.filter(id => id !== m.id));
+                                                                        }
+                                                                    }}
+                                                                />
                                                                 <div className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 shrink-0">
                                                                     <GripVertical size={16} />
                                                                 </div>
