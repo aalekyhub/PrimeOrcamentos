@@ -279,6 +279,105 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         setActiveTab('dados');
     };
 
+    const handleDeleteWork = async (id: string, e?: React.MouseEvent) => {
+        if (e) e.stopPropagation();
+        if (!confirm('AVISO: Isso excluirá PERMANENTEMENTE esta obra e todos os seus lançamentos de serviços e recursos. Deseja continuar?')) return;
+
+        try {
+            setLoading(true);
+
+            // 1. Load all tables
+            const allWorks = db.load('serviflow_works', []) as WorkHeader[];
+            const allServices = db.load('serviflow_work_services', []) as WorkService[];
+            const allMaterials = db.load('serviflow_work_materials', []) as WorkMaterial[];
+            const allLabor = db.load('serviflow_work_labor', []) as WorkLabor[];
+            const allIndirects = db.load('serviflow_work_indirects', []) as WorkIndirect[];
+            const allTaxes = db.load('serviflow_work_taxes', []) as WorkTax[];
+
+            // 2. Filter out items and save
+            await db.save('serviflow_works', allWorks.filter(w => w.id !== id));
+            await db.save('serviflow_work_services', allServices.filter(s => s.work_id !== id));
+            await db.save('serviflow_work_materials', allMaterials.filter(m => m.work_id !== id));
+            await db.save('serviflow_work_labor', allLabor.filter(l => l.work_id !== id));
+            await db.save('serviflow_work_indirects', allIndirects.filter(i => i.work_id !== id));
+            await db.save('serviflow_work_taxes', allTaxes.filter(t => t.work_id !== id));
+
+            // 3. Update state
+            setWorks(prev => prev.filter(w => w.id !== id));
+            notify("Obra excluída com sucesso.", "success");
+        } catch (error) {
+            notify("Erro ao excluir obra.", "error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDuplicateWork = async (id: string, e?: React.MouseEvent) => {
+        if (e) e.stopPropagation();
+        if (!confirm('Deseja criar uma cópia desta obra com todos os seus serviços e recursos?')) return;
+
+        try {
+            setLoading(true);
+
+            // 1. Load Source Work Header
+            const allWorks = db.load('serviflow_works', []) as WorkHeader[];
+            const sourceWork = allWorks.find(w => w.id === id);
+            if (!sourceWork) return notify("Obra original não encontrada.", "error");
+
+            // 2. Create New Work Header
+            const newWorkId = db.generateId('OBRA');
+            const newWork: WorkHeader = {
+                ...sourceWork,
+                id: newWorkId,
+                name: `CÓPIA - ${sourceWork.name}`,
+                start_date: new Date().toISOString()
+            };
+
+            // 3. Duplicate Items
+            // Services
+            const allServices = db.load('serviflow_work_services', []) as WorkService[];
+            const sourceServices = allServices.filter(s => s.work_id === id);
+            const newServices = sourceServices.map(s => ({ ...s, id: db.generateId('WSVC'), work_id: newWorkId }));
+
+            // Materials
+            const allMaterials = db.load('serviflow_work_materials', []) as WorkMaterial[];
+            const sourceMaterials = allMaterials.filter(m => m.work_id === id);
+            const newMaterials = sourceMaterials.map(m => ({ ...m, id: db.generateId('WMAT'), work_id: newWorkId }));
+
+            // Labor
+            const allLabor = db.load('serviflow_work_labor', []) as WorkLabor[];
+            const sourceLabor = allLabor.filter(l => l.work_id === id);
+            const newLabor = sourceLabor.map(l => ({ ...l, id: db.generateId('WLBR'), work_id: newWorkId }));
+
+            // Indirects
+            const allIndirects = db.load('serviflow_work_indirects', []) as WorkIndirect[];
+            const sourceIndirects = allIndirects.filter(i => i.work_id === id);
+            const newIndirects = sourceIndirects.map(i => ({ ...i, id: db.generateId('WIND'), work_id: newWorkId }));
+
+            // Taxes
+            const allTaxes = db.load('serviflow_work_taxes', []) as WorkTax[];
+            const sourceTaxes = allTaxes.filter(t => t.work_id === id);
+            const newTaxes = sourceTaxes.map(t => ({ ...t, id: db.generateId('WTAX'), work_id: newWorkId }));
+
+            // 4. Save everything
+            await db.save('serviflow_works', [newWork, ...allWorks]);
+            await db.save('serviflow_work_services', [...allServices, ...newServices]);
+            await db.save('serviflow_work_materials', [...allMaterials, ...newMaterials]);
+            await db.save('serviflow_work_labor', [...allLabor, ...newLabor]);
+            await db.save('serviflow_work_indirects', [...allIndirects, ...newIndirects]);
+            await db.save('serviflow_work_taxes', [...allTaxes, ...newTaxes]);
+
+            // 5. Update state
+            setWorks(prev => [newWork, ...prev]);
+            notify("Obra duplicada com sucesso!", "success");
+
+        } catch (error) {
+            notify("Erro ao duplicar obra.", "error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const handleSave = async () => {
         if (!currentWork) return;
         setLoading(true);
@@ -860,22 +959,43 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                             <div key={work.id}
                                 className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-emerald-400 transition-all group relative">
                                 <div className="flex justify-between items-start mb-2">
-                                    <span className="font-bold text-lg text-slate-800">{work.name}</span>
-                                    <span className={`px-2 py-1 rounded text-xs font-bold ${work.status === 'Concluída' ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-50 text-orange-700'}`}>
+                                    <div className="flex-1 min-w-0">
+                                        <span className="font-black text-lg text-slate-800 block truncate leading-tight">{work.name}</span>
+                                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{work.id}</span>
+                                    </div>
+                                    <div className="flex gap-1 ml-2 shrink-0">
+                                        <button
+                                            onClick={(e) => handleDuplicateWork(work.id, e)}
+                                            className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                                            title="Duplicar Obra"
+                                        >
+                                            <Archive size={16} />
+                                        </button>
+                                        <button
+                                            onClick={(e) => handleDeleteWork(work.id, e)}
+                                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                            title="Excluir Obra"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between items-center mb-4">
+                                    <p className="text-xs text-slate-500 truncate flex-1 pr-2">{work.address || 'Sem endereço'}</p>
+                                    <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-tighter ${work.status === 'Concluída' ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-50 text-orange-700'}`}>
                                         {work.status}
                                     </span>
                                 </div>
-                                <p className="text-sm text-slate-500 mb-4 truncate">{work.address || 'Sem endereço'}</p>
-                                <div className="flex justify-between text-xs text-slate-400 mb-4">
-                                    <span>{new Date(work.start_date).toLocaleDateString()}</span>
-                                    <span>ID: {work.id}</span>
+                                <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase mb-4">
+                                    <Calendar size={12} className="text-slate-300" />
+                                    <span>Criada em {new Date(work.start_date).toLocaleDateString()}</span>
                                 </div>
                                 <div className="pt-4 border-t border-slate-100 flex justify-end">
                                     <button
-                                        onClick={() => { setActiveWorkId(work.id); setCurrentWork(work); }}
-                                        className="text-emerald-600 font-bold text-sm bg-emerald-50 px-4 py-2 rounded-lg hover:bg-emerald-100 transition-colors w-full"
+                                        onClick={() => { setActiveWorkId(work.id); setCurrentWork(work); loadWorkDetails(work.id); }}
+                                        className="text-emerald-700 font-black text-xs uppercase tracking-widest bg-emerald-50 px-4 py-2.5 rounded-xl hover:bg-emerald-100 transition-all w-full flex items-center justify-center gap-2 group"
                                     >
-                                        Gerenciar Obra
+                                        Gerenciar Obra <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                                     </button>
                                 </div>
                             </div>
