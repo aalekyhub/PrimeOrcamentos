@@ -247,23 +247,23 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                  <div style="margin-bottom: 32px; break-inside: avoid;">
                        <div style="display: flex; justify-content: flex-end; margin-bottom: 12px; gap: 40px;">
                            <div style="text-align: right;">
-                              <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px;">SUBTOTAL</span>
+                              <span style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px;">SUBTOTAL</span>
                               <span style="font-size: 12px; font-weight: 700; color: #334155; display: block;">R$ ${subT.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                            </div>
                            ${bdiR > 0 ? `
                            <div style="text-align: right;">
-                              <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px;">BDI (${bdiR}%)</span>
+                              <span style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px;">BDI (${bdiR}%)</span>
                               <span style="font-size: 12px; font-weight: 700; color: #10b981; display: block;">+ R$ ${bdiV.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                            </div>` : ''}
                            ${taxR > 0 ? `
                            <div style="text-align: right;">
-                              <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px;">IMPOSTOS (${taxR}%)</span>
+                              <span style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px;">IMPOSTOS (${taxR}%)</span>
                               <span style="font-size: 12px; font-weight: 700; color: #3b82f6; display: block;">+ R$ ${taxV.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                            </div>` : ''}
                        </div>
                        <div style="background: #0f172a; color: white; padding: 24px 32px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center;">
                            <span style="font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">INVESTIMENTO TOTAL:</span>
-                           <span style="font-size: 36px; font-weight: 800; letter-spacing: -0.05em; line-height: 1;">R$ ${finalT.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                           <span style="font-size: 28px; font-weight: 800; letter-spacing: -0.05em; line-height: 1;">R$ ${finalT.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                        </div>
                  </div>
   
@@ -292,9 +292,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         </thead>
         <tfoot>
             <tr>
-                <td style="height: 15mm; border: none; padding: 0; vertical-align: bottom;">
-                    <div style="text-align: right; padding-right: 15mm; font-size: 9px; color: #94a3b8; font-family: 'Inter', sans-serif; padding-bottom: 5mm;" class="page-footer-number"></div>
-                </td>
+                <td style="height: 15mm; border: none; padding: 0;"><div style="height: 15mm;">&nbsp;</div></td>
             </tr>
         </tfoot>
         <tbody>
@@ -401,13 +399,6 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
            .avoid-break { break-inside: avoid; page-break-inside: avoid; }
            .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
            
-           /* Estilos para Numeração de Páginas no Ctrl+P */
-           body { counter-reset: page; }
-           .page-footer-number::after {
-             counter-increment: page;
-             content: "Pág. " counter(page);
-           }
-           
            @media print { 
               @page { margin: 0; size: A4; }
               body { background: white !important; margin: 0 !important; padding: 0 !important; } 
@@ -416,7 +407,6 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
               tr { break-inside: auto !important; break-after: auto; }
               thead { display: table-header-group; } 
               tfoot { display: table-footer-group; }
-              .page-footer-number { display: block !important; }
            }
 
             /* Estilos do Editor de Texto Rico no Print */
