@@ -166,7 +166,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           </div>
           <div style="margin-top: 100px; break-inside: avoid;">
               <div style="border-bottom: 2px solid #cbd5e1; width: 400px; max-width: 100%;"></div>
-              <p style="margin: 12px 0 0 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">ASSINATURA DO CLIENTE / ACEITE</p>
+              <p style="margin: 12px 0 0 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; line-height: 1.4; padding-bottom: 2px;">ASSINATURA DO CLIENTE / ACEITE</p>
           </div>
       </div>`;
   };
@@ -247,23 +247,23 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                  <div style="margin-bottom: 32px; break-inside: avoid;">
                        <div style="display: flex; justify-content: flex-end; margin-bottom: 12px; gap: 40px;">
                            <div style="text-align: right;">
-                              <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px;">SUBTOTAL</span>
+                              <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px; line-height: 1.2;">SUBTOTAL</span>
                               <span style="font-size: 10px; font-weight: 700; color: #334155; display: block;">R$ ${subT.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                            </div>
                            ${bdiR > 0 ? `
                            <div style="text-align: right;">
-                              <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px;">BDI (${bdiR}%)</span>
+                              <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px; line-height: 1.2;">BDI (${bdiR}%)</span>
                               <span style="font-size: 10px; font-weight: 700; color: #10b981; display: block;">+ R$ ${bdiV.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                            </div>` : ''}
                            ${taxR > 0 ? `
                            <div style="text-align: right;">
-                              <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px;">IMPOSTOS (${taxR}%)</span>
+                              <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px; line-height: 1.2;">IMPOSTOS (${taxR}%)</span>
                               <span style="font-size: 10px; font-weight: 700; color: #3b82f6; display: block;">+ R$ ${taxV.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                            </div>` : ''}
                        </div>
                        <div style="background: #0f172a; color: white; padding: 24px 32px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center;">
                            <span style="font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">INVESTIMENTO TOTAL:</span>
-                           <span style="font-size: 28px; font-weight: 800; letter-spacing: -0.05em; line-height: 1;">R$ ${finalT.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                           <span style="font-size: 28px; font-weight: 800; letter-spacing: -0.05em; line-height: 1.2; padding-bottom: 4px;">R$ ${finalT.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                        </div>
                  </div>
   
