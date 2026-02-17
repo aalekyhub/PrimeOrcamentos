@@ -164,7 +164,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                    "Ao assinar abaixo, o cliente declara estar ciente e de pleno acordo com os valores, prazos e especificações descritas. Esta aceitação autoriza o início imediato dos trabalhos sob as condições estabelecidas. Validade: ${vDays} dias."
                </p>
           </div>
-          <div style="margin-top: 60px; break-inside: avoid;">
+          <div style="margin-top: 100px; break-inside: avoid;">
               <div style="border-bottom: 2px solid #cbd5e1; width: 400px; max-width: 100%;"></div>
               <p style="margin: 12px 0 0 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">ASSINATURA DO CLIENTE / ACEITE</p>
           </div>
