@@ -166,9 +166,6 @@ export const db = {
     // 2. Remove from IndexedDB
     try {
       const idb = await getDB();
-      // If the field is one table (like company), we might remove the whole key or just part of it.
-      // But serviflow_orders for example stores all orders in one key.
-      // If so, we just put back the filtered array.
       if (Array.isArray(_cache[key])) {
         await idb.put(STORE_NAME, _cache[key], key);
       }
@@ -196,5 +193,45 @@ export const db = {
       }
     }
     return { success: true };
+  },
+
+  async deleteByCondition(key: string, column: string, value: any) {
+    // 1. Remove from cache if it's an array field
+    let deletedCount = 0;
+    if (Array.isArray(_cache[key])) {
+      const initialLength = _cache[key].length;
+      _cache[key] = _cache[key].filter((item: any) => item[column] !== value);
+      deletedCount = initialLength - _cache[key].length;
+    }
+
+    // 2. Remove from IndexedDB
+    try {
+      const idb = await getDB();
+      if (Array.isArray(_cache[key])) {
+        await idb.put(STORE_NAME, _cache[key], key);
+      }
+    } catch (e) {
+      console.error(`[IDB Delete Error] ${e}`);
+    }
+
+    // 3. Remove from Supabase
+    if (supabase) {
+      const tableName = key.replace('serviflow_', '');
+      try {
+        const { error } = await supabase
+          .from(tableName)
+          .delete()
+          .eq(column, value);
+
+        if (error) {
+          console.error(`[Supabase Delete Error] Tabela: ${tableName}. Erro: ${error.message}`);
+          return { success: false, error };
+        }
+      } catch (err) {
+        console.error(`[Delete Error] Falha crítica ao remover do Supabase:`, err);
+        return { success: false, error: err };
+      }
+    }
+    return { success: true, deletedCount };
   }
 };

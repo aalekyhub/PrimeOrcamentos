@@ -50,8 +50,7 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, onGenerateBudget }) =
 
         try {
             // 1. Delete Planning Data
-            const allPlans = db.load('serviflow_plans', []) as any[];
-            await db.save('serviflow_plans', allPlans.filter(p => p.id !== id));
+            await (db as any).deleteByCondition('serviflow_plans', 'id', id);
 
             const tables = [
                 'serviflow_plan_services',
@@ -61,8 +60,7 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, onGenerateBudget }) =
             ];
 
             for (const table of tables) {
-                const data = db.load(table, []) as any[];
-                await db.save(table, data.filter((item: any) => item.plan_id !== id));
+                await (db as any).deleteByCondition(table, 'plan_id', id);
             }
 
             // 2. Delete Linked Work Data (Execution)
@@ -70,7 +68,7 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, onGenerateBudget }) =
             const linkedWork = allWorks.find(w => w.plan_id === id);
 
             if (linkedWork) {
-                await db.save('serviflow_works', allWorks.filter(w => w.plan_id !== id));
+                await (db as any).deleteByCondition('serviflow_works', 'id', linkedWork.id);
                 const workTables = [
                     'serviflow_work_services',
                     'serviflow_work_materials',
@@ -79,8 +77,7 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, onGenerateBudget }) =
                     'serviflow_work_taxes'
                 ];
                 for (const table of workTables) {
-                    const data = db.load(table, []) as any[];
-                    await db.save(table, data.filter((item: any) => item.work_id !== linkedWork.id));
+                    await (db as any).deleteByCondition(table, 'work_id', linkedWork.id);
                 }
             }
 

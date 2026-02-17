@@ -286,21 +286,13 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         try {
             setLoading(true);
 
-            // 1. Load all tables
-            const allWorks = db.load('serviflow_works', []) as WorkHeader[];
-            const allServices = db.load('serviflow_work_services', []) as WorkService[];
-            const allMaterials = db.load('serviflow_work_materials', []) as WorkMaterial[];
-            const allLabor = db.load('serviflow_work_labor', []) as WorkLabor[];
-            const allIndirects = db.load('serviflow_work_indirects', []) as WorkIndirect[];
-            const allTaxes = db.load('serviflow_work_taxes', []) as WorkTax[];
-
-            // 2. Filter out items and save
-            await db.save('serviflow_works', allWorks.filter(w => w.id !== id));
-            await db.save('serviflow_work_services', allServices.filter(s => s.work_id !== id));
-            await db.save('serviflow_work_materials', allMaterials.filter(m => m.work_id !== id));
-            await db.save('serviflow_work_labor', allLabor.filter(l => l.work_id !== id));
-            await db.save('serviflow_work_indirects', allIndirects.filter(i => i.work_id !== id));
-            await db.save('serviflow_work_taxes', allTaxes.filter(t => t.work_id !== id));
+            // 2. Perform Physical Deletions (Local + Cloud)
+            await (db as any).deleteByCondition('serviflow_works', 'id', id);
+            await (db as any).deleteByCondition('serviflow_work_services', 'work_id', id);
+            await (db as any).deleteByCondition('serviflow_work_materials', 'work_id', id);
+            await (db as any).deleteByCondition('serviflow_work_labor', 'work_id', id);
+            await (db as any).deleteByCondition('serviflow_work_indirects', 'work_id', id);
+            await (db as any).deleteByCondition('serviflow_work_taxes', 'work_id', id);
 
             // 3. Update state
             setWorks(prev => prev.filter(w => w.id !== id));
