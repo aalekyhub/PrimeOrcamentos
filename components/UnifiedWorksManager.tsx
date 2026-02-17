@@ -275,7 +275,7 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, onGenerateBudget }) =
                             <tbody className="divide-y divide-slate-50">
                                 {plans.filter(p =>
                                     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                    (p.client_name || '').toLowerCase().includes(searchTerm.toLowerCase())
+                                    (p.client_name || customers.find(c => c.id === p.client_id)?.name || '').toLowerCase().includes(searchTerm.toLowerCase())
                                 ).map(plan => (
                                     <tr
                                         key={plan.id}
@@ -289,7 +289,9 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, onGenerateBudget }) =
                                         </td>
                                         <td className="px-6 py-5">
                                             <div className="max-w-[320px]">
-                                                <p className="font-black text-slate-800 text-sm truncate uppercase tracking-tight">{plan.client_name || 'Cliente não informado'}</p>
+                                                <p className="font-black text-slate-800 text-sm truncate uppercase tracking-tight">
+                                                    {plan.client_name || customers.find(c => c.id === plan.client_id)?.name || 'Cliente não informado'}
+                                                </p>
                                                 <div className="flex items-center gap-2 mt-0.5">
                                                     <div className={`w-1.5 h-1.5 rounded-full ${plan.status === 'Concluído' ? 'bg-emerald-500' : 'bg-blue-500'}`}></div>
                                                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">{plan.status}</span>
@@ -339,7 +341,7 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, onGenerateBudget }) =
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {plans.filter(p =>
                         p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        (p.client_name || '').toLowerCase().includes(searchTerm.toLowerCase())
+                        (p.client_name || customers.find(c => c.id === p.client_id)?.name || '').toLowerCase().includes(searchTerm.toLowerCase())
                     ).map(plan => (
                         <div
                             key={plan.id}
@@ -351,7 +353,9 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, onGenerateBudget }) =
                             <div className="flex justify-between items-start mb-4 pl-3">
                                 <div className="flex-1 min-w-0 pr-2">
                                     <h3 className="font-bold text-slate-800 text-lg group-hover:text-emerald-700 transition-colors truncate">{plan.name}</h3>
-                                    <p className="text-sm text-slate-500 font-medium truncate">{plan.client_name || 'Cliente não informado'}</p>
+                                    <p className="text-sm text-slate-500 font-medium truncate">
+                                        {plan.client_name || customers.find(c => c.id === plan.client_id)?.name || 'Cliente não informado'}
+                                    </p>
                                 </div>
                                 <div className="flex flex-col items-end gap-2 shrink-0">
                                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${plan.status === 'Concluído' ? 'bg-green-100 text-green-700' :

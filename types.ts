@@ -274,6 +274,7 @@ export interface WorkHeader {
   plan_id?: string; // Links this Realized Work to a Projected Plan
   name: string;
   client_id: string;
+  client_name?: string; // For display
   order_id?: string;
 
   address: string;

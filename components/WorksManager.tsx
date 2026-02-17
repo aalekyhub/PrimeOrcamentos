@@ -1381,8 +1381,16 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Cliente</label>
                                     <select
                                         value={currentWork.client_id}
-                                        onChange={e => setCurrentWork({ ...currentWork, client_id: e.target.value })}
-                                        className="w-full p-2 border border-slate-200 rounded-lg font-semibold text-slate-700"
+                                        onChange={e => {
+                                            const clientId = e.target.value;
+                                            const customer = customers.find(c => c.id === clientId);
+                                            setCurrentWork({
+                                                ...currentWork,
+                                                client_id: clientId,
+                                                client_name: customer ? customer.name : ''
+                                            });
+                                        }}
+                                        className="w-full p-2 border border-slate-200 rounded-lg font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-emerald-100"
                                     >
                                         <option value="">Selecione...</option>
                                         {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
