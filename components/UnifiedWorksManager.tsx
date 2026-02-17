@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
     Building2, Calendar, Search, Filter, Plus, FileText,
-    ArrowRight, HardHat, PieChart, TrendingUp, AlertTriangle, CheckCircle
+    ArrowRight, HardHat, PieChart, TrendingUp, AlertTriangle, CheckCircle,
+    Trash2, Copy
 } from 'lucide-react';
 import { db } from '../services/db';
 import { PlanningHeader, Customer } from '../types';
@@ -40,6 +41,99 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, onGenerateBudget }) =
         setView('list');
         setSelectedPlanId(null);
         loadPlans(); // Refresh list on back
+    };
+
+    const handleDeletePlan = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!confirm('Deseja excluir permanentemente este planejamento e todos os dados de execução vinculados?')) return;
+
+        try {
+            // 1. Delete Planning Data
+            const allPlans = db.load('serviflow_plans', []) as any[];
+            await db.save('serviflow_plans', allPlans.filter(p => p.id !== id));
+
+            const tables = [
+                'serviflow_plan_services',
+                'serviflow_plan_materials',
+                'serviflow_plan_labor',
+                'serviflow_plan_indirects'
+            ];
+
+            for (const table of tables) {
+                const data = db.load(table, []) as any[];
+                await db.save(table, data.filter((item: any) => item.plan_id !== id));
+            }
+
+            // 2. Delete Linked Work Data (Execution)
+            const allWorks = db.load('serviflow_works', []) as any[];
+            const linkedWork = allWorks.find(w => w.plan_id === id);
+
+            if (linkedWork) {
+                await db.save('serviflow_works', allWorks.filter(w => w.plan_id !== id));
+                const workTables = [
+                    'serviflow_work_services',
+                    'serviflow_work_materials',
+                    'serviflow_work_labor',
+                    'serviflow_work_indirects',
+                    'serviflow_work_taxes'
+                ];
+                for (const table of workTables) {
+                    const data = db.load(table, []) as any[];
+                    await db.save(table, data.filter((item: any) => item.work_id !== linkedWork.id));
+                }
+            }
+
+            loadPlans();
+            alert('Projeto excluído com sucesso.');
+        } catch (error) {
+            console.error(error);
+            alert('Erro ao excluir projeto.');
+        }
+    };
+
+    const handleDuplicatePlan = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!confirm('Deseja criar uma cópia deste planejamento?')) return;
+
+        try {
+            const allPlans = db.load('serviflow_plans', []) as any[];
+            const sourcePlan = allPlans.find(p => p.id === id);
+            if (!sourcePlan) return;
+
+            const newPlanId = db.generateId('PLAN');
+            const newPlan = {
+                ...sourcePlan,
+                id: newPlanId,
+                name: `CÓPIA - ${sourcePlan.name}`,
+                created_at: new Date().toISOString()
+            };
+
+            // Duplicate items
+            const mapping = [
+                { table: 'serviflow_plan_services', idPrefix: 'PSVC' },
+                { table: 'serviflow_plan_materials', idPrefix: 'PMAT' },
+                { table: 'serviflow_plan_labor', idPrefix: 'PLAB' },
+                { table: 'serviflow_plan_indirects', idPrefix: 'PIND' }
+            ];
+
+            for (const map of mapping) {
+                const allItems = db.load(map.table, []) as any[];
+                const sourceItems = allItems.filter(item => item.plan_id === id);
+                const newItems = sourceItems.map(item => ({
+                    ...item,
+                    id: db.generateId(map.idPrefix),
+                    plan_id: newPlanId
+                }));
+                await db.save(map.table, [...allItems, ...newItems]);
+            }
+
+            await db.save('serviflow_plans', [newPlan, ...allPlans]);
+            loadPlans();
+            alert('Projeto duplicado com sucesso!');
+        } catch (error) {
+            console.error(error);
+            alert('Erro ao duplicar projeto.');
+        }
     };
 
     if (view === 'detail' && selectedPlanId) {
@@ -164,16 +258,34 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, onGenerateBudget }) =
                         <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500 group-hover:bg-emerald-600 transition-colors"></div>
 
                         <div className="flex justify-between items-start mb-4 pl-3">
-                            <div>
-                                <h3 className="font-bold text-slate-800 text-lg group-hover:text-emerald-700 transition-colors">{plan.name}</h3>
-                                <p className="text-sm text-slate-500 font-medium">{plan.client_name || 'Cliente não informado'}</p>
+                            <div className="flex-1 min-w-0 pr-2">
+                                <h3 className="font-bold text-slate-800 text-lg group-hover:text-emerald-700 transition-colors truncate">{plan.name}</h3>
+                                <p className="text-sm text-slate-500 font-medium truncate">{plan.client_name || 'Cliente não informado'}</p>
                             </div>
-                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${plan.status === 'Concluído' ? 'bg-green-100 text-green-700' :
-                                plan.status === 'Cancelado' ? 'bg-red-100 text-red-700' :
-                                    'bg-blue-100 text-blue-700'
-                                }`}>
-                                {plan.status}
-                            </span>
+                            <div className="flex flex-col items-end gap-2 shrink-0">
+                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${plan.status === 'Concluído' ? 'bg-green-100 text-green-700' :
+                                    plan.status === 'Cancelado' ? 'bg-red-100 text-red-700' :
+                                        'bg-blue-100 text-blue-700'
+                                    }`}>
+                                    {plan.status}
+                                </span>
+                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button
+                                        onClick={(e) => handleDuplicatePlan(plan.id, e)}
+                                        className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                                        title="Duplicar Projeto"
+                                    >
+                                        <Copy size={16} />
+                                    </button>
+                                    <button
+                                        onClick={(e) => handleDeletePlan(plan.id, e)}
+                                        className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                        title="Excluir Projeto"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         <div className="pl-3 space-y-3 mb-6">
