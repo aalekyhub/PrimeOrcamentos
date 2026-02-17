@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
     Building2, Calendar, Search, Filter, Plus, FileText,
     ArrowRight, HardHat, PieChart, TrendingUp, AlertTriangle, CheckCircle,
-    Trash2, Copy
+    Trash2, Copy, LayoutGrid, List as ListIcon
 } from 'lucide-react';
 import { db } from '../services/db';
 import { PlanningHeader, Customer } from '../types';
@@ -21,6 +21,7 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, onGenerateBudget }) =
 
     const [plans, setPlans] = useState<PlanningHeader[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [layout, setLayout] = useState<'grid' | 'list'>('list');
 
     useEffect(() => {
         loadPlans();
@@ -239,86 +240,180 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, onGenerateBudget }) =
                         className="w-full pl-10 pr-4 py-3 bg-slate-50 border-none rounded-lg focus:ring-2 focus:ring-emerald-200 outline-none transition-all"
                     />
                 </div>
+                <div className="flex bg-slate-100 p-1 rounded-lg shrink-0 border border-slate-200 shadow-inner">
+                    <button
+                        onClick={() => setLayout('grid')}
+                        className={`p-2 rounded-md transition-all ${layout === 'grid' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                        title="Visualização em Grade"
+                    >
+                        <LayoutGrid size={20} />
+                    </button>
+                    <button
+                        onClick={() => setLayout('list')}
+                        className={`p-2 rounded-md transition-all ${layout === 'list' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                        title="Visualização em Lista"
+                    >
+                        <ListIcon size={20} />
+                    </button>
+                </div>
                 <button className="p-3 text-slate-500 hover:bg-slate-50 rounded-lg transition-colors relative">
                     <Filter size={20} />
                 </button>
             </div>
 
-            {/* Projects Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {plans.filter(p =>
-                    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    (p.client_name || '').toLowerCase().includes(searchTerm.toLowerCase())
-                ).map(plan => (
-                    <div
-                        key={plan.id}
-                        onClick={() => handleSelectPlan(plan.id)}
-                        className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-all cursor-pointer group relative overflow-hidden"
-                    >
-                        <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500 group-hover:bg-emerald-600 transition-colors"></div>
+            {/* List View / Projects Grid */}
+            {layout === 'list' ? (
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-slate-50 border-b border-slate-100">
+                                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Código</th>
+                                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Cliente / Razão Social</th>
+                                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Descrição do Projeto</th>
+                                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Total Orçado</th>
+                                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-50">
+                                {plans.filter(p =>
+                                    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                    (p.client_name || '').toLowerCase().includes(searchTerm.toLowerCase())
+                                ).map(plan => (
+                                    <tr
+                                        key={plan.id}
+                                        onClick={() => handleSelectPlan(plan.id)}
+                                        className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
+                                    >
+                                        <td className="px-6 py-5 whitespace-nowrap">
+                                            <span className="text-sm font-black text-blue-600 tracking-tight">
+                                                {plan.id.includes('PLAN-') ? plan.id.replace('PLAN-', 'ORC-') : plan.id}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-5">
+                                            <div className="max-w-[320px]">
+                                                <p className="font-black text-slate-800 text-sm truncate uppercase tracking-tight">{plan.client_name || 'Cliente não informado'}</p>
+                                                <div className="flex items-center gap-2 mt-0.5">
+                                                    <div className={`w-1.5 h-1.5 rounded-full ${plan.status === 'Concluído' ? 'bg-emerald-500' : 'bg-blue-500'}`}></div>
+                                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">{plan.status}</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-5">
+                                            <div className="max-w-[450px]">
+                                                <p className="text-slate-500 text-xs font-bold uppercase leading-relaxed tracking-tight line-clamp-2 italic">
+                                                    {plan.name}
+                                                </p>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-5 text-right whitespace-nowrap">
+                                            <span className="font-black text-slate-800 text-sm">
+                                                R$ {(plan.total_real_cost || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-5">
+                                            <div className="flex items-center justify-end gap-1">
+                                                <button
+                                                    onClick={(e) => handleDuplicatePlan(plan.id, e)}
+                                                    className="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                                                    title="Duplicar"
+                                                >
+                                                    <Copy size={16} />
+                                                </button>
+                                                <button
+                                                    onClick={(e) => handleDeletePlan(plan.id, e)}
+                                                    className="p-2 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                                                    title="Excluir"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                                <div className="w-8 h-8 flex items-center justify-center text-emerald-600 bg-emerald-50 rounded-lg ml-2 hover:bg-emerald-100 transition-colors">
+                                                    <ArrowRight size={18} />
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {plans.filter(p =>
+                        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        (p.client_name || '').toLowerCase().includes(searchTerm.toLowerCase())
+                    ).map(plan => (
+                        <div
+                            key={plan.id}
+                            onClick={() => handleSelectPlan(plan.id)}
+                            className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-all cursor-pointer group relative overflow-hidden"
+                        >
+                            <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500 group-hover:bg-emerald-600 transition-colors"></div>
 
-                        <div className="flex justify-between items-start mb-4 pl-3">
-                            <div className="flex-1 min-w-0 pr-2">
-                                <h3 className="font-bold text-slate-800 text-lg group-hover:text-emerald-700 transition-colors truncate">{plan.name}</h3>
-                                <p className="text-sm text-slate-500 font-medium truncate">{plan.client_name || 'Cliente não informado'}</p>
+                            <div className="flex justify-between items-start mb-4 pl-3">
+                                <div className="flex-1 min-w-0 pr-2">
+                                    <h3 className="font-bold text-slate-800 text-lg group-hover:text-emerald-700 transition-colors truncate">{plan.name}</h3>
+                                    <p className="text-sm text-slate-500 font-medium truncate">{plan.client_name || 'Cliente não informado'}</p>
+                                </div>
+                                <div className="flex flex-col items-end gap-2 shrink-0">
+                                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${plan.status === 'Concluído' ? 'bg-green-100 text-green-700' :
+                                        plan.status === 'Cancelado' ? 'bg-red-100 text-red-700' :
+                                            'bg-blue-100 text-blue-700'
+                                        }`}>
+                                        {plan.status}
+                                    </span>
+                                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button
+                                            onClick={(e) => handleDuplicatePlan(plan.id, e)}
+                                            className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                                            title="Duplicar Projeto"
+                                        >
+                                            <Copy size={16} />
+                                        </button>
+                                        <button
+                                            onClick={(e) => handleDeletePlan(plan.id, e)}
+                                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                            title="Excluir Projeto"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="flex flex-col items-end gap-2 shrink-0">
-                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${plan.status === 'Concluído' ? 'bg-green-100 text-green-700' :
-                                    plan.status === 'Cancelado' ? 'bg-red-100 text-red-700' :
-                                        'bg-blue-100 text-blue-700'
-                                    }`}>
-                                    {plan.status}
-                                </span>
-                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button
-                                        onClick={(e) => handleDuplicatePlan(plan.id, e)}
-                                        className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                                        title="Duplicar Projeto"
-                                    >
-                                        <Copy size={16} />
-                                    </button>
-                                    <button
-                                        onClick={(e) => handleDeletePlan(plan.id, e)}
-                                        className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                                        title="Excluir Projeto"
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
+
+                            <div className="pl-3 space-y-3 mb-6">
+                                <div className="flex items-center text-sm text-slate-500">
+                                    <Calendar size={14} className="mr-2" />
+                                    <span>Criado em {new Date(plan.created_at).toLocaleDateString()}</span>
+                                </div>
+                                <div className="flex items-center text-sm text-slate-500">
+                                    <HardHat size={14} className="mr-2" />
+                                    <span>{plan.type || 'Geral'}</span>
+                                </div>
+                            </div>
+
+                            <div className="pl-3 border-t border-slate-100 pt-4 flex justify-between items-center text-sm">
+                                <div className="flex flex-col">
+                                    <span className="text-xs font-bold text-slate-400 uppercase">Orçado</span>
+                                    <span className="font-bold text-slate-700">R$ {(plan.total_real_cost || 0).toFixed(2)}</span>
+                                </div>
+                                {/* Future: Show Realized Cost here too if we link it */}
+                                <div className="flex items-center text-emerald-600 font-bold group-hover:translate-x-1 transition-transform">
+                                    Abrir <ArrowRight size={16} className="ml-1" />
                                 </div>
                             </div>
                         </div>
+                    ))}
 
-                        <div className="pl-3 space-y-3 mb-6">
-                            <div className="flex items-center text-sm text-slate-500">
-                                <Calendar size={14} className="mr-2" />
-                                <span>Criado em {new Date(plan.created_at).toLocaleDateString()}</span>
-                            </div>
-                            <div className="flex items-center text-sm text-slate-500">
-                                <HardHat size={14} className="mr-2" />
-                                <span>{plan.type || 'Geral'}</span>
-                            </div>
+                    {plans.length === 0 && (
+                        <div className="col-span-full py-20 text-center text-slate-400">
+                            <Building2 size={48} className="mx-auto mb-4 opacity-20" />
+                            <p>Nenhuma obra encontrada. Comece criando um novo planejamento.</p>
                         </div>
-
-                        <div className="pl-3 border-t border-slate-100 pt-4 flex justify-between items-center text-sm">
-                            <div className="flex flex-col">
-                                <span className="text-xs font-bold text-slate-400 uppercase">Orçado</span>
-                                <span className="font-bold text-slate-700">R$ {(plan.total_real_cost || 0).toFixed(2)}</span>
-                            </div>
-                            {/* Future: Show Realized Cost here too if we link it */}
-                            <div className="flex items-center text-emerald-600 font-bold group-hover:translate-x-1 transition-transform">
-                                Abrir <ArrowRight size={16} className="ml-1" />
-                            </div>
-                        </div>
-                    </div>
-                ))}
-
-                {plans.length === 0 && (
-                    <div className="col-span-full py-20 text-center text-slate-400">
-                        <Building2 size={48} className="mx-auto mb-4 opacity-20" />
-                        <p>Nenhuma obra encontrada. Comece criando um novo planejamento.</p>
-                    </div>
-                )}
-            </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 };
