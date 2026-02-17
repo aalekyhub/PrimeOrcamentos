@@ -127,25 +127,38 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
   const getHeaderHtml = (b: ServiceOrder) => {
     const eDate = formatDate(b.createdAt);
     const vDays = company.defaultProposalValidity || 15;
-    const vDate = b.dueDate ? formatDate(b.dueDate) : formatDate(new Date(new Date(b.createdAt || Date.now()).getTime() + vDays * 24 * 60 * 60 * 1000).toISOString());
+    const vDate = b.dueDate
+      ? formatDate(b.dueDate)
+      : formatDate(
+        new Date(
+          new Date(b.createdAt || Date.now()).getTime() +
+          vDays * 24 * 60 * 60 * 1000
+        ).toISOString()
+      );
 
     return `
       <div style="padding-bottom: 25px !important; border-bottom: 3px solid #000; margin-bottom: 40px;">
          <div style="display: flex; justify-content: space-between; align-items: center;">
              <div style="display: flex; gap: 24px; align-items: center;">
                  <div style="width: 80px; display: flex; align-items: center; justify: flex-start;">
-                     ${company.logo ? `<img src="${company.logo}" style="max-height: 80px; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#1e3a8a;">PRIME</div>'}
+                     ${company.logo
+        ? `<img src="${company.logo}" style="max-height:80px; max-width:100%; object-fit:contain;">`
+        : '<div style="font-weight:900; font-size:32px; color:#1e3a8a;">PRIME</div>'}
                  </div>
                  <div>
-                     <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 0 0 2px 0; text-transform: uppercase;">${company.name}</h1>
-                     <p style="margin: 0; font-size: 11px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.02em;">SOLUÇÕES em Gestão Profissional</p>
-                      <p style="margin: 4px 0 0 0; font-size: 10px; color: #64748b; font-weight: 500;">${company.cnpj || ''} | ${company.phone || ''}</p>
+                     <h1 style="font-size:18px; font-weight:800; color:#0f172a; line-height:1.2; margin:0 0 2px 0; text-transform:uppercase;">
+                        ${company.name}
+                     </h1>
+                     <p style="margin:0; font-size:11px; font-weight:700; color:#3b82f6;">SOLUÇÕES em Gestão Profissional</p>
+                     <p style="margin:4px 0 0 0; font-size:10px; color:#64748b;">
+                        ${company.cnpj || ''} | ${company.phone || ''}
+                     </p>
                  </div>
              </div>
-             <div style="text-align: right;">
-                 <p style="margin: 0; font-size: 24px; font-weight: 800; color: #2563eb;">${b.id}</p>
-                 <p style="margin: 4px 0 0 0; font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase;">EMISSão: ${eDate}</p>
-                 <p style="margin: 2px 0 0 0; font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase;">VALIDADE: ${vDate}</p>
+             <div style="text-align:right;">
+                 <p style="margin:0; font-size:24px; font-weight:800; color:#2563eb;">${b.id}</p>
+                 <p style="margin:4px 0 0 0; font-size:10px; font-weight:700;">EMISSÃO: ${eDate}</p>
+                 <p style="margin:2px 0 0 0; font-size:10px; font-weight:700;">VALIDADE: ${vDate}</p>
              </div>
          </div>
       </div>`;
@@ -153,20 +166,14 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
 
   const getFooterHtml = (b: ServiceOrder) => {
     const vDays = company.defaultProposalValidity || 15;
+
     return `
-      <div style="margin-top: 32px; break-inside: avoid;">
-          <div style="border: 1px solid #bfdbfe; background: #eff6ff; border-radius: 16px; padding: 32px;">
-               <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-                   <div style="background: #2563eb; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold;">?</div>
-                   <span style="font-size: 13px; font-weight: 800; color: #1e40af; text-transform: uppercase; letter-spacing: 0.05em;">TERMO DE ACEITE E AUTORIZA��O PROFISSIONAL</span>
-               </div>
-               <p style="margin: 0; font-size: 12px; color: #1e3a8a; line-height: 1.6; text-align: justify; font-weight: 500;">
-                   "Ao assinar abaixo, o cliente declara estar ciente e de pleno acordo com os valores, prazos e especificações descritas. Esta aceita��o autoriza o inºcio imediato dos trabalhos sob as condi��es estabelecidas. Validade: ${vDays} dias."
-               </p>
-          </div>
-          <div style="margin-top: 60px; break-inside: avoid;">
-              <div style="border-bottom: 2px solid #cbd5e1; width: 400px; max-width: 100%;"></div>
-              <p style="margin: 12px 0 0 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">ASSINATURA DO CLIENTE / ACEITE</p>
+      <div style="margin-top:32px; break-inside: avoid;">
+          <div style="border:1px solid #bfdbfe; background:#eff6ff; border-radius:16px; padding:32px;">
+              <p style="margin:0; font-size:12px; line-height:1.6;">
+                "Ao assinar abaixo, o cliente declara estar ciente e de pleno acordo.
+                Validade: ${vDays} dias."
+              </p>
           </div>
       </div>`;
   };
@@ -195,12 +202,12 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                  <!-- Boxes Grid -->
                  <div style="display: flex; gap: 24px; margin-bottom: 40px;">
                      <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
-                         <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">CLIENTE / DESTINAT�RIO</span>
+                         <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">CLIENTE / DESTINATRIO</span>
                          <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${cust.name}</div>
                          <div style="font-size: 11px; color: #64748b; font-weight: 500; margin-top: 4px;">${cust.document || 'CPF/CNPJ não informado'}</div>
                      </div>
                      <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
-                         <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">REFER�NCIA DO Orçamento</span>
+                         <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">REFERNCIA DO Orçamento</span>
                          <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${b.description || 'PROPOSTA COMERCIAL'}</div>
                      </div>
                  </div>
@@ -236,7 +243,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                               <tr style="border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
                                   <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: left; font-weight: 800; width: 55%; letter-spacing: 0.05em;">ITEM / DESCRIÇÃO</th>
                                   <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: center; font-weight: 800; width: 10%; letter-spacing: 0.05em;">QTD</th>
-                                  <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: right; font-weight: 800; width: 17.5%; letter-spacing: 0.05em;">UNIT�RIO</th>
+                                  <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: right; font-weight: 800; width: 17.5%; letter-spacing: 0.05em;">UNITRIO</th>
                                   <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: right; font-weight: 800; width: 17.5%; letter-spacing: 0.05em;">SUBTOTAL</th>
                               </tr>
                           </thead>
@@ -334,20 +341,11 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       let isTitle = false;
 
       if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
-      else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
-        const text = el.innerText.trim();
-        const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text.replace(/\\/g, ''));
-        const isBold = el.querySelector('strong, b') || (el.style && parseInt(el.style.fontWeight) > 600) || el.tagName === 'STRONG';
-        const isShort = text.length < 150;
-        if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
-          isTitle = true;
-        }
-      }
 
       if (isTitle) {
         const nodesToWrap = [el];
         let j = i + 1;
-        while (j < allNodes.length && nodesToWrap.length < 3) {
+        while (j < allNodes.length && nodesToWrap.length < 2) {
           const next = allNodes[j] as HTMLElement;
           if (next.matches('h1, h2, h3, h4, h5, h6')) break;
           nodesToWrap.push(next);
@@ -376,119 +374,146 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
     const htmlContent = getBudgetHtml(budget);
 
     const html = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Orçamento - ${budget.id} - ${budget.description}</title>
-         <script src="https://cdn.tailwindcss.com"></script>
-         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
-        <style>
-           * { box-sizing: border-box; }
-           body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
-           @page { size: A4; margin: 0 !important; }
-           .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; padding-top: 15mm !important; padding-bottom: 15mm !important; }
-           .avoid-break { break-inside: avoid; page-break-inside: avoid; }
-           .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
-           
-           @media screen { 
-             body { background: #f1f5f9; padding: 40px 0; } 
-             .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm; } 
-           }
-           @media print { 
-             @page { margin: 0; size: A4; } /* Reset page margin to give full control to container */
-             body { background: white !important; margin: 0 !important; padding: 0 !important; } 
-              .a4-container { 
-                  box-shadow: none !important; 
-                  border: none !important; 
-                  width: 100% !important; 
-                  padding: 0 15mm !important; /* Side margins only. Vertical margins handled by thead/tfoot spacers */
-                  margin: 0 !important; 
-              }
-             table { break-inside: auto; width: 100%; }
-             tr { break-inside: auto !important; break-after: auto; }
-             thead { display: table-header-group; } 
-             tfoot { display: table-footer-group; }
-             .no-print { display: none !important; } 
-           }
+<!DOCTYPE html>
+<html>
+<head>
+<title>Orçamento - ${budget.id}</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
 
-            /* Shared Rich Text / Quill Styles */
-            .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
-            .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
-            .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
-            .ql-editor-print strong, .ql-editor-print b { font-weight: bold !important; color: #000 !important; }
-            .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4 { font-weight: 800 !important; color: #0f172a !important; margin-top: 20px !important; margin-bottom: 10px !important; break-after: avoid !important; }
-        </style>
-      </head>
-      <body>
-        ${htmlContent}
-        <script>
-           function optimizePageBreaks() {
-             const root = document.querySelector('.print-description-content');
-             if (!root) return;
-             const content = root.querySelector('div:last-child');
-             if (!content) return;
+<style>
+* { box-sizing:border-box; }
 
-             const allNodes = [];
-             Array.from(content.children).forEach(block => {
-               if (block.classList.contains('ql-editor-print')) {
-                  allNodes.push(...Array.from(block.children));
-               } else {
-                  allNodes.push(block);
-               }
-             });
+body {
+  font-family:'Inter', sans-serif;
+  margin:0;
+  padding:0;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
 
-             for (let i = 0; i < allNodes.length - 1; i++) {
-               const el = allNodes[i];
-               let isTitle = false;
-               
-               if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
-               else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
-                  const text = el.innerText.trim();
-                  const isNumbered = /^\\d+(\\.\\d+)*[\\.\\s\\)]/.test(text);
-                  const isBold = el.querySelector('strong, b') || (el.style && parseInt(el.style.fontWeight) > 600) || el.tagName === 'STRONG';
-                  const isShort = text.length < 150;
-                  if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
-                    isTitle = true;
-                  }
-               }
+@page {
+  size:A4;
+  margin:0 !important;
+}
 
-               if (isTitle) {
-                 const nodesToWrap = [el];
-                 let j = i + 1;
-                 while (j < allNodes.length && nodesToWrap.length < 3) {
-                   const next = allNodes[j];
-                   if (next.matches('h1, h2, h3, h4, h5, h6')) break;
-                   nodesToWrap.push(next);
-                   j++;
-                 }
+.a4-container {
+  width:100%;
+  padding:15mm !important;
+}
 
-                 if (nodesToWrap.length > 1) {
-                   const wrapper = document.createElement('div');
-                   wrapper.className = 'keep-together';
-                   el.parentNode.insertBefore(wrapper, el);
-                   nodesToWrap.forEach(node => wrapper.appendChild(node));
-                   i = j - 1;
-                 }
-               }
-             }
-           }
-           window.onload = function() { 
-             optimizePageBreaks();
-             setTimeout(() => { 
-                window.print(); 
-                if (window.matchMedia) {
-                    var mediaQueryList = window.matchMedia('print');
-                    mediaQueryList.addListener(function(mql) {
-                        if (!mql.matches) {
-                            // window.close(); // Optional: close after print
-                        }
-                    });
-                }
-             }, 1000); 
-           }
-        </script>
-      </body>
-      </html>`;
+/* ===== MELHORIAS PRINT ===== */
+@media print {
+
+  body { margin:0 !important; padding:0 !important; }
+
+  .a4-container {
+    width:100% !important;
+    padding:0 15mm !important;
+  }
+
+  table { break-inside:auto; }
+  tr { break-inside:auto !important; }
+
+  thead { display:table-header-group; }
+
+  /* LISTAS AGORA QUEBRAM NORMAL */
+  .ql-editor-print ul,
+  .ql-editor-print ol {
+    break-inside:auto !important;
+    page-break-inside:auto !important;
+  }
+
+  .ql-editor-print li {
+    break-inside:avoid !important;
+    page-break-inside:avoid !important;
+  }
+
+  /* título não fica sozinho */
+  .ql-editor-print h1,
+  .ql-editor-print h2,
+  .ql-editor-print h3,
+  .ql-editor-print h4 {
+    break-after:avoid !important;
+    page-break-after:avoid !important;
+  }
+}
+
+.keep-together {
+  break-inside: avoid !important;
+  page-break-inside: avoid !important;
+  display:block !important;
+  width:100% !important;
+}
+</style>
+</head>
+
+<body>
+${htmlContent}
+
+<script>
+function optimizePageBreaks() {
+  const root = document.querySelector('.print-description-content');
+  if (!root) return;
+
+  const content = root.querySelector('div:last-child');
+  if (!content) return;
+
+  const allNodes = [];
+
+  Array.from(content.children).forEach(block => {
+    if (block.classList.contains('ql-editor-print')) {
+      allNodes.push(...Array.from(block.children));
+    } else {
+      allNodes.push(block);
+    }
+  });
+
+  for (let i = 0; i < allNodes.length - 1; i++) {
+
+    const el = allNodes[i];
+    let isTitle = false;
+
+    if (el.matches('h1,h2,h3,h4,h5,h6')) {
+      isTitle = true;
+    }
+
+    if (isTitle) {
+
+      const nodesToWrap = [el];
+      let j = i + 1;
+
+      // ⭐ AJUSTE PRINCIPAL (ANTES era < 3)
+      while (j < allNodes.length && nodesToWrap.length < 2) {
+        const next = allNodes[j];
+        if (next.matches('h1,h2,h3,h4,h5,h6')) break;
+
+        nodesToWrap.push(next);
+        j++;
+      }
+
+      if (nodesToWrap.length > 1) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'keep-together';
+
+        el.parentNode.insertBefore(wrapper, el);
+        nodesToWrap.forEach(node => wrapper.appendChild(node));
+
+        i = j - 1;
+      }
+    }
+  }
+}
+
+window.onload = function() {
+  optimizePageBreaks();
+  setTimeout(() => window.print(), 700);
+};
+</script>
+
+</body>
+</html>`;
+
     printWindow.document.write(html);
     printWindow.document.close();
   };
