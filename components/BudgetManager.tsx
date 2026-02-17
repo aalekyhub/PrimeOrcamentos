@@ -399,6 +399,22 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
            .avoid-break { break-inside: avoid; page-break-inside: avoid; }
            .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
            
+           /* Estilos para Numeração de Páginas no Ctrl+P */
+           body { counter-reset: page; }
+           .page-footer-number {
+             position: fixed;
+             bottom: 8mm;
+             right: 15mm;
+             font-size: 9px;
+             color: #94a3b8;
+             font-family: 'Inter', sans-serif;
+             pointer-events: none;
+           }
+           .page-footer-number::after {
+             counter-increment: page;
+             content: "Pág. " counter(page);
+           }
+           
            @media print { 
               @page { margin: 0; size: A4; }
               body { background: white !important; margin: 0 !important; padding: 0 !important; } 
@@ -407,6 +423,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
               tr { break-inside: auto !important; break-after: auto; }
               thead { display: table-header-group; } 
               tfoot { display: table-footer-group; }
+              .page-footer-number { display: block !important; }
            }
 
             /* Estilos do Editor de Texto Rico no Print */
@@ -418,6 +435,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         </style>
       </head>
       <body>
+        <div class="page-footer-number"></div>
         ${htmlContent}
         <script>
            // Script crucial para evitar que títulos fiquem sozinhos no fim da página
