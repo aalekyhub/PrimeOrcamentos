@@ -4,7 +4,8 @@ import html2pdf from 'html2pdf.js';
 import {
   Plus, Search, X, Trash2, Pencil, Printer, Save,
   UserPlus, Package, Type, Image as ImageIcon,
-  FileText, Upload, CheckCircle, Zap, FileDown, Copy, Database
+  FileText, Upload, CheckCircle, Zap, FileDown, Copy, Database,
+  ChevronUp, ChevronDown
 } from 'lucide-react';
 import RichTextEditor from './ui/RichTextEditor';
 import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock } from '../types';
@@ -95,6 +96,14 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       }
       return item;
     }));
+  };
+
+  const moveItem = (index: number, direction: 'up' | 'down') => {
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= items.length) return;
+    const newItems = [...items];
+    [newItems[index], newItems[newIndex]] = [newItems[newIndex], newItems[index]];
+    setItems(newItems);
   };
 
   // NEXT_Methods
@@ -978,6 +987,10 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                             <div className="flex items-center gap-1 bg-slate-50 rounded px-2 py-1 border border-slate-100">
                               <span className="text-[8px] font-bold text-slate-400">TOTAL:</span>
                               <input type="number" className="w-24 bg-transparent text-[11px] font-black text-blue-600 outline-none text-right" value={Number((item.unitPrice * item.quantity).toFixed(2))} onChange={e => updateItemTotal(item.id, Number(e.target.value))} />
+                            </div>
+                            <div className="flex flex-col gap-0">
+                              <button onClick={() => moveItem(items.indexOf(item), 'up')} disabled={items.indexOf(item) === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronUp className="w-3 h-3" /></button>
+                              <button onClick={() => moveItem(items.indexOf(item), 'down')} disabled={items.indexOf(item) === items.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronDown className="w-3 h-3" /></button>
                             </div>
                             <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="text-rose-300 hover:text-rose-600"><Trash2 className="w-3.5 h-3.5" /></button>
                           </div>

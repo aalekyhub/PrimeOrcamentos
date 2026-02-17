@@ -3,7 +3,8 @@ import html2pdf from 'html2pdf.js';
 import {
     Building2, Users, Truck, HardHat, FileText,
     Plus, Trash2, Save, ChevronRight, Calculator,
-    PieChart, ArrowRight, DollarSign, Pencil, Check, X, Printer, Percent, Eye, Archive
+    PieChart, ArrowRight, DollarSign, Pencil, Check, X, Printer, Percent, Eye, Archive,
+    ChevronUp, ChevronDown
 } from 'lucide-react';
 import { useNotify } from './ToastProvider';
 import { db } from '../services/db';
@@ -1124,6 +1125,20 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                         )}
                     </div>
 
+                    {/* Helper Functions */}
+                    <div className="hidden">
+                        {(() => {
+                            (window as any).moveItem = (list: any[], setList: Function, index: number, direction: 'up' | 'down') => {
+                                const newIndex = direction === 'up' ? index - 1 : index + 1;
+                                if (newIndex < 0 || newIndex >= list.length) return;
+                                const newList = [...list];
+                                [newList[index], newList[newIndex]] = [newList[newIndex], newList[index]];
+                                setList(newList);
+                            };
+                            return null;
+                        })()}
+                    </div>
+
 
                     {/* Content */}
                     <div className="p-8 flex-1 bg-slate-50/50">
@@ -1268,6 +1283,26 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                         <p className="text-sm font-bold text-slate-800">R$ {svc.total_cost.toFixed(2)}</p>
                                                     </div>
                                                     <div className="flex gap-1">
+                                                        <div className="flex items-center gap-1 mr-2">
+                                                            <button onClick={() => {
+                                                                const idx = services.indexOf(svc);
+                                                                const newIndex = idx - 1;
+                                                                if (newIndex >= 0) {
+                                                                    const newList = [...services];
+                                                                    [newList[idx], newList[newIndex]] = [newList[newIndex], newList[idx]];
+                                                                    setServices(newList);
+                                                                }
+                                                            }} disabled={services.indexOf(svc) === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronUp size={16} /></button>
+                                                            <button onClick={() => {
+                                                                const idx = services.indexOf(svc);
+                                                                const newIndex = idx + 1;
+                                                                if (newIndex < services.length) {
+                                                                    const newList = [...services];
+                                                                    [newList[idx], newList[newIndex]] = [newList[newIndex], newList[idx]];
+                                                                    setServices(newList);
+                                                                }
+                                                            }} disabled={services.indexOf(svc) === services.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronDown size={16} /></button>
+                                                        </div>
                                                         <button
                                                             onClick={() => {
                                                                 setEditingId(svc.id);
@@ -1371,24 +1406,42 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                         <span><b>{m.material_name}</b> | (R$ {m.unit_cost.toFixed(2)}) {m.quantity}{m.unit}</span>
                                                         <div className="flex items-center gap-4">
                                                             <span className="font-bold">R$ {m.total_cost.toFixed(2)}</span>
-                                                            <div className="flex gap-2">
-                                                                <Pencil
-                                                                    size={14}
-                                                                    className="cursor-pointer text-slate-400 hover:text-blue-500"
-                                                                    onClick={() => {
-                                                                        setEditingId(m.id);
-                                                                        setEditDesc(m.material_name);
-                                                                        setEditQty(m.quantity);
-                                                                        setEditUnit(m.unit);
-                                                                        setEditPrice1(m.unit_cost);
-                                                                    }}
-                                                                />
-                                                                <Trash2
-                                                                    size={14}
-                                                                    className="cursor-pointer text-slate-400 hover:text-red-500"
-                                                                    onClick={() => handleDeleteMaterial(m.id)}
-                                                                />
+                                                            <div className="flex gap-1 mr-2">
+                                                                <button onClick={() => {
+                                                                    const idx = materials.indexOf(m);
+                                                                    const newIndex = idx - 1;
+                                                                    if (newIndex >= 0) {
+                                                                        const newList = [...materials];
+                                                                        [newList[idx], newList[newIndex]] = [newList[newIndex], newList[idx]];
+                                                                        setMaterials(newList);
+                                                                    }
+                                                                }} disabled={materials.indexOf(m) === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0"><ChevronUp size={14} /></button>
+                                                                <button onClick={() => {
+                                                                    const idx = materials.indexOf(m);
+                                                                    const newIndex = idx + 1;
+                                                                    if (newIndex < materials.length) {
+                                                                        const newList = [...materials];
+                                                                        [newList[idx], newList[newIndex]] = [newList[newIndex], newList[idx]];
+                                                                        setMaterials(newList);
+                                                                    }
+                                                                }} disabled={materials.indexOf(m) === materials.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0"><ChevronDown size={14} /></button>
                                                             </div>
+                                                            <Pencil
+                                                                size={14}
+                                                                className="cursor-pointer text-slate-400 hover:text-blue-500"
+                                                                onClick={() => {
+                                                                    setEditingId(m.id);
+                                                                    setEditDesc(m.material_name);
+                                                                    setEditQty(m.quantity);
+                                                                    setEditUnit(m.unit);
+                                                                    setEditPrice1(m.unit_cost);
+                                                                }}
+                                                            />
+                                                            <Trash2
+                                                                size={14}
+                                                                className="cursor-pointer text-slate-400 hover:text-red-500"
+                                                                onClick={() => handleDeleteMaterial(m.id)}
+                                                            />
                                                         </div>
                                                     </>
                                                 )}
@@ -1481,24 +1534,42 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                         <span><b>{l.role}</b> | ({l.cost_type}) {l.quantity}{l.unit || 'un'}</span>
                                                         <div className="flex items-center gap-4">
                                                             <span className="font-bold">R$ {l.total_cost.toFixed(2)}</span>
-                                                            <div className="flex gap-2">
-                                                                <Pencil
-                                                                    size={14}
-                                                                    className="cursor-pointer text-slate-400 hover:text-blue-500"
-                                                                    onClick={() => {
-                                                                        setEditingId(l.id);
-                                                                        setEditDesc(l.role);
-                                                                        setEditUnit(l.unit || 'un'); // Now editUnit is the UN field
-                                                                        setEditQty(l.quantity);
-                                                                        setEditPrice1(l.unit_cost);
-                                                                    }}
-                                                                />
-                                                                <Trash2
-                                                                    size={14}
-                                                                    className="cursor-pointer text-slate-400 hover:text-red-500"
-                                                                    onClick={() => handleDeleteLabor(l.id)}
-                                                                />
+                                                            <div className="flex gap-1 mr-2">
+                                                                <button onClick={() => {
+                                                                    const idx = labor.indexOf(l);
+                                                                    const newIndex = idx - 1;
+                                                                    if (newIndex >= 0) {
+                                                                        const newList = [...labor];
+                                                                        [newList[idx], newList[newIndex]] = [newList[newIndex], newList[idx]];
+                                                                        setLabor(newList);
+                                                                    }
+                                                                }} disabled={labor.indexOf(l) === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0"><ChevronUp size={14} /></button>
+                                                                <button onClick={() => {
+                                                                    const idx = labor.indexOf(l);
+                                                                    const newIndex = idx + 1;
+                                                                    if (newIndex < labor.length) {
+                                                                        const newList = [...labor];
+                                                                        [newList[idx], newList[newIndex]] = [newList[newIndex], newList[idx]];
+                                                                        setLabor(newList);
+                                                                    }
+                                                                }} disabled={labor.indexOf(l) === labor.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0"><ChevronDown size={14} /></button>
                                                             </div>
+                                                            <Pencil
+                                                                size={14}
+                                                                className="cursor-pointer text-slate-400 hover:text-blue-500"
+                                                                onClick={() => {
+                                                                    setEditingId(l.id);
+                                                                    setEditDesc(l.role);
+                                                                    setEditUnit(l.unit || 'un'); // Now editUnit is the UN field
+                                                                    setEditQty(l.quantity);
+                                                                    setEditPrice1(l.unit_cost);
+                                                                }}
+                                                            />
+                                                            <Trash2
+                                                                size={14}
+                                                                className="cursor-pointer text-slate-400 hover:text-red-500"
+                                                                onClick={() => handleDeleteLabor(l.id)}
+                                                            />
                                                         </div>
                                                     </>
                                                 )}
@@ -1572,23 +1643,41 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                         <span>[{i.category}] <b>{i.description}</b></span>
                                                         <div className="flex items-center gap-4">
                                                             <span className="font-bold">R$ {i.value.toFixed(2)}</span>
-                                                            <div className="flex gap-2">
-                                                                <Pencil
-                                                                    size={14}
-                                                                    className="cursor-pointer text-slate-400 hover:text-blue-500"
-                                                                    onClick={() => {
-                                                                        setEditingId(i.id);
-                                                                        setEditUnit(i.category);
-                                                                        setEditDesc(i.description);
-                                                                        setEditPrice1(i.value);
-                                                                    }}
-                                                                />
-                                                                <Trash2
-                                                                    size={14}
-                                                                    className="cursor-pointer text-slate-400 hover:text-red-500"
-                                                                    onClick={() => handleDeleteIndirect(i.id)}
-                                                                />
+                                                            <div className="flex gap-1 mr-2">
+                                                                <button onClick={() => {
+                                                                    const idx = indirects.indexOf(i);
+                                                                    const newIndex = idx - 1;
+                                                                    if (newIndex >= 0) {
+                                                                        const newList = [...indirects];
+                                                                        [newList[idx], newList[newIndex]] = [newList[newIndex], newList[idx]];
+                                                                        setIndirects(newList);
+                                                                    }
+                                                                }} disabled={indirects.indexOf(i) === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0"><ChevronUp size={14} /></button>
+                                                                <button onClick={() => {
+                                                                    const idx = indirects.indexOf(i);
+                                                                    const newIndex = idx + 1;
+                                                                    if (newIndex < indirects.length) {
+                                                                        const newList = [...indirects];
+                                                                        [newList[idx], newList[newIndex]] = [newList[newIndex], newList[idx]];
+                                                                        setIndirects(newList);
+                                                                    }
+                                                                }} disabled={indirects.indexOf(i) === indirects.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0"><ChevronDown size={14} /></button>
                                                             </div>
+                                                            <Pencil
+                                                                size={14}
+                                                                className="cursor-pointer text-slate-400 hover:text-blue-500"
+                                                                onClick={() => {
+                                                                    setEditingId(i.id);
+                                                                    setEditUnit(i.category);
+                                                                    setEditDesc(i.description);
+                                                                    setEditPrice1(i.value);
+                                                                }}
+                                                            />
+                                                            <Trash2
+                                                                size={14}
+                                                                className="cursor-pointer text-slate-400 hover:text-red-500"
+                                                                onClick={() => handleDeleteIndirect(i.id)}
+                                                            />
                                                         </div>
                                                     </>
                                                 )}

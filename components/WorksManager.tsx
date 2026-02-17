@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
     Building2, Users, Truck, HardHat, FileText,
     Plus, Trash2, Save, ChevronRight, Calculator,
-    PieChart, ArrowRight, DollarSign, Calendar, Pencil, Check, X, Printer, Percent, Eye, Archive
+    PieChart, ArrowRight, DollarSign, Calendar, Pencil, Check, X, Printer, Percent, Eye, Archive,
+    ChevronUp, ChevronDown
 } from 'lucide-react';
 import { useNotify } from './ToastProvider';
 import { db } from '../services/db';
@@ -893,6 +894,19 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     <p className="text-xs text-emerald-600 uppercase tracking-widest font-semibold">{currentWork?.type} • PLANEJAMENTO DE CUSTO</p>
                                 </div>
                             </div>
+                            {/* Helper Functions */}
+                            <div className="hidden">
+                                {(() => {
+                                    (window as any).moveItemWork = (list: any[], setList: Function, index: number, direction: 'up' | 'down') => {
+                                        const newIndex = direction === 'up' ? index - 1 : index + 1;
+                                        if (newIndex < 0 || newIndex >= list.length) return;
+                                        const newList = [...list];
+                                        [newList[index], newList[newIndex]] = [newList[newIndex], newList[index]];
+                                        setList(newList);
+                                    };
+                                    return null;
+                                })()}
+                            </div>
                             <div className="flex gap-2">
                                 {/* MANUAL IMPORT BUTTON */}
                                 {currentWork?.plan_id && (services.length === 0 || materials.length === 0 || labor.length === 0) && (
@@ -1354,6 +1368,10 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                     </div>
                                                     <div className="text-right flex items-center gap-4">
                                                         <p className="font-bold text-emerald-600">R$ {svc.total_cost.toFixed(2)}</p>
+                                                        <div className="flex flex-col gap-0 -mr-2">
+                                                            <button onClick={() => (window as any).moveItemWork(services, setServices, services.indexOf(svc), 'up')} disabled={services.indexOf(svc) === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronUp size={14} /></button>
+                                                            <button onClick={() => (window as any).moveItemWork(services, setServices, services.indexOf(svc), 'down')} disabled={services.indexOf(svc) === services.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronDown size={14} /></button>
+                                                        </div>
                                                         <button onClick={() => setEditingId(svc.id)} className="text-blue-400 hover:text-blue-600">
                                                             <Pencil size={16} />
                                                         </button>
@@ -1479,6 +1497,10 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             </span>
                                                             <div className="flex items-center gap-4">
                                                                 <span className="font-bold">R$ {m.total_cost.toFixed(2)}</span>
+                                                                <div className="flex gap-1">
+                                                                    <button onClick={() => (window as any).moveItemWork(materials, setMaterials, materials.indexOf(m), 'up')} disabled={materials.indexOf(m) === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronUp size={14} /></button>
+                                                                    <button onClick={() => (window as any).moveItemWork(materials, setMaterials, materials.indexOf(m), 'down')} disabled={materials.indexOf(m) === materials.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronDown size={14} /></button>
+                                                                </div>
                                                                 <Pencil size={14} className="cursor-pointer text-blue-400 hover:text-blue-600" onClick={() => setEditingId(m.id)} />
                                                                 <Trash2 size={14} className="cursor-pointer text-slate-400 hover:text-red-500" onClick={() => handleDeleteMaterial(m.id)} />
                                                             </div>
@@ -1581,6 +1603,10 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             </span>
                                                             <div className="flex items-center gap-4">
                                                                 <span className="font-bold">R$ {l.total_cost.toFixed(2)}</span>
+                                                                <div className="flex gap-1">
+                                                                    <button onClick={() => (window as any).moveItemWork(labor, setLabor, labor.indexOf(l), 'up')} disabled={labor.indexOf(l) === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronUp size={14} /></button>
+                                                                    <button onClick={() => (window as any).moveItemWork(labor, setLabor, labor.indexOf(l), 'down')} disabled={labor.indexOf(l) === labor.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronDown size={14} /></button>
+                                                                </div>
                                                                 <Pencil size={14} className="cursor-pointer text-blue-400 hover:text-blue-600" onClick={() => setEditingId(l.id)} />
                                                                 <Trash2 size={14} className="cursor-pointer text-slate-400 hover:text-red-500" onClick={() => handleDeleteLabor(l.id)} />
                                                             </div>
@@ -1663,6 +1689,10 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             <span>[{i.category}] <b>{i.description}</b></span>
                                                             <div className="flex items-center gap-4">
                                                                 <span className="font-bold">R$ {i.value.toFixed(2)}</span>
+                                                                <div className="flex gap-1">
+                                                                    <button onClick={() => (window as any).moveItemWork(indirects, setIndirects, indirects.indexOf(i), 'up')} disabled={indirects.indexOf(i) === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronUp size={14} /></button>
+                                                                    <button onClick={() => (window as any).moveItemWork(indirects, setIndirects, indirects.indexOf(i), 'down')} disabled={indirects.indexOf(i) === indirects.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronDown size={14} /></button>
+                                                                </div>
                                                                 <Pencil size={14} className="cursor-pointer text-blue-400 hover:text-blue-600" onClick={() => setEditingId(i.id)} />
                                                                 <Trash2 size={14} className="cursor-pointer text-slate-400 hover:text-red-500" onClick={() => handleDeleteIndirect(i.id)} />
                                                             </div>
