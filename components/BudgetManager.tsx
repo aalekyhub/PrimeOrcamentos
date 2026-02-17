@@ -340,14 +340,31 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       const el = allNodes[i] as HTMLElement;
       let isTitle = false;
 
-      if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
+      if (el.matches('h1, h2, h3, h4, h5, h6')) {
+        isTitle = true;
+      } else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
+        const text = el.innerText.trim();
+        const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text);
+        const isBold = el.querySelector('strong, b') ||
+          (el.style && (parseInt(el.style.fontWeight) >= 600 || el.style.fontWeight === 'bold')) ||
+          el.tagName === 'STRONG';
+        const isShort = text.length < 150;
+
+        if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 3)) {
+          isTitle = true;
+        }
+      }
 
       if (isTitle) {
         const nodesToWrap = [el];
         let j = i + 1;
-        while (j < allNodes.length && nodesToWrap.length < 2) {
+        while (j < allNodes.length && nodesToWrap.length < 3) {
           const next = allNodes[j] as HTMLElement;
-          if (next.matches('h1, h2, h3, h4, h5, h6')) break;
+          const nextText = next.innerText.trim();
+          const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') ||
+            (/^\d+(\.\d+)*[\.\s\)]/.test(nextText) && (next.querySelector('strong, b') || nextText === nextText.toUpperCase()));
+
+          if (nextIsTitle) break;
           nodesToWrap.push(next);
           j++;
         }
@@ -452,6 +469,7 @@ body {
 ${htmlContent}
 
 <script>
+// ⭐ Otimização de Quebra de Página GLOBAL
 function optimizePageBreaks() {
   const root = document.querySelector('.print-description-content');
   if (!root) return;
@@ -460,7 +478,6 @@ function optimizePageBreaks() {
   if (!content) return;
 
   const allNodes = [];
-
   Array.from(content.children).forEach(block => {
     if (block.classList.contains('ql-editor-print')) {
       allNodes.push(...Array.from(block.children));
@@ -470,24 +487,37 @@ function optimizePageBreaks() {
   });
 
   for (let i = 0; i < allNodes.length - 1; i++) {
-
     const el = allNodes[i];
     let isTitle = false;
 
-    if (el.matches('h1,h2,h3,h4,h5,h6')) {
+    // Detecção robusta de títulos (H1-H6 ou parágrafos formatados como título)
+    if (el.matches('h1, h2, h3, h4, h5, h6')) {
       isTitle = true;
+    } else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
+      const text = el.innerText.trim();
+      const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text);
+      const isBold = el.querySelector('strong, b') || 
+                    (el.style && (parseInt(el.style.fontWeight) >= 600 || el.style.fontWeight === 'bold')) || 
+                    el.tagName === 'STRONG';
+      const isShort = text.length < 150;
+      
+      if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 3)) {
+        isTitle = true;
+      }
     }
 
     if (isTitle) {
-
       const nodesToWrap = [el];
       let j = i + 1;
 
-      // ⭐ AJUSTE PRINCIPAL (ANTES era < 3)
-      while (j < allNodes.length && nodesToWrap.length < 2) {
+      // Agrupa o título com até 2 elementos seguintes (se não forem novos títulos)
+      while (j < allNodes.length && nodesToWrap.length < 3) {
         const next = allNodes[j];
-        if (next.matches('h1,h2,h3,h4,h5,h6')) break;
-
+        const nextText = next.innerText.trim();
+        const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') || 
+                           (/^\d+(\.\d+)*[\.\s\)]/.test(nextText) && (next.querySelector('strong, b') || nextText === nextText.toUpperCase()));
+        
+        if (nextIsTitle) break;
         nodesToWrap.push(next);
         j++;
       }
@@ -495,10 +525,8 @@ function optimizePageBreaks() {
       if (nodesToWrap.length > 1) {
         const wrapper = document.createElement('div');
         wrapper.className = 'keep-together';
-
         el.parentNode.insertBefore(wrapper, el);
         nodesToWrap.forEach(node => wrapper.appendChild(node));
-
         i = j - 1;
       }
     }

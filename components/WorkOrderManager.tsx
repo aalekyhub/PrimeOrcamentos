@@ -425,55 +425,59 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             ${htmlContent}
             <script>
                function optimizePageBreaks() {
-                 const root = document.querySelector('.print-description-content');
-                 if (!root) return;
-                 const content = root.querySelector('div');
-                 if (!content) return;
+             const root = document.querySelector('.print-description-content div');
+             if (!root) return;
 
-                 const allNodes = [];
-                 Array.from(content.children).forEach(block => {
-                   if (block.classList.contains('ql-editor-print')) {
-                      allNodes.push(...Array.from(block.children));
-                   } else {
-                      allNodes.push(block);
-                   }
-                 });
+             const allNodes = [];
+             Array.from(root.children).forEach(block => {
+               if (block.classList.contains('ql-editor-print')) {
+                  allNodes.push(...Array.from(block.children));
+               } else {
+                  allNodes.push(block);
+               }
+             });
 
-                 for (let i = 0; i < allNodes.length - 1; i++) {
-                   const el = allNodes[i];
-                   let isTitle = false;
-                   
-                   if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
-                   else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
-                      const text = el.innerText.trim();
-                      const isNumbered = /^\\d+(\\.\\d+)*[\\.\\s\\)]/.test(text);
-                      const isBold = el.querySelector('strong, b') || (el.style && parseInt(el.style.fontWeight) > 600) || el.tagName === 'STRONG';
-                      const isShort = text.length < 150;
-                      if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
-                        isTitle = true;
-                      }
-                   }
-
-                   if (isTitle) {
-                     const nodesToWrap = [el];
-                     let j = i + 1;
-                     while (j < allNodes.length && nodesToWrap.length < 3) {
-                       const next = allNodes[j];
-                       if (next.matches('h1, h2, h3, h4, h5, h6')) break;
-                       nodesToWrap.push(next);
-                       j++;
-                     }
-
-                     if (nodesToWrap.length > 1) {
-                       const wrapper = document.createElement('div');
-                       wrapper.className = 'keep-together';
-                       el.parentNode.insertBefore(wrapper, el);
-                       nodesToWrap.forEach(node => wrapper.appendChild(node));
-                       i = j - 1;
-                     }
-                   }
+             for (let i = 0; i < allNodes.length - 1; i++) {
+               const el = allNodes[i];
+               let isTitle = false;
+               
+               if (el.matches('h1, h2, h3, h4, h5, h6')) {
+                 isTitle = true;
+               } else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
+                 const text = el.innerText.trim();
+                 const isNumbered = /^\\d+(\\.\\d+)*[\\.\\s\\)]/.test(text);
+                 const isBold = el.querySelector('strong, b') || 
+                               (el.style && (parseInt(el.style.fontWeight) >= 600 || el.style.fontWeight === 'bold')) || 
+                               el.tagName === 'STRONG';
+                 const isShort = text.length < 150;
+                 if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 3)) {
+                   isTitle = true;
                  }
                }
+
+               if (isTitle) {
+                 const nodesToWrap = [el];
+                 let j = i + 1;
+                 while (j < allNodes.length && nodesToWrap.length < 3) {
+                   const next = allNodes[j];
+                   const nextText = next.innerText.trim();
+                   const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') || 
+                                      (/^\\d+(\\.\\d+)*[\\.\\s\\)]/.test(nextText) && (next.querySelector('strong, b') || nextText === nextText.toUpperCase()));
+                   if (nextIsTitle) break;
+                   nodesToWrap.push(next);
+                   j++;
+                 }
+
+                 if (nodesToWrap.length > 1) {
+                   const wrapper = document.createElement('div');
+                   wrapper.className = 'keep-together';
+                   el.parentNode.insertBefore(wrapper, el);
+                   nodesToWrap.forEach(node => wrapper.appendChild(node));
+                   i = j - 1;
+                 }
+               }
+             }
+           }
                window.onload = function() { 
                  optimizePageBreaks();
                  setTimeout(() => { 
@@ -496,7 +500,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     </div>
                     <div>
                         <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 0 0 2px 0; text-transform: uppercase;">${company.name}</h1>
-                        <p style="margin: 0; font-size: 11px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.02em;">Contrato de Presta��o de Serviços</p>
+                        <p style="margin: 0; font-size: 11px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.02em;">Contrato de Prestao de Serviços</p>
                         <p style="margin: 4px 0 0 0; font-size: 10px; color: #64748b; font-weight: 500;">${company.cnpj || ''} | ${company.phone || ''}</p>
                     </div>
                 </div>
@@ -526,7 +530,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     };
 
     const getContractBodyHtml = (order: ServiceOrder) => {
-        const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', address: 'Endere�o não informado', city: '', state: '', cep: '' };
+        const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', address: 'Endereo não informado', city: '', state: '', cep: '' };
 
         return `
         <div class="print-description-content">
@@ -546,74 +550,74 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             </div>
 
             <div style="margin-bottom: 40px;">
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 0;">As partes acima identificadas resolvem firmar o presente Contrato de Presta��o de Serviços por Empreitada Global, nos termos da legislação civil e previdenci�ria vigente, mediante as CLÁUSULAs e condi��es seguintes:</p>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 0;">As partes acima identificadas resolvem firmar o presente Contrato de Prestao de Serviços por Empreitada Global, nos termos da legislação civil e previdenciria vigente, mediante as CLÁUSULAs e condies seguintes:</p>
             </div>
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 1� � DO OBJETO</h4>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">1.1. O presente contrato tem por objeto a execução de reforma em unidade residencial, situada no endere�o do CONTRATANTE, compreendendo os serviços descritos abaixo, os quais ser�o executados por empreitada global, com responsabilidade TÉCNICA, administrativa e operacional integral da CONTRATADA.</p>
+                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 1  DO OBJETO</h4>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">1.1. O presente contrato tem por objeto a execução de reforma em unidade residencial, situada no endereo do CONTRATANTE, compreendendo os serviços descritos abaixo, os quais sero executados por empreitada global, com responsabilidade TÉCNICA, administrativa e operacional integral da CONTRATADA.</p>
                 <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border-left: 4px solid #3b82f6; margin-top: 12px;">
                     <p style="font-size: 14px; font-weight: 700; color: #1e3a8a; text-transform: uppercase; line-height: 1.4; margin: 0;">${order.description}</p>
                 </div>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 12px 0 0 0;">1.2. A execução dos serviços ser� realizada por obra certa, com pre�o previamente ajustado, não se caracterizando, em hip�tese alguma, cesSão ou loca��o de mão de obra.</p>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 12px 0 0 0;">1.2. A execução dos serviços ser realizada por obra certa, com preo previamente ajustado, não se caracterizando, em hiptese alguma, cesSão ou locao de mão de obra.</p>
             </div>
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 2� � DA FORMA DE execução (EMPREITADA GLOBAL)</h4>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">2.1. A CONTRATADA executar� os serviços com autonomia TÉCNICA e gerencial, utilizando meios pr�prios, inclusive pessoal, ferramentas, equipamentos e m�todos de trabalho.</p>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 8px 0 0 0;">2.2. não haver� qualquer tipo de subordina��o, exclusividade, controle de jornada ou disponibiliza��o de trabalhadores ao CONTRATANTE.</p>
+                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 2  DA FORMA DE execução (EMPREITADA GLOBAL)</h4>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">2.1. A CONTRATADA executar os serviços com autonomia TÉCNICA e gerencial, utilizando meios prprios, inclusive pessoal, ferramentas, equipamentos e mtodos de trabalho.</p>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 8px 0 0 0;">2.2. não haver qualquer tipo de subordinao, exclusividade, controle de jornada ou disponibilizao de trabalhadores ao CONTRATANTE.</p>
                 <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 8px 0 0 0;">2.3. A CONTRATADA assume total responsabilidade pela execução da obra, respondendo integralmente pelos serviços contratados.</p>
             </div>
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 3� � DO PRE�O E DA FORMA DE PAGAMENTO</h4>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">3.1. Pelos serviços objeto deste contrato, o CONTRATANTE pagar� � CONTRATADA o valor global de <b style="color: #0f172a;">R$ ${order.contractPrice && order.contractPrice > 0 ? order.contractPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>.</p>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 8px 0 0 0;">3.2. O pagamento ser� efetuado da seguinte forma: <b style="color: #0f172a;">${order.paymentTerms || 'Conforme combinado'}</b>.</p>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 8px 0 0 0;">3.3. O valor contratado corresponde ao pre�o fechado da obra, não estando vinculado a horas trabalhadas, nºmero de funcionºrios ou fornecimento de mão de obra.</p>
+                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 3  DO PREO E DA FORMA DE PAGAMENTO</h4>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">3.1. Pelos serviços objeto deste contrato, o CONTRATANTE pagar  CONTRATADA o valor global de <b style="color: #0f172a;">R$ ${order.contractPrice && order.contractPrice > 0 ? order.contractPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>.</p>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 8px 0 0 0;">3.2. O pagamento ser efetuado da seguinte forma: <b style="color: #0f172a;">${order.paymentTerms || 'Conforme combinado'}</b>.</p>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 8px 0 0 0;">3.3. O valor contratado corresponde ao preo fechado da obra, não estando vinculado a horas trabalhadas, nºmero de funcionºrios ou fornecimento de mão de obra.</p>
             </div>
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 4ª � DAS OBRIGAÇÕES DA CONTRATADA</h4>
+                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 4ª  DAS OBRIGAÇÕES DA CONTRATADA</h4>
                 <ul style="list-style-type: none; padding-left: 0 !important; font-size: 14px; color: #475569; line-height: 1.6; margin: 0;">
-                    <li style="margin-bottom: 4px; padding-left: 0 !important;">4.1. Executar os serviços conforme o escopo contratado e normas TÉCNICAs aplic�veis.</li>
+                    <li style="margin-bottom: 4px; padding-left: 0 !important;">4.1. Executar os serviços conforme o escopo contratado e normas TÉCNICAs aplicveis.</li>
                     <li style="margin-bottom: 4px; padding-left: 0 !important;">4.2. Responsabilizar-se integralmente por seus empregados, prepostos ou subcontratados, inclusive quanto a encargos trabalhistas, previdenciários, fiscais e securitários.</li>
                     <li style="margin-bottom: 4px; padding-left: 0 !important;">4.3. Manter seus tributos, contribuições e obrigações legais em dia.</li>
-                    <li style="padding-left: 0 !important;">4.4. Responder por danos eventualmente causados ao im�vel durante a execução dos serviços.</li>
+                    <li style="padding-left: 0 !important;">4.4. Responder por danos eventualmente causados ao imvel durante a execução dos serviços.</li>
                 </ul>
             </div>
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 5ª � DAS OBRIGAÇÕES DO CONTRANTE</h4>
+                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 5ª  DAS OBRIGAÇÕES DO CONTRANTE</h4>
                 <ul style="list-style-type: none; padding-left: 0 !important; font-size: 14px; color: #475569; line-height: 1.6; margin: 0;">
                     <li style="margin-bottom: 4px; padding-left: 0 !important;">5.1. Garantir o acesso da CONTRATADA ao local da obra.</li>
                     <li style="margin-bottom: 4px; padding-left: 0 !important;">5.2. Efetuar os pagamentos conforme acordado.</li>
-                    <li style="padding-left: 0 !important;">5.3. Fornecer, quando necess�rio, autorizAções do condom�nio para execução dos serviços.</li>
+                    <li style="padding-left: 0 !important;">5.3. Fornecer, quando necessrio, autorizAções do condomnio para execução dos serviços.</li>
                 </ul>
             </div>
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 6ª � DAS RESPONSABILIDADES PREVIDENCI�RIAS E FISCAIS</h4>
+                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 6ª  DAS RESPONSABILIDADES PREVIDENCIRIAS E FISCAIS</h4>
                 <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">6.1. As partes reconhecem que o presente contrato caracteriza empreitada global de obra, nos termos da legislação vigente, não se aplicando a retenção de 11% (onze por cento) de INSS, conforme disposto na Lei nº 8.212/91 e Instrução Normativa RFB nº 971/2009.</p>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 8px 0 0 0;">6.2. A CONTRATADA � a única responsável pelo recolhimento de seus tributos e contribuições incidentes sobre suas atividades.</p>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 8px 0 0 0;">6.2. A CONTRATADA  a única responsável pelo recolhimento de seus tributos e contribuições incidentes sobre suas atividades.</p>
             </div>
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 7ª � DO PRAZO</h4>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">7.1. O prazo estimado para execução da obra � de <b style="color: #0f172a;">${order.deliveryTime || 'A combinar'}</b>, contado a partir do inºcio efetivo dos serviços, podendo ser ajustado mediante comum acordo entre as partes.</p>
+                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 7ª  DO PRAZO</h4>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">7.1. O prazo estimado para execução da obra  de <b style="color: #0f172a;">${order.deliveryTime || 'A combinar'}</b>, contado a partir do inºcio efetivo dos serviços, podendo ser ajustado mediante comum acordo entre as partes.</p>
             </div>
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 8ª � DA RESPONSABILIDADE TÉCNICA</h4>
+                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 8ª  DA RESPONSABILIDADE TÉCNICA</h4>
                 <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">8.1. Quando aplicável, a CONTRATADA providenciará a emissão de ART/RRT, assumindo a responsabilidade TÉCNICA pela execução dos serviços.</p>
             </div>
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 9ª � DA RECISÃO</h4>
+                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 9ª  DA RECISÃO</h4>
                 <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">9.1. O descumprimento de qualquer CLÁUSULA ensejará a RECISÃO deste instrumento, sem prejuízo de perdas e danos.</p>
             </div>
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 10ª � DO FORO</h4>
+                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 10ª  DO FORO</h4>
                 <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">10.1. Fica eleito o foro da comarca de <b style="color: #0f172a;">${customer.city || 'São Paulo'} - ${customer.state || 'SP'}</b>, para dirimir quaisquer controvérsias oriundas deste contrato, renunciando as partes a qualquer outro, por mais privilegiado que seja.</p>
             </div>
         </div>`;
@@ -632,7 +636,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     const runOptimizePageBreaks = (container: HTMLElement) => {
         const root = container.querySelector('.print-description-content');
         if (!root) return;
-        const content = root;
+        const content = root.querySelector('div:last-child');
+        if (!content) return;
 
         const allNodes: Element[] = [];
         Array.from(content.children).forEach(block => {
@@ -647,13 +652,17 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             const el = allNodes[i] as HTMLElement;
             let isTitle = false;
 
-            if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
-            else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
+            if (el.matches('h1, h2, h3, h4, h5, h6')) {
+                isTitle = true;
+            } else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
                 const text = el.innerText.trim();
-                const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text.replace(/\\/g, ''));
-                const isBold = el.querySelector('strong, b') || (el.style && parseInt(el.style.fontWeight) > 600) || el.tagName === 'STRONG';
+                const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text);
+                const isBold = el.querySelector('strong, b') ||
+                    (el.style && (parseInt(el.style.fontWeight) >= 600 || el.style.fontWeight === 'bold')) ||
+                    el.tagName === 'STRONG';
                 const isShort = text.length < 150;
-                if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
+
+                if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 3)) {
                     isTitle = true;
                 }
             }
@@ -663,7 +672,11 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                 let j = i + 1;
                 while (j < allNodes.length && nodesToWrap.length < 3) {
                     const next = allNodes[j] as HTMLElement;
-                    if (next.matches('h1, h2, h3, h4, h5, h6')) break;
+                    const nextText = next.innerText.trim();
+                    const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') ||
+                        (/^\d+(\.\d+)*[\.\s\)]/.test(nextText) && (next.querySelector('strong, b') || nextText === nextText.toUpperCase()));
+
+                    if (nextIsTitle) break;
                     nodesToWrap.push(next);
                     j++;
                 }
