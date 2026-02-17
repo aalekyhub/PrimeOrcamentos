@@ -4,7 +4,7 @@ import {
     Building2, Users, Truck, HardHat, FileText,
     Plus, Trash2, Save, ChevronRight, Calculator,
     PieChart, ArrowRight, DollarSign, Pencil, Check, X, Printer, Percent, Eye, Archive,
-    ChevronUp, ChevronDown
+    ChevronUp, ChevronDown, GripVertical
 } from 'lucide-react';
 import { useNotify } from './ToastProvider';
 import { db } from '../services/db';
@@ -47,6 +47,11 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
 
     const [activeTab, setActiveTab] = useState<'dados' | 'servicos' | 'recursos' | 'resumo'>('dados');
     const [resourceTab, setResourceTab] = useState<'material' | 'mo' | 'indireto' | 'impostos'>('material');
+
+    const [draggedSvcIndex, setDraggedSvcIndex] = useState<number | null>(null);
+    const [draggedMatIndex, setDraggedMatIndex] = useState<number | null>(null);
+    const [draggedLabIndex, setDraggedLabIndex] = useState<number | null>(null);
+    const [draggedIndIndex, setDraggedIndIndex] = useState<number | null>(null);
 
     // Preview UI State
     const [showPreview, setShowPreview] = useState(false);
@@ -1135,6 +1140,17 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                 [newList[index], newList[newIndex]] = [newList[newIndex], newList[index]];
                                 setList(newList);
                             };
+                            (window as any).handleDragOver = (e: React.DragEvent, index: number, draggedIndex: number | null, list: any[], setList: Function, setDraggedIndex: Function) => {
+                                e.preventDefault();
+                                if (draggedIndex !== null && draggedIndex !== index) {
+                                    const newList = [...list];
+                                    const draggedItem = newList[draggedIndex];
+                                    newList.splice(draggedIndex, 1);
+                                    newList.splice(index, 0, draggedItem);
+                                    setList(newList);
+                                    setDraggedIndex(index);
+                                }
+                            };
                             return null;
                         })()}
                     </div>
@@ -1198,8 +1214,15 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                             <div className="max-w-4xl mx-auto">
 
                                 <div className="space-y-2">
-                                    {services.map(svc => (
-                                        <div key={svc.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex justify-between items-center group hover:border-blue-300">
+                                    {services.map((svc, index) => (
+                                        <div
+                                            key={svc.id}
+                                            draggable
+                                            onDragStart={() => setDraggedSvcIndex(index)}
+                                            onDragOver={(e) => (window as any).handleDragOver(e, index, draggedSvcIndex, services, setServices, setDraggedSvcIndex)}
+                                            onDragEnd={() => setDraggedSvcIndex(null)}
+                                            className={`bg-white p-4 rounded-xl border transition-all flex justify-between items-center group hover:border-blue-300 ${draggedSvcIndex === index ? 'opacity-50 bg-blue-50 border-blue-200 shadow-inner' : 'border-slate-200 shadow-sm'}`}
+                                        >
                                             {editingId === svc.id ? (
                                                 <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center">
                                                     <div className="md:col-span-4">
@@ -1273,35 +1296,24 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 </div>
                                             ) : (
                                                 <>
-                                                    <div className="flex-1">
-                                                        <p className="font-bold text-slate-800">{svc.description}</p>
-                                                        <p className="text-xs text-slate-500">
-                                                            {svc.quantity} {svc.unit} x (Mat: {svc.unit_material_cost.toFixed(2)} + MO: {svc.unit_labor_cost.toFixed(2)})
-                                                        </p>
+                                                    <div className="flex items-center gap-3 grow">
+                                                        <div className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 shrink-0">
+                                                            <GripVertical size={18} />
+                                                        </div>
+                                                        <div className="grow">
+                                                            <p className="font-bold text-slate-800">{svc.description}</p>
+                                                            <p className="text-xs text-slate-500">
+                                                                {svc.quantity} {svc.unit} x (Mat: {svc.unit_material_cost.toFixed(2)} + MO: {svc.unit_labor_cost.toFixed(2)})
+                                                            </p>
+                                                        </div>
                                                     </div>
-                                                    <div className="text-right mr-4">
+                                                    <div className="text-right mr-4 shrink-0">
                                                         <p className="text-sm font-bold text-slate-800">R$ {svc.total_cost.toFixed(2)}</p>
                                                     </div>
-                                                    <div className="flex gap-1">
+                                                    <div className="flex gap-1 shrink-0">
                                                         <div className="flex items-center gap-1 mr-2">
-                                                            <button onClick={() => {
-                                                                const idx = services.indexOf(svc);
-                                                                const newIndex = idx - 1;
-                                                                if (newIndex >= 0) {
-                                                                    const newList = [...services];
-                                                                    [newList[idx], newList[newIndex]] = [newList[newIndex], newList[idx]];
-                                                                    setServices(newList);
-                                                                }
-                                                            }} disabled={services.indexOf(svc) === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronUp size={16} /></button>
-                                                            <button onClick={() => {
-                                                                const idx = services.indexOf(svc);
-                                                                const newIndex = idx + 1;
-                                                                if (newIndex < services.length) {
-                                                                    const newList = [...services];
-                                                                    [newList[idx], newList[newIndex]] = [newList[newIndex], newList[idx]];
-                                                                    setServices(newList);
-                                                                }
-                                                            }} disabled={services.indexOf(svc) === services.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronDown size={16} /></button>
+                                                            <button onClick={() => (window as any).moveItem(services, setServices, index, 'up')} disabled={index === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronUp size={16} /></button>
+                                                            <button onClick={() => (window as any).moveItem(services, setServices, index, 'down')} disabled={index === services.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronDown size={16} /></button>
                                                         </div>
                                                         <button
                                                             onClick={() => {
@@ -1338,8 +1350,15 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                             <div className="max-w-4xl mx-auto space-y-6">
                                 {resourceTab === 'material' && (
                                     <div className="space-y-2">
-                                        {materials.map(m => (
-                                            <div key={m.id} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center text-sm">
+                                        {materials.map((m, index) => (
+                                            <div
+                                                key={m.id}
+                                                draggable
+                                                onDragStart={() => setDraggedMatIndex(index)}
+                                                onDragOver={(e) => (window as any).handleDragOver(e, index, draggedMatIndex, materials, setMaterials, setDraggedMatIndex)}
+                                                onDragEnd={() => setDraggedMatIndex(null)}
+                                                className={`bg-white p-3 rounded-lg border flex justify-between items-center text-sm transition-all ${draggedMatIndex === index ? 'opacity-50 bg-blue-50 border-blue-200 shadow-inner' : 'border-slate-200 shadow-sm'}`}
+                                            >
                                                 {editingId === m.id ? (
                                                     <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center mr-2">
                                                         <div className="md:col-span-5">
@@ -1403,28 +1422,19 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                     </div>
                                                 ) : (
                                                     <>
-                                                        <span><b>{m.material_name}</b> | (R$ {m.unit_cost.toFixed(2)}) {m.quantity}{m.unit}</span>
-                                                        <div className="flex items-center gap-4">
+                                                        <div className="flex items-center gap-2 grow">
+                                                            <div className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 shrink-0">
+                                                                <GripVertical size={16} />
+                                                            </div>
+                                                            <div className="grow">
+                                                                <span><b>{m.material_name}</b> | (R$ {m.unit_cost.toFixed(2)}) {m.quantity}{m.unit}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-4 text-xs shrink-0">
                                                             <span className="font-bold">R$ {m.total_cost.toFixed(2)}</span>
                                                             <div className="flex gap-1 mr-2">
-                                                                <button onClick={() => {
-                                                                    const idx = materials.indexOf(m);
-                                                                    const newIndex = idx - 1;
-                                                                    if (newIndex >= 0) {
-                                                                        const newList = [...materials];
-                                                                        [newList[idx], newList[newIndex]] = [newList[newIndex], newList[idx]];
-                                                                        setMaterials(newList);
-                                                                    }
-                                                                }} disabled={materials.indexOf(m) === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0"><ChevronUp size={14} /></button>
-                                                                <button onClick={() => {
-                                                                    const idx = materials.indexOf(m);
-                                                                    const newIndex = idx + 1;
-                                                                    if (newIndex < materials.length) {
-                                                                        const newList = [...materials];
-                                                                        [newList[idx], newList[newIndex]] = [newList[newIndex], newList[idx]];
-                                                                        setMaterials(newList);
-                                                                    }
-                                                                }} disabled={materials.indexOf(m) === materials.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0"><ChevronDown size={14} /></button>
+                                                                <button onClick={() => (window as any).moveItem(materials, setMaterials, index, 'up')} disabled={index === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronUp size={14} /></button>
+                                                                <button onClick={() => (window as any).moveItem(materials, setMaterials, index, 'down')} disabled={index === materials.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronDown size={14} /></button>
                                                             </div>
                                                             <Pencil
                                                                 size={14}
@@ -1452,8 +1462,15 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
 
                                 {resourceTab === 'mo' && (
                                     <div className="space-y-2">
-                                        {labor.map(l => (
-                                            <div key={l.id} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center text-sm">
+                                        {labor.map((l, index) => (
+                                            <div
+                                                key={l.id}
+                                                draggable
+                                                onDragStart={() => setDraggedLabIndex(index)}
+                                                onDragOver={(e) => (window as any).handleDragOver(e, index, draggedLabIndex, labor, setLabor, setDraggedLabIndex)}
+                                                onDragEnd={() => setDraggedLabIndex(null)}
+                                                className={`bg-white p-3 rounded-lg border flex justify-between items-center text-sm transition-all ${draggedLabIndex === index ? 'opacity-50 bg-blue-50 border-blue-200 shadow-inner' : 'border-slate-200 shadow-sm'}`}
+                                            >
                                                 {editingId === l.id ? (
                                                     <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center mr-2">
                                                         <div className="md:col-span-4">
@@ -1531,28 +1548,19 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                     </div>
                                                 ) : (
                                                     <>
-                                                        <span><b>{l.role}</b> | ({l.cost_type}) {l.quantity}{l.unit || 'un'}</span>
-                                                        <div className="flex items-center gap-4">
+                                                        <div className="flex items-center gap-2 grow">
+                                                            <div className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 shrink-0">
+                                                                <GripVertical size={16} />
+                                                            </div>
+                                                            <div className="grow">
+                                                                <span><b>{l.role}</b> | ({l.cost_type}) {l.quantity}{l.unit || 'un'}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-4 text-xs shrink-0">
                                                             <span className="font-bold">R$ {l.total_cost.toFixed(2)}</span>
                                                             <div className="flex gap-1 mr-2">
-                                                                <button onClick={() => {
-                                                                    const idx = labor.indexOf(l);
-                                                                    const newIndex = idx - 1;
-                                                                    if (newIndex >= 0) {
-                                                                        const newList = [...labor];
-                                                                        [newList[idx], newList[newIndex]] = [newList[newIndex], newList[idx]];
-                                                                        setLabor(newList);
-                                                                    }
-                                                                }} disabled={labor.indexOf(l) === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0"><ChevronUp size={14} /></button>
-                                                                <button onClick={() => {
-                                                                    const idx = labor.indexOf(l);
-                                                                    const newIndex = idx + 1;
-                                                                    if (newIndex < labor.length) {
-                                                                        const newList = [...labor];
-                                                                        [newList[idx], newList[newIndex]] = [newList[newIndex], newList[idx]];
-                                                                        setLabor(newList);
-                                                                    }
-                                                                }} disabled={labor.indexOf(l) === labor.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0"><ChevronDown size={14} /></button>
+                                                                <button onClick={() => (window as any).moveItem(labor, setLabor, index, 'up')} disabled={index === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronUp size={14} /></button>
+                                                                <button onClick={() => (window as any).moveItem(labor, setLabor, index, 'down')} disabled={index === labor.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronDown size={14} /></button>
                                                             </div>
                                                             <Pencil
                                                                 size={14}
@@ -1580,8 +1588,15 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
 
                                 {resourceTab === 'indireto' && (
                                     <div className="space-y-2">
-                                        {indirects.map(i => (
-                                            <div key={i.id} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center text-sm">
+                                        {indirects.map((i, index) => (
+                                            <div
+                                                key={i.id}
+                                                draggable
+                                                onDragStart={() => setDraggedIndIndex(index)}
+                                                onDragOver={(e) => (window as any).handleDragOver(e, index, draggedIndIndex, indirects, setIndirects, setDraggedIndIndex)}
+                                                onDragEnd={() => setDraggedIndIndex(null)}
+                                                className={`bg-white p-3 rounded-lg border flex justify-between items-center text-sm transition-all ${draggedIndIndex === index ? 'opacity-50 bg-blue-50 border-blue-200 shadow-inner' : 'border-slate-200 shadow-sm'}`}
+                                            >
                                                 {editingId === i.id ? (
                                                     <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center mr-2">
                                                         <div className="md:col-span-3">
@@ -1640,28 +1655,19 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                     </div>
                                                 ) : (
                                                     <>
-                                                        <span>[{i.category}] <b>{i.description}</b></span>
-                                                        <div className="flex items-center gap-4">
+                                                        <div className="flex items-center gap-2 grow">
+                                                            <div className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 shrink-0">
+                                                                <GripVertical size={16} />
+                                                            </div>
+                                                            <div className="grow">
+                                                                <span>[{i.category}] <b>{i.description}</b></span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-4 text-xs shrink-0">
                                                             <span className="font-bold">R$ {i.value.toFixed(2)}</span>
                                                             <div className="flex gap-1 mr-2">
-                                                                <button onClick={() => {
-                                                                    const idx = indirects.indexOf(i);
-                                                                    const newIndex = idx - 1;
-                                                                    if (newIndex >= 0) {
-                                                                        const newList = [...indirects];
-                                                                        [newList[idx], newList[newIndex]] = [newList[newIndex], newList[idx]];
-                                                                        setIndirects(newList);
-                                                                    }
-                                                                }} disabled={indirects.indexOf(i) === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0"><ChevronUp size={14} /></button>
-                                                                <button onClick={() => {
-                                                                    const idx = indirects.indexOf(i);
-                                                                    const newIndex = idx + 1;
-                                                                    if (newIndex < indirects.length) {
-                                                                        const newList = [...indirects];
-                                                                        [newList[idx], newList[newIndex]] = [newList[newIndex], newList[idx]];
-                                                                        setIndirects(newList);
-                                                                    }
-                                                                }} disabled={indirects.indexOf(i) === indirects.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0"><ChevronDown size={14} /></button>
+                                                                <button onClick={() => (window as any).moveItem(indirects, setIndirects, index, 'up')} disabled={index === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronUp size={14} /></button>
+                                                                <button onClick={() => (window as any).moveItem(indirects, setIndirects, index, 'down')} disabled={index === indirects.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronDown size={14} /></button>
                                                             </div>
                                                             <Pencil
                                                                 size={14}

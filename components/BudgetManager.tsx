@@ -5,7 +5,7 @@ import {
   Plus, Search, X, Trash2, Pencil, Printer, Save,
   UserPlus, Package, Type, Image as ImageIcon,
   FileText, Upload, CheckCircle, Zap, FileDown, Copy, Database,
-  ChevronUp, ChevronDown
+  ChevronUp, ChevronDown, GripVertical
 } from 'lucide-react';
 import RichTextEditor from './ui/RichTextEditor';
 import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock } from '../types';
@@ -97,6 +97,8 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       return item;
     }));
   };
+
+  const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
 
   const moveItem = (index: number, direction: 'up' | 'down') => {
     const newIndex = direction === 'up' ? index - 1 : index + 1;
@@ -619,7 +621,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         pagebreak: { mode: ["css", "legacy"] as any },
       };
 
-      await html2pdf()
+      const worker = html2pdf()
         .set(options)
         .from(elementToPrint)
         .toPdf()
@@ -636,8 +638,9 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
               pdf.internal.pageSize.getHeight() - 8
             );
           }
-        })
-        .save();
+        });
+
+      await (worker as any).save();
 
       notify("PDF baixado com sucesso!");
     } catch (err) {
@@ -968,18 +971,40 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                     </div>
 
                     <div className="space-y-1.5 max-h-40 overflow-y-auto no-scrollbar">
-                      {items.map(item => (
-                        <div key={item.id} className="flex justify-between items-center p-2.5 bg-white rounded-lg border border-slate-100 group gap-2">
-                          <div className="grow">
-                            <p className="text-[10px] font-black text-slate-900 uppercase mb-1">{item.description}</p>
-                            <div className="flex items-center gap-2">
-                              <div className="flex items-center gap-1 bg-slate-50 rounded px-2 py-1 border border-slate-100">
-                                <span className="text-[8px] font-bold text-slate-400">QTD:</span>
-                                <input type="number" className="w-12 bg-transparent text-[9px] font-black text-slate-700 outline-none" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', Number(e.target.value))} />
-                              </div>
-                              <div className="flex items-center gap-1 bg-slate-50 rounded px-2 py-1 border border-slate-100">
-                                <span className="text-[8px] font-bold text-slate-400">VALOR:</span>
-                                <input type="number" className="w-20 bg-transparent text-[9px] font-black text-slate-700 outline-none" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', Number(e.target.value))} />
+                      {items.map((item, index) => (
+                        <div
+                          key={item.id}
+                          draggable
+                          onDragStart={() => setDraggedItemIndex(index)}
+                          onDragOver={(e) => {
+                            e.preventDefault();
+                            if (draggedItemIndex !== null && draggedItemIndex !== index) {
+                              const newItems = [...items];
+                              const draggedItem = newItems[draggedItemIndex];
+                              newItems.splice(draggedItemIndex, 1);
+                              newItems.splice(index, 0, draggedItem);
+                              setItems(newItems);
+                              setDraggedItemIndex(index);
+                            }
+                          }}
+                          onDragEnd={() => setDraggedItemIndex(null)}
+                          className={`flex justify-between items-center p-2.5 rounded-lg border group gap-2 transition-all ${draggedItemIndex === index ? 'opacity-50 bg-blue-50 border-blue-200' : 'bg-white border-slate-100 hover:border-blue-200 cursor-default'}`}
+                        >
+                          <div className="flex items-center gap-2 grow">
+                            <div className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 shrink-0">
+                              <GripVertical size={14} />
+                            </div>
+                            <div className="grow">
+                              <p className="text-[10px] font-black text-slate-900 uppercase mb-1">{item.description}</p>
+                              <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1 bg-slate-50 rounded px-2 py-1 border border-slate-100">
+                                  <span className="text-[8px] font-bold text-slate-400">QTD:</span>
+                                  <input type="number" className="w-12 bg-transparent text-[9px] font-black text-slate-700 outline-none" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', Number(e.target.value))} />
+                                </div>
+                                <div className="flex items-center gap-1 bg-slate-50 rounded px-2 py-1 border border-slate-100">
+                                  <span className="text-[8px] font-bold text-slate-400">VALOR:</span>
+                                  <input type="number" className="w-20 bg-transparent text-[9px] font-black text-slate-700 outline-none" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', Number(e.target.value))} />
+                                </div>
                               </div>
                             </div>
                           </div>

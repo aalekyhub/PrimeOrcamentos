@@ -3,7 +3,7 @@ import {
     Building2, Users, Truck, HardHat, FileText,
     Plus, Trash2, Save, ChevronRight, Calculator,
     PieChart, ArrowRight, DollarSign, Calendar, Pencil, Check, X, Printer, Percent, Eye, Archive,
-    ChevronUp, ChevronDown
+    ChevronUp, ChevronDown, GripVertical
 } from 'lucide-react';
 import { useNotify } from './ToastProvider';
 import { db } from '../services/db';
@@ -41,6 +41,12 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
     const [activeTab, setActiveTab] = useState<'dados' | 'servicos' | 'recursos' | 'resumo'>('dados');
     const [resourceTab, setResourceTab] = useState<'material' | 'mo' | 'indireto' | 'impostos'>('material');
+
+    // Drag and Drop State
+    const [draggedSvcIndex, setDraggedSvcIndex] = useState<number | null>(null);
+    const [draggedMatIndex, setDraggedMatIndex] = useState<number | null>(null);
+    const [draggedLabIndex, setDraggedLabIndex] = useState<number | null>(null);
+    const [draggedIndIndex, setDraggedIndIndex] = useState<number | null>(null);
 
     // Preview UI State
     const [showPreview, setShowPreview] = useState(false);
@@ -1285,8 +1291,15 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                             <div className="max-w-4xl mx-auto">
 
                                 <div className="space-y-2">
-                                    {services.map(svc => (
-                                        <div key={svc.id} className="bg-white p-4 rounded-lg shadow-sm border border-slate-100 flex justify-between items-center group">
+                                    {services.map((svc, index) => (
+                                        <div
+                                            key={svc.id}
+                                            draggable
+                                            onDragStart={() => setDraggedSvcIndex(index)}
+                                            onDragOver={(e) => (window as any).handleDragOver(e, index, draggedSvcIndex, services, setServices, setDraggedSvcIndex)}
+                                            onDragEnd={() => setDraggedSvcIndex(null)}
+                                            className={`bg-white p-4 rounded-lg shadow-sm border flex justify-between items-center group transition-all ${draggedSvcIndex === index ? 'opacity-50 bg-blue-50 border-blue-200 shadow-inner' : 'border-slate-100'}`}
+                                        >
                                             {editingId === svc.id ? (
                                                 <div className="flex-1 grid grid-cols-12 gap-2 items-center">
                                                     <div className="col-span-4">
@@ -1340,10 +1353,6 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                     total_cost: newQty * (newMat + newLab)
                                                                 } : s);
                                                                 setServices(updated);
-                                                                // Save to DB immediately or wait for big save? Let's verify requirement. 
-                                                                // User usually wants immediate feedback but standard is big save. 
-                                                                // But to keep consistency with "delete", let's update state and rely on main Save button or auto-save if we implement it.
-                                                                // Actually, delete is just state update. So this is fine.
                                                                 setEditingId(null);
                                                             }}
                                                             className="text-green-600 hover:bg-green-50 p-1 rounded"
@@ -1360,17 +1369,22 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 </div>
                                             ) : (
                                                 <>
-                                                    <div className="flex-1">
-                                                        <p className="font-bold text-slate-800">{svc.description}</p>
-                                                        <p className="text-xs text-slate-500">
-                                                            {svc.quantity} {svc.unit} • Mat: R$ {svc.unit_material_cost.toFixed(2)} • M.O: R$ {svc.unit_labor_cost.toFixed(2)}
-                                                        </p>
+                                                    <div className="flex items-center gap-2 flex-1">
+                                                        <div className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 shrink-0">
+                                                            <GripVertical size={16} />
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-bold text-slate-800">{svc.description}</p>
+                                                            <p className="text-xs text-slate-500">
+                                                                {svc.quantity} {svc.unit} • Mat: R$ {svc.unit_material_cost.toFixed(2)} • M.O: R$ {svc.unit_labor_cost.toFixed(2)}
+                                                            </p>
+                                                        </div>
                                                     </div>
                                                     <div className="text-right flex items-center gap-4">
                                                         <p className="font-bold text-emerald-600">R$ {svc.total_cost.toFixed(2)}</p>
                                                         <div className="flex flex-col gap-0 -mr-2">
-                                                            <button onClick={() => (window as any).moveItemWork(services, setServices, services.indexOf(svc), 'up')} disabled={services.indexOf(svc) === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronUp size={14} /></button>
-                                                            <button onClick={() => (window as any).moveItemWork(services, setServices, services.indexOf(svc), 'down')} disabled={services.indexOf(svc) === services.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronDown size={14} /></button>
+                                                            <button onClick={() => (window as any).moveItemWork(services, setServices, index, 'up')} disabled={index === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronUp size={14} /></button>
+                                                            <button onClick={() => (window as any).moveItemWork(services, setServices, index, 'down')} disabled={index === services.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronDown size={14} /></button>
                                                         </div>
                                                         <button onClick={() => setEditingId(svc.id)} className="text-blue-400 hover:text-blue-600">
                                                             <Pencil size={16} />
@@ -1419,8 +1433,15 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             )}
                                         </div>
                                         <div className="space-y-2">
-                                            {materials.map(m => (
-                                                <div key={m.id} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center text-sm">
+                                            {materials.map((m, index) => (
+                                                <div
+                                                    key={m.id}
+                                                    draggable
+                                                    onDragStart={() => setDraggedMatIndex(index)}
+                                                    onDragOver={(e) => (window as any).handleDragOver(e, index, draggedMatIndex, materials, setMaterials, setDraggedMatIndex)}
+                                                    onDragEnd={() => setDraggedMatIndex(null)}
+                                                    className={`bg-white p-3 rounded-lg border flex justify-between items-center text-sm transition-all ${draggedMatIndex === index ? 'opacity-50 bg-blue-50 border-blue-200 shadow-inner' : 'border-slate-200'}`}
+                                                >
                                                     {editingId === m.id ? (
                                                         <div className="flex-1 grid grid-cols-12 gap-2 items-center">
                                                             <div className="col-span-5">
@@ -1489,17 +1510,22 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         </div>
                                                     ) : (
                                                         <>
-                                                            <span className="flex items-center">
-                                                                <b>{m.material_name}</b>
-                                                                <span className="text-slate-400 mx-2">|</span>
-                                                                <span className="text-[10px] text-slate-400 mr-2">(R$ {m.unit_cost.toFixed(2)})</span>
-                                                                <span>{m.quantity}{m.unit}</span>
-                                                            </span>
-                                                            <div className="flex items-center gap-4">
+                                                            <div className="flex items-center gap-2 grow">
+                                                                <div className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 shrink-0">
+                                                                    <GripVertical size={16} />
+                                                                </div>
+                                                                <span className="flex items-center">
+                                                                    <b>{m.material_name}</b>
+                                                                    <span className="text-slate-400 mx-2">|</span>
+                                                                    <span className="text-[10px] text-slate-400 mr-2">(R$ {m.unit_cost.toFixed(2)})</span>
+                                                                    <span>{m.quantity}{m.unit}</span>
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex items-center gap-4 shrink-0">
                                                                 <span className="font-bold">R$ {m.total_cost.toFixed(2)}</span>
                                                                 <div className="flex gap-1">
-                                                                    <button onClick={() => (window as any).moveItemWork(materials, setMaterials, materials.indexOf(m), 'up')} disabled={materials.indexOf(m) === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronUp size={14} /></button>
-                                                                    <button onClick={() => (window as any).moveItemWork(materials, setMaterials, materials.indexOf(m), 'down')} disabled={materials.indexOf(m) === materials.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronDown size={14} /></button>
+                                                                    <button onClick={() => (window as any).moveItemWork(materials, setMaterials, index, 'up')} disabled={index === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronUp size={14} /></button>
+                                                                    <button onClick={() => (window as any).moveItemWork(materials, setMaterials, index, 'down')} disabled={index === materials.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronDown size={14} /></button>
                                                                 </div>
                                                                 <Pencil size={14} className="cursor-pointer text-blue-400 hover:text-blue-600" onClick={() => setEditingId(m.id)} />
                                                                 <Trash2 size={14} className="cursor-pointer text-slate-400 hover:text-red-500" onClick={() => handleDeleteMaterial(m.id)} />
@@ -1516,8 +1542,15 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 {resourceTab === 'mo' && (
                                     <div>
                                         <div className="space-y-2">
-                                            {labor.map(l => (
-                                                <div key={l.id} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center text-sm">
+                                            {labor.map((l, index) => (
+                                                <div
+                                                    key={l.id}
+                                                    draggable
+                                                    onDragStart={() => setDraggedLabIndex(index)}
+                                                    onDragOver={(e) => (window as any).handleDragOver(e, index, draggedLabIndex, labor, setLabor, setDraggedLabIndex)}
+                                                    onDragEnd={() => setDraggedLabIndex(null)}
+                                                    className={`bg-white p-3 rounded-lg border flex justify-between items-center text-sm transition-all ${draggedLabIndex === index ? 'opacity-50 bg-blue-50 border-blue-200 shadow-inner' : 'border-slate-200'}`}
+                                                >
                                                     {editingId === l.id ? (
                                                         <div className="flex-1 grid grid-cols-12 gap-2 items-center">
                                                             <div className="col-span-4">
@@ -1594,18 +1627,23 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         </div>
                                                     ) : (
                                                         <>
-                                                            <span className="flex items-center">
-                                                                <b>{l.role}</b>
-                                                                <span className="text-slate-400 mx-2">|</span>
-                                                                <span className="text-[10px] text-slate-400 mr-2">({l.cost_type})</span>
-                                                                <span>{l.quantity}{l.unit || 'un'}</span>
-                                                                <span className="text-[10px] text-slate-400 ml-2">(R$ {l.unit_cost.toFixed(2)})</span>
-                                                            </span>
-                                                            <div className="flex items-center gap-4">
+                                                            <div className="flex items-center gap-2 grow">
+                                                                <div className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 shrink-0">
+                                                                    <GripVertical size={16} />
+                                                                </div>
+                                                                <span className="flex items-center">
+                                                                    <b>{l.role}</b>
+                                                                    <span className="text-slate-400 mx-2">|</span>
+                                                                    <span className="text-[10px] text-slate-400 mr-2">({l.cost_type})</span>
+                                                                    <span>{l.quantity}{l.unit || 'un'}</span>
+                                                                    <span className="text-[10px] text-slate-400 ml-2">(R$ {l.unit_cost.toFixed(2)})</span>
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex items-center gap-4 shrink-0">
                                                                 <span className="font-bold">R$ {l.total_cost.toFixed(2)}</span>
                                                                 <div className="flex gap-1">
-                                                                    <button onClick={() => (window as any).moveItemWork(labor, setLabor, labor.indexOf(l), 'up')} disabled={labor.indexOf(l) === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronUp size={14} /></button>
-                                                                    <button onClick={() => (window as any).moveItemWork(labor, setLabor, labor.indexOf(l), 'down')} disabled={labor.indexOf(l) === labor.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronDown size={14} /></button>
+                                                                    <button onClick={() => (window as any).moveItemWork(labor, setLabor, index, 'up')} disabled={index === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronUp size={14} /></button>
+                                                                    <button onClick={() => (window as any).moveItemWork(labor, setLabor, index, 'down')} disabled={index === labor.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronDown size={14} /></button>
                                                                 </div>
                                                                 <Pencil size={14} className="cursor-pointer text-blue-400 hover:text-blue-600" onClick={() => setEditingId(l.id)} />
                                                                 <Trash2 size={14} className="cursor-pointer text-slate-400 hover:text-red-500" onClick={() => handleDeleteLabor(l.id)} />
@@ -1622,8 +1660,15 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 {resourceTab === 'indireto' && (
                                     <div>
                                         <div className="space-y-2">
-                                            {indirects.map(i => (
-                                                <div key={i.id} className="bg-white p-3 rounded-lg border border-slate-200 flex justify-between items-center text-sm">
+                                            {indirects.map((i, index) => (
+                                                <div
+                                                    key={i.id}
+                                                    draggable
+                                                    onDragStart={() => setDraggedIndIndex(index)}
+                                                    onDragOver={(e) => (window as any).handleDragOver(e, index, draggedIndIndex, indirects, setIndirects, setDraggedIndIndex)}
+                                                    onDragEnd={() => setDraggedIndIndex(null)}
+                                                    className={`bg-white p-3 rounded-lg border flex justify-between items-center text-sm transition-all ${draggedIndIndex === index ? 'opacity-50 bg-blue-50 border-blue-200 shadow-inner' : 'border-slate-200'}`}
+                                                >
                                                     {editingId === i.id ? (
                                                         <div className="flex-1 grid grid-cols-12 gap-2 items-center">
                                                             <div className="col-span-3">
@@ -1686,12 +1731,17 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         </div>
                                                     ) : (
                                                         <>
-                                                            <span>[{i.category}] <b>{i.description}</b></span>
-                                                            <div className="flex items-center gap-4">
+                                                            <div className="flex items-center gap-2 grow">
+                                                                <div className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 shrink-0">
+                                                                    <GripVertical size={16} />
+                                                                </div>
+                                                                <span>[{i.category}] <b>{i.description}</b></span>
+                                                            </div>
+                                                            <div className="flex items-center gap-4 shrink-0">
                                                                 <span className="font-bold">R$ {i.value.toFixed(2)}</span>
                                                                 <div className="flex gap-1">
-                                                                    <button onClick={() => (window as any).moveItemWork(indirects, setIndirects, indirects.indexOf(i), 'up')} disabled={indirects.indexOf(i) === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronUp size={14} /></button>
-                                                                    <button onClick={() => (window as any).moveItemWork(indirects, setIndirects, indirects.indexOf(i), 'down')} disabled={indirects.indexOf(i) === indirects.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronDown size={14} /></button>
+                                                                    <button onClick={() => (window as any).moveItemWork(indirects, setIndirects, index, 'up')} disabled={index === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronUp size={14} /></button>
+                                                                    <button onClick={() => (window as any).moveItemWork(indirects, setIndirects, index, 'down')} disabled={index === indirects.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronDown size={14} /></button>
                                                                 </div>
                                                                 <Pencil size={14} className="cursor-pointer text-blue-400 hover:text-blue-600" onClick={() => setEditingId(i.id)} />
                                                                 <Trash2 size={14} className="cursor-pointer text-slate-400 hover:text-red-500" onClick={() => handleDeleteIndirect(i.id)} />
