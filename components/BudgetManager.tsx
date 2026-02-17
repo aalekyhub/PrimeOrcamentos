@@ -248,17 +248,17 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
                        <div style="display: flex; justify-content: flex-end; margin-bottom: 12px; gap: 40px;">
                            <div style="text-align: right;">
                               <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px;">SUBTOTAL</span>
-                              <span style="font-size: 11px; font-weight: 700; color: #334155; display: block;">R$ ${subT.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                              <span style="font-size: 10px; font-weight: 700; color: #334155; display: block;">R$ ${subT.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                            </div>
                            ${bdiR > 0 ? `
                            <div style="text-align: right;">
                               <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px;">BDI (${bdiR}%)</span>
-                              <span style="font-size: 11px; font-weight: 700; color: #10b981; display: block;">+ R$ ${bdiV.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                              <span style="font-size: 10px; font-weight: 700; color: #10b981; display: block;">+ R$ ${bdiV.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                            </div>` : ''}
                            ${taxR > 0 ? `
                            <div style="text-align: right;">
                               <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px;">IMPOSTOS (${taxR}%)</span>
-                              <span style="font-size: 11px; font-weight: 700; color: #3b82f6; display: block;">+ R$ ${taxV.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                              <span style="font-size: 10px; font-weight: 700; color: #3b82f6; display: block;">+ R$ ${taxV.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                            </div>` : ''}
                        </div>
                        <div style="background: #0f172a; color: white; padding: 24px 32px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center;">
