@@ -1296,7 +1296,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     {services.map((svc, index) => (
                                         <div
                                             key={svc.id}
-                                            draggable
+                                            draggable={editingId !== svc.id}
                                             onDragStart={() => setDraggedSvcIndex(index)}
                                             onDragOver={(e) => (window as any).handleDragOver(e, index, draggedSvcIndex, services, setServices, setDraggedSvcIndex)}
                                             onDragEnd={() => setDraggedSvcIndex(null)}
@@ -1490,7 +1490,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             {materials.map((m, index) => (
                                                 <div
                                                     key={m.id}
-                                                    draggable
+                                                    draggable={editingId !== m.id}
                                                     onDragStart={() => setDraggedMatIndex(index)}
                                                     onDragOver={(e) => (window as any).handleDragOver(e, index, draggedMatIndex, materials, setMaterials, setDraggedMatIndex)}
                                                     onDragEnd={() => setDraggedMatIndex(null)}
@@ -1619,7 +1619,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             {labor.map((l, index) => (
                                                 <div
                                                     key={l.id}
-                                                    draggable
+                                                    draggable={editingId !== l.id}
                                                     onDragStart={() => setDraggedLabIndex(index)}
                                                     onDragOver={(e) => (window as any).handleDragOver(e, index, draggedLabIndex, labor, setLabor, setDraggedLabIndex)}
                                                     onDragEnd={() => setDraggedLabIndex(null)}
@@ -1737,7 +1737,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             {indirects.map((i, index) => (
                                                 <div
                                                     key={i.id}
-                                                    draggable
+                                                    draggable={editingId !== i.id}
                                                     onDragStart={() => setDraggedIndIndex(index)}
                                                     onDragOver={(e) => (window as any).handleDragOver(e, index, draggedIndIndex, indirects, setIndirects, setDraggedIndIndex)}
                                                     onDragEnd={() => setDraggedIndIndex(null)}

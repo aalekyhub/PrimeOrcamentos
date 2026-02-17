@@ -1219,7 +1219,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                     {services.map((svc, index) => (
                                         <div
                                             key={svc.id}
-                                            draggable
+                                            draggable={editingId !== svc.id}
                                             onDragStart={() => setDraggedSvcIndex(index)}
                                             onDragOver={(e) => (window as any).handleDragOver(e, index, draggedSvcIndex, services, setServices, setDraggedSvcIndex)}
                                             onDragEnd={() => setDraggedSvcIndex(null)}
@@ -1404,7 +1404,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                         {materials.map((m, index) => (
                                             <div
                                                 key={m.id}
-                                                draggable
+                                                draggable={editingId !== m.id}
                                                 onDragStart={() => setDraggedMatIndex(index)}
                                                 onDragOver={(e) => (window as any).handleDragOver(e, index, draggedMatIndex, materials, setMaterials, setDraggedMatIndex)}
                                                 onDragEnd={() => setDraggedMatIndex(null)}
@@ -1528,7 +1528,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                         {labor.map((l, index) => (
                                             <div
                                                 key={l.id}
-                                                draggable
+                                                draggable={editingId !== l.id}
                                                 onDragStart={() => setDraggedLabIndex(index)}
                                                 onDragOver={(e) => (window as any).handleDragOver(e, index, draggedLabIndex, labor, setLabor, setDraggedLabIndex)}
                                                 onDragEnd={() => setDraggedLabIndex(null)}
@@ -1654,7 +1654,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                         {indirects.map((i, index) => (
                                             <div
                                                 key={i.id}
-                                                draggable
+                                                draggable={editingId !== i.id}
                                                 onDragStart={() => setDraggedIndIndex(index)}
                                                 onDragOver={(e) => (window as any).handleDragOver(e, index, draggedIndIndex, indirects, setIndirects, setDraggedIndIndex)}
                                                 onDragEnd={() => setDraggedIndIndex(null)}
