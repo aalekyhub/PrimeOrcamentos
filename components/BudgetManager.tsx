@@ -292,7 +292,9 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         </thead>
         <tfoot>
             <tr>
-                <td style="height: 15mm; border: none; padding: 0;"><div style="height: 15mm;">&nbsp;</div></td>
+                <td style="height: 15mm; border: none; padding: 0; vertical-align: bottom;">
+                    <div style="text-align: right; padding-right: 15mm; font-size: 9px; color: #94a3b8; font-family: 'Inter', sans-serif; padding-bottom: 5mm;" class="page-footer-number"></div>
+                </td>
             </tr>
         </tfoot>
         <tbody>
@@ -401,15 +403,6 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
            
            /* Estilos para Numeração de Páginas no Ctrl+P */
            body { counter-reset: page; }
-           .page-footer-number {
-             position: fixed;
-             bottom: 8mm;
-             right: 15mm;
-             font-size: 9px;
-             color: #94a3b8;
-             font-family: 'Inter', sans-serif;
-             pointer-events: none;
-           }
            .page-footer-number::after {
              counter-increment: page;
              content: "Pág. " counter(page);
@@ -435,7 +428,6 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         </style>
       </head>
       <body>
-        <div class="page-footer-number"></div>
         ${htmlContent}
         <script>
            // Script crucial para evitar que títulos fiquem sozinhos no fim da página
@@ -617,7 +609,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
         filename,
         image: { type: "jpeg" as const, quality: 0.98 },
         html2canvas: {
-          scale: 2,
+          scale: 3,
           useCORS: true,
           allowTaint: false,
           backgroundColor: "#ffffff",
