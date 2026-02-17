@@ -287,7 +287,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
       <table style="width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif;">
         <thead>
             <tr>
-                <td style="height: 20mm; border: none; padding: 0;"><div style="height: 20mm;">&nbsp;</div></td>
+                <td style="height: 15mm; border: none; padding: 0;"><div style="height: 15mm;">&nbsp;</div></td>
             </tr>
         </thead>
         <tfoot>
@@ -299,7 +299,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
           <tr>
             <td style="padding: 0;">
               <div class="a4-container">
-                  <div style="margin-bottom: 20px;">
+                  <div style="margin-bottom: 25px;">
                     ${getHeaderHtml(budget)}
                   </div>
                   ${getBodyHtml(budget)}
@@ -395,7 +395,7 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
            * { box-sizing: border-box; }
            body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
            @page { size: A4; margin: 0 !important; }
-           .a4-container { width: 100%; margin: 0; background: white; padding: 15mm !important; }
+           .a4-container { width: 100%; margin: 0; background: white; padding: 0 15mm !important; }
            .avoid-break { break-inside: avoid; page-break-inside: avoid; }
            .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
            
