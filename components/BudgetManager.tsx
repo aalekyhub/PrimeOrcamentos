@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import html2pdf from 'html2pdf.js';
 import {
   Plus, Search, X, Trash2, Pencil, Printer, Save,
@@ -23,9 +23,21 @@ interface Props {
   catalogServices: CatalogService[];
   setCatalogServices: React.Dispatch<React.SetStateAction<CatalogService[]>>;
   company: CompanyProfile;
+  prefilledData: any;
+  onPrefilledDataConsumed: () => void;
 }
 
-const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCustomers, catalogServices, setCatalogServices, company }) => {
+const BudgetManager: React.FC<Props> = ({
+  orders,
+  setOrders,
+  customers,
+  setCustomers,
+  catalogServices,
+  setCatalogServices,
+  company,
+  prefilledData,
+  onPrefilledDataConsumed
+}) => {
   const [showForm, setShowForm] = useState(false);
   const [showFullClientForm, setShowFullClientForm] = useState(false);
   const [showFullServiceForm, setShowFullServiceForm] = useState(false);
@@ -58,6 +70,81 @@ const BudgetManager: React.FC<Props> = ({ orders, setOrders, customers, setCusto
   const budgets = useMemo(() => orders.filter(o =>
     (o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED) && (o.customerName.toLowerCase().includes(searchTerm.toLowerCase()) || o.id.includes(searchTerm))
   ), [orders, searchTerm]);
+
+  // Handle Prefilled Data from Planning
+  useEffect(() => {
+    if (prefilledData) {
+      const { plan, services, totalMaterial, totalLabor, totalIndirect } = prefilledData;
+
+      // 1. Set Customer
+      setSelectedCustomerId(plan.client_id || '');
+
+      // 2. Set Title
+      setProposalTitle(plan.name || '');
+
+      // 3. Map items
+      const newItems: ServiceItem[] = [];
+
+      // Add services
+      if (services && services.length > 0) {
+        services.forEach((s: any) => {
+          newItems.push({
+            id: db.generateId('ITEM'),
+            description: s.description,
+            quantity: s.quantity,
+            unitPrice: s.unit_labor_cost + s.unit_material_cost,
+            unit: s.unit,
+            type: 'Serviço'
+          });
+        });
+      }
+
+      // Add summary items for direct costs if needed
+      if (totalMaterial > 0) {
+        newItems.push({
+          id: db.generateId('ITEM'),
+          description: 'TOTAL DE MATERIAIS E INSUMOS (PREVISTO)',
+          quantity: 1,
+          unitPrice: totalMaterial,
+          unit: 'un',
+          type: 'Material'
+        });
+      }
+
+      if (totalLabor > 0) {
+        newItems.push({
+          id: db.generateId('ITEM'),
+          description: 'TOTAL DE MÃO DE OBRA (PREVISTO)',
+          quantity: 1,
+          unitPrice: totalLabor,
+          unit: 'un',
+          type: 'Serviço'
+        });
+      }
+
+      if (totalIndirect > 0) {
+        newItems.push({
+          id: db.generateId('ITEM'),
+          description: 'CUSTOS INDIRETOS E OPERACIONAIS (PREVISTO)',
+          quantity: 1,
+          unitPrice: totalIndirect,
+          unit: 'un',
+          type: 'Serviço'
+        });
+      }
+
+      setItems(newItems);
+
+      // 4. Open form
+      setShowForm(true);
+      setEditingBudgetId(null); // Ensure it's a new budget
+
+      // 5. Consume data
+      onPrefilledDataConsumed();
+
+      notify("Dados do planejamento importados com sucesso!");
+    }
+  }, [prefilledData, onPrefilledDataConsumed, notify]);
 
   const subtotal = useMemo(() => items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0), [items]);
   const totalAmount = useMemo(() => {
