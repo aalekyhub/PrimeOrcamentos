@@ -851,11 +851,11 @@ const BudgetManager: React.FC<Props> = ({
         <table className="w-full text-left">
           <thead className="bg-slate-50 text-[10px] font-black uppercase text-slate-400 border-b">
             <tr>
-              <th className="px-8 py-5">OR� #</th>
+              <th className="px-8 py-5">ORC</th>
               <th className="px-8 py-5">CLIENTE</th>
               <th className="px-8 py-5">DESCRIÇÃO</th>
               <th className="px-8 py-5">VALOR</th>
-              <th className="px-8 py-5 text-right">A�+�ES</th>
+              <th className="px-8 py-5 text-right">AÇÕES</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
