@@ -1,4 +1,4 @@
-// @ts-ignore
+﻿// @ts-ignore
 import html2pdf from 'html2pdf.js';
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
@@ -39,7 +39,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     const { handlePrintOS } = usePrintOS(customers, company);
 
     const [selectedCustomerId, setSelectedCustomerId] = useState('');
-    const [osTitle, setOsTitle] = useState('ExecuÃ§Ã£o de Obra');
+    const [osTitle, setOsTitle] = useState('Execuçío de Obra');
     const [diagnosis, setDiagnosis] = useState(''); // description of work
     const [descriptionBlocks, setDescriptionBlocks] = useState<DescriptionBlock[]>([]);
     const [paymentTerms, setPaymentTerms] = useState('');
@@ -54,7 +54,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     const [currentUnit, setCurrentUnit] = useState('un');
     const [activeEditField, setActiveEditField] = useState<string | null>(null);
 
-    // Current Item Real Fields (MediÃ§Ã£o)
+    // Current Item Real Fields (Mediçío)
     const [currentActualQty, setCurrentActualQty] = useState<number>(0);
     const [currentActualPrice, setCurrentActualPrice] = useState<number>(0);
     const [currentActual, setCurrentActual] = useState<number | ''>('');
@@ -102,7 +102,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
     const addTextBlock = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'text', content: '' }]);
     const addImageBlock = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'image', content: '' }]);
-    const addPageBreak = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'page-break', content: 'QUEBRA DE PÃƒÂGINA' }]);
+    const addPageBreak = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'page-break', content: 'QUEBRA DE PíƒÂGINA' }]);
     const updateBlockContent = (id: string, content: string) => setDescriptionBlocks(prev => prev.map(b => b.id === id ? { ...b, content } : b));
 
     const handleImageUpload = async (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,7 +125,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             description: currentDesc,
             quantity: currentQty || 1,
             unitPrice: currentPrice || 0,
-            type: 'ServiÃ§o',
+            type: 'Serviço',
             unit: currentUnit || 'un',
             actualValue: (currentActual === '' ? 0 : currentActual) || ((currentActualQty || 0) * (currentActualPrice || 0)),
             actualQuantity: currentActualQty || 0,
@@ -192,10 +192,10 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
 
     const handleDownloadPDF = (order: ServiceOrder) => {
-        const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', address: 'EndereÃ§o nÃ£o informado', city: '', state: '', cep: '' };
+        const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', address: 'Endereço nío informado', city: '', state: '', cep: '' };
 
         const html = `
-    < !DOCTYPE html >
+    <!DOCTYPE html >
         <html>
             <head>
                 <title>Contrato - ${order.id}</title>
@@ -203,7 +203,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
                     <style>
                         * {box - sizing: border-box; }
-                        body {font - family: 'Inter', sans-serif; margin: 0; padding: 0; }
+                        body {font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
                         .a4-container {width: 100%; background: white; }
                         .avoid-break { break-inside: avoid; page-break-inside: avoid; }
                     </style>
@@ -218,14 +218,14 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                 </div>
                                 <div>
                                     <h1 class="text-3xl font-black text-slate-900 leading-none mb-2 uppercase tracking-tight">${company.name}</h1>
-                                    <p class="text-[11px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">Contrato de PrestaÃ§Ã£o de ServiÃ§os</p>
+                                    <p class="text-[11px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">Contrato de Prestaçío de Serviços</p>
                                     <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tight">${company.cnpj || ''} | ${company.phone || ''}</p>
                                 </div>
                             </div>
                             <div class="text-right">
                                 <div class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest mb-2 shadow-md inline-block">CONTRATO</div>
                                 <p class="text-4xl font-black text-[#0f172a] tracking-tighter mb-1 whitespace-nowrap">${order.id}</p>
-                                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">EMISSÃƒO: ${new Date().toLocaleDateString('pt-BR')}</p>
+                                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">EMISSíƒO: ${new Date().toLocaleDateString('pt-BR')}</p>
                             </div>
                         </div>
 
@@ -237,75 +237,75 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
 
                         <div className="mb-10">
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">As partes acima identificadas resolvem firmar o presente Contrato de PrestaÃ§Ã£o de ServiÃ§os por Empreitada Global, nos termos da legislaÃ§Ã£o civil e previdenciÃ¡ria vigente, mediante as clÃ¡usulas e condiÃ§Ãµes seguintes:</p>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">As partes acima identificadas resolvem firmar o presente Contrato de Prestaçío de Serviços por Empreitada Global, nos termos da legislaçío civil e previdenciária vigente, mediante as cláusulas e condiçíµes seguintes:</p>
                         </div>
 
                         <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 1Âª â€“ DO OBJETO</h4>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">1.1. O presente contrato tem por objeto a execuÃ§Ã£o de reforma em unidade residencial, situada no endereÃ§o do CONTRATANTE, compreendendo os serviÃ§os descritos abaixo, os quais serÃ£o executados por empreitada global, com responsabilidade tÃ©cnica, administrativa e operacional integral da CONTRATADA.</p>
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLíUSULA 1Âª â€“ DO OBJETO</h4>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">1.1. O presente contrato tem por objeto a execuçío de reforma em unidade residencial, situada no endereço do CONTRATANTE, compreendendo os serviços descritos abaixo, os quais serío executados por empreitada global, com responsabilidade técnica, administrativa e operacional integral da CONTRATADA.</p>
                             <div class="bg-blue-50/50 p-4 rounded-xl border-l-4 border-blue-500 mt-4">
                                 <p class="text-[14px] font-bold text-blue-900 uppercase tracking-wide">${order.description}</p>
                             </div>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-4">1.2. A execuÃ§Ã£o dos serviÃ§os serÃ¡ realizada por obra certa, com preÃ§o previamente ajustado, nÃ£o se caracterizando, em hipÃ³tese alguma, cessÃ£o ou locaÃ§Ã£o de mÃ£o de obra.</p>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-4">1.2. A execuçío dos serviços será realizada por obra certa, com preço previamente ajustado, nío se caracterizando, em hipótese alguma, cessío ou locaçío de mío de obra.</p>
                         </div>
 
                         <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 2Âª â€“ DA FORMA DE EXECUÃ‡ÃƒO (EMPREITADA GLOBAL)</h4>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">2.1. A CONTRATADA executarÃ¡ os serviÃ§os com autonomia tÃ©cnica e gerencial, utilizando meios prÃ³prios, inclusive pessoal, ferramentas, equipamentos e mÃ©todos de trabalho.</p>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">2.2. NÃ£o haverÃ¡ qualquer tipo de subordinaÃ§Ã£o, exclusividade, controle de jornada ou disponibilizaÃ§Ã£o de trabalhadores ao CONTRATANTE.</p>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">2.3. A CONTRATADA assume total responsabilidade pela execuÃ§Ã£o da obra, respondendo integralmente pelos serviÃ§os contratados.</p>
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLíUSULA 2Âª â€“ DA FORMA DE EXECUí‡íƒO (EMPREITADA GLOBAL)</h4>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">2.1. A CONTRATADA executará os serviços com autonomia técnica e gerencial, utilizando meios próprios, inclusive pessoal, ferramentas, equipamentos e métodos de trabalho.</p>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">2.2. Nío haverá qualquer tipo de subordinaçío, exclusividade, controle de jornada ou disponibilizaçío de trabalhadores ao CONTRATANTE.</p>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">2.3. A CONTRATADA assume total responsabilidade pela execuçío da obra, respondendo integralmente pelos serviços contratados.</p>
                         </div>
 
                         <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 3Âª â€“ DO PREÃ‡O E DA FORMA DE PAGAMENTO</h4>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">3.1. Pelos serviÃ§os objeto deste contrato, o CONTRATANTE pagarÃ¡ Ã  CONTRATADA o valor global de <b class="text-slate-900">R$ ${order.contractPrice && order.contractPrice > 0 ? order.contractPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>.</p>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">3.2. O pagamento serÃ¡ efetuado da seguinte forma: <b>${order.paymentTerms || 'Conforme combinado'}</b>.</p>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">3.3. O valor contratado corresponde ao preÃ§o fechado da obra, nÃ£o estando vinculado a horas trabalhadas, nÃºmero de funcionÃ¡rios ou fornecimento de mÃ£o de obra.</p>
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLíUSULA 3Âª â€“ DO PREí‡O E DA FORMA DE PAGAMENTO</h4>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">3.1. Pelos serviços objeto deste contrato, o CONTRATANTE pagará í  CONTRATADA o valor global de <b class="text-slate-900">R$ ${order.contractPrice && order.contractPrice > 0 ? order.contractPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>.</p>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">3.2. O pagamento será efetuado da seguinte forma: <b>${order.paymentTerms || 'Conforme combinado'}</b>.</p>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">3.3. O valor contratado corresponde ao preço fechado da obra, nío estando vinculado a horas trabalhadas, número de funcionários ou fornecimento de mío de obra.</p>
                         </div>
 
                         <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 4Âª â€“ DAS OBRIGAÃ‡Ã•ES DA CONTRATADA</h4>
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLíUSULA 4Âª â€“ DAS OBRIGAí‡í•ES DA CONTRATADA</h4>
                             <ul class="list-disc pl-5 mt-3 text-[14px] text-slate-600 leading-relaxed space-y-2">
-                                <li>4.1. Executar os serviÃ§os conforme o escopo contratado e normas tÃ©cnicas aplicÃ¡veis.</li>
-                                <li>4.2. Responsabilizar-se integralmente por seus empregados, prepostos ou subcontratados, inclusive quanto a encargos trabalhistas, previdenciÃ¡rios, fiscais e securitÃ¡rios.</li>
-                                <li>4.3. Manter seus tributos, contribuiÃ§Ãµes e obrigaÃ§Ãµes legais em dia.</li>
-                                <li>4.4. Responder por danos eventualmente causados ao imÃ³vel durante a execuÃ§Ã£o dos serviÃ§os.</li>
+                                <li>4.1. Executar os serviços conforme o escopo contratado e normas técnicas aplicáveis.</li>
+                                <li>4.2. Responsabilizar-se integralmente por seus empregados, prepostos ou subcontratados, inclusive quanto a encargos trabalhistas, previdenciários, fiscais e securitários.</li>
+                                <li>4.3. Manter seus tributos, contribuiçíµes e obrigaçíµes legais em dia.</li>
+                                <li>4.4. Responder por danos eventualmente causados ao imóvel durante a execuçío dos serviços.</li>
                             </ul>
                         </div>
 
                         <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 5Âª â€“ DAS OBRIGAÃ‡Ã•ES DO CONTRATANTE</h4>
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLíUSULA 5Âª â€“ DAS OBRIGAí‡í•ES DO CONTRATANTE</h4>
                             <ul class="list-disc pl-5 mt-3 text-[14px] text-slate-600 leading-relaxed space-y-2">
                                 <li>5.1. Garantir o acesso da CONTRATADA ao local da obra.</li>
                                 <li>5.2. Efetuar os pagamentos conforme acordado.</li>
-                                <li>5.3. Fornecer, quando necessÃ¡rio, autorizaÃ§Ãµes do condomÃ­nio para execuÃ§Ã£o dos serviÃ§os.</li>
+                                <li>5.3. Fornecer, quando necessário, autorizaçíµes do condomí­nio para execuçío dos serviços.</li>
                             </ul>
                         </div>
 
                         <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 6Âª â€“ DAS RESPONSABILIDADES PREVIDENCIÃRIAS E FISCAIS</h4>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">6.1. As partes reconhecem que o presente contrato caracteriza empreitada global de obra, nos termos da legislaÃ§Ã£o vigente, nÃ£o se aplicando a retenÃ§Ã£o de 11% (onze por cento) de INSS, conforme disposto na Lei nÂº 8.212/91 e InstruÃ§Ã£o Normativa RFB nÂº 971/2009.</p>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">6.2. A CONTRATADA Ã© a Ãºnica responsÃ¡vel pelo recolhimento de seus tributos e contribuiÃ§Ãµes incidentes sobre suas atividades.</p>
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLíUSULA 6Âª â€“ DAS RESPONSABILIDADES PREVIDENCIíRIAS E FISCAIS</h4>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">6.1. As partes reconhecem que o presente contrato caracteriza empreitada global de obra, nos termos da legislaçío vigente, nío se aplicando a retençío de 11% (onze por cento) de INSS, conforme disposto na Lei nÂº 8.212/91 e Instruçío Normativa RFB nÂº 971/2009.</p>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">6.2. A CONTRATADA é a única responsável pelo recolhimento de seus tributos e contribuiçíµes incidentes sobre suas atividades.</p>
                         </div>
 
                         <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 7Âª â€“ DO PRAZO</h4>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">7.1. O prazo estimado para execuÃ§Ã£o da obra Ã© de <b>${order.deliveryTime || 'conforme demanda'}</b>, contado a partir do inÃ­cio efetivo dos serviÃ§os, podendo ser ajustado mediante comum acordo entre as partes.</p>
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLíUSULA 7Âª â€“ DO PRAZO</h4>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">7.1. O prazo estimado para execuçío da obra é de <b>${order.deliveryTime || 'conforme demanda'}</b>, contado a partir do iní­cio efetivo dos serviços, podendo ser ajustado mediante comum acordo entre as partes.</p>
                         </div>
 
                         <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 8Âª â€“ DA RESPONSABILIDADE TÃ‰CNICA</h4>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">8.1. Quando aplicÃ¡vel, a CONTRATADA providenciarÃ¡ a emissÃ£o de ART/RRT, assumindo a responsabilidade tÃ©cnica pela execuÃ§Ã£o dos serviÃ§os.</p>
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLíUSULA 8Âª â€“ DA RESPONSABILIDADE Tí‰CNICA</h4>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">8.1. Quando aplicável, a CONTRATADA providenciará a emissío de ART/RRT, assumindo a responsabilidade técnica pela execuçío dos serviços.</p>
                         </div>
 
                         <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 9Âª â€“ DA RESCISÃƒO</h4>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">9.1. O presente contrato poderÃ¡ ser rescindido por descumprimento de quaisquer de suas clÃ¡usulas, mediante notificaÃ§Ã£o por escrito.</p>
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLíUSULA 9Âª â€“ DA RESCISíƒO</h4>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">9.1. O presente contrato poderá ser rescindido por descumprimento de quaisquer de suas cláusulas, mediante notificaçío por escrito.</p>
                         </div>
 
                         <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 10Âª â€“ DO FORO</h4>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">10.1. Fica eleito o foro da comarca de <b>${customer.city || 'SÃ£o Paulo'} - ${customer.state || 'SP'}</b>, para dirimir quaisquer controvÃ©rsias oriundas deste contrato, renunciando as partes a qualquer outro, por mais privilegiado que seja.</p>
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLíUSULA 10Âª â€“ DO FORO</h4>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">10.1. Fica eleito o foro da comarca de <b>${customer.city || 'Sío Paulo'} - ${customer.state || 'SP'}</b>, para dirimir quaisquer controvérsias oriundas deste contrato, renunciando as partes a qualquer outro, por mais privilegiado que seja.</p>
                         </div>
 
                         <div class="mb-8" style="padding-top: 30mm; padding-bottom: 20mm; page-break-inside: avoid; break-inside: avoid;">
@@ -384,7 +384,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                 pdf.setPage(i);
                 pdf.setFontSize(10);
                 pdf.setTextColor(148, 163, 184); // #94a3b8
-                pdf.text('PÃGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
+                pdf.text('PíGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
             }
             pdf.save(opt.filename);
             document.body.removeChild(worker);
@@ -392,12 +392,12 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     };
 
     const handlePrintContract = (order: ServiceOrder) => {
-        const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', address: 'EndereÃ§o nÃ£o informado', city: '', state: '', cep: '' };
+        const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', address: 'Endereço nío informado', city: '', state: '', cep: '' };
         const printWindow = window.open('', '_blank');
         if (!printWindow) return;
 
         const html = `
-    < !DOCTYPE html >
+    <!DOCTYPE html >
         <html>
             <head>
                 <title>Contrato - ${order.id.replace('OS-', 'OS')} - ${order.description || 'Proposta'}</title>
@@ -451,14 +451,14 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                     </div>
                                     <div>
                                         <h1 class="text-3xl font-black text-slate-900 leading-none mb-2 uppercase tracking-tight">${company.name}</h1>
-                                        <p class="text-[11px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">Contrato de PrestaÃ§Ã£o de ServiÃ§os</p>
+                                        <p class="text-[11px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">Contrato de Prestaçío de Serviços</p>
                                         <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tight">${company.cnpj || ''} | ${company.phone || ''}</p>
                                     </div>
                                 </div>
                                 <div class="text-right">
                                     <div class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest mb-2 shadow-md inline-block">CONTRATO</div>
                                     <p class="text-4xl font-black text-[#0f172a] tracking-tighter mb-1 whitespace-nowrap">${order.id}</p>
-                                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">EMISSÃƒO: ${new Date().toLocaleDateString('pt-BR')}</p>
+                                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">EMISSíƒO: ${new Date().toLocaleDateString('pt-BR')}</p>
                                 </div>
                             </div>
 
@@ -468,75 +468,75 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                             </div>
 
                             <div className="mb-10">
-                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">As partes acima identificadas resolvem firmar o presente Contrato de PrestaÃ§Ã£o de ServiÃ§os por Empreitada Global, nos termos da legislaÃ§Ã£o civil e previdenciÃ¡ria vigente, mediante as clÃ¡usulas e condiÃ§Ãµes seguintes:</p>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">As partes acima identificadas resolvem firmar o presente Contrato de Prestaçío de Serviços por Empreitada Global, nos termos da legislaçío civil e previdenciária vigente, mediante as cláusulas e condiçíµes seguintes:</p>
                             </div>
 
                             <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 1Âª â€“ DO OBJETO</h4>
-                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">1.1. O presente contrato tem por objeto a execuÃ§Ã£o de reforma em unidade residencial, situada no endereÃ§o do CONTRATANTE, compreendendo os serviÃ§os descritos abaixo, os quais serÃ£o executados por empreitada global, com responsabilidade tÃ©cnica, administrativa e operacional integral da CONTRATADA.</p>
+                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLíUSULA 1Âª â€“ DO OBJETO</h4>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">1.1. O presente contrato tem por objeto a execuçío de reforma em unidade residencial, situada no endereço do CONTRATANTE, compreendendo os serviços descritos abaixo, os quais serío executados por empreitada global, com responsabilidade técnica, administrativa e operacional integral da CONTRATADA.</p>
                                 <div class="bg-blue-50/50 p-4 rounded-xl border-l-4 border-blue-500 mt-4">
                                     <p class="text-[14px] font-bold text-blue-900 uppercase tracking-wide">${order.description}</p>
                                 </div>
-                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-4">1.2. A execuÃ§Ã£o dos serviÃ§os serÃ¡ realizada por obra certa, com preÃ§o previamente ajustado, nÃ£o se caracterizando, em hipÃ³tese alguma, cessÃ£o ou locaÃ§Ã£o de mÃ£o de obra.</p>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-4">1.2. A execuçío dos serviços será realizada por obra certa, com preço previamente ajustado, nío se caracterizando, em hipótese alguma, cessío ou locaçío de mío de obra.</p>
                             </div>
 
                             <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 2Âª â€“ DA FORMA DE EXECUÃ‡ÃƒO (EMPREITADA GLOBAL)</h4>
-                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">2.1. A CONTRATADA executarÃ¡ os serviÃ§os com autonomia tÃ©cnica e gerencial, utilizando meios prÃ³prios, inclusive pessoal, ferramentas, equipamentos e mÃ©todos de trabalho.</p>
-                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">2.2. NÃ£o haverÃ¡ qualquer tipo de subordinaÃ§Ã£o, exclusividade, controle de jornada ou disponibilizaÃ§Ã£o de trabalhadores ao CONTRATANTE.</p>
-                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">2.3. A CONTRATADA assume total responsabilidade pela execuÃ§Ã£o da obra, respondendo integralmente pelos serviÃ§os contratados.</p>
+                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLíUSULA 2Âª â€“ DA FORMA DE EXECUí‡íƒO (EMPREITADA GLOBAL)</h4>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">2.1. A CONTRATADA executará os serviços com autonomia técnica e gerencial, utilizando meios próprios, inclusive pessoal, ferramentas, equipamentos e métodos de trabalho.</p>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">2.2. Nío haverá qualquer tipo de subordinaçío, exclusividade, controle de jornada ou disponibilizaçío de trabalhadores ao CONTRATANTE.</p>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">2.3. A CONTRATADA assume total responsabilidade pela execuçío da obra, respondendo integralmente pelos serviços contratados.</p>
                             </div>
 
                             <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 3Âª â€“ DO PREÃ‡O E DA FORMA DE PAGAMENTO</h4>
-                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">3.1. Pelos serviÃ§os objeto deste contrato, o CONTRATANTE pagarÃ¡ Ã  CONTRATADA o valor global de <b class="text-slate-900">R$ ${order.contractPrice && order.contractPrice > 0 ? order.contractPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>.</p>
-                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">3.2. O pagamento serÃ¡ efetuado da seguinte forma: <b>${order.paymentTerms || 'Conforme combinado'}</b>.</p>
-                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">3.3. O valor contratado corresponde ao preÃ§o fechado da obra, nÃ£o estando vinculado a horas trabalhadas, nÃºmero de funcionÃ¡rios ou fornecimento de mÃ£o de obra.</p>
+                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLíUSULA 3Âª â€“ DO PREí‡O E DA FORMA DE PAGAMENTO</h4>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">3.1. Pelos serviços objeto deste contrato, o CONTRATANTE pagará í  CONTRATADA o valor global de <b class="text-slate-900">R$ ${order.contractPrice && order.contractPrice > 0 ? order.contractPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>.</p>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">3.2. O pagamento será efetuado da seguinte forma: <b>${order.paymentTerms || 'Conforme combinado'}</b>.</p>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">3.3. O valor contratado corresponde ao preço fechado da obra, nío estando vinculado a horas trabalhadas, número de funcionários ou fornecimento de mío de obra.</p>
                             </div>
 
                             <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 4Âª â€“ DAS OBRIGAÃ‡Ã•ES DA CONTRATADA</h4>
+                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLíUSULA 4Âª â€“ DAS OBRIGAí‡í•ES DA CONTRATADA</h4>
                                 <ul class="list-disc pl-5 mt-3 text-[14px] text-slate-600 leading-relaxed space-y-2">
-                                    <li>4.1. Executar os serviÃ§os conforme o escopo contratado e normas tÃ©cnicas aplicÃ¡veis.</li>
-                                    <li>4.2. Responsabilizar-se integralmente por seus empregados, prepostos ou subcontratados, inclusive quanto a encargos trabalhistas, previdenciÃ¡rios, fiscais e securitÃ¡rios.</li>
-                                    <li>4.3. Manter seus tributos, contribuiÃ§Ãµes e obrigaÃ§Ãµes legais em dia.</li>
-                                    <li>4.4. Responder por danos eventualmente causados ao imÃ³vel durante a execuÃ§Ã£o dos serviÃ§os.</li>
+                                    <li>4.1. Executar os serviços conforme o escopo contratado e normas técnicas aplicáveis.</li>
+                                    <li>4.2. Responsabilizar-se integralmente por seus empregados, prepostos ou subcontratados, inclusive quanto a encargos trabalhistas, previdenciários, fiscais e securitários.</li>
+                                    <li>4.3. Manter seus tributos, contribuiçíµes e obrigaçíµes legais em dia.</li>
+                                    <li>4.4. Responder por danos eventualmente causados ao imóvel durante a execuçío dos serviços.</li>
                                 </ul>
                             </div>
 
                             <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 5Âª â€“ DAS OBRIGAÃ‡Ã•ES DO CONTRATANTE</h4>
+                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLíUSULA 5Âª â€“ DAS OBRIGAí‡í•ES DO CONTRATANTE</h4>
                                 <ul class="list-disc pl-5 mt-3 text-[14px] text-slate-600 leading-relaxed space-y-2">
                                     <li>5.1. Garantir o acesso da CONTRATADA ao local da obra.</li>
                                     <li>5.2. Efetuar os pagamentos conforme acordado.</li>
-                                    <li>5.3. Fornecer, quando necessÃ¡rio, autorizaÃ§Ãµes do condomÃ­nio para execuÃ§Ã£o dos serviÃ§os.</li>
+                                    <li>5.3. Fornecer, quando necessário, autorizaçíµes do condomí­nio para execuçío dos serviços.</li>
                                 </ul>
                             </div>
 
                             <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 6Âª â€“ DAS RESPONSABILIDADES PREVIDENCIÃRIAS E FISCAIS</h4>
-                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">6.1. As partes reconhecem que o presente contrato caracteriza empreitada global de obra, nos termos da legislaÃ§Ã£o vigente, nÃ£o se aplicando a retenÃ§Ã£o de 11% (onze por cento) de INSS, conforme disposto na Lei nÂº 8.212/91 e InstruÃ§Ã£o Normativa RFB nÂº 971/2009.</p>
-                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">6.2. A CONTRATADA Ã© a Ãºnica responsÃ¡vel pelo recolhimento de seus tributos e contribuiÃ§Ãµes incidentes sobre suas atividades.</p>
+                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLíUSULA 6Âª â€“ DAS RESPONSABILIDADES PREVIDENCIíRIAS E FISCAIS</h4>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">6.1. As partes reconhecem que o presente contrato caracteriza empreitada global de obra, nos termos da legislaçío vigente, nío se aplicando a retençío de 11% (onze por cento) de INSS, conforme disposto na Lei nÂº 8.212/91 e Instruçío Normativa RFB nÂº 971/2009.</p>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">6.2. A CONTRATADA é a única responsável pelo recolhimento de seus tributos e contribuiçíµes incidentes sobre suas atividades.</p>
                             </div>
 
                             <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 7Âª â€“ DO PRAZO</h4>
-                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">7.1. O prazo estimado para execuÃ§Ã£o da obra Ã© de <b>${order.deliveryTime || 'conforme demanda'}</b>, contado a partir do inÃ­cio efetivo dos serviÃ§os, podendo ser ajustado mediante comum acordo entre as partes.</p>
+                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLíUSULA 7Âª â€“ DO PRAZO</h4>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">7.1. O prazo estimado para execuçío da obra é de <b>${order.deliveryTime || 'conforme demanda'}</b>, contado a partir do iní­cio efetivo dos serviços, podendo ser ajustado mediante comum acordo entre as partes.</p>
                             </div>
 
                             <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 8Âª â€“ DA RESPONSABILIDADE TÃ‰CNICA</h4>
-                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">8.1. Quando aplicÃ¡vel, a CONTRATADA providenciarÃ¡ a emissÃ£o de ART/RRT, assumindo a responsabilidade tÃ©cnica pela execuÃ§Ã£o dos serviÃ§os.</p>
+                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLíUSULA 8Âª â€“ DA RESPONSABILIDADE Tí‰CNICA</h4>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">8.1. Quando aplicável, a CONTRATADA providenciará a emissío de ART/RRT, assumindo a responsabilidade técnica pela execuçío dos serviços.</p>
                             </div>
 
                             <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 9Âª â€“ DA RESCISÃƒO</h4>
-                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">9.1. O presente contrato poderÃ¡ ser rescindido por descumprimento de quaisquer de suas clÃ¡usulas, mediante notificaÃ§Ã£o por escrito.</p>
+                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLíUSULA 9Âª â€“ DA RESCISíƒO</h4>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">9.1. O presente contrato poderá ser rescindido por descumprimento de quaisquer de suas cláusulas, mediante notificaçío por escrito.</p>
                             </div>
 
                             <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 10Âª â€“ DO FORO</h4>
-                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">10.1. Fica eleito o foro da comarca de <b>${customer.city || 'SÃ£o Paulo'} - ${customer.state || 'SP'}</b>, para dirimir quaisquer controvÃ©rsias oriundas deste contrato, renunciando as partes a qualquer outro, por mais privilegiado que seja.</p>
+                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLíUSULA 10Âª â€“ DO FORO</h4>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">10.1. Fica eleito o foro da comarca de <b>${customer.city || 'Sío Paulo'} - ${customer.state || 'SP'}</b>, para dirimir quaisquer controvérsias oriundas deste contrato, renunciando as partes a qualquer outro, por mais privilegiado que seja.</p>
                             </div>
 
                             <div class="mb-8" style="padding-top: 50mm; page-break-inside: avoid; break-inside: avoid;">
@@ -568,22 +568,22 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             catch { return new Date().toLocaleDateString('pt-BR'); }
         };
 
-        // --- CALCULAÃ‡Ã•ES FINANCEIRAS ---
+        // --- CALCULAí‡í•ES FINANCEIRAS ---
         const revenue = order.contractPrice || order.totalAmount || 0; // O que o cliente paga
         const plannedCost = (order.costItems || []).reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0); // O que a empresa gasta (planejado)
 
-        // NOVO: Despesas Reais agora baseadas na MediÃ§Ã£o (CostItems) para alinhar com o Dashboard
+        // NOVO: Despesas Reais agora baseadas na Mediçío (CostItems) para alinhar com o Dashboard
         const totalActualExpenses = (order.costItems || []).reduce((acc, i) => acc + (i.actualQuantity ? (i.actualQuantity * (i.actualUnitPrice || 0)) : (i.actualValue || 0)), 0);
 
-        const profitValue = revenue - totalActualExpenses; // Lucro Real (baseado em mediÃ§Ã£o)
+        const profitValue = revenue - totalActualExpenses; // Lucro Real (baseado em mediçío)
         const plannedProfit = revenue - plannedCost; // Lucro Previsto
 
-        // Valores do OrÃ§amento Original (para referÃªncia se necessÃ¡rio)
+        // Valores do Orçamento Original (para referência se necessário)
         const budgetSubTotal = order.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0);
         const bdiValue = order.bdiRate ? budgetSubTotal * (order.bdiRate / 100) : 0;
         const taxValue = order.taxRate ? (budgetSubTotal + bdiValue) * (order.taxRate / 100) : 0;
 
-        // Gerar HTML da Tabela de Itens (Sempre usando costItems para consistÃªncia na Obra)
+        // Gerar HTML da Tabela de Itens (Sempre usando costItems para consistência na Obra)
         const itemsHtml = (order.costItems || []).map((item: ServiceItem) => {
             const plannedTotal = item.quantity * item.unitPrice;
 
@@ -598,7 +598,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     <td style="padding: 12px 0; text-align: center; vertical-align: top; font-weight: 700; color: #0f172a; font-size: 11px;">${item.quantity}</td>
                     <td style="padding: 12px 0; text-align: right; vertical-align: top; color: #0f172a; font-size: 11px; font-weight: 700;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
                     <td style="padding: 12px 0; text-align: right; vertical-align: top; font-weight: 800; font-size: 12px; color: #2563eb;">R$ ${plannedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                </tr > `;
+                </tr> `;
             }
 
             const actualTotal = (item.actualQuantity || 0) * (item.actualUnitPrice || 0);
@@ -625,14 +625,14 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         <div style="font-weight: 900; font-size: 12px; color: #0f172a;">REAL: R$ ${actualTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
                         ${diff !== 0 ? `<div style="font-size: 9.5px; font-weight: 900; color: ${diffColor}; margin-top: 3px; font-variant-numeric: tabular-nums;">${diff > 0 ? '+' : ''} R$ ${diff.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>` : ''}
                     </td>
-                </tr > `;
+                </tr> `;
         }).join('');
 
         const html = `
-    < !DOCTYPE html >
+    <!DOCTYPE html >
         <html>
             <head>
-                <title>RelatÃ³rio de Obra - ${order.id} - ${order.description || 'Obra'}</title>
+                <title>Relatório de Obra - ${order.id} - ${order.description || 'Obra'}</title>
                 <script src="https://cdn.tailwindcss.com"></script>
                 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Roboto:wght@400;700&family=Montserrat:wght@400;700&family=Open+Sans:wght@400;700&family=Lato:wght@400;700&family=Poppins:wght@400;700&family=Oswald:wght@400;700&family=Playfair+Display:wght@400;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
                     <style>
@@ -701,14 +701,14 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                     </div>
                                     <div>
                                         <h1 class="text-3xl font-black text-slate-900 leading-none mb-2 uppercase tracking-tight">${company.name}</h1>
-                                        <p class="text-[11px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">RelatÃ³rio Gerencial de Obra - ${reportMode === 'estimated' ? 'ESTIMADO' : 'REAL'}</p>
+                                        <p class="text-[11px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">Relatório Gerencial de Obra - ${reportMode === 'estimated' ? 'ESTIMADO' : 'REAL'}</p>
                                         <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tight">${company.cnpj || ''} | ${company.phone || ''}</p>
                                     </div>
                                 </div>
                                 <div class="text-right">
                                     <div class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest mb-2 shadow-md inline-block">CONTROLE DE OBRA</div>
                                     <p class="text-2xl font-black text-[#0f172a] tracking-tighter mb-1">${order.id}</p>
-                                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">EMISSÃƒO: ${new Date().toLocaleDateString('pt-BR')}</p>
+                                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">EMISSíƒO: ${new Date().toLocaleDateString('pt-BR')}</p>
                                 </div>
                             </div>
 
@@ -716,26 +716,26 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                 <div class="info-box">
                                     <span class="info-label">Contratante / Cliente</span>
                                     <div class="info-value">${customer.name}</div>
-                                    <div class="text-[11px] text-slate-400 font-bold mt-1.5 uppercase">${customer.document || 'DOC NÃƒO INF.'}</div>
+                                    <div class="text-[11px] text-slate-400 font-bold mt-1.5 uppercase">${customer.document || 'DOC NíƒO INF.'}</div>
                                 </div>
                                 <div class="info-box">
-                                    <span class="info-label">IdentificaÃ§Ã£o da Obra</span>
+                                    <span class="info-label">Identificaçío da Obra</span>
                                     <div class="info-value">${order.description}</div>
-                                    <div class="text-[11px] text-slate-400 font-bold mt-1.5 uppercase">InÃ­cio: ${formatDate(order.createdAt)} | Entrega: ${order.dueDate ? formatDate(order.dueDate) : 'A COMBINAR'}</div>
+                                    <div class="text-[11px] text-slate-400 font-bold mt-1.5 uppercase">Iní­cio: ${formatDate(order.createdAt)} | Entrega: ${order.dueDate ? formatDate(order.dueDate) : 'A COMBINAR'}</div>
                                 </div>
                             </div>
 
                             <div class="section-title">Resumo Financeiro da Obra</div>
                             <div class="grid grid-cols-3 gap-4 mb-10">
-                                <!-- Card 1: Valor do OrÃ§amento (Receita) -->
+                                <!-- Card 1: Valor do Orçamento (Receita) -->
                                 <div class="card-summary bg-blue-50/50 border-blue-100 px-6 py-4">
-                                    <span class="text-[10px] font-black text-blue-600 uppercase tracking-widest block mb-1">Valor do OrÃ§amento</span>
+                                    <span class="text-[10px] font-black text-blue-600 uppercase tracking-widest block mb-1">Valor do Orçamento</span>
                                     <span class="text-xl font-black text-blue-700 block">R$ ${revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                 </div>
 
-                                <!-- Card 2: Despesas (Previstas ou Reais baseadas em MediÃ§Ã£o) -->
+                                <!-- Card 2: Despesas (Previstas ou Reais baseadas em Mediçío) -->
                                 <div class="card-summary bg-rose-50/50 border-rose-100 px-6 py-4">
-                                    <span class="text-[10px] font-black text-rose-600 uppercase tracking-widest block mb-1">${reportMode === 'estimated' ? 'Despesas Previstas' : 'Despesas Reais (MediÃ§Ã£o)'}</span>
+                                    <span class="text-[10px] font-black text-rose-600 uppercase tracking-widest block mb-1">${reportMode === 'estimated' ? 'Despesas Previstas' : 'Despesas Reais (Mediçío)'}</span>
                                     <span class="text-xl font-black text-rose-700 block">R$ ${(reportMode === 'estimated' ? plannedCost : totalActualExpenses).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                 </div>
 
@@ -751,21 +751,21 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
 
                             <div class="avoid-break mt-6">
-                                <div class="section-title">${reportMode === 'estimated' ? 'DETALHAMENTO DE CUSTOS ESTIMADOS' : 'COMPARATIVO DE ITENS (ORÃ‡ADO VS REAL)'}</div>
+                                <div class="section-title">${reportMode === 'estimated' ? 'DETALHAMENTO DE CUSTOS ESTIMADOS' : 'COMPARATIVO DE ITENS (ORí‡ADO VS REAL)'}</div>
                                 <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                                     <thead>
                                         <tr style="border-bottom: 2px solid #0f172a;">
-                                            <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; width: 38%;">DescriÃ§Ã£o</th>
+                                            <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; width: 38%;">Descriçío</th>
                                             <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800; width: 7%;">UN</th>
                                             <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800; width: 15%;">Qtd</th>
-                                            <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 22%;">UnitÃ¡rio</th>
+                                            <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 22%;">Unitário</th>
                                             <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 18%;">Total</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         ${itemsHtml}
                                         <tr style="border-top: 1px solid #f1f5f9; background: #fafafa;">
-                                            <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Subtotal dos Itens (OrÃ§amento):</td>
+                                            <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Subtotal dos Itens (Orçamento):</td>
                                             <td style="padding: 12px 10px; text-align: right; font-size: 12px; font-weight: 800; color: #0f172a;">R$ ${budgetSubTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                         </tr>
                                         ${order.bdiRate ? `
@@ -779,11 +779,11 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                  <td style="padding: 8px 10px; text-align: right; font-size: 12px; font-weight: 800; color: #0f172a;">R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                              </tr>` : ''}
                                         <tr style="border-top: 1px solid #cbd5e1; background: #f8fafc;">
-                                            <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 12px; font-weight: 900; color: #334155; text-transform: uppercase;">Total do OrÃ§amento (ArrecadaÃ§Ã£o):</td>
+                                            <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 12px; font-weight: 900; color: #334155; text-transform: uppercase;">Total do Orçamento (Arrecadaçío):</td>
                                             <td style="padding: 12px 10px; text-align: right; font-size: 13px; font-weight: 900; color: #1e40af;">R$ ${revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                         </tr>
                                         <tr style="border-top: 3px solid #0f172a; background: #f1f5f9;">
-                                            <td colspan="4" style="padding: 16px 10px; text-align: right; font-size: 13px; font-weight: 900; color: #0f172a; text-transform: uppercase;">${reportMode === 'estimated' ? 'Custo Total Estimado de Obra:' : 'Total Realizado em Obra (MediÃ§Ã£o):'}</td>
+                                            <td colspan="4" style="padding: 16px 10px; text-align: right; font-size: 13px; font-weight: 900; color: #0f172a; text-transform: uppercase;">${reportMode === 'estimated' ? 'Custo Total Estimado de Obra:' : 'Total Realizado em Obra (Mediçío):'}</td>
                                             <td style="padding: 16px 10px; text-align: right; font-size: 14px; font-weight: 900; color: ${reportMode === 'estimated' ? '#2563eb' : '#e11d48'};">R$ ${(reportMode === 'estimated' ? plannedCost : totalActualExpenses).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                         </tr>
                                     </tbody>
@@ -793,7 +793,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
                             ${order.descriptionBlocks && order.descriptionBlocks.length > 0 ? `
                 <div class="mb-10 print-description-content">
-                    <div class="section-title">DESCRIÃ‡ÃƒO TÃ‰CNICA / ESCOPO</div>
+                    <div class="section-title">DESCRIí‡íƒO Tí‰CNICA / ESCOPO</div>
                     <div class="space-y-6">
                         ${order.descriptionBlocks.map(block => {
             if (block.type === 'text') {
@@ -812,7 +812,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                 <div class="flex justify-center px-8">
                                     <div class="text-center w-80">
                                         <div style="border-top: 1px solid #cbd5e1; margin-bottom: 60px;"></div>
-                                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">ResponsÃ¡vel TÃ©cnico</p>
+                                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Responsável Técnico</p>
                                         <p class="text-[12px] font-black uppercase text-slate-900">${company.name}</p>
                                     </div>
                                 </div>
@@ -891,7 +891,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             <div className="flex justify-between items-center">
                 <div>
                     <h2 className="text-2xl font-bold text-slate-900 tracking-tight">OS de Obra</h2>
-                    <p className="text-slate-500 text-sm">GestÃ£o de reformas e construÃ§Ãµes.</p>
+                    <p className="text-slate-500 text-sm">Gestío de reformas e construçíµes.</p>
                 </div>
                 <button onClick={() => {
                     setShowForm(true);
@@ -921,7 +921,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             <div className="bg-white rounded-[2rem] border overflow-hidden shadow-sm overflow-x-auto">
                 <table className="w-full text-left">
                     <thead className="bg-slate-50 text-[10px] font-black uppercase text-slate-400 border-b">
-                        <tr><th className="px-8 py-5">OS #</th><th className="px-8 py-5">CLIENTE</th><th className="px-8 py-5">OBRA / DESCRIÃ‡ÃƒO</th><th className="px-8 py-5 text-right">AÃ‡Ã•ES</th></tr>
+                        <tr><th className="px-8 py-5">OS #</th><th className="px-8 py-5">CLIENTE</th><th className="px-8 py-5">OBRA / DESCRIí‡íƒO</th><th className="px-8 py-5 text-right">Aí‡í•ES</th></tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                         {activeOrders.map(order => (
@@ -932,7 +932,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                 <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button onClick={() => handleDownloadPDF(order)} className="p-2 text-slate-400 hover:text-emerald-500 transition-colors" title="Baixar Contrato"><FileDown className="w-4 h-4" /></button>
                                     <button onClick={() => handlePrintContract(order)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Gerar Contrato"><ScrollText className="w-4 h-4" /></button>
-                                    <button onClick={() => { setSelectedOrderForReport(order); setShowReportTypeModal(true); }} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="RelatÃ³rio de Obra"><FileText className="w-4 h-4" /></button>
+                                    <button onClick={() => { setSelectedOrderForReport(order); setShowReportTypeModal(true); }} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Relatório de Obra"><FileText className="w-4 h-4" /></button>
                                     <button onClick={() => handlePrintOS(order)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Imprimir OS"><Printer className="w-4 h-4" /></button>
                                     <button onClick={() => {
                                         setEditingOrderId(order.id);
@@ -950,7 +950,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                         setBdiRate(order.bdiRate || 0);
                                         setActiveTab('financial');
                                         setShowForm(true);
-                                    }} className="p-2 text-slate-400 hover:text-emerald-600 transition-colors" title="GestÃ£o Financeira"><Wallet className="w-4 h-4" /></button>
+                                    }} className="p-2 text-slate-400 hover:text-emerald-600 transition-colors" title="Gestío Financeira"><Wallet className="w-4 h-4" /></button>
                                     <button onClick={() => {
                                         setEditingOrderId(order.id);
                                         setSelectedCustomerId(order.customerId);
@@ -990,7 +990,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                 <div>
                                     <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter mb-0.5">{editingOrderId ? `Editando Obra ${editingOrderId} ` : 'Nova OS de Obra'}</h3>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-[10px] font-black uppercase tracking-widest bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md">ConstruÃ§Ã£o Civil</span>
+                                        <span className="text-[10px] font-black uppercase tracking-widest bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md">Construçío Civil</span>
                                     </div>
                                 </div>
                             </div>
@@ -1001,7 +1001,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         {editingOrderId && (
                             <div className="bg-white px-8 border-b flex gap-6">
                                 <button onClick={() => setActiveTab('details')} className={`py-3 text-xs font-black uppercase tracking-widest border-b-2 transition-colors ${activeTab === 'details' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>Detalhes da Obra</button>
-                                <button onClick={() => setActiveTab('financial')} className={`py-3 text-xs font-black uppercase tracking-widest border-b-2 transition-colors ${activeTab === 'financial' ? 'border-purple-600 text-purple-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>GestÃ£o Financeira</button>
+                                <button onClick={() => setActiveTab('financial')} className={`py-3 text-xs font-black uppercase tracking-widest border-b-2 transition-colors ${activeTab === 'financial' ? 'border-purple-600 text-purple-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>Gestío Financeira</button>
                             </div>
                         )}
 
@@ -1016,17 +1016,17 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                     <select className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all custom-select" value={selectedCustomerId} onChange={e => setSelectedCustomerId(e.target.value)}><option value="">Selecione...</option>{customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
                                                 </div>
                                                 <div><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-2 block ml-1">Valor Fechado do Contrato (Receita)</label><input type="number" placeholder="R$ 0,00" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400" value={contractPrice} onChange={e => setContractPrice(Number(e.target.value))} /></div>
-                                                <div className="md:col-span-2"><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-2 block ml-1">TÃ­tulo da Obra</label><input type="text" placeholder="Ex: Reforma da Cozinha" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400" value={osTitle} onChange={e => setOsTitle(e.target.value)} /></div>
+                                                <div className="md:col-span-2"><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-2 block ml-1">Tí­tulo da Obra</label><input type="text" placeholder="Ex: Reforma da Cozinha" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400" value={osTitle} onChange={e => setOsTitle(e.target.value)} /></div>
                                             </div>
                                         </div>
 
                                         <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
                                             <div>
-                                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">ObservaÃ§Ãµes TÃ©cnicas e Escopo Detalhado</label>
+                                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Observaçíµes Técnicas e Escopo Detalhado</label>
                                                 <RichTextEditor
                                                     value={diagnosis}
                                                     onChange={setDiagnosis}
-                                                    placeholder="Descreva os serviÃ§os a serem executados por extenso..."
+                                                    placeholder="Descreva os serviços a serem executados por extenso..."
                                                 />
                                             </div>
                                         </div>
@@ -1041,7 +1041,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                         <button onClick={(e) => { e.stopPropagation(); addTextBlock(); }} className="bg-blue-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-blue-100 hover:scale-105 transition-all"><Type className="w-4 h-4" /> + Iniciar com Texto</button>
                                                         <button onClick={(e) => { e.stopPropagation(); addImageBlock(); }} className="bg-emerald-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-emerald-100 hover:scale-105 transition-all"><ImageIcon className="w-4 h-4" /> + Iniciar com Imagem</button>
                                                     </div>
-                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 animate-pulse">Comece a montar o relatÃ³rio da obra acima</p>
+                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 animate-pulse">Comece a montar o relatório da obra acima</p>
                                                 </div>
                                             )}
                                             {descriptionBlocks.map((block) => (
@@ -1076,7 +1076,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                     <div className="space-y-6">
                                         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
                                             <InfoCard
-                                                label="Valor do OrÃ§amento"
+                                                label="Valor do Orçamento"
                                                 value={`R$ ${contractPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
                                                 className="bg-white"
                                                 icon={<div className="absolute top-0 left-0 w-full h-1 bg-blue-500"></div>}
@@ -1112,7 +1112,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                         <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
                                             <div className="flex justify-between items-center mb-4"><h1 className="text-xs font-black text-slate-900 uppercase tracking-tight">1. Planejamento de Custos e Acompanhamento</h1></div>
                                             <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
-                                                <div className="md:col-span-3"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">DescriÃ§Ã£o</label><input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentDesc} onChange={e => setCurrentDesc(e.target.value)} placeholder="Ex: Tinta, Cimento..." /></div>
+                                                <div className="md:col-span-3"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Descriçío</label><input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentDesc} onChange={e => setCurrentDesc(e.target.value)} placeholder="Ex: Tinta, Cimento..." /></div>
                                                 <div className="md:col-span-1 text-center"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Qtd Est.</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-center" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} /></div>
                                                 <div className="md:col-span-1 text-center"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">UN</label><input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-center" value={currentUnit} onChange={e => setCurrentUnit(e.target.value)} placeholder="un" /></div>
                                                 <div className="md:col-span-1 text-right"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">VL. PROJ</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-right" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} /></div>
@@ -1131,7 +1131,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                 <div className="col-span-1"></div>
                                             </div>
                                             <div className="mb-2 grid grid-cols-12 gap-1 px-3">
-                                                <div className="col-span-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">DESCRIÃ‡ÃƒO</span></div>
+                                                <div className="col-span-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">DESCRIí‡íƒO</span></div>
                                                 <div className="col-span-1 text-center"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">QTD</span></div>
                                                 <div className="col-span-1 text-center"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">UN</span></div>
                                                 <div className="col-span-1 text-right pr-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">VL. PROJ</span></div>
@@ -1256,7 +1256,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl p-8 transform animate-in zoom-in-95 duration-200">
                             <div className="flex justify-between items-start mb-6">
                                 <div>
-                                    <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase">Tipo de RelatÃ³rio</h3>
+                                    <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase">Tipo de Relatório</h3>
                                     <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">Selecione para imprimir</p>
                                 </div>
                                 <button onClick={() => setShowReportTypeModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X className="w-5 h-5 text-slate-400" /></button>
@@ -1271,8 +1271,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                         <ScrollText className="w-6 h-6" />
                                     </div>
                                     <div>
-                                        <h4 className="font-black text-blue-900 group-hover:text-white uppercase text-sm tracking-tight">RELATÃ“RIO DO ESTIMADO</h4>
-                                        <p className="text-blue-600/70 group-hover:text-white/80 text-[10px] font-bold uppercase">Apenas planejamento e custos orÃ§ados</p>
+                                        <h4 className="font-black text-blue-900 group-hover:text-white uppercase text-sm tracking-tight">RELATí“RIO DO ESTIMADO</h4>
+                                        <p className="text-blue-600/70 group-hover:text-white/80 text-[10px] font-bold uppercase">Apenas planejamento e custos orçados</p>
                                     </div>
                                 </button>
 
@@ -1284,8 +1284,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                         <CheckCircle className="w-6 h-6" />
                                     </div>
                                     <div>
-                                        <h4 className="font-black text-emerald-900 group-hover:text-white uppercase text-sm tracking-tight">RELATÃ“RIO DO REAL</h4>
-                                        <p className="text-emerald-600/70 group-hover:text-white/80 text-[10px] font-bold uppercase">Custos orÃ§ados vs Realizados e Resultado</p>
+                                        <h4 className="font-black text-emerald-900 group-hover:text-white uppercase text-sm tracking-tight">RELATí“RIO DO REAL</h4>
+                                        <p className="text-emerald-600/70 group-hover:text-white/80 text-[10px] font-bold uppercase">Custos orçados vs Realizados e Resultado</p>
                                     </div>
                                 </button>
                             </div>
