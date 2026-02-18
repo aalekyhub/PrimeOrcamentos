@@ -82,6 +82,10 @@ const BudgetManager: React.FC<Props> = ({
       // 2. Set Title
       setProposalTitle(plan.name || '');
 
+      // 2.1 Set BDI and Taxes
+      if (typeof prefilledData.bdiRate === 'number') setBdiRate(prefilledData.bdiRate);
+      if (typeof prefilledData.taxRate === 'number') setTaxRate(prefilledData.taxRate);
+
       // 3. Map items
       const newItems: ServiceItem[] = [];
 

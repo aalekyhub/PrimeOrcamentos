@@ -16,7 +16,7 @@ import {
 
 interface Props {
     customers: Customer[];
-    onGenerateBudget?: (plan: PlanningHeader, services: PlannedService[], totalMat: number, totalLab: number, totalInd: number) => void;
+    onGenerateBudget?: (plan: PlanningHeader, services: PlannedService[], totalMat: number, totalLab: number, totalInd: number, bdiRate: number, taxRate: number) => void;
     embeddedPlanId?: string | null;
     onBack?: () => void;
     onPlanCreated?: (plan: PlanningHeader) => void;
@@ -1860,7 +1860,12 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                         type="button"
                                         onClick={() => {
                                             if (onGenerateBudget) {
-                                                onGenerateBudget(currentPlan, services, totalMaterial, totalLabor, totalIndirect);
+                                                const bdiTx = taxes.find(t => t.name === 'BDI');
+                                                const otherTxs = taxes.filter(t => t.name !== 'BDI');
+                                                const bdiRate = bdiTx ? bdiTx.rate : 0;
+                                                const taxRate = otherTxs.reduce((acc, t) => acc + (t.rate || 0), 0);
+
+                                                onGenerateBudget(currentPlan, services, totalMaterial, totalLabor, totalIndirect, bdiRate, taxRate);
                                             } else {
                                                 notify("Função de gerar orçamento não disponível neste modo.", "info");
                                             }

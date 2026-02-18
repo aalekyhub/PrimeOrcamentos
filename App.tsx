@@ -251,13 +251,15 @@ const AppContent: React.FC = () => {
     };
   }, [orders, transactions]);
 
-  const handleGenerateBudget = (plan: any, services: any[], totalMaterial: number, totalLabor: number, totalIndirect: number) => {
+  const handleGenerateBudget = (plan: any, services: any[], totalMaterial: number, totalLabor: number, totalIndirect: number, bdiRate: number, taxRate: number) => {
     setPrefilledBudgetData({
       plan,
       services,
       totalMaterial,
       totalLabor,
-      totalIndirect
+      totalIndirect,
+      bdiRate,
+      taxRate
     });
 
     if (!openTabs.includes('budgets')) {

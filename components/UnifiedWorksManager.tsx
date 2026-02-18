@@ -11,7 +11,7 @@ import WorksManager from './WorksManager';
 
 interface Props {
     customers: Customer[];
-    onGenerateBudget?: (plan: any, services: any[], totalMaterial: number, totalLabor: number, totalIndirect: number) => void;
+    onGenerateBudget?: (plan: any, services: any[], totalMaterial: number, totalLabor: number, totalIndirect: number, bdiRate: number, taxRate: number) => void;
 }
 
 const UnifiedWorksManager: React.FC<Props> = ({ customers, onGenerateBudget }) => {
