@@ -1,1353 +1,1554 @@
-﻿
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+﻿/**
+ * BudgetManager.tsx (versão revisada)
+ *
+ * Principais mudanças:
+ * 1) PDF usa o MESMO HTML do Print (getBudgetHtml) -> consistência total.
+ * 2) IDs: usa crypto.randomUUID() (sem Math.random/Date.now) -> evita colisão e bugs de reorder.
+ * 3) Sanitização do HTML do RichText (DOMPurify) -> evita XSS e quebra de PDF.
+ * 4) Margens: removida duplicidade (html2pdf margin = 0; padding fica no container).
+ * 5) Drag & Drop: reordena no drop (onDragEnd) -> menos “jitter” e menos renders.
+ * 6) setState: forma funcional em pontos críticos.
+ * 7) Corrigidos textos com encoding quebrado (Voc+� etc.) — ajuste local no código.
+ *
+ * Dependência:
+ *   npm i dompurify
+ *   (se TS reclamar) npm i -D @types/dompurify
+ */
+
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import html2pdf from 'html2pdf.js';
+import DOMPurify from 'dompurify';
+
 import {
-    Plus, Search, X, Trash2, Pencil, Printer, Save, FileDown,
-    UserPlus, HardHat, Eraser, FileText, ScrollText, Wallet,
-    Type, Image as ImageIcon, Zap, Upload, CheckCircle
+  Plus, Search, X, Trash2, Pencil, Printer, Save,
+  UserPlus, Package, Type, Image as ImageIcon,
+  FileText, Upload, CheckCircle, Zap, FileDown, Copy, Database,
+  ChevronUp, ChevronDown, GripVertical
 } from 'lucide-react';
-import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock, Transaction } from '../types';
+
+import RichTextEditor from './ui/RichTextEditor';
+import {
+  ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock
+} from '../types';
 import { useNotify } from './ToastProvider';
 import CustomerManager from './CustomerManager';
+import ServiceCatalog from './ServiceCatalog';
 import { db } from '../services/db';
-import { formatDocument } from '../services/validation';
 import { compressImage } from '../services/imageUtils';
-import { usePrintOS } from '../hooks/usePrintOS';
-import { financeUtils } from '../services/financeUtils';
-import InfoCard from './ui/InfoCard';
-import RichTextEditor from './ui/RichTextEditor';
-import html2pdf from 'html2pdf.js';
 
 interface Props {
-    orders: ServiceOrder[];
-    setOrders: React.Dispatch<React.SetStateAction<ServiceOrder[]>>;
-    customers: Customer[];
-    setCustomers: React.Dispatch<React.SetStateAction<Customer[]>>;
-    catalogServices: CatalogService[];
-    setCatalogServices: React.Dispatch<React.SetStateAction<CatalogService[]>>;
-    company: CompanyProfile;
-    transactions: Transaction[];
-    setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>;
+  orders: ServiceOrder[];
+  setOrders: React.Dispatch<React.SetStateAction<ServiceOrder[]>>;
+  customers: Customer[];
+  setCustomers: React.Dispatch<React.SetStateAction<Customer[]>>;
+  catalogServices: CatalogService[];
+  setCatalogServices: React.Dispatch<React.SetStateAction<CatalogService[]>>;
+  company: CompanyProfile;
+  prefilledData: any;
+  onPrefilledDataConsumed: () => void;
 }
 
-const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCustomers, company, transactions, setTransactions }) => {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [showForm, setShowForm] = useState(false);
-    const [showFullClientForm, setShowFullClientForm] = useState(false);
-    const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
-    const [isSaving, setIsSaving] = useState(false);
-    const { notify } = useNotify();
-    const { handlePrintOS } = usePrintOS(customers, company);
+const uid = () => (typeof crypto !== 'undefined' && 'randomUUID' in crypto)
+  ? crypto.randomUUID()
+  : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
-    const [selectedCustomerId, setSelectedCustomerId] = useState('');
-    const [osTitle, setOsTitle] = useState('Execução de Obra');
-    const [diagnosis, setDiagnosis] = useState(''); // description of work
-    const [descriptionBlocks, setDescriptionBlocks] = useState<DescriptionBlock[]>([]);
-    const [paymentTerms, setPaymentTerms] = useState('');
-    const [deliveryTime, setDeliveryTime] = useState('');
-    const [deliveryDate, setDeliveryDate] = useState(new Date().toISOString().split('T')[0]);
-    const [contractPrice, setContractPrice] = useState<number>(0);
-    const [items, setItems] = useState<ServiceItem[]>([]);
+const sanitizeHtml = (html: string) => {
+  // Permitir tags típicas do editor, bloquear scripts e handlers
+  return DOMPurify.sanitize(html, {
+    USE_PROFILES: { html: true },
+    FORBID_TAGS: ['script', 'iframe', 'object', 'embed'],
+    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'style'], // style pode quebrar layout e permitir bypass
+  });
+};
 
-    const [currentDesc, setCurrentDesc] = useState('');
-    const [currentPrice, setCurrentPrice] = useState(0);
-    const [currentQty, setCurrentQty] = useState(1);
-    const [currentUnit, setCurrentUnit] = useState('un');
-    const [activeEditField, setActiveEditField] = useState<string | null>(null);
+const BudgetManager: React.FC<Props> = ({
+  orders,
+  setOrders,
+  customers,
+  setCustomers,
+  catalogServices,
+  setCatalogServices,
+  company,
+  prefilledData,
+  onPrefilledDataConsumed
+}) => {
+  const [showForm, setShowForm] = useState(false);
+  const [showFullClientForm, setShowFullClientForm] = useState(false);
+  const [showFullServiceForm, setShowFullServiceForm] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [editingBudgetId, setEditingBudgetId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const { notify } = useNotify();
 
-    // Current Item Real Fields (Medição)
-    const [currentActualQty, setCurrentActualQty] = useState<number>(0);
-    const [currentActualPrice, setCurrentActualPrice] = useState<number>(0);
-    const [currentActual, setCurrentActual] = useState<number | ''>('');
+  const [selectedCustomerId, setSelectedCustomerId] = useState('');
+  const [proposalTitle, setProposalTitle] = useState('');
+  const [paymentTerms, setPaymentTerms] = useState('50% à vista, 25% com 30 dias, 25% restante na conclusão');
+  const [paymentEntryPercent, setPaymentEntryPercent] = useState<number>(30);
+  const [deliveryTime, setDeliveryTime] = useState('15 dias úteis');
+  const [items, setItems] = useState<ServiceItem[]>([]);
+  const [descriptionBlocks, setDescriptionBlocks] = useState<DescriptionBlock[]>([]);
 
-    // Financial State
-    const [activeTab, setActiveTab] = useState<'details' | 'financial'>('details');
-    const [taxRate, setTaxRate] = useState<number>(0);
-    const [bdiRate, setBdiRate] = useState<number>(0);
+  const [currentDesc, setCurrentDesc] = useState('');
+  const [currentUnit, setCurrentUnit] = useState('un');
+  const [currentQty, setCurrentQty] = useState(1);
+  const [currentPrice, setCurrentPrice] = useState(0);
 
-    // Report State
-    const [showReportTypeModal, setShowReportTypeModal] = useState(false);
-    const [selectedOrderForReport, setSelectedOrderForReport] = useState<ServiceOrder | null>(null);
+  const [taxRate, setTaxRate] = useState<string | number>(0);
+  const [bdiRate, setBdiRate] = useState<string | number>(0);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importSearch, setImportSearch] = useState('');
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedCatalogId, setSelectedCatalogId] = useState('');
 
+  const budgets = useMemo(() => {
+    const term = searchTerm.toLowerCase();
+    return orders.filter(o =>
+      (o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED) &&
+      (o.customerName.toLowerCase().includes(term) || o.id.includes(searchTerm))
+    );
+  }, [orders, searchTerm]);
 
+  // Handle Prefilled Data from Planning
+  useEffect(() => {
+    if (prefilledData) {
+      const { plan, services, totalMaterial, totalLabor, totalIndirect } = prefilledData;
 
-    const totalExpenses = useMemo(() => items.reduce((acc, i) => acc + (i.actualQuantity ? (i.actualQuantity * (i.actualUnitPrice || 0)) : (i.actualValue || 0)), 0), [items]);
-    const expensesByCategory = useMemo(() => {
-        const groups: { [key: string]: number } = {};
-        items.forEach(i => {
-            const val = i.actualQuantity ? (i.actualQuantity * (i.actualUnitPrice || 0)) : (i.actualValue || 0);
-            if (val && val > 0) {
-                const cat = (i.type || 'Geral').toUpperCase();
-                groups[cat] = (groups[cat] || 0) + val;
-            }
+      setSelectedCustomerId(plan?.client_id || '');
+      setProposalTitle(plan?.name || '');
+
+      if (typeof prefilledData.bdiRate === 'number') setBdiRate(prefilledData.bdiRate);
+      if (typeof prefilledData.taxRate === 'number') setTaxRate(prefilledData.taxRate);
+
+      const newItems: ServiceItem[] = [];
+
+      if (services && services.length > 0) {
+        services.forEach((s: any) => {
+          newItems.push({
+            id: uid(),
+            description: s.description,
+            quantity: s.quantity,
+            unitPrice: (s.unit_labor_cost || 0) + (s.unit_material_cost || 0),
+            unit: s.unit,
+            type: 'Serviço'
+          });
         });
-        return groups;
-    }, [items]);
+      }
 
-    const plannedCost = useMemo(() => financeUtils.calculateSubtotal(items), [items]);
+      if (totalMaterial > 0) {
+        newItems.push({
+          id: uid(),
+          description: 'TOTAL DE MATERIAIS E INSUMOS (PREVISTO)',
+          quantity: 1,
+          unitPrice: totalMaterial,
+          unit: 'un',
+          type: 'Material'
+        });
+      }
 
-    const revenue = contractPrice || 0;
+      if (totalLabor > 0) {
+        newItems.push({
+          id: uid(),
+          description: 'TOTAL DE MÃO DE OBRA (PREVISTO)',
+          quantity: 1,
+          unitPrice: totalLabor,
+          unit: 'un',
+          type: 'Serviço'
+        });
+      }
 
-    const plannedProfit = useMemo(() => revenue - plannedCost, [revenue, plannedCost]);
-    const actualProfit = useMemo(() => revenue - totalExpenses, [revenue, totalExpenses]);
-    const executionVariance = useMemo(() => plannedCost - totalExpenses, [plannedCost, totalExpenses]);
+      if (totalIndirect > 0) {
+        newItems.push({
+          id: uid(),
+          description: 'CUSTOS INDIRETOS E OPERACIONAIS (PREVISTO)',
+          quantity: 1,
+          unitPrice: totalIndirect,
+          unit: 'un',
+          type: 'Serviço'
+        });
+      }
 
+      setItems(newItems);
 
-    // Filter for WORK orders
-    const activeOrders = useMemo(() => orders.filter(o => {
-        if (o.osType !== 'WORK') return false; // Only Work Orders
-        if (o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED) return false;
-        return o.customerName.toLowerCase().includes(searchTerm.toLowerCase()) || o.id.includes(searchTerm);
-    }), [orders, searchTerm]);
+      setShowForm(true);
+      setEditingBudgetId(null);
 
-    const subtotal = useMemo(() => financeUtils.calculateSubtotal(items), [items]);
+      onPrefilledDataConsumed();
+      notify("Dados do planejamento importados com sucesso!");
+    }
+  }, [prefilledData, onPrefilledDataConsumed, notify]);
 
-    const addTextBlock = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'text', content: '' }]);
-    const addImageBlock = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'image', content: '' }]);
-    const addPageBreak = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'page-break', content: 'QUEBRA DE PÁGINA' }]);
-    const updateBlockContent = (id: string, content: string) => setDescriptionBlocks(prev => prev.map(b => b.id === id ? { ...b, content } : b));
+  const subtotal = useMemo(
+    () => items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0),
+    [items]
+  );
 
-    const handleImageUpload = async (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            try {
-                const compressedBase64 = await compressImage(file);
-                updateBlockContent(id, compressedBase64);
-            } catch (error) {
-                console.error("Erro ao comprimir imagem:", error);
-                notify("Erro ao processar imagem. Tente uma menor.", "error");
-            }
-        }
+  const totalAmount = useMemo(() => {
+    const bdi = Number(bdiRate) || 0;
+    const tax = Number(taxRate) || 0;
+
+    const bdiValue = subtotal * (bdi / 100);
+    const subtotalWithBDI = subtotal + bdiValue;
+
+    // Gross-up imposto
+    const taxFactor = Math.max(0.01, 1 - (tax / 100));
+    return subtotalWithBDI / taxFactor;
+  }, [subtotal, taxRate, bdiRate]);
+
+  const handleAddItem = () => {
+    if (!currentDesc || currentPrice <= 0) return;
+
+    const newItem: ServiceItem = {
+      id: uid(),
+      description: currentDesc,
+      quantity: currentQty,
+      unitPrice: currentPrice,
+      unit: currentUnit,
+      type: 'Serviço'
     };
 
-    const handleAddItem = () => {
-        if (!currentDesc) return;
-        setItems([...items, {
-            id: Date.now().toString(),
-            description: currentDesc,
-            quantity: currentQty || 1,
-            unitPrice: currentPrice || 0,
-            type: 'Serviço',
-            unit: currentUnit || 'un',
-            actualValue: (currentActual === '' ? 0 : currentActual) || ((currentActualQty || 0) * (currentActualPrice || 0)),
-            actualQuantity: currentActualQty || 0,
-            actualUnitPrice: currentActualPrice || 0
-        }]);
-        setCurrentDesc(''); setCurrentPrice(0); setCurrentQty(1); setCurrentUnit('un'); setCurrentActual('');
-        setCurrentActualQty(0); setCurrentActualPrice(0);
-        notify("Item adicionado");
+    setItems(prev => [...prev, newItem]);
+    setCurrentDesc('');
+    setCurrentPrice(0);
+    setCurrentQty(1);
+    setSelectedCatalogId('');
+  };
+
+  const updateItem = (id: string, field: keyof ServiceItem, value: any) => {
+    setItems(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item));
+  };
+
+  const updateItemTotal = (id: string, total: number) => {
+    setItems(prev => prev.map(item => {
+      if (item.id === id) {
+        const quantity = item.quantity || 1;
+        return { ...item, unitPrice: total / quantity };
+      }
+      return item;
+    }));
+  };
+
+  // Drag & Drop (reorder no dragEnd)
+  const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  const reorderItems = useCallback((from: number, to: number) => {
+    if (from === to) return;
+    setItems(prev => {
+      const arr = [...prev];
+      const [moved] = arr.splice(from, 1);
+      arr.splice(to, 0, moved);
+      return arr;
+    });
+  }, []);
+
+  const moveItem = (index: number, direction: 'up' | 'down') => {
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= items.length) return;
+    reorderItems(index, newIndex);
+  };
+
+  // Description Blocks
+  const addTextBlock = () => setDescriptionBlocks(prev => [...prev, { id: uid(), type: 'text', content: '' }]);
+  const addImageBlock = () => setDescriptionBlocks(prev => [...prev, { id: uid(), type: 'image', content: '' }]);
+
+  const updateBlockContent = (id: string, content: string) => {
+    setDescriptionBlocks(prev => prev.map(b => b.id === id ? { ...b, content } : b));
+  };
+
+  const handleImageUpload = async (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const compressedBase64 = await compressImage(file);
+      updateBlockContent(id, compressedBase64);
+    } catch (error) {
+      console.error("Erro ao comprimir imagem:", error);
+      notify("Erro ao processar imagem. Tente uma menor.", "error");
+    }
+  };
+
+  const formatDate = (dateStr: string) => {
+    try {
+      const d = new Date(dateStr);
+      return isNaN(d.getTime())
+        ? new Date().toLocaleDateString('pt-BR')
+        : d.toLocaleDateString('pt-BR');
+    } catch {
+      return new Date().toLocaleDateString('pt-BR');
+    }
+  };
+
+  const getHeaderHtml = (b: ServiceOrder) => {
+    const eDate = formatDate(b.createdAt);
+    const vDays = company.defaultProposalValidity || 15;
+    const vDate = b.dueDate
+      ? formatDate(b.dueDate)
+      : formatDate(
+        new Date(
+          new Date(b.createdAt || Date.now()).getTime() + vDays * 24 * 60 * 60 * 1000
+        ).toISOString()
+      );
+
+    return `
+      <div style="padding-bottom: 25px !important; border-bottom: 3px solid #000; margin-bottom: 40px;">
+         <div style="display: flex; justify-content: space-between; align-items: center;">
+             <div style="display: flex; gap: 24px; align-items: center;">
+                 <div style="width: 80px; display: flex; align-items: center; justify: flex-start;">
+                     ${company.logo ? `<img src="${company.logo}" style="max-height: 80px; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#1e3a8a;">PRIME</div>'}
+                 </div>
+                 <div>
+                     <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 0 0 2px 0; text-transform: uppercase;">${company.name}</h1>
+                     <p style="margin: 0; font-size: 11px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.02em;">SOLUÇÕES em Gestão Profissional</p>
+                      <p style="margin: 4px 0 0 0; font-size: 10px; color: #64748b; font-weight: 500;">${company.cnpj || ''} | ${company.phone || ''}</p>
+                 </div>
+             </div>
+             <div style="text-align: right;">
+                 <p style="margin: 0; font-size: 24px; font-weight: 800; color: #2563eb;">${b.id}</p>
+                 <p style="margin: 4px 0 0 0; font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase;">EMISSÃO: ${eDate}</p>
+                 <p style="margin: 2px 0 0 0; font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase;">VALIDADE: ${vDate}</p>
+             </div>
+         </div>
+      </div>`;
+  };
+
+  const getFooterHtml = (b: ServiceOrder) => {
+    const vDays = company.defaultProposalValidity || 15;
+    return `
+      <div style="margin-top: 32px; break-inside: avoid;">
+          <div style="border: 1px solid #bfdbfe; background: #eff6ff; border-radius: 16px; padding: 32px;">
+               <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                   <div style="background: #2563eb; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold;">?</div>
+                   <span style="font-size: 13px; font-weight: 800; color: #1e40af; text-transform: uppercase; letter-spacing: 0.05em;">TERMO DE ACEITE E AUTORIZAÇÃO PROFISSIONAL</span>
+               </div>
+               <p style="margin: 0; font-size: 12px; color: #1e3a8a; line-height: 1.6; text-align: justify; font-weight: 500;">
+                   "Ao assinar abaixo, o cliente declara estar ciente e de pleno acordo com os valores, prazos e especificações descritas. Esta aceitação autoriza o início imediato dos trabalhos sob as condições estabelecidas. Validade: ${vDays} dias."
+               </p>
+          </div>
+          <div style="margin-top: 100px; break-inside: avoid;">
+              <div style="border-bottom: 2px solid #cbd5e1; width: 400px; max-width: 100%;"></div>
+              <p style="margin: 12px 0 0 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; line-height: 1.4; padding-bottom: 2px;">ASSINATURA DO CLIENTE / ACEITE</p>
+          </div>
+      </div>`;
+  };
+
+  const getBodyHtml = (b: ServiceOrder) => {
+    const cust = customers.find(c => c.id === b.customerId) || {
+      name: b.customerName,
+      address: 'não informado',
+      document: 'Documento não informado'
     };
 
-    const updateItem = (id: string, field: keyof ServiceItem, value: any) => {
-        setItems(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item));
-    };
+    const subT = b.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0);
+    const bdiR = Number(b.bdiRate || 0);
+    const taxR = Number(b.taxRate || 0);
 
-    const updateItemTotal = (id: string, total: number) => {
-        setItems(prev => prev.map(item => {
-            if (item.id === id) {
-                const quantity = item.quantity || 1;
-                return { ...item, unitPrice: total / quantity };
-            }
-            return item;
-        }));
-    };
+    const bdiV = subT * (bdiR / 100);
+    const subTWithBDI = subT + bdiV;
 
-    const handleSaveOS = async () => {
-        if (isSaving) return;
-        const customer = customers.find(c => c.id === selectedCustomerId);
-        if (!customer) { notify("Selecione um cliente", "error"); return; }
+    const taxFactorBody = Math.max(0.01, 1 - (taxR / 100));
+    const finalT = subTWithBDI / taxFactorBody;
+    const taxV = finalT - subTWithBDI;
 
-        const existingOrder = editingOrderId ? orders.find(o => o.id === editingOrderId) : null;
+    const itemFBase = company.itemsFontSize || 12;
 
-        const data: ServiceOrder = {
-            id: editingOrderId || db.generateId('OS'),
-            customerId: customer.id,
-            customerName: customer.name,
-            customerEmail: customer.email,
-            description: osTitle,
-            serviceDescription: diagnosis,
-            status: OrderStatus.IN_PROGRESS,
-            items: existingOrder?.items || items, // Preserve original budget items
-            costItems: items, // Save current list as Planned Costs
-            totalAmount: revenue,
-            descriptionBlocks,
-            paymentTerms,
-            deliveryTime,
-            createdAt: existingOrder?.createdAt || new Date().toISOString().split('T')[0],
-            dueDate: deliveryDate,
-            taxRate: taxRate,
-            bdiRate: bdiRate,
-            osType: 'WORK',
-            contractPrice: contractPrice
+    const itemsH = b.items.map((item: ServiceItem) => `
+      <tr style="border-bottom: 1px solid #e2e8f0;">
+        <td style="padding: 16px 0; font-weight: 600; text-transform: uppercase; font-size: ${itemFBase}px; color: #334155; width: 55%; vertical-align: top;">${item.description}</td>
+        <td style="padding: 16px 0; text-align: center; font-weight: 600; color: #475569; font-size: ${itemFBase}px; width: 10%; vertical-align: top;">${item.quantity} ${item.unit || ''}</td>
+        <td style="padding: 16px 0; text-align: right; color: #475569; font-size: ${itemFBase}px; width: 17.5%; vertical-align: top;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        <td style="padding: 16px 0; text-align: right; font-weight: 700; font-size: ${itemFBase}px; color: #0f172a; width: 17.5%; vertical-align: top;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+      </tr>`).join('');
+
+    const safeBlocks = (b.descriptionBlocks || []).map(block => {
+      if (block.type === 'text') {
+        return {
+          ...block,
+          content: sanitizeHtml(block.content || ''),
         };
+      }
+      return block;
+    });
 
-        const newList = editingOrderId ? orders.map(o => o.id === editingOrderId ? data : o) : [data, ...orders];
-        setOrders(newList);
+    return `
+      <div style="display: flex; gap: 24px; margin-bottom: 40px;">
+        <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
+          <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">CLIENTE / DESTINATÁRIO</span>
+          <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${cust.name}</div>
+          <div style="font-size: 11px; color: #64748b; font-weight: 500; margin-top: 4px;">${cust.document || 'CPF/CNPJ não informado'}</div>
+        </div>
+        <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
+          <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">REFERÊNCIA DO ORÇAMENTO</span>
+          <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${b.description || 'PROPOSTA COMERCIAL'}</div>
+        </div>
+      </div>
 
-        setIsSaving(true);
-        try {
-            const result = await db.save('serviflow_orders', newList);
-            if (result?.success) { notify(editingOrderId ? "OS de Obra atualizada!" : "OS de Obra registrada!"); setEditingOrderId(null); setShowForm(false); }
-            else { notify("Salvo localmente. Erro ao sincronizar.", "warning"); setEditingOrderId(null); setShowForm(false); }
-        } finally { setIsSaving(false); }
-    };
+      <div style="margin-bottom: 32px;">
+        <h2 style="margin: 0 0 8px 0; font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase; letter-spacing: 0.02em;">PROPOSTA COMERCIAL</h2>
+        <p style="margin: 0; font-size: 20px; font-weight: 800; color: #2563eb; text-transform: uppercase; line-height: 1.3;">${b.description || ''}</p>
+      </div>
 
-    const getWorkReportHtml = (order: ServiceOrder, reportMode: 'estimated' | 'real') => {
-        const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', city: '', state: '' };
-        const formatDate = (dateStr: string) => {
-            try { const d = new Date(dateStr); return isNaN(d.getTime()) ? new Date().toLocaleDateString('pt-BR') : d.toLocaleDateString('pt-BR'); }
-            catch { return new Date().toLocaleDateString('pt-BR'); }
-        };
+      ${safeBlocks && safeBlocks.length > 0 ? `
+        <div style="margin-bottom: 48px;" class="print-description-content">
+          <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0; margin-bottom: 24px;">DESCRIÇÃO DOS SERVIÇOS</div>
+          <div style="display: block;">
+            ${safeBlocks.map(block => {
+              if (block.type === 'text') {
+                return `<div class="ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px; color: #334155; line-height: 1.6; text-align: justify; margin-bottom: 24px;">${block.content}</div>`;
+              } else if (block.type === 'image') {
+                return `<div style="margin: 24px 0; break-inside: avoid; page-break-inside: avoid; display: block; text-align: center;">
+                  <img src="${block.content}" style="width: auto; max-width: 100%; border-radius: 8px; display: block; margin: 0 auto; object-fit: contain; max-height: 980px;">
+                </div>`;
+              } else if (block.type === 'page-break') {
+                return `<div style="page-break-after: always; break-after: page; height: 0;"></div>`;
+              }
+              return '';
+            }).join('')}
+          </div>
+        </div>` : ''}
 
-        const revenue = order.contractPrice || order.totalAmount || 0;
-        const plannedCost = (order.costItems || []).reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0);
-        const totalActualExpenses = (order.costItems || []).reduce((acc, i) => acc + (i.actualQuantity ? (i.actualQuantity * (i.actualUnitPrice || 0)) : (i.actualValue || 0)), 0);
-        const profitValue = revenue - totalActualExpenses;
-        const budgetSubTotal = order.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0);
-        const bdiValue = order.bdiRate ? budgetSubTotal * (order.bdiRate / 100) : 0;
-        const taxValue = order.taxRate ? (budgetSubTotal + bdiValue) * (order.taxRate / 100) : 0;
-
-        const itemsHtml = (order.costItems || []).map((item: ServiceItem) => {
-            const plannedTotal = item.quantity * item.unitPrice;
-            if (reportMode === 'estimated') {
-                return `
-                <tr style="border-bottom: 1px solid #f1f5f9;">
-                    <td style="padding: 12px 0; text-align: left; vertical-align: top;">
-                        <div style="font-weight: 700; text-transform: uppercase; font-size: 11px; color: #0f172a;">${item.description}</div>
-                        <div style="font-size: 9px; color: #94a3b8; font-weight: 600;">${item.type || 'GERAL'}</div>
-                    </td>
-                    <td style="padding: 12px 0; text-align: center; vertical-align: top; color: #64748b; font-size: 11px; font-weight: 600; text-transform: uppercase;">${item.unit || 'UN'}</td>
-                    <td style="padding: 12px 0; text-align: center; vertical-align: top; font-weight: 700; color: #0f172a; font-size: 11px;">${item.quantity}</td>
-                    <td style="padding: 12px 0; text-align: right; vertical-align: top; color: #0f172a; font-size: 11px; font-weight: 700;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                    <td style="padding: 12px 0; text-align: right; vertical-align: top; font-weight: 800; font-size: 12px; color: #2563eb;">R$ ${plannedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                </tr>`;
-            }
-            const actualTotal = (item.actualQuantity || 0) * (item.actualUnitPrice || 0);
-            const diff = actualTotal - plannedTotal;
-            const diffColor = diff > 0 ? '#e11d48' : diff < 0 ? '#059669' : '#64748b';
-            return `
-            <tr style="border-bottom: 1px solid #f1f5f9;">
-                <td style="padding: 12px 0; text-align: left; vertical-align: top;">
-                    <div style="font-weight: 700; text-transform: uppercase; font-size: 11px; color: #0f172a;">${item.description}</div>
-                    <div style="font-size: 9px; color: #94a3b8; font-weight: 600;">${item.type || 'GERAL'}</div>
-                </td>
-                <td style="padding: 12px 0; text-align: center; vertical-align: top; color: #64748b; font-size: 11px; font-weight: 600; text-transform: uppercase;">${item.unit || 'UN'}</td>
-                <td style="padding: 12px 0; text-align: center; vertical-align: top;">
-                    <div style="font-weight: 700; color: #94a3b8; font-size: 8px; margin-bottom: 2px; text-transform: uppercase;">Est: ${item.quantity}</div>
-                    <div style="font-weight: 800; color: #0f172a; font-size: 10px;">REAL: ${item.actualQuantity || 0}</div>
-                </td>
-                <td style="padding: 12px 0; text-align: right; vertical-align: top;">
-                    <div style="color: #94a3b8; font-size: 8px; margin-bottom: 2px; font-weight: 700; text-transform: uppercase;">Est: R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                    <div style="color: #0f172a; font-size: 10.5px; font-weight: 800;">REAL: R$ ${(item.actualUnitPrice || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                </td>
-                <td style="padding: 12px 0; text-align: right; vertical-align: top;">
-                    <div style="font-weight: 700; font-size: 8px; color: #94a3b8; margin-bottom: 2px; text-transform: uppercase;">Est: R$ ${plannedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                    <div style="font-weight: 900; font-size: 12px; color: #0f172a;">REAL: R$ ${actualTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                    ${diff !== 0 ? `<div style="font-size: 9.5px; font-weight: 900; color: ${diffColor}; margin-top: 3px;">${diff > 0 ? '+' : ''} R$ ${diff.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>` : ''}
-                </td>
-            </tr>`;
-        }).join('');
-
-        return `
+      <div style="margin-bottom: 40px; break-inside: avoid;">
+        <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; padding-bottom: 12px; margin-bottom: 8px;">DETALHAMENTO FINANCEIRO</div>
         <table style="width: 100%; border-collapse: collapse;">
           <thead>
-            <tr><td style="height: 20mm; border: none; padding: 0;"><div style="height: 20mm;">&nbsp;</div></td></tr>
+            <tr style="border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
+              <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: left; font-weight: 800; width: 55%; letter-spacing: 0.05em;">ITEM / DESCRIÇÃO</th>
+              <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: center; font-weight: 800; width: 10%; letter-spacing: 0.05em;">QTD</th>
+              <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: right; font-weight: 800; width: 17.5%; letter-spacing: 0.05em;">UNITÁRIO</th>
+              <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: right; font-weight: 800; width: 17.5%; letter-spacing: 0.05em;">SUBTOTAL</th>
+            </tr>
+          </thead>
+          <tbody>${itemsH}</tbody>
+        </table>
+      </div>
+
+      <div style="margin-bottom: 32px; break-inside: avoid;">
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 12px; gap: 40px;">
+          <div style="text-align: right;">
+            <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px; line-height: 1.2;">SUBTOTAL</span>
+            <span style="font-size: 10px; font-weight: 700; color: #334155; display: block;">R$ ${subT.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+          </div>
+          ${bdiR > 0 ? `
+          <div style="text-align: right;">
+            <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px; line-height: 1.2;">BDI (${bdiR}%)</span>
+            <span style="font-size: 10px; font-weight: 700; color: #10b981; display: block;">+ R$ ${bdiV.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+          </div>` : ''}
+          ${taxR > 0 ? `
+          <div style="text-align: right;">
+            <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px; line-height: 1.2;">IMPOSTOS (${taxR}%)</span>
+            <span style="font-size: 10px; font-weight: 700; color: #3b82f6; display: block;">+ R$ ${taxV.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+          </div>` : ''}
+        </div>
+
+        <div style="background: #0f172a; color: white; padding: 24px 32px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">INVESTIMENTO TOTAL:</span>
+          <span style="font-size: 28px; font-weight: 800; letter-spacing: -0.05em; line-height: 1.2; padding-bottom: 4px;">R$ ${finalT.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 24px; break-inside: avoid;">
+        <div style="display: flex; gap: 24px;">
+          <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
+            <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">FORMA DE PAGAMENTO</span>
+            <p style="margin: 0; font-size: 12px; font-weight: 600; color: #334155; line-height: 1.5;">${b.paymentTerms || 'A combinar'}</p>
+          </div>
+          <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
+            <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">PRAZO DE ENTREGA / EXECUÇÃO</span>
+            <p style="margin: 0; font-size: 12px; font-weight: 600; color: #334155; line-height: 1.5;">${b.deliveryTime || 'A combinar'}</p>
+          </div>
+        </div>
+      </div>
+    `;
+  };
+
+  const getBudgetHtml = (budget: ServiceOrder) => {
+    return `
+      <div class="pdf-root">
+        <table style="width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif;">
+          <thead>
+            <tr>
+              <td style="height: 15mm; border: none; padding: 0;"><div style="height: 15mm;">&nbsp;</div></td>
+            </tr>
           </thead>
           <tfoot>
-            <tr><td style="height: 15mm; border: none; padding: 0;"><div style="height: 15mm;">&nbsp;</div></td></tr>
+            <tr>
+              <td style="height: 15mm; border: none; padding: 0;"><div style="height: 15mm;">&nbsp;</div></td>
+            </tr>
           </tfoot>
           <tbody>
             <tr>
               <td style="padding: 0;">
                 <div class="a4-container">
-                    <!-- HEADER MOVED TO BODY (First Page Only) -->
-                     <div style="padding-bottom: 20px !important; border-bottom: 3px solid #0f172a; margin-bottom: 20px;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                            <div style="display: flex; gap: 24px; align-items: center;">
-                                <div style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
-                                    ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>'}
-                                </div>
-                                <div>
-                                    <h1 style="font-size: 30px; font-weight: 900; color: #0f172a; line-height: 1; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: -0.025em;">${company.name}</h1>
-                                    <p style="margin: 0; font-size: 11px; font-weight: 800; color: #2563eb; text-transform: uppercase; letter-spacing: 0.1em;">Relatório Gerencial de Obra - ${reportMode === 'estimated' ? 'ESTIMADO' : 'REAL'}</p>
-                                    <p style="margin: 8px 0 0 0; font-size: 9px; color: #94a3b8; font-weight: 700; text-transform: uppercase;">${company.cnpj || ''} | ${company.phone || ''}</p>
-                                </div>
-                            </div>
-                            <div style="text-align: right;">
-                                <div style="background: #2563eb; color: white; padding: 6px 16px; border-radius: 8px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; display: inline-block;">CONTROLE DE OBRA</div>
-                                <p style="margin: 0; font-size: 36px; font-weight: 900; color: #0f172a; letter-spacing: -0.05em;">${order.id}</p>
-                                <p style="margin: 4px 0 0 0; font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em;">emissão: ${new Date().toLocaleDateString('pt-BR')}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div style="display: flex; gap: 24px; margin-bottom: 32px;">
-                        <div style="flex: 1; background: #f8fafc; border-radius: 16px; padding: 24px; border: 1px solid #e2e8f0;">
-                            <span style="font-size: 10px; font-weight: 900; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">Contratante / Cliente</span>
-                            <div style="font-size: 16px; font-weight: 700; color: #0f172a; text-transform: uppercase; line-height: 1.2;">${customer.name}</div>
-                            <div style="font-size: 11px; text-slate-400 font-bold mt-4 uppercase;">${customer.document || 'DOC não INF.'}</div>
-                        </div>
-                        <div style="flex: 1; background: #f8fafc; border-radius: 16px; padding: 24px; border: 1px solid #e2e8f0;">
-                            <span style="font-size: 10px; font-weight: 900; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">Identificação da Obra</span>
-                            <div style="font-size: 16px; font-weight: 700; color: #0f172a; text-transform: uppercase; line-height: 1.2;">${order.description}</div>
-                            <div style="font-size: 11px; text-slate-400 font-bold mt-4 uppercase;">Início: ${formatDate(order.createdAt)} | Entrega: ${order.dueDate ? formatDate(order.dueDate) : 'A COMBINAR'}</div>
-                        </div>
-                    </div>
-        
-                    <div style="font-size: 14px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 2px solid #f1f5f9; margin-bottom: 16px; margin-top: 32px;">Resumo Financeiro da Obra</div>
-                    <div style="display: flex; gap: 16px; margin-bottom: 40px;">
-                        <div style="flex: 1; background: rgba(37, 99, 235, 0.05); border-radius: 12px; padding: 16px; border: 1px solid #dbeafe;">
-                            <span style="font-size: 10px; font-weight: 900; text-transform: uppercase; color: #2563eb; display: block; margin-bottom: 4px;">Valor do Orçamento</span>
-                            <span style="font-size: 20px; font-weight: 900; color: #1e40af;">R$ ${revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                        </div>
-                        <div style="flex: 1; background: rgba(225, 29, 72, 0.05); border-radius: 12px; padding: 16px; border: 1px solid #fecdd3;">
-                            <span style="font-size: 10px; font-weight: 900; text-transform: uppercase; color: #e11d48; display: block; margin-bottom: 4px;">${reportMode === 'estimated' ? 'Despesas Previstas' : 'Despesas Reais'}</span>
-                            <span style="font-size: 20px; font-weight: 900; color: #be123c;">R$ ${(reportMode === 'estimated' ? plannedCost : totalActualExpenses).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                        </div>
-                        <div style="flex: 1; background: ${(reportMode === 'estimated' ? (revenue - plannedCost) : profitValue) >= 0 ? 'rgba(5, 150, 105, 0.05)' : 'rgba(220, 38, 38, 0.05)'}; border-radius: 12px; padding: 16px; border: 1px solid ${(reportMode === 'estimated' ? (revenue - plannedCost) : profitValue) >= 0 ? '#a7f3d0' : '#fecaca'};">
-                            <span style="font-size: 10px; font-weight: 900; text-transform: uppercase; color: ${(reportMode === 'estimated' ? (revenue - plannedCost) : profitValue) >= 0 ? '#059669' : '#dc2626'}; display: block; margin-bottom: 4px;">${reportMode === 'estimated' ? 'Lucro Previsto' : 'Lucro Real'}</span>
-                            <span style="font-size: 20px; font-weight: 900; color: ${(reportMode === 'estimated' ? (revenue - plannedCost) : profitValue) >= 0 ? '#047857' : '#b91c1c'};">R$ ${(reportMode === 'estimated' ? (revenue - plannedCost) : profitValue).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                        </div>
-                    </div>
-        
-                    <div style="break-inside: avoid;">
-                        <div style="font-size: 14px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 2px solid #f1f5f9; margin-bottom: 16px;">${reportMode === 'estimated' ? 'Detalhamento de Custos Estimados' : 'Comparativo de Itens (Orï¿½ado vs Real)'}</div>
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <thead>
-                                <tr style="border-bottom: 2px solid #0f172a;">
-                                    <th style="padding-bottom: 12px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; width: 38%;">Descrição</th>
-                                    <th style="padding-bottom: 12px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800; width: 7%;">UN</th>
-                                    <th style="padding-bottom: 12px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800; width: 15%;">Qtd</th>
-                                    <th style="padding-bottom: 12px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 22%;">Unitário</th>
-                                    <th style="padding-bottom: 12px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 18%;">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${itemsHtml}
-                                <tr style="border-top: 1px solid #f1f5f9; background: #fafafa;">
-                                    <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Subtotal dos Itens (Orçamento):</td>
-                                    <td style="padding: 12px 10px; text-align: right; font-size: 12px; font-weight: 800; color: #0f172a;">R$ ${budgetSubTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                                </tr>
-                                ${order.bdiRate ? `
-                                <tr style="background: #fafafa;">
-                                    <td colspan="4" style="padding: 8px 10px; text-align: right; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">BDI (${order.bdiRate}%):</td>
-                                    <td style="padding: 8px 10px; text-align: right; font-size: 12px; font-weight: 800; color: #0f172a;">R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                                </tr>` : ''}
-                                ${order.taxRate ? `
-                                <tr style="background: #fafafa;">
-                                    <td colspan="4" style="padding: 8px 10px; text-align: right; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Impostos (${order.taxRate}%):</td>
-                                    <td style="padding: 8px 10px; text-align: right; font-size: 12px; font-weight: 800; color: #0f172a;">R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                                </tr>` : ''}
-                                <tr style="border-top: 1px solid #cbd5e1; background: #f8fafc;">
-                                    <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 12px; font-weight: 900; color: #334155; text-transform: uppercase;">Total do Orçamento (Arrecadação):</td>
-                                    <td style="padding: 12px 10px; text-align: right; font-size: 13px; font-weight: 900; color: #1e40af;">R$ ${revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                                </tr>
-                                <tr style="border-top: 3px solid #0f172a; background: #f1f5f9;">
-                                    <td colspan="4" style="padding: 16px 10px; text-align: right; font-size: 13px; font-weight: 900; color: #0f172a; text-transform: uppercase;">${reportMode === 'estimated' ? 'Custo Total Estimado de Obra:' : 'Total Realizado em Obra (Medição):'}</td>
-                                    <td style="padding: 16px 10px; text-align: right; font-size: 14px; font-weight: 900; color: ${reportMode === 'estimated' ? '#2563eb' : '#e11d48'};">R$ ${(reportMode === 'estimated' ? plannedCost : totalActualExpenses).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-        
-                    ${order.descriptionBlocks && order.descriptionBlocks.length > 0 ? `
-                    <div style="margin-top: 40px;" class="print-description-content">
-                        <div style="font-size: 14px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 2px solid #f1f5f9; margin-bottom: 16px;">Descrição TÉCNICA / Escopo</div>
-                        <div style="display: flex; flex-direction: column; gap: 24px;">
-                            ${order.descriptionBlocks.map(block => {
-            if (block.type === 'text') {
-                return `<div class="ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px; color: #475569; line-height: 1.6; text-align: justify;">${block.content}</div>`;
-            } else if (block.type === 'image') {
-                return `<div style="margin: 20px 0; break-inside: avoid;"><img src="${block.content}" style="width: 100%; border-radius: 12px; border: 1px solid #e2e8f0; display: block; object-fit: contain;"></div>`;
-            } else if (block.type === 'page-break') {
-                return `<div style="page-break-after: always; break-after: page; height: 0;"></div>`;
-            }
-            return '';
-        }).join('')}
-                        </div>
-                    </div>` : ''}
-        
-                    <div style="margin-top: 80px; break-inside: avoid; border-top: 1px solid #cbd5e1; padding-top: 60px;">
-                        <div style="display: flex; justify-content: center;">
-                            <div style="text-align: center; width: 320px;">
-                                <div style="border-top: 1px solid #cbd5e1; margin-bottom: 12px;"></div>
-                                <p style="font-size: 9px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 4px 0;">Responsável Técnico</p>
-                                <p style="font-size: 14px; font-weight: 800; color: #0f172a; text-transform: uppercase; margin: 0;">${company.name}</p>
-                            </div>
-                        </div>
-                    </div>
+                  <div style="margin-bottom: 25px;">
+                    ${getHeaderHtml(budget)}
+                  </div>
+                  ${getBodyHtml(budget)}
+                  ${getFooterHtml(budget)}
                 </div>
               </td>
             </tr>
           </tbody>
         </table>
-        `;
-    };
+      </div>
+    `;
+  };
 
-    const handlePreviewWorkReport = (order: ServiceOrder, reportMode: 'estimated' | 'real') => {
-        const printWindow = window.open('', '_blank');
-        if (!printWindow) return;
+  const runOptimizePageBreaks = (container: HTMLElement) => {
+    const root = container.querySelector('.print-description-content');
+    if (!root) return;
+    const content = root.querySelector('div:last-child');
+    if (!content) return;
 
-        const htmlContent = getWorkReportHtml(order, reportMode);
-        const title = `Relatório de Obra - ${order.id}`;
+    const allNodes: Element[] = [];
+    Array.from(content.children).forEach(block => {
+      if (block.classList.contains('ql-editor-print')) {
+        allNodes.push(...Array.from(block.children));
+      } else {
+        allNodes.push(block);
+      }
+    });
 
-        const html = `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <title>${title}</title>
-             <script src="https://cdn.tailwindcss.com"></script>
-             <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
-            <style>
-               * { box-sizing: border-box; }
-               body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
-               @page { size: A4; margin: 0 !important; }
-               .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; padding-top: 15mm !important; padding-bottom: 15mm !important; }
-               .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
-               
-               @media screen { 
-                 body { background: #f1f5f9; padding: 40px 0; } 
-                 .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; } 
-               }
-               @media print { 
-                 body { background: white !important; margin: 0 !important; } 
-                 .a4-container { box-shadow: none !important; border: none !important; width: 100% !important; } 
-                 .no-print { display: none !important; } 
-               }
+    for (let i = 0; i < allNodes.length - 1; i++) {
+      const el = allNodes[i] as HTMLElement;
+      let isTitle = false;
 
-                /* Shared Rich Text / Quill Styles */
-                .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
-                .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
-                .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
-                .ql-editor-print strong, .ql-editor-print b { font-weight: bold !important; color: #000 !important; }
-                .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4 { font-weight: 800 !important; color: #0f172a !important; margin-top: 20px !important; margin-bottom: 10px !important; break-after: avoid !important; }
-            </style>
-          </head>
-          <body>
-            ${htmlContent}
-            <script>
-               function optimizePageBreaks() {
-             const root = document.querySelector('.print-description-content div');
-             if (!root) return;
+      if (el.matches('h1, h2, h3, h4, h5, h6')) {
+        isTitle = true;
+      } else {
+        const text = (el.innerText || '').trim();
+        const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text);
+        const isBold =
+          !!el.querySelector('strong, b') ||
+          el.classList.contains('font-bold') ||
+          el.tagName === 'STRONG' ||
+          (el.style && (parseInt(el.style.fontWeight || '0', 10) >= 600 || el.style.fontWeight === 'bold'));
+        const isShort = text.length < 150;
 
-             const allNodes = [];
-             Array.from(root.children).forEach(block => {
-               if (block.classList.contains('ql-editor-print')) {
-                  allNodes.push(...Array.from(block.children));
-               } else {
-                  allNodes.push(block);
-               }
-             });
+        if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 3)) {
+          isTitle = true;
+        }
+      }
 
-             for (let i = 0; i < allNodes.length - 1; i++) {
-               const el = allNodes[i];
-               let isTitle = false;
-               
-               if (el.matches('h1, h2, h3, h4, h5, h6')) {
-                 isTitle = true;
-               } else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
-                 const text = el.innerText.trim();
-                 const isNumbered = /^\\d+(\\.\\d+)*[\\.\\s\\)]/.test(text);
-                 const isBold = el.querySelector('strong, b') || 
-                               (el.style && (parseInt(el.style.fontWeight) >= 600 || el.style.fontWeight === 'bold')) || 
-                               el.tagName === 'STRONG';
-                 const isShort = text.length < 150;
-                 if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 3)) {
-                   isTitle = true;
-                 }
-               }
+      if (isTitle) {
+        const nodesToWrap: HTMLElement[] = [el];
+        let j = i + 1;
 
-               if (isTitle) {
-                 const nodesToWrap = [el];
-                 let j = i + 1;
-                 while (j < allNodes.length && nodesToWrap.length < 3) {
-                   const next = allNodes[j];
-                   const nextText = next.innerText.trim();
-                   const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') || 
-                                      (/^\\d+(\\.\\d+)*[\\.\\s\\)]/.test(nextText) && (next.querySelector('strong, b') || nextText === nextText.toUpperCase()));
-                   if (nextIsTitle) break;
-                   nodesToWrap.push(next);
-                   j++;
-                 }
+        while (j < allNodes.length && nodesToWrap.length < 2) {
+          const next = allNodes[j] as HTMLElement;
+          const nextText = (next.innerText || '').trim();
+          const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') ||
+            (/^\d+(\.\d+)*[\.\s\)]/.test(nextText) && (next.querySelector('strong, b') || nextText === nextText.toUpperCase()));
+          if (nextIsTitle) break;
+          nodesToWrap.push(next);
+          j++;
+        }
 
-                 if (nodesToWrap.length > 1) {
-                   const wrapper = document.createElement('div');
-                   wrapper.className = 'keep-together';
-                   el.parentNode.insertBefore(wrapper, el);
-                   nodesToWrap.forEach(node => wrapper.appendChild(node));
-                   i = j - 1;
-                 }
-               }
-             }
-           }
-               window.onload = function() { 
-                 optimizePageBreaks();
-                 setTimeout(() => { 
-                    window.print(); 
-                 }, 1000); 
-               }
-            </script>
-          </body>
-          </html>`;
-        printWindow.document.write(html);
-        printWindow.document.close();
-    };
-    const getContractHeaderHtml = (order: ServiceOrder) => {
-        return `
-        <div style="padding-top: 10px; padding-bottom: 25px !important; border-bottom: 3px solid #0f172a; margin-bottom: 40px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div style="display: flex; gap: 24px; align-items: center;">
-                    <div style="width: 80px; display: flex; align-items: center; justify-content: flex-start;">
-                        ${company.logo ? `<img src="${company.logo}" style="max-height: 80px; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#1e3a8a;">PRIME</div>'}
-                    </div>
-                    <div>
-                        <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 0 0 2px 0; text-transform: uppercase;">${company.name}</h1>
-                        <p style="margin: 0; font-size: 11px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.02em;">Contrato de Prestação de Serviços</p>
-                        <p style="margin: 4px 0 0 0; font-size: 10px; color: #64748b; font-weight: 500;">${company.cnpj || ''} | ${company.phone || ''}</p>
-                    </div>
-                </div>
-                <div style="text-align: right;">
-                    <p style="margin: 0; font-size: 24px; font-weight: 800; color: #2563eb;">${order.id}</p>
-                    <p style="margin: 4px 0 0 0; font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase;">emissão: ${new Date().toLocaleDateString('pt-BR')}</p>
-                </div>
-            </div>
-        </div>`;
-    };
+        if (nodesToWrap.length > 1) {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'keep-together';
+          wrapper.style.breakInside = 'avoid';
+          wrapper.style.pageBreakInside = 'avoid';
+          wrapper.style.display = 'block';
+          wrapper.style.width = '100%';
+          el.parentNode?.insertBefore(wrapper, el);
+          nodesToWrap.forEach(node => wrapper.appendChild(node));
+          i = j - 1;
+        }
+      }
+    }
+  };
 
-    const getContractFooterHtml = (order: ServiceOrder) => {
-        const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName };
-        return `
-        <div style="margin-top: 100px; break-inside: avoid;">
-            <div style="display: flex; gap: 40px; justify-content: space-around; padding: 0 20px;">
-                <div style="text-align: center; border-top: 1px solid #64748b; padding-top: 8px; flex: 1;">
-                    <p style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 2px 0;">CONTRATADA</p>
-                    <p style="font-size: 14px; font-weight: 800; color: #0f172a; text-transform: uppercase; margin: 0;">${company.name}</p>
-                </div>
-                <div style="text-align: center; border-top: 1px solid #64748b; padding-top: 8px; flex: 1;">
-                    <p style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 2px 0;">CONTRATANTE</p>
-                    <p style="font-size: 14px; font-weight: 800; color: #0f172a; text-transform: uppercase; margin: 0;">${customer.name}</p>
-                </div>
-            </div>
-        </div>`;
-    };
+  const handlePrint = (budget: ServiceOrder) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
 
-    const getContractBodyHtml = (order: ServiceOrder) => {
-        const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', address: 'Endereo não informado', city: '', state: '', cep: '' };
+    const htmlContent = getBudgetHtml(budget);
 
-        return `
-        <div class="print-description-content">
-            <div style="display: flex; gap: 24px; margin-bottom: 32px;">
-                <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
-                    <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">CONTRATADA</span>
-                    <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${company.name}</div>
-                    <div style="font-size: 11px; color: #64748b; font-weight: 500; margin-top: 4px;">${company.address || ''}</div>
-                    <div style="font-size: 11px; color: #64748b; font-weight: 500;">${company.email || ''}</div>
-                </div>
-                <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
-                    <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">CONTRATANTE</span>
-                    <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${customer.name}</div>
-                    <div style="font-size: 11px; color: #64748b; font-weight: 500; margin-top: 4px;">${(customer.document || '').replace(/\D/g, '').length <= 11 ? 'CPF' : 'CNPJ'}: ${formatDocument(customer.document || '') || 'N/A'}</div>
-                    <div style="font-size: 11px; color: #64748b; font-weight: 500;">${customer.address || ''}, ${customer.number || ''} - ${customer.city || ''}</div>
-                </div>
-            </div>
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Orçamento - ${budget.id}</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
+        <style>
+          * { box-sizing: border-box; }
+          body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
+          @page { size: A4; margin: 0 !important; }
+          .a4-container { width: 100%; margin: 0; background: white; padding: 0 15mm !important; }
+          .avoid-break { break-inside: avoid; page-break-inside: avoid; }
+          .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
 
-            <div style="margin-bottom: 40px;">
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 0;">As partes acima identificadas resolvem firmar o presente Contrato de Prestação de Serviços por Empreitada Global, nos termos da legislação civil e previdenciÃ¡ria vigente, mediante as CLÁUSULAs e condições seguintes:</p>
-            </div>
+          @media print {
+            @page { margin: 0; size: A4; }
+            body { background: white !important; margin: 0 !important; padding: 0 !important; }
+            .a4-container { box-shadow: none !important; border: none !important; width: 100% !important; padding: 0 15mm !important; margin: 0 !important; }
+            table { break-inside: auto; width: 100%; }
+            tr { break-inside: auto !important; break-after: auto; }
+            thead { display: table-header-group; }
+            tfoot { display: table-footer-group; }
+          }
 
-            <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 1  DO OBJETO</h4>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">1.1. O presente contrato tem por objeto a execução de reforma em unidade residencial, situada no endereo do CONTRATANTE, compreendendo os serviços descritos abaixo, os quais serão executados por empreitada global, com responsabilidade TÉCNICA, administrativa e operacional integral da CONTRATADA.</p>
-                <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border-left: 4px solid #3b82f6; margin-top: 12px;">
-                    <p style="font-size: 14px; font-weight: 700; color: #1e3a8a; text-transform: uppercase; line-height: 1.4; margin: 0;">${order.description}</p>
-                </div>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 12px 0 0 0;">1.2. A execução dos serviços ser realizada por obra certa, com preço previamente ajustado, não se caracterizando, em hipótese alguma, cessão ou locação de mão de obra.</p>
-            </div>
+          .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
+          .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
+          .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
+          .ql-editor-print strong, .ql-editor-print b { font-weight: bold !important; color: #000 !important; }
+          .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4 { font-weight: 800 !important; color: #0f172a !important; margin-top: 20px !important; margin-bottom: 10px !important; break-after: avoid !important; }
+        </style>
+      </head>
+      <body>
+        ${htmlContent}
+        <script>
+          window.onload = function() {
+            setTimeout(() => { window.print(); }, 300);
+          }
+        </script>
+      </body>
+      </html>
+    `;
 
-            <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 2  DA FORMA DE execução (EMPREITADA GLOBAL)</h4>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">2.1. A CONTRATADA executará os serviços com autonomia TÉCNICA e gerencial, utilizando meios próprios, inclusive pessoal, ferramentas, equipamentos e métodos de trabalho.</p>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 8px 0 0 0;">2.2. não haver qualquer tipo de subordinação, exclusividade, controle de jornada ou disponibilização de trabalhadores ao CONTRATANTE.</p>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 8px 0 0 0;">2.3. A CONTRATADA assume total responsabilidade pela execução da obra, respondendo integralmente pelos serviços contratados.</p>
-            </div>
+    printWindow.document.write(html);
+    printWindow.document.close();
+  };
 
-            <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 3  DO PREO E DA FORMA DE PAGAMENTO</h4>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">3.1. Pelos serviços objeto deste contrato, o CONTRATANTE pagar  CONTRATADA o valor global de <b style="color: #0f172a;">R$ ${order.contractPrice && order.contractPrice > 0 ? order.contractPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>.</p>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 8px 0 0 0;">3.2. O pagamento ser efetuado da seguinte forma: <b style="color: #0f172a;">${order.paymentTerms || 'Conforme combinado'}</b>.</p>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 8px 0 0 0;">3.3. O valor contratado corresponde ao preo fechado da obra, não estando vinculado a horas trabalhadas, nÂºmero de funcionÂºrios ou fornecimento de mão de obra.</p>
-            </div>
+  const handleGeneratePDF = async (budget: ServiceOrder) => {
+    let container: HTMLDivElement | null = null;
 
-            <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 4Âª  DAS OBRIGAÃ‡Ã•ES DA CONTRATADA</h4>
-                <ul style="list-style-type: none; padding-left: 0 !important; font-size: 14px; color: #475569; line-height: 1.6; margin: 0;">
-                    <li style="margin-bottom: 4px; padding-left: 0 !important;">4.1. Executar os serviços conforme o escopo contratado e normas TÉCNICAs aplicveis.</li>
-                    <li style="margin-bottom: 4px; padding-left: 0 !important;">4.2. Responsabilizar-se integralmente por seus empregados, prepostos ou subcontratados, inclusive quanto a encargos trabalhistas, previdenciÃ¡rios, fiscais e securitÃ¡rios.</li>
-                    <li style="margin-bottom: 4px; padding-left: 0 !important;">4.3. Manter seus tributos, contribuições e obrigações legais em dia.</li>
-                    <li style="padding-left: 0 !important;">4.4. Responder por danos eventualmente causados ao imvel durante a execução dos serviços.</li>
-                </ul>
-            </div>
+    try {
+      notify("Gerando PDF...");
 
-            <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 5Âª  DAS OBRIGAÃ‡Ã•ES DO CONTRANTE</h4>
-                <ul style="list-style-type: none; padding-left: 0 !important; font-size: 14px; color: #475569; line-height: 1.6; margin: 0;">
-                    <li style="margin-bottom: 4px; padding-left: 0 !important;">5.1. Garantir o acesso da CONTRATADA ao local da obra.</li>
-                    <li style="margin-bottom: 4px; padding-left: 0 !important;">5.2. Efetuar os pagamentos conforme acordado.</li>
-                    <li style="padding-left: 0 !important;">5.3. Fornecer, quando necessrio, autorizAções do condomnio para execução dos serviços.</li>
-                </ul>
-            </div>
+      // ✅ Agora usa o HTML COMPLETO (igual print)
+      const htmlContent = getBudgetHtml(budget);
 
-            <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 6Âª  DAS RESPONSABILIDADES PREVIDENCIRIAS E FISCAIS</h4>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">6.1. As partes reconhecem que o presente contrato caracteriza empreitada global de obra, nos termos da legislação vigente, não se aplicando a retenção de 11% (onze por cento) de INSS, conforme disposto na Lei nÂº 8.212/91 e Instrução Normativa RFB nÂº 971/2009.</p>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 8px 0 0 0;">6.2. A CONTRATADA  a única responsÃ¡vel pelo recolhimento de seus tributos e contribuições incidentes sobre suas atividades.</p>
-            </div>
+      container = document.createElement("div");
+      container.id = "pdf-temp-root";
+      Object.assign(container.style, {
+        position: "fixed",
+        left: "0",
+        top: "0",
+        width: "210mm",
+        background: "white",
+        opacity: "0",
+        pointerEvents: "none",
+        zIndex: "999999",
+      });
 
-            <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 7Âª  DO PRAZO</h4>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">7.1. O prazo estimado para execução da obra  de <b style="color: #0f172a;">${order.deliveryTime || 'A combinar'}</b>, contado a partir do inÂºcio efetivo dos serviços, podendo ser ajustado mediante comum acordo entre as partes.</p>
-            </div>
+      const head = `
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
+        <style>
+          * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background: white; color: #000; }
+          .pdf-page { width: 210mm; background: white; margin: 0; padding: 0; }
+          .a4-container { width: 100%; background: white; padding: 0 15mm; }
+          .avoid-break, .keep-together { break-inside: avoid; page-break-inside: avoid; }
+          table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+          thead { display: table-header-group; }
+          tfoot { display: table-footer-group; }
+          tr { break-inside: auto !important; }
 
-            <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 8Âª  DA RESPONSABILIDADE TÉCNICA</h4>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">8.1. Quando aplicÃ¡vel, a CONTRATADA providenciarÃ¡ a emissão de ART/RRT, assumindo a responsabilidade TÉCNICA pela execução dos serviços.</p>
-            </div>
+          .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
+          .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
+          .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
+          .ql-editor-print strong, .ql-editor-print b { font-weight: bold !important; color: #000 !important; }
+          .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4 {
+            font-weight: 800 !important; color: #0f172a !important;
+            margin-top: 20px !important; margin-bottom: 10px !important;
+            break-after: avoid !important;
+          }
+        </style>
+      `;
 
-            <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 9Âª  DA RECISÃƒO</h4>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">9.1. O descumprimento de qualquer CLÁUSULA ensejarÃ¡ a RECISÃƒO deste instrumento, sem prejuízo de perdas e danos.</p>
-            </div>
-
-            <div style="margin-bottom: 32px; break-inside: avoid;">
-                <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 10Âª  DO FORO</h4>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">10.1. Fica eleito o foro da comarca de <b style="color: #0f172a;">${customer.city || 'São Paulo'} - ${customer.state || 'SP'}</b>, para dirimir quaisquer controvérsias oriundas deste contrato, renunciando as partes a qualquer outro, por mais privilegiado que seja.</p>
-            </div>
-        </div>`;
-    };
-
-    const getContractHtml = (order: ServiceOrder) => {
-        return `
-        <div class="a4-container">
-            ${getContractHeaderHtml(order)}
-            ${getContractBodyHtml(order)}
-            ${getContractFooterHtml(order)}
+      container.innerHTML = `
+        ${head}
+        <div class="pdf-page">
+          ${htmlContent}
         </div>
-        `;
-    };
+      `;
 
-    const runOptimizePageBreaks = (container: HTMLElement) => {
-        const root = container.querySelector('.print-description-content');
-        if (!root) return;
-        const content = root.querySelector('div:last-child');
-        if (!content) return;
+      document.body.appendChild(container);
 
-        const allNodes: Element[] = [];
-        Array.from(content.children).forEach(block => {
-            if (block.classList.contains('ql-editor-print')) {
-                allNodes.push(...Array.from(block.children));
-            } else {
-                allNodes.push(block);
-            }
+      // Otimizar quebras antes de capturar
+      runOptimizePageBreaks(container);
+
+      const elementToPrint = container.querySelector(".pdf-page") as HTMLElement;
+      if (!elementToPrint) throw new Error("Elemento de impressão não encontrado.");
+
+      // Aguarda imagens
+      const imgs = Array.from(container.querySelectorAll("img"));
+      await Promise.all(
+        imgs.map((img) => {
+          const el = img as HTMLImageElement;
+          if (el.complete) return Promise.resolve();
+          return new Promise<void>((resolve) => {
+            el.addEventListener("load", () => resolve(), { once: true });
+            el.addEventListener("error", () => resolve(), { once: true });
+          });
+        })
+      );
+
+      // Aguarda fontes
+      if ("fonts" in document) {
+        // @ts-ignore
+        await document.fonts.ready;
+      }
+
+      await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+
+      const filename = `${budget.id}_${(budget.customerName || "cliente")
+        .replace(/[^a-z0-9]/gi, "_")
+        .toLowerCase()}.pdf`;
+
+      // ✅ Margin do html2pdf = 0 (padding já está no HTML)
+      const options = {
+        margin: 0,
+        filename,
+        image: { type: "jpeg" as const, quality: 0.98 },
+        html2canvas: {
+          scale: 3,
+          useCORS: true,
+          allowTaint: false,
+          backgroundColor: "#ffffff",
+          logging: false,
+          windowWidth: 794,
+        },
+        jsPDF: { unit: "mm" as const, format: "a4" as const, orientation: "portrait" as const },
+        pagebreak: { mode: ["avoid-all", "css", "legacy"] as any },
+      };
+
+      const worker = html2pdf()
+        .set(options)
+        .from(elementToPrint)
+        .toPdf()
+        .get('pdf')
+        .then((pdf: any) => {
+          const totalPages = pdf.internal.getNumberOfPages();
+          for (let i = 1; i <= totalPages; i++) {
+            pdf.setPage(i);
+            pdf.setFontSize(8);
+            pdf.setTextColor(150);
+            pdf.text(
+              `Pág. ${i} / ${totalPages}`,
+              pdf.internal.pageSize.getWidth() - 15,
+              pdf.internal.pageSize.getHeight() - 8
+            );
+          }
         });
 
-        for (let i = 0; i < allNodes.length - 1; i++) {
-            const el = allNodes[i] as HTMLElement;
-            let isTitle = false;
+      await (worker as any).save();
 
-            if (el.matches('h1, h2, h3, h4, h5, h6')) {
-                isTitle = true;
-            } else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
-                const text = el.innerText.trim();
-                const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text);
-                const isBold = el.querySelector('strong, b') ||
-                    (el.style && (parseInt(el.style.fontWeight) >= 600 || el.style.fontWeight === 'bold')) ||
-                    el.tagName === 'STRONG';
-                const isShort = text.length < 150;
+      notify("PDF baixado com sucesso!");
+    } catch (err) {
+      console.error("PDF Error:", err);
+      notify("Erro ao gerar PDF", "error");
+    } finally {
+      if (container?.parentNode) container.parentNode.removeChild(container);
+    }
+  };
 
-                if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 3)) {
-                    isTitle = true;
-                }
-            }
+  const handleSave = async () => {
+    if (isSaving) return;
 
-            if (isTitle) {
-                const nodesToWrap = [el];
-                let j = i + 1;
-                while (j < allNodes.length && nodesToWrap.length < 3) {
-                    const next = allNodes[j] as HTMLElement;
-                    const nextText = next.innerText.trim();
-                    const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') ||
-                        (/^\d+(\.\d+)*[\.\s\)]/.test(nextText) && (next.querySelector('strong, b') || nextText === nextText.toUpperCase()));
+    const customer = customers.find(c => c.id === selectedCustomerId);
+    if (!customer) { notify("Selecione um cliente", "error"); return; }
+    if (items.length === 0) { notify("Adicione itens ao Orçamento", "error"); return; }
 
-                    if (nextIsTitle) break;
-                    nodesToWrap.push(next);
-                    j++;
-                }
+    const existingBudget = editingBudgetId ? orders.find(o => o.id === editingBudgetId) : null;
 
-                if (nodesToWrap.length > 1) {
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'keep-together';
-                    wrapper.style.breakInside = 'avoid';
-                    wrapper.style.pageBreakInside = 'avoid';
-                    wrapper.style.display = 'block';
-                    wrapper.style.width = '100%';
-                    el.parentNode?.insertBefore(wrapper, el);
-                    nodesToWrap.forEach(node => wrapper.appendChild(node));
-                    i = j - 1;
-                }
-            }
-        }
+    // Sanitiza textos antes de salvar
+    const safeDescriptionBlocks = (descriptionBlocks || []).map(b => {
+      if (b.type === 'text') return { ...b, content: sanitizeHtml(b.content || '') };
+      return b;
+    });
+
+    const data: ServiceOrder = {
+      id: editingBudgetId || db.generateId('ORC'),
+      customerId: customer.id,
+      customerName: customer.name,
+      customerEmail: customer.email,
+      description: proposalTitle || 'PROPOSTA COMERCIAL',
+      status: OrderStatus.PENDING,
+      items,
+      descriptionBlocks: safeDescriptionBlocks,
+      totalAmount,
+      paymentTerms,
+      deliveryTime,
+      paymentEntryPercent,
+      taxRate: Number(taxRate) || 0,
+      bdiRate: Number(bdiRate) || 0,
+      createdAt: existingBudget?.createdAt || new Date().toISOString().split('T')[0],
+      dueDate: existingBudget?.dueDate || new Date(Date.now() + (company.defaultProposalValidity || 15) * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
     };
 
-    const handleGenerateContractPDF = async (order: ServiceOrder) => {
-        let container: HTMLDivElement | null = null;
+    const newList = editingBudgetId
+      ? orders.map(o => o.id === editingBudgetId ? data : o)
+      : [data, ...orders];
 
-        try {
-            notify("Gerando PDF do Contrato...");
+    setOrders(newList);
 
-            const bodyHtml = getContractBodyHtml(order);
+    setIsSaving(true);
+    try {
+      const result = await db.save('serviflow_orders', newList);
+      if (result?.success) {
+        notify("Orçamento salvo e sincronizado!");
+        setTimeout(() => setShowForm(false), 800);
+      } else if (result?.error === 'quota_exceeded') {
+        notify("ERRO DE ARMAZENAMENTO: Limite excedido.", "error");
+      } else {
+        notify(`Salvo localmente. Erro Sync: ${result?.error?.message || JSON.stringify(result?.error)}`, "warning");
+        setShowForm(false);
+      }
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
-            container = document.createElement("div");
-            container.id = "pdf-temp-root";
-            Object.assign(container.style, {
-                position: "fixed",
-                left: "0",
-                top: "0",
-                width: "210mm",
-                background: "white",
-                opacity: "0",
-                pointerEvents: "none",
-                zIndex: "999999",
-            });
+  const loadBudgetToForm = (budget: ServiceOrder, isClone = false) => {
+    setShowImportModal(false);
+    setEditingBudgetId(isClone ? null : budget.id);
+    setSelectedCustomerId(budget.customerId);
 
-            const head = `
-            <link rel="preconnect" href="https://fonts.googleapis.com">
-            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
-            <style>
-                * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-                body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background: white; color: #000; }
-                .pdf-page { width: 210mm; background: white; margin: 0; padding: 0; }
-                .a4-container { width: 100%; background: white; padding: 0 15mm; }
-                .avoid-break, .keep-together { break-inside: avoid; page-break-inside: avoid; }
-                
-                .pdf-header { margin-bottom: 25px; }
-                .pdf-footer { margin-top: 32px; }
+    // Recria IDs para evitar conflito no React keys
+    setItems(budget.items.map(item => ({ ...item, id: uid() })));
+    setProposalTitle(isClone ? `${budget.description} (CÓPIA)` : (budget.description || ''));
 
-                ul, ol { margin: 0; padding-left: 20px !important; }
-                li { padding-left: 5px !important; margin-bottom: 4px !important; line-height: 1.6 !important; }
-
-                .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
-                .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
-                .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
-                .ql-editor-print strong, .ql-editor-print b { font-weight: bold !important; color: #000 !important; }
-                .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4 {
-                    font-weight: 800 !important; color: #0f172a !important;
-                    margin-top: 20px !important; margin-bottom: 10px !important;
-                    break-after: avoid !important;
-                }
-            </style>
-            `;
-
-            container.innerHTML = `
-            ${head}
-            <div class="pdf-page">
-                <div class="a4-container">
-                    <div class="pdf-header">
-                        ${getContractHeaderHtml(order)}
-                    </div>
-                    <div class="pdf-body">
-                        ${bodyHtml}
-                    </div>
-                    <div class="pdf-footer">
-                        ${getContractFooterHtml(order)}
-                    </div>
-                </div>
-            </div>
-            `;
-
-            document.body.appendChild(container);
-
-            runOptimizePageBreaks(container);
-
-            const elementToPrint = container.querySelector(".pdf-page") as HTMLElement;
-            if (!elementToPrint) throw new Error("Elemento de impresSão não encontrado.");
-
-            const imgs = Array.from(container.querySelectorAll("img"));
-            await Promise.all(
-                imgs.map((img) => {
-                    if ((img as HTMLImageElement).complete) return Promise.resolve();
-                    return new Promise<void>((resolve) => {
-                        img.addEventListener("load", () => resolve(), { once: true });
-                        img.addEventListener("error", () => resolve(), { once: true });
-                    });
-                })
-            );
-
-            if ("fonts" in document) {
-                // @ts-ignore
-                await document.fonts.ready;
-            }
-
-            await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
-
-            const filename = `contrato_${order.id}_${(order.customerName || "cliente")
-                .replace(/[^a-z0-9]/gi, "_")
-                .toLowerCase()}.pdf`;
-
-            const options = {
-                margin: [15, 0, 15, 0] as [number, number, number, number],
-                filename,
-                image: { type: "jpeg" as const, quality: 0.98 },
-                html2canvas: {
-                    scale: 3,
-                    useCORS: true,
-                    allowTaint: false,
-                    backgroundColor: "#ffffff",
-                    logging: false,
-                    windowWidth: 794,
-                },
-                jsPDF: { unit: "mm" as const, format: "a4" as const, orientation: "portrait" as const },
-                pagebreak: { mode: ["css", "legacy"] as any },
-            };
-
-            await (html2pdf()
-                .set(options)
-                .from(elementToPrint)
-                .toPdf()
-                .get('pdf')
-                .then((pdf: any) => {
-                    const totalPages = pdf.internal.getNumberOfPages();
-                    for (let i = 1; i <= totalPages; i++) {
-                        pdf.setPage(i);
-                        pdf.setFontSize(8);
-                        pdf.setTextColor(150);
-                        pdf.text(
-                            `PÃ¡g. ${i} / ${totalPages}`,
-                            pdf.internal.pageSize.getWidth() - 15,
-                            pdf.internal.pageSize.getHeight() - 8
-                        );
-                    }
-                }) as any)
-                .save();
-
-            notify("PDF do Contrato baixado com sucesso!");
-        } catch (err) {
-            console.error("PDF Contract Error:", err);
-            notify("Erro ao gerar PDF do contrato", "error");
-        } finally {
-            if (container?.parentNode) container.parentNode.removeChild(container);
-        }
-    };
-
-    const handlePrintContract = (order: ServiceOrder) => {
-        const printWindow = window.open('', '_blank');
-        if (!printWindow) return;
-
-        const bodyHtml = getContractBodyHtml(order);
-        const headerHtml = getContractHeaderHtml(order);
-        const footerHtml = getContractFooterHtml(order);
-        const title = `Contrato Prime - ${order.id}`;
-
-        const html = `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <title>${title}</title>
-             <script src="https://cdn.tailwindcss.com"></script>
-             <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-            <style>
-               * { box-sizing: border-box; }
-               body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
-               
-               @page { size: A4; margin: 0 !important; }
-               
-               .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; padding-top: 15mm !important; padding-bottom: 15mm !important; }
-               .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
-               
-               ul, ol { margin: 0; padding-left: 20px !important; }
-               li { padding-left: 5px !important; margin-bottom: 4px !important; line-height: 1.6 !important; }
-               
-               @media screen { 
-                 body { background: #f1f5f9; padding: 40px 0; } 
-                 .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm; } 
-               }
-                @media print { 
-                  @page { margin: 20mm 15mm 20mm 15mm !important; size: A4; }
-                  body { background: white !important; margin: 0 !important; padding: 0 !important; } 
-                  .a4-container { 
-                      box-shadow: none !important; 
-                      border: none !important; 
-                      width: 100% !important; 
-                      padding: 0 !important; 
-                      margin: 0 !important; 
-                  }
-                 table { break-inside: auto; width: 100%; }
-                 tr { break-inside: auto !important; break-after: auto; }
-                 .no-print { display: none !important; } 
-               }
-            </style>
-          </head>
-          <body>
-            <div class="a4-container">
-                ${headerHtml}
-                ${bodyHtml}
-                ${footerHtml}
-            </div>
-            <script>
-               window.onload = function() { 
-                 // Aplicar otimização de quebras
-                 const content = document.querySelector('.print-description-content');
-                 if (content) {
-                    const allNodes = [];
-                    Array.from(content.children).forEach(block => {
-                        if (block.classList.contains('ql-editor-print')) {
-                            allNodes.push(...Array.from(block.children));
-                        } else {
-                            allNodes.push(block);
-                        }
-                    });
-
-                    for (let i = 0; i < allNodes.length - 1; i++) {
-                        const el = allNodes[i];
-                        let isTitle = false;
-                        if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
-                        else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
-                            const text = el.innerText.trim();
-                            const isNumbered = /^\\d+(\\.\\d+)*[\\.\\s\\)]/.test(text.replace(/\\\\/g, ''));
-                            const isBold = el.querySelector('strong, b') || (el.style && parseInt(el.style.fontWeight) > 600) || el.tagName === 'STRONG';
-                            const isShort = text.length < 150;
-                            if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
-                                isTitle = true;
-                            }
-                        }
-
-                        if (isTitle) {
-                            const nodesToWrap = [el];
-                            let j = i + 1;
-                            while (j < allNodes.length && nodesToWrap.length < 3) {
-                                const next = allNodes[j];
-                                if (next.matches('h1, h2, h3, h4, h5, h6')) break;
-                                nodesToWrap.push(next);
-                                j++;
-                            }
-                            if (nodesToWrap.length > 1) {
-                                const wrapper = document.createElement('div');
-                                wrapper.className = 'keep-together';
-                                el.parentNode.insertBefore(wrapper, el);
-                                nodesToWrap.forEach(node => wrapper.appendChild(node));
-                                i = j - 1;
-                            }
-                        }
-                    }
-                 }
-                 setTimeout(() => { 
-                    window.print(); 
-                 }, 1000); 
-               }
-            </script>
-          </body>
-          </html>`;
-        printWindow.document.write(html);
-        printWindow.document.close();
-    };
-
-    const handlePrintWorkReport = (order: ServiceOrder, mode: 'estimated' | 'real') => handlePreviewWorkReport(order, mode);
-
-
-
-    useEffect(() => { /* Signature Removed */ }, [showForm]);
-
-    return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <div>
-                    <h2 className="text-2xl font-bold text-slate-900 tracking-tight">OS de Obra</h2>
-                    <p className="text-slate-500 text-sm">Gestão de reformas e construções.</p>
-                </div>
-                <button onClick={() => {
-                    setShowForm(true);
-                    setActiveTab('details');
-                    setEditingOrderId(null);
-                    setSelectedCustomerId('');
-                    setItems([]);
-                    setOsTitle('Reforma / Obra');
-                    setDiagnosis('');
-                    setDescriptionBlocks([]);
-                    setPaymentTerms('');
-                    setDeliveryTime('');
-                    setContractPrice(0);
-                    setTaxRate(0);
-                    setBdiRate(0);
-                }} className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold shadow-2xl shadow-blue-100 hover:bg-blue-700 transition-all flex items-center gap-2">
-                    <Plus className="w-5 h-5" /> Nova Obra
-                </button>
-            </div>
-            <div className="bg-white p-4 rounded-[1.5rem] border shadow-sm">
-                <div className="relative">
-                    <Search className="absolute left-4 top-3 w-4 h-4 text-slate-400" />
-                    <input type="text" placeholder="Buscar por cliente ou obra..." className="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 transition-all" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
-                </div>
-            </div>
-
-            <div className="bg-white rounded-[2rem] border overflow-hidden shadow-sm overflow-x-auto">
-                <table className="w-full text-left">
-                    <thead className="bg-slate-50 text-[10px] font-black uppercase text-slate-400 border-b">
-                        <tr><th className="px-8 py-5">OS #</th><th className="px-8 py-5">CLIENTE</th><th className="px-8 py-5">OBRA/DESCRIÇÃO</th><th className="px-8 py-5 text-right">AÇÕES</th></tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                        {activeOrders.map(order => (
-                            <tr key={order.id} className="hover:bg-slate-50 group transition-all">
-                                <td className="px-8 py-5 text-xs font-mono font-black text-blue-600">{order.id}</td>
-                                <td className="px-8 py-5 text-sm font-black uppercase text-slate-900">{order.customerName}</td>
-                                <td className="px-8 py-5 text-xs font-bold text-slate-400 uppercase">{order.description}</td>
-                                <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onClick={() => handleGenerateContractPDF(order)} className="p-2 text-blue-500 hover:text-blue-700 transition-colors" title="Baixar Contrato PDF"><FileDown className="w-4 h-4" /></button>
-                                    <button onClick={() => handlePrintContract(order)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Gerar Contrato (Imprimir)"><ScrollText className="w-4 h-4" /></button>
-                                    <button onClick={() => handlePrintOS(order)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Imprimir OS"><Printer className="w-4 h-4" /></button>
-                                    <button onClick={() => {
-                                        setEditingOrderId(order.id);
-                                        setSelectedCustomerId(order.customerId);
-                                        setItems(order.costItems || []); // Load COST items (empty initially)
-                                        setOsTitle(order.description);
-                                        setDiagnosis(order.serviceDescription || '');
-                                        setDeliveryDate(order.dueDate);
-                                        setDescriptionBlocks(order.descriptionBlocks || []);
-                                        setPaymentTerms(order.paymentTerms || '');
-                                        setDeliveryTime(order.deliveryTime || '');
-                                        const calculatedTotal = order.items?.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0) || 0;
-                                        setContractPrice(order.contractPrice || order.totalAmount || calculatedTotal || 0);
-                                        setTaxRate(order.taxRate || 0);
-                                        setBdiRate(order.bdiRate || 0);
-                                        setShowForm(true);
-                                    }} className="p-2 text-slate-400 hover:text-blue-600 transition-colors"><Pencil className="w-4 h-4" /></button>
-                                    <button onClick={async () => {
-                                        if (confirm("Excluir esta OS de Obra?")) {
-                                            const idToDelete = order.id;
-                                            setOrders(p => p.filter(x => x.id !== idToDelete));
-                                            await db.remove('orders', idToDelete);
-                                            notify("OS removida.");
-                                        }
-                                    }} className="p-2 text-rose-300 hover:text-rose-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-            {showForm && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
-                    <div className="bg-slate-50 w-full max-w-[1240px] h-[95vh] rounded-[2.5rem] shadow-[0_0_80px_rgba(0,0,0,0.2)] overflow-hidden flex flex-col animate-in zoom-in-95">
-                        <div className="bg-white px-8 py-5 border-b flex justify-between items-center shrink-0">
-                            <div className="flex items-center gap-4">
-                                <div className="bg-slate-900 p-2.5 rounded-xl text-white shadow-xl shadow-slate-200"><HardHat className="w-5 h-5" /></div>
-                                <div>
-                                    <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter mb-0.5">{editingOrderId ? `Editando Obra ${editingOrderId} ` : 'Nova OS de Obra'}</h3>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-[10px] font-black uppercase tracking-widest bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md">construção Civil</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <button onClick={() => setShowForm(false)} className="bg-slate-100 hover:bg-slate-200 p-2 rounded-full transition-colors"><X className="w-6 h-6 text-slate-400" /></button>
-                        </div>
-
-
-                        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
-                            <div className="flex-1 overflow-y-auto p-8 space-y-6 bg-[#f8fafc] no-scrollbar">
-                                {activeTab === 'details' && (
-                                    <>
-                                        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div>
-                                                    <div className="flex justify-between items-center mb-2"><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest ml-1">Cliente</label><button onClick={() => setShowFullClientForm(true)} className="text-blue-600 text-[9px] font-black uppercase flex items-center gap-1 hover:underline"><UserPlus className="w-3 h-3" /> Novo</button></div>
-                                                    <select className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all custom-select" value={selectedCustomerId} onChange={e => setSelectedCustomerId(e.target.value)}><option value="">Selecione...</option>{customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
-                                                </div>
-                                                <div><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-2 block ml-1">Valor Fechado do Contrato (Receita)</label><input type="number" placeholder="R$ 0,00" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400" value={contractPrice} onChange={e => setContractPrice(Number(e.target.value))} /></div>
-                                                <div className="md:col-span-2"><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-2 block ml-1">Título da Obra</label><input type="text" placeholder="Ex: Reforma da Cozinha" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400" value={osTitle} onChange={e => setOsTitle(e.target.value)} /></div>
-                                            </div>
-                                        </div>
-
-                                        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                                            <div>
-                                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Observações TÉCNICAs e Escopo Detalhado</label>
-                                                <RichTextEditor
-                                                    value={diagnosis}
-                                                    onChange={setDiagnosis}
-                                                    placeholder="Descreva os serviços a serem executados por extenso..."
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
-                                            <div className="flex justify-between items-center">
-                                                <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-widest border-b pb-2 grow mr-6">FOTOS E ANEXOS DA OBRA</h4>
-                                            </div>
-                                            {descriptionBlocks.length === 0 && (
-                                                <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-[2rem] p-8 flex flex-col items-center justify-center gap-4 group hover:border-blue-400 transition-colors cursor-pointer" onClick={addTextBlock}>
-                                                    <div className="flex gap-4">
-                                                        <button onClick={(e) => { e.stopPropagation(); addTextBlock(); }} className="bg-blue-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-blue-100 hover:scale-105 transition-all"><Type className="w-4 h-4" /> + Iniciar com Texto</button>
-                                                        <button onClick={(e) => { e.stopPropagation(); addImageBlock(); }} className="bg-emerald-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-emerald-100 hover:scale-105 transition-all"><ImageIcon className="w-4 h-4" /> + Iniciar com Imagem</button>
-                                                    </div>
-                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 animate-pulse">Comece a montar o Relatório da obra acima</p>
-                                                </div>
-                                            )}
-                                            {descriptionBlocks.map((block) => (
-                                                <div key={block.id} className="relative group">
-                                                    {block.type === 'text' && (
-                                                        <div className="flex-1">
-                                                            <RichTextEditor
-                                                                id={block.id}
-                                                                value={block.content}
-                                                                onChange={(content) => updateBlockContent(block.id, content)}
-                                                                onAddText={addTextBlock}
-                                                                onAddImage={addImageBlock}
-                                                                placeholder="Detalhes da foto ou texto..."
-                                                            />
-                                                        </div>
-                                                    )}
-                                                    {block.type === 'image' && (
-                                                        <div className="w-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center gap-2">
-                                                            {block.content ? (
-                                                                <div className="relative max-w-[200px]"><img src={block.content} className="w-full h-auto rounded-lg shadow-lg" /><button onClick={() => updateBlockContent(block.id, '')} className="absolute -top-2 -right-2 bg-rose-500 text-white p-1.5 rounded-full"><Trash2 className="w-3 h-3" /></button></div>
-                                                            ) : (
-                                                                <label className="cursor-pointer flex flex-col items-center gap-1"><Upload className="w-5 h-5 text-blue-500" /><span className="text-[8px] font-black text-slate-400 uppercase">Subir Foto</span><input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(block.id, e)} /></label>
-                                                            )}
-                                                        </div>
-                                                    )}
-                                                    <button onClick={() => setDescriptionBlocks(descriptionBlocks.filter(b => b.id !== block.id))} className="absolute -top-2 -right-2 bg-slate-200 text-slate-500 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><X className="w-3 h-3" /></button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </>
-                                )}
-                                {false && (
-                                    <div className="space-y-6">
-                                        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-                                            <InfoCard
-                                                label="Valor do Orçamento"
-                                                value={`R$ ${contractPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} `}
-                                                className="bg-white"
-                                                icon={<div className="absolute top-0 left-0 w-full h-1 bg-blue-500"></div>}
-                                            />
-                                            <InfoCard
-                                                label="Despesas Previstas"
-                                                value={`R$ ${plannedCost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} `}
-                                                className="bg-white"
-                                                icon={<div className="absolute top-0 left-0 w-full h-1 bg-amber-500"></div>}
-                                            />
-                                            <InfoCard
-                                                label="Despesas Reais"
-                                                value={`R$ ${totalExpenses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} `}
-                                                className="bg-white"
-                                                icon={<div className="absolute top-0 left-0 w-full h-1 bg-rose-500"></div>}
-                                            />
-                                            <InfoCard
-                                                label="Lucro Previsto"
-                                                value={`R$ ${plannedProfit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} `}
-                                                className="bg-white"
-                                                icon={<div className="absolute top-0 left-0 w-full h-1 bg-indigo-500"></div>}
-                                            />
-                                            <InfoCard
-                                                label="Lucro Real"
-                                                value={`R$ ${actualProfit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} `}
-                                                className={actualProfit >= 0 ? 'bg-emerald-50/50 border-emerald-100' : 'bg-rose-50/50 border-rose-100'}
-                                                icon={<div className={`absolute top-0 left-0 w-full h-1 ${actualProfit >= 0 ? 'bg-emerald-500' : 'bg-rose-500'}`}></div>}
-                                                labelClassName={actualProfit >= 0 ? 'text-emerald-600' : 'text-rose-600'}
-                                                valueClassName={actualProfit >= 0 ? 'text-emerald-700' : 'text-rose-700'}
-                                            />
-                                        </div>
-
-                                        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                                            <div className="flex justify-between items-center mb-4"><h1 className="text-xs font-black text-slate-900 uppercase tracking-tight">1. Planejamento de Custos e Acompanhamento</h1></div>
-                                            <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
-                                                <div className="md:col-span-3"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Descrição</label><input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentDesc} onChange={e => setCurrentDesc(e.target.value)} placeholder="Ex: Tinta, Cimento..." /></div>
-                                                <div className="md:col-span-1 text-center"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Qtd Est.</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-center" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} /></div>
-                                                <div className="md:col-span-1 text-center"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">UN</label><input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-center" value={currentUnit} onChange={e => setCurrentUnit(e.target.value)} placeholder="un" /></div>
-                                                <div className="md:col-span-1 text-right"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">VL. PROJ</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-right" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} /></div>
-                                                <div className="md:col-span-1 pl-1 relative"><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-1.5 block ml-1">TOTAL PROJ</label><div className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold text-blue-700 text-right min-h-[42px] flex items-center justify-end">R$ {((currentQty || 0) * (currentPrice || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div><div className="absolute -right-1 top-4 bottom-0 w-[1px] bg-slate-200 hidden md:block"></div></div>
-
-                                                <div className="md:col-span-1 text-center"><label className="text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1.5 block ml-1">Qtd Real</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-center" value={currentActualQty} onChange={e => setCurrentActualQty(Number(e.target.value))} /></div>
-                                                <div className="md:col-span-1 text-center"><label className="text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1.5 block ml-1">UN</label><div className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-center min-h-[42px] flex items-center justify-center uppercase">{currentUnit || 'un'}</div></div>
-                                                <div className="md:col-span-1 text-right"><label className="text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1.5 block ml-1">VL. REAL</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-right" value={currentActualPrice} onChange={e => setCurrentActualPrice(Number(e.target.value))} /></div>
-                                                <div className="md:col-span-1 pl-1"><label className="text-[9px] font-black text-amber-600 uppercase tracking-widest mb-1.5 block ml-1">TOTAL REAL</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-right" value={currentActual || ((currentActualQty || 0) * (currentActualPrice || 0)) || ''} onChange={e => setCurrentActual(e.target.value === '' ? 0 : Number(e.target.value))} /></div>
-                                                <div className="md:col-span-1"><button onClick={handleAddItem} className="bg-slate-900 text-white w-full h-[42px] rounded-xl flex items-center justify-center hover:bg-slate-800 transition-colors shadow-lg font-bold"><Plus className="w-5 h-5" /></button></div>
-                                            </div>
-                                            <div className="mt-6 mb-1 grid grid-cols-12 gap-2 px-3">
-                                                <div className="col-span-2"></div>
-                                                <div className="col-span-4 text-center border-b border-slate-200 pb-1 mx-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">PLANEJADO</span></div>
-                                                <div className="col-span-5 text-center border-b border-rose-100 pb-1 mx-2"><span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">REALIZADO</span></div>
-                                                <div className="col-span-1"></div>
-                                            </div>
-                                            <div className="mb-2 grid grid-cols-12 gap-1 px-3">
-                                                <div className="col-span-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">DESCRIÃ‡ÃƒO</span></div>
-                                                <div className="col-span-1 text-center"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">QTD</span></div>
-                                                <div className="col-span-1 text-center"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">UN</span></div>
-                                                <div className="col-span-1 text-right pr-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">VL. PROJ</span></div>
-                                                <div className="col-span-1 text-right pr-2"><span className="text-[9px] font-black text-blue-600 uppercase tracking-widest">TOTAL PROJ</span></div>
-                                                <div className="col-span-1 text-center"><span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">QTD</span></div>
-                                                <div className="col-span-1 text-center"><span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">UN</span></div>
-                                                <div className="col-span-1 text-right pr-2"><span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">VL. REAL</span></div>
-                                                <div className="col-span-2 text-right pr-2"><span className="text-[9px] font-black text-amber-600 uppercase tracking-widest">TOTAL REAL</span></div>
-                                                <div className="col-span-1"></div>
-                                            </div>
-                                            <div className="max-h-[300px] overflow-y-auto no-scrollbar">
-                                                {items.map(item => (
-                                                    <div key={item.id} className="grid grid-cols-12 gap-1 items-center py-2 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors px-3">
-                                                        <div className="col-span-2">
-                                                            <input type="text" className="w-full bg-transparent text-xs font-bold text-slate-700 uppercase outline-none" value={item.description} onChange={e => updateItem(item.id, 'description', e.target.value)} />
-                                                        </div>
-                                                        <div className="col-span-1 pl-1">
-                                                            <input type="number" className="w-full bg-transparent text-xs font-bold text-slate-600 outline-none text-center appearance-none" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', Number(e.target.value))} />
-                                                        </div>
-                                                        <div className="col-span-1">
-                                                            <input type="text" className="w-full bg-transparent text-xs font-bold text-slate-400 outline-none text-center uppercase" value={item.unit || 'un'} onChange={e => updateItem(item.id, 'unit', e.target.value)} />
-                                                        </div>
-                                                        <div className="col-span-1">
-                                                            <div className="flex items-center justify-end gap-1" onClick={() => setActiveEditField(`${item.id} -price`)}>
-                                                                <span className="text-xs text-blue-600 font-bold">R$</span>
-                                                                {activeEditField === `${item.id} -price` ? (
-                                                                    <input
-                                                                        autoFocus
-                                                                        type="number"
-                                                                        className="bg-transparent text-xs font-bold text-blue-600 outline-none text-right appearance-none"
-                                                                        style={{ width: `${(item.unitPrice.toString().length + 2) * 8} px` }}
-                                                                        value={item.unitPrice}
-                                                                        onChange={e => updateItem(item.id, 'unitPrice', Number(e.target.value))}
-                                                                        onBlur={() => setActiveEditField(null)}
-                                                                    />
-                                                                ) : (
-                                                                    <span className="text-xs font-bold text-blue-600 text-right cursor-pointer">
-                                                                        {item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                        <div className="col-span-1 text-right px-2">
-                                                            <span className="text-xs font-bold text-blue-600">R$ {(item.quantity * item.unitPrice).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                                                        </div>
-
-                                                        <div className="col-span-1 pl-1">
-                                                            <input type="number" className="w-full bg-transparent text-xs font-bold text-rose-600 outline-none text-center appearance-none" value={item.actualQuantity || 0} onChange={e => updateItem(item.id, 'actualQuantity', Number(e.target.value))} />
-                                                        </div>
-                                                        <div className="col-span-1 text-center">
-                                                            <span className="text-[10px] font-bold text-slate-400 uppercase">{item.unit || 'un'}</span>
-                                                        </div>
-                                                        <div className="col-span-1">
-                                                            <div className="flex items-center justify-end gap-1" onClick={() => setActiveEditField(`${item.id} -actualPrice`)}>
-                                                                <span className="text-xs text-amber-700 font-bold">R$</span>
-                                                                {activeEditField === `${item.id} -actualPrice` ? (
-                                                                    <input
-                                                                        autoFocus
-                                                                        type="number"
-                                                                        className="bg-transparent text-xs font-bold text-amber-700 outline-none text-right appearance-none"
-                                                                        style={{ width: `${((item.actualUnitPrice || 0).toString().length + 2) * 8} px` }}
-                                                                        value={item.actualUnitPrice || 0}
-                                                                        onChange={e => updateItem(item.id, 'actualUnitPrice', Number(e.target.value))}
-                                                                        onBlur={() => setActiveEditField(null)}
-                                                                    />
-                                                                ) : (
-                                                                    <span className="text-xs font-bold text-amber-700 text-right cursor-pointer">
-                                                                        {(item.actualUnitPrice || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                        <div className="col-span-2 pl-1 text-right px-2">
-                                                            <span className="text-xs font-bold text-amber-700">R$ {((item.actualQuantity || 0) * (item.actualUnitPrice || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                                                        </div>
-                                                        <div className="col-span-1 flex justify-center">
-                                                            <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="text-slate-300 hover:text-rose-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="bg-white px-8 py-5 border-t flex justify-end shrink-0">
-                            <button onClick={handleSaveOS} disabled={isSaving} className={`bg-slate-900 text-white px-12 py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-slate-200 hover:shadow-2xl transition-all flex items-center justify-center gap-3 ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                                <Save className={`w-4 h-4 ${isSaving ? 'animate-pulse' : ''}`} /> {isSaving ? 'Salvando...' : 'Salvar OS de Obra'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )
-            }
-            {
-                showFullClientForm && (
-                    <div className="fixed inset-0 z-[60] bg-black/20 backdrop-blur-sm flex items-center justify-center p-4">
-                        <div className="bg-white w-full max-w-2xl max-h-[90vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col">
-                            <div className="p-4 border-b flex justify-between items-center">
-                                <h3 className="font-bold">Novo Cliente</h3>
-                                <button onClick={() => setShowFullClientForm(false)}><X className="w-5 h-5" /></button>
-                            </div>
-                            <div className="flex-1 overflow-y-auto p-0">
-                                <CustomerManager
-                                    customers={customers}
-                                    setCustomers={setCustomers}
-                                    orders={orders}
-                                    defaultOpenForm={true}
-                                    onSuccess={(c) => { setSelectedCustomerId(c.id); setShowFullClientForm(false); }}
-                                    onCancel={() => setShowFullClientForm(false)}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                )
-            }
-            {
-                showReportTypeModal && selectedOrderForReport && (
-                    <div className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-300">
-                        <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl p-8 transform animate-in zoom-in-95 duration-200">
-                            <div className="flex justify-between items-start mb-6">
-                                <div>
-                                    <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase">Tipo de Relatório</h3>
-                                    <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">Selecione para imprimir</p>
-                                </div>
-                                <button onClick={() => setShowReportTypeModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X className="w-5 h-5 text-slate-400" /></button>
-                            </div>
-
-                            <div className="grid grid-cols-1 gap-4">
-                                <button
-                                    onClick={() => { handlePrintWorkReport(selectedOrderForReport, 'estimated'); setShowReportTypeModal(false); }}
-                                    className="group flex items-center gap-4 p-5 bg-blue-50 hover:bg-blue-600 rounded-3xl transition-all border border-blue-100 text-left"
-                                >
-                                    <div className="p-3 bg-white rounded-2xl shadow-sm text-blue-600 group-hover:scale-110 transition-transform">
-                                        <ScrollText className="w-6 h-6" />
-                                    </div>
-                                    <div>
-                                        <h4 className="font-black text-blue-900 group-hover:text-white uppercase text-sm tracking-tight">Relatório DO ESTIMADO</h4>
-                                        <p className="text-blue-600/70 group-hover:text-white/80 text-[10px] font-bold uppercase">Apenas planejamento e custos orçados</p>
-                                    </div>
-                                </button>
-
-                                <button
-                                    onClick={() => { handlePrintWorkReport(selectedOrderForReport, 'real'); setShowReportTypeModal(false); }}
-                                    className="group flex items-center gap-4 p-5 bg-emerald-50 hover:bg-emerald-600 rounded-3xl transition-all border border-emerald-100 text-left"
-                                >
-                                    <div className="p-3 bg-white rounded-2xl shadow-sm text-emerald-600 group-hover:scale-110 transition-transform">
-                                        <CheckCircle className="w-6 h-6" />
-                                    </div>
-                                    <div>
-                                        <h4 className="font-black text-emerald-900 group-hover:text-white uppercase text-sm tracking-tight">Relatório DO REAL</h4>
-                                        <p className="text-emerald-600/70 group-hover:text-white/80 text-[10px] font-bold uppercase">Custos orçados vs Realizados e Resultado</p>
-                                    </div>
-                                </button>
-                            </div>
-
-                            <div className="mt-8 pt-6 border-t border-slate-100 flex justify-center">
-                                <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">ServiFlow v2.0</p>
-                            </div>
-                        </div>
-                    </div>
-                )
-            }
-        </div>
+    setDescriptionBlocks(
+      budget.descriptionBlocks && budget.descriptionBlocks.length > 0
+        ? budget.descriptionBlocks.map(block => ({ ...block, id: uid() }))
+        : []
     );
+
+    if (budget.paymentTerms) setPaymentTerms(budget.paymentTerms);
+    if (budget.deliveryTime) setDeliveryTime(budget.deliveryTime);
+    setPaymentEntryPercent(budget.paymentEntryPercent ?? 30);
+
+    // Normaliza possíveis nomes vindos do DB
+    const b: any = budget;
+    const t = b.taxRate ?? b.taxrate ?? b.tax_rate ?? 0;
+    const d = b.bdiRate ?? b.bdirate ?? b.bdi_rate ?? 0;
+
+    setTaxRate(t);
+    setBdiRate(d);
+
+    setShowForm(true);
+    if (isClone) notify("Orçamento clonado! Você está editando uma nova cópia.");
+  };
+
+  return (
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+        <div>
+          <h2 className="text-2xl font-black text-slate-900 tracking-tighter flex items-center gap-2">
+            Orçamentos <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">{orders.filter(o => o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED).length}</span>
+          </h2>
+          <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Gerencie suas propostas comerciais</p>
+        </div>
+        <div className="flex gap-4 w-full md:w-auto">
+          <button
+            onClick={() => {
+              setEditingBudgetId(null);
+              setItems([]);
+              setProposalTitle('');
+              setTaxRate(0);
+              setBdiRate(0);
+              setDescriptionBlocks([]);
+              setPaymentTerms('50% à vista, 25% com 30 dias, 25% restante na conclusão');
+              setDeliveryTime('15 dias úteis');
+              setSelectedCustomerId('');
+              setShowForm(true);
+            }}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-200 hover:shadow-blue-300 transition-all flex items-center gap-2 active:scale-95"
+          >
+            <Plus className="w-4 h-4" /> Novo Orçamento
+          </button>
+        </div>
+      </div>
+
+      <div className="bg-white p-4 rounded-[1.5rem] border shadow-sm">
+        <div className="relative">
+          <Search className="absolute left-4 top-3 w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Buscar por cliente ou Orçamento..."
+            className="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 transition-all font-bold text-slate-700"
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="bg-white rounded-[2rem] border overflow-hidden shadow-sm overflow-x-auto">
+        <table className="w-full text-left">
+          <thead className="bg-slate-50 text-[10px] font-black uppercase text-slate-400 border-b">
+            <tr>
+              <th className="px-8 py-5">ORC.</th>
+              <th className="px-8 py-5">CLIENTE</th>
+              <th className="px-8 py-5">DESCRIÇÃO</th>
+              <th className="px-8 py-5">VALOR</th>
+              <th className="px-8 py-5 text-right">AÇÕES</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {budgets.map(budget => (
+              <tr key={budget.id} className="hover:bg-slate-50 group transition-all">
+                <td className="px-8 py-5 text-xs font-mono font-black text-blue-600">
+                  <div className="flex items-center gap-2">
+                    {budget.id}
+                    {budget.status === OrderStatus.APPROVED && <CheckCircle className="w-3 h-3 text-emerald-500" />}
+                  </div>
+                </td>
+                <td className="px-8 py-5 text-sm font-black uppercase text-slate-900">{budget.customerName}</td>
+                <td className="px-8 py-5 text-xs font-bold text-slate-400 uppercase">{budget.description}</td>
+                <td className="px-8 py-5 text-sm font-black text-slate-900">R$ {budget.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+
+                <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {budget.status !== OrderStatus.APPROVED && (
+                    <button
+                      onClick={async () => {
+                        if (confirm("Deseja APROVAR este Orçamento? Ele será convertido em Ordem de Serviço.")) {
+                          const approvedBudget = { ...budget, status: OrderStatus.APPROVED };
+                          const newServiceOrderId = budget.id.replace('ORC', 'OS');
+
+                          const existingOSIndex = orders.findIndex(o =>
+                            (o.osType === 'WORK' && o.originBudgetId === budget.id) ||
+                            o.id === newServiceOrderId
+                          );
+
+                          let finalList: ServiceOrder[];
+
+                          if (existingOSIndex !== -1) {
+                            const previousOS = orders[existingOSIndex];
+                            const updatedOS = {
+                              ...previousOS,
+                              items: budget.items.map(i => ({ ...i })),
+                              descriptionBlocks: budget.descriptionBlocks ? [...budget.descriptionBlocks] : [],
+                              totalAmount: budget.totalAmount,
+                              taxRate: budget.taxRate,
+                              bdiRate: budget.bdiRate,
+                              description: budget.description,
+                              paymentTerms: budget.paymentTerms,
+                              deliveryTime: budget.deliveryTime,
+                              customerName: budget.customerName,
+                              customerEmail: budget.customerEmail,
+                              originBudgetId: budget.id
+                            };
+
+                            const newList = orders.map(o => o.id === budget.id ? approvedBudget : o);
+                            finalList = newList.map(o => o.id === previousOS.id ? updatedOS : o);
+                          } else {
+                            const newServiceOrder: ServiceOrder = {
+                              ...budget,
+                              id: newServiceOrderId,
+                              status: OrderStatus.IN_PROGRESS,
+                              createdAt: new Date().toISOString(),
+                              items: budget.items.map(i => ({ ...i })),
+                              descriptionBlocks: budget.descriptionBlocks ? [...budget.descriptionBlocks] : [],
+                              osType: 'WORK',
+                              originBudgetId: budget.id
+                            };
+                            const newList = orders.map(o => o.id === budget.id ? approvedBudget : o);
+                            finalList = [...newList, newServiceOrder];
+                          }
+
+                          setOrders(finalList);
+                          const result = await db.save('serviflow_orders', finalList);
+                          if (result?.success) notify(existingOSIndex !== -1 ? "O.S. atualizada com novos dados do Orçamento!" : "Orçamento APROVADO! Cópia gerada em O.S.");
+                          else notify("Erro ao sincronizar.", "error");
+                        }
+                      }}
+                      className="p-2 text-slate-400 hover:text-emerald-600 transition-colors"
+                      title="Aprovar"
+                    >
+                      <CheckCircle className="w-4 h-4" />
+                    </button>
+                  )}
+
+                  <button onClick={() => loadBudgetToForm(budget, true)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Duplicar">
+                    <Copy className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => loadBudgetToForm(budget)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Editar">
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => handlePrint(budget)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Imprimir">
+                    <Printer className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => handleGeneratePDF(budget)} className="p-2 text-slate-400 hover:text-rose-600 transition-colors" title="Baixar PDF">
+                    <FileDown className="w-4 h-4" />
+                  </button>
+
+                  <button
+                    onClick={async () => {
+                      if (confirm("Deseja excluir este Orçamento? Esta ação também removerá os dados da nuvem.")) {
+                        const idToDelete = budget.id;
+
+                        // remove local
+                        const filtered = orders.filter(o => o.id !== idToDelete);
+                        setOrders(filtered);
+
+                        // ✅ manter chave consistente com save (serviflow_orders)
+                        const result = await db.save('serviflow_orders', filtered);
+                        if (result?.success) notify("Orçamento removido da nuvem com sucesso.");
+                        else notify("Removido localmente, mas houve um erro ao sincronizar com a nuvem.", "error");
+                      }
+                    }}
+                    className="p-2 text-rose-300 hover:text-rose-600 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {showForm && (
+        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-[1240px] h-[95vh] rounded-[2rem] shadow-[0_0_100px_rgba(0,0,0,0.3)] overflow-hidden flex flex-col animate-in zoom-in-95">
+            <div className="px-8 py-4 border-b flex justify-between items-center bg-white shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="bg-blue-600 p-2 rounded-xl text-white shadow-xl shadow-blue-100"><FileText className="w-5 h-5" /></div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900 uppercase tracking-tighter mb-0.5">Elaboração de Orçamento Prime</h3>
+                  <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em]">Configuração de Documento Comercial</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                {!editingBudgetId && (
+                  <button onClick={() => setShowImportModal(true)} className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase flex items-center gap-2 transition-all">
+                    <Database className="w-4 h-4" /> Importar de Existente
+                  </button>
+                )}
+                <button onClick={() => setShowForm(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X className="w-6 h-6 text-slate-300" /></button>
+              </div>
+            </div>
+
+            <div className="flex-1 flex flex-col lg:flex-row overflow-hidden overflow-y-auto lg:overflow-y-hidden relative">
+              <div className="flex-1 lg:overflow-y-auto p-6 bg-[#f8fafc] space-y-6 no-scrollbar">
+                <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="text-[11px] font-black text-blue-700 uppercase ml-1">Cliente</label>
+                        <button onClick={() => setShowFullClientForm(true)} className="text-blue-600 text-[10px] font-black uppercase flex items-center gap-1 hover:underline">
+                          <UserPlus className="w-3 h-3" /> Cadastrar Cliente
+                        </button>
+                      </div>
+                      <select className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-900 outline-none" value={selectedCustomerId} onChange={e => setSelectedCustomerId(e.target.value)}>
+                        <option value="">Selecione o cliente...</option>
+                        {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-black text-blue-700 uppercase mb-2 block ml-1">Título da Proposta</label>
+                      <input type="text" placeholder="Ex: Reforma Geral" className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-900 outline-none placeholder:text-slate-500" value={proposalTitle} onChange={e => setProposalTitle(e.target.value)} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* DESCRIÇÃO TÉCNICA */}
+                <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-widest border-b pb-2 grow mr-6">DESCRIÇÃO TÉCNICA</h4>
+                  </div>
+
+                  <div className="space-y-3">
+                    {descriptionBlocks.length === 0 && (
+                      <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl p-8 flex flex-col items-center justify-center gap-4 group hover:border-blue-400 transition-colors cursor-pointer" onClick={addTextBlock}>
+                        <div className="flex gap-4">
+                          <button onClick={(e) => { e.stopPropagation(); addTextBlock(); }} className="bg-blue-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-blue-100 hover:scale-105 transition-all">
+                            <Type className="w-4 h-4" /> + Iniciar com Texto
+                          </button>
+                          <button onClick={(e) => { e.stopPropagation(); addImageBlock(); }} className="bg-emerald-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-emerald-100 hover:scale-105 transition-all">
+                            <ImageIcon className="w-4 h-4" /> + Iniciar com Imagem
+                          </button>
+                        </div>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 animate-pulse">Comece a montar o escopo técnico acima</p>
+                      </div>
+                    )}
+
+                    {descriptionBlocks.map((block) => (
+                      <div key={block.id} className="relative group">
+                        {block.type === 'text' && (
+                          <div className="flex-1">
+                            <RichTextEditor
+                              id={block.id}
+                              value={block.content}
+                              onChange={(content) => updateBlockContent(block.id, content)}
+                              onAddText={addTextBlock}
+                              onAddImage={addImageBlock}
+                              placeholder="Descreva aqui os detalhes técnicos do serviço..."
+                            />
+                          </div>
+                        )}
+
+                        {block.type === 'image' && (
+                          <div className="w-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center gap-2">
+                            {block.content ? (
+                              <div className="relative max-w-[200px]">
+                                <img src={block.content} className="w-full h-auto rounded-lg shadow-lg" />
+                                <button onClick={() => updateBlockContent(block.id, '')} className="absolute -top-2 -right-2 bg-rose-500 text-white p-1.5 rounded-full">
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              </div>
+                            ) : (
+                              <label className="cursor-pointer flex flex-col items-center gap-1">
+                                <Upload className="w-5 h-5 text-blue-500" />
+                                <span className="text-[8px] font-black text-slate-400 uppercase">Subir Foto</span>
+                                <input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(block.id, e)} />
+                              </label>
+                            )}
+                          </div>
+                        )}
+
+                        <button onClick={() => setDescriptionBlocks(prev => prev.filter(b => b.id !== block.id))} className="absolute -top-2 -right-2 bg-slate-900 text-white p-1.5 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all">
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* ITENS */}
+                <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-widest border-b pb-2 grow mr-6">ITENS DO ORÇAMENTO</h4>
+                    <button onClick={() => setShowFullServiceForm(true)} className="text-blue-600 text-[8px] font-black uppercase flex items-center gap-1 hover:underline tracking-widest">
+                      <Package className="w-3 h-3" /> CATÁLOGO
+                    </button>
+                  </div>
+
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
+                    <div>
+                      <label className="text-[8px] font-black text-blue-600 uppercase tracking-widest block mb-1.5">Puxar do Catálogo</label>
+                      <select className="w-full bg-white border-none rounded-xl p-2.5 text-[10px] font-bold text-slate-500 outline-none" value={selectedCatalogId} onChange={e => {
+                        const id = e.target.value;
+                        setSelectedCatalogId(id);
+                        const s = catalogServices.find(x => x.id === id);
+                        if (s) { setCurrentDesc(s.name); setCurrentPrice(s.basePrice); setCurrentUnit(s.unit || 'un'); }
+                      }}>
+                        <option value="">Selecione para preencher...</option>
+                        {catalogServices.map(s => <option key={s.id} value={s.id}>{s.name} (R$ {s.basePrice.toLocaleString()})</option>)}
+                      </select>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
+                      <div className="md:col-span-6">
+                        <label className="text-[11px] font-black text-blue-700 uppercase mb-1.5 block ml-1">Descrição</label>
+                        <input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs font-bold text-slate-900 outline-none placeholder:text-slate-500" value={currentDesc} onChange={e => setCurrentDesc(e.target.value)} />
+                      </div>
+                      <div className="w-24">
+                        <label className="text-[11px] font-black text-blue-700 uppercase mb-1.5 block text-center">Unit</label>
+                        <input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs font-black text-center outline-none uppercase text-slate-900" value={currentUnit} onChange={e => setCurrentUnit(e.target.value)} />
+                      </div>
+                      <div className="w-24">
+                        <label className="text-[11px] font-black text-blue-700 uppercase mb-1.5 block text-center">Qtd</label>
+                        <input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs font-black text-center outline-none text-slate-900" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} />
+                      </div>
+                      <div className="w-32">
+                        <label className="text-[11px] font-black text-blue-700 uppercase mb-1.5 block ml-1">Preço (R$)</label>
+                        <input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs font-black outline-none text-slate-900" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} />
+                      </div>
+                      <div className="md:col-span-1">
+                        <button onClick={handleAddItem} className="bg-blue-600 text-white w-full h-[58px] rounded-xl flex items-center justify-center hover:scale-105 transition-all shadow-xl">
+                          <Plus className="w-6 h-6" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5 max-h-40 overflow-y-auto no-scrollbar">
+                      {items.map((item, index) => (
+                        <div
+                          key={item.id}
+                          draggable
+                          onDragStart={() => { setDraggedItemIndex(index); setDragOverIndex(index); }}
+                          onDragOver={(e) => { e.preventDefault(); setDragOverIndex(index); }}
+                          onDragEnd={() => {
+                            if (draggedItemIndex !== null && dragOverIndex !== null) {
+                              reorderItems(draggedItemIndex, dragOverIndex);
+                            }
+                            setDraggedItemIndex(null);
+                            setDragOverIndex(null);
+                          }}
+                          className={`flex justify-between items-center p-2.5 rounded-lg border group gap-2 transition-all ${
+                            draggedItemIndex === index ? 'opacity-50 bg-blue-50 border-blue-200' : 'bg-white border-slate-100 hover:border-blue-200 cursor-default'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 grow">
+                            <div className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 shrink-0">
+                              <GripVertical size={14} />
+                            </div>
+                            <div className="grow">
+                              <p className="text-[10px] font-black text-slate-900 uppercase mb-1">{item.description}</p>
+                              <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1 bg-slate-50 rounded px-2 py-1 border border-slate-100">
+                                  <span className="text-[8px] font-bold text-slate-400">QTD:</span>
+                                  <input type="number" className="w-12 bg-transparent text-[9px] font-black text-slate-700 outline-none" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', Number(e.target.value))} />
+                                </div>
+                                <div className="flex items-center gap-1 bg-slate-50 rounded px-2 py-1 border border-slate-100">
+                                  <span className="text-[8px] font-bold text-slate-400">VALOR:</span>
+                                  <input type="number" className="w-20 bg-transparent text-[9px] font-black text-slate-700 outline-none" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', Number(e.target.value))} />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3 shrink-0">
+                            <div className="flex items-center gap-1 bg-slate-50 rounded px-2 py-1 border border-slate-100">
+                              <span className="text-[8px] font-bold text-slate-400">TOTAL:</span>
+                              <input type="number" className="w-24 bg-transparent text-[11px] font-black text-blue-600 outline-none text-right" value={Number((item.unitPrice * item.quantity).toFixed(2))} onChange={e => updateItemTotal(item.id, Number(e.target.value))} />
+                            </div>
+                            <div className="flex flex-col gap-0">
+                              <button onClick={() => moveItem(index, 'up')} disabled={index === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all">
+                                <ChevronUp className="w-3 h-3" />
+                              </button>
+                              <button onClick={() => moveItem(index, 'down')} disabled={index === items.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all">
+                                <ChevronDown className="w-3 h-3" />
+                              </button>
+                            </div>
+                            <button onClick={() => setItems(prev => prev.filter(i => i.id !== item.id))} className="text-rose-300 hover:text-rose-600">
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {items.length > 0 && (
+                      <div className="flex justify-end pt-2">
+                        <div className="bg-white border-2 border-slate-100 rounded-2xl px-6 py-3 flex items-center gap-4 shadow-sm">
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Subtotal dos Itens</span>
+                          <span className="text-lg font-black text-slate-900">R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {showFullClientForm && (
+                  <div className="absolute inset-0 z-[60] bg-white overflow-y-auto p-6">
+                    <CustomerManager
+                      customers={customers}
+                      setCustomers={setCustomers}
+                      orders={orders}
+                      defaultOpenForm={true}
+                      onSuccess={(c) => { setSelectedCustomerId(c.id); setShowFullClientForm(false); }}
+                      onCancel={() => setShowFullClientForm(false)}
+                    />
+                  </div>
+                )}
+
+                {showFullServiceForm && (
+                  <div className="absolute inset-0 z-[60] bg-white overflow-y-auto p-6">
+                    <ServiceCatalog
+                      services={catalogServices}
+                      setServices={setCatalogServices}
+                      company={company}
+                      defaultOpenForm={true}
+                      onSuccess={(s) => { setCurrentDesc(s.name); setCurrentPrice(s.basePrice); setCurrentUnit(s.unit || 'un'); setShowFullServiceForm(false); }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* SIDEBAR */}
+              <div className="w-full lg:w-[340px] bg-[#0f172a] text-white p-6 flex flex-col space-y-6 shrink-0 shadow-2xl relative overflow-hidden h-auto lg:h-full">
+                <div className="relative z-10">
+                  <h4 className="text-[8px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Investimento Total</h4>
+
+                  <div className="grid grid-cols-2 gap-2 mb-4">
+                    <div>
+                      <label className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">BDI (%)</label>
+                      <input type="number" className="w-full bg-slate-800/50 border border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-200 outline-none focus:ring-1 focus:ring-blue-500" value={bdiRate} onChange={e => setBdiRate(e.target.value)} placeholder="0%" />
+                    </div>
+                    <div>
+                      <label className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Impostos (%)</label>
+                      <input type="number" className="w-full bg-slate-800/50 border border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-200 outline-none focus:ring-1 focus:ring-blue-500" value={taxRate} onChange={e => setTaxRate(e.target.value)} placeholder="0%" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1 mb-4 text-[10px] text-slate-400">
+                    <div className="flex justify-between"><span>Subtotal:</span> <span>R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
+                    {Number(bdiRate) > 0 && <div className="flex justify-between text-emerald-400"><span>+ BDI:</span> <span>R$ {(subtotal * (Number(bdiRate) / 100)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>}
+                    {Number(taxRate) > 0 && (
+                      <div className="flex justify-between text-blue-400">
+                        <span>+ Impostos:</span>
+                        <span>R$ {(totalAmount - (subtotal + (subtotal * (Number(bdiRate) / 100)))).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex justify-between items-baseline border-b border-slate-800 pb-4">
+                    <span className="text-[32px] font-black text-blue-400 tracking-tighter leading-none">R$ {totalAmount.toLocaleString('pt-BR')}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-4 relative z-10">
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="text-[8px] font-bold text-slate-400 uppercase tracking-widest block">Pagamento</label>
+                      <button onClick={() => setShowPaymentModal(true)} className="text-[8px] font-black text-emerald-400 hover:text-emerald-300 uppercase tracking-widest flex items-center gap-1 transition-colors">
+                        <Zap className="w-3 h-3" /> Gerar
+                      </button>
+                    </div>
+                    <textarea className="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-3 text-[9px] font-bold text-slate-200 outline-none h-20 focus:ring-1 focus:ring-blue-500 leading-relaxed shadow-inner" value={paymentTerms} onChange={e => setPaymentTerms(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Prazo Entrega</label>
+                    <input type="text" className="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-3 text-[9px] font-bold text-slate-200 outline-none focus:ring-1 focus:ring-blue-500 shadow-inner" value={deliveryTime} onChange={e => setDeliveryTime(e.target.value)} />
+                  </div>
+                </div>
+
+                <div className="mt-auto space-y-3 relative z-10">
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => handlePrint({
+                        customerId: selectedCustomerId,
+                        customerName: customers.find(c => c.id === selectedCustomerId)?.name || 'N/A',
+                        customerEmail: customers.find(c => c.id === selectedCustomerId)?.email || '',
+                        items,
+                        totalAmount,
+                        description: proposalTitle,
+                        descriptionBlocks,
+                        paymentTerms,
+                        deliveryTime,
+                        id: editingBudgetId || 'ORC-XXXX',
+                        status: OrderStatus.PENDING,
+                        taxRate: Number(taxRate) || 0,
+                        bdiRate: Number(bdiRate) || 0,
+                        createdAt: new Date().toISOString().split('T')[0],
+                        dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+                      })}
+                      className="bg-slate-800 hover:bg-slate-700 text-white p-4 rounded-xl font-black uppercase text-[8px] flex flex-col items-center gap-1 transition-all border border-slate-700 group"
+                    >
+                      <Printer className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" /> IMPRIMIR
+                    </button>
+
+                    <button
+                      onClick={() => handleGeneratePDF({
+                        customerId: selectedCustomerId,
+                        customerName: customers.find(c => c.id === selectedCustomerId)?.name || 'N/A',
+                        customerEmail: customers.find(c => c.id === selectedCustomerId)?.email || '',
+                        items,
+                        totalAmount,
+                        description: proposalTitle,
+                        descriptionBlocks,
+                        paymentTerms,
+                        deliveryTime,
+                        id: editingBudgetId || 'ORC-XXXX',
+                        status: OrderStatus.PENDING,
+                        taxRate: Number(taxRate) || 0,
+                        bdiRate: Number(bdiRate) || 0,
+                        createdAt: new Date().toISOString().split('T')[0],
+                        dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+                      })}
+                      className="bg-slate-800 hover:bg-slate-700 text-white p-4 rounded-xl font-black uppercase text-[8px] flex flex-col items-center gap-1 transition-all border border-slate-700 group"
+                    >
+                      <FileDown className="w-4 h-4 text-rose-400 group-hover:scale-110 transition-transform" /> BAIXAR PDF
+                    </button>
+
+                    <button onClick={handleSave} className="col-span-2 bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[11px] shadow-xl transition-all flex items-center justify-center gap-2">
+                      <Save className="w-5 h-5" /> REGISTRAR
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showPaymentModal && (
+        <PaymentTypeModal
+          onClose={() => setShowPaymentModal(false)}
+          onConfirm={(text, percent) => {
+            setPaymentTerms(text);
+            setPaymentEntryPercent(percent);
+            setShowPaymentModal(false);
+          }}
+          totalValue={totalAmount}
+          initialPercent={paymentEntryPercent}
+        />
+      )}
+
+      {showImportModal && (
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[70] flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 flex flex-col max-h-[80vh]">
+            <div className="p-6 border-b flex justify-between items-center bg-slate-50">
+              <div>
+                <h3 className="font-black text-slate-800 uppercase tracking-tight">Importar Dados de Orçamento</h3>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Selecione um Orçamento para copiar itens e descrição</p>
+              </div>
+              <button onClick={() => setShowImportModal(false)}><X className="w-5 h-5 text-slate-400 hover:text-rose-500" /></button>
+            </div>
+
+            <div className="p-4 bg-white border-b">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Pesquisar por cliente ou título..."
+                  className="w-full bg-slate-100 border-none rounded-2xl py-3 pl-12 pr-4 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500"
+                  value={importSearch}
+                  onChange={e => setImportSearch(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 space-y-2 no-scrollbar">
+              {orders
+                .filter(o =>
+                  (o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED) &&
+                  (o.customerName.toLowerCase().includes(importSearch.toLowerCase()) ||
+                    (o.description || '').toLowerCase().includes(importSearch.toLowerCase()))
+                )
+                .map(budget => (
+                  <button
+                    key={budget.id}
+                    onClick={() => loadBudgetToForm(budget, true)}
+                    className="w-full text-left p-4 rounded-2xl border border-slate-100 hover:border-blue-400 hover:bg-blue-50 transition-all group flex justify-between items-center"
+                  >
+                    <div>
+                      <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1">{budget.id}</p>
+                      <p className="font-bold text-slate-900">{budget.description}</p>
+                      <p className="text-xs text-slate-500 font-medium">{budget.customerName}</p>
+                    </div>
+                    <Plus className="w-5 h-5 text-slate-300 group-hover:text-blue-600 transition-colors" />
+                  </button>
+                ))
+              }
+
+              {orders.filter(o => (o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED)).length === 0 && (
+                <div className="text-center py-12">
+                  <Database className="w-12 h-12 text-slate-200 mx-auto mb-4" />
+                  <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Nenhum Orçamento disponível para importação</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
 };
 
-export default WorkOrderManager;
+// Sub-component for Payment Logic
+const PaymentTypeModal: React.FC<{
+  onClose: () => void,
+  onConfirm: (text: string, percent: number) => void,
+  totalValue: number,
+  initialPercent?: number
+}> = ({ onClose, onConfirm, totalValue, initialPercent }) => {
+  const [type, setType] = useState<'vista' | 'parcelado' | 'conclusao'>('parcelado');
+  const [entryValue, setEntryValue] = useState(0);
+  const [percentValue, setPercentValue] = useState(initialPercent || 30);
+  const [installments, setInstallments] = useState(3);
+  const [preview, setPreview] = useState('');
 
+  useEffect(() => {
+    if (totalValue > 0) {
+      const p = initialPercent || 30;
+      setEntryValue(totalValue * (p / 100));
+      setPercentValue(p);
+    }
+  }, [totalValue, initialPercent]);
 
+  useEffect(() => {
+    let text = '';
+    const currency = (val: number) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
+    if (type === 'vista') {
+      text = `Pagamento à vista com desconto na aprovação do Orçamento. Total: ${currency(totalValue)}.`;
+    } else if (type === 'conclusao') {
+      text = `Pagamento integral ${currency(totalValue)} a ser realizado após entrega técnica e aprovação dos serviços.`;
+    } else {
+      const remainder = totalValue - entryValue;
+      const parcValue = installments > 0 ? remainder / installments : 0;
 
+      text = `Entrada de ${currency(entryValue)} na aprovação.`;
+      if (installments > 0) {
+        text += `\nSaldo restante de ${currency(remainder)} dividido em ${installments}x de ${currency(parcValue)}.`;
+      }
+    }
+
+    setPreview(text);
+  }, [type, entryValue, installments, totalValue]);
+
+  return (
+    <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[70] flex items-center justify-center p-4">
+      <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95">
+        <div className="p-6 border-b flex justify-between items-center bg-slate-50">
+          <h3 className="font-black text-slate-800 uppercase tracking-tight">Condição de Pagamento</h3>
+          <button onClick={onClose}><X className="w-5 h-5 text-slate-400 hover:text-rose-500" /></button>
+        </div>
+
+        <div className="p-6 space-y-6">
+          <div>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Tipo de Negociação</label>
+            <div className="grid grid-cols-3 gap-2">
+              <button onClick={() => setType('vista')} className={`p-3 rounded-xl border text-xs font-bold uppercase transition-all ${type === 'vista' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>À Vista</button>
+              <button onClick={() => setType('parcelado')} className={`p-3 rounded-xl border text-xs font-bold uppercase transition-all ${type === 'parcelado' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>Parcelado</button>
+              <button onClick={() => setType('conclusao')} className={`p-3 rounded-xl border text-xs font-bold uppercase transition-all ${type === 'conclusao' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>Entrega</button>
+            </div>
+          </div>
+
+          {type === 'parcelado' && (
+            <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+              <div className="col-span-2">
+                <div className="flex justify-between mb-1"><span className="text-[10px] font-bold text-slate-400 uppercase">Valor Total</span> <span className="text-[10px] font-black text-slate-900">{totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span></div>
+                <div className="h-1 w-full bg-slate-200 rounded-full overflow-hidden">
+                  <div className="h-full bg-blue-500" style={{ width: `${totalValue > 0 ? Math.min(100, (entryValue / totalValue) * 100) : 0}%` }} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 col-span-2">
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Entrada (%)</label>
+                  <input type="number" className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500" value={percentValue} onChange={e => {
+                    const val = Number(e.target.value);
+                    setPercentValue(val);
+                    setEntryValue(totalValue * (val / 100));
+                  }} />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Entrada (R$)</label>
+                  <input type="number" className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500" value={entryValue} onChange={e => {
+                    const val = Number(e.target.value);
+                    setEntryValue(val);
+                    if (totalValue > 0) setPercentValue(Number(((val / totalValue) * 100).toFixed(1)));
+                  }} />
+                </div>
+              </div>
+
+              <div className="col-span-2">
+                <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Parcelas</label>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setInstallments(Math.max(1, installments - 1))} className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-100 font-bold text-slate-600">-</button>
+                  <span className="flex-1 text-center font-black text-slate-900 text-lg">{installments}x</span>
+                  <button onClick={() => setInstallments(installments + 1)} className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-100 font-bold text-slate-600">+</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Prévia do Texto</label>
+            <div className="bg-slate-800 text-slate-200 p-4 rounded-xl text-sm font-medium leading-relaxed border border-slate-700 min-h-[80px] whitespace-pre-line">
+              {preview}
+            </div>
+          </div>
+        </div>
+
+        <div className="p-4 bg-slate-50 border-t flex gap-3">
+          <button onClick={onClose} className="flex-1 py-3 text-xs font-bold uppercase text-slate-500 hover:bg-slate-200 rounded-xl transition-colors">Cancelar</button>
+          <button onClick={() => onConfirm(preview, percentValue)} className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black uppercase tracking-wide shadow-lg shadow-blue-200 transition-all active:scale-95">Aplicar Texto</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default BudgetManager;
