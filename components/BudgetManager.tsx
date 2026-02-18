@@ -150,10 +150,15 @@ const BudgetManager: React.FC<Props> = ({
   const totalAmount = useMemo(() => {
     const bdi = Number(bdiRate) || 0;
     const tax = Number(taxRate) || 0;
+
+    // 1. Calculate base with Mark-up for BDI (standard behavior)
     const bdiValue = subtotal * (bdi / 100);
     const subtotalWithBDI = subtotal + bdiValue;
-    const taxValue = subtotalWithBDI * (tax / 100);
-    return subtotalWithBDI + taxValue;
+
+    // 2. Apply Gross Up for Taxes (incidência sobre o total)
+    // Formula: Total = (Custo + BDI) / (1 - Taxas%)
+    const taxFactor = Math.max(0.01, 1 - (tax / 100));
+    return subtotalWithBDI / taxFactor;
   }, [subtotal, taxRate, bdiRate]);
 
   const handleAddItem = () => {
