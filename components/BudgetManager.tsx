@@ -986,7 +986,7 @@ const BudgetManager: React.FC<Props> = ({
                       </select>
                     </div>
                     <div>
-                      <label className="text-[11px] font-black text-blue-700 uppercase mb-2 block ml-1">T+�tulo da Proposta</label>
+                      <label className="text-[11px] font-black text-blue-700 uppercase mb-2 block ml-1">Título da Proposta</label>
                       <input type="text" placeholder="Ex: Reforma Geral de Ar-Condicionado" className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-900 outline-none placeholder:text-slate-500" value={proposalTitle} onChange={e => setProposalTitle(e.target.value)} />
                     </div>
                   </div>
@@ -1016,7 +1016,7 @@ const BudgetManager: React.FC<Props> = ({
                               onChange={(content) => updateBlockContent(block.id, content)}
                               onAddText={addTextBlock}
                               onAddImage={addImageBlock}
-                              placeholder="Descreva aqui os detalhes t+�cnicos do servi�o..."
+                              placeholder="Descreva aqui os detalhes técnicos do serviço..."
                             />
                           </div>
                         )}
@@ -1397,7 +1397,7 @@ const PaymentTypeModal: React.FC<{
           )}
 
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Pr+�via do Texto</label>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Prévia do Texto</label>
             <div className="bg-slate-800 text-slate-200 p-4 rounded-xl text-sm font-medium leading-relaxed border border-slate-700 min-h-[80px]">
               {preview}
             </div>
@@ -1416,3 +1416,4 @@ const PaymentTypeModal: React.FC<{
 };
 
 export default BudgetManager;
+

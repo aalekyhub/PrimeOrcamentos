@@ -1893,3 +1893,4 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
 };
 
 export default PlanningManager;
+

@@ -268,7 +268,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                    <div class="info-box">
                        <span class="info-label">Dados do Equipamento / Objeto</span>
                        <div class="info-value">${order.equipmentBrand || ''} ${order.equipmentModel || 'Nào especificado'}</div>
-                       <div class="info-sub mt-1">Sà‰RIE: ${order.equipmentSerialNumber || 'N/A'}</div>
+                       <div class="info-sub mt-1">SÉRIE: ${order.equipmentSerialNumber || 'N/A'}</div>
                    </div>
                </div>
 
@@ -344,7 +344,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                    <div class="border-l-4 border-blue-600 bg-blue-50/40 p-6 rounded-xl">
                        <h5 class="text-[14px] font-bold text-blue-600 uppercase tracking-widest mb-2">Garantia e Notas Legais</h5>
                        <p class="text-[13px] text-slate-700 leading-tight mb-2"><b>â€¢ GARANTIA Tà‰CNICA:</b> 90 dias para os serviços executados (Art. 26 CDC).</p>
-                       <p class="text-[13px] text-rose-600 font-bold uppercase leading-tight"><b>â€¢ ATENà‡àƒO:</b> Equipamentos não retirados em até 30 dias após aviso de conclusào estarào sujeitos a taxas de armazenamento ou descarte legal.</p>
+                       <p class="text-[13px] text-rose-600 font-bold uppercase leading-tight"><b>â€¢ ATENÇÃO:</b> Equipamentos não retirados em até 30 dias após aviso de conclusào estarào sujeitos a taxas de armazenamento ou descarte legal.</p>
                    </div>
                </div>
 
@@ -503,7 +503,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                 <div class="text-right">
                     <div class="bg-blue-600 text-white px-4 py-1 rounded text-[8px] font-bold uppercase tracking-widest mb-1 inline-block">CONTRATO</div>
                     <h2 class="text-3xl font-bold text-slate-900 tracking-tighter">${order.id}</h2>
-                    <div class="mt-2 space-y-0.5"><p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest text-right">EMISSàƒO: ${new Date().toLocaleDateString('pt-BR')}</p></div>
+                    <div class="mt-2 space-y-0.5"><p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest text-right">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p></div>
                 </div>
             </div>
 
@@ -906,4 +906,5 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
 };
 
 export default ServiceOrderManager;
+
 

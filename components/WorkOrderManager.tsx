@@ -275,7 +275,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                             <div style="text-align: right;">
                                 <div style="background: #2563eb; color: white; padding: 6px 16px; border-radius: 8px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; display: inline-block;">CONTROLE DE OBRA</div>
                                 <p style="margin: 0; font-size: 36px; font-weight: 900; color: #0f172a; letter-spacing: -0.05em;">${order.id}</p>
-                                <p style="margin: 4px 0 0 0; font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em;">EMISSão: ${new Date().toLocaleDateString('pt-BR')}</p>
+                                <p style="margin: 4px 0 0 0; font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em;">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p>
                             </div>
                         </div>
                     </div>
@@ -500,13 +500,13 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     </div>
                     <div>
                         <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 0 0 2px 0; text-transform: uppercase;">${company.name}</h1>
-                        <p style="margin: 0; font-size: 11px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.02em;">Contrato de Prestao de Serviços</p>
+                        <p style="margin: 0; font-size: 11px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.02em;">Contrato de Prestação de Serviços</p>
                         <p style="margin: 4px 0 0 0; font-size: 10px; color: #64748b; font-weight: 500;">${company.cnpj || ''} | ${company.phone || ''}</p>
                     </div>
                 </div>
                 <div style="text-align: right;">
                     <p style="margin: 0; font-size: 24px; font-weight: 800; color: #2563eb;">${order.id}</p>
-                    <p style="margin: 4px 0 0 0; font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase;">EMISSão: ${new Date().toLocaleDateString('pt-BR')}</p>
+                    <p style="margin: 4px 0 0 0; font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase;">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p>
                 </div>
             </div>
         </div>`;
@@ -550,7 +550,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             </div>
 
             <div style="margin-bottom: 40px;">
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 0;">As partes acima identificadas resolvem firmar o presente Contrato de Prestao de Serviços por Empreitada Global, nos termos da legislação civil e previdenciria vigente, mediante as CLÁUSULAs e condies seguintes:</p>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 0;">As partes acima identificadas resolvem firmar o presente Contrato de Prestação de Serviços por Empreitada Global, nos termos da legislação civil e previdenciária vigente, mediante as CLÁUSULAs e condições seguintes:</p>
             </div>
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
@@ -564,8 +564,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
             <div style="margin-bottom: 32px; break-inside: avoid;">
                 <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 12px 0; padding-top: 16px; border-top: 1px solid #e2e8f0;">CLÁUSULA 2  DA FORMA DE execução (EMPREITADA GLOBAL)</h4>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">2.1. A CONTRATADA executar os serviços com autonomia TÉCNICA e gerencial, utilizando meios prprios, inclusive pessoal, ferramentas, equipamentos e mtodos de trabalho.</p>
-                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 8px 0 0 0;">2.2. não haver qualquer tipo de subordinao, exclusividade, controle de jornada ou disponibilizao de trabalhadores ao CONTRATANTE.</p>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify;">2.1. A CONTRATADA executar os serviços com autonomia TÉCNICA e gerencial, utilizando meios prprios, inclusive pessoal, ferramentas, equipamentos e métodos de trabalho.</p>
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 8px 0 0 0;">2.2. não haver qualquer tipo de subordinação, exclusividade, controle de jornada ou disponibilização de trabalhadores ao CONTRATANTE.</p>
                 <p style="font-size: 14px; color: #475569; line-height: 1.6; text-align: justify; margin: 8px 0 0 0;">2.3. A CONTRATADA assume total responsabilidade pela execução da obra, respondendo integralmente pelos serviços contratados.</p>
             </div>
 
@@ -1347,5 +1347,6 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 };
 
 export default WorkOrderManager;
+
 
 
