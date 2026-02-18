@@ -224,7 +224,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         // HTML CORRIGIDO (className → class)
         const contentHtml = `
         <div id="contract-content" style="background:#fff; padding: 0; margin: 0; font-family: Arial, sans-serif;">
-          <div class="a4-container" style="background:#fff; max-width: 210mm; margin: 0 auto; padding: 15mm;">
+          <div class="a4-container" style="background:#fff; max-width: 210mm; margin: 0 auto; padding: 0 15mm;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10mm; border-bottom: 3px solid #0f172a; padding-bottom: 8mm;">
               <div style="display: flex; gap: 6mm; align-items: center;">
                 <div style="width: 80px; height: 80px; display:flex; align-items:center; justify-content:center;">
@@ -354,16 +354,17 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
       `;
 
         const opt = {
-            margin: [10, 10, 15, 10] as [number, number, number, number],
+            margin: [15, 0, 15, 0] as [number, number, number, number],
             filename: `Contrato - ${order.id.replace("OS-", "OS")} - ${order.description || "Proposta"}.pdf`,
             image: { type: "jpeg" as const, quality: 0.98 },
             html2canvas: {
-                scale: 2,
+                scale: 3,
                 useCORS: true,
                 allowTaint: false,
                 backgroundColor: "#ffffff",
-                logging: true,
-                letterRendering: true
+                logging: false,
+                letterRendering: true,
+                windowWidth: 1200,
             },
             jsPDF: { unit: "mm", format: "a4", orientation: "portrait" as const },
             pagebreak: { mode: ["css", "legacy"] }
@@ -372,7 +373,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         // Criar elemento temporário
         const tempDiv = document.createElement("div");
         tempDiv.innerHTML = contentHtml;
-        
+
         // Estilos básicos
         const style = document.createElement("style");
         style.textContent = `
@@ -390,13 +391,29 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         try {
             // Aguardar um pouco para renderização
             await new Promise(resolve => setTimeout(resolve, 500));
-            
+
             // Gerar PDF
-            await html2pdf()
+            await (html2pdf()
                 .set(opt)
                 .from(tempDiv)
+                .toPdf()
+                .get('pdf')
+                .then((pdf: any) => {
+                    const totalPages = pdf.internal.getNumberOfPages();
+                    for (let i = 1; i <= totalPages; i++) {
+                        pdf.setPage(i);
+                        pdf.setFontSize(10);
+                        pdf.setTextColor(148, 163, 184);
+                        pdf.text(
+                            `PÁGINA ${i} DE ${totalPages}`,
+                            pdf.internal.pageSize.getWidth() / 2,
+                            pdf.internal.pageSize.getHeight() - 10,
+                            { align: "center" }
+                        );
+                    }
+                }) as any)
                 .save();
-                
+
             notify("PDF gerado com sucesso!", "success");
         } catch (error) {
             console.error("Erro ao gerar PDF:", error);
