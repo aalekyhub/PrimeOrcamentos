@@ -191,145 +191,147 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     };
 
 
-    const handleDownloadPDF = (order: ServiceOrder) => {
-        const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', address: 'Endereço não informado', city: '', state: '', cep: '' };
+    const handleDownloadPDF = async (order: ServiceOrder) => {
+        const customer =
+            customers.find(c => c.id === order.customerId) || {
+                name: order.customerName,
+                document: 'N/A',
+                address: 'Endereço não informado',
+                city: '',
+                state: '',
+                cep: '',
+            };
 
         const html = `
-    < !DOCTYPE html >
-        <html>
-            <head>
-                <title>Contrato - ${order.id}</title>
-                <script src="https://cdn.tailwindcss.com"></script>
-                <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
-                    <style>
-                        * {box - sizing: border-box; }
-                        body {font - family: 'Inter', sans-serif; margin: 0; padding: 0; }
-                        .a4-container {width: 100%; background: white; }
-                        .avoid-break { break-inside: avoid; page-break-inside: avoid; }
-                    </style>
-            </head>
-            <body class="no-scrollbar">
-                <div id="contract-content">
-                    <div class="a4-container">
-                        <div class="flex justify-between items-start mb-10 border-b-[3px] border-slate-900 pb-8">
-                            <div class="flex gap-6 items-center">
-                                <div style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
-                                    ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>'}
-                                </div>
-                                <div>
-                                    <h1 class="text-3xl font-black text-slate-900 leading-none mb-2 uppercase tracking-tight">${company.name}</h1>
-                                    <p class="text-[11px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">Contrato de Prestação de Serviços</p>
-                                    <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tight">${company.cnpj || ''} | ${company.phone || ''}</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <div class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest mb-2 shadow-md inline-block">CONTRATO</div>
-                                <p class="text-4xl font-black text-[#0f172a] tracking-tighter mb-1 whitespace-nowrap">${order.id}</p>
-                                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p>
-                            </div>
-                        </div>
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Contrato - ${order.id}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        font-family: 'Inter', sans-serif;
+        margin: 0; padding: 0;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        background: #fff;
+      }
+      .a4-container { width: 100%; background: white; }
+      .avoid-break { break-inside: avoid; page-break-inside: avoid; }
+      .keep-together { break-inside: avoid; page-break-inside: avoid; }
+    </style>
+  </head>
+  <body>
+    <div id="contract-content">
+      <div class="a4-container">
 
-                        <div class="grid grid-cols-2 gap-4 mb-8">
-                            <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100"><h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</h4><p class="text-base font-black text-slate-900 uppercase">${company.name}</p><p class="text-xs font-bold text-slate-500 uppercase mt-1">${company.address || ''}</p><p class="text-xs font-bold text-slate-500 uppercase">${company.email || ''}</p></div>
-                            <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100"><h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</h4><p class="text-base font-black text-slate-900 uppercase">${customer.name}</p><p class="text-xs font-bold text-slate-500 uppercase mt-1">${(customer.document || '').replace(/\D/g, '').length <= 11 ? 'CPF' : 'CNPJ'}: ${formatDocument(customer.document || '') || 'N/A'}</p><p class="text-xs font-bold text-slate-500 uppercase">${customer.address || ''}, ${customer.number || ''} - ${customer.city || ''}</p></div>
-                        </div>
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; border-bottom:3px solid #0f172a; padding-bottom:18px;">
+          <div style="display:flex; gap:16px; align-items:center;">
+            <div style="width:80px;height:80px;display:flex;align-items:center;justify-content:center;">
+              ${company.logo
+                ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">`
+                : `<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>`
+            }
+            </div>
+            <div>
+              <div style="font-size:22px; font-weight:900; color:#0f172a; line-height:1.1; text-transform:uppercase;">${company.name}</div>
+              <div style="font-size:11px; font-weight:800; color:#2563eb; text-transform:uppercase; letter-spacing:.12em; margin-top:6px;">Contrato de Prestação de Serviços</div>
+              <div style="font-size:10px; font-weight:700; color:#64748b; text-transform:uppercase; margin-top:6px;">${company.cnpj || ''} | ${company.phone || ''}</div>
+            </div>
+          </div>
 
+          <div style="text-align:right;">
+            <div style="display:inline-block; background:#2563eb; color:#fff; padding:6px 10px; border-radius:10px; font-size:10px; font-weight:900; letter-spacing:.14em;">CONTRATO</div>
+            <div style="font-size:28px; font-weight:900; color:#0f172a; margin-top:8px; white-space:nowrap;">${order.id}</div>
+            <div style="font-size:10px; font-weight:800; color:#64748b; letter-spacing:.12em; text-transform:uppercase;">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</div>
+          </div>
+        </div>
 
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:18px;">
+          <div style="background:#f8fafc; padding:16px; border-radius:14px; border:1px solid #e2e8f0;">
+            <div style="font-size:10px; font-weight:900; color:#94a3b8; letter-spacing:.14em; text-transform:uppercase;">CONTRATADA</div>
+            <div style="font-size:14px; font-weight:900; color:#0f172a; text-transform:uppercase; margin-top:6px;">${company.name}</div>
+            <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; margin-top:6px;">${company.address || ''}</div>
+            <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">${company.email || ''}</div>
+          </div>
 
-                        <div className="mb-10">
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">As partes acima identificadas resolvem firmar o presente Contrato de Prestação de Serviços por Empreitada Global, nos termos da legislação civil e previdenciária vigente, mediante as cláusulas e condições seguintes:</p>
-                        </div>
+          <div style="background:#f8fafc; padding:16px; border-radius:14px; border:1px solid #e2e8f0;">
+            <div style="font-size:10px; font-weight:900; color:#94a3b8; letter-spacing:.14em; text-transform:uppercase;">CONTRATANTE</div>
+            <div style="font-size:14px; font-weight:900; color:#0f172a; text-transform:uppercase; margin-top:6px;">${customer.name}</div>
+            <div style="font-size:11px; font-weight:800; color:#64748b; text-transform:uppercase; margin-top:6px;">
+              ${(customer.document || '').replace(/\D/g, '').length <= 11 ? 'CPF' : 'CNPJ'}: ${formatDocument(customer.document || '') || 'N/A'}
+            </div>
+            <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase;">
+              ${customer.address || ''}, ${customer.number || ''} - ${customer.city || ''} / ${customer.state || ''}
+            </div>
+          </div>
+        </div>
 
-                        <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 1ª – DO OBJETO</h4>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">1.1. O presente contrato tem por objeto a execução de reforma em unidade residencial, situada no endereço do CONTRATANTE, compreendendo os serviços descritos abaixo, os quais serão executados por empreitada global, com responsabilidade técnica, administrativa e operacional integral da CONTRATADA.</p>
-                            <div class="bg-blue-50/50 p-4 rounded-xl border-l-4 border-blue-500 mt-4">
-                                <p class="text-[14px] font-bold text-blue-900 uppercase tracking-wide">${order.description}</p>
-                            </div>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-4">1.2. A execução dos serviços será realizada por obra certa, com preço previamente ajustado, não se caracterizando, em hipótese alguma, cessão ou locação de mão de obra.</p>
-                        </div>
+        <div style="margin-bottom:18px;">
+          <p style="font-size:13px; color:#475569; line-height:1.7; text-align:justify;">
+            As partes acima identificadas resolvem firmar o presente Contrato de Prestação de Serviços por Empreitada Global, nos termos da legislação civil e previdenciária vigente, mediante as cláusulas e condições seguintes:
+          </p>
+        </div>
 
-                        <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 2ª – DA FORMA DE EXECUÇÃO (EMPREITADA GLOBAL)</h4>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">2.1. A CONTRATADA executará os serviços com autonomia técnica e gerencial, utilizando meios próprios, inclusive pessoal, ferramentas, equipamentos e métodos de trabalho.</p>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">2.2. Não haverá qualquer tipo de subordinação, exclusividade, controle de jornada ou disponibilização de trabalhadores ao CONTRATANTE.</p>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">2.3. A CONTRATADA assume total responsabilidade pela execução da obra, respondendo integralmente pelos serviços contratados.</p>
-                        </div>
+        <div class="avoid-break" style="margin-bottom:16px;">
+          <div style="font-size:13px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:.12em; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+            CLÁUSULA 1ª – DO OBJETO
+          </div>
+          <p style="font-size:13px; color:#475569; line-height:1.7; text-align:justify; margin-top:10px;">
+            1.1. O presente contrato tem por objeto a execução de reforma em unidade residencial, situada no endereço do CONTRATANTE, compreendendo os serviços descritos abaixo, os quais serão executados por empreitada global, com responsabilidade técnica, administrativa e operacional integral da CONTRATADA.
+          </p>
+          <div style="background:#eff6ff; padding:12px; border-radius:12px; border-left:4px solid #3b82f6; margin-top:10px;">
+            <div style="font-size:13px; font-weight:900; color:#1e3a8a; text-transform:uppercase;">${order.description}</div>
+          </div>
+          <p style="font-size:13px; color:#475569; line-height:1.7; text-align:justify; margin-top:10px;">
+            1.2. A execução dos serviços será realizada por obra certa, com preço previamente ajustado, não se caracterizando, em hipótese alguma, cessão ou locação de mão de obra.
+          </p>
+        </div>
 
-                        <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 3ª – DO PREÇO E DA FORMA DE PAGAMENTO</h4>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">3.1. Pelos serviços objeto deste contrato, o CONTRATANTE pagará à CONTRATADA o valor global de <b class="text-slate-900">R$ ${order.contractPrice && order.contractPrice > 0 ? order.contractPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>.</p>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">3.2. O pagamento será efetuado da seguinte forma: <b>${order.paymentTerms || 'Conforme combinado'}</b>.</p>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">3.3. O valor contratado corresponde ao preço fechado da obra, não estando vinculado a horas trabalhadas, número de funcionários ou fornecimento de mão de obra.</p>
-                        </div>
+        <div class="avoid-break" style="margin-bottom:16px;">
+          <div style="font-size:13px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:.12em; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+            CLÁUSULA 3ª – DO PREÇO E DA FORMA DE PAGAMENTO
+          </div>
+          <p style="font-size:13px; color:#475569; line-height:1.7; text-align:justify; margin-top:10px;">
+            3.1. Pelos serviços objeto deste contrato, o CONTRATANTE pagará à CONTRATADA o valor global de
+            <b style="color:#0f172a;">R$ ${order.contractPrice && order.contractPrice > 0
+                ? order.contractPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+                : (order.totalAmount || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+            }</b>.
+          </p>
+          <p style="font-size:13px; color:#475569; line-height:1.7; text-align:justify; margin-top:6px;">
+            3.2. O pagamento será efetuado da seguinte forma: <b style="color:#0f172a;">${order.paymentTerms || 'Conforme combinado'}</b>.
+          </p>
+        </div>
 
-                        <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 4ª – DAS OBRIGAÇÕES DA CONTRATADA</h4>
-                            <ul class="list-disc pl-5 mt-3 text-[14px] text-slate-600 leading-relaxed space-y-2">
-                                <li>4.1. Executar os serviços conforme o escopo contratado e normas técnicas aplicáveis.</li>
-                                <li>4.2. Responsabilizar-se integralmente por seus empregados, prepostos ou subcontratados, inclusive quanto a encargos trabalhistas, previdenciários, fiscais e securitários.</li>
-                                <li>4.3. Manter seus tributos, contribuições e obrigações legais em dia.</li>
-                                <li>4.4. Responder por danos eventualmente causados ao imóvel durante a execução dos serviços.</li>
-                            </ul>
-                        </div>
+        <div class="avoid-break" style="margin-top:60px; padding-top:18px; border-top:1px solid #e2e8f0;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:40px; padding:0 24px;">
+            <div style="text-align:center; border-top:1px solid #cbd5e1; padding-top:10px;">
+              <div style="font-size:10px; font-weight:900; color:#94a3b8; letter-spacing:.14em; text-transform:uppercase;">CONTRATADA</div>
+              <div style="font-size:12px; font-weight:900; color:#0f172a; text-transform:uppercase; margin-top:6px;">${company.name}</div>
+            </div>
+            <div style="text-align:center; border-top:1px solid #cbd5e1; padding-top:10px;">
+              <div style="font-size:10px; font-weight:900; color:#94a3b8; letter-spacing:.14em; text-transform:uppercase;">CONTRATANTE</div>
+              <div style="font-size:12px; font-weight:900; color:#0f172a; text-transform:uppercase; margin-top:6px;">${customer.name}</div>
+            </div>
+          </div>
+        </div>
 
-                        <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 5ª – DAS OBRIGAÇÕES DO CONTRATANTE</h4>
-                            <ul class="list-disc pl-5 mt-3 text-[14px] text-slate-600 leading-relaxed space-y-2">
-                                <li>5.1. Garantir o acesso da CONTRATADA ao local da obra.</li>
-                                <li>5.2. Efetuar os pagamentos conforme acordado.</li>
-                                <li>5.3. Fornecer, quando necessário, autorizações do condomínio para execução dos serviços.</li>
-                            </ul>
-                        </div>
+      </div>
+    </div>
+  </body>
+</html>`;
 
-                        <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 6ª – DAS RESPONSABILIDADES PREVIDENCIÁRIAS E FISCAIS</h4>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">6.1. As partes reconhecem que o presente contrato caracteriza empreitada global de obra, nos termos da legislação vigente, não se aplicando a retenção de 11% (onze por cento) de INSS, conforme disposto na Lei nº 8.212/91 e Instrução Normativa RFB nº 971/2009.</p>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">6.2. A CONTRATADA é a única responsável pelo recolhimento de seus tributos e contribuições incidentes sobre suas atividades.</p>
-                        </div>
-
-                        <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 7ª – DO PRAZO</h4>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">7.1. O prazo estimado para execução da obra é de <b>${order.deliveryTime || 'conforme demanda'}</b>, contado a partir do início efetivo dos serviços, podendo ser ajustado mediante comum acordo entre as partes.</p>
-                        </div>
-
-                        <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 8ª – DA RESPONSABILIDADE TÉCNICA</h4>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">8.1. Quando aplicável, a CONTRATADA providenciará a emissão de ART/RRT, assumindo a responsabilidade técnica pela execução dos serviços.</p>
-                        </div>
-
-                        <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 9ª – DA RESCISÃO</h4>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">9.1. O presente contrato poderá ser rescindido por descumprimento de quaisquer de suas cláusulas, mediante notificação por escrito.</p>
-                        </div>
-
-                        <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 10ª – DO FORO</h4>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">10.1. Fica eleito o foro da comarca de <b>${customer.city || 'São Paulo'} - ${customer.state || 'SP'}</b>, para dirimir quaisquer controvérsias oriundas deste contrato, renunciando as partes a qualquer outro, por mais privilegiado que seja.</p>
-                        </div>
-
-                        <div class="mb-8" style="padding-top: 30mm; padding-bottom: 20mm; page-break-inside: avoid; break-inside: avoid;">
-                            <div class="grid grid-cols-2 gap-16 px-10">
-                                <div class="text-center border-t border-slate-300 pt-3" style="page-break-inside: avoid; break-inside: avoid;"><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</p><p class="text-sm font-bold uppercase text-slate-900">${company.name}</p></div>
-                                <div class="text-center border-t border-slate-300 pt-3 relative" style="page-break-inside: avoid; break-inside: avoid;"><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</p><p class="text-sm font-bold uppercase text-slate-900">${customer.name}</p></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </body>
-        </html>`;
-
-        // PDF Generation Options
         const opt = {
             margin: 15,
             filename: `Contrato - ${order.id.replace('OS-', 'OS')} - ${order.description || 'Proposta'}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 3, useCORS: true },
+            html2canvas: { scale: 3, useCORS: true, backgroundColor: '#ffffff' },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
         };
 
-        // Use a hidden div to process HTML for PDF (must be in DOM and visible for layout)
         const worker = document.createElement('div');
         worker.style.position = 'absolute';
         worker.style.left = '-9999px';
@@ -338,57 +340,33 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         worker.innerHTML = html;
         document.body.appendChild(worker);
 
-        // Apply optimizations manually (scripts in innerHTML don't run)
-        // Apply optimizations manually
-        const root = worker.querySelector('.print-description-content .space-y-6');
-        if (root) {
-            const allNodes: any[] = [];
-            Array.from(root.children).forEach(block => {
-                if (block.classList.contains('ql-editor-print')) {
-                    allNodes.push(...Array.from(block.children));
-                } else {
-                    allNodes.push(block);
-                }
-            });
-
-            for (let i = 0; i < allNodes.length - 1; i++) {
-                const el = allNodes[i] as HTMLElement;
-                let isTitle = false;
-
-                if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
-                else if (el.tagName === 'P' || el.tagName === 'DIV') {
-                    const text = el.innerText.trim();
-                    const isNumbered = /^\d+[\.\)]/.test(text);
-                    const hasBold = el.querySelector('strong, b');
-                    if (isNumbered && hasBold && text.length < 150) isTitle = true;
-                }
-
-                if (isTitle) {
-                    const next = allNodes[i + 1];
-                    if (next && !next.matches('h1, h2, h3, h4, h5, h6')) {
-                        const wrapper = document.createElement('div');
-                        wrapper.className = 'keep-together';
-                        el.parentNode?.insertBefore(wrapper, el);
-                        wrapper.appendChild(el);
-                        wrapper.appendChild(next);
-                        i++;
-                    }
-                }
-            }
-        }
+        try {
+            // @ts-ignore
+            if (document.fonts?.ready) await document.fonts.ready;
+        } catch { }
 
         // @ts-ignore
-        html2pdf().set(opt).from(worker).toPdf().get('pdf').then(function (pdf: any) {
-            var totalPages = pdf.internal.getNumberOfPages();
-            for (var i = 1; i <= totalPages; i++) {
-                pdf.setPage(i);
-                pdf.setFontSize(10);
-                pdf.setTextColor(148, 163, 184); // #94a3b8
-                pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
-            }
-            pdf.save(opt.filename);
-            document.body.removeChild(worker);
-        });
+        html2pdf()
+            .set(opt)
+            .from(worker)
+            .toPdf()
+            .get('pdf')
+            .then((pdf: any) => {
+                const totalPages = pdf.internal.getNumberOfPages();
+                for (let i = 1; i <= totalPages; i++) {
+                    pdf.setPage(i);
+                    pdf.setFontSize(10);
+                    pdf.setTextColor(148, 163, 184);
+                    pdf.text(
+                        `PÁGINA ${i} DE ${totalPages}`,
+                        pdf.internal.pageSize.getWidth() / 2,
+                        pdf.internal.pageSize.getHeight() - 10,
+                        { align: 'center' }
+                    );
+                }
+                pdf.save(opt.filename);
+                document.body.removeChild(worker);
+            });
     };
 
     const handlePrintContract = (order: ServiceOrder) => {
