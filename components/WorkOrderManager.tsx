@@ -2,9 +2,9 @@
 import html2pdf from 'html2pdf.js';
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
-  Plus, Search, X, Trash2, Pencil, Printer, Save, FileDown,
-  UserPlus, HardHat, Eraser, FileText, ScrollText, Wallet,
-  Type, Image as ImageIcon, Zap, Upload, CheckCircle
+    Plus, Search, X, Trash2, Pencil, Printer, Save, FileDown,
+    UserPlus, HardHat, Eraser, FileText, ScrollText, Wallet,
+    Type, Image as ImageIcon, Zap, Upload, CheckCircle
 } from 'lucide-react';
 import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock, Transaction } from '../types';
 import { useNotify } from './ToastProvider';
@@ -18,183 +18,183 @@ import InfoCard from './ui/InfoCard';
 import RichTextEditor from './ui/RichTextEditor';
 
 interface Props {
-  orders: ServiceOrder[];
-  setOrders: React.Dispatch<React.SetStateAction<ServiceOrder[]>>;
-  customers: Customer[];
-  setCustomers: React.Dispatch<React.SetStateAction<Customer[]>>;
-  catalogServices: CatalogService[];
-  setCatalogServices: React.Dispatch<React.SetStateAction<CatalogService[]>>;
-  company: CompanyProfile;
-  transactions: Transaction[];
-  setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>;
+    orders: ServiceOrder[];
+    setOrders: React.Dispatch<React.SetStateAction<ServiceOrder[]>>;
+    customers: Customer[];
+    setCustomers: React.Dispatch<React.SetStateAction<Customer[]>>;
+    catalogServices: CatalogService[];
+    setCatalogServices: React.Dispatch<React.SetStateAction<CatalogService[]>>;
+    company: CompanyProfile;
+    transactions: Transaction[];
+    setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>;
 }
 
 const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCustomers, company, transactions, setTransactions }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [showForm, setShowForm] = useState(false);
-  const [showFullClientForm, setShowFullClientForm] = useState(false);
-  const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const { notify } = useNotify();
-  const { handlePrintOS } = usePrintOS(customers, company);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [showForm, setShowForm] = useState(false);
+    const [showFullClientForm, setShowFullClientForm] = useState(false);
+    const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
+    const { notify } = useNotify();
+    const { handlePrintOS } = usePrintOS(customers, company);
 
-  const [selectedCustomerId, setSelectedCustomerId] = useState('');
-  const [osTitle, setOsTitle] = useState('Execução de Obra');
-  const [diagnosis, setDiagnosis] = useState(''); // description of work
-  const [descriptionBlocks, setDescriptionBlocks] = useState<DescriptionBlock[]>([]);
-  const [paymentTerms, setPaymentTerms] = useState('');
-  const [deliveryTime, setDeliveryTime] = useState('');
-  const [deliveryDate, setDeliveryDate] = useState(new Date().toISOString().split('T')[0]);
-  const [contractPrice, setContractPrice] = useState<number>(0);
-  const [items, setItems] = useState<ServiceItem[]>([]);
+    const [selectedCustomerId, setSelectedCustomerId] = useState('');
+    const [osTitle, setOsTitle] = useState('ExecuÃ§Ã£o de Obra');
+    const [diagnosis, setDiagnosis] = useState(''); // description of work
+    const [descriptionBlocks, setDescriptionBlocks] = useState<DescriptionBlock[]>([]);
+    const [paymentTerms, setPaymentTerms] = useState('');
+    const [deliveryTime, setDeliveryTime] = useState('');
+    const [deliveryDate, setDeliveryDate] = useState(new Date().toISOString().split('T')[0]);
+    const [contractPrice, setContractPrice] = useState<number>(0);
+    const [items, setItems] = useState<ServiceItem[]>([]);
 
-  const [currentDesc, setCurrentDesc] = useState('');
-  const [currentPrice, setCurrentPrice] = useState(0);
-  const [currentQty, setCurrentQty] = useState(1);
-  const [currentUnit, setCurrentUnit] = useState('un');
-  const [activeEditField, setActiveEditField] = useState<string | null>(null);
+    const [currentDesc, setCurrentDesc] = useState('');
+    const [currentPrice, setCurrentPrice] = useState(0);
+    const [currentQty, setCurrentQty] = useState(1);
+    const [currentUnit, setCurrentUnit] = useState('un');
+    const [activeEditField, setActiveEditField] = useState<string | null>(null);
 
-  // Current Item Real Fields (Medição)
-  const [currentActualQty, setCurrentActualQty] = useState<number>(0);
-  const [currentActualPrice, setCurrentActualPrice] = useState<number>(0);
-  const [currentActual, setCurrentActual] = useState<number | ''>('');
+    // Current Item Real Fields (MediÃ§Ã£o)
+    const [currentActualQty, setCurrentActualQty] = useState<number>(0);
+    const [currentActualPrice, setCurrentActualPrice] = useState<number>(0);
+    const [currentActual, setCurrentActual] = useState<number | ''>('');
 
-  // Financial State
-  const [activeTab, setActiveTab] = useState<'details' | 'financial'>('details');
-  const [taxRate, setTaxRate] = useState<number>(0);
-  const [bdiRate, setBdiRate] = useState<number>(0);
+    // Financial State
+    const [activeTab, setActiveTab] = useState<'details' | 'financial'>('details');
+    const [taxRate, setTaxRate] = useState<number>(0);
+    const [bdiRate, setBdiRate] = useState<number>(0);
 
-  // Report State
-  const [showReportTypeModal, setShowReportTypeModal] = useState(false);
-  const [selectedOrderForReport, setSelectedOrderForReport] = useState<ServiceOrder | null>(null);
-
-
-  const totalExpenses = useMemo(() => items.reduce((acc, i) => acc + (i.actualQuantity ? (i.actualQuantity * (i.actualUnitPrice || 0)) : (i.actualValue || 0)), 0), [items]);
-  const expensesByCategory = useMemo(() => {
-    const groups: { [key: string]: number } = {};
-    items.forEach(i => {
-      const val = i.actualQuantity ? (i.actualQuantity * (i.actualUnitPrice || 0)) : (i.actualValue || 0);
-      if (val && val > 0) {
-        const cat = (i.type || 'Geral').toUpperCase();
-        groups[cat] = (groups[cat] || 0) + val;
-      }
-    });
-    return groups;
-  }, [items]);
-
-  const plannedCost = useMemo(() => financeUtils.calculateSubtotal(items), [items]);
-
-  const revenue = contractPrice || 0;
-
-  const plannedProfit = useMemo(() => revenue - plannedCost, [revenue, plannedCost]);
-  const actualProfit = useMemo(() => revenue - totalExpenses, [revenue, totalExpenses]);
-  const executionVariance = useMemo(() => plannedCost - totalExpenses, [plannedCost, totalExpenses]);
+    // Report State
+    const [showReportTypeModal, setShowReportTypeModal] = useState(false);
+    const [selectedOrderForReport, setSelectedOrderForReport] = useState<ServiceOrder | null>(null);
 
 
-  // Filter for WORK orders
-  const activeOrders = useMemo(() => orders.filter(o => {
-    if (o.osType !== 'WORK') return false; // Only Work Orders
-    if (o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED) return false;
-    return o.customerName.toLowerCase().includes(searchTerm.toLowerCase()) || o.id.includes(searchTerm);
-  }), [orders, searchTerm]);
+    const totalExpenses = useMemo(() => items.reduce((acc, i) => acc + (i.actualQuantity ? (i.actualQuantity * (i.actualUnitPrice || 0)) : (i.actualValue || 0)), 0), [items]);
+    const expensesByCategory = useMemo(() => {
+        const groups: { [key: string]: number } = {};
+        items.forEach(i => {
+            const val = i.actualQuantity ? (i.actualQuantity * (i.actualUnitPrice || 0)) : (i.actualValue || 0);
+            if (val && val > 0) {
+                const cat = (i.type || 'Geral').toUpperCase();
+                groups[cat] = (groups[cat] || 0) + val;
+            }
+        });
+        return groups;
+    }, [items]);
 
-  const subtotal = useMemo(() => financeUtils.calculateSubtotal(items), [items]);
+    const plannedCost = useMemo(() => financeUtils.calculateSubtotal(items), [items]);
 
-  const addTextBlock = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'text', content: '' }]);
-  const addImageBlock = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'image', content: '' }]);
-  const addPageBreak = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'page-break', content: 'QUEBRA DE PÃ GINA' }]);
-  const updateBlockContent = (id: string, content: string) => setDescriptionBlocks(prev => prev.map(b => b.id === id ? { ...b, content } : b));
+    const revenue = contractPrice || 0;
 
-  const handleImageUpload = async (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      try {
-        const compressedBase64 = await compressImage(file);
-        updateBlockContent(id, compressedBase64);
-      } catch (error) {
-        console.error("Erro ao comprimir imagem:", error);
-        notify("Erro ao processar imagem. Tente uma menor.", "error");
-      }
-    }
-  };
+    const plannedProfit = useMemo(() => revenue - plannedCost, [revenue, plannedCost]);
+    const actualProfit = useMemo(() => revenue - totalExpenses, [revenue, totalExpenses]);
+    const executionVariance = useMemo(() => plannedCost - totalExpenses, [plannedCost, totalExpenses]);
 
-  const handleAddItem = () => {
-    if (!currentDesc) return;
-    setItems([...items, {
-      id: Date.now().toString(),
-      description: currentDesc,
-      quantity: currentQty || 1,
-      unitPrice: currentPrice || 0,
-      type: 'Serviço',
-      unit: currentUnit || 'un',
-      actualValue: (currentActual === '' ? 0 : currentActual) || ((currentActualQty || 0) * (currentActualPrice || 0)),
-      actualQuantity: currentActualQty || 0,
-      actualUnitPrice: currentActualPrice || 0
-    }]);
-    setCurrentDesc(''); setCurrentPrice(0); setCurrentQty(1); setCurrentUnit('un'); setCurrentActual('');
-    setCurrentActualQty(0); setCurrentActualPrice(0);
-    notify("Item adicionado");
-  };
 
-  const updateItem = (id: string, field: keyof ServiceItem, value: any) => {
-    setItems(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item));
-  };
+    // Filter for WORK orders
+    const activeOrders = useMemo(() => orders.filter(o => {
+        if (o.osType !== 'WORK') return false; // Only Work Orders
+        if (o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED) return false;
+        return o.customerName.toLowerCase().includes(searchTerm.toLowerCase()) || o.id.includes(searchTerm);
+    }), [orders, searchTerm]);
 
-  const updateItemTotal = (id: string, total: number) => {
-    setItems(prev => prev.map(item => {
-      if (item.id === id) {
-        const quantity = item.quantity || 1;
-        return { ...item, unitPrice: total / quantity };
-      }
-      return item;
-    }));
-  };
+    const subtotal = useMemo(() => financeUtils.calculateSubtotal(items), [items]);
 
-  const handleSaveOS = async () => {
-    if (isSaving) return;
-    const customer = customers.find(c => c.id === selectedCustomerId);
-    if (!customer) { notify("Selecione um cliente", "error"); return; }
+    const addTextBlock = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'text', content: '' }]);
+    const addImageBlock = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'image', content: '' }]);
+    const addPageBreak = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'page-break', content: 'QUEBRA DE PÃƒÂGINA' }]);
+    const updateBlockContent = (id: string, content: string) => setDescriptionBlocks(prev => prev.map(b => b.id === id ? { ...b, content } : b));
 
-    const existingOrder = editingOrderId ? orders.find(o => o.id === editingOrderId) : null;
-
-    const data: ServiceOrder = {
-      id: editingOrderId || db.generateId('OS'),
-      customerId: customer.id,
-      customerName: customer.name,
-      customerEmail: customer.email,
-      description: osTitle,
-      serviceDescription: diagnosis,
-      status: OrderStatus.IN_PROGRESS,
-      items: existingOrder?.items || items, // Preserve original budget items
-      costItems: items, // Save current list as Planned Costs
-      totalAmount: revenue,
-      descriptionBlocks,
-      paymentTerms,
-      deliveryTime,
-      createdAt: existingOrder?.createdAt || new Date().toISOString().split('T')[0],
-      dueDate: deliveryDate,
-      taxRate: taxRate,
-      bdiRate: bdiRate,
-      osType: 'WORK',
-      contractPrice: contractPrice
+    const handleImageUpload = async (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            try {
+                const compressedBase64 = await compressImage(file);
+                updateBlockContent(id, compressedBase64);
+            } catch (error) {
+                console.error("Erro ao comprimir imagem:", error);
+                notify("Erro ao processar imagem. Tente uma menor.", "error");
+            }
+        }
     };
 
-    const newList = editingOrderId ? orders.map(o => o.id === editingOrderId ? data : o) : [data, ...orders];
-    setOrders(newList);
+    const handleAddItem = () => {
+        if (!currentDesc) return;
+        setItems([...items, {
+            id: Date.now().toString(),
+            description: currentDesc,
+            quantity: currentQty || 1,
+            unitPrice: currentPrice || 0,
+            type: 'ServiÃ§o',
+            unit: currentUnit || 'un',
+            actualValue: (currentActual === '' ? 0 : currentActual) || ((currentActualQty || 0) * (currentActualPrice || 0)),
+            actualQuantity: currentActualQty || 0,
+            actualUnitPrice: currentActualPrice || 0
+        }]);
+        setCurrentDesc(''); setCurrentPrice(0); setCurrentQty(1); setCurrentUnit('un'); setCurrentActual('');
+        setCurrentActualQty(0); setCurrentActualPrice(0);
+        notify("Item adicionado");
+    };
 
-    setIsSaving(true);
-    try {
-      const result = await db.save('serviflow_orders', newList);
-      if (result?.success) { notify(editingOrderId ? "OS de Obra atualizada!" : "OS de Obra registrada!"); setEditingOrderId(null); setShowForm(false); }
-      else { notify("Salvo localmente. Erro ao sincronizar.", "warning"); setEditingOrderId(null); setShowForm(false); }
-    } finally { setIsSaving(false); }
-  };
+    const updateItem = (id: string, field: keyof ServiceItem, value: any) => {
+        setItems(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item));
+    };
+
+    const updateItemTotal = (id: string, total: number) => {
+        setItems(prev => prev.map(item => {
+            if (item.id === id) {
+                const quantity = item.quantity || 1;
+                return { ...item, unitPrice: total / quantity };
+            }
+            return item;
+        }));
+    };
+
+    const handleSaveOS = async () => {
+        if (isSaving) return;
+        const customer = customers.find(c => c.id === selectedCustomerId);
+        if (!customer) { notify("Selecione um cliente", "error"); return; }
+
+        const existingOrder = editingOrderId ? orders.find(o => o.id === editingOrderId) : null;
+
+        const data: ServiceOrder = {
+            id: editingOrderId || db.generateId('OS'),
+            customerId: customer.id,
+            customerName: customer.name,
+            customerEmail: customer.email,
+            description: osTitle,
+            serviceDescription: diagnosis,
+            status: OrderStatus.IN_PROGRESS,
+            items: existingOrder?.items || items, // Preserve original budget items
+            costItems: items, // Save current list as Planned Costs
+            totalAmount: revenue,
+            descriptionBlocks,
+            paymentTerms,
+            deliveryTime,
+            createdAt: existingOrder?.createdAt || new Date().toISOString().split('T')[0],
+            dueDate: deliveryDate,
+            taxRate: taxRate,
+            bdiRate: bdiRate,
+            osType: 'WORK',
+            contractPrice: contractPrice
+        };
+
+        const newList = editingOrderId ? orders.map(o => o.id === editingOrderId ? data : o) : [data, ...orders];
+        setOrders(newList);
+
+        setIsSaving(true);
+        try {
+            const result = await db.save('serviflow_orders', newList);
+            if (result?.success) { notify(editingOrderId ? "OS de Obra atualizada!" : "OS de Obra registrada!"); setEditingOrderId(null); setShowForm(false); }
+            else { notify("Salvo localmente. Erro ao sincronizar.", "warning"); setEditingOrderId(null); setShowForm(false); }
+        } finally { setIsSaving(false); }
+    };
 
 
-  const handleDownloadPDF = (order: ServiceOrder) => {
-    const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', address: 'Endereço não informado', city: '', state: '', cep: '' };
+    const handleDownloadPDF = (order: ServiceOrder) => {
+        const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', address: 'EndereÃ§o nÃ£o informado', city: '', state: '', cep: '' };
 
-    const html = `
+        const html = `
     < !DOCTYPE html >
         <html>
             <head>
@@ -214,18 +214,18 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         <div class="flex justify-between items-start mb-10 border-b-[3px] border-slate-900 pb-8">
                             <div class="flex gap-6 items-center">
                                 <div style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
-                                    ${company.logo ?\`<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">\` : '<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>'}
+                                    ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>'}
                                 </div>
                                 <div>
                                     <h1 class="text-3xl font-black text-slate-900 leading-none mb-2 uppercase tracking-tight">${company.name}</h1>
-                                    <p class="text-[11px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">Contrato de Prestação de Serviços</p>
+                                    <p class="text-[11px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">Contrato de PrestaÃ§Ã£o de ServiÃ§os</p>
                                     <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tight">${company.cnpj || ''} | ${company.phone || ''}</p>
                                 </div>
                             </div>
                             <div class="text-right">
                                 <div class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest mb-2 shadow-md inline-block">CONTRATO</div>
                                 <p class="text-4xl font-black text-[#0f172a] tracking-tighter mb-1 whitespace-nowrap">${order.id}</p>
-                                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p>
+                                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">EMISSÃƒO: ${new Date().toLocaleDateString('pt-BR')}</p>
                             </div>
                         </div>
 
@@ -237,75 +237,75 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
 
                         <div className="mb-10">
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">As partes acima identificadas resolvem firmar o presente Contrato de Prestação de Serviços por Empreitada Global, nos termos da legislação civil e previdenciária vigente, mediante as cláusulas e condições seguintes:</p>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">As partes acima identificadas resolvem firmar o presente Contrato de PrestaÃ§Ã£o de ServiÃ§os por Empreitada Global, nos termos da legislaÃ§Ã£o civil e previdenciÃ¡ria vigente, mediante as clÃ¡usulas e condiÃ§Ãµes seguintes:</p>
                         </div>
 
                         <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 1ª – DO OBJETO</h4>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">1.1. O presente contrato tem por objeto a execução de reforma em unidade residencial, situada no endereço do CONTRATANTE, compreendendo os serviços descritos abaixo, os quais serão executados por empreitada global, com responsabilidade técnica, administrativa e operacional integral da CONTRATADA.</p>
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 1Âª â€“ DO OBJETO</h4>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">1.1. O presente contrato tem por objeto a execuÃ§Ã£o de reforma em unidade residencial, situada no endereÃ§o do CONTRATANTE, compreendendo os serviÃ§os descritos abaixo, os quais serÃ£o executados por empreitada global, com responsabilidade tÃ©cnica, administrativa e operacional integral da CONTRATADA.</p>
                             <div class="bg-blue-50/50 p-4 rounded-xl border-l-4 border-blue-500 mt-4">
                                 <p class="text-[14px] font-bold text-blue-900 uppercase tracking-wide">${order.description}</p>
                             </div>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-4">1.2. A execução dos serviços será realizada por obra certa, com preço previamente ajustado, não se caracterizando, em hipótese alguma, cessão ou locação de mão de obra.</p>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-4">1.2. A execuÃ§Ã£o dos serviÃ§os serÃ¡ realizada por obra certa, com preÃ§o previamente ajustado, nÃ£o se caracterizando, em hipÃ³tese alguma, cessÃ£o ou locaÃ§Ã£o de mÃ£o de obra.</p>
                         </div>
 
                         <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 2ª – DA FORMA DE EXECUÇÃO (EMPREITADA GLOBAL)</h4>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">2.1. A CONTRATADA executará os serviços com autonomia técnica e gerencial, utilizando meios próprios, inclusive pessoal, ferramentas, equipamentos e métodos de trabalho.</p>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">2.2. Não haverá qualquer tipo de subordinação, exclusividade, controle de jornada ou disponibilização de trabalhadores ao CONTRATANTE.</p>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">2.3. A CONTRATADA assume total responsabilidade pela execução da obra, respondendo integralmente pelos serviços contratados.</p>
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 2Âª â€“ DA FORMA DE EXECUÃ‡ÃƒO (EMPREITADA GLOBAL)</h4>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">2.1. A CONTRATADA executarÃ¡ os serviÃ§os com autonomia tÃ©cnica e gerencial, utilizando meios prÃ³prios, inclusive pessoal, ferramentas, equipamentos e mÃ©todos de trabalho.</p>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">2.2. NÃ£o haverÃ¡ qualquer tipo de subordinaÃ§Ã£o, exclusividade, controle de jornada ou disponibilizaÃ§Ã£o de trabalhadores ao CONTRATANTE.</p>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">2.3. A CONTRATADA assume total responsabilidade pela execuÃ§Ã£o da obra, respondendo integralmente pelos serviÃ§os contratados.</p>
                         </div>
 
                         <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 3ª – DO PREÇO E DA FORMA DE PAGAMENTO</h4>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">3.1. Pelos serviços objeto deste contrato, o CONTRATANTE pagará à CONTRATADA o valor global de <b class="text-slate-900">R$ ${order.contractPrice && order.contractPrice > 0 ? order.contractPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>.</p>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">3.2. O pagamento será efetuado da seguinte forma: <b>${order.paymentTerms || 'Conforme combinado'}</b>.</p>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">3.3. O valor contratado corresponde ao preço fechado da obra, não estando vinculado a horas trabalhadas, número de funcionários ou fornecimento de mão de obra.</p>
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 3Âª â€“ DO PREÃ‡O E DA FORMA DE PAGAMENTO</h4>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">3.1. Pelos serviÃ§os objeto deste contrato, o CONTRATANTE pagarÃ¡ Ã  CONTRATADA o valor global de <b class="text-slate-900">R$ ${order.contractPrice && order.contractPrice > 0 ? order.contractPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>.</p>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">3.2. O pagamento serÃ¡ efetuado da seguinte forma: <b>${order.paymentTerms || 'Conforme combinado'}</b>.</p>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">3.3. O valor contratado corresponde ao preÃ§o fechado da obra, nÃ£o estando vinculado a horas trabalhadas, nÃºmero de funcionÃ¡rios ou fornecimento de mÃ£o de obra.</p>
                         </div>
 
                         <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 4ª – DAS OBRIGAÇÕES DA CONTRATADA</h4>
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 4Âª â€“ DAS OBRIGAÃ‡Ã•ES DA CONTRATADA</h4>
                             <ul class="list-disc pl-5 mt-3 text-[14px] text-slate-600 leading-relaxed space-y-2">
-                                <li>4.1. Executar os serviços conforme o escopo contratado e normas técnicas aplicáveis.</li>
-                                <li>4.2. Responsabilizar-se integralmente por seus empregados, prepostos ou subcontratados, inclusive quanto a encargos trabalhistas, previdenciários, fiscais e securitários.</li>
-                                <li>4.3. Manter seus tributos, contribuições e obrigações legais em dia.</li>
-                                <li>4.4. Responder por danos eventualmente causados ao imóvel durante a execução dos serviços.</li>
+                                <li>4.1. Executar os serviÃ§os conforme o escopo contratado e normas tÃ©cnicas aplicÃ¡veis.</li>
+                                <li>4.2. Responsabilizar-se integralmente por seus empregados, prepostos ou subcontratados, inclusive quanto a encargos trabalhistas, previdenciÃ¡rios, fiscais e securitÃ¡rios.</li>
+                                <li>4.3. Manter seus tributos, contribuiÃ§Ãµes e obrigaÃ§Ãµes legais em dia.</li>
+                                <li>4.4. Responder por danos eventualmente causados ao imÃ³vel durante a execuÃ§Ã£o dos serviÃ§os.</li>
                             </ul>
                         </div>
 
                         <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 5ª – DAS OBRIGAÇÕES DO CONTRATANTE</h4>
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 5Âª â€“ DAS OBRIGAÃ‡Ã•ES DO CONTRATANTE</h4>
                             <ul class="list-disc pl-5 mt-3 text-[14px] text-slate-600 leading-relaxed space-y-2">
                                 <li>5.1. Garantir o acesso da CONTRATADA ao local da obra.</li>
                                 <li>5.2. Efetuar os pagamentos conforme acordado.</li>
-                                <li>5.3. Fornecer, quando necessário, autorizações do condomínio para execução dos serviços.</li>
+                                <li>5.3. Fornecer, quando necessÃ¡rio, autorizaÃ§Ãµes do condomÃ­nio para execuÃ§Ã£o dos serviÃ§os.</li>
                             </ul>
                         </div>
 
                         <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 6ª – DAS RESPONSABILIDADES PREVIDENCIÁRIAS E FISCAIS</h4>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">6.1. As partes reconhecem que o presente contrato caracteriza empreitada global de obra, nos termos da legislação vigente, não se aplicando a retenção de 11% (onze por cento) de INSS, conforme disposto na Lei nº 8.212/91 e Instrução Normativa RFB nº 971/2009.</p>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">6.2. A CONTRATADA é a única responsável pelo recolhimento de seus tributos e contribuições incidentes sobre suas atividades.</p>
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 6Âª â€“ DAS RESPONSABILIDADES PREVIDENCIÃRIAS E FISCAIS</h4>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">6.1. As partes reconhecem que o presente contrato caracteriza empreitada global de obra, nos termos da legislaÃ§Ã£o vigente, nÃ£o se aplicando a retenÃ§Ã£o de 11% (onze por cento) de INSS, conforme disposto na Lei nÂº 8.212/91 e InstruÃ§Ã£o Normativa RFB nÂº 971/2009.</p>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">6.2. A CONTRATADA Ã© a Ãºnica responsÃ¡vel pelo recolhimento de seus tributos e contribuiÃ§Ãµes incidentes sobre suas atividades.</p>
                         </div>
 
                         <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 7ª – DO PRAZO</h4>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">7.1. O prazo estimado para execução da obra é de <b>${order.deliveryTime || 'conforme demanda'}</b>, contado a partir do início efetivo dos serviços, podendo ser ajustado mediante comum acordo entre as partes.</p>
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 7Âª â€“ DO PRAZO</h4>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">7.1. O prazo estimado para execuÃ§Ã£o da obra Ã© de <b>${order.deliveryTime || 'conforme demanda'}</b>, contado a partir do inÃ­cio efetivo dos serviÃ§os, podendo ser ajustado mediante comum acordo entre as partes.</p>
                         </div>
 
                         <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 8ª – DA RESPONSABILIDADE TÉCNICA</h4>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">8.1. Quando aplicável, a CONTRATADA providenciará a emissão de ART/RRT, assumindo a responsabilidade técnica pela execução dos serviços.</p>
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 8Âª â€“ DA RESPONSABILIDADE TÃ‰CNICA</h4>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">8.1. Quando aplicÃ¡vel, a CONTRATADA providenciarÃ¡ a emissÃ£o de ART/RRT, assumindo a responsabilidade tÃ©cnica pela execuÃ§Ã£o dos serviÃ§os.</p>
                         </div>
 
                         <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 9ª – DA RESCISÃO</h4>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">9.1. O presente contrato poderá ser rescindido por descumprimento de quaisquer de suas cláusulas, mediante notificação por escrito.</p>
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 9Âª â€“ DA RESCISÃƒO</h4>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">9.1. O presente contrato poderÃ¡ ser rescindido por descumprimento de quaisquer de suas clÃ¡usulas, mediante notificaÃ§Ã£o por escrito.</p>
                         </div>
 
                         <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 10ª – DO FORO</h4>
-                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">10.1. Fica eleito o foro da comarca de <b>${customer.city || 'São Paulo'} - ${customer.state || 'SP'}</b>, para dirimir quaisquer controvérsias oriundas deste contrato, renunciando as partes a qualquer outro, por mais privilegiado que seja.</p>
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 10Âª â€“ DO FORO</h4>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">10.1. Fica eleito o foro da comarca de <b>${customer.city || 'SÃ£o Paulo'} - ${customer.state || 'SP'}</b>, para dirimir quaisquer controvÃ©rsias oriundas deste contrato, renunciando as partes a qualquer outro, por mais privilegiado que seja.</p>
                         </div>
 
                         <div class="mb-8" style="padding-top: 30mm; padding-bottom: 20mm; page-break-inside: avoid; break-inside: avoid;">
@@ -317,12 +317,12 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     </div>
                 </div>
             </body>
-        </html>\`;
+        </html>`;
 
         // PDF Generation Options
         const opt = {
             margin: 15,
-            filename: \`Contrato - \${order.id.replace('OS-', 'OS')} - \${order.description || 'Proposta'}.pdf\`,
+            filename: `Contrato - ${order.id.replace('OS-', 'OS')} - ${order.description || 'Proposta'}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 3, useCORS: true },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
@@ -340,468 +340,798 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
         // Apply optimizations manually (scripts in innerHTML don't run)
         // Apply optimizations manually
-        html2pdf().from(worker).set(opt).save().then(() => {
+        const root = worker.querySelector('.print-description-content .space-y-6');
+        if (root) {
+            const allNodes: any[] = [];
+            Array.from(root.children).forEach(block => {
+                if (block.classList.contains('ql-editor-print')) {
+                    allNodes.push(...Array.from(block.children));
+                } else {
+                    allNodes.push(block);
+                }
+            });
+
+            for (let i = 0; i < allNodes.length - 1; i++) {
+                const el = allNodes[i] as HTMLElement;
+                let isTitle = false;
+
+                if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
+                else if (el.tagName === 'P' || el.tagName === 'DIV') {
+                    const text = el.innerText.trim();
+                    const isNumbered = /^\d+[\.\)]/.test(text);
+                    const hasBold = el.querySelector('strong, b');
+                    if (isNumbered && hasBold && text.length < 150) isTitle = true;
+                }
+
+                if (isTitle) {
+                    const next = allNodes[i + 1];
+                    if (next && !next.matches('h1, h2, h3, h4, h5, h6')) {
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'keep-together';
+                        el.parentNode?.insertBefore(wrapper, el);
+                        wrapper.appendChild(el);
+                        wrapper.appendChild(next);
+                        i++;
+                    }
+                }
+            }
+        }
+
+        // @ts-ignore
+        html2pdf().set(opt).from(worker).toPdf().get('pdf').then(function (pdf: any) {
+            var totalPages = pdf.internal.getNumberOfPages();
+            for (var i = 1; i <= totalPages; i++) {
+                pdf.setPage(i);
+                pdf.setFontSize(10);
+                pdf.setTextColor(148, 163, 184); // #94a3b8
+                pdf.text('PÃGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
+            }
+            pdf.save(opt.filename);
             document.body.removeChild(worker);
         });
     };
 
-    const handlePrintWorkReport = (order: ServiceOrder, type: 'estimated' | 'real') => {
-        const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, address: 'Não informado', document: 'N/A' };
+    const handlePrintContract = (order: ServiceOrder) => {
+        const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', address: 'EndereÃ§o nÃ£o informado', city: '', state: '', cep: '' };
         const printWindow = window.open('', '_blank');
         if (!printWindow) return;
 
-        const formatDate = (dateStr: string) => {
-            try {
-                const d = new Date(dateStr);
-                return isNaN(d.getTime()) ? new Date().toLocaleDateString('pt-BR') : d.toLocaleDateString('pt-BR');
-            } catch {
-                return new Date().toLocaleDateString('pt-BR');
-            }
-        };
-
-        const { subtotal, bdiValue, taxValue, finalTotal } = financeUtils.getDetailedFinancials(order);
-
-        const itemsHtml = order.costItems?.map((item) => {
-            const estimatedTotal = item.quantity * item.unitPrice;
-            const actualTotal = item.actualValue || ((item.actualQuantity || 0) * (item.actualUnitPrice || 0));
-            const diff = estimatedTotal - actualTotal;
-
-            if (type === 'estimated') {
-                return `
-      < tr style = "border-bottom: 1px solid #f1f5f9;" >
-            <td style="padding: 10px 0; text-align: left; vertical-align: middle;">
-                <div style="font-weight: 700; text-transform: uppercase; font-size: 11px; color: #0f172a;">${item.description}</div>
-            </td>
-            <td style="padding: 10px 0; text-align: center; vertical-align: middle; color: #64748b; font-size: 10px; font-weight: 700;">${(item.type || 'MAT').toUpperCase()}</td>
-            <td style="padding: 10px 0; text-align: center; vertical-align: middle; color: #0f172a; font-size: 11px; font-weight: 700;">${item.quantity} ${item.unit || 'un'}</td>
-            <td style="padding: 10px 0; text-align: right; vertical-align: middle; color: #64748b; font-size: 10px; font-weight: 700;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-            <td style="padding: 10px 0; text-align: right; vertical-align: middle; font-weight: 800; font-size: 12px; color: #0f172a;">R$ ${estimatedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-          </tr > `;
-            } else {
-                return `
-  < tr style = "border-bottom: 1px solid #f1f5f9;" >
-            <td style="padding: 10px 0; text-align: left; vertical-align: middle;">
-                <div style="font-weight: 800; text-transform: uppercase; font-size: 10px; color: #0f172a;">${item.description}</div>
-            </td>
-            <td style="padding: 10px 0; text-align: center; vertical-align: middle; color: #0f172a; font-size: 10px; font-weight: 700;">${item.quantity}</td>
-            <td style="padding: 10px 0; text-align: right; vertical-align: middle; color: #3b82f6; font-size: 10px; font-weight: 700;">R$ ${estimatedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-            <td style="padding: 10px 0; text-align: center; vertical-align: middle; color: #0f172a; font-size: 10px; font-weight: 700;">${item.actualQuantity || 0}</td>
-            <td style="padding: 10px 0; text-align: right; vertical-align: middle; color: #e11d48; font-size: 10px; font-weight: 800;">R$ ${actualTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-            <td style="padding: 10px 0; text-align: right; vertical-align: middle; font-weight: 900; font-size: 11px; color: ${diff >= 0 ? '#059669' : '#e11d48'};">R$ ${diff.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-          </tr > `;
-            }
-        }).join('') || '';
-
         const html = `
-  < !DOCTYPE html >
-    <html>
-      <head>
-        <title>Relatório de Obra - ${order.id}</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-          <style>
-            body {font - family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            @page {size: A4; margin: 15mm; }
-            .info-box {background: #f8fafc; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; }
-            .info-label {font - size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; display: block; }
-            .info-value {font - size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; }
-          </style>
-      </head>
-      <body>
-        <div class="flex justify-between items-start mb-8 border-b-[3px] border-slate-900 pb-6">
-          <div class="flex gap-6 items-center">
-            <div style="width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;">
-              ${company.logo ?\`<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">\` : '<div style="font-weight:900; font-size:28px; color:#2563eb;">PO</div>'}
-            </div>
-            <div>
-              <h1 class="text-2xl font-black text-slate-900 leading-none mb-2 uppercase tracking-tight">${company.name}</h1>
-              <p class="text-[10px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">Relatório de Acompanhamento de Obra</p>
-              <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tight">${company.cnpj || ''} | ${company.phone || ''}</p>
-            </div>
-          </div>
-          <div class="text-right">
-            <div class="${type === 'estimated' ? 'bg-blue-600' : 'bg-rose-600'} text-white px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest mb-2 shadow-md inline-block">RELATÓRIO ${type === 'estimated' ? 'ESTIMADO' : 'REALIZADO'}</div>
-            <p class="text-xl font-black text-[#0f172a] tracking-tighter mb-1 whitespace-nowrap">${order.id}</p>
-            <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest text-right">DATA: ${new Date().toLocaleDateString('pt-BR')}</p>
-          </div>
-        </div>
+    < !DOCTYPE html >
+        <html>
+            <head>
+                <title>Contrato - ${order.id.replace('OS-', 'OS')} - ${order.description || 'Proposta'}</title>
+                <script src="https://cdn.tailwindcss.com"></script>
+                <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
+                    <style>
+                        body {font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
+                        @page {size: A4; margin: 0 !important; }
+                        .a4-container {width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
+                        .avoid-break { break-inside: avoid; page-break-inside: avoid; }
+                        .break-after-avoid { break-after: avoid !important; page-break-after: avoid !important; }
+                        .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; }
+                        @media screen {body {background: #f1f5f9; padding: 40px 0; } .a4-container {width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; } }
+                         @media print {
+                             body { background: white !important; margin: 0 !important; } 
+                             .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; width: 100% !important; padding-left: 20mm !important; padding-right: 20mm !important; } 
+                             .no-print { display: none !important; } 
+                             * { box-shadow: none !important; } 
+                             .print-footer { display: none !important; color: white !important; } 
+                             .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; overflow: hidden !important; } 
+                             .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; }
+                         }
+                        
+                        /* Styles for Rich Text (Quill) */
+                        .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
+                        .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
+                        .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
+                        .ql-editor-print strong { font-weight: bold !important; }
+                        .ql-editor-print em { font-style: italic !important; }
+                        .ql-editor-print .ql-align-center { text-align: center !important; }
+                        .ql-editor-print .ql-align-right { text-align: right !important; }
+                        .ql-editor-print .ql-align-justify { text-align: justify !important; }
 
-        <div class="grid grid-cols-2 gap-4 mb-8">
-          <div class="info-box"><span class="info-label">Cliente</span><div class="info-value">${customer.name}</div></div>
-          <div class="info-box"><span class="info-label">Descrição do Projeto</span><div class="info-value">${order.description}</div></div>
-        </div>
+                        /* Prevent widowed headings */
+                        .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4, .ql-editor-print h5, .ql-editor-print h6 { 
+                            break-after: avoid-page !important; 
+                            page-break-after: avoid !important; 
+                        }
+                        .ql-editor-print p { orphans: 3; widows: 3; }
+                    </style>
+            </head>
+            <body class="no-scrollbar">
+                <table style="width: 100%;">
+                    <thead><tr><td style="height: ${company.printMarginTop || 15}mm;"><div style="height: ${company.printMarginTop || 15}mm; display: block;">&nbsp;</div></td></tr></thead>
+                    <tbody><tr><td>
+                        <div class="a4-container">
+                            <div class="flex justify-between items-start mb-10 border-b-[3px] border-slate-900 pb-8">
+                                <div class="flex gap-6 items-center">
+                                    <div style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                                        ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>'}
+                                    </div>
+                                    <div>
+                                        <h1 class="text-3xl font-black text-slate-900 leading-none mb-2 uppercase tracking-tight">${company.name}</h1>
+                                        <p class="text-[11px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">Contrato de PrestaÃ§Ã£o de ServiÃ§os</p>
+                                        <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tight">${company.cnpj || ''} | ${company.phone || ''}</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest mb-2 shadow-md inline-block">CONTRATO</div>
+                                    <p class="text-4xl font-black text-[#0f172a] tracking-tighter mb-1 whitespace-nowrap">${order.id}</p>
+                                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">EMISSÃƒO: ${new Date().toLocaleDateString('pt-BR')}</p>
+                                </div>
+                            </div>
 
-        <div class="mb-8">
-          <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 border-b-2 border-slate-100 pb-2">RESUMO FINANCEIRO</div>
-          <div class="grid grid-cols-4 gap-4">
-            <div class="bg-blue-50 border border-blue-100 p-4 rounded-2xl">
-              <span class="text-[8px] font-black text-blue-600 uppercase tracking-widest block mb-1">Total Orçado</span>
-              <span class="text-lg font-black text-blue-900 leading-none">R$ ${plannedCost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-            </div>
-            <div class="bg-rose-50 border border-rose-100 p-4 rounded-2xl">
-              <span class="text-[8px] font-black text-rose-600 uppercase tracking-widest block mb-1">Total Realizado</span>
-              <span class="text-lg font-black text-rose-900 leading-none">R$ ${totalExpenses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-            </div>
-            <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl">
-              <span class="text-[8px] font-black text-emerald-600 uppercase tracking-widest block mb-1">Valor Contrato</span>
-              <span class="text-lg font-black text-emerald-900 leading-none">R$ ${revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-            </div>
-            <div class="bg-slate-900 p-4 rounded-2xl shadow-lg">
-              <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-1">Resultado Atual</span>
-              <span class="text-lg font-black text-white leading-none">R$ ${actualProfit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-            </div>
-          </div>
-        </div>
+                            <div class="grid grid-cols-2 gap-4 mb-8">
+                                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100"><h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</h4><p class="text-base font-black text-slate-900 uppercase">${company.name}</p><p class="text-xs font-bold text-slate-500 uppercase mt-1">${company.address || ''}</p><p class="text-xs font-bold text-slate-500 uppercase">${company.email || ''}</p></div>
+                                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100"><h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</h4><p class="text-base font-black text-slate-900 uppercase">${customer.name}</p><p class="text-xs font-bold text-slate-500 uppercase mt-1">${(customer.document || '').replace(/\D/g, '').length <= 11 ? 'CPF' : 'CNPJ'}: ${formatDocument(customer.document || '') || 'N/A'}</p><p class="text-xs font-bold text-slate-500 uppercase">${customer.address || ''}, ${customer.number || ''} - ${customer.city || ''}</p></div>
+                            </div>
 
-        <div class="mb-10">
-          <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 border-b-2 border-slate-100 pb-2">DETALHAMENTO DOS ITENS</div>
-          <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-              <tr style="border-bottom: 2px solid #0f172a;">
-                ${type === 'estimated' ? `
-                            <th style="padding-bottom: 8px; font-size: 9px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800;">Descrição do Item</th>
-                            <th style="padding-bottom: 8px; font-size: 9px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800;">Tipo</th>
-                            <th style="padding-bottom: 8px; font-size: 9px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800;">Qtd</th>
-                            <th style="padding-bottom: 8px; font-size: 9px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800;">Vlr Unit.</th>
-                            <th style="padding-bottom: 8px; font-size: 9px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800;">Total Orçado</th>
-                        ` : `
-                            <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; width: 40%">Descrição</th>
-                            <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800;">Qtd Orc</th>
-                            <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800;">Vlr Orc</th>
-                            <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800;">Qtd Real</th>
-                            <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800;">Vlr Real</th>
-                            <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800;">Saldo</th>
-                        `}
-              </tr>
-            </thead>
-            <tbody>${itemsHtml}</tbody>
-          </table>
-        </div>
+                            <div className="mb-10">
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">As partes acima identificadas resolvem firmar o presente Contrato de PrestaÃ§Ã£o de ServiÃ§os por Empreitada Global, nos termos da legislaÃ§Ã£o civil e previdenciÃ¡ria vigente, mediante as clÃ¡usulas e condiÃ§Ãµes seguintes:</p>
+                            </div>
 
-        <div class="mt-20 pt-10 border-t border-slate-100 flex justify-between items-center opacity-70">
-          <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">ServiFlow - Gestão de Obras Inteligente</p>
-          <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Página 1 de 1</p>
-        </div>
-        <script>window.onload = function() {setTimeout(function () { window.print(); window.close(); }, 500); }</script>
-      </body>
-    </html>\`;
+                            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
+                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 1Âª â€“ DO OBJETO</h4>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">1.1. O presente contrato tem por objeto a execuÃ§Ã£o de reforma em unidade residencial, situada no endereÃ§o do CONTRATANTE, compreendendo os serviÃ§os descritos abaixo, os quais serÃ£o executados por empreitada global, com responsabilidade tÃ©cnica, administrativa e operacional integral da CONTRATADA.</p>
+                                <div class="bg-blue-50/50 p-4 rounded-xl border-l-4 border-blue-500 mt-4">
+                                    <p class="text-[14px] font-bold text-blue-900 uppercase tracking-wide">${order.description}</p>
+                                </div>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-4">1.2. A execuÃ§Ã£o dos serviÃ§os serÃ¡ realizada por obra certa, com preÃ§o previamente ajustado, nÃ£o se caracterizando, em hipÃ³tese alguma, cessÃ£o ou locaÃ§Ã£o de mÃ£o de obra.</p>
+                            </div>
 
+                            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
+                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 2Âª â€“ DA FORMA DE EXECUÃ‡ÃƒO (EMPREITADA GLOBAL)</h4>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">2.1. A CONTRATADA executarÃ¡ os serviÃ§os com autonomia tÃ©cnica e gerencial, utilizando meios prÃ³prios, inclusive pessoal, ferramentas, equipamentos e mÃ©todos de trabalho.</p>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">2.2. NÃ£o haverÃ¡ qualquer tipo de subordinaÃ§Ã£o, exclusividade, controle de jornada ou disponibilizaÃ§Ã£o de trabalhadores ao CONTRATANTE.</p>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">2.3. A CONTRATADA assume total responsabilidade pela execuÃ§Ã£o da obra, respondendo integralmente pelos serviÃ§os contratados.</p>
+                            </div>
+
+                            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
+                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 3Âª â€“ DO PREÃ‡O E DA FORMA DE PAGAMENTO</h4>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">3.1. Pelos serviÃ§os objeto deste contrato, o CONTRATANTE pagarÃ¡ Ã  CONTRATADA o valor global de <b class="text-slate-900">R$ ${order.contractPrice && order.contractPrice > 0 ? order.contractPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>.</p>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">3.2. O pagamento serÃ¡ efetuado da seguinte forma: <b>${order.paymentTerms || 'Conforme combinado'}</b>.</p>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">3.3. O valor contratado corresponde ao preÃ§o fechado da obra, nÃ£o estando vinculado a horas trabalhadas, nÃºmero de funcionÃ¡rios ou fornecimento de mÃ£o de obra.</p>
+                            </div>
+
+                            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
+                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 4Âª â€“ DAS OBRIGAÃ‡Ã•ES DA CONTRATADA</h4>
+                                <ul class="list-disc pl-5 mt-3 text-[14px] text-slate-600 leading-relaxed space-y-2">
+                                    <li>4.1. Executar os serviÃ§os conforme o escopo contratado e normas tÃ©cnicas aplicÃ¡veis.</li>
+                                    <li>4.2. Responsabilizar-se integralmente por seus empregados, prepostos ou subcontratados, inclusive quanto a encargos trabalhistas, previdenciÃ¡rios, fiscais e securitÃ¡rios.</li>
+                                    <li>4.3. Manter seus tributos, contribuiÃ§Ãµes e obrigaÃ§Ãµes legais em dia.</li>
+                                    <li>4.4. Responder por danos eventualmente causados ao imÃ³vel durante a execuÃ§Ã£o dos serviÃ§os.</li>
+                                </ul>
+                            </div>
+
+                            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
+                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 5Âª â€“ DAS OBRIGAÃ‡Ã•ES DO CONTRATANTE</h4>
+                                <ul class="list-disc pl-5 mt-3 text-[14px] text-slate-600 leading-relaxed space-y-2">
+                                    <li>5.1. Garantir o acesso da CONTRATADA ao local da obra.</li>
+                                    <li>5.2. Efetuar os pagamentos conforme acordado.</li>
+                                    <li>5.3. Fornecer, quando necessÃ¡rio, autorizaÃ§Ãµes do condomÃ­nio para execuÃ§Ã£o dos serviÃ§os.</li>
+                                </ul>
+                            </div>
+
+                            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
+                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 6Âª â€“ DAS RESPONSABILIDADES PREVIDENCIÃRIAS E FISCAIS</h4>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">6.1. As partes reconhecem que o presente contrato caracteriza empreitada global de obra, nos termos da legislaÃ§Ã£o vigente, nÃ£o se aplicando a retenÃ§Ã£o de 11% (onze por cento) de INSS, conforme disposto na Lei nÂº 8.212/91 e InstruÃ§Ã£o Normativa RFB nÂº 971/2009.</p>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">6.2. A CONTRATADA Ã© a Ãºnica responsÃ¡vel pelo recolhimento de seus tributos e contribuiÃ§Ãµes incidentes sobre suas atividades.</p>
+                            </div>
+
+                            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
+                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 7Âª â€“ DO PRAZO</h4>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">7.1. O prazo estimado para execuÃ§Ã£o da obra Ã© de <b>${order.deliveryTime || 'conforme demanda'}</b>, contado a partir do inÃ­cio efetivo dos serviÃ§os, podendo ser ajustado mediante comum acordo entre as partes.</p>
+                            </div>
+
+                            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
+                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 8Âª â€“ DA RESPONSABILIDADE TÃ‰CNICA</h4>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">8.1. Quando aplicÃ¡vel, a CONTRATADA providenciarÃ¡ a emissÃ£o de ART/RRT, assumindo a responsabilidade tÃ©cnica pela execuÃ§Ã£o dos serviÃ§os.</p>
+                            </div>
+
+                            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
+                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 9Âª â€“ DA RESCISÃƒO</h4>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">9.1. O presente contrato poderÃ¡ ser rescindido por descumprimento de quaisquer de suas clÃ¡usulas, mediante notificaÃ§Ã£o por escrito.</p>
+                            </div>
+
+                            <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
+                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÃUSULA 10Âª â€“ DO FORO</h4>
+                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">10.1. Fica eleito o foro da comarca de <b>${customer.city || 'SÃ£o Paulo'} - ${customer.state || 'SP'}</b>, para dirimir quaisquer controvÃ©rsias oriundas deste contrato, renunciando as partes a qualquer outro, por mais privilegiado que seja.</p>
+                            </div>
+
+                            <div class="mb-8" style="padding-top: 50mm; page-break-inside: avoid; break-inside: avoid;">
+                                <div class="grid grid-cols-2 gap-16 px-10">
+                                    <div class="text-center border-t border-slate-300 pt-3"><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</p><p class="text-sm font-bold uppercase text-slate-900">${company.name}</p></div>
+                                    <div class="text-center border-t border-slate-300 pt-3 relative"><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</p><p class="text-sm font-bold uppercase text-slate-900">${customer.name}</p></div>
+                                </div>
+                            </div>
+                        </div>
+                    </td></tr></tbody>
+                    <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;"><div style="height: ${company.printMarginBottom || 15}mm; display: block;">&nbsp;</div></td></tr></tfoot>
+                </table>
+                <script>
+                    window.onload = function() {setTimeout(() => { window.print(); window.close(); }, 800); }
+                </script>
+            </body>
+        </html>`;
         printWindow.document.write(html);
         printWindow.document.close();
     };
 
-    const handleEditOrder = (order: ServiceOrder) => {
-        setEditingOrderId(order.id);
-        setSelectedCustomerId(order.customerId);
-        setOsTitle(order.description);
-        setDiagnosis(order.serviceDescription || '');
-        setDescriptionBlocks(order.descriptionBlocks || []);
-        setPaymentTerms(order.paymentTerms || '');
-        setDeliveryTime(order.deliveryTime || '');
-        setDeliveryDate(order.dueDate || new Date().toISOString().split('T')[0]);
-        setContractPrice(order.contractPrice || order.totalAmount);
-        setTaxRate(order.taxRate || 0);
-        setBdiRate(order.bdiRate || 0);
-        setItems(order.costItems || order.items); // Use costItems if available, otherwise budget items
-        setShowForm(true);
-        setActiveTab('details');
-    };
+    const handlePrintWorkReport = (order: ServiceOrder, reportMode: 'estimated' | 'real') => {
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) return;
+        const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', city: '', state: '' };
 
+        const formatDate = (dateStr: string) => {
+            try { const d = new Date(dateStr); return isNaN(d.getTime()) ? new Date().toLocaleDateString('pt-BR') : d.toLocaleDateString('pt-BR'); }
+            catch { return new Date().toLocaleDateString('pt-BR'); }
+        };
 
-    return (
-        <div className="p-4 md:p-8 max-w-[1400px] mx-auto animate-in fade-in duration-500">
-            {/* Header section com stats */}
-            <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
-                <div>
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="bg-slate-900 p-2.5 rounded-2xl shadow-xl shadow-slate-200">
-                            <HardHat className="w-6 h-6 text-white" />
-                        </div>
-                        <h2 className="text-3xl font-black text-slate-900 tracking-tight uppercase">Gestão de Obras</h2>
-                    </div>
-                    <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Acompanhamento técnico e financeiro em tempo real</p>
-                </div>
+        // --- CALCULAÃ‡Ã•ES FINANCEIRAS ---
+        const revenue = order.contractPrice || order.totalAmount || 0; // O que o cliente paga
+        const plannedCost = (order.costItems || []).reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0); // O que a empresa gasta (planejado)
 
-                <div className="flex gap-4">
-                    <div className="relative group">
-                        <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                            <Search className="w-4 h-4 text-slate-400 group-focus-within:text-slate-900 transition-colors" />
-                        </div>
-                        <input
-                            type="text"
-                            placeholder="BUSCAR OBRA OU CLIENTE..."
-                            className="bg-white border-2 border-slate-100 rounded-2xl py-3 pl-12 pr-6 text-xs font-black uppercase tracking-widest outline-none focus:border-slate-900 transition-all w-full md:w-[350px] shadow-sm"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-                </div>
-            </div>
+        // NOVO: Despesas Reais agora baseadas na MediÃ§Ã£o (CostItems) para alinhar com o Dashboard
+        const totalActualExpenses = (order.costItems || []).reduce((acc, i) => acc + (i.actualQuantity ? (i.actualQuantity * (i.actualUnitPrice || 0)) : (i.actualValue || 0)), 0);
 
-            {/* Grid de Obras Ativas */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {activeOrders.map(order => (
-                    <div key={order.id} className="group bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-300/50 transition-all duration-500 overflow-hidden flex flex-col">
-                        <div className="p-8 pb-4">
-                            <div className="flex justify-between items-start mb-6">
-                                <div className="bg-blue-50 text-blue-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest">
-                                    {order.id}
+        const profitValue = revenue - totalActualExpenses; // Lucro Real (baseado em mediÃ§Ã£o)
+        const plannedProfit = revenue - plannedCost; // Lucro Previsto
+
+        // Valores do OrÃ§amento Original (para referÃªncia se necessÃ¡rio)
+        const budgetSubTotal = order.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0);
+        const bdiValue = order.bdiRate ? budgetSubTotal * (order.bdiRate / 100) : 0;
+        const taxValue = order.taxRate ? (budgetSubTotal + bdiValue) * (order.taxRate / 100) : 0;
+
+        // Gerar HTML da Tabela de Itens (Sempre usando costItems para consistÃªncia na Obra)
+        const itemsHtml = (order.costItems || []).map((item: ServiceItem) => {
+            const plannedTotal = item.quantity * item.unitPrice;
+
+            if (reportMode === 'estimated') {
+                return `
+            < tr style = "border-bottom: 1px solid #f1f5f9;" >
+                    <td style="padding: 12px 0; text-align: left; vertical-align: top;">
+                        <div style="font-weight: 700; text-transform: uppercase; font-size: 11px; color: #0f172a;">${item.description}</div>
+                        <div style="font-size: 9px; color: #94a3b8; font-weight: 600;">${item.type || 'GERAL'}</div>
+                    </td>
+                    <td style="padding: 12px 0; text-align: center; vertical-align: top; color: #64748b; font-size: 11px; font-weight: 600; text-transform: uppercase;">${item.unit || 'UN'}</td>
+                    <td style="padding: 12px 0; text-align: center; vertical-align: top; font-weight: 700; color: #0f172a; font-size: 11px;">${item.quantity}</td>
+                    <td style="padding: 12px 0; text-align: right; vertical-align: top; color: #0f172a; font-size: 11px; font-weight: 700;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                    <td style="padding: 12px 0; text-align: right; vertical-align: top; font-weight: 800; font-size: 12px; color: #2563eb;">R$ ${plannedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                </tr > `;
+            }
+
+            const actualTotal = (item.actualQuantity || 0) * (item.actualUnitPrice || 0);
+            const diff = actualTotal - plannedTotal;
+            const diffColor = diff > 0 ? '#e11d48' : diff < 0 ? '#059669' : '#64748b';
+
+            return `
+    < tr style = "border-bottom: 1px solid #f1f5f9;" >
+                    <td style="padding: 12px 0; text-align: left; vertical-align: top;">
+                        <div style="font-weight: 700; text-transform: uppercase; font-size: 11px; color: #0f172a;">${item.description}</div>
+                        <div style="font-size: 9px; color: #94a3b8; font-weight: 600;">${item.type || 'GERAL'}</div>
+                    </td>
+                    <td style="padding: 12px 0; text-align: center; vertical-align: top; color: #64748b; font-size: 11px; font-weight: 600; text-transform: uppercase;">${item.unit || 'UN'}</td>
+                    <td style="padding: 12px 0; text-align: center; vertical-align: top;">
+                        <div style="font-weight: 700; color: #94a3b8; font-size: 8px; margin-bottom: 2px; text-transform: uppercase;">Est: ${item.quantity}</div>
+                        <div style="font-weight: 800; color: #0f172a; font-size: 10px;">REAL: ${item.actualQuantity || 0}</div>
+                    </td>
+                    <td style="padding: 12px 0; text-align: right; vertical-align: top;">
+                        <div style="color: #94a3b8; font-size: 8px; margin-bottom: 2px; font-weight: 700; text-transform: uppercase;">Est: R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                        <div style="color: #0f172a; font-size: 10.5px; font-weight: 800;">REAL: R$ ${(item.actualUnitPrice || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                    </td>
+                    <td style="padding: 12px 0; text-align: right; vertical-align: top;">
+                        <div style="font-weight: 700; font-size: 8px; color: #94a3b8; margin-bottom: 2px; text-transform: uppercase;">Est: R$ ${plannedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                        <div style="font-weight: 900; font-size: 12px; color: #0f172a;">REAL: R$ ${actualTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                        ${diff !== 0 ? `<div style="font-size: 9.5px; font-weight: 900; color: ${diffColor}; margin-top: 3px; font-variant-numeric: tabular-nums;">${diff > 0 ? '+' : ''} R$ ${diff.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>` : ''}
+                    </td>
+                </tr > `;
+        }).join('');
+
+        const html = `
+    < !DOCTYPE html >
+        <html>
+            <head>
+                <title>RelatÃ³rio de Obra - ${order.id} - ${order.description || 'Obra'}</title>
+                <script src="https://cdn.tailwindcss.com"></script>
+                <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Roboto:wght@400;700&family=Montserrat:wght@400;700&family=Open+Sans:wght@400;700&family=Lato:wght@400;700&family=Poppins:wght@400;700&family=Oswald:wght@400;700&family=Playfair+Display:wght@400;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+                    <style>
+                        * { box-sizing: border-box; }
+                        body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; color: #0f172a; }
+                        @page { size: A4; margin: 0 !important; }
+                        .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
+                        .avoid-break { break-inside: avoid; page-break-inside: avoid; }
+                        .info-box { background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
+                        .info-label { font-size: 11px; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block; }
+                        .info-value { font-size: 16px; font-weight: 700; color: #0f172a; text-transform: uppercase; line-height: 1.2; }
+                        .section-title { font-size: 14px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 2px solid #f1f5f9; margin-bottom: 16px; margin-top: 32px; }
+                        .card-summary { padding: 12px; border-radius: 12px; border: 1px solid transparent; }
+                        @media print {
+                            body { background: white !important; margin: 0 !important; }
+                            .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; width: 100% !important; padding-left: 20mm !important; padding-right: 20mm !important; }
+                            .no-print { display: none !important; }
+                            .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; } 
+                            .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
+                        }
+           
+                        /* Styles for Rich Text (Quill) */
+                        .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
+                        .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
+                        .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
+                        .ql-editor-print strong { font-weight: bold !important; }
+                        .ql-editor-print em { font-style: italic !important; }
+                        .ql-editor-print .ql-align-center { text-align: center !important; }
+                        .ql-editor-print .ql-align-right { text-align: right !important; }
+                        .ql-editor-print .ql-align-justify { text-align: justify !important; }
+
+                        /* Font Classes for Print */
+                        .ql-font-inter { font-family: 'Inter', sans-serif !important; }
+                        .ql-font-arial { font-family: Arial, sans-serif !important; }
+                        .ql-font-roboto { font-family: 'Roboto', sans-serif !important; }
+                        .ql-font-serif { font-family: serif !important; }
+                        .ql-font-monospace { font-family: monospace !important; }
+                        .ql-font-montserrat { font-family: 'Montserrat', sans-serif !important; }
+                        .ql-font-opensans { font-family: 'Open Sans', sans-serif !important; }
+                        .ql-font-lato { font-family: 'Lato', sans-serif !important; }
+                        .ql-font-poppins { font-family: 'Poppins', sans-serif !important; }
+                        .ql-font-oswald { font-family: 'Oswald', sans-serif !important; }
+                        .ql-font-playfair { font-family: 'Playfair Display', serif !important; }
+                        .ql-font-nunito { font-family: 'Nunito', sans-serif !important; }
+
+                        /* Size Classes for Print */
+                        .ql-size-10px { font-size: 10px !important; }
+                        .ql-size-12px { font-size: 12px !important; }
+                        .ql-size-14px { font-size: 14px !important; }
+                        .ql-size-16px { font-size: 16px !important; }
+                        .ql-size-18px { font-size: 18px !important; }
+                        .ql-size-20px { font-size: 20px !important; }
+                        .ql-size-24px { font-size: 24px !important; }
+                        .ql-size-32px { font-size: 32px !important; }
+                    </style>
+            </head>
+            <body>
+                <table style="width: 100%;">
+                    <thead><tr><td style="height: ${company.printMarginTop || 15}mm;">&nbsp;</td></tr></thead>
+                    <tbody><tr><td>
+                        <div class="a4-container">
+                            <div class="flex justify-between items-start mb-10 border-b-[3px] border-slate-900 pb-8">
+                                <div class="flex gap-6 items-center">
+                                    <div style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                                        ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>'}
+                                    </div>
+                                    <div>
+                                        <h1 class="text-3xl font-black text-slate-900 leading-none mb-2 uppercase tracking-tight">${company.name}</h1>
+                                        <p class="text-[11px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">RelatÃ³rio Gerencial de Obra - ${reportMode === 'estimated' ? 'ESTIMADO' : 'REAL'}</p>
+                                        <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tight">${company.cnpj || ''} | ${company.phone || ''}</p>
+                                    </div>
                                 </div>
-                                <div className="flex gap-2">
-                                    <button onClick={() => { setSelectedOrderForReport(order); setShowReportTypeModal(true); }} className="p-2.5 bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white rounded-xl transition-all shadow-sm" title="Relatório de Obra"><FileText className="w-4 h-4" /></button>
-                                    <button onClick={() => handleDownloadPDF(order)} className="p-2.5 bg-slate-50 text-slate-400 hover:bg-blue-600 hover:text-white rounded-xl transition-all shadow-sm" title="Gerar Contrato (PDF)"><ScrollText className="w-4 h-4" /></button>
-                                    <button onClick={() => handleEditOrder(order)} className="p-2.5 bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white rounded-xl transition-all shadow-sm"><Pencil className="w-4 h-4" /></button>
+                                <div class="text-right">
+                                    <div class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest mb-2 shadow-md inline-block">CONTROLE DE OBRA</div>
+                                    <p class="text-2xl font-black text-[#0f172a] tracking-tighter mb-1">${order.id}</p>
+                                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">EMISSÃƒO: ${new Date().toLocaleDateString('pt-BR')}</p>
                                 </div>
                             </div>
 
-                            <h3 className="text-xl font-black text-slate-900 uppercase leading-tight mb-2 group-hover:text-blue-600 transition-colors">{order.description}</h3>
-                            <div className="flex items-center gap-2 mb-6">
-                                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{order.customerName}</span>
+                            <div class="grid grid-cols-2 gap-4 mb-8">
+                                <div class="info-box">
+                                    <span class="info-label">Contratante / Cliente</span>
+                                    <div class="info-value">${customer.name}</div>
+                                    <div class="text-[11px] text-slate-400 font-bold mt-1.5 uppercase">${customer.document || 'DOC NÃƒO INF.'}</div>
+                                </div>
+                                <div class="info-box">
+                                    <span class="info-label">IdentificaÃ§Ã£o da Obra</span>
+                                    <div class="info-value">${order.description}</div>
+                                    <div class="text-[11px] text-slate-400 font-bold mt-1.5 uppercase">InÃ­cio: ${formatDate(order.createdAt)} | Entrega: ${order.dueDate ? formatDate(order.dueDate) : 'A COMBINAR'}</div>
+                                </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4 pt-6 border-t border-slate-50">
-                                <div>
-                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Investimento</span>
-                                    <span className="text-sm font-black text-slate-900 leading-none">R$ {(order.contractPrice || order.totalAmount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                            <div class="section-title">Resumo Financeiro da Obra</div>
+                            <div class="grid grid-cols-3 gap-4 mb-10">
+                                <!-- Card 1: Valor do OrÃ§amento (Receita) -->
+                                <div class="card-summary bg-blue-50/50 border-blue-100 px-6 py-4">
+                                    <span class="text-[10px] font-black text-blue-600 uppercase tracking-widest block mb-1">Valor do OrÃ§amento</span>
+                                    <span class="text-xl font-black text-blue-700 block">R$ ${revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                 </div>
-                                <div className="text-right">
-                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Previsão</span>
-                                    <span className="text-sm font-black text-slate-900 leading-none">{order.dueDate ? new Date(order.dueDate).toLocaleDateString('pt-BR') : 'A definir'}</span>
-                                </div>
-                            </div>
-                        </div>
 
-                        <div className="mt-auto bg-slate-50/50 px-8 py-5 flex items-center justify-between border-t border-slate-50">
-                            <div className="flex items-center gap-2">
-                                <div className="flex -space-x-2">
-                                    {[1, 2].map(i => <div key={i} className="w-6 h-6 rounded-full border-2 border-white bg-slate-200"></div>)}
+                                <!-- Card 2: Despesas (Previstas ou Reais baseadas em MediÃ§Ã£o) -->
+                                <div class="card-summary bg-rose-50/50 border-rose-100 px-6 py-4">
+                                    <span class="text-[10px] font-black text-rose-600 uppercase tracking-widest block mb-1">${reportMode === 'estimated' ? 'Despesas Previstas' : 'Despesas Reais (MediÃ§Ã£o)'}</span>
+                                    <span class="text-xl font-black text-rose-700 block">R$ ${(reportMode === 'estimated' ? plannedCost : totalActualExpenses).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                 </div>
-                                <span className="text-[9px] font-black text-slate-400 uppercase">Equipe Ativa</span>
+
+                                <!-- Card 3: Lucro (Previsto ou Real) -->
+                                <div class="card-summary ${(reportMode === 'estimated' ? (revenue - plannedCost) : profitValue) >= 0 ? 'bg-emerald-50/50 border-emerald-100' : 'bg-red-50/50 border-red-100'} px-6 py-4">
+                                    <span class="text-[10px] font-black ${(reportMode === 'estimated' ? (revenue - plannedCost) : profitValue) >= 0 ? 'text-emerald-600' : 'text-red-600'} uppercase tracking-widest block mb-1">${reportMode === 'estimated' ? 'Lucro Previsto' : 'Lucro Real'}</span>
+                                    <span class="text-xl font-black ${(reportMode === 'estimated' ? (revenue - plannedCost) : profitValue) >= 0 ? 'text-emerald-700' : 'text-red-700'} block">R$ ${(reportMode === 'estimated' ? (revenue - plannedCost) : profitValue).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                </div>
                             </div>
-                            <button onClick={() => handlePrintOS(order)} className="flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors">
-                                <span className="text-[10px] font-black uppercase tracking-widest">Imprimir OS</span>
-                                <Printer className="w-4 h-4" />
-                            </button>
-                        </div>
+
+
+
+
+
+                            <div class="avoid-break mt-6">
+                                <div class="section-title">${reportMode === 'estimated' ? 'DETALHAMENTO DE CUSTOS ESTIMADOS' : 'COMPARATIVO DE ITENS (ORÃ‡ADO VS REAL)'}</div>
+                                <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+                                    <thead>
+                                        <tr style="border-bottom: 2px solid #0f172a;">
+                                            <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; width: 38%;">DescriÃ§Ã£o</th>
+                                            <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800; width: 7%;">UN</th>
+                                            <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800; width: 15%;">Qtd</th>
+                                            <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 22%;">UnitÃ¡rio</th>
+                                            <th style="padding-bottom: 10px; font-size: 10px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 18%;">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${itemsHtml}
+                                        <tr style="border-top: 1px solid #f1f5f9; background: #fafafa;">
+                                            <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Subtotal dos Itens (OrÃ§amento):</td>
+                                            <td style="padding: 12px 10px; text-align: right; font-size: 12px; font-weight: 800; color: #0f172a;">R$ ${budgetSubTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                        </tr>
+                                        ${order.bdiRate ? `
+                             <tr style="background: #fafafa;">
+                                 <td colspan="4" style="padding: 8px 10px; text-align: right; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">BDI (${order.bdiRate}%):</td>
+                                 <td style="padding: 8px 10px; text-align: right; font-size: 12px; font-weight: 800; color: #0f172a;">R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                             </tr>` : ''}
+                                        ${order.taxRate ? `
+                             <tr style="background: #fafafa;">
+                                 <td colspan="4" style="padding: 8px 10px; text-align: right; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase;">Impostos (${order.taxRate}%):</td>
+                                 <td style="padding: 8px 10px; text-align: right; font-size: 12px; font-weight: 800; color: #0f172a;">R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                             </tr>` : ''}
+                                        <tr style="border-top: 1px solid #cbd5e1; background: #f8fafc;">
+                                            <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 12px; font-weight: 900; color: #334155; text-transform: uppercase;">Total do OrÃ§amento (ArrecadaÃ§Ã£o):</td>
+                                            <td style="padding: 12px 10px; text-align: right; font-size: 13px; font-weight: 900; color: #1e40af;">R$ ${revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                        </tr>
+                                        <tr style="border-top: 3px solid #0f172a; background: #f1f5f9;">
+                                            <td colspan="4" style="padding: 16px 10px; text-align: right; font-size: 13px; font-weight: 900; color: #0f172a; text-transform: uppercase;">${reportMode === 'estimated' ? 'Custo Total Estimado de Obra:' : 'Total Realizado em Obra (MediÃ§Ã£o):'}</td>
+                                            <td style="padding: 16px 10px; text-align: right; font-size: 14px; font-weight: 900; color: ${reportMode === 'estimated' ? '#2563eb' : '#e11d48'};">R$ ${(reportMode === 'estimated' ? plannedCost : totalActualExpenses).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                            </div>
+
+                            ${order.descriptionBlocks && order.descriptionBlocks.length > 0 ? `
+                <div class="mb-10 print-description-content">
+                    <div class="section-title">DESCRIÃ‡ÃƒO TÃ‰CNICA / ESCOPO</div>
+                    <div class="space-y-6">
+                        ${order.descriptionBlocks.map(block => {
+            if (block.type === 'text') {
+                return `<div class="text-slate-600 leading-relaxed text-justify ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px;">${block.content}</div>`;
+            } else if (block.type === 'image') {
+                return `<div class="avoid-break" style="margin: 20px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; border: 1px solid #e2e8f0; display: block; object-fit: contain;"></div>`;
+            } else if (block.type === 'page-break') {
+                return `<div style="page-break-after: always; break-after: page; height: 0; margin: 0; padding: 0;"></div>`;
+            }
+            return '';
+        }).join('')}
                     </div>
-                ))}
+                </div>` : ''}
 
-                {/* Card de Nova Obra (Botão) */}
-                <button
-                    onClick={() => { setEditingOrderId(null); setOsTitle('Execução de Obra'); setDiagnosis(''); setSelectedCustomerId(''); setItems([]); setContractPrice(0); setShowForm(true); }}
-                    className="group border-4 border-dashed border-slate-100 rounded-[2.5rem] p-8 flex flex-col items-center justify-center min-h-[300px] hover:border-blue-200 hover:bg-blue-50/30 transition-all duration-500"
-                >
-                    <div className="bg-white p-6 rounded-3xl shadow-xl shadow-slate-100 group-hover:scale-110 group-hover:bg-blue-600 transition-all duration-500 mb-6">
-                        <Plus className="w-8 h-8 text-slate-900 group-hover:text-white" />
-                    </div>
-                    <span className="text-sm font-black text-slate-900 uppercase tracking-widest">Nova Obra</span>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase mt-1">Iniciar acompanhamento</span>
-                </button>
-            </div>
-
-            {/* Modal de Formulário */}
-            {showForm && (
-                <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-300">
-                    <div className="bg-white w-full max-w-6xl h-full max-h-[900px] rounded-[3rem] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
-                        {/* Modal Header */}
-                        <div className="bg-white px-10 py-8 border-b flex justify-between items-center shrink-0">
-                            <div className="flex items-center gap-5">
-                                <div className="bg-slate-900 p-3.5 rounded-2xl shadow-lg">
-                                    <HardHat className="w-6 h-6 text-white" />
-                                </div>
-                                <div>
-                                    <input
-                                        type="text"
-                                        className="text-2xl font-black text-slate-900 uppercase tracking-tight outline-none w-[400px] border-b-2 border-transparent focus:border-blue-500 transition-all"
-                                        value={osTitle}
-                                        onChange={(e) => setOsTitle(e.target.value)}
-                                        placeholder="TÍTULO DA OBRA"
-                                    />
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{editingOrderId || 'NOVA ORDEM'}</span>
-                                        <div className="w-1 h-1 rounded-full bg-slate-300"></div>
-                                        <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Painel de Controle</span>
+                            <div style="margin-top: 120px !important;" class="avoid-break pt-24 border-t border-slate-100">
+                                <div class="flex justify-center px-8">
+                                    <div class="text-center w-80">
+                                        <div style="border-top: 1px solid #cbd5e1; margin-bottom: 60px;"></div>
+                                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">ResponsÃ¡vel TÃ©cnico</p>
+                                        <p class="text-[12px] font-black uppercase text-slate-900">${company.name}</p>
                                     </div>
                                 </div>
                             </div>
-                            <button onClick={() => setShowForm(false)} className="p-3 bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-500 rounded-2xl transition-all"><X className="w-6 h-6" /></button>
+                        </div>
+                    </td></tr></tbody>
+                    <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;">&nbsp;</td></tr></tfoot>
+                </table>
+                <script>
+                    function optimizePageBreaks() {
+                        const root = document.querySelector('.print-description-content .space-y-6');
+                        if (!root) return;
+
+                        const allNodes = [];
+                        Array.from(root.children).forEach(block => {
+                            if (block.classList.contains('ql-editor-print')) {
+                                allNodes.push(...Array.from(block.children));
+                            } else {
+                                allNodes.push(block);
+                            }
+                        });
+
+                        for (let i = 0; i < allNodes.length - 1; i++) {
+                            const el = allNodes[i];
+                            let isTitle = false;
+                            
+                            if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
+                            else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
+                                const text = el.innerText.trim();
+                                const isNumbered = /^\d+[\.\)]/.test(text);
+                                const isBold = el.querySelector('strong, b') || (el.style && parseInt(el.style.fontWeight) > 500) || el.tagName === 'STRONG';
+                                const isShort = text.length < 150;
+                                if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
+                                    isTitle = true;
+                                }
+                            }
+
+                            if (isTitle) {
+                                const nodesToWrap = [el];
+                                let j = i + 1;
+                                while (j < allNodes.length && nodesToWrap.length < 3) {
+                                    const next = allNodes[j];
+                                    const nText = next.innerText.trim();
+                                    const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') || 
+                                                        (/^\d+[\.\)]/.test(nText) && (next.querySelector('strong, b') || nText === nText.toUpperCase()));
+                                    if (nextIsTitle) break;
+                                    nodesToWrap.push(next);
+                                    j++;
+                                }
+
+                                if (nodesToWrap.length > 1) {
+                                    const wrapper = document.createElement('div');
+                                    wrapper.className = 'keep-together';
+                                    el.parentNode.insertBefore(wrapper, el);
+                                    nodesToWrap.forEach(node => wrapper.appendChild(node));
+                                    i = j - 1;
+                                }
+                            }
+                        }
+                    }
+                    window.onload = function() { 
+                        optimizePageBreaks();
+                        setTimeout(() => { window.print(); window.close(); }, 2000); 
+                    }
+                </script>
+            </body>
+        </html>`;
+        printWindow.document.write(html);
+        printWindow.document.close();
+    };
+
+    useEffect(() => { /* Signature Removed */ }, [showForm]);
+
+    return (
+        <div className="space-y-6">
+            <div className="flex justify-between items-center">
+                <div>
+                    <h2 className="text-2xl font-bold text-slate-900 tracking-tight">OS de Obra</h2>
+                    <p className="text-slate-500 text-sm">GestÃ£o de reformas e construÃ§Ãµes.</p>
+                </div>
+                <button onClick={() => {
+                    setShowForm(true);
+                    setActiveTab('details');
+                    setEditingOrderId(null);
+                    setSelectedCustomerId('');
+                    setItems([]);
+                    setOsTitle('Reforma / Obra');
+                    setDiagnosis('');
+                    setDescriptionBlocks([]);
+                    setPaymentTerms('');
+                    setDeliveryTime('');
+                    setContractPrice(0);
+                    setTaxRate(0);
+                    setBdiRate(0);
+                }} className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold shadow-2xl shadow-blue-100 hover:bg-blue-700 transition-all flex items-center gap-2">
+                    <Plus className="w-5 h-5" /> Nova Obra
+                </button>
+            </div>
+            <div className="bg-white p-4 rounded-[1.5rem] border shadow-sm">
+                <div className="relative">
+                    <Search className="absolute left-4 top-3 w-4 h-4 text-slate-400" />
+                    <input type="text" placeholder="Buscar por cliente ou obra..." className="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 transition-all" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+                </div>
+            </div>
+
+            <div className="bg-white rounded-[2rem] border overflow-hidden shadow-sm overflow-x-auto">
+                <table className="w-full text-left">
+                    <thead className="bg-slate-50 text-[10px] font-black uppercase text-slate-400 border-b">
+                        <tr><th className="px-8 py-5">OS #</th><th className="px-8 py-5">CLIENTE</th><th className="px-8 py-5">OBRA / DESCRIÃ‡ÃƒO</th><th className="px-8 py-5 text-right">AÃ‡Ã•ES</th></tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                        {activeOrders.map(order => (
+                            <tr key={order.id} className="hover:bg-slate-50 group transition-all">
+                                <td className="px-8 py-5 text-xs font-mono font-black text-blue-600">{order.id}</td>
+                                <td className="px-8 py-5 text-sm font-black uppercase text-slate-900">{order.customerName}</td>
+                                <td className="px-8 py-5 text-xs font-bold text-slate-400 uppercase">{order.description}</td>
+                                <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button onClick={() => handleDownloadPDF(order)} className="p-2 text-slate-400 hover:text-emerald-500 transition-colors" title="Baixar Contrato"><FileDown className="w-4 h-4" /></button>
+                                    <button onClick={() => handlePrintContract(order)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Gerar Contrato"><ScrollText className="w-4 h-4" /></button>
+                                    <button onClick={() => { setSelectedOrderForReport(order); setShowReportTypeModal(true); }} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="RelatÃ³rio de Obra"><FileText className="w-4 h-4" /></button>
+                                    <button onClick={() => handlePrintOS(order)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Imprimir OS"><Printer className="w-4 h-4" /></button>
+                                    <button onClick={() => {
+                                        setEditingOrderId(order.id);
+                                        setSelectedCustomerId(order.customerId);
+                                        setItems(order.costItems || []); // Load COST items (empty initially)
+                                        setOsTitle(order.description);
+                                        setDiagnosis(order.serviceDescription || '');
+                                        setDeliveryDate(order.dueDate);
+                                        setDescriptionBlocks(order.descriptionBlocks || []);
+                                        setPaymentTerms(order.paymentTerms || '');
+                                        setDeliveryTime(order.deliveryTime || '');
+                                        const calculatedTotal = order.items?.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0) || 0;
+                                        setContractPrice(order.contractPrice || order.totalAmount || calculatedTotal || 0);
+                                        setTaxRate(order.taxRate || 0);
+                                        setBdiRate(order.bdiRate || 0);
+                                        setActiveTab('financial');
+                                        setShowForm(true);
+                                    }} className="p-2 text-slate-400 hover:text-emerald-600 transition-colors" title="GestÃ£o Financeira"><Wallet className="w-4 h-4" /></button>
+                                    <button onClick={() => {
+                                        setEditingOrderId(order.id);
+                                        setSelectedCustomerId(order.customerId);
+                                        setItems(order.costItems || []); // Load COST items (empty initially)
+                                        setOsTitle(order.description);
+                                        setDiagnosis(order.serviceDescription || '');
+                                        setDeliveryDate(order.dueDate);
+                                        setDescriptionBlocks(order.descriptionBlocks || []);
+                                        setPaymentTerms(order.paymentTerms || '');
+                                        setDeliveryTime(order.deliveryTime || '');
+                                        const calculatedTotal = order.items?.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0) || 0;
+                                        setContractPrice(order.contractPrice || order.totalAmount || calculatedTotal || 0);
+                                        setTaxRate(order.taxRate || 0);
+                                        setBdiRate(order.bdiRate || 0);
+                                        setShowForm(true);
+                                    }} className="p-2 text-slate-400 hover:text-blue-600 transition-colors"><Pencil className="w-4 h-4" /></button>
+                                    <button onClick={async () => {
+                                        if (confirm("Excluir esta OS de Obra?")) {
+                                            const idToDelete = order.id;
+                                            setOrders(p => p.filter(x => x.id !== idToDelete));
+                                            await db.remove('orders', idToDelete);
+                                            notify("OS removida.");
+                                        }
+                                    }} className="p-2 text-rose-300 hover:text-rose-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+            {showForm && (
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+                    <div className="bg-slate-50 w-full max-w-[1240px] h-[95vh] rounded-[2.5rem] shadow-[0_0_80px_rgba(0,0,0,0.2)] overflow-hidden flex flex-col animate-in zoom-in-95">
+                        <div className="bg-white px-8 py-5 border-b flex justify-between items-center shrink-0">
+                            <div className="flex items-center gap-4">
+                                <div className="bg-slate-900 p-2.5 rounded-xl text-white shadow-xl shadow-slate-200"><HardHat className="w-5 h-5" /></div>
+                                <div>
+                                    <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter mb-0.5">{editingOrderId ? `Editando Obra ${editingOrderId} ` : 'Nova OS de Obra'}</h3>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[10px] font-black uppercase tracking-widest bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md">ConstruÃ§Ã£o Civil</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button onClick={() => setShowForm(false)} className="bg-slate-100 hover:bg-slate-200 p-2 rounded-full transition-colors"><X className="w-6 h-6 text-slate-400" /></button>
                         </div>
 
-                        {/* Modal Tabs */}
-                        <div className="px-10 py-4 bg-slate-50/50 flex gap-4 border-b shrink-0">
-                            <button onClick={() => setActiveTab('details')} className={`flex items - center gap - 2 px - 6 py - 2.5 rounded - xl text - [10px] font - black uppercase tracking - widest transition - all ${ activeTab === 'details' ? 'bg-slate-900 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-100' } `}>
-                                <ScrollText className="w-4 h-4" /> Dados Gerais
-                            </button>
-                            <button onClick={() => setActiveTab('financial')} className={`flex items - center gap - 2 px - 6 py - 2.5 rounded - xl text - [10px] font - black uppercase tracking - widest transition - all ${ activeTab === 'financial' ? 'bg-slate-900 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-100' } `}>
-                                <Wallet className="w-4 h-4" /> Gestão Financeira
-                            </button>
-                        </div>
+                        {/* Tabs */}
+                        {editingOrderId && (
+                            <div className="bg-white px-8 border-b flex gap-6">
+                                <button onClick={() => setActiveTab('details')} className={`py-3 text-xs font-black uppercase tracking-widest border-b-2 transition-colors ${activeTab === 'details' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>Detalhes da Obra</button>
+                                <button onClick={() => setActiveTab('financial')} className={`py-3 text-xs font-black uppercase tracking-widest border-b-2 transition-colors ${activeTab === 'financial' ? 'border-purple-600 text-purple-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>GestÃ£o Financeira</button>
+                            </div>
+                        )}
 
-                        {/* Modal Body */}
-                        <div className="flex-1 overflow-y-auto no-scrollbar">
-                            <div className="p-10">
+                        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+                            <div className="flex-1 overflow-y-auto p-8 space-y-6 bg-[#f8fafc] no-scrollbar">
                                 {activeTab === 'details' ? (
-                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                                        <div className="space-y-8">
-                                            <div className="space-y-4">
-                                                <div className="flex justify-between items-center">
-                                                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Cliente</label>
-                                                    <button onClick={() => setShowFullClientForm(true)} className="flex items-center gap-2 text-[10px] font-black text-blue-600 hover:text-blue-700 uppercase tracking-widest"><UserPlus className="w-4 h-4" /> Novo Cliente</button>
+                                    <>
+                                        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div>
+                                                    <div className="flex justify-between items-center mb-2"><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest ml-1">Cliente</label><button onClick={() => setShowFullClientForm(true)} className="text-blue-600 text-[9px] font-black uppercase flex items-center gap-1 hover:underline"><UserPlus className="w-3 h-3" /> Novo</button></div>
+                                                    <select className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all custom-select" value={selectedCustomerId} onChange={e => setSelectedCustomerId(e.target.value)}><option value="">Selecione...</option>{customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
                                                 </div>
-                                                <select
-                                                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-4 px-6 text-sm font-bold text-slate-900 uppercase outline-none focus:border-slate-900 transition-all shadow-sm appearance-none cursor-pointer"
-                                                    value={selectedCustomerId}
-                                                    onChange={(e) => setSelectedCustomerId(e.target.value)}
-                                                >
-                                                    <option value="">Selecione o Cliente...</option>
-                                                    {customers.map(c => <option key={c.id} value={c.id} className="font-bold">{c.name}</option>)}
-                                                </select>
+                                                <div><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-2 block ml-1">Valor Fechado do Contrato (Receita)</label><input type="number" placeholder="R$ 0,00" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400" value={contractPrice} onChange={e => setContractPrice(Number(e.target.value))} /></div>
+                                                <div className="md:col-span-2"><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-2 block ml-1">TÃ­tulo da Obra</label><input type="text" placeholder="Ex: Reforma da Cozinha" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400" value={osTitle} onChange={e => setOsTitle(e.target.value)} /></div>
                                             </div>
+                                        </div>
 
-                                            <div className="grid grid-cols-2 gap-6">
-                                                <div className="space-y-4">
-                                                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Valor do Contrato (R$)</label>
-                                                    <div className="relative group">
-                                                        <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none text-blue-600 font-bold">R$</div>
-                                                        <input
-                                                            type="number"
-                                                            className="w-full bg-blue-50/30 border-2 border-blue-100 rounded-2xl py-4 pl-14 pr-6 text-base font-black text-blue-900 outline-none focus:border-blue-500 transition-all shadow-sm"
-                                                            value={contractPrice}
-                                                            onChange={(e) => setContractPrice(Number(e.target.value))}
-                                                            placeholder="0,00"
-                                                        />
-                                                    </div>
-                                                </div>
-                                                <div className="space-y-4">
-                                                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Entrega (Prazo)</label>
-                                                    <input
-                                                        type="date"
-                                                        className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:border-slate-900 transition-all shadow-sm"
-                                                        value={deliveryDate}
-                                                        onChange={(e) => setDeliveryDate(e.target.value)}
-                                                    />
-                                                </div>
-                                            </div>
-
-                                            <div className="space-y-4">
-                                                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Observações Técnicas</label>
+                                        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                                            <div>
+                                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">ObservaÃ§Ãµes TÃ©cnicas e Escopo Detalhado</label>
                                                 <RichTextEditor
-                                                    content={diagnosis}
+                                                    value={diagnosis}
                                                     onChange={setDiagnosis}
-                                                    placeholder="DESCREVA O ESCOPO TÉCNICO E DETALHES IMPORTANTES DA OBRA..."
+                                                    placeholder="Descreva os serviÃ§os a serem executados por extenso..."
                                                 />
                                             </div>
                                         </div>
 
-                                        <div className="space-y-8">
-                                            <div className="space-y-4">
-                                                <div className="flex justify-between items-center">
-                                                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Fotos / Anexos</label>
-                                                    <div className="flex gap-2">
-                                                        <button onClick={addImageBlock} className="p-2.5 bg-slate-900 text-white rounded-xl shadow-lg hover:scale-105 transition-all"><ImageIcon className="w-4 h-4" /></button>
-                                                        <button onClick={addTextBlock} className="p-2.5 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 transition-all"><Type className="w-4 h-4" /></button>
-                                                        <button onClick={addPageBreak} className="p-2.5 bg-amber-50 text-amber-600 rounded-xl hover:bg-amber-100 transition-all" title="Add Quebra de Página"><Zap className="w-4 h-4" /></button>
+                                        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
+                                            <div className="flex justify-between items-center">
+                                                <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-widest border-b pb-2 grow mr-6">FOTOS E ANEXOS DA OBRA</h4>
+                                            </div>
+                                            {descriptionBlocks.length === 0 && (
+                                                <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-[2rem] p-8 flex flex-col items-center justify-center gap-4 group hover:border-blue-400 transition-colors cursor-pointer" onClick={addTextBlock}>
+                                                    <div className="flex gap-4">
+                                                        <button onClick={(e) => { e.stopPropagation(); addTextBlock(); }} className="bg-blue-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-blue-100 hover:scale-105 transition-all"><Type className="w-4 h-4" /> + Iniciar com Texto</button>
+                                                        <button onClick={(e) => { e.stopPropagation(); addImageBlock(); }} className="bg-emerald-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-emerald-100 hover:scale-105 transition-all"><ImageIcon className="w-4 h-4" /> + Iniciar com Imagem</button>
                                                     </div>
+                                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 animate-pulse">Comece a montar o relatÃ³rio da obra acima</p>
                                                 </div>
-
-                                                <div className="space-y-6 max-h-[600px] overflow-y-auto pr-4 no-scrollbar">
-                                                    {descriptionBlocks.map(block => (
-                                                        <div key={block.id} className="group relative bg-slate-50 rounded-3xl p-6 border-2 border-slate-100 hover:border-blue-200 transition-all">
-                                                            <button onClick={() => setDescriptionBlocks(prev => prev.filter(b => b.id !== block.id))} className="absolute -top-3 -right-3 bg-white border-2 border-slate-100 text-rose-500 p-2 rounded-xl shadow-lg opacity-0 group-hover:opacity-100 transition-all"><X className="w-4 h-4" /></button>
-
-                                                            {block.type === 'text' && (
-                                                                <textarea
-                                                                    className="w-full bg-transparent text-sm font-bold text-slate-700 placeholder-slate-300 outline-none min-h-[100px] resize-none"
-                                                                    value={block.content}
-                                                                    onChange={(e) => updateBlockContent(block.id, e.target.value)}
-                                                                    placeholder="NOTAS ADICIONAIS..."
-                                                                />
-                                                            )}
-
-                                                            {block.type === 'image' && (
-                                                                <div className="flex flex-col items-center gap-4">
-                                                                    {block.content ? (
-                                                                        <img src={block.content} className="max-h-[250px] rounded-2xl object-contain shadow-md" alt="Anexo" />
-                                                                    ) : (
-                                                                        <div className="w-full h-40 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center p-6 bg-white/50">
-                                                                            <Upload className="w-8 h-8 text-slate-300 mb-2" />
-                                                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Upload de Foto da Obra</span>
-                                                                        </div>
-                                                                    )}
-                                                                    <input type="file" accept="image/*" onChange={(e) => handleImageUpload(block.id, e)} className="text-[10px] font-black text-slate-400 file:bg-slate-900 file:text-white file:border-0 file:px-4 file:py-2 file:rounded-lg file:mr-4 file:cursor-pointer" />
-                                                                </div>
-                                                            )}
-
-                                                            {block.type === 'page-break' && (
-                                                                <div className="flex items-center justify-center gap-4 py-2 opacity-50">
-                                                                    <div className="h-[1px] flex-1 bg-amber-300"></div>
-                                                                    <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest whitespace-nowrap">QUEBRA DE PÃ GINA PDF</span>
-                                                                    <div className="h-[1px] flex-1 bg-amber-300"></div>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    ))}
-                                                    {descriptionBlocks.length === 0 && (
-                                                        <div className="text-center py-20 opacity-20">
-                                                            <ImageIcon className="w-16 h-16 mx-auto mb-4" />
-                                                            <p className="text-xs font-black uppercase tracking-widest">Nenhuma foto ou anexo adicionado</p>
+                                            )}
+                                            {descriptionBlocks.map((block) => (
+                                                <div key={block.id} className="relative group">
+                                                    {block.type === 'text' && (
+                                                        <div className="flex-1">
+                                                            <RichTextEditor
+                                                                id={block.id}
+                                                                value={block.content}
+                                                                onChange={(content) => updateBlockContent(block.id, content)}
+                                                                onAddText={addTextBlock}
+                                                                onAddImage={addImageBlock}
+                                                                placeholder="Detalhes da foto ou texto..."
+                                                            />
                                                         </div>
                                                     )}
+                                                    {block.type === 'image' && (
+                                                        <div className="w-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center gap-2">
+                                                            {block.content ? (
+                                                                <div className="relative max-w-[200px]"><img src={block.content} className="w-full h-auto rounded-lg shadow-lg" /><button onClick={() => updateBlockContent(block.id, '')} className="absolute -top-2 -right-2 bg-rose-500 text-white p-1.5 rounded-full"><Trash2 className="w-3 h-3" /></button></div>
+                                                            ) : (
+                                                                <label className="cursor-pointer flex flex-col items-center gap-1"><Upload className="w-5 h-5 text-blue-500" /><span className="text-[8px] font-black text-slate-400 uppercase">Subir Foto</span><input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(block.id, e)} /></label>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                    <button onClick={() => setDescriptionBlocks(descriptionBlocks.filter(b => b.id !== block.id))} className="absolute -top-2 -right-2 bg-slate-200 text-slate-500 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><X className="w-3 h-3" /></button>
                                                 </div>
-                                            </div>
+                                            ))}
                                         </div>
-                                    </div>
+                                    </>
                                 ) : (
-                                    <div className="animate-in slide-in-from-right duration-500">
-                                        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-10">
-                                            <InfoCard title="Receita (Contrato)" value={revenue} color="emerald" icon={<ScrollText />} />
-                                            <InfoCard title="Custo Orçado" value={plannedCost} color="blue" icon={<HardHat />} />
-                                            <InfoCard title="Custo Real (Gasto)" value={totalExpenses} color="rose" icon={<Wallet />} />
-                                            <div className={`p - 6 rounded - [2rem] border - 2 shadow - xl ${ actualProfit >= 0 ? 'bg-slate-900 border-slate-800' : 'bg-rose-900 border-rose-800' } `}>
-                                                <div className="flex justify-between items-start mb-4">
-                                                    <div className={`p - 2 rounded - xl ${ actualProfit >= 0 ? 'bg-slate-800' : 'bg-rose-800' } `}><Zap className="w-5 h-5 text-white" /></div>
-                                                    <div className={`px - 3 py - 1 rounded - full text - [9px] font - black uppercase tracking - widest ${ actualProfit >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-white/10 text-white' } `}>Lucro Atual</div>
-                                                </div>
-                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Resultado Líquido</p>
-                                                <p className="text-2xl font-black text-white leading-none">R$ {actualProfit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                                            </div>
+                                    <div className="space-y-6">
+                                        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+                                            <InfoCard
+                                                label="Valor do OrÃ§amento"
+                                                value={`R$ ${contractPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                                                className="bg-white"
+                                                icon={<div className="absolute top-0 left-0 w-full h-1 bg-blue-500"></div>}
+                                            />
+                                            <InfoCard
+                                                label="Despesas Previstas"
+                                                value={`R$ ${plannedCost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                                                className="bg-white"
+                                                icon={<div className="absolute top-0 left-0 w-full h-1 bg-amber-500"></div>}
+                                            />
+                                            <InfoCard
+                                                label="Despesas Reais"
+                                                value={`R$ ${totalExpenses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                                                className="bg-white"
+                                                icon={<div className="absolute top-0 left-0 w-full h-1 bg-rose-500"></div>}
+                                            />
+                                            <InfoCard
+                                                label="Lucro Previsto"
+                                                value={`R$ ${plannedProfit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                                                className="bg-white"
+                                                icon={<div className="absolute top-0 left-0 w-full h-1 bg-indigo-500"></div>}
+                                            />
+                                            <InfoCard
+                                                label="Lucro Real"
+                                                value={`R$ ${actualProfit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                                                className={actualProfit >= 0 ? 'bg-emerald-50/50 border-emerald-100' : 'bg-rose-50/50 border-rose-100'}
+                                                icon={<div className={`absolute top-0 left-0 w-full h-1 ${actualProfit >= 0 ? 'bg-emerald-500' : 'bg-rose-500'}`}></div>}
+                                                labelClassName={actualProfit >= 0 ? 'text-emerald-600' : 'text-rose-600'}
+                                                valueClassName={actualProfit >= 0 ? 'text-emerald-700' : 'text-rose-700'}
+                                            />
                                         </div>
 
-                                        <div className="bg-white rounded-[2.5rem] border-2 border-slate-100 p-8 shadow-sm">
-                                            <div className="mb-8 grid grid-cols-12 gap-6">
-                                                <div className="col-span-4">
-                                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Descrição do Custo</label>
-                                                    <input type="text" className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-3 px-6 text-xs font-bold text-slate-900 uppercase block outline-none focus:border-slate-900 transition-all" value={currentDesc} onChange={e => setCurrentDesc(e.target.value)} placeholder="EX: CIMENTO, MÃO DE OBRA PEDREIRO..." />
-                                                </div>
-                                                <div className="col-span-1">
-                                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block text-center">Qtde</label>
-                                                    <input type="number" className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-3 px-4 text-xs font-bold text-slate-900 text-center block outline-none focus:border-slate-900 transition-all" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} />
-                                                </div>
-                                                <div className="col-span-1">
-                                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block text-center">Unid</label>
-                                                    <input type="text" className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-3 px-2 text-xs font-bold text-slate-900 text-center block outline-none focus:border-slate-900 transition-all uppercase" value={currentUnit} onChange={e => setCurrentUnit(e.target.value)} />
-                                                </div>
-                                                <div className="col-span-2">
-                                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block text-right">Vlr Orçado</label>
-                                                    <input type="number" className="w-full bg-blue-50/50 border-2 border-blue-100 rounded-2xl py-3 px-6 text-xs font-bold text-blue-900 text-right block outline-none focus:border-blue-500 transition-all" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} />
-                                                </div>
-                                                <div className="col-span-2">
-                                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block text-right">Vlr Realizado</label>
-                                                    <input type="number" className="w-full bg-rose-50/50 border-2 border-rose-100 rounded-2xl py-3 px-6 text-xs font-bold text-rose-900 text-right block outline-none focus:border-rose-500 transition-all" value={currentActual === '' ? '' : currentActual} onChange={e => setCurrentActual(e.target.value === '' ? '' : Number(e.target.value))} placeholder="Total gasto" />
-                                                </div>
-                                                <div className="col-span-2 flex items-end">
-                                                    <button onClick={handleAddItem} className="w-full bg-slate-900 text-white rounded-2xl py-3 text-xs font-black uppercase tracking-widest hover:bg-slate-800 hover:scale-105 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2"><Plus className="w-4 h-4" /> Adicionar</button>
-                                                </div>
-                                            </div>
+                                        <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                                            <div className="flex justify-between items-center mb-4"><h1 className="text-xs font-black text-slate-900 uppercase tracking-tight">1. Planejamento de Custos e Acompanhamento</h1></div>
+                                            <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
+                                                <div className="md:col-span-3"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">DescriÃ§Ã£o</label><input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentDesc} onChange={e => setCurrentDesc(e.target.value)} placeholder="Ex: Tinta, Cimento..." /></div>
+                                                <div className="md:col-span-1 text-center"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Qtd Est.</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-center" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} /></div>
+                                                <div className="md:col-span-1 text-center"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">UN</label><input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-center" value={currentUnit} onChange={e => setCurrentUnit(e.target.value)} placeholder="un" /></div>
+                                                <div className="md:col-span-1 text-right"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">VL. PROJ</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-right" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} /></div>
+                                                <div className="md:col-span-1 pl-1 relative"><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-1.5 block ml-1">TOTAL PROJ</label><div className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold text-blue-700 text-right min-h-[42px] flex items-center justify-end">R$ {((currentQty || 0) * (currentPrice || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div><div className="absolute -right-1 top-4 bottom-0 w-[1px] bg-slate-200 hidden md:block"></div></div>
 
-                                            <div className="mb-4 grid grid-cols-12 gap-1 px-3">
-                                                <div className="col-span-5 text-center border-b border-blue-100 pb-1 mx-2"><span className="text-[9px] font-black text-blue-600 uppercase tracking-widest">PLANEJADO</span></div>
+                                                <div className="md:col-span-1 text-center"><label className="text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1.5 block ml-1">Qtd Real</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-center" value={currentActualQty} onChange={e => setCurrentActualQty(Number(e.target.value))} /></div>
+                                                <div className="md:col-span-1 text-center"><label className="text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1.5 block ml-1">UN</label><div className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-center min-h-[42px] flex items-center justify-center uppercase">{currentUnit || 'un'}</div></div>
+                                                <div className="md:col-span-1 text-right"><label className="text-[9px] font-black text-rose-400 uppercase tracking-widest mb-1.5 block ml-1">VL. REAL</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-right" value={currentActualPrice} onChange={e => setCurrentActualPrice(Number(e.target.value))} /></div>
+                                                <div className="md:col-span-1 pl-1"><label className="text-[9px] font-black text-amber-600 uppercase tracking-widest mb-1.5 block ml-1">TOTAL REAL</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none text-right" value={currentActual || ((currentActualQty || 0) * (currentActualPrice || 0)) || ''} onChange={e => setCurrentActual(e.target.value === '' ? 0 : Number(e.target.value))} /></div>
+                                                <div className="md:col-span-1"><button onClick={handleAddItem} className="bg-slate-900 text-white w-full h-[42px] rounded-xl flex items-center justify-center hover:bg-slate-800 transition-colors shadow-lg font-bold"><Plus className="w-5 h-5" /></button></div>
+                                            </div>
+                                            <div className="mt-6 mb-1 grid grid-cols-12 gap-2 px-3">
+                                                <div className="col-span-2"></div>
+                                                <div className="col-span-4 text-center border-b border-slate-200 pb-1 mx-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">PLANEJADO</span></div>
                                                 <div className="col-span-5 text-center border-b border-rose-100 pb-1 mx-2"><span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">REALIZADO</span></div>
                                                 <div className="col-span-1"></div>
                                             </div>
                                             <div className="mb-2 grid grid-cols-12 gap-1 px-3">
-                                                <div className="col-span-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">DESCRIÇÃO</span></div>
+                                                <div className="col-span-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">DESCRIÃ‡ÃƒO</span></div>
                                                 <div className="col-span-1 text-center"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">QTD</span></div>
                                                 <div className="col-span-1 text-center"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">UN</span></div>
                                                 <div className="col-span-1 text-right pr-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">VL. PROJ</span></div>
@@ -825,14 +1155,14 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                             <input type="text" className="w-full bg-transparent text-xs font-bold text-slate-400 outline-none text-center uppercase" value={item.unit || 'un'} onChange={e => updateItem(item.id, 'unit', e.target.value)} />
                                                         </div>
                                                         <div className="col-span-1">
-                                                            <div className="flex items-center justify-end gap-1" onClick={() => setActiveEditField(`${ item.id } -price`)}>
+                                                            <div className="flex items-center justify-end gap-1" onClick={() => setActiveEditField(`${item.id}-price`)}>
                                                                 <span className="text-xs text-blue-600 font-bold">R$</span>
-                                                                {activeEditField === `${ item.id } -price` ? (
+                                                                {activeEditField === `${item.id}-price` ? (
                                                                     <input
                                                                         autoFocus
                                                                         type="number"
                                                                         className="bg-transparent text-xs font-bold text-blue-600 outline-none text-right appearance-none"
-                                                                        style={{ width: `${ (item.unitPrice.toString().length + 2) * 8 } px` }}
+                                                                        style={{ width: `${(item.unitPrice.toString().length + 2) * 8}px` }}
                                                                         value={item.unitPrice}
                                                                         onChange={e => updateItem(item.id, 'unitPrice', Number(e.target.value))}
                                                                         onBlur={() => setActiveEditField(null)}
@@ -855,14 +1185,14 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                             <span className="text-[10px] font-bold text-slate-400 uppercase">{item.unit || 'un'}</span>
                                                         </div>
                                                         <div className="col-span-1">
-                                                            <div className="flex items-center justify-end gap-1" onClick={() => setActiveEditField(`${ item.id } -actualPrice`)}>
+                                                            <div className="flex items-center justify-end gap-1" onClick={() => setActiveEditField(`${item.id}-actualPrice`)}>
                                                                 <span className="text-xs text-amber-700 font-bold">R$</span>
-                                                                {activeEditField === `${ item.id } -actualPrice` ? (
+                                                                {activeEditField === `${item.id}-actualPrice` ? (
                                                                     <input
                                                                         autoFocus
                                                                         type="number"
                                                                         className="bg-transparent text-xs font-bold text-amber-700 outline-none text-right appearance-none"
-                                                                        style={{ width: `${ ((item.actualUnitPrice || 0).toString().length + 2) * 8 } px` }}
+                                                                        style={{ width: `${((item.actualUnitPrice || 0).toString().length + 2) * 8}px` }}
                                                                         value={item.actualUnitPrice || 0}
                                                                         onChange={e => updateItem(item.id, 'actualUnitPrice', Number(e.target.value))}
                                                                         onBlur={() => setActiveEditField(null)}
@@ -890,8 +1220,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         </div>
 
                         <div className="bg-white px-8 py-5 border-t flex justify-end shrink-0">
-                            <button onClick={handleSaveOS} disabled={isSaving} className={`bg - slate - 900 text - white px - 12 py - 4 rounded - 2xl font - black uppercase tracking - widest text - xs shadow - xl shadow - slate - 200 hover: shadow - 2xl transition - all flex items - center justify - center gap - 3 ${ isSaving ? 'opacity-50 cursor-not-allowed' : '' } `}>
-                                <Save className={`w - 4 h - 4 ${ isSaving ? 'animate-pulse' : '' } `} /> {isSaving ? 'Salvando...' : 'Salvar OS de Obra'}
+                            <button onClick={handleSaveOS} disabled={isSaving} className={`bg-slate-900 text-white px-12 py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-slate-200 hover:shadow-2xl transition-all flex items-center justify-center gap-3 ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                <Save className={`w-4 h-4 ${isSaving ? 'animate-pulse' : ''}`} /> {isSaving ? 'Salvando...' : 'Salvar OS de Obra'}
                             </button>
                         </div>
                     </div>
@@ -926,7 +1256,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl p-8 transform animate-in zoom-in-95 duration-200">
                             <div className="flex justify-between items-start mb-6">
                                 <div>
-                                    <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase">Tipo de Relatório</h3>
+                                    <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase">Tipo de RelatÃ³rio</h3>
                                     <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">Selecione para imprimir</p>
                                 </div>
                                 <button onClick={() => setShowReportTypeModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X className="w-5 h-5 text-slate-400" /></button>
@@ -941,8 +1271,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                         <ScrollText className="w-6 h-6" />
                                     </div>
                                     <div>
-                                        <h4 className="font-black text-blue-900 group-hover:text-white uppercase text-sm tracking-tight">RELATÓRIO DO ESTIMADO</h4>
-                                        <p className="text-blue-600/70 group-hover:text-white/80 text-[10px] font-bold uppercase">Apenas planejamento e custos orçados</p>
+                                        <h4 className="font-black text-blue-900 group-hover:text-white uppercase text-sm tracking-tight">RELATÃ“RIO DO ESTIMADO</h4>
+                                        <p className="text-blue-600/70 group-hover:text-white/80 text-[10px] font-bold uppercase">Apenas planejamento e custos orÃ§ados</p>
                                     </div>
                                 </button>
 
@@ -954,8 +1284,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                         <CheckCircle className="w-6 h-6" />
                                     </div>
                                     <div>
-                                        <h4 className="font-black text-emerald-900 group-hover:text-white uppercase text-sm tracking-tight">RELATÓRIO DO REAL</h4>
-                                        <p className="text-emerald-600/70 group-hover:text-white/80 text-[10px] font-bold uppercase">Custos orçados vs Realizados e Resultado</p>
+                                        <h4 className="font-black text-emerald-900 group-hover:text-white uppercase text-sm tracking-tight">RELATÃ“RIO DO REAL</h4>
+                                        <p className="text-emerald-600/70 group-hover:text-white/80 text-[10px] font-bold uppercase">Custos orÃ§ados vs Realizados e Resultado</p>
                                     </div>
                                 </button>
                             </div>
@@ -972,3 +1302,556 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 };
 
 export default WorkOrderManager;
+
+
+```
+```diff:usePrintOS.ts
+import { ServiceOrder, CompanyProfile, Customer } from '../types';
+import { financeUtils } from '../services/financeUtils';
+
+export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
+    const handlePrintOS = (order: ServiceOrder) => {
+        const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, address: 'NÃ£o informado', document: 'N/A' };
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) return;
+
+        const formatDate = (dateStr: string) => {
+            try {
+                const d = new Date(dateStr);
+                return isNaN(d.getTime()) ? new Date().toLocaleDateString('pt-BR') : d.toLocaleDateString('pt-BR');
+            } catch {
+                return new Date().toLocaleDateString('pt-BR');
+            }
+        };
+
+        const { subtotal, bdiValue, taxValue, finalTotal } = financeUtils.getDetailedFinancials(order);
+
+        const itemFontBase = company.itemsFontSize || 12;
+
+        const itemsHtml = order.items.map((item) => {
+            const total = item.quantity * item.unitPrice;
+            return `
+      <tr style="border-bottom: 1px solid #f1f5f9;">
+        <td style="padding: 10px 0; text-align: left; vertical-align: middle;">
+            <div style="font-weight: 700; text-transform: uppercase; font-size: ${itemFontBase}px; color: #0f172a;">${item.description}</div>
+        </td>
+        <td style="padding: 10px 0; text-align: center; vertical-align: middle; color: #64748b; font-size: ${Math.max(8, itemFontBase - 1)}px; font-weight: 700; text-transform: uppercase;">${item.type || 'SERV'}</td>
+        <td style="padding: 10px 0; text-align: center; vertical-align: middle; color: #0f172a; font-size: ${itemFontBase}px; font-weight: 700;">${item.quantity} ${item.unit || 'un'}</td>
+        <td style="padding: 10px 0; text-align: right; vertical-align: middle; color: #64748b; font-size: ${itemFontBase}px; font-weight: 700;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        <td style="padding: 10px 0; text-align: right; vertical-align: middle; font-weight: 800; font-size: ${itemFontBase + 1}px; color: #0f172a;">R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+      </tr>`;
+        }).join('');
+
+        const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>OS - ${order.id.replace('OS-', '')} - ${order.description || 'Obra'}</title>
+         <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+        <style>
+           * { box-sizing: border-box; }
+           body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
+           @page { size: A4; margin: 0 !important; }
+           .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
+           .avoid-break { break-inside: avoid; page-break-inside: avoid; }
+           .info-box { background: #f8fafc; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; }
+           .info-label { font-size: 9px; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; display: block; }
+           .info-value { font-size: 11px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.3; }
+           .info-sub { font-size: 10px; color: #64748b; font-weight: 600; }
+           .section-title { font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 6px; border-bottom: 2px solid #e2e8f0; margin-bottom: 12px; }
+           @media screen { body { background: #f1f5f9; padding: 40px 0; } .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; } }
+           @media print { 
+             body { background: white !important; margin: 0 !important; } 
+             .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; width: 100% !important; padding-left: 20mm !important; padding-right: 20mm !important; } 
+             .no-screen { display: block !important; } 
+             .no-print { display: none !important; } 
+             .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: white !important; text-transform: uppercase; } 
+             .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; } 
+             
+             /* Styles for Rich Text (Quill) */
+             .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
+             .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
+             .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
+             .ql-editor-print strong { font-weight: bold !important; }
+             .ql-editor-print em { font-style: italic !important; }
+             .ql-editor-print .ql-align-center { text-align: center !important; }
+             .ql-editor-print .ql-align-right { text-align: right !important; }
+             .ql-editor-print .ql-align-justify { text-align: justify !important; }
+             .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; }
+           }
+        </style>
+      </head>
+      <body class="no-scrollbar">
+        <table style="width: 100%;">
+          <thead><tr><td style="height: ${company.printMarginTop || 15}mm;"><div style="height: ${company.printMarginTop || 15}mm; display: block;">&nbsp;</div></td></tr></thead>
+          <tbody><tr><td>
+            <div class="a4-container">
+               <div class="flex justify-between items-start mb-8 border-b-[3px] border-slate-900 pb-6">
+                   <div class="flex gap-6 items-center">
+                       <div style="width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;">
+                           ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:28px; color:#2563eb;">PO</div>'}
+                       </div>
+                       <div>
+                           <h1 class="text-2xl font-black text-slate-900 leading-none mb-2 uppercase tracking-tight">${company.name}</h1>
+                           <p class="text-[10px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">Ordem de ServiÃ§o de Obra / Reforma</p>
+                           <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tight">${company.cnpj || ''} | ${company.phone || ''}</p>
+                       </div>
+                   </div>
+                   <div class="text-right">
+                       <div class="bg-blue-600 text-white px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest mb-2 shadow-md inline-block">ORDEM DE SERVIÃ‡O</div>
+                       <p class="text-xl font-black text-[#0f172a] tracking-tighter mb-1 whitespace-nowrap">${order.id}</p>
+                       <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest text-right">ABERTURA: ${formatDate(order.createdAt)}</p>
+                   </div>
+               </div>
+
+               <div class="grid grid-cols-2 gap-4 mb-8">
+                   <div class="info-box">
+                       <span class="info-label">Cliente / Solicitante</span>
+                       <div class="info-value">${customer.name}</div>
+                       <div class="info-sub mt-1">${customer.document || 'Documento nÃ£o inf.'}</div>
+                   </div>
+                   <div class="info-box">
+                       <span class="info-label">Detalhes da Obra</span>
+                       <div class="info-value">${order.description}</div>
+                       <div class="info-sub mt-1">PrevisÃ£o: ${order.deliveryTime || order.dueDate ? formatDate(order.dueDate) : 'A combinar'}</div>
+                   </div>
+               </div>
+
+                ${order.descriptionBlocks && order.descriptionBlocks.length > 0 ? `
+                <div class="mb-10 print-description-content">
+                    <div class="section-title">DESCRIÃ‡ÃƒO TÃ‰CNICA</div>
+                    <div class="space-y-6">
+                        ${order.descriptionBlocks.map(block => {
+            if (block.type === 'text') {
+                return `<div class="text-slate-800 leading-relaxed text-justify font-medium ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px;">${block.content}</div>`;
+            } else if (block.type === 'image') {
+                return `<div style="break-inside: avoid; page-break-inside: avoid; margin: 20px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; object-fit: contain;"></div>`;
+            } else if (block.type === 'page-break') {
+                return `<div style="page-break-after: always; break-after: page; height: 0; margin: 0; padding: 0;"></div>`;
+            }
+            return '';
+        }).join('')}
+                    </div>
+                </div>` : ''}
+
+                 <div class="avoid-break mb-8 overflow-hidden">
+                    <div class="section-title">Detalhamento Financeiro</div>
+                    <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid #0f172a;">
+                                <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; width: 45%;">Item / DescriÃ§Ã£o</th>
+                                <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800; width: 10%;">Tipo</th>
+                                <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800; width: 15%;">Qtd</th>
+                                <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 15%;">UnitÃ¡rio</th>
+                                <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 15%;">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>${itemsHtml}</tbody>
+                    </table>
+
+                    <div style="display: flex !important; flex-direction: row !important; justify-content: flex-end !important; gap: 40px !important; align-items: flex-end !important; margin-top: 16px; margin-bottom: 24px; padding: 0 16px;">
+                        <div style="text-align: right;">
+                            <p style="font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px;">Subtotal</p>
+                            <p style="font-size: 10px; font-weight: 800; color: #0f172a; margin: 0;">R$ ${subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                        </div>
+                        ${order.bdiRate ? `
+                        <div style="text-align: right;">
+                            <p style="font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px;">BDI (${order.bdiRate}%)</p>
+                            <p style="font-size: 10px; font-weight: 800; color: #059669; margin: 0;">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                        </div>` : ''}
+                        ${order.taxRate ? `
+                        <div style="text-align: right;">
+                            <p style="font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px;">Impostos (${order.taxRate}%)</p>
+                            <p style="font-size: 10px; font-weight: 800; color: #2563eb; margin: 0;">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                        </div>` : ''}
+                    </div>
+
+                    <div class="bg-[#0f172a] text-white p-5 rounded-2xl shadow-xl mb-4" style="display: flex !important; flex-direction: row !important; justify-content: space-between !important; align-items: center !important;">
+                        <p style="font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; margin: 0; opacity: 0.8 !important;">INVESTIMENTO TOTAL:</p>
+                        <p style="font-size: 32px; font-weight: 900; letter-spacing: -0.05em; margin: 0 !important; line-height: 1 !important;">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    </div>
+                </div>
+
+                <div class="avoid-break mb-8" style="display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 16px !important;">
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 shadow-sm">
+                        <p class="text-blue-600 font-black text-[10px] uppercase tracking-widest mb-2" style="display: block;">Forma de Pagamento</p>
+                        <p class="text-slate-700 text-[${company.descriptionFontSize || 12}px] font-bold leading-relaxed">${order.paymentTerms || 'A combinar com o responsÃ¡vel.'}</p>
+                    </div>
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 shadow-sm">
+                        <p class="text-blue-600 font-black text-[10px] uppercase tracking-widest mb-2" style="display: block;">Prazo de Entrega / ExecuÃ§Ã£o</p>
+                        <p class="text-slate-700 text-[${company.descriptionFontSize || 12}px] font-bold leading-relaxed">${order.deliveryTime || 'Conforme cronograma da obra.'}</p>
+                    </div>
+                </div>
+
+                <div class="avoid-break mt-auto pt-8">
+                   <div style="display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 64px !important; padding: 0 40px !important;">
+                       <div class="text-center">
+                           <div style="border-top: 1px solid #cbd5e1; margin-bottom: 8px;"></div>
+                           <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">ResponsÃ¡vel TÃ©cnico</p>
+                           <p class="text-[10px] font-bold uppercase text-slate-900">${company.name}</p>
+                       </div>
+                        <div class="text-center relative">
+                            <div style="border-top: 1px solid #cbd5e1; margin-bottom: 8px;"></div>
+                            <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Assinatura do Cliente</p>
+                            <p class="text-[11px] font-bold uppercase text-slate-900">${order.customerName}</p>
+                        </div>
+                   </div>
+               </div>
+            </div>
+          </td></tr></tbody>
+          <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;"><div style="height: ${company.printMarginBottom || 15}mm; display: block;">&nbsp;</div></td></tr></tfoot>
+        </table>
+        <div class="print-footer no-screen"><span>PÃ¡gina 1 de 1</span></div>
+        <script>
+           function optimizePageBreaks() {
+             const root = document.querySelector('.print-description-content .space-y-6');
+             if (!root) return;
+
+             const allNodes = [];
+             Array.from(root.children).forEach(block => {
+               if (block.classList.contains('ql-editor-print')) {
+                  allNodes.push(...Array.from(block.children));
+               } else {
+                  allNodes.push(block);
+               }
+             });
+
+             for (let i = 0; i < allNodes.length - 1; i++) {
+               const el = allNodes[i];
+               let isTitle = false;
+               
+               if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
+               else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
+                 const text = el.innerText.trim();
+                 const isNumbered = /^\d+[\.\)]/.test(text);
+                 const isBold = el.querySelector('strong, b') || (el.style && parseInt(el.style.fontWeight) > 500) || el.tagName === 'STRONG';
+                 const isShort = text.length < 150;
+                 if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
+                   isTitle = true;
+                 }
+               }
+
+               if (isTitle) {
+                 const nodesToWrap = [el];
+                 let j = i + 1;
+                 while (j < allNodes.length && nodesToWrap.length < 3) {
+                   const next = allNodes[j];
+                   const nText = next.innerText.trim();
+                   const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') || 
+                                       (/^\d+[\.\)]/.test(nText) && (next.querySelector('strong, b') || nText === nText.toUpperCase()));
+                   if (nextIsTitle) break;
+                   nodesToWrap.push(next);
+                   j++;
+                 }
+
+                 if (nodesToWrap.length > 1) {
+                   const wrapper = document.createElement('div');
+                   wrapper.className = 'keep-together';
+                   el.parentNode.insertBefore(wrapper, el);
+                   nodesToWrap.forEach(node => wrapper.appendChild(node));
+                   i = j - 1;
+                 }
+               }
+             }
+           }
+           window.onload = function() { 
+             optimizePageBreaks();
+             setTimeout(() => { window.print(); window.close(); }, 1200); 
+           }
+        </script>
+      </body>
+      </html>`;
+        printWindow.document.write(html);
+        printWindow.document.close();
+    };
+
+    return { handlePrintOS };
+};
+===
+import { ServiceOrder, CompanyProfile, Customer } from '../types';
+import { financeUtils } from '../services/financeUtils';
+
+export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
+    const handlePrintOS = (order: ServiceOrder) => {
+        const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, address: 'NÃ£o informado', document: 'N/A' };
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) return;
+
+        const formatDate = (dateStr: string) => {
+            try {
+                const d = new Date(dateStr);
+                return isNaN(d.getTime()) ? new Date().toLocaleDateString('pt-BR') : d.toLocaleDateString('pt-BR');
+            } catch {
+                return new Date().toLocaleDateString('pt-BR');
+            }
+        };
+
+        const { subtotal, bdiValue, taxValue, finalTotal } = financeUtils.getDetailedFinancials(order);
+
+        const itemFontBase = company.itemsFontSize || 12;
+
+        const itemsHtml = order.items.map((item) => {
+            const total = item.quantity * item.unitPrice;
+            return `
+      <tr style="border-bottom: 1px solid #f1f5f9;">
+        <td style="padding: 10px 0; text-align: left; vertical-align: middle;">
+            <div style="font-weight: 700; text-transform: uppercase; font-size: ${itemFontBase}px; color: #0f172a;">${item.description}</div>
+        </td>
+        <td style="padding: 10px 0; text-align: center; vertical-align: middle; color: #64748b; font-size: ${Math.max(8, itemFontBase - 1)}px; font-weight: 700; text-transform: uppercase;">${item.type || 'SERV'}</td>
+        <td style="padding: 10px 0; text-align: center; vertical-align: middle; color: #0f172a; font-size: ${itemFontBase}px; font-weight: 700;">${item.quantity} ${item.unit || 'un'}</td>
+        <td style="padding: 10px 0; text-align: right; vertical-align: middle; color: #64748b; font-size: ${itemFontBase}px; font-weight: 700;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        <td style="padding: 10px 0; text-align: right; vertical-align: middle; font-weight: 800; font-size: ${itemFontBase + 1}px; color: #0f172a;">R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+      </tr>`;
+        }).join('');
+
+        const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>OS - ${order.id.replace('OS-', '')} - ${order.description || 'Obra'}</title>
+         <script src="https://cdn.tailwindcss.com"></script>
+              <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&family=Roboto:wght@400;700&family=Montserrat:wght@400;700&family=Open+Sans:wght@400;700&family=Lato:wght@400;700&family=Poppins:wght@400;700&family=Oswald:wght@400;700&family=Playfair+Display:wght@400;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+        <style>
+           * { box-sizing: border-box; }
+           body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
+           @page { size: A4; margin: 0 !important; }
+           .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
+           .avoid-break { break-inside: avoid; page-break-inside: avoid; }
+           .info-box { background: #f8fafc; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; }
+           .info-label { font-size: 9px; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; display: block; }
+           .info-value { font-size: 11px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.3; }
+           .info-sub { font-size: 10px; color: #64748b; font-weight: 600; }
+           .section-title { font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 6px; border-bottom: 2px solid #e2e8f0; margin-bottom: 12px; }
+           @media screen { body { background: #f1f5f9; padding: 40px 0; } .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; } }
+           @media print { 
+             body { background: white !important; margin: 0 !important; } 
+             .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; width: 100% !important; padding-left: 20mm !important; padding-right: 20mm !important; } 
+             .no-screen { display: block !important; } 
+             .no-print { display: none !important; } 
+             .print-footer { position: fixed; bottom: 0; left: 0; right: 0; padding-bottom: 5mm; text-align: center; font-size: 8px; font-weight: bold; color: white !important; text-transform: uppercase; } 
+              .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; } 
+             
+             /* Styles for Rich Text (Quill) */
+             .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
+             .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
+             .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
+             .ql-editor-print strong { font-weight: bold !important; }
+             .ql-editor-print em { font-style: italic !important; }
+             .ql-editor-print .ql-align-center { text-align: center !important; }
+             .ql-editor-print .ql-align-right { text-align: right !important; }
+             .ql-editor-print .ql-align-justify { text-align: justify !important; }
+
+              /* Font Classes for Print */
+              .ql-font-inter { font-family: 'Inter', sans-serif !important; }
+              .ql-font-arial { font-family: Arial, sans-serif !important; }
+              .ql-font-roboto { font-family: 'Roboto', sans-serif !important; }
+              .ql-font-serif { font-family: serif !important; }
+              .ql-font-monospace { font-family: monospace !important; }
+              .ql-font-montserrat { font-family: 'Montserrat', sans-serif !important; }
+              .ql-font-opensans { font-family: 'Open Sans', sans-serif !important; }
+              .ql-font-lato { font-family: 'Lato', sans-serif !important; }
+              .ql-font-poppins { font-family: 'Poppins', sans-serif !important; }
+              .ql-font-oswald { font-family: 'Oswald', sans-serif !important; }
+              .ql-font-playfair { font-family: 'Playfair Display', serif !important; }
+              .ql-font-nunito { font-family: 'Nunito', sans-serif !important; }
+
+              /* Size Classes for Print */
+              .ql-size-10px { font-size: 10px !important; }
+              .ql-size-12px { font-size: 12px !important; }
+              .ql-size-14px { font-size: 14px !important; }
+              .ql-size-16px { font-size: 16px !important; }
+              .ql-size-18px { font-size: 18px !important; }
+              .ql-size-20px { font-size: 20px !important; }
+              .ql-size-24px { font-size: 24px !important; }
+              .ql-size-32px { font-size: 32px !important; }
+              .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
+           }
+        </style>
+      </head>
+      <body class="no-scrollbar">
+        <table style="width: 100%;">
+          <thead><tr><td style="height: ${company.printMarginTop || 15}mm;"><div style="height: ${company.printMarginTop || 15}mm; display: block;">&nbsp;</div></td></tr></thead>
+          <tbody><tr><td>
+            <div class="a4-container">
+               <div class="flex justify-between items-start mb-8 border-b-[3px] border-slate-900 pb-6">
+                   <div class="flex gap-6 items-center">
+                       <div style="width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;">
+                           ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:28px; color:#2563eb;">PO</div>'}
+                       </div>
+                       <div>
+                           <h1 class="text-2xl font-black text-slate-900 leading-none mb-2 uppercase tracking-tight">${company.name}</h1>
+                           <p class="text-[10px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">Ordem de ServiÃ§o de Obra / Reforma</p>
+                           <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tight">${company.cnpj || ''} | ${company.phone || ''}</p>
+                       </div>
+                   </div>
+                   <div class="text-right">
+                       <div class="bg-blue-600 text-white px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest mb-2 shadow-md inline-block">ORDEM DE SERVIÃ‡O</div>
+                       <p class="text-xl font-black text-[#0f172a] tracking-tighter mb-1 whitespace-nowrap">${order.id}</p>
+                       <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest text-right">ABERTURA: ${formatDate(order.createdAt)}</p>
+                   </div>
+               </div>
+
+               <div class="grid grid-cols-2 gap-4 mb-8">
+                   <div class="info-box">
+                       <span class="info-label">Cliente / Solicitante</span>
+                       <div class="info-value">${customer.name}</div>
+                       <div class="info-sub mt-1">${customer.document || 'Documento nÃ£o inf.'}</div>
+                   </div>
+                   <div class="info-box">
+                       <span class="info-label">Detalhes da Obra</span>
+                       <div class="info-value">${order.description}</div>
+                       <div class="info-sub mt-1">PrevisÃ£o: ${order.deliveryTime || order.dueDate ? formatDate(order.dueDate) : 'A combinar'}</div>
+                   </div>
+               </div>
+
+                ${order.descriptionBlocks && order.descriptionBlocks.length > 0 ? `
+                <div class="mb-10 print-description-content">
+                    <div class="section-title">DESCRIÃ‡ÃƒO TÃ‰CNICA</div>
+                    <div class="space-y-6">
+                        ${order.descriptionBlocks.map(block => {
+            if (block.type === 'text') {
+                return `<div class="text-slate-800 leading-relaxed text-justify font-medium ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px;">${block.content}</div>`;
+            } else if (block.type === 'image') {
+                return `<div class="avoid-break" style="margin: 20px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; object-fit: contain; display: block;"></div>`;
+            } else if (block.type === 'page-break') {
+                return `<div style="page-break-after: always; break-after: page; height: 0; margin: 0; padding: 0;"></div>`;
+            }
+            return '';
+        }).join('')}
+                    </div>
+                </div>` : ''}
+
+                 <div class="avoid-break mb-8 overflow-hidden">
+                    <div class="section-title">Detalhamento Financeiro</div>
+                    <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid #0f172a;">
+                                <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; width: 45%;">Item / DescriÃ§Ã£o</th>
+                                <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800; width: 10%;">Tipo</th>
+                                <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800; width: 15%;">Qtd</th>
+                                <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 15%;">UnitÃ¡rio</th>
+                                <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 15%;">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>${itemsHtml}</tbody>
+                    </table>
+
+                    <div style="display: flex !important; flex-direction: row !important; justify-content: flex-end !important; gap: 40px !important; align-items: flex-end !important; margin-top: 16px; margin-bottom: 24px; padding: 0 16px;">
+                        <div style="text-align: right;">
+                            <p style="font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px;">Subtotal</p>
+                            <p style="font-size: 10px; font-weight: 800; color: #0f172a; margin: 0;">R$ ${subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                        </div>
+                        ${order.bdiRate ? `
+                        <div style="text-align: right;">
+                            <p style="font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px;">BDI (${order.bdiRate}%)</p>
+                            <p style="font-size: 10px; font-weight: 800; color: #059669; margin: 0;">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                        </div>` : ''}
+                        ${order.taxRate ? `
+                        <div style="text-align: right;">
+                            <p style="font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px;">Impostos (${order.taxRate}%)</p>
+                            <p style="font-size: 10px; font-weight: 800; color: #2563eb; margin: 0;">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                        </div>` : ''}
+                    </div>
+
+                    <div class="bg-[#0f172a] text-white p-5 rounded-2xl shadow-xl mb-4" style="display: flex !important; flex-direction: row !important; justify-content: space-between !important; align-items: center !important;">
+                        <p style="font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; margin: 0; opacity: 0.8 !important;">INVESTIMENTO TOTAL:</p>
+                        <p style="font-size: 32px; font-weight: 900; letter-spacing: -0.05em; margin: 0 !important; line-height: 1 !important;">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    </div>
+                </div>
+
+                <div class="avoid-break mb-8" style="display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 16px !important;">
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 shadow-sm">
+                        <p class="text-blue-600 font-black text-[10px] uppercase tracking-widest mb-2" style="display: block;">Forma de Pagamento</p>
+                        <p class="text-slate-700 text-[${Math.max(13, (company.descriptionFontSize || 12))}px] font-bold leading-relaxed">${order.paymentTerms || 'A combinar com o responsÃ¡vel.'}</p>
+                    </div>
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5 shadow-sm">
+                        <p class="text-blue-600 font-black text-[10px] uppercase tracking-widest mb-2" style="display: block;">Prazo de Entrega / ExecuÃ§Ã£o</p>
+                        <p class="text-slate-700 text-[${Math.max(13, (company.descriptionFontSize || 12))}px] font-bold leading-relaxed">${order.deliveryTime || 'Conforme cronograma da obra.'}</p>
+                    </div>
+                </div>
+
+                <div style="margin-top: 120px !important;" class="avoid-break pt-32">
+                   <div style="display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 64px !important; padding: 0 40px !important;">
+                       <div class="text-center">
+                           <div style="border-top: 1px solid #cbd5e1; margin-bottom: 8px;"></div>
+                           <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">ResponsÃ¡vel TÃ©cnico</p>
+                           <p class="text-[10px] font-bold uppercase text-slate-900">${company.name}</p>
+                       </div>
+                        <div class="text-center relative">
+                            <div style="border-top: 1px solid #cbd5e1; margin-bottom: 8px;"></div>
+                            <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Assinatura do Cliente</p>
+                            <p class="text-[11px] font-bold uppercase text-slate-900">${order.customerName}</p>
+                        </div>
+                   </div>
+               </div>
+            </div>
+          </td></tr></tbody>
+          <tfoot><tr><td style="height: ${company.printMarginBottom || 15}mm;"><div style="height: ${company.printMarginBottom || 15}mm; display: block;">&nbsp;</div></td></tr></tfoot>
+        </table>
+        <script>
+           function optimizePageBreaks() {
+             const root = document.querySelector('.print-description-content .space-y-6');
+             if (!root) return;
+
+             const allNodes = [];
+             Array.from(root.children).forEach(block => {
+               if (block.classList.contains('ql-editor-print')) {
+                  allNodes.push(...Array.from(block.children));
+               } else {
+                  allNodes.push(block);
+               }
+             });
+
+             for (let i = 0; i < allNodes.length - 1; i++) {
+               const el = allNodes[i];
+               let isTitle = false;
+               
+               if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
+               else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
+                 const text = el.innerText.trim();
+                 const isNumbered = /^\d+[\.\)]/.test(text);
+                 const isBold = el.querySelector('strong, b') || (el.style && parseInt(el.style.fontWeight) > 500) || el.tagName === 'STRONG';
+                 const isShort = text.length < 150;
+                 if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
+                   isTitle = true;
+                 }
+               }
+
+               if (isTitle) {
+                 const nodesToWrap = [el];
+                 let j = i + 1;
+                 while (j < allNodes.length && nodesToWrap.length < 3) {
+                   const next = allNodes[j];
+                   const nText = next.innerText.trim();
+                   const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') || 
+                                       (/^\d+[\.\)]/.test(nText) && (next.querySelector('strong, b') || nText === nText.toUpperCase()));
+                   if (nextIsTitle) break;
+                   nodesToWrap.push(next);
+                   j++;
+                 }
+
+                 if (nodesToWrap.length > 1) {
+                   const wrapper = document.createElement('div');
+                   wrapper.className = 'keep-together';
+                   el.parentNode.insertBefore(wrapper, el);
+                   nodesToWrap.forEach(node => wrapper.appendChild(node));
+                   i = j - 1;
+                 }
+               }
+             }
+           }
+           window.onload = function() { 
+             optimizePageBreaks();
+              setTimeout(() => { window.print(); window.close(); }, 2000); 
+           }
+        </script>
+      </body>
+      </html>`;
+        printWindow.document.write(html);
+        printWindow.document.close();
+    };
+
+    return { handlePrintOS };
+};
+```
