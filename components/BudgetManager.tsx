@@ -48,7 +48,7 @@ const BudgetManager: React.FC<Props> = ({
 
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
   const [proposalTitle, setProposalTitle] = useState('');
-  const [paymentTerms, setPaymentTerms] = useState('50% avista, 25% com 30 dias, 25% restante na concluSão');
+  const [paymentTerms, setPaymentTerms] = useState('50% avista, 25% com 30 dias, 25% restante na conclusão');
   const [paymentEntryPercent, setPaymentEntryPercent] = useState<number>(30);
   const [deliveryTime, setDeliveryTime] = useState('15 dias uteis');
   const [items, setItems] = useState<ServiceItem[]>([]);

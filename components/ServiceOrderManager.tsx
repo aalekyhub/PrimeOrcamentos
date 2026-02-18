@@ -1,4 +1,4 @@
-
+﻿
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   Plus, Search, X, Trash2, Pencil, Printer, Save,
@@ -32,7 +32,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
   const { notify } = useNotify();
 
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
-  const [osTitle, setOsTitle] = useState('Execuçào de Serviço');
+  const [osTitle, setOsTitle] = useState('Execução de Serviço');
   const [brand, setBrand] = useState('');
   const [model, setModel] = useState('');
   const [serial, setSerial] = useState('');
@@ -138,7 +138,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
   };
   // NEXT_PrintOS
   const handlePrintOS = (order: ServiceOrder, mode: 'print' | 'pdf' = 'print') => {
-    const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, address: 'Nào informado', document: 'N/A' };
+    const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, address: 'Não informado', document: 'N/A' };
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
@@ -247,7 +247,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                        </div>
                        <div>
                            <h1 class="text-2xl font-bold text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
-                           <p class="text-[9px] font-bold text-blue-600 uppercase tracking-widest leading-none">Soluções em Gestào Profissional</p>
+                           <p class="text-[9px] font-bold text-blue-600 uppercase tracking-widest leading-none">Soluções em Gestão Profissional</p>
                            <p class="text-[8px] text-slate-400 font-medium uppercase tracking-tight mt-2">${company.cnpj || ''} | ${company.phone || ''}</p>
                        </div>
                    </div>
@@ -267,7 +267,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                    </div>
                    <div class="info-box">
                        <span class="info-label">Dados do Equipamento / Objeto</span>
-                       <div class="info-value">${order.equipmentBrand || ''} ${order.equipmentModel || 'Nào especificado'}</div>
+                       <div class="info-value">${order.equipmentBrand || ''} ${order.equipmentModel || 'Não especificado'}</div>
                        <div class="info-sub mt-1">SÉRIE: ${order.equipmentSerialNumber || 'N/A'}</div>
                    </div>
                </div>
@@ -303,7 +303,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                    <table style="width: 100%; border-collapse: collapse;">
                        <thead>
                            <tr style="border-bottom: 2px solid #0f172a;">
-                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 700; letter-spacing: 0.05em;">Descriçào</th>
+                               <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 700; letter-spacing: 0.05em;">Descrição</th>
                                <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 700; letter-spacing: 0.05em;">UN</th>
                                <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 700; letter-spacing: 0.05em;">Qtd</th>
                                <th style="padding-bottom: 12px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 700; letter-spacing: 0.05em;">Unitário</th>
@@ -343,8 +343,8 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                <div class="avoid-break mb-12">
                    <div class="border-l-4 border-blue-600 bg-blue-50/40 p-6 rounded-xl">
                        <h5 class="text-[14px] font-bold text-blue-600 uppercase tracking-widest mb-2">Garantia e Notas Legais</h5>
-                       <p class="text-[13px] text-slate-700 leading-tight mb-2"><b>â€¢ GARANTIA Tà‰CNICA:</b> 90 dias para os serviços executados (Art. 26 CDC).</p>
-                       <p class="text-[13px] text-rose-600 font-bold uppercase leading-tight"><b>â€¢ ATENÇÃO:</b> Equipamentos não retirados em até 30 dias após aviso de conclusào estarào sujeitos a taxas de armazenamento ou descarte legal.</p>
+                       <p class="text-[13px] text-slate-700 leading-tight mb-2"><b>• GARANTIA TÉCNICA:</b> 90 dias para os serviços executados (Art. 26 CDC).</p>
+                       <p class="text-[13px] text-rose-600 font-bold uppercase leading-tight"><b>• ATENÇÃO:</b> Equipamentos não retirados em até 30 dias após aviso de conclusão estarão sujeitos a taxas de armazenamento ou descarte legal.</p>
                    </div>
                </div>
 
@@ -460,7 +460,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
           .no-print { display: none !important; } 
           * { box-shadow: none !important; } 
           .print-footer { position: fixed; bottom: 0; left: 0; right: 0; height: 15mm; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: bold; color: #94a3b8; text-transform: uppercase; background: white; } 
-          .print-footer::after { content: "Página " counter(page); } 
+          .print-footer::after { content: "PÃ¡gina " counter(page); } 
           .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: table !important; width: 100% !important; } 
           
           /* Styles for Rich Text (Quill) */
@@ -496,14 +496,14 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                     </div>
                     <div>
                         <h1 class="text-xl font-black text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
-                        <p class="text-[9px] font-black text-blue-600 uppercase tracking-widest">${company.tagline || 'Soluções em Gestào e Manutençào Profissional'}</p>
+                        <p class="text-[9px] font-black text-blue-600 uppercase tracking-widest">${company.tagline || 'Soluções em Gestão e Manutenção Profissional'}</p>
                         <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tight mt-1">${company.cnpj || ''} | ${company.phone || ''}</p>
                     </div>
                 </div>
                 <div class="text-right">
                     <div class="bg-blue-600 text-white px-4 py-1 rounded text-[8px] font-bold uppercase tracking-widest mb-1 inline-block">CONTRATO</div>
                     <h2 class="text-3xl font-bold text-slate-900 tracking-tighter">${order.id}</h2>
-                    <div class="mt-2 space-y-0.5"><p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest text-right">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p></div>
+                    <div class="mt-2 space-y-0.5"><p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest text-right">EMISSÃƒO: ${new Date().toLocaleDateString('pt-BR')}</p></div>
                 </div>
             </div>
 
@@ -512,13 +512,13 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
               <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 class="text-[7px] font-bold text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</h4><p class="text-[10px] font-bold text-slate-900 uppercase">${customer.name}</p><p class="text-[9px] text-slate-500 uppercase">DOC: ${customer.document || 'N/A'}</p><p class="text-[9px] text-slate-500 uppercase">${customer.address || ''}, ${customer.number || ''} - ${customer.city || ''}</p></div>
             </div>
 
-            <div class="mb-8"><p class="text-[10px] text-slate-600 leading-relaxed text-justify">As partes acima identificadas resolvem firmar o presente Contrato de Prestação de Serviços por Empreitada Global, nos termos da legislação civil e previdenciária vigente, mediante as cláusulas e condições seguintes:</p></div><div class="mb-6"><h4 class="text-[9px] font-black text-slate-900 uppercase tracking-widest mb-2 border-b pb-1">1. OBJETO DO CONTRATO</h4><p class="text-[10px] text-slate-600 leading-relaxed text-justify">O presente contrato tem por objeto a prestação dos serviços técnicos descritos abaixo, a serem realizados pela CONTRATADA à CONTRATANTE:</p><div class="bg-blue-50/50 p-4 rounded-lg border-l-4 border-blue-500 mt-2"><p class="text-[10px] font-bold text-blue-900 uppercase">${order.description}</p><p class="text-[9px] text-blue-700 mt-1">${order.items.map(i => `${i.quantity}x ${i.description}`).join(', ')}</p></div></div>
+            <div class="mb-8"><p class="text-[10px] text-slate-600 leading-relaxed text-justify">As partes acima identificadas resolvem firmar o presente Contrato de Prestação de Serviços por Empreitada Global, nos termos da legislação civil e previdenciÃ¡ria vigente, mediante as clÃ¡usulas e condições seguintes:</p></div><div class="mb-6"><h4 class="text-[9px] font-black text-slate-900 uppercase tracking-widest mb-2 border-b pb-1">1. OBJETO DO CONTRATO</h4><p class="text-[10px] text-slate-600 leading-relaxed text-justify">O presente contrato tem por objeto a prestação dos serviços técnicos descritos abaixo, a serem realizados pela CONTRATADA Ã  CONTRATANTE:</p><div class="bg-blue-50/50 p-4 rounded-lg border-l-4 border-blue-500 mt-2"><p class="text-[10px] font-bold text-blue-900 uppercase">${order.description}</p><p class="text-[9px] text-blue-700 mt-1">${order.items.map(i => `${i.quantity}x ${i.description}`).join(', ')}</p></div></div>
             
-            <div class="mb-6"><h4 class="text-[9px] font-black text-slate-900 uppercase tracking-widest mb-2 border-b pb-1">2. VALORES E PAGAMENTO</h4><p class="text-[10px] text-slate-600 leading-relaxed text-justify">Pelos serviços contratados, a CONTRATANTE pagará o valor total de <b class="text-slate-900">R$ ${order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>. Condições: ${order.paymentTerms || 'Conforme combinado'}.</p></div>
+            <div class="mb-6"><h4 class="text-[9px] font-black text-slate-900 uppercase tracking-widest mb-2 border-b pb-1">2. VALORES E PAGAMENTO</h4><p class="text-[10px] text-slate-600 leading-relaxed text-justify">Pelos serviços contratados, a CONTRATANTE pagarÃ¡ o valor total de <b class="text-slate-900">R$ ${order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>. Condições: ${order.paymentTerms || 'Conforme combinado'}.</p></div>
 
             <div class="mb-6"><h4 class="text-[9px] font-black text-slate-900 uppercase tracking-widest mb-2 border-b pb-1">3. PRAZOS E GARANTIA</h4><p class="text-[10px] text-slate-600 leading-relaxed text-justify">O prazo estimado é de <b>${order.deliveryTime || 'A combinar'}</b>. A garantia dos serviços é de 90 dias (Art. 26 CDC).</p></div>
             
-            <div class="mb-6"><h4 class="text-[9px] font-black text-slate-900 uppercase tracking-widest mb-2 border-b pb-1">4. DIREITOS E OBRIGAÇÕES</h4><p class="text-[10px] text-slate-600 leading-relaxed text-justify">4.1. A CONTRATADA compromete-se a executar os serviços com qualidade técnica, utilizando mão-de-obra qualificada.<br>4.2. A garantia dos serviços prestados é de 90 (noventa) dias, conforme Art. 26 do Código de Defesa do Consumidor.<br>4.3. A CONTRATANTE deve fornecer as condições necessárias (acesso, energia, etc.) para a execução dos trabalhos.</p></div>
+            <div class="mb-6"><h4 class="text-[9px] font-black text-slate-900 uppercase tracking-widest mb-2 border-b pb-1">4. DIREITOS E OBRIGAÃ‡Ã•ES</h4><p class="text-[10px] text-slate-600 leading-relaxed text-justify">4.1. A CONTRATADA compromete-se a executar os serviços com qualidade técnica, utilizando mão-de-obra qualificada.<br>4.2. A garantia dos serviços prestados é de 90 (noventa) dias, conforme Art. 26 do Código de Defesa do Consumidor.<br>4.3. A CONTRATANTE deve fornecer as condições necessÃ¡rias (acesso, energia, etc.) para a execução dos trabalhos.</p></div>
 
             <div class="mb-6"><h4 class="text-[9px] font-black text-slate-900 uppercase tracking-widest mb-2 border-b pb-1">5. FORO</h4><p class="text-[10px] text-slate-600 leading-relaxed text-justify">Fica eleito o foro da comarca de São Paulo/SP para dirimir quaisquer dúvidas oriundas deste contrato.</p></div>
 
@@ -643,7 +643,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
           <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Ordens de Serviço</h2>
           <p className="text-slate-500 text-sm">Painel de execução técnica e laudos.</p>
         </div>
-        <button onClick={() => { setShowForm(true); setEditingOrderId(null); setSelectedCustomerId(''); setItems([]); setOsTitle('Execuçào de Serviço'); setDiagnosis(''); setBrand(''); setModel(''); setSerial(''); setDescriptionBlocks([]); setPaymentTerms(''); setDeliveryTime(''); }} className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold shadow-2xl shadow-blue-100 hover:bg-blue-700 transition-all flex items-center gap-2">
+        <button onClick={() => { setShowForm(true); setEditingOrderId(null); setSelectedCustomerId(''); setItems([]); setOsTitle('ExecuçÃ o de Serviço'); setDiagnosis(''); setBrand(''); setModel(''); setSerial(''); setDescriptionBlocks([]); setPaymentTerms(''); setDeliveryTime(''); }} className="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold shadow-2xl shadow-blue-100 hover:bg-blue-700 transition-all flex items-center gap-2">
           <Plus className="w-5 h-5" /> Nova O.S.
         </button>
       </div>
@@ -657,7 +657,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
       <div className="bg-white rounded-[2rem] border overflow-hidden shadow-sm overflow-x-auto">
         <table className="w-full text-left">
           <thead className="bg-slate-50 text-[10px] font-black uppercase text-slate-400 border-b">
-            <tr><th className="px-8 py-5">OS #</th><th className="px-8 py-5">CLIENTE</th><th className="px-8 py-5">EQUIPAMENTO</th><th className="px-8 py-5 text-right">Aà‡à•ES</th></tr>
+            <tr><th className="px-8 py-5">OS #</th><th className="px-8 py-5">CLIENTE</th><th className="px-8 py-5">EQUIPAMENTO</th><th className="px-8 py-5 text-right">AÇÕES</th></tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {activeOrders.map(order => (
@@ -684,7 +684,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                     setShowForm(true);
                   }} className="p-2 text-slate-400 hover:text-blue-600 transition-colors"><Pencil className="w-4 h-4" /></button>
                   <button onClick={async () => {
-                    if (confirm("Excluir esta O.S.? Esta açào também removerá os dados da nuvem.")) {
+                    if (confirm("Excluir esta O.S.? Esta açÃ o também removerÃ¡ os dados da nuvem.")) {
                       const idToDelete = order.id;
                       setOrders(p => p.filter(x => x.id !== idToDelete));
                       const result = await db.remove('orders', idToDelete);
@@ -710,7 +710,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                 <div>
                   <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter mb-0.5">{editingOrderId ? `Editando O.S. ${editingOrderId}` : 'Nova Ordem de Serviço'}</h3>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md">Manutençào</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md">Manutenção</span>
                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{new Date().toLocaleDateString('pt-BR')}</span>
                   </div>
                 </div>
@@ -725,7 +725,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                       <div className="flex justify-between items-center mb-2"><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest ml-1">Cliente Solicitante</label><button onClick={() => setShowFullClientForm(true)} className="text-blue-600 text-[9px] font-black uppercase flex items-center gap-1 hover:underline"><UserPlus className="w-3 h-3" /> Novo</button></div>
                       <select className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all custom-select" value={selectedCustomerId} onChange={e => setSelectedCustomerId(e.target.value)}><option value="">Selecione...</option>{customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select>
                     </div>
-                    <div><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-2 block ml-1">Título da O.S.</label><input type="text" placeholder="Ex: Manutençào de Notebook" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400" value={osTitle} onChange={e => setOsTitle(e.target.value)} /></div>
+                    <div><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-2 block ml-1">Título da O.S.</label><input type="text" placeholder="Ex: Manutenção de Notebook" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400" value={osTitle} onChange={e => setOsTitle(e.target.value)} /></div>
                   </div>
                 </div>
 
@@ -734,13 +734,13 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
                     <div><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Marca/Fabricante</label><input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500" value={brand} onChange={e => setBrand(e.target.value)} /></div>
                     <div><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Modelo</label><input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500" value={model} onChange={e => setModel(e.target.value)} /></div>
-                    <div><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Nº Série / Patrimônio</label><input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500" value={serial} onChange={e => setSerial(e.target.value)} /></div>
+                    <div><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">NÂº Série / PatrimÃ´nio</label><input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500" value={serial} onChange={e => setSerial(e.target.value)} /></div>
                   </div>
                   <div><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Laudo Técnico / Diagnóstico</label><RichTextEditor id="diagnosis-editor" value={diagnosis} onChange={setDiagnosis} placeholder="Descreva o problema ou serviço realizado..." /></div>
 
                   <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
                     <div className="flex justify-between items-center">
-                      <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-widest border-b pb-2 grow mr-6">FOTOS E ANEXOS DO SERVIÇO</h4>
+                      <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-widest border-b pb-2 grow mr-6">FOTOS E ANEXOS DO SERVIÃ‡O</h4>
                     </div>
                     <div className="space-y-3">
                       {descriptionBlocks.length === 0 && (
@@ -749,7 +749,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                             <button onClick={(e) => { e.stopPropagation(); addTextBlock(); }} className="bg-blue-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-blue-100 hover:scale-105 transition-all"><Type className="w-4 h-4" /> + Iniciar com Texto</button>
                             <button onClick={(e) => { e.stopPropagation(); addImageBlock(); }} className="bg-emerald-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-emerald-100 hover:scale-105 transition-all"><ImageIcon className="w-4 h-4" /> + Iniciar com Imagem</button>
                           </div>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 animate-pulse">Comece a montar o relatório fotográfico acima</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 animate-pulse">Comece a montar o relatório fotogrÃ¡fico acima</p>
                         </div>
                       )}
                       {descriptionBlocks.map((block) => (
@@ -786,7 +786,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                   <div className="flex justify-between items-center mb-4"><h4 className="text-[9px] font-black text-slate-400 uppercase tracking-widest border-b pb-2 grow mr-4">Peças e Serviços</h4></div>
                   <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
-                      <div className="md:col-span-6"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Descriçào do Item</label><input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentDesc} onChange={e => setCurrentDesc(e.target.value)} /></div>
+                      <div className="md:col-span-6"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Descrição do Item</label><input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentDesc} onChange={e => setCurrentDesc(e.target.value)} /></div>
                       <div className="md:col-span-2"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Valor Unit.</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} /></div>
                       <div className="md:col-span-2"><label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block ml-1">Quantidade</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} /></div>
                       <div className="md:col-span-2"><button onClick={handleAddItem} className="bg-blue-600 text-white w-full h-[42px] rounded-xl flex items-center justify-center hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200"><Plus className="w-5 h-5" /></button></div>
@@ -845,7 +845,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Valor Total Estimado</p>
                   <div className="text-4xl font-black text-slate-900 tracking-tighter mb-1">R$ {totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Peças + Mào de Obra</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Peças + MÃ o de Obra</p>
                 </div>
 
                 <div className="bg-white rounded-[2rem] border border-slate-200 overflow-hidden shadow-sm relative grow flex flex-col mb-4 min-h-[200px] lg:min-h-0">
@@ -855,7 +855,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                   </div>
                   <div className="grow bg-white relative cursor-crosshair h-32 lg:h-auto">
                     <canvas ref={canvasRef} width={320} height={180} className="w-full h-full touch-none" />
-                    <div className="absolute bottom-2 left-0 w-full text-center pointer-events-none opacity-20"><p className="text-[8px] font-black uppercase text-slate-300">àrea de Assinatura Digital</p></div>
+                    <div className="absolute bottom-2 left-0 w-full text-center pointer-events-none opacity-20"><p className="text-[8px] font-black uppercase text-slate-300">Ã Ârea de Assinatura Digital</p></div>
                   </div>
                 </div>
 
@@ -906,5 +906,6 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
 };
 
 export default ServiceOrderManager;
+
 
 
