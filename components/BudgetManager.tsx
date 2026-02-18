@@ -670,10 +670,10 @@ const BudgetManager: React.FC<Props> = ({
 
       document.body.appendChild(container);
 
-      // Otimizar quebras de p�gina antes de capturar
+      // Otimizar quebras de pagina antes de capturar
       runOptimizePageBreaks(container);
 
-      // 3) Pegue o elemento REAL que ser� capturado (não o container pai)
+      // 3) Pegue o elemento REAL que sera capturado (não o container pai)
       const elementToPrint = container.querySelector(".pdf-page") as HTMLElement;
       if (!elementToPrint) throw new Error("Elemento de impresSão não encontrado.");
 
@@ -813,7 +813,7 @@ const BudgetManager: React.FC<Props> = ({
     setBdiRate(d);
 
     setShowForm(true);
-    if (isClone) notify("Orçamento clonado! Voc+� est� editando uma nova c�pia.");
+    if (isClone) notify("Orçamento clonado! Voce esta editando uma nova copia.");
   };
 
 
@@ -956,8 +956,8 @@ const BudgetManager: React.FC<Props> = ({
               <div className="flex items-center gap-3">
                 <div className="bg-blue-600 p-2 rounded-xl text-white shadow-xl shadow-blue-100"><FileText className="w-5 h-5" /></div>
                 <div>
-                  <h3 className="text-lg font-black text-slate-900 uppercase tracking-tighter mb-0.5">Elabora��o de Orçamento Prime</h3>
-                  <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em]">Configura��o de Documento Comercial</p>
+                  <h3 className="text-lg font-black text-slate-900 uppercase tracking-tighter mb-0.5">Elaboração de Orçamento Prime</h3>
+                  <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em]">Configuração de Documento Comercial</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
@@ -1003,7 +1003,7 @@ const BudgetManager: React.FC<Props> = ({
                           <button onClick={(e) => { e.stopPropagation(); addTextBlock(); }} className="bg-blue-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-blue-100 hover:scale-105 transition-all"><Type className="w-4 h-4" /> + Iniciar com Texto</button>
                           <button onClick={(e) => { e.stopPropagation(); addImageBlock(); }} className="bg-emerald-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-emerald-100 hover:scale-105 transition-all"><ImageIcon className="w-4 h-4" /> + Iniciar com Imagem</button>
                         </div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 animate-pulse">Comece a montar o escopo t+�cnico acima</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 animate-pulse">Comece a montar o escopo tecnico acima</p>
                       </div>
                     )}
                     {descriptionBlocks.map((block) => (
@@ -1038,11 +1038,11 @@ const BudgetManager: React.FC<Props> = ({
                 <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
                   <div className="flex justify-between items-center">
                     <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-widest border-b pb-2 grow mr-6">ITENS DO Orçamento</h4>
-                    <button onClick={() => setShowFullServiceForm(true)} className="text-blue-600 text-[8px] font-black uppercase flex items-center gap-1 hover:underline tracking-widest"><Package className="w-3 h-3" /> CAT�LOGO</button>
+                    <button onClick={() => setShowFullServiceForm(true)} className="text-blue-600 text-[8px] font-black uppercase flex items-center gap-1 hover:underline tracking-widest"><Package className="w-3 h-3" /> CATALOGO</button>
                   </div>
                   <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
                     <div>
-                      <label className="text-[8px] font-black text-blue-600 uppercase tracking-widest block mb-1.5">Puxar do Cat�logo</label>
+                      <label className="text-[8px] font-black text-blue-600 uppercase tracking-widest block mb-1.5">Puxar do Catalogo</label>
                       <select className="w-full bg-white border-none rounded-xl p-2.5 text-[10px] font-bold text-slate-500 outline-none" value={selectedCatalogId} onChange={e => {
                         const id = e.target.value;
                         setSelectedCatalogId(id);
@@ -1061,7 +1061,7 @@ const BudgetManager: React.FC<Props> = ({
                       </div>
                       <div className="w-24"><label className="text-[11px] font-black text-blue-700 uppercase mb-1.5 block text-center">Unit</label><input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs font-black text-center outline-none uppercase text-slate-900" value={currentUnit} onChange={e => setCurrentUnit(e.target.value)} /></div>
                       <div className="w-24"><label className="text-[11px] font-black text-blue-700 uppercase mb-1.5 block text-center">Qtd</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs font-black text-center outline-none text-slate-900" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} /></div>
-                      <div className="w-32"><label className="text-[11px] font-black text-blue-700 uppercase mb-1.5 block ml-1">Pre�o (R$)</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs font-black outline-none text-slate-900" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} /></div>
+                      <div className="w-32"><label className="text-[11px] font-black text-blue-700 uppercase mb-1.5 block ml-1">Preço (R$)</label><input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs font-black outline-none text-slate-900" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} /></div>
                       <div className="md:col-span-1">
                         <button onClick={handleAddItem} className="bg-blue-600 text-white w-full h-[58px] rounded-xl flex items-center justify-center hover:scale-105 transition-all shadow-xl"><Plus className="w-6 h-6" /></button>
                       </div>
@@ -1288,7 +1288,7 @@ const BudgetManager: React.FC<Props> = ({
               {orders.filter(o => (o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED)).length === 0 && (
                 <div className="text-center py-12">
                   <Database className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-                  <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Nenhum Orçamento dispon+�vel para importa��o</p>
+                  <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Nenhum Orçamento disponivel para importação</p>
                 </div>
               )}
             </div>
@@ -1353,7 +1353,7 @@ const PaymentTypeModal: React.FC<{
 
         <div className="p-6 space-y-6">
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Tipo de Negocia��o</label>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Tipo de Negociação</label>
             <div className="grid grid-cols-3 gap-2">
               <button onClick={() => setType('vista')} className={`p-3 rounded-xl border text-xs font-bold uppercase transition-all ${type === 'vista' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>+� Vista</button>
               <button onClick={() => setType('parcelado')} className={`p-3 rounded-xl border text-xs font-bold uppercase transition-all ${type === 'parcelado' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>Parcelado</button>
