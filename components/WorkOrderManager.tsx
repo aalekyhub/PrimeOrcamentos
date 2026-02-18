@@ -195,15 +195,15 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', address: 'Endereço não informado', city: '', state: '', cep: '' };
 
         const html = `
-    < !DOCTYPE html >
+<!DOCTYPE html>
         <html>
             <head>
                 <title>Contrato - ${order.id}</title>
                 <script src="https://cdn.tailwindcss.com"></script>
                 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
                     <style>
-                        * {box - sizing: border-box; }
-                        body {font - family: 'Inter', sans-serif; margin: 0; padding: 0; }
+                        * {box-sizing: border-box; }
+                        body {font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
                         .a4-container {width: 100%; background: white; }
                         .avoid-break { break-inside: avoid; page-break-inside: avoid; }
                     </style>
@@ -397,7 +397,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         if (!printWindow) return;
 
         const html = `
-    < !DOCTYPE html >
+<!DOCTYPE html>
         <html>
             <head>
                 <title>Contrato - ${order.id.replace('OS-', 'OS')} - ${order.description || 'Proposta'}</title>
@@ -629,7 +629,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         }).join('');
 
         const html = `
-    < !DOCTYPE html >
+<!DOCTYPE html>
         <html>
             <head>
                 <title>Relatório de Obra - ${order.id} - ${order.description || 'Obra'}</title>
@@ -1302,3 +1302,4 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 };
 
 export default WorkOrderManager;
+
