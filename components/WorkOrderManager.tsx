@@ -191,7 +191,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     };
 
 
-    const handleDownloadPDF = (order: ServiceOrder) => {
+    const handleDownloadPDF = async (order: ServiceOrder) => {
         const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', address: 'Endereço não informado', city: '', state: '', cep: '' };
 
         const html = `
@@ -203,7 +203,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
                     <style>
                         * {box-sizing: border-box; }
-                        body {font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
+                        body {font-family: 'Inter', sans-serif; margin: 0; padding: 0; background: white; }
                         .a4-container {width: 100%; background: white; }
                         .avoid-break { break-inside: avoid; page-break-inside: avoid; }
                     </style>
@@ -324,58 +324,26 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             margin: 15,
             filename: `Contrato - ${order.id.replace('OS-', 'OS')} - ${order.description || 'Proposta'}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 3, useCORS: true },
+            html2canvas: { scale: 3, useCORS: true, backgroundColor: '#ffffff' },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
             pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
         };
 
-        // Use a hidden div to process HTML for PDF (must be in DOM and visible for layout)
         const worker = document.createElement('div');
         worker.style.position = 'absolute';
         worker.style.left = '-9999px';
         worker.style.top = '0';
-        worker.style.width = '210mm';
+        worker.style.width = '190mm'; // Slightly smaller to ensure fit
         worker.innerHTML = html;
         document.body.appendChild(worker);
 
-        // Apply optimizations manually (scripts in innerHTML don't run)
-        // Apply optimizations manually
-        const root = worker.querySelector('.print-description-content .space-y-6');
-        if (root) {
-            const allNodes: any[] = [];
-            Array.from(root.children).forEach(block => {
-                if (block.classList.contains('ql-editor-print')) {
-                    allNodes.push(...Array.from(block.children));
-                } else {
-                    allNodes.push(block);
-                }
-            });
+        // Wait for styles and fonts
+        await new Promise(resolve => setTimeout(resolve, 800));
 
-            for (let i = 0; i < allNodes.length - 1; i++) {
-                const el = allNodes[i] as HTMLElement;
-                let isTitle = false;
-
-                if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
-                else if (el.tagName === 'P' || el.tagName === 'DIV') {
-                    const text = el.innerText.trim();
-                    const isNumbered = /^\d+[\.\)]/.test(text);
-                    const hasBold = el.querySelector('strong, b');
-                    if (isNumbered && hasBold && text.length < 150) isTitle = true;
-                }
-
-                if (isTitle) {
-                    const next = allNodes[i + 1];
-                    if (next && !next.matches('h1, h2, h3, h4, h5, h6')) {
-                        const wrapper = document.createElement('div');
-                        wrapper.className = 'keep-together';
-                        el.parentNode?.insertBefore(wrapper, el);
-                        wrapper.appendChild(el);
-                        wrapper.appendChild(next);
-                        i++;
-                    }
-                }
-            }
-        }
+        try {
+            // @ts-ignore
+            if (document.fonts?.ready) await document.fonts.ready;
+        } catch (e) { console.error('Font error', e); }
 
         // @ts-ignore
         html2pdf().set(opt).from(worker).toPdf().get('pdf').then(function (pdf: any) {
@@ -387,6 +355,9 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                 pdf.text('PÁGINA ' + i + ' DE ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
             }
             pdf.save(opt.filename);
+            document.body.removeChild(worker);
+        }).catch(err => {
+            console.error('PDF Generation Error:', err);
             document.body.removeChild(worker);
         });
     };
