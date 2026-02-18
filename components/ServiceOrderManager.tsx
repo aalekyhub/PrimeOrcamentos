@@ -240,22 +240,22 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
           <tbody><tr><td>
             <div class="a4-container">
                <!-- Header -->
-               <div class="flex justify-between items-start mb-12 border-b-2 border-slate-900 pb-8">
-                   <div class="flex gap-6 items-center">
-                       <div style="width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;">
-                           ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:700; font-size:30px; color:#2563eb;">PO</div>'}
-                       </div>
-                       <div>
-                           <h1 class="text-2xl font-bold text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
-                           <p class="text-[9px] font-bold text-blue-600 uppercase tracking-widest leading-none">Soluções em Gestão Profissional</p>
-                           <p class="text-[8px] text-slate-400 font-medium uppercase tracking-tight mt-2">${company.cnpj || ''} | ${company.phone || ''}</p>
-                       </div>
+               <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10mm; border-bottom: 3px solid #0f172a; padding-bottom: 8mm;">
+                 <div style="display: flex; gap: 6mm; align-items: center;">
+                   <div style="width: 80px; height: 80px; display:flex; align-items:center; justify-content:center;">
+                     ${company.logo ? `<img src="${company.logo}" style="max-height:100%; max-width:100%; object-fit:contain;" />` : `<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>`}
                    </div>
-                   <div class="text-right">
-                       <div class="bg-slate-900 text-white px-3 py-1 rounded text-[8px] font-bold uppercase tracking-widest mb-2 inline-block">Ordem de Serviço</div>
-                       <p class="text-3xl font-bold text-slate-900 tracking-tighter mb-1">${order.id}</p>
-                       <p class="text-[8px] font-medium text-slate-400 uppercase tracking-widest text-right">ABERTURA: ${formatDate(order.createdAt)}</p>
+                   <div>
+                     <h1 style="font-size:18px; font-weight:900; color:#0f172a; margin:0 0 2mm 0; text-transform:uppercase; letter-spacing:-0.5px;">${company.name}</h1>
+                     <p style="font-size:11px; font-weight:800; color:#2563eb; text-transform:uppercase; letter-spacing:1px; margin:0 0 2mm 0;">${company.tagline || 'Soluções em Gestão Profissional'}</p>
+                     <p style="font-size:9px; color:#94a3b8; font-weight:700; text-transform:uppercase; letter-spacing:-0.3px; margin:0;">${company.cnpj || ""} | ${company.phone || ""}</p>
                    </div>
+                 </div>
+                 <div style="text-align:right;">
+                   <div style="background:#2563eb; color:white; padding:2mm 4mm; border-radius:2mm; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:1px; margin-bottom:2mm; display:inline-block;">ORDEM DE SERVIÇO</div>
+                   <p style="font-size:24px; font-weight:900; color:#0f172a; letter-spacing:-1px; margin:0 0 1mm 0; white-space:nowrap;">${order.id}</p>
+                   <p style="font-size:10px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1px; text-align:right; margin:0;">ABERTURA: ${formatDate(order.createdAt)}</p>
+                 </div>
                </div>
 
                <!-- Boxes Grid (Customer & Equipment) -->
@@ -489,22 +489,23 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
         <thead><tr><td style="height: ${company.printMarginTop || 15}mm;"><div style="height: ${company.printMarginTop || 15}mm; display: block;">&nbsp;</div></td></tr></thead>
         <tbody><tr><td>
           <div class="a4-container">
-            <div class="flex justify-between items-start mb-8">
-                <div class="flex gap-4">
-                    <div class="w-16 h-16 shrink-0 flex items-center justify-center overflow-hidden">
-                        ${company.logo ? `<img src="${company.logo}" style="height: 100%; object-fit: contain;">` : `<div style="width: 64px; height: 64px; background: #2563eb; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white;"><svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></div>`}
-                    </div>
-                    <div>
-                        <h1 class="text-xl font-black text-slate-900 leading-none mb-1 uppercase tracking-tight">${company.name}</h1>
-                        <p class="text-[9px] font-black text-blue-600 uppercase tracking-widest">${company.tagline || 'Soluções em Gestão e Manutenção Profissional'}</p>
-                        <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tight mt-1">${company.cnpj || ''} | ${company.phone || ''}</p>
-                    </div>
+            <!-- Header -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10mm; border-bottom: 3px solid #0f172a; padding-bottom: 8mm;">
+              <div style="display: flex; gap: 6mm; align-items: center;">
+                <div style="width: 80px; height: 80px; display:flex; align-items:center; justify-content:center;">
+                  ${company.logo ? `<img src="${company.logo}" style="max-height:100%; max-width:100%; object-fit:contain;" />` : `<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>`}
                 </div>
-                <div class="text-right">
-                    <div class="bg-blue-600 text-white px-4 py-1 rounded text-[8px] font-bold uppercase tracking-widest mb-1 inline-block">CONTRATO</div>
-                    <h2 class="text-3xl font-bold text-slate-900 tracking-tighter">${order.id}</h2>
-                    <div class="mt-2 space-y-0.5"><p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest text-right">EMISSÃƒO: ${new Date().toLocaleDateString('pt-BR')}</p></div>
+                <div>
+                  <h1 style="font-size:18px; font-weight:900; color:#0f172a; margin:0 0 2mm 0; text-transform:uppercase; letter-spacing:-0.5px;">${company.name}</h1>
+                  <p style="font-size:11px; font-weight:800; color:#2563eb; text-transform:uppercase; letter-spacing:1px; margin:0 0 2mm 0;">${company.tagline || 'Soluções em Gestão Profissional'}</p>
+                  <p style="font-size:9px; color:#94a3b8; font-weight:700; text-transform:uppercase; letter-spacing:-0.3px; margin:0;">${company.cnpj || ""} | ${company.phone || ""}</p>
                 </div>
+              </div>
+              <div style="text-align:right;">
+                <div style="background:#2563eb; color:white; padding:2mm 4mm; border-radius:2mm; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:1px; margin-bottom:2mm; display:inline-block;">CONTRATO</div>
+                <p style="font-size:24px; font-weight:900; color:#0f172a; letter-spacing:-1px; margin:0 0 1mm 0; white-space:nowrap;">${order.id}</p>
+                <p style="font-size:10px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1px; text-align:right; margin:0;">EXPEDIÇÃO: ${new Date().toLocaleDateString('pt-BR')}</p>
+              </div>
             </div>
 
             <div class="grid grid-cols-2 gap-4 mb-8">

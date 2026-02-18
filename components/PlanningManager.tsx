@@ -351,16 +351,26 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                 <tbody>
                     <tr>
                         <td style="padding: 0;">
-                           <div class="a4-container" style="padding-bottom: 10px !important; border-bottom: 2px solid #e2e8f0; margin-bottom: 10px;">
-                                <div style="display: flex; justify-content: space-between; align-items: start;">
-                                    <div>
-                                        <h1 style="margin: 0; color: #1e40af; font-size: 26px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.025em;">Planejamento Executivo de Obra</h1>
-                                        <p style="margin: 5px 0 0 0; color: #3b82f6; font-size: 16px; font-weight: 700;">${currentPlan.name.toUpperCase()}</p>
+                           <div class="a4-container" style="padding-bottom: 8mm; border-bottom: 3px solid #0f172a; margin-bottom: 8mm;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                    <div style="display: flex; gap: 6mm; align-items: center;">
+                                        <div style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                                            ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>'}
+                                        </div>
+                                        <div>
+                                            <h1 style="font-size:18px; font-weight:900; color:#0f172a; margin:0 0 2mm 0; text-transform:uppercase; letter-spacing:-0.5px;">${company.name}</h1>
+                                            <p style="font-size:11px; font-weight:800; color:#2563eb; text-transform:uppercase; letter-spacing:1px; margin:0 0 2mm 0;">Planejamento Executivo de Obra</p>
+                                            <p style="font-size:9px; color:#94a3b8; font-weight:700; text-transform:uppercase; letter-spacing:-0.3px; margin:0;">${company.cnpj || ''} | ${company.phone || ''}</p>
+                                        </div>
                                     </div>
-                                    <div style="text-align: right;">
-                                        <p style="margin: 0; color: #94a3b8; font-size: 10px; font-weight: 800; text-transform: uppercase;">Emissão: ${new Date().toLocaleDateString('pt-BR')}</p>
-                                        <p style="margin: 5px 0 0 0; color: #475569; font-size: 11px;">ID: ${currentPlan.id}</p>
+                                    <div style="text-align:right;">
+                                        <div style="background:#2563eb; color:white; padding:2mm 4mm; border-radius:2mm; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:1px; margin-bottom:2mm; display:inline-block;">PLANEJAMENTO</div>
+                                        <p style="font-size:24px; font-weight:900; color:#0f172a; letter-spacing:-1px; margin:0 0 1mm 0; white-space:nowrap;">${currentPlan.id}</p>
+                                        <p style="font-size:10px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1px; text-align:right; margin:0;">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p>
                                     </div>
+                                </div>
+                                <div style="margin-top: 4mm;">
+                                    <p style="margin: 0; color: #3b82f6; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">${currentPlan.name}</p>
                                 </div>
                             </div>
                             <div class="a4-container">
@@ -593,7 +603,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
         Promise.all(imagePromises).finally(() => {
             setTimeout(() => {
                 const opt = {
-                    margin: [10, 10, 10, 10] as [number, number, number, number],
+                    margin: [15, 0, 15, 0] as [number, number, number, number],
                     filename: `Planejamento_Obra_${currentPlan.name.replace(/\s+/g, '_')}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 } as any,
                     html2canvas: {

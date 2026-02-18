@@ -117,22 +117,22 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
           <thead>
             <tr>
               <td style="padding: 0;">
-                <div class="a4-container" style="padding-bottom: 20px !important; border-bottom: 1px solid #e2e8f0; margin-bottom: 20px;">
-                   <div class="flex justify-between items-start">
-                       <div class="flex gap-6 items-center">
-                           <div style="width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;">
-                               ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:28px; color:#2563eb;">PO</div>'}
+                <div class="a4-container" style="padding-bottom: 8mm; border-bottom: 3px solid #0f172a; margin-bottom: 8mm;">
+                   <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                       <div style="display: flex; gap: 6mm; align-items: center;">
+                           <div style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                               ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>'}
                            </div>
                            <div>
-                               <h1 class="text-2xl font-black text-slate-900 leading-none mb-2 uppercase tracking-tight">${company.name}</h1>
-                               <p class="text-[10px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">Ordem de Serviço de Obra / Reforma</p>
-                               <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tight">${company.cnpj || ''} | ${company.phone || ''}</p>
+                               <h1 style="font-size:18px; font-weight:900; color:#0f172a; margin:0 0 2mm 0; text-transform:uppercase; letter-spacing:-0.5px;">${company.name}</h1>
+                               <p style="font-size:11px; font-weight:800; color:#2563eb; text-transform:uppercase; letter-spacing:1px; margin:0 0 2mm 0;">Ordem de Serviço de Obra / Reforma</p>
+                               <p style="font-size:9px; color:#94a3b8; font-weight:700; text-transform:uppercase; letter-spacing:-0.3px; margin:0;">${company.cnpj || ''} | ${company.phone || ''}</p>
                            </div>
                        </div>
-                       <div class="text-right">
-                           <div class="bg-blue-600 text-white px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest mb-2 shadow-md inline-block">ORDEM DE SERVIÇO</div>
-                           <p class="text-xl font-black text-[#0f172a] tracking-tighter mb-1 whitespace-nowrap">${order.id}</p>
-                           <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest text-right">ABERTURA: ${formatDate(order.createdAt)}</p>
+                       <div style="text-align:right;">
+                           <div style="background:#2563eb; color:white; padding:2mm 4mm; border-radius:2mm; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:1px; margin-bottom:2mm; display:inline-block;">ORDEM DE SERVIÇO</div>
+                           <p style="font-size:24px; font-weight:900; color:#0f172a; letter-spacing:-1px; margin:0 0 1mm 0; white-space:nowrap;">${order.id}</p>
+                           <p style="font-size:10px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1px; text-align:right; margin:0;">ABERTURA: ${formatDate(order.createdAt)}</p>
                        </div>
                    </div>
                 </div>
