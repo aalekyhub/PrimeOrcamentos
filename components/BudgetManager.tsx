@@ -281,8 +281,9 @@ const BudgetManager: React.FC<Props> = ({
     const taxR = b.taxRate || 0;
     const bdiV = subT * (bdiR / 100);
     const subTWithBDI = subT + bdiV;
-    const taxV = subTWithBDI * (taxR / 100);
-    const finalT = subTWithBDI + taxV;
+    const taxFactorBody = Math.max(0.01, 1 - (taxR / 100));
+    const finalT = subTWithBDI / taxFactorBody;
+    const taxV = finalT - subTWithBDI;
     const itemFBase = company.itemsFontSize || 12;
 
     const itemsH = b.items.map((item: ServiceItem) => `
@@ -1155,7 +1156,12 @@ const BudgetManager: React.FC<Props> = ({
                   <div className="space-y-1 mb-4 text-[10px] text-slate-400">
                     <div className="flex justify-between"><span>Subtotal:</span> <span>R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
                     {bdiRate > 0 && <div className="flex justify-between text-emerald-400"><span>+ BDI:</span> <span>R$ {(subtotal * (bdiRate / 100)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>}
-                    {taxRate > 0 && <div className="flex justify-between text-blue-400"><span>+ Impostos:</span> <span>R$ {((subtotal + (subtotal * (bdiRate / 100))) * (taxRate / 100)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>}
+                    {taxRate > 0 && (
+                      <div className="flex justify-between text-blue-400">
+                        <span>+ Impostos:</span>
+                        <span>R$ {(totalAmount - (subtotal + (subtotal * (bdiRate / 100)))).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex justify-between items-baseline border-b border-slate-800 pb-4">
