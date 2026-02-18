@@ -990,7 +990,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             <div className="bg-white rounded-[2rem] border overflow-hidden shadow-sm overflow-x-auto">
                 <table className="w-full text-left">
                     <thead className="bg-slate-50 text-[10px] font-black uppercase text-slate-400 border-b">
-                        <tr><th className="px-8 py-5">OS #</th><th className="px-8 py-5">CLIENTE</th><th className="px-8 py-5">OBRA / DESCRIÃ‡ÃƒO</th><th className="px-8 py-5 text-right">AÃ‡Ã•ES</th></tr>
+                        <tr><th className="px-8 py-5">OS #</th><th className="px-8 py-5">CLIENTE</th><th className="px-8 py-5">OBRA/DESCRIÇÃO</th><th className="px-8 py-5 text-right">AÇÕES</th></tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                         {activeOrders.map(order => (
