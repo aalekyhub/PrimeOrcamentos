@@ -797,7 +797,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                 filename,
                 image: { type: "jpeg" as const, quality: 0.98 },
                 html2canvas: {
-                    scale: 2,
+                    scale: 3,
                     useCORS: true,
                     allowTaint: false,
                     backgroundColor: "#ffffff",
