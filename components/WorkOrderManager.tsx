@@ -1,40 +1,21 @@
-﻿/**
- * BudgetManager.tsx (versão revisada)
- *
- * Principais mudanças:
- * 1) PDF usa o MESMO HTML do Print (getBudgetHtml) -> consistência total.
- * 2) IDs: usa crypto.randomUUID() (sem Math.random/Date.now) -> evita colisão e bugs de reorder.
- * 3) Sanitização do HTML do RichText (DOMPurify) -> evita XSS e quebra de PDF.
- * 4) Margens: removida duplicidade (html2pdf margin = 0; padding fica no container).
- * 5) Drag & Drop: reordena no drop (onDragEnd) -> menos “jitter” e menos renders.
- * 6) setState: forma funcional em pontos críticos.
- * 7) Corrigidos textos com encoding quebrado (Voc+� etc.) — ajuste local no código.
- *
- * Dependência:
- *   npm i dompurify
- *   (se TS reclamar) npm i -D @types/dompurify
- */
-
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+﻿// @ts-ignore
 import html2pdf from 'html2pdf.js';
-import DOMPurify from 'dompurify';
-
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
-  Plus, Search, X, Trash2, Pencil, Printer, Save,
-  UserPlus, Package, Type, Image as ImageIcon,
-  FileText, Upload, CheckCircle, Zap, FileDown, Copy, Database,
-  ChevronUp, ChevronDown, GripVertical
+  Plus, Search, X, Trash2, Pencil, Printer, Save, FileDown,
+  UserPlus, HardHat, Eraser, FileText, ScrollText, Wallet,
+  Type, Image as ImageIcon, Zap, Upload, CheckCircle
 } from 'lucide-react';
-
-import RichTextEditor from './ui/RichTextEditor';
-import {
-  ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock
-} from '../types';
+import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock, Transaction } from '../types';
 import { useNotify } from './ToastProvider';
 import CustomerManager from './CustomerManager';
-import ServiceCatalog from './ServiceCatalog';
 import { db } from '../services/db';
+import { formatDocument } from '../services/validation';
 import { compressImage } from '../services/imageUtils';
+import { usePrintOS } from '../hooks/usePrintOS';
+import { financeUtils } from '../services/financeUtils';
+import InfoCard from './ui/InfoCard';
+import RichTextEditor from './ui/RichTextEditor';
 
 interface Props {
   orders: ServiceOrder[];
@@ -44,173 +25,115 @@ interface Props {
   catalogServices: CatalogService[];
   setCatalogServices: React.Dispatch<React.SetStateAction<CatalogService[]>>;
   company: CompanyProfile;
-  prefilledData: any;
-  onPrefilledDataConsumed: () => void;
+  transactions: Transaction[];
+  setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>;
 }
 
-const uid = () => (typeof crypto !== 'undefined' && 'randomUUID' in crypto)
-  ? crypto.randomUUID()
-  : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-
-const sanitizeHtml = (html: string) => {
-  // Permitir tags típicas do editor, bloquear scripts e handlers
-  return DOMPurify.sanitize(html, {
-    USE_PROFILES: { html: true },
-    FORBID_TAGS: ['script', 'iframe', 'object', 'embed'],
-    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'style'], // style pode quebrar layout e permitir bypass
-  });
-};
-
-const BudgetManager: React.FC<Props> = ({
-  orders,
-  setOrders,
-  customers,
-  setCustomers,
-  catalogServices,
-  setCatalogServices,
-  company,
-  prefilledData,
-  onPrefilledDataConsumed
-}) => {
+const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCustomers, company, transactions, setTransactions }) => {
+  const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [showFullClientForm, setShowFullClientForm] = useState(false);
-  const [showFullServiceForm, setShowFullServiceForm] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [editingBudgetId, setEditingBudgetId] = useState<string | null>(null);
+  const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const { notify } = useNotify();
+  const { handlePrintOS } = usePrintOS(customers, company);
 
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
-  const [proposalTitle, setProposalTitle] = useState('');
-  const [paymentTerms, setPaymentTerms] = useState('50% à vista, 25% com 30 dias, 25% restante na conclusão');
-  const [paymentEntryPercent, setPaymentEntryPercent] = useState<number>(30);
-  const [deliveryTime, setDeliveryTime] = useState('15 dias úteis');
-  const [items, setItems] = useState<ServiceItem[]>([]);
+  const [osTitle, setOsTitle] = useState('Execução de Obra');
+  const [diagnosis, setDiagnosis] = useState(''); // description of work
   const [descriptionBlocks, setDescriptionBlocks] = useState<DescriptionBlock[]>([]);
+  const [paymentTerms, setPaymentTerms] = useState('');
+  const [deliveryTime, setDeliveryTime] = useState('');
+  const [deliveryDate, setDeliveryDate] = useState(new Date().toISOString().split('T')[0]);
+  const [contractPrice, setContractPrice] = useState<number>(0);
+  const [items, setItems] = useState<ServiceItem[]>([]);
 
   const [currentDesc, setCurrentDesc] = useState('');
-  const [currentUnit, setCurrentUnit] = useState('un');
-  const [currentQty, setCurrentQty] = useState(1);
   const [currentPrice, setCurrentPrice] = useState(0);
+  const [currentQty, setCurrentQty] = useState(1);
+  const [currentUnit, setCurrentUnit] = useState('un');
+  const [activeEditField, setActiveEditField] = useState<string | null>(null);
 
-  const [taxRate, setTaxRate] = useState<string | number>(0);
-  const [bdiRate, setBdiRate] = useState<string | number>(0);
-  const [showImportModal, setShowImportModal] = useState(false);
-  const [importSearch, setImportSearch] = useState('');
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [selectedCatalogId, setSelectedCatalogId] = useState('');
+  // Current Item Real Fields (Medição)
+  const [currentActualQty, setCurrentActualQty] = useState<number>(0);
+  const [currentActualPrice, setCurrentActualPrice] = useState<number>(0);
+  const [currentActual, setCurrentActual] = useState<number | ''>('');
 
-  const budgets = useMemo(() => {
-    const term = searchTerm.toLowerCase();
-    return orders.filter(o =>
-      (o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED) &&
-      (o.customerName.toLowerCase().includes(term) || o.id.includes(searchTerm))
-    );
-  }, [orders, searchTerm]);
+  // Financial State
+  const [activeTab, setActiveTab] = useState<'details' | 'financial'>('details');
+  const [taxRate, setTaxRate] = useState<number>(0);
+  const [bdiRate, setBdiRate] = useState<number>(0);
 
-  // Handle Prefilled Data from Planning
-  useEffect(() => {
-    if (prefilledData) {
-      const { plan, services, totalMaterial, totalLabor, totalIndirect } = prefilledData;
+  // Report State
+  const [showReportTypeModal, setShowReportTypeModal] = useState(false);
+  const [selectedOrderForReport, setSelectedOrderForReport] = useState<ServiceOrder | null>(null);
 
-      setSelectedCustomerId(plan?.client_id || '');
-      setProposalTitle(plan?.name || '');
 
-      if (typeof prefilledData.bdiRate === 'number') setBdiRate(prefilledData.bdiRate);
-      if (typeof prefilledData.taxRate === 'number') setTaxRate(prefilledData.taxRate);
-
-      const newItems: ServiceItem[] = [];
-
-      if (services && services.length > 0) {
-        services.forEach((s: any) => {
-          newItems.push({
-            id: uid(),
-            description: s.description,
-            quantity: s.quantity,
-            unitPrice: (s.unit_labor_cost || 0) + (s.unit_material_cost || 0),
-            unit: s.unit,
-            type: 'Serviço'
-          });
-        });
+  const totalExpenses = useMemo(() => items.reduce((acc, i) => acc + (i.actualQuantity ? (i.actualQuantity * (i.actualUnitPrice || 0)) : (i.actualValue || 0)), 0), [items]);
+  const expensesByCategory = useMemo(() => {
+    const groups: { [key: string]: number } = {};
+    items.forEach(i => {
+      const val = i.actualQuantity ? (i.actualQuantity * (i.actualUnitPrice || 0)) : (i.actualValue || 0);
+      if (val && val > 0) {
+        const cat = (i.type || 'Geral').toUpperCase();
+        groups[cat] = (groups[cat] || 0) + val;
       }
+    });
+    return groups;
+  }, [items]);
 
-      if (totalMaterial > 0) {
-        newItems.push({
-          id: uid(),
-          description: 'TOTAL DE MATERIAIS E INSUMOS (PREVISTO)',
-          quantity: 1,
-          unitPrice: totalMaterial,
-          unit: 'un',
-          type: 'Material'
-        });
+  const plannedCost = useMemo(() => financeUtils.calculateSubtotal(items), [items]);
+
+  const revenue = contractPrice || 0;
+
+  const plannedProfit = useMemo(() => revenue - plannedCost, [revenue, plannedCost]);
+  const actualProfit = useMemo(() => revenue - totalExpenses, [revenue, totalExpenses]);
+  const executionVariance = useMemo(() => plannedCost - totalExpenses, [plannedCost, totalExpenses]);
+
+
+  // Filter for WORK orders
+  const activeOrders = useMemo(() => orders.filter(o => {
+    if (o.osType !== 'WORK') return false; // Only Work Orders
+    if (o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED) return false;
+    return o.customerName.toLowerCase().includes(searchTerm.toLowerCase()) || o.id.includes(searchTerm);
+  }), [orders, searchTerm]);
+
+  const subtotal = useMemo(() => financeUtils.calculateSubtotal(items), [items]);
+
+  const addTextBlock = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'text', content: '' }]);
+  const addImageBlock = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'image', content: '' }]);
+  const addPageBreak = () => setDescriptionBlocks([...descriptionBlocks, { id: Date.now().toString(), type: 'page-break', content: 'QUEBRA DE PÃ GINA' }]);
+  const updateBlockContent = (id: string, content: string) => setDescriptionBlocks(prev => prev.map(b => b.id === id ? { ...b, content } : b));
+
+  const handleImageUpload = async (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        const compressedBase64 = await compressImage(file);
+        updateBlockContent(id, compressedBase64);
+      } catch (error) {
+        console.error("Erro ao comprimir imagem:", error);
+        notify("Erro ao processar imagem. Tente uma menor.", "error");
       }
-
-      if (totalLabor > 0) {
-        newItems.push({
-          id: uid(),
-          description: 'TOTAL DE MÃO DE OBRA (PREVISTO)',
-          quantity: 1,
-          unitPrice: totalLabor,
-          unit: 'un',
-          type: 'Serviço'
-        });
-      }
-
-      if (totalIndirect > 0) {
-        newItems.push({
-          id: uid(),
-          description: 'CUSTOS INDIRETOS E OPERACIONAIS (PREVISTO)',
-          quantity: 1,
-          unitPrice: totalIndirect,
-          unit: 'un',
-          type: 'Serviço'
-        });
-      }
-
-      setItems(newItems);
-
-      setShowForm(true);
-      setEditingBudgetId(null);
-
-      onPrefilledDataConsumed();
-      notify("Dados do planejamento importados com sucesso!");
     }
-  }, [prefilledData, onPrefilledDataConsumed, notify]);
-
-  const subtotal = useMemo(
-    () => items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0),
-    [items]
-  );
-
-  const totalAmount = useMemo(() => {
-    const bdi = Number(bdiRate) || 0;
-    const tax = Number(taxRate) || 0;
-
-    const bdiValue = subtotal * (bdi / 100);
-    const subtotalWithBDI = subtotal + bdiValue;
-
-    // Gross-up imposto
-    const taxFactor = Math.max(0.01, 1 - (tax / 100));
-    return subtotalWithBDI / taxFactor;
-  }, [subtotal, taxRate, bdiRate]);
+  };
 
   const handleAddItem = () => {
-    if (!currentDesc || currentPrice <= 0) return;
-
-    const newItem: ServiceItem = {
-      id: uid(),
+    if (!currentDesc) return;
+    setItems([...items, {
+      id: Date.now().toString(),
       description: currentDesc,
-      quantity: currentQty,
-      unitPrice: currentPrice,
-      unit: currentUnit,
-      type: 'Serviço'
-    };
-
-    setItems(prev => [...prev, newItem]);
-    setCurrentDesc('');
-    setCurrentPrice(0);
-    setCurrentQty(1);
-    setSelectedCatalogId('');
+      quantity: currentQty || 1,
+      unitPrice: currentPrice || 0,
+      type: 'Serviço',
+      unit: currentUnit || 'un',
+      actualValue: (currentActual === '' ? 0 : currentActual) || ((currentActualQty || 0) * (currentActualPrice || 0)),
+      actualQuantity: currentActualQty || 0,
+      actualUnitPrice: currentActualPrice || 0
+    }]);
+    setCurrentDesc(''); setCurrentPrice(0); setCurrentQty(1); setCurrentUnit('un'); setCurrentActual('');
+    setCurrentActualQty(0); setCurrentActualPrice(0);
+    notify("Item adicionado");
   };
 
   const updateItem = (id: string, field: keyof ServiceItem, value: any) => {
@@ -227,1328 +150,825 @@ const BudgetManager: React.FC<Props> = ({
     }));
   };
 
-  // Drag & Drop (reorder no dragEnd)
-  const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
-
-  const reorderItems = useCallback((from: number, to: number) => {
-    if (from === to) return;
-    setItems(prev => {
-      const arr = [...prev];
-      const [moved] = arr.splice(from, 1);
-      arr.splice(to, 0, moved);
-      return arr;
-    });
-  }, []);
-
-  const moveItem = (index: number, direction: 'up' | 'down') => {
-    const newIndex = direction === 'up' ? index - 1 : index + 1;
-    if (newIndex < 0 || newIndex >= items.length) return;
-    reorderItems(index, newIndex);
-  };
-
-  // Description Blocks
-  const addTextBlock = () => setDescriptionBlocks(prev => [...prev, { id: uid(), type: 'text', content: '' }]);
-  const addImageBlock = () => setDescriptionBlocks(prev => [...prev, { id: uid(), type: 'image', content: '' }]);
-
-  const updateBlockContent = (id: string, content: string) => {
-    setDescriptionBlocks(prev => prev.map(b => b.id === id ? { ...b, content } : b));
-  };
-
-  const handleImageUpload = async (id: string, e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    try {
-      const compressedBase64 = await compressImage(file);
-      updateBlockContent(id, compressedBase64);
-    } catch (error) {
-      console.error("Erro ao comprimir imagem:", error);
-      notify("Erro ao processar imagem. Tente uma menor.", "error");
-    }
-  };
-
-  const formatDate = (dateStr: string) => {
-    try {
-      const d = new Date(dateStr);
-      return isNaN(d.getTime())
-        ? new Date().toLocaleDateString('pt-BR')
-        : d.toLocaleDateString('pt-BR');
-    } catch {
-      return new Date().toLocaleDateString('pt-BR');
-    }
-  };
-
-  const getHeaderHtml = (b: ServiceOrder) => {
-    const eDate = formatDate(b.createdAt);
-    const vDays = company.defaultProposalValidity || 15;
-    const vDate = b.dueDate
-      ? formatDate(b.dueDate)
-      : formatDate(
-        new Date(
-          new Date(b.createdAt || Date.now()).getTime() + vDays * 24 * 60 * 60 * 1000
-        ).toISOString()
-      );
-
-    return `
-      <div style="padding-bottom: 25px !important; border-bottom: 3px solid #000; margin-bottom: 40px;">
-         <div style="display: flex; justify-content: space-between; align-items: center;">
-             <div style="display: flex; gap: 24px; align-items: center;">
-                 <div style="width: 80px; display: flex; align-items: center; justify: flex-start;">
-                     ${company.logo ? `<img src="${company.logo}" style="max-height: 80px; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#1e3a8a;">PRIME</div>'}
-                 </div>
-                 <div>
-                     <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 0 0 2px 0; text-transform: uppercase;">${company.name}</h1>
-                     <p style="margin: 0; font-size: 11px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.02em;">SOLUÇÕES em Gestão Profissional</p>
-                      <p style="margin: 4px 0 0 0; font-size: 10px; color: #64748b; font-weight: 500;">${company.cnpj || ''} | ${company.phone || ''}</p>
-                 </div>
-             </div>
-             <div style="text-align: right;">
-                 <p style="margin: 0; font-size: 24px; font-weight: 800; color: #2563eb;">${b.id}</p>
-                 <p style="margin: 4px 0 0 0; font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase;">EMISSÃO: ${eDate}</p>
-                 <p style="margin: 2px 0 0 0; font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase;">VALIDADE: ${vDate}</p>
-             </div>
-         </div>
-      </div>`;
-  };
-
-  const getFooterHtml = (b: ServiceOrder) => {
-    const vDays = company.defaultProposalValidity || 15;
-    return `
-      <div style="margin-top: 32px; break-inside: avoid;">
-          <div style="border: 1px solid #bfdbfe; background: #eff6ff; border-radius: 16px; padding: 32px;">
-               <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-                   <div style="background: #2563eb; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold;">?</div>
-                   <span style="font-size: 13px; font-weight: 800; color: #1e40af; text-transform: uppercase; letter-spacing: 0.05em;">TERMO DE ACEITE E AUTORIZAÇÃO PROFISSIONAL</span>
-               </div>
-               <p style="margin: 0; font-size: 12px; color: #1e3a8a; line-height: 1.6; text-align: justify; font-weight: 500;">
-                   "Ao assinar abaixo, o cliente declara estar ciente e de pleno acordo com os valores, prazos e especificações descritas. Esta aceitação autoriza o início imediato dos trabalhos sob as condições estabelecidas. Validade: ${vDays} dias."
-               </p>
-          </div>
-          <div style="margin-top: 100px; break-inside: avoid;">
-              <div style="border-bottom: 2px solid #cbd5e1; width: 400px; max-width: 100%;"></div>
-              <p style="margin: 12px 0 0 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; line-height: 1.4; padding-bottom: 2px;">ASSINATURA DO CLIENTE / ACEITE</p>
-          </div>
-      </div>`;
-  };
-
-  const getBodyHtml = (b: ServiceOrder) => {
-    const cust = customers.find(c => c.id === b.customerId) || {
-      name: b.customerName,
-      address: 'não informado',
-      document: 'Documento não informado'
-    };
-
-    const subT = b.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0);
-    const bdiR = Number(b.bdiRate || 0);
-    const taxR = Number(b.taxRate || 0);
-
-    const bdiV = subT * (bdiR / 100);
-    const subTWithBDI = subT + bdiV;
-
-    const taxFactorBody = Math.max(0.01, 1 - (taxR / 100));
-    const finalT = subTWithBDI / taxFactorBody;
-    const taxV = finalT - subTWithBDI;
-
-    const itemFBase = company.itemsFontSize || 12;
-
-    const itemsH = b.items.map((item: ServiceItem) => `
-      <tr style="border-bottom: 1px solid #e2e8f0;">
-        <td style="padding: 16px 0; font-weight: 600; text-transform: uppercase; font-size: ${itemFBase}px; color: #334155; width: 55%; vertical-align: top;">${item.description}</td>
-        <td style="padding: 16px 0; text-align: center; font-weight: 600; color: #475569; font-size: ${itemFBase}px; width: 10%; vertical-align: top;">${item.quantity} ${item.unit || ''}</td>
-        <td style="padding: 16px 0; text-align: right; color: #475569; font-size: ${itemFBase}px; width: 17.5%; vertical-align: top;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-        <td style="padding: 16px 0; text-align: right; font-weight: 700; font-size: ${itemFBase}px; color: #0f172a; width: 17.5%; vertical-align: top;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-      </tr>`).join('');
-
-    const safeBlocks = (b.descriptionBlocks || []).map(block => {
-      if (block.type === 'text') {
-        return {
-          ...block,
-          content: sanitizeHtml(block.content || ''),
-        };
-      }
-      return block;
-    });
-
-    return `
-      <div style="display: flex; gap: 24px; margin-bottom: 40px;">
-        <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
-          <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">CLIENTE / DESTINATÁRIO</span>
-          <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${cust.name}</div>
-          <div style="font-size: 11px; color: #64748b; font-weight: 500; margin-top: 4px;">${cust.document || 'CPF/CNPJ não informado'}</div>
-        </div>
-        <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
-          <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">REFERÊNCIA DO ORÇAMENTO</span>
-          <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${b.description || 'PROPOSTA COMERCIAL'}</div>
-        </div>
-      </div>
-
-      <div style="margin-bottom: 32px;">
-        <h2 style="margin: 0 0 8px 0; font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase; letter-spacing: 0.02em;">PROPOSTA COMERCIAL</h2>
-        <p style="margin: 0; font-size: 20px; font-weight: 800; color: #2563eb; text-transform: uppercase; line-height: 1.3;">${b.description || ''}</p>
-      </div>
-
-      ${safeBlocks && safeBlocks.length > 0 ? `
-        <div style="margin-bottom: 48px;" class="print-description-content">
-          <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0; margin-bottom: 24px;">DESCRIÇÃO DOS SERVIÇOS</div>
-          <div style="display: block;">
-            ${safeBlocks.map(block => {
-              if (block.type === 'text') {
-                return `<div class="ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px; color: #334155; line-height: 1.6; text-align: justify; margin-bottom: 24px;">${block.content}</div>`;
-              } else if (block.type === 'image') {
-                return `<div style="margin: 24px 0; break-inside: avoid; page-break-inside: avoid; display: block; text-align: center;">
-                  <img src="${block.content}" style="width: auto; max-width: 100%; border-radius: 8px; display: block; margin: 0 auto; object-fit: contain; max-height: 980px;">
-                </div>`;
-              } else if (block.type === 'page-break') {
-                return `<div style="page-break-after: always; break-after: page; height: 0;"></div>`;
-              }
-              return '';
-            }).join('')}
-          </div>
-        </div>` : ''}
-
-      <div style="margin-bottom: 40px; break-inside: avoid;">
-        <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; padding-bottom: 12px; margin-bottom: 8px;">DETALHAMENTO FINANCEIRO</div>
-        <table style="width: 100%; border-collapse: collapse;">
-          <thead>
-            <tr style="border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
-              <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: left; font-weight: 800; width: 55%; letter-spacing: 0.05em;">ITEM / DESCRIÇÃO</th>
-              <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: center; font-weight: 800; width: 10%; letter-spacing: 0.05em;">QTD</th>
-              <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: right; font-weight: 800; width: 17.5%; letter-spacing: 0.05em;">UNITÁRIO</th>
-              <th style="padding: 12px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: right; font-weight: 800; width: 17.5%; letter-spacing: 0.05em;">SUBTOTAL</th>
-            </tr>
-          </thead>
-          <tbody>${itemsH}</tbody>
-        </table>
-      </div>
-
-      <div style="margin-bottom: 32px; break-inside: avoid;">
-        <div style="display: flex; justify-content: flex-end; margin-bottom: 12px; gap: 40px;">
-          <div style="text-align: right;">
-            <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px; line-height: 1.2;">SUBTOTAL</span>
-            <span style="font-size: 10px; font-weight: 700; color: #334155; display: block;">R$ ${subT.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-          </div>
-          ${bdiR > 0 ? `
-          <div style="text-align: right;">
-            <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px; line-height: 1.2;">BDI (${bdiR}%)</span>
-            <span style="font-size: 10px; font-weight: 700; color: #10b981; display: block;">+ R$ ${bdiV.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-          </div>` : ''}
-          ${taxR > 0 ? `
-          <div style="text-align: right;">
-            <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px; line-height: 1.2;">IMPOSTOS (${taxR}%)</span>
-            <span style="font-size: 10px; font-weight: 700; color: #3b82f6; display: block;">+ R$ ${taxV.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-          </div>` : ''}
-        </div>
-
-        <div style="background: #0f172a; color: white; padding: 24px 32px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center;">
-          <span style="font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;">INVESTIMENTO TOTAL:</span>
-          <span style="font-size: 28px; font-weight: 800; letter-spacing: -0.05em; line-height: 1.2; padding-bottom: 4px;">R$ ${finalT.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-        </div>
-      </div>
-
-      <div style="margin-bottom: 24px; break-inside: avoid;">
-        <div style="display: flex; gap: 24px;">
-          <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
-            <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">FORMA DE PAGAMENTO</span>
-            <p style="margin: 0; font-size: 12px; font-weight: 600; color: #334155; line-height: 1.5;">${b.paymentTerms || 'A combinar'}</p>
-          </div>
-          <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
-            <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">PRAZO DE ENTREGA / EXECUÇÃO</span>
-            <p style="margin: 0; font-size: 12px; font-weight: 600; color: #334155; line-height: 1.5;">${b.deliveryTime || 'A combinar'}</p>
-          </div>
-        </div>
-      </div>
-    `;
-  };
-
-  const getBudgetHtml = (budget: ServiceOrder) => {
-    return `
-      <div class="pdf-root">
-        <table style="width: 100%; border-collapse: collapse; font-family: 'Inter', sans-serif;">
-          <thead>
-            <tr>
-              <td style="height: 15mm; border: none; padding: 0;"><div style="height: 15mm;">&nbsp;</div></td>
-            </tr>
-          </thead>
-          <tfoot>
-            <tr>
-              <td style="height: 15mm; border: none; padding: 0;"><div style="height: 15mm;">&nbsp;</div></td>
-            </tr>
-          </tfoot>
-          <tbody>
-            <tr>
-              <td style="padding: 0;">
-                <div class="a4-container">
-                  <div style="margin-bottom: 25px;">
-                    ${getHeaderHtml(budget)}
-                  </div>
-                  ${getBodyHtml(budget)}
-                  ${getFooterHtml(budget)}
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    `;
-  };
-
-  const runOptimizePageBreaks = (container: HTMLElement) => {
-    const root = container.querySelector('.print-description-content');
-    if (!root) return;
-    const content = root.querySelector('div:last-child');
-    if (!content) return;
-
-    const allNodes: Element[] = [];
-    Array.from(content.children).forEach(block => {
-      if (block.classList.contains('ql-editor-print')) {
-        allNodes.push(...Array.from(block.children));
-      } else {
-        allNodes.push(block);
-      }
-    });
-
-    for (let i = 0; i < allNodes.length - 1; i++) {
-      const el = allNodes[i] as HTMLElement;
-      let isTitle = false;
-
-      if (el.matches('h1, h2, h3, h4, h5, h6')) {
-        isTitle = true;
-      } else {
-        const text = (el.innerText || '').trim();
-        const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text);
-        const isBold =
-          !!el.querySelector('strong, b') ||
-          el.classList.contains('font-bold') ||
-          el.tagName === 'STRONG' ||
-          (el.style && (parseInt(el.style.fontWeight || '0', 10) >= 600 || el.style.fontWeight === 'bold'));
-        const isShort = text.length < 150;
-
-        if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 3)) {
-          isTitle = true;
-        }
-      }
-
-      if (isTitle) {
-        const nodesToWrap: HTMLElement[] = [el];
-        let j = i + 1;
-
-        while (j < allNodes.length && nodesToWrap.length < 2) {
-          const next = allNodes[j] as HTMLElement;
-          const nextText = (next.innerText || '').trim();
-          const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') ||
-            (/^\d+(\.\d+)*[\.\s\)]/.test(nextText) && (next.querySelector('strong, b') || nextText === nextText.toUpperCase()));
-          if (nextIsTitle) break;
-          nodesToWrap.push(next);
-          j++;
-        }
-
-        if (nodesToWrap.length > 1) {
-          const wrapper = document.createElement('div');
-          wrapper.className = 'keep-together';
-          wrapper.style.breakInside = 'avoid';
-          wrapper.style.pageBreakInside = 'avoid';
-          wrapper.style.display = 'block';
-          wrapper.style.width = '100%';
-          el.parentNode?.insertBefore(wrapper, el);
-          nodesToWrap.forEach(node => wrapper.appendChild(node));
-          i = j - 1;
-        }
-      }
-    }
-  };
-
-  const handlePrint = (budget: ServiceOrder) => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-
-    const htmlContent = getBudgetHtml(budget);
-
-    const html = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Orçamento - ${budget.id}</title>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
-        <style>
-          * { box-sizing: border-box; }
-          body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
-          @page { size: A4; margin: 0 !important; }
-          .a4-container { width: 100%; margin: 0; background: white; padding: 0 15mm !important; }
-          .avoid-break { break-inside: avoid; page-break-inside: avoid; }
-          .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
-
-          @media print {
-            @page { margin: 0; size: A4; }
-            body { background: white !important; margin: 0 !important; padding: 0 !important; }
-            .a4-container { box-shadow: none !important; border: none !important; width: 100% !important; padding: 0 15mm !important; margin: 0 !important; }
-            table { break-inside: auto; width: 100%; }
-            tr { break-inside: auto !important; break-after: auto; }
-            thead { display: table-header-group; }
-            tfoot { display: table-footer-group; }
-          }
-
-          .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
-          .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
-          .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
-          .ql-editor-print strong, .ql-editor-print b { font-weight: bold !important; color: #000 !important; }
-          .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4 { font-weight: 800 !important; color: #0f172a !important; margin-top: 20px !important; margin-bottom: 10px !important; break-after: avoid !important; }
-        </style>
-      </head>
-      <body>
-        ${htmlContent}
-        <script>
-          window.onload = function() {
-            setTimeout(() => { window.print(); }, 300);
-          }
-        </script>
-      </body>
-      </html>
-    `;
-
-    printWindow.document.write(html);
-    printWindow.document.close();
-  };
-
-  const handleGeneratePDF = async (budget: ServiceOrder) => {
-    let container: HTMLDivElement | null = null;
-
-    try {
-      notify("Gerando PDF...");
-
-      // ✅ Agora usa o HTML COMPLETO (igual print)
-      const htmlContent = getBudgetHtml(budget);
-
-      container = document.createElement("div");
-      container.id = "pdf-temp-root";
-      Object.assign(container.style, {
-        position: "fixed",
-        left: "0",
-        top: "0",
-        width: "210mm",
-        background: "white",
-        opacity: "0",
-        pointerEvents: "none",
-        zIndex: "999999",
-      });
-
-      const head = `
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
-        <style>
-          * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-          body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background: white; color: #000; }
-          .pdf-page { width: 210mm; background: white; margin: 0; padding: 0; }
-          .a4-container { width: 100%; background: white; padding: 0 15mm; }
-          .avoid-break, .keep-together { break-inside: avoid; page-break-inside: avoid; }
-          table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-          thead { display: table-header-group; }
-          tfoot { display: table-footer-group; }
-          tr { break-inside: auto !important; }
-
-          .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
-          .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
-          .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
-          .ql-editor-print strong, .ql-editor-print b { font-weight: bold !important; color: #000 !important; }
-          .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4 {
-            font-weight: 800 !important; color: #0f172a !important;
-            margin-top: 20px !important; margin-bottom: 10px !important;
-            break-after: avoid !important;
-          }
-        </style>
-      `;
-
-      container.innerHTML = `
-        ${head}
-        <div class="pdf-page">
-          ${htmlContent}
-        </div>
-      `;
-
-      document.body.appendChild(container);
-
-      // Otimizar quebras antes de capturar
-      runOptimizePageBreaks(container);
-
-      const elementToPrint = container.querySelector(".pdf-page") as HTMLElement;
-      if (!elementToPrint) throw new Error("Elemento de impressão não encontrado.");
-
-      // Aguarda imagens
-      const imgs = Array.from(container.querySelectorAll("img"));
-      await Promise.all(
-        imgs.map((img) => {
-          const el = img as HTMLImageElement;
-          if (el.complete) return Promise.resolve();
-          return new Promise<void>((resolve) => {
-            el.addEventListener("load", () => resolve(), { once: true });
-            el.addEventListener("error", () => resolve(), { once: true });
-          });
-        })
-      );
-
-      // Aguarda fontes
-      if ("fonts" in document) {
-        // @ts-ignore
-        await document.fonts.ready;
-      }
-
-      await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
-
-      const filename = `${budget.id}_${(budget.customerName || "cliente")
-        .replace(/[^a-z0-9]/gi, "_")
-        .toLowerCase()}.pdf`;
-
-      // ✅ Margin do html2pdf = 0 (padding já está no HTML)
-      const options = {
-        margin: 0,
-        filename,
-        image: { type: "jpeg" as const, quality: 0.98 },
-        html2canvas: {
-          scale: 3,
-          useCORS: true,
-          allowTaint: false,
-          backgroundColor: "#ffffff",
-          logging: false,
-          windowWidth: 794,
-        },
-        jsPDF: { unit: "mm" as const, format: "a4" as const, orientation: "portrait" as const },
-        pagebreak: { mode: ["avoid-all", "css", "legacy"] as any },
-      };
-
-      const worker = html2pdf()
-        .set(options)
-        .from(elementToPrint)
-        .toPdf()
-        .get('pdf')
-        .then((pdf: any) => {
-          const totalPages = pdf.internal.getNumberOfPages();
-          for (let i = 1; i <= totalPages; i++) {
-            pdf.setPage(i);
-            pdf.setFontSize(8);
-            pdf.setTextColor(150);
-            pdf.text(
-              `Pág. ${i} / ${totalPages}`,
-              pdf.internal.pageSize.getWidth() - 15,
-              pdf.internal.pageSize.getHeight() - 8
-            );
-          }
-        });
-
-      await (worker as any).save();
-
-      notify("PDF baixado com sucesso!");
-    } catch (err) {
-      console.error("PDF Error:", err);
-      notify("Erro ao gerar PDF", "error");
-    } finally {
-      if (container?.parentNode) container.parentNode.removeChild(container);
-    }
-  };
-
-  const handleSave = async () => {
+  const handleSaveOS = async () => {
     if (isSaving) return;
-
     const customer = customers.find(c => c.id === selectedCustomerId);
     if (!customer) { notify("Selecione um cliente", "error"); return; }
-    if (items.length === 0) { notify("Adicione itens ao Orçamento", "error"); return; }
 
-    const existingBudget = editingBudgetId ? orders.find(o => o.id === editingBudgetId) : null;
-
-    // Sanitiza textos antes de salvar
-    const safeDescriptionBlocks = (descriptionBlocks || []).map(b => {
-      if (b.type === 'text') return { ...b, content: sanitizeHtml(b.content || '') };
-      return b;
-    });
+    const existingOrder = editingOrderId ? orders.find(o => o.id === editingOrderId) : null;
 
     const data: ServiceOrder = {
-      id: editingBudgetId || db.generateId('ORC'),
+      id: editingOrderId || db.generateId('OS'),
       customerId: customer.id,
       customerName: customer.name,
       customerEmail: customer.email,
-      description: proposalTitle || 'PROPOSTA COMERCIAL',
-      status: OrderStatus.PENDING,
-      items,
-      descriptionBlocks: safeDescriptionBlocks,
-      totalAmount,
+      description: osTitle,
+      serviceDescription: diagnosis,
+      status: OrderStatus.IN_PROGRESS,
+      items: existingOrder?.items || items, // Preserve original budget items
+      costItems: items, // Save current list as Planned Costs
+      totalAmount: revenue,
+      descriptionBlocks,
       paymentTerms,
       deliveryTime,
-      paymentEntryPercent,
-      taxRate: Number(taxRate) || 0,
-      bdiRate: Number(bdiRate) || 0,
-      createdAt: existingBudget?.createdAt || new Date().toISOString().split('T')[0],
-      dueDate: existingBudget?.dueDate || new Date(Date.now() + (company.defaultProposalValidity || 15) * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      createdAt: existingOrder?.createdAt || new Date().toISOString().split('T')[0],
+      dueDate: deliveryDate,
+      taxRate: taxRate,
+      bdiRate: bdiRate,
+      osType: 'WORK',
+      contractPrice: contractPrice
     };
 
-    const newList = editingBudgetId
-      ? orders.map(o => o.id === editingBudgetId ? data : o)
-      : [data, ...orders];
-
+    const newList = editingOrderId ? orders.map(o => o.id === editingOrderId ? data : o) : [data, ...orders];
     setOrders(newList);
 
     setIsSaving(true);
     try {
       const result = await db.save('serviflow_orders', newList);
-      if (result?.success) {
-        notify("Orçamento salvo e sincronizado!");
-        setTimeout(() => setShowForm(false), 800);
-      } else if (result?.error === 'quota_exceeded') {
-        notify("ERRO DE ARMAZENAMENTO: Limite excedido.", "error");
-      } else {
-        notify(`Salvo localmente. Erro Sync: ${result?.error?.message || JSON.stringify(result?.error)}`, "warning");
-        setShowForm(false);
-      }
-    } finally {
-      setIsSaving(false);
-    }
+      if (result?.success) { notify(editingOrderId ? "OS de Obra atualizada!" : "OS de Obra registrada!"); setEditingOrderId(null); setShowForm(false); }
+      else { notify("Salvo localmente. Erro ao sincronizar.", "warning"); setEditingOrderId(null); setShowForm(false); }
+    } finally { setIsSaving(false); }
   };
 
-  const loadBudgetToForm = (budget: ServiceOrder, isClone = false) => {
-    setShowImportModal(false);
-    setEditingBudgetId(isClone ? null : budget.id);
-    setSelectedCustomerId(budget.customerId);
 
-    // Recria IDs para evitar conflito no React keys
-    setItems(budget.items.map(item => ({ ...item, id: uid() })));
-    setProposalTitle(isClone ? `${budget.description} (CÓPIA)` : (budget.description || ''));
+  const handleDownloadPDF = (order: ServiceOrder) => {
+    const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', address: 'Endereço não informado', city: '', state: '', cep: '' };
 
-    setDescriptionBlocks(
-      budget.descriptionBlocks && budget.descriptionBlocks.length > 0
-        ? budget.descriptionBlocks.map(block => ({ ...block, id: uid() }))
-        : []
-    );
+    const html = `
+    < !DOCTYPE html >
+        <html>
+            <head>
+                <title>Contrato - ${order.id}</title>
+                <script src="https://cdn.tailwindcss.com"></script>
+                <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
+                    <style>
+                        * {box - sizing: border-box; }
+                        body {font - family: 'Inter', sans-serif; margin: 0; padding: 0; }
+                        .a4-container {width: 100%; background: white; }
+                        .avoid-break { break-inside: avoid; page-break-inside: avoid; }
+                    </style>
+            </head>
+            <body class="no-scrollbar">
+                <div id="contract-content">
+                    <div class="a4-container">
+                        <div class="flex justify-between items-start mb-10 border-b-[3px] border-slate-900 pb-8">
+                            <div class="flex gap-6 items-center">
+                                <div style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                                    ${company.logo ?\`<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">\` : '<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>'}
+                                </div>
+                                <div>
+                                    <h1 class="text-3xl font-black text-slate-900 leading-none mb-2 uppercase tracking-tight">${company.name}</h1>
+                                    <p class="text-[11px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">Contrato de Prestação de Serviços</p>
+                                    <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tight">${company.cnpj || ''} | ${company.phone || ''}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest mb-2 shadow-md inline-block">CONTRATO</div>
+                                <p class="text-4xl font-black text-[#0f172a] tracking-tighter mb-1 whitespace-nowrap">${order.id}</p>
+                                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-right">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p>
+                            </div>
+                        </div>
 
-    if (budget.paymentTerms) setPaymentTerms(budget.paymentTerms);
-    if (budget.deliveryTime) setDeliveryTime(budget.deliveryTime);
-    setPaymentEntryPercent(budget.paymentEntryPercent ?? 30);
+                        <div class="grid grid-cols-2 gap-4 mb-8">
+                            <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100"><h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</h4><p class="text-base font-black text-slate-900 uppercase">${company.name}</p><p class="text-xs font-bold text-slate-500 uppercase mt-1">${company.address || ''}</p><p class="text-xs font-bold text-slate-500 uppercase">${company.email || ''}</p></div>
+                            <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100"><h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</h4><p class="text-base font-black text-slate-900 uppercase">${customer.name}</p><p class="text-xs font-bold text-slate-500 uppercase mt-1">${(customer.document || '').replace(/\D/g, '').length <= 11 ? 'CPF' : 'CNPJ'}: ${formatDocument(customer.document || '') || 'N/A'}</p><p class="text-xs font-bold text-slate-500 uppercase">${customer.address || ''}, ${customer.number || ''} - ${customer.city || ''}</p></div>
+                        </div>
 
-    // Normaliza possíveis nomes vindos do DB
-    const b: any = budget;
-    const t = b.taxRate ?? b.taxrate ?? b.tax_rate ?? 0;
-    const d = b.bdiRate ?? b.bdirate ?? b.bdi_rate ?? 0;
 
-    setTaxRate(t);
-    setBdiRate(d);
 
-    setShowForm(true);
-    if (isClone) notify("Orçamento clonado! Você está editando uma nova cópia.");
-  };
+                        <div className="mb-10">
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">As partes acima identificadas resolvem firmar o presente Contrato de Prestação de Serviços por Empreitada Global, nos termos da legislação civil e previdenciária vigente, mediante as cláusulas e condições seguintes:</p>
+                        </div>
 
-  return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-black text-slate-900 tracking-tighter flex items-center gap-2">
-            Orçamentos <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">{orders.filter(o => o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED).length}</span>
-          </h2>
-          <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Gerencie suas propostas comerciais</p>
+                        <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 1ª – DO OBJETO</h4>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">1.1. O presente contrato tem por objeto a execução de reforma em unidade residencial, situada no endereço do CONTRATANTE, compreendendo os serviços descritos abaixo, os quais serão executados por empreitada global, com responsabilidade técnica, administrativa e operacional integral da CONTRATADA.</p>
+                            <div class="bg-blue-50/50 p-4 rounded-xl border-l-4 border-blue-500 mt-4">
+                                <p class="text-[14px] font-bold text-blue-900 uppercase tracking-wide">${order.description}</p>
+                            </div>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-4">1.2. A execução dos serviços será realizada por obra certa, com preço previamente ajustado, não se caracterizando, em hipótese alguma, cessão ou locação de mão de obra.</p>
+                        </div>
+
+                        <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 2ª – DA FORMA DE EXECUÇÃO (EMPREITADA GLOBAL)</h4>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">2.1. A CONTRATADA executará os serviços com autonomia técnica e gerencial, utilizando meios próprios, inclusive pessoal, ferramentas, equipamentos e métodos de trabalho.</p>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">2.2. Não haverá qualquer tipo de subordinação, exclusividade, controle de jornada ou disponibilização de trabalhadores ao CONTRATANTE.</p>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">2.3. A CONTRATADA assume total responsabilidade pela execução da obra, respondendo integralmente pelos serviços contratados.</p>
+                        </div>
+
+                        <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 3ª – DO PREÇO E DA FORMA DE PAGAMENTO</h4>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">3.1. Pelos serviços objeto deste contrato, o CONTRATANTE pagará à CONTRATADA o valor global de <b class="text-slate-900">R$ ${order.contractPrice && order.contractPrice > 0 ? order.contractPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>.</p>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">3.2. O pagamento será efetuado da seguinte forma: <b>${order.paymentTerms || 'Conforme combinado'}</b>.</p>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">3.3. O valor contratado corresponde ao preço fechado da obra, não estando vinculado a horas trabalhadas, número de funcionários ou fornecimento de mão de obra.</p>
+                        </div>
+
+                        <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 4ª – DAS OBRIGAÇÕES DA CONTRATADA</h4>
+                            <ul class="list-disc pl-5 mt-3 text-[14px] text-slate-600 leading-relaxed space-y-2">
+                                <li>4.1. Executar os serviços conforme o escopo contratado e normas técnicas aplicáveis.</li>
+                                <li>4.2. Responsabilizar-se integralmente por seus empregados, prepostos ou subcontratados, inclusive quanto a encargos trabalhistas, previdenciários, fiscais e securitários.</li>
+                                <li>4.3. Manter seus tributos, contribuições e obrigações legais em dia.</li>
+                                <li>4.4. Responder por danos eventualmente causados ao imóvel durante a execução dos serviços.</li>
+                            </ul>
+                        </div>
+
+                        <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 5ª – DAS OBRIGAÇÕES DO CONTRATANTE</h4>
+                            <ul class="list-disc pl-5 mt-3 text-[14px] text-slate-600 leading-relaxed space-y-2">
+                                <li>5.1. Garantir o acesso da CONTRATADA ao local da obra.</li>
+                                <li>5.2. Efetuar os pagamentos conforme acordado.</li>
+                                <li>5.3. Fornecer, quando necessário, autorizações do condomínio para execução dos serviços.</li>
+                            </ul>
+                        </div>
+
+                        <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 6ª – DAS RESPONSABILIDADES PREVIDENCIÁRIAS E FISCAIS</h4>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">6.1. As partes reconhecem que o presente contrato caracteriza empreitada global de obra, nos termos da legislação vigente, não se aplicando a retenção de 11% (onze por cento) de INSS, conforme disposto na Lei nº 8.212/91 e Instrução Normativa RFB nº 971/2009.</p>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-2">6.2. A CONTRATADA é a única responsável pelo recolhimento de seus tributos e contribuições incidentes sobre suas atividades.</p>
+                        </div>
+
+                        <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 7ª – DO PRAZO</h4>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">7.1. O prazo estimado para execução da obra é de <b>${order.deliveryTime || 'conforme demanda'}</b>, contado a partir do início efetivo dos serviços, podendo ser ajustado mediante comum acordo entre as partes.</p>
+                        </div>
+
+                        <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 8ª – DA RESPONSABILIDADE TÉCNICA</h4>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">8.1. Quando aplicável, a CONTRATADA providenciará a emissão de ART/RRT, assumindo a responsabilidade técnica pela execução dos serviços.</p>
+                        </div>
+
+                        <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 9ª – DA RESCISÃO</h4>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">9.1. O presente contrato poderá ser rescindido por descumprimento de quaisquer de suas cláusulas, mediante notificação por escrito.</p>
+                        </div>
+
+                        <div className="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
+                            <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 10ª – DO FORO</h4>
+                            <p class="text-[14px] text-slate-600 leading-relaxed text-justify">10.1. Fica eleito o foro da comarca de <b>${customer.city || 'São Paulo'} - ${customer.state || 'SP'}</b>, para dirimir quaisquer controvérsias oriundas deste contrato, renunciando as partes a qualquer outro, por mais privilegiado que seja.</p>
+                        </div>
+
+                        <div class="mb-8" style="padding-top: 30mm; padding-bottom: 20mm; page-break-inside: avoid; break-inside: avoid;">
+                            <div class="grid grid-cols-2 gap-16 px-10">
+                                <div class="text-center border-t border-slate-300 pt-3" style="page-break-inside: avoid; break-inside: avoid;"><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</p><p class="text-sm font-bold uppercase text-slate-900">${company.name}</p></div>
+                                <div class="text-center border-t border-slate-300 pt-3 relative" style="page-break-inside: avoid; break-inside: avoid;"><p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</p><p class="text-sm font-bold uppercase text-slate-900">${customer.name}</p></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </body>
+        </html>\`;
+
+        // PDF Generation Options
+        const opt = {
+            margin: 15,
+            filename: \`Contrato - \${order.id.replace('OS-', 'OS')} - \${order.description || 'Proposta'}.pdf\`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 3, useCORS: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        };
+
+        // Use a hidden div to process HTML for PDF (must be in DOM and visible for layout)
+        const worker = document.createElement('div');
+        worker.style.position = 'absolute';
+        worker.style.left = '-9999px';
+        worker.style.top = '0';
+        worker.style.width = '210mm';
+        worker.innerHTML = html;
+        document.body.appendChild(worker);
+
+        // Apply optimizations manually (scripts in innerHTML don't run)
+        // Apply optimizations manually
+        html2pdf().from(worker).set(opt).save().then(() => {
+            document.body.removeChild(worker);
+        });
+    };
+
+    const handlePrintWorkReport = (order: ServiceOrder, type: 'estimated' | 'real') => {
+        const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, address: 'Não informado', document: 'N/A' };
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) return;
+
+        const formatDate = (dateStr: string) => {
+            try {
+                const d = new Date(dateStr);
+                return isNaN(d.getTime()) ? new Date().toLocaleDateString('pt-BR') : d.toLocaleDateString('pt-BR');
+            } catch {
+                return new Date().toLocaleDateString('pt-BR');
+            }
+        };
+
+        const { subtotal, bdiValue, taxValue, finalTotal } = financeUtils.getDetailedFinancials(order);
+
+        const itemsHtml = order.costItems?.map((item) => {
+            const estimatedTotal = item.quantity * item.unitPrice;
+            const actualTotal = item.actualValue || ((item.actualQuantity || 0) * (item.actualUnitPrice || 0));
+            const diff = estimatedTotal - actualTotal;
+
+            if (type === 'estimated') {
+                return `
+      < tr style = "border-bottom: 1px solid #f1f5f9;" >
+            <td style="padding: 10px 0; text-align: left; vertical-align: middle;">
+                <div style="font-weight: 700; text-transform: uppercase; font-size: 11px; color: #0f172a;">${item.description}</div>
+            </td>
+            <td style="padding: 10px 0; text-align: center; vertical-align: middle; color: #64748b; font-size: 10px; font-weight: 700;">${(item.type || 'MAT').toUpperCase()}</td>
+            <td style="padding: 10px 0; text-align: center; vertical-align: middle; color: #0f172a; font-size: 11px; font-weight: 700;">${item.quantity} ${item.unit || 'un'}</td>
+            <td style="padding: 10px 0; text-align: right; vertical-align: middle; color: #64748b; font-size: 10px; font-weight: 700;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+            <td style="padding: 10px 0; text-align: right; vertical-align: middle; font-weight: 800; font-size: 12px; color: #0f172a;">R$ ${estimatedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+          </tr > `;
+            } else {
+                return `
+  < tr style = "border-bottom: 1px solid #f1f5f9;" >
+            <td style="padding: 10px 0; text-align: left; vertical-align: middle;">
+                <div style="font-weight: 800; text-transform: uppercase; font-size: 10px; color: #0f172a;">${item.description}</div>
+            </td>
+            <td style="padding: 10px 0; text-align: center; vertical-align: middle; color: #0f172a; font-size: 10px; font-weight: 700;">${item.quantity}</td>
+            <td style="padding: 10px 0; text-align: right; vertical-align: middle; color: #3b82f6; font-size: 10px; font-weight: 700;">R$ ${estimatedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+            <td style="padding: 10px 0; text-align: center; vertical-align: middle; color: #0f172a; font-size: 10px; font-weight: 700;">${item.actualQuantity || 0}</td>
+            <td style="padding: 10px 0; text-align: right; vertical-align: middle; color: #e11d48; font-size: 10px; font-weight: 800;">R$ ${actualTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+            <td style="padding: 10px 0; text-align: right; vertical-align: middle; font-weight: 900; font-size: 11px; color: ${diff >= 0 ? '#059669' : '#e11d48'};">R$ ${diff.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+          </tr > `;
+            }
+        }).join('') || '';
+
+        const html = `
+  < !DOCTYPE html >
+    <html>
+      <head>
+        <title>Relatório de Obra - ${order.id}</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+          <style>
+            body {font - family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            @page {size: A4; margin: 15mm; }
+            .info-box {background: #f8fafc; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; }
+            .info-label {font - size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; display: block; }
+            .info-value {font - size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; }
+          </style>
+      </head>
+      <body>
+        <div class="flex justify-between items-start mb-8 border-b-[3px] border-slate-900 pb-6">
+          <div class="flex gap-6 items-center">
+            <div style="width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;">
+              ${company.logo ?\`<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">\` : '<div style="font-weight:900; font-size:28px; color:#2563eb;">PO</div>'}
+            </div>
+            <div>
+              <h1 class="text-2xl font-black text-slate-900 leading-none mb-2 uppercase tracking-tight">${company.name}</h1>
+              <p class="text-[10px] font-extrabold text-blue-600 uppercase tracking-widest leading-none mb-2">Relatório de Acompanhamento de Obra</p>
+              <p class="text-[8px] text-slate-400 font-bold uppercase tracking-tight">${company.cnpj || ''} | ${company.phone || ''}</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="${type === 'estimated' ? 'bg-blue-600' : 'bg-rose-600'} text-white px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest mb-2 shadow-md inline-block">RELATÓRIO ${type === 'estimated' ? 'ESTIMADO' : 'REALIZADO'}</div>
+            <p class="text-xl font-black text-[#0f172a] tracking-tighter mb-1 whitespace-nowrap">${order.id}</p>
+            <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest text-right">DATA: ${new Date().toLocaleDateString('pt-BR')}</p>
+          </div>
         </div>
-        <div className="flex gap-4 w-full md:w-auto">
-          <button
-            onClick={() => {
-              setEditingBudgetId(null);
-              setItems([]);
-              setProposalTitle('');
-              setTaxRate(0);
-              setBdiRate(0);
-              setDescriptionBlocks([]);
-              setPaymentTerms('50% à vista, 25% com 30 dias, 25% restante na conclusão');
-              setDeliveryTime('15 dias úteis');
-              setSelectedCustomerId('');
-              setShowForm(true);
-            }}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest shadow-lg shadow-blue-200 hover:shadow-blue-300 transition-all flex items-center gap-2 active:scale-95"
-          >
-            <Plus className="w-4 h-4" /> Novo Orçamento
-          </button>
+
+        <div class="grid grid-cols-2 gap-4 mb-8">
+          <div class="info-box"><span class="info-label">Cliente</span><div class="info-value">${customer.name}</div></div>
+          <div class="info-box"><span class="info-label">Descrição do Projeto</span><div class="info-value">${order.description}</div></div>
         </div>
-      </div>
 
-      <div className="bg-white p-4 rounded-[1.5rem] border shadow-sm">
-        <div className="relative">
-          <Search className="absolute left-4 top-3 w-4 h-4 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Buscar por cliente ou Orçamento..."
-            className="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 transition-all font-bold text-slate-700"
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-          />
+        <div class="mb-8">
+          <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 border-b-2 border-slate-100 pb-2">RESUMO FINANCEIRO</div>
+          <div class="grid grid-cols-4 gap-4">
+            <div class="bg-blue-50 border border-blue-100 p-4 rounded-2xl">
+              <span class="text-[8px] font-black text-blue-600 uppercase tracking-widest block mb-1">Total Orçado</span>
+              <span class="text-lg font-black text-blue-900 leading-none">R$ ${plannedCost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+            </div>
+            <div class="bg-rose-50 border border-rose-100 p-4 rounded-2xl">
+              <span class="text-[8px] font-black text-rose-600 uppercase tracking-widest block mb-1">Total Realizado</span>
+              <span class="text-lg font-black text-rose-900 leading-none">R$ ${totalExpenses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+            </div>
+            <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl">
+              <span class="text-[8px] font-black text-emerald-600 uppercase tracking-widest block mb-1">Valor Contrato</span>
+              <span class="text-lg font-black text-emerald-900 leading-none">R$ ${revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+            </div>
+            <div class="bg-slate-900 p-4 rounded-2xl shadow-lg">
+              <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-1">Resultado Atual</span>
+              <span class="text-lg font-black text-white leading-none">R$ ${actualProfit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div className="bg-white rounded-[2rem] border overflow-hidden shadow-sm overflow-x-auto">
-        <table className="w-full text-left">
-          <thead className="bg-slate-50 text-[10px] font-black uppercase text-slate-400 border-b">
-            <tr>
-              <th className="px-8 py-5">ORC.</th>
-              <th className="px-8 py-5">CLIENTE</th>
-              <th className="px-8 py-5">DESCRIÇÃO</th>
-              <th className="px-8 py-5">VALOR</th>
-              <th className="px-8 py-5 text-right">AÇÕES</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {budgets.map(budget => (
-              <tr key={budget.id} className="hover:bg-slate-50 group transition-all">
-                <td className="px-8 py-5 text-xs font-mono font-black text-blue-600">
-                  <div className="flex items-center gap-2">
-                    {budget.id}
-                    {budget.status === OrderStatus.APPROVED && <CheckCircle className="w-3 h-3 text-emerald-500" />}
-                  </div>
-                </td>
-                <td className="px-8 py-5 text-sm font-black uppercase text-slate-900">{budget.customerName}</td>
-                <td className="px-8 py-5 text-xs font-bold text-slate-400 uppercase">{budget.description}</td>
-                <td className="px-8 py-5 text-sm font-black text-slate-900">R$ {budget.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-
-                <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {budget.status !== OrderStatus.APPROVED && (
-                    <button
-                      onClick={async () => {
-                        if (confirm("Deseja APROVAR este Orçamento? Ele será convertido em Ordem de Serviço.")) {
-                          const approvedBudget = { ...budget, status: OrderStatus.APPROVED };
-                          const newServiceOrderId = budget.id.replace('ORC', 'OS');
-
-                          const existingOSIndex = orders.findIndex(o =>
-                            (o.osType === 'WORK' && o.originBudgetId === budget.id) ||
-                            o.id === newServiceOrderId
-                          );
-
-                          let finalList: ServiceOrder[];
-
-                          if (existingOSIndex !== -1) {
-                            const previousOS = orders[existingOSIndex];
-                            const updatedOS = {
-                              ...previousOS,
-                              items: budget.items.map(i => ({ ...i })),
-                              descriptionBlocks: budget.descriptionBlocks ? [...budget.descriptionBlocks] : [],
-                              totalAmount: budget.totalAmount,
-                              taxRate: budget.taxRate,
-                              bdiRate: budget.bdiRate,
-                              description: budget.description,
-                              paymentTerms: budget.paymentTerms,
-                              deliveryTime: budget.deliveryTime,
-                              customerName: budget.customerName,
-                              customerEmail: budget.customerEmail,
-                              originBudgetId: budget.id
-                            };
-
-                            const newList = orders.map(o => o.id === budget.id ? approvedBudget : o);
-                            finalList = newList.map(o => o.id === previousOS.id ? updatedOS : o);
-                          } else {
-                            const newServiceOrder: ServiceOrder = {
-                              ...budget,
-                              id: newServiceOrderId,
-                              status: OrderStatus.IN_PROGRESS,
-                              createdAt: new Date().toISOString(),
-                              items: budget.items.map(i => ({ ...i })),
-                              descriptionBlocks: budget.descriptionBlocks ? [...budget.descriptionBlocks] : [],
-                              osType: 'WORK',
-                              originBudgetId: budget.id
-                            };
-                            const newList = orders.map(o => o.id === budget.id ? approvedBudget : o);
-                            finalList = [...newList, newServiceOrder];
-                          }
-
-                          setOrders(finalList);
-                          const result = await db.save('serviflow_orders', finalList);
-                          if (result?.success) notify(existingOSIndex !== -1 ? "O.S. atualizada com novos dados do Orçamento!" : "Orçamento APROVADO! Cópia gerada em O.S.");
-                          else notify("Erro ao sincronizar.", "error");
-                        }
-                      }}
-                      className="p-2 text-slate-400 hover:text-emerald-600 transition-colors"
-                      title="Aprovar"
-                    >
-                      <CheckCircle className="w-4 h-4" />
-                    </button>
-                  )}
-
-                  <button onClick={() => loadBudgetToForm(budget, true)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Duplicar">
-                    <Copy className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => loadBudgetToForm(budget)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Editar">
-                    <Pencil className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => handlePrint(budget)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Imprimir">
-                    <Printer className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => handleGeneratePDF(budget)} className="p-2 text-slate-400 hover:text-rose-600 transition-colors" title="Baixar PDF">
-                    <FileDown className="w-4 h-4" />
-                  </button>
-
-                  <button
-                    onClick={async () => {
-                      if (confirm("Deseja excluir este Orçamento? Esta ação também removerá os dados da nuvem.")) {
-                        const idToDelete = budget.id;
-
-                        // remove local
-                        const filtered = orders.filter(o => o.id !== idToDelete);
-                        setOrders(filtered);
-
-                        // ✅ manter chave consistente com save (serviflow_orders)
-                        const result = await db.save('serviflow_orders', filtered);
-                        if (result?.success) notify("Orçamento removido da nuvem com sucesso.");
-                        else notify("Removido localmente, mas houve um erro ao sincronizar com a nuvem.", "error");
-                      }
-                    }}
-                    className="p-2 text-rose-300 hover:text-rose-600 transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </td>
+        <div class="mb-10">
+          <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 border-b-2 border-slate-100 pb-2">DETALHAMENTO DOS ITENS</div>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="border-bottom: 2px solid #0f172a;">
+                ${type === 'estimated' ? `
+                            <th style="padding-bottom: 8px; font-size: 9px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800;">Descrição do Item</th>
+                            <th style="padding-bottom: 8px; font-size: 9px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800;">Tipo</th>
+                            <th style="padding-bottom: 8px; font-size: 9px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800;">Qtd</th>
+                            <th style="padding-bottom: 8px; font-size: 9px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800;">Vlr Unit.</th>
+                            <th style="padding-bottom: 8px; font-size: 9px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800;">Total Orçado</th>
+                        ` : `
+                            <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; width: 40%">Descrição</th>
+                            <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800;">Qtd Orc</th>
+                            <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800;">Vlr Orc</th>
+                            <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800;">Qtd Real</th>
+                            <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800;">Vlr Real</th>
+                            <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800;">Saldo</th>
+                        `}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>${itemsHtml}</tbody>
+          </table>
+        </div>
 
-      {showForm && (
-        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-[1240px] h-[95vh] rounded-[2rem] shadow-[0_0_100px_rgba(0,0,0,0.3)] overflow-hidden flex flex-col animate-in zoom-in-95">
-            <div className="px-8 py-4 border-b flex justify-between items-center bg-white shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="bg-blue-600 p-2 rounded-xl text-white shadow-xl shadow-blue-100"><FileText className="w-5 h-5" /></div>
+        <div class="mt-20 pt-10 border-t border-slate-100 flex justify-between items-center opacity-70">
+          <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">ServiFlow - Gestão de Obras Inteligente</p>
+          <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Página 1 de 1</p>
+        </div>
+        <script>window.onload = function() {setTimeout(function () { window.print(); window.close(); }, 500); }</script>
+      </body>
+    </html>\`;
+
+        printWindow.document.write(html);
+        printWindow.document.close();
+    };
+
+    const handleEditOrder = (order: ServiceOrder) => {
+        setEditingOrderId(order.id);
+        setSelectedCustomerId(order.customerId);
+        setOsTitle(order.description);
+        setDiagnosis(order.serviceDescription || '');
+        setDescriptionBlocks(order.descriptionBlocks || []);
+        setPaymentTerms(order.paymentTerms || '');
+        setDeliveryTime(order.deliveryTime || '');
+        setDeliveryDate(order.dueDate || new Date().toISOString().split('T')[0]);
+        setContractPrice(order.contractPrice || order.totalAmount);
+        setTaxRate(order.taxRate || 0);
+        setBdiRate(order.bdiRate || 0);
+        setItems(order.costItems || order.items); // Use costItems if available, otherwise budget items
+        setShowForm(true);
+        setActiveTab('details');
+    };
+
+
+    return (
+        <div className="p-4 md:p-8 max-w-[1400px] mx-auto animate-in fade-in duration-500">
+            {/* Header section com stats */}
+            <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div>
-                  <h3 className="text-lg font-black text-slate-900 uppercase tracking-tighter mb-0.5">Elaboração de Orçamento Prime</h3>
-                  <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em]">Configuração de Documento Comercial</p>
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="bg-slate-900 p-2.5 rounded-2xl shadow-xl shadow-slate-200">
+                            <HardHat className="w-6 h-6 text-white" />
+                        </div>
+                        <h2 className="text-3xl font-black text-slate-900 tracking-tight uppercase">Gestão de Obras</h2>
+                    </div>
+                    <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">Acompanhamento técnico e financeiro em tempo real</p>
                 </div>
-              </div>
-              <div className="flex items-center gap-4">
-                {!editingBudgetId && (
-                  <button onClick={() => setShowImportModal(true)} className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase flex items-center gap-2 transition-all">
-                    <Database className="w-4 h-4" /> Importar de Existente
-                  </button>
-                )}
-                <button onClick={() => setShowForm(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X className="w-6 h-6 text-slate-300" /></button>
-              </div>
+
+                <div className="flex gap-4">
+                    <div className="relative group">
+                        <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                            <Search className="w-4 h-4 text-slate-400 group-focus-within:text-slate-900 transition-colors" />
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="BUSCAR OBRA OU CLIENTE..."
+                            className="bg-white border-2 border-slate-100 rounded-2xl py-3 pl-12 pr-6 text-xs font-black uppercase tracking-widest outline-none focus:border-slate-900 transition-all w-full md:w-[350px] shadow-sm"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                </div>
             </div>
 
-            <div className="flex-1 flex flex-col lg:flex-row overflow-hidden overflow-y-auto lg:overflow-y-hidden relative">
-              <div className="flex-1 lg:overflow-y-auto p-6 bg-[#f8fafc] space-y-6 no-scrollbar">
-                <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <div className="flex justify-between items-center mb-2">
-                        <label className="text-[11px] font-black text-blue-700 uppercase ml-1">Cliente</label>
-                        <button onClick={() => setShowFullClientForm(true)} className="text-blue-600 text-[10px] font-black uppercase flex items-center gap-1 hover:underline">
-                          <UserPlus className="w-3 h-3" /> Cadastrar Cliente
-                        </button>
-                      </div>
-                      <select className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-900 outline-none" value={selectedCustomerId} onChange={e => setSelectedCustomerId(e.target.value)}>
-                        <option value="">Selecione o cliente...</option>
-                        {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                      </select>
-                    </div>
+            {/* Grid de Obras Ativas */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {activeOrders.map(order => (
+                    <div key={order.id} className="group bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-300/50 transition-all duration-500 overflow-hidden flex flex-col">
+                        <div className="p-8 pb-4">
+                            <div className="flex justify-between items-start mb-6">
+                                <div className="bg-blue-50 text-blue-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest">
+                                    {order.id}
+                                </div>
+                                <div className="flex gap-2">
+                                    <button onClick={() => { setSelectedOrderForReport(order); setShowReportTypeModal(true); }} className="p-2.5 bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white rounded-xl transition-all shadow-sm" title="Relatório de Obra"><FileText className="w-4 h-4" /></button>
+                                    <button onClick={() => handleDownloadPDF(order)} className="p-2.5 bg-slate-50 text-slate-400 hover:bg-blue-600 hover:text-white rounded-xl transition-all shadow-sm" title="Gerar Contrato (PDF)"><ScrollText className="w-4 h-4" /></button>
+                                    <button onClick={() => handleEditOrder(order)} className="p-2.5 bg-slate-50 text-slate-400 hover:bg-slate-900 hover:text-white rounded-xl transition-all shadow-sm"><Pencil className="w-4 h-4" /></button>
+                                </div>
+                            </div>
 
-                    <div>
-                      <label className="text-[11px] font-black text-blue-700 uppercase mb-2 block ml-1">Título da Proposta</label>
-                      <input type="text" placeholder="Ex: Reforma Geral" className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-900 outline-none placeholder:text-slate-500" value={proposalTitle} onChange={e => setProposalTitle(e.target.value)} />
-                    </div>
-                  </div>
-                </div>
+                            <h3 className="text-xl font-black text-slate-900 uppercase leading-tight mb-2 group-hover:text-blue-600 transition-colors">{order.description}</h3>
+                            <div className="flex items-center gap-2 mb-6">
+                                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{order.customerName}</span>
+                            </div>
 
-                {/* DESCRIÇÃO TÉCNICA */}
-                <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-                  <div className="flex justify-between items-center">
-                    <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-widest border-b pb-2 grow mr-6">DESCRIÇÃO TÉCNICA</h4>
-                  </div>
-
-                  <div className="space-y-3">
-                    {descriptionBlocks.length === 0 && (
-                      <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl p-8 flex flex-col items-center justify-center gap-4 group hover:border-blue-400 transition-colors cursor-pointer" onClick={addTextBlock}>
-                        <div className="flex gap-4">
-                          <button onClick={(e) => { e.stopPropagation(); addTextBlock(); }} className="bg-blue-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-blue-100 hover:scale-105 transition-all">
-                            <Type className="w-4 h-4" /> + Iniciar com Texto
-                          </button>
-                          <button onClick={(e) => { e.stopPropagation(); addImageBlock(); }} className="bg-emerald-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-emerald-100 hover:scale-105 transition-all">
-                            <ImageIcon className="w-4 h-4" /> + Iniciar com Imagem
-                          </button>
+                            <div className="grid grid-cols-2 gap-4 pt-6 border-t border-slate-50">
+                                <div>
+                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Investimento</span>
+                                    <span className="text-sm font-black text-slate-900 leading-none">R$ {(order.contractPrice || order.totalAmount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                </div>
+                                <div className="text-right">
+                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-1">Previsão</span>
+                                    <span className="text-sm font-black text-slate-900 leading-none">{order.dueDate ? new Date(order.dueDate).toLocaleDateString('pt-BR') : 'A definir'}</span>
+                                </div>
+                            </div>
                         </div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 animate-pulse">Comece a montar o escopo técnico acima</p>
-                      </div>
-                    )}
 
-                    {descriptionBlocks.map((block) => (
-                      <div key={block.id} className="relative group">
-                        {block.type === 'text' && (
-                          <div className="flex-1">
-                            <RichTextEditor
-                              id={block.id}
-                              value={block.content}
-                              onChange={(content) => updateBlockContent(block.id, content)}
-                              onAddText={addTextBlock}
-                              onAddImage={addImageBlock}
-                              placeholder="Descreva aqui os detalhes técnicos do serviço..."
-                            />
-                          </div>
-                        )}
-
-                        {block.type === 'image' && (
-                          <div className="w-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center gap-2">
-                            {block.content ? (
-                              <div className="relative max-w-[200px]">
-                                <img src={block.content} className="w-full h-auto rounded-lg shadow-lg" />
-                                <button onClick={() => updateBlockContent(block.id, '')} className="absolute -top-2 -right-2 bg-rose-500 text-white p-1.5 rounded-full">
-                                  <Trash2 className="w-3 h-3" />
-                                </button>
-                              </div>
-                            ) : (
-                              <label className="cursor-pointer flex flex-col items-center gap-1">
-                                <Upload className="w-5 h-5 text-blue-500" />
-                                <span className="text-[8px] font-black text-slate-400 uppercase">Subir Foto</span>
-                                <input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(block.id, e)} />
-                              </label>
-                            )}
-                          </div>
-                        )}
-
-                        <button onClick={() => setDescriptionBlocks(prev => prev.filter(b => b.id !== block.id))} className="absolute -top-2 -right-2 bg-slate-900 text-white p-1.5 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all">
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* ITENS */}
-                <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-                  <div className="flex justify-between items-center">
-                    <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-widest border-b pb-2 grow mr-6">ITENS DO ORÇAMENTO</h4>
-                    <button onClick={() => setShowFullServiceForm(true)} className="text-blue-600 text-[8px] font-black uppercase flex items-center gap-1 hover:underline tracking-widest">
-                      <Package className="w-3 h-3" /> CATÁLOGO
-                    </button>
-                  </div>
-
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-4">
-                    <div>
-                      <label className="text-[8px] font-black text-blue-600 uppercase tracking-widest block mb-1.5">Puxar do Catálogo</label>
-                      <select className="w-full bg-white border-none rounded-xl p-2.5 text-[10px] font-bold text-slate-500 outline-none" value={selectedCatalogId} onChange={e => {
-                        const id = e.target.value;
-                        setSelectedCatalogId(id);
-                        const s = catalogServices.find(x => x.id === id);
-                        if (s) { setCurrentDesc(s.name); setCurrentPrice(s.basePrice); setCurrentUnit(s.unit || 'un'); }
-                      }}>
-                        <option value="">Selecione para preencher...</option>
-                        {catalogServices.map(s => <option key={s.id} value={s.id}>{s.name} (R$ {s.basePrice.toLocaleString()})</option>)}
-                      </select>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
-                      <div className="md:col-span-6">
-                        <label className="text-[11px] font-black text-blue-700 uppercase mb-1.5 block ml-1">Descrição</label>
-                        <input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs font-bold text-slate-900 outline-none placeholder:text-slate-500" value={currentDesc} onChange={e => setCurrentDesc(e.target.value)} />
-                      </div>
-                      <div className="w-24">
-                        <label className="text-[11px] font-black text-blue-700 uppercase mb-1.5 block text-center">Unit</label>
-                        <input type="text" className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs font-black text-center outline-none uppercase text-slate-900" value={currentUnit} onChange={e => setCurrentUnit(e.target.value)} />
-                      </div>
-                      <div className="w-24">
-                        <label className="text-[11px] font-black text-blue-700 uppercase mb-1.5 block text-center">Qtd</label>
-                        <input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs font-black text-center outline-none text-slate-900" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} />
-                      </div>
-                      <div className="w-32">
-                        <label className="text-[11px] font-black text-blue-700 uppercase mb-1.5 block ml-1">Preço (R$)</label>
-                        <input type="number" className="w-full bg-white border border-slate-200 rounded-xl p-4 text-xs font-black outline-none text-slate-900" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} />
-                      </div>
-                      <div className="md:col-span-1">
-                        <button onClick={handleAddItem} className="bg-blue-600 text-white w-full h-[58px] rounded-xl flex items-center justify-center hover:scale-105 transition-all shadow-xl">
-                          <Plus className="w-6 h-6" />
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="space-y-1.5 max-h-40 overflow-y-auto no-scrollbar">
-                      {items.map((item, index) => (
-                        <div
-                          key={item.id}
-                          draggable
-                          onDragStart={() => { setDraggedItemIndex(index); setDragOverIndex(index); }}
-                          onDragOver={(e) => { e.preventDefault(); setDragOverIndex(index); }}
-                          onDragEnd={() => {
-                            if (draggedItemIndex !== null && dragOverIndex !== null) {
-                              reorderItems(draggedItemIndex, dragOverIndex);
-                            }
-                            setDraggedItemIndex(null);
-                            setDragOverIndex(null);
-                          }}
-                          className={`flex justify-between items-center p-2.5 rounded-lg border group gap-2 transition-all ${
-                            draggedItemIndex === index ? 'opacity-50 bg-blue-50 border-blue-200' : 'bg-white border-slate-100 hover:border-blue-200 cursor-default'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2 grow">
-                            <div className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 shrink-0">
-                              <GripVertical size={14} />
-                            </div>
-                            <div className="grow">
-                              <p className="text-[10px] font-black text-slate-900 uppercase mb-1">{item.description}</p>
-                              <div className="flex items-center gap-2">
-                                <div className="flex items-center gap-1 bg-slate-50 rounded px-2 py-1 border border-slate-100">
-                                  <span className="text-[8px] font-bold text-slate-400">QTD:</span>
-                                  <input type="number" className="w-12 bg-transparent text-[9px] font-black text-slate-700 outline-none" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', Number(e.target.value))} />
+                        <div className="mt-auto bg-slate-50/50 px-8 py-5 flex items-center justify-between border-t border-slate-50">
+                            <div className="flex items-center gap-2">
+                                <div className="flex -space-x-2">
+                                    {[1, 2].map(i => <div key={i} className="w-6 h-6 rounded-full border-2 border-white bg-slate-200"></div>)}
                                 </div>
-                                <div className="flex items-center gap-1 bg-slate-50 rounded px-2 py-1 border border-slate-100">
-                                  <span className="text-[8px] font-bold text-slate-400">VALOR:</span>
-                                  <input type="number" className="w-20 bg-transparent text-[9px] font-black text-slate-700 outline-none" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', Number(e.target.value))} />
-                                </div>
-                              </div>
+                                <span className="text-[9px] font-black text-slate-400 uppercase">Equipe Ativa</span>
                             </div>
-                          </div>
-
-                          <div className="flex items-center gap-3 shrink-0">
-                            <div className="flex items-center gap-1 bg-slate-50 rounded px-2 py-1 border border-slate-100">
-                              <span className="text-[8px] font-bold text-slate-400">TOTAL:</span>
-                              <input type="number" className="w-24 bg-transparent text-[11px] font-black text-blue-600 outline-none text-right" value={Number((item.unitPrice * item.quantity).toFixed(2))} onChange={e => updateItemTotal(item.id, Number(e.target.value))} />
-                            </div>
-                            <div className="flex flex-col gap-0">
-                              <button onClick={() => moveItem(index, 'up')} disabled={index === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all">
-                                <ChevronUp className="w-3 h-3" />
-                              </button>
-                              <button onClick={() => moveItem(index, 'down')} disabled={index === items.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all">
-                                <ChevronDown className="w-3 h-3" />
-                              </button>
-                            </div>
-                            <button onClick={() => setItems(prev => prev.filter(i => i.id !== item.id))} className="text-rose-300 hover:text-rose-600">
-                              <Trash2 className="w-3.5 h-3.5" />
+                            <button onClick={() => handlePrintOS(order)} className="flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors">
+                                <span className="text-[10px] font-black uppercase tracking-widest">Imprimir OS</span>
+                                <Printer className="w-4 h-4" />
                             </button>
-                          </div>
                         </div>
-                      ))}
                     </div>
+                ))}
 
-                    {items.length > 0 && (
-                      <div className="flex justify-end pt-2">
-                        <div className="bg-white border-2 border-slate-100 rounded-2xl px-6 py-3 flex items-center gap-4 shadow-sm">
-                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Subtotal dos Itens</span>
-                          <span className="text-lg font-black text-slate-900">R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                {/* Card de Nova Obra (Botão) */}
+                <button
+                    onClick={() => { setEditingOrderId(null); setOsTitle('Execução de Obra'); setDiagnosis(''); setSelectedCustomerId(''); setItems([]); setContractPrice(0); setShowForm(true); }}
+                    className="group border-4 border-dashed border-slate-100 rounded-[2.5rem] p-8 flex flex-col items-center justify-center min-h-[300px] hover:border-blue-200 hover:bg-blue-50/30 transition-all duration-500"
+                >
+                    <div className="bg-white p-6 rounded-3xl shadow-xl shadow-slate-100 group-hover:scale-110 group-hover:bg-blue-600 transition-all duration-500 mb-6">
+                        <Plus className="w-8 h-8 text-slate-900 group-hover:text-white" />
+                    </div>
+                    <span className="text-sm font-black text-slate-900 uppercase tracking-widest">Nova Obra</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase mt-1">Iniciar acompanhamento</span>
+                </button>
+            </div>
+
+            {/* Modal de Formulário */}
+            {showForm && (
+                <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-300">
+                    <div className="bg-white w-full max-w-6xl h-full max-h-[900px] rounded-[3rem] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
+                        {/* Modal Header */}
+                        <div className="bg-white px-10 py-8 border-b flex justify-between items-center shrink-0">
+                            <div className="flex items-center gap-5">
+                                <div className="bg-slate-900 p-3.5 rounded-2xl shadow-lg">
+                                    <HardHat className="w-6 h-6 text-white" />
+                                </div>
+                                <div>
+                                    <input
+                                        type="text"
+                                        className="text-2xl font-black text-slate-900 uppercase tracking-tight outline-none w-[400px] border-b-2 border-transparent focus:border-blue-500 transition-all"
+                                        value={osTitle}
+                                        onChange={(e) => setOsTitle(e.target.value)}
+                                        placeholder="TÍTULO DA OBRA"
+                                    />
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{editingOrderId || 'NOVA ORDEM'}</span>
+                                        <div className="w-1 h-1 rounded-full bg-slate-300"></div>
+                                        <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Painel de Controle</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button onClick={() => setShowForm(false)} className="p-3 bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-500 rounded-2xl transition-all"><X className="w-6 h-6" /></button>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
 
-                {showFullClientForm && (
-                  <div className="absolute inset-0 z-[60] bg-white overflow-y-auto p-6">
-                    <CustomerManager
-                      customers={customers}
-                      setCustomers={setCustomers}
-                      orders={orders}
-                      defaultOpenForm={true}
-                      onSuccess={(c) => { setSelectedCustomerId(c.id); setShowFullClientForm(false); }}
-                      onCancel={() => setShowFullClientForm(false)}
-                    />
-                  </div>
-                )}
+                        {/* Modal Tabs */}
+                        <div className="px-10 py-4 bg-slate-50/50 flex gap-4 border-b shrink-0">
+                            <button onClick={() => setActiveTab('details')} className={`flex items - center gap - 2 px - 6 py - 2.5 rounded - xl text - [10px] font - black uppercase tracking - widest transition - all ${ activeTab === 'details' ? 'bg-slate-900 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-100' } `}>
+                                <ScrollText className="w-4 h-4" /> Dados Gerais
+                            </button>
+                            <button onClick={() => setActiveTab('financial')} className={`flex items - center gap - 2 px - 6 py - 2.5 rounded - xl text - [10px] font - black uppercase tracking - widest transition - all ${ activeTab === 'financial' ? 'bg-slate-900 text-white shadow-lg' : 'bg-white text-slate-400 border border-slate-100' } `}>
+                                <Wallet className="w-4 h-4" /> Gestão Financeira
+                            </button>
+                        </div>
 
-                {showFullServiceForm && (
-                  <div className="absolute inset-0 z-[60] bg-white overflow-y-auto p-6">
-                    <ServiceCatalog
-                      services={catalogServices}
-                      setServices={setCatalogServices}
-                      company={company}
-                      defaultOpenForm={true}
-                      onSuccess={(s) => { setCurrentDesc(s.name); setCurrentPrice(s.basePrice); setCurrentUnit(s.unit || 'un'); setShowFullServiceForm(false); }}
-                    />
-                  </div>
-                )}
-              </div>
+                        {/* Modal Body */}
+                        <div className="flex-1 overflow-y-auto no-scrollbar">
+                            <div className="p-10">
+                                {activeTab === 'details' ? (
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                                        <div className="space-y-8">
+                                            <div className="space-y-4">
+                                                <div className="flex justify-between items-center">
+                                                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Cliente</label>
+                                                    <button onClick={() => setShowFullClientForm(true)} className="flex items-center gap-2 text-[10px] font-black text-blue-600 hover:text-blue-700 uppercase tracking-widest"><UserPlus className="w-4 h-4" /> Novo Cliente</button>
+                                                </div>
+                                                <select
+                                                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-4 px-6 text-sm font-bold text-slate-900 uppercase outline-none focus:border-slate-900 transition-all shadow-sm appearance-none cursor-pointer"
+                                                    value={selectedCustomerId}
+                                                    onChange={(e) => setSelectedCustomerId(e.target.value)}
+                                                >
+                                                    <option value="">Selecione o Cliente...</option>
+                                                    {customers.map(c => <option key={c.id} value={c.id} className="font-bold">{c.name}</option>)}
+                                                </select>
+                                            </div>
 
-              {/* SIDEBAR */}
-              <div className="w-full lg:w-[340px] bg-[#0f172a] text-white p-6 flex flex-col space-y-6 shrink-0 shadow-2xl relative overflow-hidden h-auto lg:h-full">
-                <div className="relative z-10">
-                  <h4 className="text-[8px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Investimento Total</h4>
+                                            <div className="grid grid-cols-2 gap-6">
+                                                <div className="space-y-4">
+                                                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Valor do Contrato (R$)</label>
+                                                    <div className="relative group">
+                                                        <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none text-blue-600 font-bold">R$</div>
+                                                        <input
+                                                            type="number"
+                                                            className="w-full bg-blue-50/30 border-2 border-blue-100 rounded-2xl py-4 pl-14 pr-6 text-base font-black text-blue-900 outline-none focus:border-blue-500 transition-all shadow-sm"
+                                                            value={contractPrice}
+                                                            onChange={(e) => setContractPrice(Number(e.target.value))}
+                                                            placeholder="0,00"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="space-y-4">
+                                                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Entrega (Prazo)</label>
+                                                    <input
+                                                        type="date"
+                                                        className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:border-slate-900 transition-all shadow-sm"
+                                                        value={deliveryDate}
+                                                        onChange={(e) => setDeliveryDate(e.target.value)}
+                                                    />
+                                                </div>
+                                            </div>
 
-                  <div className="grid grid-cols-2 gap-2 mb-4">
-                    <div>
-                      <label className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">BDI (%)</label>
-                      <input type="number" className="w-full bg-slate-800/50 border border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-200 outline-none focus:ring-1 focus:ring-blue-500" value={bdiRate} onChange={e => setBdiRate(e.target.value)} placeholder="0%" />
+                                            <div className="space-y-4">
+                                                <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Observações Técnicas</label>
+                                                <RichTextEditor
+                                                    content={diagnosis}
+                                                    onChange={setDiagnosis}
+                                                    placeholder="DESCREVA O ESCOPO TÉCNICO E DETALHES IMPORTANTES DA OBRA..."
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-8">
+                                            <div className="space-y-4">
+                                                <div className="flex justify-between items-center">
+                                                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Fotos / Anexos</label>
+                                                    <div className="flex gap-2">
+                                                        <button onClick={addImageBlock} className="p-2.5 bg-slate-900 text-white rounded-xl shadow-lg hover:scale-105 transition-all"><ImageIcon className="w-4 h-4" /></button>
+                                                        <button onClick={addTextBlock} className="p-2.5 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 transition-all"><Type className="w-4 h-4" /></button>
+                                                        <button onClick={addPageBreak} className="p-2.5 bg-amber-50 text-amber-600 rounded-xl hover:bg-amber-100 transition-all" title="Add Quebra de Página"><Zap className="w-4 h-4" /></button>
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-6 max-h-[600px] overflow-y-auto pr-4 no-scrollbar">
+                                                    {descriptionBlocks.map(block => (
+                                                        <div key={block.id} className="group relative bg-slate-50 rounded-3xl p-6 border-2 border-slate-100 hover:border-blue-200 transition-all">
+                                                            <button onClick={() => setDescriptionBlocks(prev => prev.filter(b => b.id !== block.id))} className="absolute -top-3 -right-3 bg-white border-2 border-slate-100 text-rose-500 p-2 rounded-xl shadow-lg opacity-0 group-hover:opacity-100 transition-all"><X className="w-4 h-4" /></button>
+
+                                                            {block.type === 'text' && (
+                                                                <textarea
+                                                                    className="w-full bg-transparent text-sm font-bold text-slate-700 placeholder-slate-300 outline-none min-h-[100px] resize-none"
+                                                                    value={block.content}
+                                                                    onChange={(e) => updateBlockContent(block.id, e.target.value)}
+                                                                    placeholder="NOTAS ADICIONAIS..."
+                                                                />
+                                                            )}
+
+                                                            {block.type === 'image' && (
+                                                                <div className="flex flex-col items-center gap-4">
+                                                                    {block.content ? (
+                                                                        <img src={block.content} className="max-h-[250px] rounded-2xl object-contain shadow-md" alt="Anexo" />
+                                                                    ) : (
+                                                                        <div className="w-full h-40 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center p-6 bg-white/50">
+                                                                            <Upload className="w-8 h-8 text-slate-300 mb-2" />
+                                                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Upload de Foto da Obra</span>
+                                                                        </div>
+                                                                    )}
+                                                                    <input type="file" accept="image/*" onChange={(e) => handleImageUpload(block.id, e)} className="text-[10px] font-black text-slate-400 file:bg-slate-900 file:text-white file:border-0 file:px-4 file:py-2 file:rounded-lg file:mr-4 file:cursor-pointer" />
+                                                                </div>
+                                                            )}
+
+                                                            {block.type === 'page-break' && (
+                                                                <div className="flex items-center justify-center gap-4 py-2 opacity-50">
+                                                                    <div className="h-[1px] flex-1 bg-amber-300"></div>
+                                                                    <span className="text-[9px] font-black text-amber-500 uppercase tracking-widest whitespace-nowrap">QUEBRA DE PÃ GINA PDF</span>
+                                                                    <div className="h-[1px] flex-1 bg-amber-300"></div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                    {descriptionBlocks.length === 0 && (
+                                                        <div className="text-center py-20 opacity-20">
+                                                            <ImageIcon className="w-16 h-16 mx-auto mb-4" />
+                                                            <p className="text-xs font-black uppercase tracking-widest">Nenhuma foto ou anexo adicionado</p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="animate-in slide-in-from-right duration-500">
+                                        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-10">
+                                            <InfoCard title="Receita (Contrato)" value={revenue} color="emerald" icon={<ScrollText />} />
+                                            <InfoCard title="Custo Orçado" value={plannedCost} color="blue" icon={<HardHat />} />
+                                            <InfoCard title="Custo Real (Gasto)" value={totalExpenses} color="rose" icon={<Wallet />} />
+                                            <div className={`p - 6 rounded - [2rem] border - 2 shadow - xl ${ actualProfit >= 0 ? 'bg-slate-900 border-slate-800' : 'bg-rose-900 border-rose-800' } `}>
+                                                <div className="flex justify-between items-start mb-4">
+                                                    <div className={`p - 2 rounded - xl ${ actualProfit >= 0 ? 'bg-slate-800' : 'bg-rose-800' } `}><Zap className="w-5 h-5 text-white" /></div>
+                                                    <div className={`px - 3 py - 1 rounded - full text - [9px] font - black uppercase tracking - widest ${ actualProfit >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-white/10 text-white' } `}>Lucro Atual</div>
+                                                </div>
+                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Resultado Líquido</p>
+                                                <p className="text-2xl font-black text-white leading-none">R$ {actualProfit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-white rounded-[2.5rem] border-2 border-slate-100 p-8 shadow-sm">
+                                            <div className="mb-8 grid grid-cols-12 gap-6">
+                                                <div className="col-span-4">
+                                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Descrição do Custo</label>
+                                                    <input type="text" className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-3 px-6 text-xs font-bold text-slate-900 uppercase block outline-none focus:border-slate-900 transition-all" value={currentDesc} onChange={e => setCurrentDesc(e.target.value)} placeholder="EX: CIMENTO, MÃO DE OBRA PEDREIRO..." />
+                                                </div>
+                                                <div className="col-span-1">
+                                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block text-center">Qtde</label>
+                                                    <input type="number" className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-3 px-4 text-xs font-bold text-slate-900 text-center block outline-none focus:border-slate-900 transition-all" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} />
+                                                </div>
+                                                <div className="col-span-1">
+                                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block text-center">Unid</label>
+                                                    <input type="text" className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-3 px-2 text-xs font-bold text-slate-900 text-center block outline-none focus:border-slate-900 transition-all uppercase" value={currentUnit} onChange={e => setCurrentUnit(e.target.value)} />
+                                                </div>
+                                                <div className="col-span-2">
+                                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block text-right">Vlr Orçado</label>
+                                                    <input type="number" className="w-full bg-blue-50/50 border-2 border-blue-100 rounded-2xl py-3 px-6 text-xs font-bold text-blue-900 text-right block outline-none focus:border-blue-500 transition-all" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} />
+                                                </div>
+                                                <div className="col-span-2">
+                                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block text-right">Vlr Realizado</label>
+                                                    <input type="number" className="w-full bg-rose-50/50 border-2 border-rose-100 rounded-2xl py-3 px-6 text-xs font-bold text-rose-900 text-right block outline-none focus:border-rose-500 transition-all" value={currentActual === '' ? '' : currentActual} onChange={e => setCurrentActual(e.target.value === '' ? '' : Number(e.target.value))} placeholder="Total gasto" />
+                                                </div>
+                                                <div className="col-span-2 flex items-end">
+                                                    <button onClick={handleAddItem} className="w-full bg-slate-900 text-white rounded-2xl py-3 text-xs font-black uppercase tracking-widest hover:bg-slate-800 hover:scale-105 transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2"><Plus className="w-4 h-4" /> Adicionar</button>
+                                                </div>
+                                            </div>
+
+                                            <div className="mb-4 grid grid-cols-12 gap-1 px-3">
+                                                <div className="col-span-5 text-center border-b border-blue-100 pb-1 mx-2"><span className="text-[9px] font-black text-blue-600 uppercase tracking-widest">PLANEJADO</span></div>
+                                                <div className="col-span-5 text-center border-b border-rose-100 pb-1 mx-2"><span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">REALIZADO</span></div>
+                                                <div className="col-span-1"></div>
+                                            </div>
+                                            <div className="mb-2 grid grid-cols-12 gap-1 px-3">
+                                                <div className="col-span-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">DESCRIÇÃO</span></div>
+                                                <div className="col-span-1 text-center"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">QTD</span></div>
+                                                <div className="col-span-1 text-center"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">UN</span></div>
+                                                <div className="col-span-1 text-right pr-2"><span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">VL. PROJ</span></div>
+                                                <div className="col-span-1 text-right pr-2"><span className="text-[9px] font-black text-blue-600 uppercase tracking-widest">TOTAL PROJ</span></div>
+                                                <div className="col-span-1 text-center"><span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">QTD</span></div>
+                                                <div className="col-span-1 text-center"><span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">UN</span></div>
+                                                <div className="col-span-1 text-right pr-2"><span className="text-[9px] font-black text-rose-400 uppercase tracking-widest">VL. REAL</span></div>
+                                                <div className="col-span-2 text-right pr-2"><span className="text-[9px] font-black text-amber-600 uppercase tracking-widest">TOTAL REAL</span></div>
+                                                <div className="col-span-1"></div>
+                                            </div>
+                                            <div className="max-h-[300px] overflow-y-auto no-scrollbar">
+                                                {items.map(item => (
+                                                    <div key={item.id} className="grid grid-cols-12 gap-1 items-center py-2 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors px-3">
+                                                        <div className="col-span-2">
+                                                            <input type="text" className="w-full bg-transparent text-xs font-bold text-slate-700 uppercase outline-none" value={item.description} onChange={e => updateItem(item.id, 'description', e.target.value)} />
+                                                        </div>
+                                                        <div className="col-span-1 pl-1">
+                                                            <input type="number" className="w-full bg-transparent text-xs font-bold text-slate-600 outline-none text-center appearance-none" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', Number(e.target.value))} />
+                                                        </div>
+                                                        <div className="col-span-1">
+                                                            <input type="text" className="w-full bg-transparent text-xs font-bold text-slate-400 outline-none text-center uppercase" value={item.unit || 'un'} onChange={e => updateItem(item.id, 'unit', e.target.value)} />
+                                                        </div>
+                                                        <div className="col-span-1">
+                                                            <div className="flex items-center justify-end gap-1" onClick={() => setActiveEditField(`${ item.id } -price`)}>
+                                                                <span className="text-xs text-blue-600 font-bold">R$</span>
+                                                                {activeEditField === `${ item.id } -price` ? (
+                                                                    <input
+                                                                        autoFocus
+                                                                        type="number"
+                                                                        className="bg-transparent text-xs font-bold text-blue-600 outline-none text-right appearance-none"
+                                                                        style={{ width: `${ (item.unitPrice.toString().length + 2) * 8 } px` }}
+                                                                        value={item.unitPrice}
+                                                                        onChange={e => updateItem(item.id, 'unitPrice', Number(e.target.value))}
+                                                                        onBlur={() => setActiveEditField(null)}
+                                                                    />
+                                                                ) : (
+                                                                    <span className="text-xs font-bold text-blue-600 text-right cursor-pointer">
+                                                                        {item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <div className="col-span-1 text-right px-2">
+                                                            <span className="text-xs font-bold text-blue-600">R$ {(item.quantity * item.unitPrice).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                                        </div>
+
+                                                        <div className="col-span-1 pl-1">
+                                                            <input type="number" className="w-full bg-transparent text-xs font-bold text-rose-600 outline-none text-center appearance-none" value={item.actualQuantity || 0} onChange={e => updateItem(item.id, 'actualQuantity', Number(e.target.value))} />
+                                                        </div>
+                                                        <div className="col-span-1 text-center">
+                                                            <span className="text-[10px] font-bold text-slate-400 uppercase">{item.unit || 'un'}</span>
+                                                        </div>
+                                                        <div className="col-span-1">
+                                                            <div className="flex items-center justify-end gap-1" onClick={() => setActiveEditField(`${ item.id } -actualPrice`)}>
+                                                                <span className="text-xs text-amber-700 font-bold">R$</span>
+                                                                {activeEditField === `${ item.id } -actualPrice` ? (
+                                                                    <input
+                                                                        autoFocus
+                                                                        type="number"
+                                                                        className="bg-transparent text-xs font-bold text-amber-700 outline-none text-right appearance-none"
+                                                                        style={{ width: `${ ((item.actualUnitPrice || 0).toString().length + 2) * 8 } px` }}
+                                                                        value={item.actualUnitPrice || 0}
+                                                                        onChange={e => updateItem(item.id, 'actualUnitPrice', Number(e.target.value))}
+                                                                        onBlur={() => setActiveEditField(null)}
+                                                                    />
+                                                                ) : (
+                                                                    <span className="text-xs font-bold text-amber-700 text-right cursor-pointer">
+                                                                        {(item.actualUnitPrice || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                        <div className="col-span-2 pl-1 text-right px-2">
+                                                            <span className="text-xs font-bold text-amber-700">R$ {((item.actualQuantity || 0) * (item.actualUnitPrice || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                                        </div>
+                                                        <div className="col-span-1 flex justify-center">
+                                                            <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="text-slate-300 hover:text-rose-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="bg-white px-8 py-5 border-t flex justify-end shrink-0">
+                            <button onClick={handleSaveOS} disabled={isSaving} className={`bg - slate - 900 text - white px - 12 py - 4 rounded - 2xl font - black uppercase tracking - widest text - xs shadow - xl shadow - slate - 200 hover: shadow - 2xl transition - all flex items - center justify - center gap - 3 ${ isSaving ? 'opacity-50 cursor-not-allowed' : '' } `}>
+                                <Save className={`w - 4 h - 4 ${ isSaving ? 'animate-pulse' : '' } `} /> {isSaving ? 'Salvando...' : 'Salvar OS de Obra'}
+                            </button>
+                        </div>
                     </div>
-                    <div>
-                      <label className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Impostos (%)</label>
-                      <input type="number" className="w-full bg-slate-800/50 border border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-200 outline-none focus:ring-1 focus:ring-blue-500" value={taxRate} onChange={e => setTaxRate(e.target.value)} placeholder="0%" />
+                </div>
+            )
+            }
+            {
+                showFullClientForm && (
+                    <div className="fixed inset-0 z-[60] bg-black/20 backdrop-blur-sm flex items-center justify-center p-4">
+                        <div className="bg-white w-full max-w-2xl max-h-[90vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col">
+                            <div className="p-4 border-b flex justify-between items-center">
+                                <h3 className="font-bold">Novo Cliente</h3>
+                                <button onClick={() => setShowFullClientForm(false)}><X className="w-5 h-5" /></button>
+                            </div>
+                            <div className="flex-1 overflow-y-auto p-0">
+                                <CustomerManager
+                                    customers={customers}
+                                    setCustomers={setCustomers}
+                                    orders={orders}
+                                    defaultOpenForm={true}
+                                    onSuccess={(c) => { setSelectedCustomerId(c.id); setShowFullClientForm(false); }}
+                                    onCancel={() => setShowFullClientForm(false)}
+                                />
+                            </div>
+                        </div>
                     </div>
-                  </div>
-
-                  <div className="space-y-1 mb-4 text-[10px] text-slate-400">
-                    <div className="flex justify-between"><span>Subtotal:</span> <span>R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
-                    {Number(bdiRate) > 0 && <div className="flex justify-between text-emerald-400"><span>+ BDI:</span> <span>R$ {(subtotal * (Number(bdiRate) / 100)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>}
-                    {Number(taxRate) > 0 && (
-                      <div className="flex justify-between text-blue-400">
-                        <span>+ Impostos:</span>
-                        <span>R$ {(totalAmount - (subtotal + (subtotal * (Number(bdiRate) / 100)))).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex justify-between items-baseline border-b border-slate-800 pb-4">
-                    <span className="text-[32px] font-black text-blue-400 tracking-tighter leading-none">R$ {totalAmount.toLocaleString('pt-BR')}</span>
-                  </div>
-                </div>
-
-                <div className="space-y-4 relative z-10">
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <label className="text-[8px] font-bold text-slate-400 uppercase tracking-widest block">Pagamento</label>
-                      <button onClick={() => setShowPaymentModal(true)} className="text-[8px] font-black text-emerald-400 hover:text-emerald-300 uppercase tracking-widest flex items-center gap-1 transition-colors">
-                        <Zap className="w-3 h-3" /> Gerar
-                      </button>
-                    </div>
-                    <textarea className="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-3 text-[9px] font-bold text-slate-200 outline-none h-20 focus:ring-1 focus:ring-blue-500 leading-relaxed shadow-inner" value={paymentTerms} onChange={e => setPaymentTerms(e.target.value)} />
-                  </div>
-                  <div>
-                    <label className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Prazo Entrega</label>
-                    <input type="text" className="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-3 text-[9px] font-bold text-slate-200 outline-none focus:ring-1 focus:ring-blue-500 shadow-inner" value={deliveryTime} onChange={e => setDeliveryTime(e.target.value)} />
-                  </div>
-                </div>
-
-                <div className="mt-auto space-y-3 relative z-10">
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      onClick={() => handlePrint({
-                        customerId: selectedCustomerId,
-                        customerName: customers.find(c => c.id === selectedCustomerId)?.name || 'N/A',
-                        customerEmail: customers.find(c => c.id === selectedCustomerId)?.email || '',
-                        items,
-                        totalAmount,
-                        description: proposalTitle,
-                        descriptionBlocks,
-                        paymentTerms,
-                        deliveryTime,
-                        id: editingBudgetId || 'ORC-XXXX',
-                        status: OrderStatus.PENDING,
-                        taxRate: Number(taxRate) || 0,
-                        bdiRate: Number(bdiRate) || 0,
-                        createdAt: new Date().toISOString().split('T')[0],
-                        dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-                      })}
-                      className="bg-slate-800 hover:bg-slate-700 text-white p-4 rounded-xl font-black uppercase text-[8px] flex flex-col items-center gap-1 transition-all border border-slate-700 group"
-                    >
-                      <Printer className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" /> IMPRIMIR
-                    </button>
-
-                    <button
-                      onClick={() => handleGeneratePDF({
-                        customerId: selectedCustomerId,
-                        customerName: customers.find(c => c.id === selectedCustomerId)?.name || 'N/A',
-                        customerEmail: customers.find(c => c.id === selectedCustomerId)?.email || '',
-                        items,
-                        totalAmount,
-                        description: proposalTitle,
-                        descriptionBlocks,
-                        paymentTerms,
-                        deliveryTime,
-                        id: editingBudgetId || 'ORC-XXXX',
-                        status: OrderStatus.PENDING,
-                        taxRate: Number(taxRate) || 0,
-                        bdiRate: Number(bdiRate) || 0,
-                        createdAt: new Date().toISOString().split('T')[0],
-                        dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-                      })}
-                      className="bg-slate-800 hover:bg-slate-700 text-white p-4 rounded-xl font-black uppercase text-[8px] flex flex-col items-center gap-1 transition-all border border-slate-700 group"
-                    >
-                      <FileDown className="w-4 h-4 text-rose-400 group-hover:scale-110 transition-transform" /> BAIXAR PDF
-                    </button>
-
-                    <button onClick={handleSave} className="col-span-2 bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[11px] shadow-xl transition-all flex items-center justify-center gap-2">
-                      <Save className="w-5 h-5" /> REGISTRAR
-                    </button>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showPaymentModal && (
-        <PaymentTypeModal
-          onClose={() => setShowPaymentModal(false)}
-          onConfirm={(text, percent) => {
-            setPaymentTerms(text);
-            setPaymentEntryPercent(percent);
-            setShowPaymentModal(false);
-          }}
-          totalValue={totalAmount}
-          initialPercent={paymentEntryPercent}
-        />
-      )}
-
-      {showImportModal && (
-        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[70] flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 flex flex-col max-h-[80vh]">
-            <div className="p-6 border-b flex justify-between items-center bg-slate-50">
-              <div>
-                <h3 className="font-black text-slate-800 uppercase tracking-tight">Importar Dados de Orçamento</h3>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Selecione um Orçamento para copiar itens e descrição</p>
-              </div>
-              <button onClick={() => setShowImportModal(false)}><X className="w-5 h-5 text-slate-400 hover:text-rose-500" /></button>
-            </div>
-
-            <div className="p-4 bg-white border-b">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Pesquisar por cliente ou título..."
-                  className="w-full bg-slate-100 border-none rounded-2xl py-3 pl-12 pr-4 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500"
-                  value={importSearch}
-                  onChange={e => setImportSearch(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-4 space-y-2 no-scrollbar">
-              {orders
-                .filter(o =>
-                  (o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED) &&
-                  (o.customerName.toLowerCase().includes(importSearch.toLowerCase()) ||
-                    (o.description || '').toLowerCase().includes(importSearch.toLowerCase()))
                 )
-                .map(budget => (
-                  <button
-                    key={budget.id}
-                    onClick={() => loadBudgetToForm(budget, true)}
-                    className="w-full text-left p-4 rounded-2xl border border-slate-100 hover:border-blue-400 hover:bg-blue-50 transition-all group flex justify-between items-center"
-                  >
-                    <div>
-                      <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1">{budget.id}</p>
-                      <p className="font-bold text-slate-900">{budget.description}</p>
-                      <p className="text-xs text-slate-500 font-medium">{budget.customerName}</p>
+            }
+            {
+                showReportTypeModal && selectedOrderForReport && (
+                    <div className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-300">
+                        <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl p-8 transform animate-in zoom-in-95 duration-200">
+                            <div className="flex justify-between items-start mb-6">
+                                <div>
+                                    <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase">Tipo de Relatório</h3>
+                                    <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">Selecione para imprimir</p>
+                                </div>
+                                <button onClick={() => setShowReportTypeModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X className="w-5 h-5 text-slate-400" /></button>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-4">
+                                <button
+                                    onClick={() => { handlePrintWorkReport(selectedOrderForReport, 'estimated'); setShowReportTypeModal(false); }}
+                                    className="group flex items-center gap-4 p-5 bg-blue-50 hover:bg-blue-600 rounded-3xl transition-all border border-blue-100 text-left"
+                                >
+                                    <div className="p-3 bg-white rounded-2xl shadow-sm text-blue-600 group-hover:scale-110 transition-transform">
+                                        <ScrollText className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-black text-blue-900 group-hover:text-white uppercase text-sm tracking-tight">RELATÓRIO DO ESTIMADO</h4>
+                                        <p className="text-blue-600/70 group-hover:text-white/80 text-[10px] font-bold uppercase">Apenas planejamento e custos orçados</p>
+                                    </div>
+                                </button>
+
+                                <button
+                                    onClick={() => { handlePrintWorkReport(selectedOrderForReport, 'real'); setShowReportTypeModal(false); }}
+                                    className="group flex items-center gap-4 p-5 bg-emerald-50 hover:bg-emerald-600 rounded-3xl transition-all border border-emerald-100 text-left"
+                                >
+                                    <div className="p-3 bg-white rounded-2xl shadow-sm text-emerald-600 group-hover:scale-110 transition-transform">
+                                        <CheckCircle className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-black text-emerald-900 group-hover:text-white uppercase text-sm tracking-tight">RELATÓRIO DO REAL</h4>
+                                        <p className="text-emerald-600/70 group-hover:text-white/80 text-[10px] font-bold uppercase">Custos orçados vs Realizados e Resultado</p>
+                                    </div>
+                                </button>
+                            </div>
+
+                            <div className="mt-8 pt-6 border-t border-slate-100 flex justify-center">
+                                <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em]">ServiFlow v2.0</p>
+                            </div>
+                        </div>
                     </div>
-                    <Plus className="w-5 h-5 text-slate-300 group-hover:text-blue-600 transition-colors" />
-                  </button>
-                ))
-              }
-
-              {orders.filter(o => (o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED)).length === 0 && (
-                <div className="text-center py-12">
-                  <Database className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-                  <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Nenhum Orçamento disponível para importação</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-    </div>
-  );
+                )
+            }
+        </div >
+    );
 };
 
-// Sub-component for Payment Logic
-const PaymentTypeModal: React.FC<{
-  onClose: () => void,
-  onConfirm: (text: string, percent: number) => void,
-  totalValue: number,
-  initialPercent?: number
-}> = ({ onClose, onConfirm, totalValue, initialPercent }) => {
-  const [type, setType] = useState<'vista' | 'parcelado' | 'conclusao'>('parcelado');
-  const [entryValue, setEntryValue] = useState(0);
-  const [percentValue, setPercentValue] = useState(initialPercent || 30);
-  const [installments, setInstallments] = useState(3);
-  const [preview, setPreview] = useState('');
-
-  useEffect(() => {
-    if (totalValue > 0) {
-      const p = initialPercent || 30;
-      setEntryValue(totalValue * (p / 100));
-      setPercentValue(p);
-    }
-  }, [totalValue, initialPercent]);
-
-  useEffect(() => {
-    let text = '';
-    const currency = (val: number) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
-    if (type === 'vista') {
-      text = `Pagamento à vista com desconto na aprovação do Orçamento. Total: ${currency(totalValue)}.`;
-    } else if (type === 'conclusao') {
-      text = `Pagamento integral ${currency(totalValue)} a ser realizado após entrega técnica e aprovação dos serviços.`;
-    } else {
-      const remainder = totalValue - entryValue;
-      const parcValue = installments > 0 ? remainder / installments : 0;
-
-      text = `Entrada de ${currency(entryValue)} na aprovação.`;
-      if (installments > 0) {
-        text += `\nSaldo restante de ${currency(remainder)} dividido em ${installments}x de ${currency(parcValue)}.`;
-      }
-    }
-
-    setPreview(text);
-  }, [type, entryValue, installments, totalValue]);
-
-  return (
-    <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[70] flex items-center justify-center p-4">
-      <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95">
-        <div className="p-6 border-b flex justify-between items-center bg-slate-50">
-          <h3 className="font-black text-slate-800 uppercase tracking-tight">Condição de Pagamento</h3>
-          <button onClick={onClose}><X className="w-5 h-5 text-slate-400 hover:text-rose-500" /></button>
-        </div>
-
-        <div className="p-6 space-y-6">
-          <div>
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Tipo de Negociação</label>
-            <div className="grid grid-cols-3 gap-2">
-              <button onClick={() => setType('vista')} className={`p-3 rounded-xl border text-xs font-bold uppercase transition-all ${type === 'vista' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>À Vista</button>
-              <button onClick={() => setType('parcelado')} className={`p-3 rounded-xl border text-xs font-bold uppercase transition-all ${type === 'parcelado' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>Parcelado</button>
-              <button onClick={() => setType('conclusao')} className={`p-3 rounded-xl border text-xs font-bold uppercase transition-all ${type === 'conclusao' ? 'bg-blue-600 border-blue-600 text-white ring-2 ring-blue-200' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}>Entrega</button>
-            </div>
-          </div>
-
-          {type === 'parcelado' && (
-            <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
-              <div className="col-span-2">
-                <div className="flex justify-between mb-1"><span className="text-[10px] font-bold text-slate-400 uppercase">Valor Total</span> <span className="text-[10px] font-black text-slate-900">{totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span></div>
-                <div className="h-1 w-full bg-slate-200 rounded-full overflow-hidden">
-                  <div className="h-full bg-blue-500" style={{ width: `${totalValue > 0 ? Math.min(100, (entryValue / totalValue) * 100) : 0}%` }} />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 col-span-2">
-                <div>
-                  <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Entrada (%)</label>
-                  <input type="number" className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500" value={percentValue} onChange={e => {
-                    const val = Number(e.target.value);
-                    setPercentValue(val);
-                    setEntryValue(totalValue * (val / 100));
-                  }} />
-                </div>
-                <div>
-                  <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Entrada (R$)</label>
-                  <input type="number" className="w-full bg-white border border-slate-200 rounded-lg p-2 text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500" value={entryValue} onChange={e => {
-                    const val = Number(e.target.value);
-                    setEntryValue(val);
-                    if (totalValue > 0) setPercentValue(Number(((val / totalValue) * 100).toFixed(1)));
-                  }} />
-                </div>
-              </div>
-
-              <div className="col-span-2">
-                <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Parcelas</label>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => setInstallments(Math.max(1, installments - 1))} className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-100 font-bold text-slate-600">-</button>
-                  <span className="flex-1 text-center font-black text-slate-900 text-lg">{installments}x</span>
-                  <button onClick={() => setInstallments(installments + 1)} className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center hover:bg-slate-100 font-bold text-slate-600">+</button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div>
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Prévia do Texto</label>
-            <div className="bg-slate-800 text-slate-200 p-4 rounded-xl text-sm font-medium leading-relaxed border border-slate-700 min-h-[80px] whitespace-pre-line">
-              {preview}
-            </div>
-          </div>
-        </div>
-
-        <div className="p-4 bg-slate-50 border-t flex gap-3">
-          <button onClick={onClose} className="flex-1 py-3 text-xs font-bold uppercase text-slate-500 hover:bg-slate-200 rounded-xl transition-colors">Cancelar</button>
-          <button onClick={() => onConfirm(preview, percentValue)} className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black uppercase tracking-wide shadow-lg shadow-blue-200 transition-all active:scale-95">Aplicar Texto</button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default BudgetManager;
+export default WorkOrderManager;
