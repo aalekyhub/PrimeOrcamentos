@@ -145,23 +145,29 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
         if (!currentPlan) return;
         setLoading(true);
 
-        // Calculate Totals
-        const totalMat = materials.reduce((acc, m) => acc + (m.total_cost || 0), 0) +
-            services.reduce((acc, s) => acc + (s.unit_material_cost * s.quantity), 0);
-
-        const totalLab = labor.reduce((acc, l) => acc + (l.total_cost || 0), 0) +
-            services.reduce((acc, s) => acc + (s.unit_labor_cost * s.quantity), 0);
-
+        // Calculate Totals using the exact same formula from the 'resumo' tab (Gross Up)
+        const totalSvc = services.reduce((acc, s) => acc + (s.total_cost || 0), 0);
+        const totalMat = materials.reduce((acc, m) => acc + (m.total_cost || 0), 0);
+        const totalLab = labor.reduce((acc, l) => acc + (l.total_cost || 0), 0);
         const totalInd = indirects.reduce((acc, i) => acc + (i.value || 0), 0);
 
-        const baseTotal = totalMat + totalLab + totalInd;
-        const totalTax = taxes.reduce((acc, t) => acc + (t.rate > 0 ? baseTotal * (t.rate / 100) : (t.value || 0)), 0);
+        const totDirect = totalSvc + totalMat + totalLab + totalInd;
 
-        const finalTotal = baseTotal + totalTax;
+        const bdiTx = taxes.find(t => t.name === 'BDI');
+        const otherTxs = taxes.filter(t => t.name !== 'BDI');
+
+        const bdiVal = bdiTx ? (bdiTx.rate > 0 ? (totDirect * (bdiTx.rate / 100)) : (bdiTx.value || 0)) : 0;
+        const liqDesired = totDirect + bdiVal;
+
+        const ratesSum = otherTxs.reduce((acc, t) => acc + (t.rate > 0 ? (t.rate / 100) : 0), 0);
+        const factorGrossUp = Math.max(0.01, 1 - ratesSum);
+
+        const fixedSum = otherTxs.reduce((acc, t) => acc + (t.rate > 0 ? 0 : (t.value || 0)), 0);
+        const totalPlanValue = (liqDesired + fixedSum) / factorGrossUp;
 
         const updatedPlanHeader = {
             ...currentPlan,
-            total_real_cost: finalTotal
+            total_real_cost: totalPlanValue
         };
 
         // DANGER: Loading list from state 'plans' might be outdated if we just created a new plan 

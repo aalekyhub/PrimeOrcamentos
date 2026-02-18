@@ -135,33 +135,32 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, onGenerateBudget }) =
     };
 
     const getBudgetedTotal = (plan: PlanningHeader) => {
-        if (plan.total_real_cost && plan.total_real_cost > 0) return plan.total_real_cost;
+        // Fallback: Manually sum items using Gross Up if header is 0
+        const svcs = (db.load('serviflow_plan_services', []) as any[]).filter(s => s.plan_id === plan.id);
+        const mats = (db.load('serviflow_plan_materials', []) as any[]).filter(m => m.plan_id === plan.id);
+        const labs = (db.load('serviflow_plan_labor', []) as any[]).filter(l => l.plan_id === plan.id);
+        const inds = (db.load('serviflow_plan_indirects', []) as any[]).filter(i => i.plan_id === plan.id);
+        const txs = (db.load('serviflow_plan_taxes', []) as any[]).filter(t => t.plan_id === plan.id);
 
-        // Fallback: Manually sum items if header is 0
-        const services = db.load('serviflow_plan_services', []) as any[];
-        const materials = db.load('serviflow_plan_materials', []) as any[];
-        const labor = db.load('serviflow_plan_labor', []) as any[];
-        const indirects = db.load('serviflow_plan_indirects', []) as any[];
-        const taxes = db.load('serviflow_plan_taxes', []) as any[];
+        const totalSvc = svcs.reduce((acc, s) => acc + (s.total_cost || 0), 0);
+        const totalMat = mats.reduce((acc, m) => acc + (m.total_cost || 0), 0);
+        const totalLab = labs.reduce((acc, l) => acc + (l.total_cost || 0), 0);
+        const totalInd = inds.reduce((acc, i) => acc + (i.value || 0), 0);
 
-        const planServices = services.filter(s => s.plan_id === plan.id);
-        const planMaterials = materials.filter(m => m.plan_id === plan.id);
-        const planLabor = labor.filter(l => l.plan_id === plan.id);
-        const planIndirects = indirects.filter(i => i.plan_id === plan.id);
-        const planTaxes = taxes.filter(t => t.plan_id === plan.id);
+        const totDirect = totalSvc + totalMat + totalLab + totalInd;
 
-        const totalMat = planMaterials.reduce((acc, m) => acc + (m.total_cost || 0), 0) +
-            planServices.reduce((acc, s) => acc + (s.unit_material_cost * s.quantity), 0);
+        const bdiTx = txs.find(t => t.name === 'BDI');
+        const otherTxs = txs.filter(t => t.name !== 'BDI');
 
-        const totalLab = planLabor.reduce((acc, l) => acc + (l.total_cost || 0), 0) +
-            planServices.reduce((acc, s) => acc + (s.unit_labor_cost * s.quantity), 0);
+        const bdiVal = bdiTx ? (bdiTx.rate > 0 ? (totDirect * (bdiTx.rate / 100)) : (bdiTx.value || 0)) : 0;
+        const liqDesired = totDirect + bdiVal;
 
-        const totalInd = planIndirects.reduce((acc, i) => acc + (i.value || 0), 0);
+        const ratesSum = otherTxs.reduce((acc, t) => acc + (t.rate > 0 ? (t.rate / 100) : 0), 0);
+        const factorGrossUp = Math.max(0.01, 1 - ratesSum);
 
-        const baseTotal = totalMat + totalLab + totalInd;
-        const totalTax = planTaxes.reduce((acc, t) => acc + (t.rate > 0 ? baseTotal * (t.rate / 100) : (t.value || 0)), 0);
+        const fixedSum = otherTxs.reduce((acc, t) => acc + (t.rate > 0 ? 0 : (t.value || 0)), 0);
 
-        return baseTotal + totalTax;
+        return (liqDesired + fixedSum) / factorGrossUp;
     };
 
     if (view === 'detail' && selectedPlanId) {
