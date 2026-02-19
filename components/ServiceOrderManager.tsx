@@ -524,32 +524,94 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
         </div>
 
         <div style="margin-bottom: 5mm;">
-          <h4 style="font-size:16px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:0.5px; margin:0 0 10px 0; padding-top: 3mm;">1. OBJETO DO CONTRATO</h4>
-          <p style="font-size:13px; color:#475569; line-height:1.6; text-align:justify; margin:0 0 10px 0;">O presente contrato tem por objeto a prestação dos serviços técnicos descritos abaixo, a serem realizados pela CONTRATADA à CONTRATANTE:</p>
+          <h4 style="font-size:16px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:0.5px; margin:0 0 10px 0; padding-top: 3mm;">CLÁUSULA 1ª – DO OBJETO</h4>
+          <p style="font-size:13px; color:#475569; line-height:1.6; text-align:justify; margin:0 0 10px 0;">
+            1.1. O presente contrato tem por objeto a execução de reforma na unidade situada no endereço do CONTRATANTE, compreendendo os serviços descritos em memorial descritivo e/ou proposta comercial anexa, que passa a integrar este instrumento para todos os fins legais.
+          </p>
           <div style="background:#f8fafc; padding: 15px; border-radius: 8px; border-left: 5px solid #2563eb; margin: 15px 0;">
             <p style="font-size:14px; font-weight:800; color:#1e3a8a; text-transform:uppercase; letter-spacing:0.5px; margin:0;">${order.description}</p>
             <p style="font-size:12px; color:#1e3a8a; mt-1">${order.items.map(i => `${i.quantity}x ${i.description}`).join(', ')}</p>
           </div>
+          <p style="font-size:13px; color:#475569; line-height:1.6; text-align:justify; margin:10px 0 0 0;">1.2. A contratação se dá sob regime de empreitada global, com fornecimento de materiais e mão de obra, assumindo a CONTRATADA integral responsabilidade técnica, administrativa e operacional pela execução da obra.</p>
+          <p style="font-size:13px; color:#475569; line-height:1.6; text-align:justify; margin:10px 0 0 0;">1.3. Não se caracteriza, em hipótese alguma, cessão ou locação de mão de obra.</p>
         </div>
         
         <div style="margin-bottom: 5mm;">
-          <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 3mm 0; padding-top: 3mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">2. VALORES E PAGAMENTO</h4>
-          <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0;">Pelos serviços contratados, a CONTRATANTE pagará o valor total de <b style="color:#0f172a;">R$ ${order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>. Condições: ${order.paymentTerms || 'Conforme combinado'}.</p>
+          <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 3mm 0; padding-top: 3mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">CLÁUSULA 2ª – DA FORMA DE EXECUÇÃO</h4>
+          <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0 0 2mm 0;">2.1. A CONTRATADA executará os serviços com autonomia técnica e gerencial, utilizando meios próprios, inclusive pessoal, ferramentas, equipamentos e métodos de trabalho.</p>
+          <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:2mm 0 2mm 0;">2.2. Não haverá subordinação, exclusividade, controle de jornada ou disponibilização de trabalhadores ao CONTRATANTE.</p>
+          <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:2mm 0 0 0;">2.3. A CONTRATADA assume integral responsabilidade pela obra e pelos profissionais por ela contratados.</p>
         </div>
 
         <div style="margin-bottom: 5mm;">
-          <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 3mm 0; padding-top: 3mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">3. PRAZOS E GARANTIA</h4>
-          <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0;">O prazo estimado é de <b>${order.deliveryTime || 'A combinar'}</b>. A garantia dos serviços é de 90 dias (Art. 26 CDC).</p>
-        </div>
-        
-        <div style="margin-bottom: 5mm;">
-          <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 3mm 0; padding-top: 3mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">4. DIREITOS E OBRIGAÇÕES</h4>
-          <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0;">4.1. A CONTRATADA compromete-se a executar os serviços com qualidade técnica, utilizando mão-de-obra qualificada.<br>4.2. A garantia dos serviços prestados é de 90 (noventa) dias, conforme Art. 26 do Código de Defesa do Consumidor.<br>4.3. A CONTRATANTE deve fornecer as condições necessárias (acesso, energia, etc.) para a execução dos trabalhos.</p>
+          <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 3mm 0; padding-top: 3mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">CLÁUSULA 3ª – DO PREÇO E FORMA DE PAGAMENTO</h4>
+          <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0 0 2mm 0;">3.1. Pelos serviços objeto deste contrato, o CONTRATANTE pagará à CONTRATADA o valor global de <b style="color:#0f172a;">R$ ${order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>.</p>
+          <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:2mm 0 2mm 0;">3.2. O pagamento será realizado da seguinte forma: <b>${order.paymentTerms || 'Conforme combinado'}</b>.</p>
+          <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:2mm 0 0 0;">3.3. O valor contratado corresponde a preço fechado por obra certa, não estando vinculado a horas trabalhadas ou número de funcionários.</p>
         </div>
 
         <div style="margin-bottom: 5mm;">
-          <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 3mm 0; padding-top: 3mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">5. FORO</h4>
-          <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0;">Fica eleito o foro da comarca de São Paulo/SP para dirimir quaisquer dúvidas oriundas deste contrato.</p>
+          <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 3mm 0; padding-top: 3mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">CLÁUSULA 4ª – DAS OBRIGAÇÕES DA CONTRATADA</h4>
+          <ul style="list-style-type: none; padding-left: 0; margin: 3mm 0 0 0; font-size:14px; color:#475569; line-height:1.6;">
+              <li>4.1. Executar os serviços conforme escopo contratado e normas técnicas aplicáveis.</li>
+              <li>4.2. Responsabilizar-se por seus empregados quanto a encargos trabalhistas, previdenciários e fiscais.</li>
+              <li>4.3. Manter regularidade fiscal durante a execução do contrato.</li>
+              <li>4.4. Responder por danos causados ao imóvel decorrentes de culpa comprovada.</li>
+          </ul>
+        </div>
+
+        <div style="margin-bottom: 5mm;">
+          <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 3mm 0; padding-top: 3mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">CLÁUSULA 5ª – DAS OBRIGAÇÕES DO CONTRATANTE</h4>
+          <ul style="list-style-type: none; padding-left: 0; margin: 3mm 0 0 0; font-size:14px; color:#475569; line-height:1.6;">
+              <li>5.1. Garantir acesso ao local da obra.</li>
+              <li>5.2. Efetuar os pagamentos conforme pactuado.</li>
+              <li>5.3. Providenciar autorizações condominiais, quando exigidas.</li>
+          </ul>
+        </div>
+
+        <div style="margin-bottom: 5mm;">
+          <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 3mm 0; padding-top: 3mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">CLÁUSULA 6ª – DAS RESPONSABILIDADES PREVIDENCIÁRIAS E FISCAIS</h4>
+          <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0 0 2mm 0;">6.1. O presente contrato caracteriza empreitada total, nos termos da legislação previdenciária vigente, especialmente Lei nº 8.212/91 e IN RFB 2110/2022.</p>
+          <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:2mm 0 2mm 0;">6.2. Não se aplica retenção de 11% de INSS, por não se tratar de cessão de mão de obra.</p>
+          <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:2mm 0 0 0;">6.3. A CONTRATADA é responsável pelo recolhimento de tributos incidentes sobre suas atividades.</p>
+        </div>
+
+        <div style="margin-bottom: 5mm;">
+          <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 3mm 0; padding-top: 3mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">CLÁUSULA 7ª – DO PRAZO</h4>
+          <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0 0 2mm 0;">7.1. O prazo estimado para execução da obra é de <b>${order.deliveryTime || '15 dias úteis'}</b>, contados do início efetivo dos serviços.</p>
+          <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:2mm 0 0 0;">7.2. O prazo poderá ser prorrogado em caso de: serviços adicionais, atraso de pagamento, impedimento de acesso, ou caso fortuito/força maior.</p>
+        </div>
+
+        <div style="margin-bottom: 5mm;">
+          <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 3mm 0; padding-top: 3mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">CLÁUSULA 8ª – DA RESPONSABILIDADE TÉCNICA</h4>
+          <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0;">8.1. Quando exigido pela natureza dos serviços, será providenciada ART ou RRT por profissional habilitado.</p>
+        </div>
+
+        <div style="margin-bottom: 5mm;">
+          <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 3mm 0; padding-top: 3mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">CLÁUSULA 9ª – DOS SERVIÇOS ADICIONAIS</h4>
+          <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0 0 2mm 0;">9.1. Qualquer serviço não previsto no escopo original será considerado extra e dependerá de orçamento complementar e aprovação formal do CONTRATANTE.</p>
+          <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:2mm 0 0 0;">9.2. A execução de serviços adicionais implicará ajuste de prazo e valor mediante termo aditivo.</p>
+        </div>
+
+        <div style="margin-bottom: 5mm;">
+          <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 3mm 0; padding-top: 3mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">CLÁUSULA 10ª – DA MULTA E INADIMPLEMENTO</h4>
+          <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0 0 2mm 0;">10.1. O atraso no pagamento implicará multa de 2% sobre o valor devido, juros de 1% ao mês e correção monetária pelo índice oficial vigente.</p>
+          <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:2mm 0 0 0;">10.2. Em caso de rescisão imotivada por parte do CONTRATANTE, será devida multa equivalente a 10% do valor restante do contrato.</p>
+        </div>
+
+        <div style="margin-bottom: 5mm;">
+          <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 3mm 0; padding-top: 3mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">CLÁUSULA 11ª – DA RESCISÃO</h4>
+          <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0;">11.1. O contrato poderá ser rescindido por descumprimento contratual mediante notificação escrita.</p>
+        </div>
+
+        <div style="margin-bottom: 5mm;">
+          <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 3mm 0; padding-top: 3mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">CLÁUSULA 12ª – DO FORO</h4>
+          <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0;">12.1. Fica eleito o foro da Comarca de <b>${customer.city || 'Brasília'} - ${customer.state || 'DF'}</b> para dirimir quaisquer controvérsias oriundas deste contrato.</p>
+        </div>
+
+        <div style="margin-top: 10mm; font-size: 14px; color: #475569; line-height: 1.6;">
+          <p>E por estarem justas e contratadas, assinam as partes o presente instrumento em duas vias de igual teor.</p>
+          <p style="margin-top: 5mm;">${customer.city || 'Brasília'}/${customer.state || 'DF'}, ${new Date().getDate()} de ${new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(new Date())} de ${new Date().getFullYear()}.</p>
         </div>
 
         <div style="margin: 30mm 0 20mm 0; page-break-inside: avoid;">
