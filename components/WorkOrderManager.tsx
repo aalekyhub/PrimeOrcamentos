@@ -450,7 +450,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                 <title>Contrato - ${order.id.replace('OS-', 'OS')} - ${order.description || 'Proposta'}</title>
                 <style>
                     body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: white; }
-                    @page { size: A4; margin: 15mm 0; }
+                    @page { size: A4; margin: 10mm 0; }
                     .a4-container { width: 210mm; margin: 0 auto; padding: 0 15mm; background: white; box-sizing: border-box; }
                     * { box-sizing: border-box; }
                     p, h1, h2, h3, h4, h5, h6 { margin: 0; }
@@ -465,7 +465,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             </head>
             <body>
                 <div class="a4-container">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #e2e8f0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 2px solid #e2e8f0;">
                       <div style="width: 120px;">
                         ${company.logo ? `<img src="${company.logo}" style="max-height: 70px; width: auto; object-fit: contain;" />` : ''}
                       </div>
@@ -480,7 +480,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                       </div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin-bottom: 20px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin-bottom: 15px;">
                       <div style="background:#f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #f1f5f9;">
                         <h4 style="font-size:10px; font-weight:900; color:#3b82f6; text-transform:uppercase; letter-spacing:1px; margin:0 0 2mm 0;">CONTRATADA</h4>
                         <p style="font-size:14px; font-weight:900; color:#0f172a; text-transform:uppercase; margin:0;">${company.name}</p>
@@ -495,7 +495,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                       </div>
                     </div>
 
-                    <div style="margin-bottom: 5mm;">
+                    <div style="margin-bottom: 3mm;">
                       <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0;">
                         As partes acima identificadas resolvem firmar o presente Contrato de Prestação de Serviços por Empreitada Global, nos termos da legislação civil e previdenciária vigente, mediante as cláusulas e condições seguintes:
                       </p>
