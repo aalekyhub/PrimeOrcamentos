@@ -478,7 +478,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
           .ql-editor-print h3 { font-size: 17px !important; }
           .ql-editor-print h4 { font-size: 14px !important; }
           
-          .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
+          .ql-editor-print ul { list-style-type: none !important; padding-left: 0 !important; margin: 12px 0 !important; }
           .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
           .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
         }

@@ -288,7 +288,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     
             <div style="margin-bottom: 10mm; page-break-inside: avoid;">
                 <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 4mm 0; padding-top: 6mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">CLÁUSULA 4ª – DAS OBRIGAÇÕES DA CONTRATADA</h4>
-                <ul style="list-style-type: disc; padding-left: 5mm; margin: 3mm 0 0 0; font-size:14px; color:#475569; line-height:1.6;">
+                <ul style="list-style-type: none; padding-left: 0; margin: 3mm 0 0 0; font-size:14px; color:#475569; line-height:1.6;">
                     <li>4.1. Executar os serviços conforme o escopo contratado e normas técnicas aplicáveis.</li>
                     <li>4.2. Responsabilizar-se integralmente por seus empregados, prepostos ou subcontratados, inclusive quanto a encargos trabalhistas, previdenciários, fiscais e securitários.</li>
                     <li>4.3. Manter seus tributos, contribuições e obrigações legais em dia.</li>
@@ -298,7 +298,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     
             <div style="margin-bottom: 10mm; page-break-inside: avoid;">
                 <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 4mm 0; padding-top: 6mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">CLÁUSULA 5ª – DAS OBRIGAÇÕES DO CONTRATANTE</h4>
-                <ul style="list-style-type: disc; padding-left: 5mm; margin: 3mm 0 0 0; font-size:14px; color:#475569; line-height:1.6;">
+                <ul style="list-style-type: none; padding-left: 0; margin: 3mm 0 0 0; font-size:14px; color:#475569; line-height:1.6;">
                     <li>5.1. Garantir o acesso da CONTRATADA ao local da obra.</li>
                     <li>5.2. Efetuar os pagamentos conforme acordado.</li>
                     <li>5.3. Fornecer, quando necessário, autorizações do condomínio para execução dos serviços.</li>
@@ -374,7 +374,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             * { box-sizing: border-box; margin: 0; padding: 0; }
             body { background: white; font-family: Arial, sans-serif; }
             .a4-container { max-width: 210mm; margin: 0 auto; background: white; }
-            ul, ol { padding-left: 20px; }
+            ul, ol { padding-left: 0; list-style-type: none; }
             li { margin-bottom: 4px; }
         `;
         tempDiv.appendChild(style);
@@ -434,7 +434,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     .a4-container { width: 210mm; margin: 0 auto; padding: 0 15mm; background: white; box-sizing: border-box; }
                     * { box-sizing: border-box; }
                     p, h1, h2, h3, h4, h5, h6 { margin: 0; }
-                    ul { list-style-type: disc; padding-left: 5mm; margin: 3mm 0 0 0; }
+                    ul { list-style-type: none; padding-left: 0; margin: 3mm 0 0 0; }
                     li { margin-bottom: 4px; }
                     
                     @media print {
@@ -508,7 +508,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
                     <div style="margin-bottom: 10mm;">
                         <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 4mm 0; padding-top: 6mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">CLÁUSULA 4ª – DAS OBRIGAÇÕES DA CONTRATADA</h4>
-                        <ul style="list-style-type: disc; padding-left: 5mm; margin: 3mm 0 0 0; font-size:14px; color:#475569; line-height:1.6;">
+                        <ul style="list-style-type: none; padding-left: 0; margin: 3mm 0 0 0; font-size:14px; color:#475569; line-height:1.6;">
                             <li>4.1. Executar os serviços conforme o escopo contratado e normas técnicas aplicáveis.</li>
                             <li>4.2. Responsabilizar-se integralmente por seus empregados, prepostos ou subcontratados, inclusive quanto a encargos trabalhistas, previdenciários, fiscais e securitários.</li>
                             <li>4.3. Manter seus tributos, contribuições e obrigações legais em dia.</li>
@@ -518,7 +518,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
                     <div style="margin-bottom: 10mm;">
                         <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 4mm 0; padding-top: 6mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">CLÁUSULA 5ª – DAS OBRIGAÇÕES DO CONTRATANTE</h4>
-                        <ul style="list-style-type: disc; padding-left: 5mm; margin: 3mm 0 0 0; font-size:14px; color:#475569; line-height:1.6;">
+                        <ul style="list-style-type: none; padding-left: 0; margin: 3mm 0 0 0; font-size:14px; color:#475569; line-height:1.6;">
                             <li>5.1. Garantir o acesso da CONTRATADA ao local da obra.</li>
                             <li>5.2. Efetuar os pagamentos conforme acordado.</li>
                             <li>5.3. Fornecer, quando necessário, autorizações do condomínio para execução dos serviços.</li>
