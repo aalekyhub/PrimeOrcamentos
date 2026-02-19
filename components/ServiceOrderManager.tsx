@@ -532,17 +532,17 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
           </div>
         </div>
         
-        <div style="margin-bottom: 6mm;">
+        <div style="margin-bottom: 5mm;">
           <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 3mm 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">2. VALORES E PAGAMENTO</h4>
           <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0;">Pelos serviços contratados, a CONTRATANTE pagará o valor total de <b style="color:#0f172a;">R$ ${order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>. Condições: ${order.paymentTerms || 'Conforme combinado'}.</p>
         </div>
 
-        <div style="margin-bottom: 6mm;">
+        <div style="margin-bottom: 5mm;">
           <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 3mm 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">3. PRAZOS E GARANTIA</h4>
           <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0;">O prazo estimado é de <b>${order.deliveryTime || 'A combinar'}</b>. A garantia dos serviços é de 90 dias (Art. 26 CDC).</p>
         </div>
         
-        <div style="margin-bottom: 6mm;">
+        <div style="margin-bottom: 5mm;">
           <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 3mm 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">4. DIREITOS E OBRIGAÇÕES</h4>
           <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0;">4.1. A CONTRATADA compromete-se a executar os serviços com qualidade técnica, utilizando mão-de-obra qualificada.<br>4.2. A garantia dos serviços prestados é de 90 (noventa) dias, conforme Art. 26 do Código de Defesa do Consumidor.<br>4.3. A CONTRATANTE deve fornecer as condições necessárias (acesso, energia, etc.) para a execução dos trabalhos.</p>
         </div>
