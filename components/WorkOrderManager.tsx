@@ -225,39 +225,33 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         const contentHtml = `
         <div id="contract-content" style="background:#fff; padding: 0; margin: 0; font-family: Arial, sans-serif;">
           <div class="a4-container" style="background:#fff; max-width: 210mm; margin: 0 auto; padding: 0 15mm;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10mm; border-bottom: 3px solid #0f172a; padding-bottom: 8mm;">
-              <div style="display: flex; gap: 6mm; align-items: center;">
-                <div style="width: 80px; height: 80px; display:flex; align-items:center; justify-content:center;">
-                  ${company.logo
-                ? `<img src="${company.logo}" style="max-height:100%; max-width:100%; object-fit:contain;" crossorigin="anonymous" />`
-                : `<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>`
-            }
-                </div>
-                <div>
-                  <h1 style="font-size:18px; font-weight:900; color:#0f172a; margin:0 0 2mm 0; text-transform:uppercase; letter-spacing:-0.5px;">${company.name}</h1>
-                  <p style="font-size:11px; font-weight:800; color:#2563eb; text-transform:uppercase; letter-spacing:1px; margin:0 0 2mm 0;">Contrato de Prestação de Serviços</p>
-                  <p style="font-size:9px; color:#94a3b8; font-weight:700; text-transform:uppercase; letter-spacing:-0.3px; margin:0;">${company.cnpj || ""} | ${company.phone || ""}</p>
-                </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #e2e8f0;">
+              <div style="width: 120px;">
+                ${company.logo ? `<img src="${company.logo}" style="max-height: 70px; width: auto; object-fit: contain;" crossorigin="anonymous" />` : ''}
               </div>
-              <div style="text-align:right;">
-                <div style="background:#2563eb; color:white; padding:2mm 4mm; border-radius:2mm; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:1px; margin-bottom:2mm; display:inline-block;">CONTRATO</div>
-                <p style="font-size:24px; font-weight:900; color:#0f172a; letter-spacing:-1px; margin:0 0 1mm 0; white-space:nowrap;">${order.id}</p>
-                <p style="font-size:10px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1px; text-align:right; margin:0;">EMISSÃO: ${new Date().toLocaleDateString("pt-BR")}</p>
+              <div style="text-align: center; flex-grow: 1;">
+                <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 2px; text-transform: uppercase;">${company.name}</h1>
+                <p style="font-size: 11px; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">CONTRATO DE PRESTAÇÃO DE SERVIÇOS</p>
+                <p style="font-size: 9px; color: #64748b; font-weight: 600;">${company.cnpj || ""} | ${company.phone || ""}</p>
+              </div>
+              <div style="text-align: right; width: 120px;">
+                <h2 style="font-size: 24px; font-weight: 900; color: #2563eb; margin: 0; letter-spacing: -1px;">${order.id}</h2>
+                <p style="font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase; margin-top: 2px;">EMISSÃO: ${new Date().toLocaleDateString("pt-BR")}</p>
               </div>
             </div>
     
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin-bottom: 8mm;">
-              <div style="background:#f8fafc; padding: 6mm; border-radius: 4mm; border: 1px solid #f1f5f9;">
-                <h4 style="font-size:10px; font-weight:900; color:#94a3b8; text-transform:uppercase; letter-spacing:1px; margin:0 0 1mm 0;">CONTRATADA</h4>
-                <p style="font-size:16px; font-weight:900; color:#0f172a; text-transform:uppercase; margin:0 0 1mm 0;">${company.name}</p>
-                <p style="font-size:12px; font-weight:700; color:#64748b; text-transform:uppercase; margin:1mm 0 0 0;">${company.address || ""}</p>
-                <p style="font-size:12px; font-weight:700; color:#64748b; text-transform:uppercase; margin:0;">${company.email || ""}</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin-bottom: 20px;">
+              <div style="background:#f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #f1f5f9;">
+                <h4 style="font-size:10px; font-weight:900; color:#3b82f6; text-transform:uppercase; letter-spacing:1px; margin:0 0 2mm 0;">CONTRATADA</h4>
+                <p style="font-size:14px; font-weight:900; color:#0f172a; text-transform:uppercase; margin:0;">${company.name}</p>
+                <p style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; margin:1mm 0 0 0;">${company.address || ""}</p>
+                <p style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; margin:0;">${company.email || ""}</p>
               </div>
-              <div style="background:#f8fafc; padding: 6mm; border-radius: 4mm; border: 1px solid #f1f5f9;">
-                <h4 style="font-size:10px; font-weight:900; color:#94a3b8; text-transform:uppercase; letter-spacing:1px; margin:0 0 1mm 0;">CONTRATANTE</h4>
-                <p style="font-size:16px; font-weight:900; color:#0f172a; text-transform:uppercase; margin:0 0 1mm 0;">${customer.name}</p>
-                <p style="font-size:12px; font-weight:700; color:#64748b; text-transform:uppercase; margin:1mm 0 0 0;">${(customer.document || "").replace(/\D/g, "").length <= 11 ? "CPF" : "CNPJ"}: ${formatDocument(customer.document || "") || "N/A"}</p>
-                <p style="font-size:12px; font-weight:700; color:#64748b; text-transform:uppercase; margin:0;">${customer.address || ""}, ${customer.number || ""} - ${customer.city || ""}</p>
+              <div style="background:#f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #f1f5f9;">
+                <h4 style="font-size:10px; font-weight:900; color:#3b82f6; text-transform:uppercase; letter-spacing:1px; margin:0 0 2mm 0;">CONTRATANTE</h4>
+                <p style="font-size:14px; font-weight:900; color:#0f172a; text-transform:uppercase; margin:0;">${customer.name}</p>
+                <p style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; margin:1mm 0 0 0;">${(customer.document || "").replace(/\D/g, "").length <= 11 ? "CPF" : "CNPJ"}: ${customer.document || "N/A"}</p>
+                <p style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; margin:0;">${customer.address || ""}, ${customer.number || ""} - ${customer.city || ""}</p>
               </div>
             </div>
     
@@ -268,14 +262,14 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             </div>
     
             <div style="margin-bottom: 10mm; page-break-inside: avoid;">
-              <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 4mm 0; padding-top: 6mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">CLÁUSULA 1ª – DO OBJETO</h4>
-              <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0 0 2mm 0;">
+              <h4 style="font-size:16px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:0.5px; margin:0 0 10px 0;">CLÁUSULA 1ª – DO OBJETO</h4>
+              <p style="font-size:13px; color:#475569; line-height:1.6; text-align:justify; margin:0 0 10px 0;">
                 1.1. O presente contrato tem por objeto a execução de reforma em unidade residencial, situada no endereço do CONTRATANTE, compreendendo os serviços descritos abaixo, os quais serão executados por empreitada global, com responsabilidade técnica, administrativa e operacional integral da CONTRATADA.
               </p>
-              <div style="background:#eff6ff; padding: 4mm; border-radius: 2mm; border-left: 4px solid #2563eb; margin: 4mm 0;">
-                <p style="font-size:14px; font-weight:700; color:#1e3a8a; text-transform:uppercase; letter-spacing:0.5px; margin:0;">${order.description || ""}</p>
+              <div style="background:#f8fafc; padding: 15px; border-radius: 8px; border-left: 5px solid #2563eb; margin: 15px 0;">
+                <p style="font-size:14px; font-weight:800; color:#1e3a8a; text-transform:uppercase; letter-spacing:0.5px; margin:0;">${order.description || ""}</p>
               </div>
-              <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:4mm 0 0 0;">1.2. A execução dos serviços será realizada por obra certa, com preço previamente ajustado, não se caracterizando, em hipótese alguma, cessão ou locação de mão de obra.</p>
+              <p style="font-size:13px; color:#475569; line-height:1.6; text-align:justify; margin:10px 0 0 0;">1.2. A execução dos serviços será realizada por obra certa, com preço previamente ajustado, não se caracterizando, em hipótese alguma, cessão ou locação de mão de obra.</p>
             </div>
     
             <div style="margin-bottom: 10mm; page-break-inside: avoid;">
@@ -405,10 +399,10 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         pdf.setFontSize(10);
                         pdf.setTextColor(148, 163, 184);
                         pdf.text(
-                            `PÁGINA ${i} DE ${totalPages}`,
-                            pdf.internal.pageSize.getWidth() / 2,
+                            `Pág. ${i} / ${totalPages}`,
+                            pdf.internal.pageSize.getWidth() - 15,
                             pdf.internal.pageSize.getHeight() - 10,
-                            { align: "center" }
+                            { align: "right" }
                         );
                     }
                 }) as any)
@@ -477,27 +471,36 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     <thead><tr><td style="height: ${company.printMarginTop || 15}mm;"><div style="height: ${company.printMarginTop || 15}mm; display: block;">&nbsp;</div></td></tr></thead>
                     <tbody><tr><td>
                         <div class="a4-container">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10mm; border-bottom: 3px solid #0f172a; padding-bottom: 8mm;">
-                                <div style="display: flex; gap: 6mm; align-items: center;">
-                                    <div style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
-                                        ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>'}
-                                    </div>
-                                    <div>
-                                        <h1 style="font-size:18px; font-weight:900; color:#0f172a; margin:0 0 2mm 0; text-transform:uppercase; letter-spacing:-0.5px;">${company.name}</h1>
-                                        <p style="font-size:11px; font-weight:800; color:#2563eb; text-transform:uppercase; letter-spacing:1px; margin:0 0 2mm 0;">Contrato de Prestação de Serviços</p>
-                                        <p style="font-size:9px; color:#94a3b8; font-weight:700; text-transform:uppercase; letter-spacing:-0.3px; margin:0;">${company.cnpj || ''} | ${company.phone || ''}</p>
-                                    </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #e2e8f0;">
+                                <div style="width: 120px;">
+                                    ${company.logo ? `<img src="${company.logo}" style="max-height: 70px; width: auto; object-fit: contain;">` : ''}
                                 </div>
-                                <div style="text-align:right;">
-                                    <div style="background:#2563eb; color:white; padding:2mm 4mm; border-radius:2mm; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:1px; margin-bottom:2mm; display:inline-block;">CONTRATO</div>
-                                    <p style="font-size:24px; font-weight:900; color:#0f172a; letter-spacing:-1px; margin:0 0 1mm 0; white-space:nowrap;">${order.id}</p>
-                                    <p style="font-size:10px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1px; text-align:right; margin:0;">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p>
+                                <div style="text-align: center; flex-grow: 1;">
+                                    <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 2px; text-transform: uppercase;">${company.name}</h1>
+                                    <p style="font-size: 11px; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">CONTRATO DE PRESTAÇÃO DE SERVIÇOS</p>
+                                    <p style="font-size: 9px; color: #64748b; font-weight: 600;">${company.cnpj || ''} | ${company.phone || ''}</p>
+                                </div>
+                                <div style="text-align: right; width: 120px;">
+                                    <h2 style="font-size: 24px; font-weight: 900; color: #2563eb; margin: 0; letter-spacing: -1px;">${order.id}</h2>
+                                    <p style="font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase; margin-top: 2px;">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p>
                                 </div>
                             </div>
 
                             <div class="grid grid-cols-2 gap-4 mb-8">
-                                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100"><h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</h4><p class="text-base font-black text-slate-900 uppercase">${company.name}</p><p class="text-xs font-bold text-slate-500 uppercase mt-1">${company.address || ''}</p><p class="text-xs font-bold text-slate-500 uppercase">${company.email || ''}</p></div>
-                                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100"><h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</h4><p class="text-base font-black text-slate-900 uppercase">${customer.name}</p><p class="text-xs font-bold text-slate-500 uppercase mt-1">${(customer.document || '').replace(/\D/g, '').length <= 11 ? 'CPF' : 'CNPJ'}: ${formatDocument(customer.document || '') || 'N/A'}</p><p class="text-xs font-bold text-slate-500 uppercase">${customer.address || ''}, ${customer.number || ''} - ${customer.city || ''}</p></div>
+                            <div class="grid grid-cols-2 gap-4 mb-6">
+                                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col">
+                                    <span class="text-[10px] font-extrabold text-blue-600 uppercase mb-2 tracking-wider">CONTRATADA</span>
+                                    <p class="text-[13px] font-black text-slate-900 uppercase">${company.name}</p>
+                                    <p class="text-[11px] font-bold text-slate-500 uppercase mt-1 leading-tight">${company.address || ''}</p>
+                                    <p class="text-[11px] font-bold text-slate-500 mt-0.5">${company.email || ''}</p>
+                                </div>
+                                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col">
+                                    <span class="text-[10px] font-extrabold text-blue-600 uppercase mb-2 tracking-wider">CONTRATANTE</span>
+                                    <p class="text-[13px] font-black text-slate-900 uppercase">${customer.name}</p>
+                                    <p class="text-[11px] font-bold text-slate-500 uppercase mt-1">${(customer.document || '').replace(/\D/g, '').length <= 11 ? 'CPF' : 'CNPJ'}: ${customer.document || 'N/A'}</p>
+                                    <p class="text-[11px] font-bold text-slate-500 uppercase mt-0.5 leading-tight">${customer.address || ''}, ${customer.number || ''} - ${customer.city || ''}</p>
+                                </div>
+                            </div>
                             </div>
 
                             <div class="mb-10">
@@ -505,12 +508,12 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                             </div>
 
                             <div class="mb-10" style="page-break-inside: avoid; break-inside: avoid;">
-                                <h4 class="text-[15px] font-black text-slate-900 uppercase tracking-widest mb-4 pt-6 border-b pb-2" style="page-break-after: avoid; break-after: avoid;">CLÁUSULA 1ª – DO OBJETO</h4>
-                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify">1.1. O presente contrato tem por objeto a execução de reforma em unidade residencial, situada no endereço do CONTRATANTE, compreendendo os serviços descritos abaixo, os quais serão executados por empreitada global, com responsabilidade técnica, administrativa e operacional integral da CONTRATADA.</p>
-                                <div class="bg-blue-50/50 p-4 rounded-xl border-l-4 border-blue-500 mt-4">
-                                    <p class="text-[14px] font-bold text-blue-900 uppercase tracking-wide">${order.description}</p>
+                                <h4 class="text-[16px] font-black text-slate-900 uppercase mb-2">CLÁUSULA 1ª – DO OBJETO</h4>
+                                <p class="text-[13px] text-slate-600 leading-relaxed text-justify">1.1. O presente contrato tem por objeto a execução de reforma em unidade residencial, situada no endereço do CONTRATANTE, compreendendo os serviços descritos abaixo, os quais serão executados por empreitada global, com responsabilidade técnica, administrativa e operacional integral da CONTRATADA.</p>
+                                <div class="bg-slate-50 p-5 rounded-xl border-l-[6px] border-blue-600 mt-4">
+                                    <p class="text-[15px] font-black text-blue-900 uppercase tracking-tight">${order.description}</p>
                                 </div>
-                                <p class="text-[14px] text-slate-600 leading-relaxed text-justify mt-4">1.2. A execução dos serviços será realizada por obra certa, com preço previamente ajustado, não se caracterizando, em hipótese alguma, cessão ou locação de mão de obra.</p>
+                                <p class="text-[13px] text-slate-600 leading-relaxed text-justify mt-4">1.2. A execução dos serviços será realizada por obra certa, com preço previamente ajustado, não se caracterizando, em hipótese alguma, cessão ou locação de mão de obra.</p>
                             </div>
 
                             <div class="mb-10" style="page-break-inside: avoid; break-inside: avoid;">

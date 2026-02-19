@@ -490,36 +490,45 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
         <tbody><tr><td>
           <div class="a4-container">
             <!-- Header -->
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10mm; border-bottom: 3px solid #0f172a; padding-bottom: 8mm;">
-              <div style="display: flex; gap: 6mm; align-items: center;">
-                <div style="width: 80px; height: 80px; display:flex; align-items:center; justify-content:center;">
-                  ${company.logo ? `<img src="${company.logo}" style="max-height:100%; max-width:100%; object-fit:contain;" />` : `<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>`}
-                </div>
-                <div>
-                  <h1 style="font-size:18px; font-weight:900; color:#0f172a; margin:0 0 2mm 0; text-transform:uppercase; letter-spacing:-0.5px;">${company.name}</h1>
-                  <p style="font-size:11px; font-weight:800; color:#2563eb; text-transform:uppercase; letter-spacing:1px; margin:0 0 2mm 0;">${company.tagline || 'Soluções em Gestão Profissional'}</p>
-                  <p style="font-size:9px; color:#94a3b8; font-weight:700; text-transform:uppercase; letter-spacing:-0.3px; margin:0;">${company.cnpj || ""} | ${company.phone || ""}</p>
-                </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #e2e8f0;">
+              <div style="width: 120px;">
+                ${company.logo ? `<img src="${company.logo}" style="max-height: 70px; width: auto; object-fit: contain;" />` : ''}
               </div>
-              <div style="text-align:right;">
-                <div style="background:#2563eb; color:white; padding:2mm 4mm; border-radius:2mm; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:1px; margin-bottom:2mm; display:inline-block;">CONTRATO</div>
-                <p style="font-size:24px; font-weight:900; color:#0f172a; letter-spacing:-1px; margin:0 0 1mm 0; white-space:nowrap;">${order.id}</p>
-                <p style="font-size:10px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1px; text-align:right; margin:0;">EXPEDIÇÃO: ${new Date().toLocaleDateString('pt-BR')}</p>
+              <div style="text-align: center; flex-grow: 1;">
+                <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 2px; text-transform: uppercase;">${company.name}</h1>
+                <p style="font-size: 11px; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">CONTRATO DE PRESTAÇÃO DE SERVIÇOS</p>
+                <p style="font-size: 9px; color: #64748b; font-weight: 600;">${company.cnpj || ""} | ${company.phone || ""}</p>
+              </div>
+              <div style="text-align: right; width: 120px;">
+                <h2 style="font-size: 24px; font-weight: 900; color: #2563eb; margin: 0; letter-spacing: -1px;">${order.id}</h2>
+                <p style="font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase; margin-top: 2px;">EXPEDIÇÃO: ${new Date().toLocaleDateString('pt-BR')}</p>
               </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4 mb-8">
-              <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 class="text-[7px] font-bold text-slate-400 uppercase tracking-widest mb-1">CONTRATADA</h4><p class="text-[10px] font-bold text-slate-900 uppercase">${company.name}</p><p class="text-[9px] text-slate-500 uppercase">${company.address || ''}</p><p class="text-[9px] text-slate-500 uppercase">${company.email || ''}</p></div>
-              <div class="bg-slate-50 p-4 rounded-xl border border-slate-100"><h4 class="text-[7px] font-bold text-slate-400 uppercase tracking-widest mb-1">CONTRATANTE</h4><p class="text-[10px] font-bold text-slate-900 uppercase">${customer.name}</p><p class="text-[9px] text-slate-500 uppercase">DOC: ${customer.document || 'N/A'}</p><p class="text-[9px] text-slate-500 uppercase">${customer.address || ''}, ${customer.number || ''} - ${customer.city || ''}</p></div>
+            <div class="grid grid-cols-2 gap-4 mb-6">
+              <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col">
+                <span class="text-[10px] font-extrabold text-blue-600 uppercase mb-2 tracking-wider">CONTRATADA</span>
+                <p class="text-[10px] font-bold text-slate-900 uppercase">${company.name}</p>
+                <p class="text-[9px] text-slate-500 uppercase mt-1 leading-tight">${company.address || ''}</p>
+                <p class="text-[9px] text-slate-500 mt-0.5">${company.email || ''}</p>
+              </div>
+              <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col">
+                <span class="text-[10px] font-extrabold text-blue-600 uppercase mb-2 tracking-wider">CONTRATANTE</span>
+                <p class="text-[10px] font-bold text-slate-900 uppercase">${customer.name}</p>
+                <p class="text-[9px] text-slate-500 uppercase mt-1">CNPJ: ${customer.document || 'N/A'}</p>
+                <p class="text-[9px] text-slate-500 uppercase mt-0.5 leading-tight">${customer.address || ''}, ${customer.number || ''} - ${customer.city || ''}</p>
+              </div>
             </div>
 
-            <div class="mb-8"><p class="text-[10px] text-slate-600 leading-relaxed text-justify">As partes acima identificadas resolvem firmar o presente Contrato de Prestação de Serviços por Empreitada Global, nos termos da legislação civil e previdenciÃ¡ria vigente, mediante as clÃ¡usulas e condições seguintes:</p></div><div class="mb-6"><h4 class="text-[9px] font-black text-slate-900 uppercase tracking-widest mb-2 border-b pb-1">1. OBJETO DO CONTRATO</h4><p class="text-[10px] text-slate-600 leading-relaxed text-justify">O presente contrato tem por objeto a prestação dos serviços técnicos descritos abaixo, a serem realizados pela CONTRATADA Ã  CONTRATANTE:</p><div class="bg-blue-50/50 p-4 rounded-lg border-l-4 border-blue-500 mt-2"><p class="text-[10px] font-bold text-blue-900 uppercase">${order.description}</p><p class="text-[9px] text-blue-700 mt-1">${order.items.map(i => `${i.quantity}x ${i.description}`).join(', ')}</p></div></div>
+            <div class="mb-8"><p class="text-[10px] text-slate-600 leading-relaxed text-justify">As partes acima identificadas resolvem firmar o presente Contrato de Prestação de Serviços por Empreitada Global, nos termos da legislação civil e previdenciária vigente, mediante as cláusulas e condições seguintes:</p></div>
+            <div class="mb-6"><h4 class="text-[9px] font-black text-slate-900 uppercase tracking-widest mb-2 border-b pb-1">1. OBJETO DO CONTRATO</h4><p class="text-[10px] text-slate-600 leading-relaxed text-justify">O presente contrato tem por objeto a prestação dos serviços técnicos descritos abaixo, a serem realizados pela CONTRATADA à CONTRATANTE:</p>
+            <div class="bg-slate-50 p-4 rounded-lg border-l-4 border-blue-600 mt-2"><p class="text-[10px] font-bold text-blue-900 uppercase">${order.description}</p><p class="text-[9px] text-blue-700 mt-1">${order.items.map(i => `${i.quantity}x ${i.description}`).join(', ')}</p></div></div>
             
-            <div class="mb-6"><h4 class="text-[9px] font-black text-slate-900 uppercase tracking-widest mb-2 border-b pb-1">2. VALORES E PAGAMENTO</h4><p class="text-[10px] text-slate-600 leading-relaxed text-justify">Pelos serviços contratados, a CONTRATANTE pagarÃ¡ o valor total de <b class="text-slate-900">R$ ${order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>. Condições: ${order.paymentTerms || 'Conforme combinado'}.</p></div>
+            <div class="mb-6"><h4 class="text-[9px] font-black text-slate-900 uppercase tracking-widest mb-2 border-b pb-1">2. VALORES E PAGAMENTO</h4><p class="text-[10px] text-slate-600 leading-relaxed text-justify">Pelos serviços contratados, a CONTRATANTE pagará o valor total de <b class="text-slate-900">R$ ${order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>. Condições: ${order.paymentTerms || 'Conforme combinado'}.</p></div>
 
             <div class="mb-6"><h4 class="text-[9px] font-black text-slate-900 uppercase tracking-widest mb-2 border-b pb-1">3. PRAZOS E GARANTIA</h4><p class="text-[10px] text-slate-600 leading-relaxed text-justify">O prazo estimado é de <b>${order.deliveryTime || 'A combinar'}</b>. A garantia dos serviços é de 90 dias (Art. 26 CDC).</p></div>
             
-            <div class="mb-6"><h4 class="text-[9px] font-black text-slate-900 uppercase tracking-widest mb-2 border-b pb-1">4. DIREITOS E OBRIGAÃ‡Ã•ES</h4><p class="text-[10px] text-slate-600 leading-relaxed text-justify">4.1. A CONTRATADA compromete-se a executar os serviços com qualidade técnica, utilizando mão-de-obra qualificada.<br>4.2. A garantia dos serviços prestados é de 90 (noventa) dias, conforme Art. 26 do Código de Defesa do Consumidor.<br>4.3. A CONTRATANTE deve fornecer as condições necessÃ¡rias (acesso, energia, etc.) para a execução dos trabalhos.</p></div>
+            <div class="mb-6"><h4 class="text-[9px] font-black text-slate-900 uppercase tracking-widest mb-2 border-b pb-1">4. DIREITOS E OBRIGAÇÕES</h4><p class="text-[10px] text-slate-600 leading-relaxed text-justify">4.1. A CONTRATADA compromete-se a executar os serviços com qualidade técnica, utilizando mão-de-obra qualificada.<br>4.2. A garantia dos serviços prestados é de 90 (noventa) dias, conforme Art. 26 do Código de Defesa do Consumidor.<br>4.3. A CONTRATANTE deve fornecer as condições necessárias (acesso, energia, etc.) para a execução dos trabalhos.</p></div>
 
             <div class="mb-6"><h4 class="text-[9px] font-black text-slate-900 uppercase tracking-widest mb-2 border-b pb-1">5. FORO</h4><p class="text-[10px] text-slate-600 leading-relaxed text-justify">Fica eleito o foro da comarca de São Paulo/SP para dirimir quaisquer dúvidas oriundas deste contrato.</p></div>
 
