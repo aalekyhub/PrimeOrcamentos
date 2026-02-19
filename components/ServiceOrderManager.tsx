@@ -517,7 +517,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
           </div>
         </div>
 
-        <div style="margin-bottom: 6mm;">
+        <div style="margin-bottom: 5mm;">
           <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0;">
             As partes acima identificadas resolvem firmar o presente Contrato de Prestação de Serviços por Empreitada Global, nos termos da legislação civil e previdenciária vigente, mediante as cláusulas e condições seguintes:
           </p>

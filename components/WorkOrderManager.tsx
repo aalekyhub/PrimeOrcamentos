@@ -255,7 +255,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
               </div>
             </div>
     
-            <div style="margin-bottom: 10mm;">
+            <div style="margin-bottom: 5mm;">
               <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0;">
                 As partes acima identificadas resolvem firmar o presente Contrato de Prestação de Serviços por Empreitada Global, nos termos da legislação civil e previdenciária vigente, mediante as cláusulas e condições seguintes:
               </p>
@@ -348,7 +348,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
       `;
 
         const opt = {
-            margin: [15, 0, 15, 0] as [number, number, number, number],
+            margin: [10, 0, 15, 0] as [number, number, number, number],
             filename: `Contrato - ${order.id.replace("OS-", "OS")} - ${order.description || "Proposta"}.pdf`,
             image: { type: "jpeg" as const, quality: 0.98 },
             html2canvas: {
@@ -492,8 +492,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                       <p style="font-size:13px; color:#475569; line-height:1.6; text-align:justify; margin:10px 0 0 0;">1.2. A execução dos serviços será realizada por obra certa, com preço previamente ajustado, não se caracterizando, em hipótese alguma, cessão ou locação de mão de obra.</p>
                     </div>
 
-                    <div style="margin-bottom: 6mm;">
-                        <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 3mm 0; padding-top: 4mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">CLÁUSULA 2ª – DA FORMA DE EXECUÇÃO (EMPREITADA GLOBAL)</h4>
+                    <div style="margin-bottom: 5mm;">
+                        <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 3mm 0; padding-top: 3mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">CLÁUSULA 2ª – DA FORMA DE EXECUÇÃO (EMPREITADA GLOBAL)</h4>
                         <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0 0 2mm 0;">2.1. A CONTRATADA executará os serviços com autonomia técnica e gerencial, utilizando meios próprios, inclusive pessoal, ferramentas, equipamentos e métodos de trabalho.</p>
                         <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:2mm 0 2mm 0;">2.2. Não haverá qualquer tipo de subordinação, exclusividade, controle de jornada ou disponibilização de trabalhadores ao CONTRATANTE.</p>
                         <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:2mm 0 0 0;">2.3. A CONTRATADA assume total responsabilidade pela execução da obra, respondendo integralmente pelos serviços contratados.</p>
