@@ -450,7 +450,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
       <style>
         * { box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; counter-reset: page 1; }
-        @page { size: A4; margin: 0 !important; }
+        @page { size: A4; margin: 10mm !important; }
         .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
         .avoid-break { break-inside: avoid; page-break-inside: avoid; }
         @media screen { body { background: #f1f5f9; padding: 40px 0; } .a4-container { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; padding: 15mm !important; } }
@@ -487,7 +487,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
     <body class="no-scrollbar">
       <div class="a4-container">
         <!-- Header -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid #e2e8f0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 2px solid #e2e8f0;">
           <div style="width: 120px;">
             ${company.logo ? `<img src="${company.logo}" style="max-height: 70px; width: auto; object-fit: contain;" />` : ''}
           </div>
@@ -502,7 +502,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin-bottom: 20px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin-bottom: 15px;">
           <div style="background:#f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #f1f5f9;">
             <h4 style="font-size:10px; font-weight:900; color:#3b82f6; text-transform:uppercase; letter-spacing:1px; margin:0 0 2mm 0;">CONTRATADA</h4>
             <p style="font-size:14px; font-weight:900; color:#0f172a; text-transform:uppercase; margin:0;">${company.name}</p>
@@ -517,7 +517,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
           </div>
         </div>
 
-        <div style="margin-bottom: 5mm;">
+        <div style="margin-bottom: 3mm;">
           <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0;">
             As partes acima identificadas resolvem firmar o presente Contrato de Prestação de Serviços por Empreitada Global, nos termos da legislação civil e previdenciária vigente, mediante as cláusulas e condições seguintes:
           </p>
