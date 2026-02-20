@@ -351,26 +351,30 @@ const BudgetManager: React.FC<Props> = ({
                       </table>
                   </div>
   
-                 <!-- Total Bar -->
-                 <div style="margin-bottom: 32px; break-inside: avoid;">
-                       <div style="display: flex; justify-content: flex-end; margin-bottom: 12px; gap: 40px;">
-                           <div style="text-align: right;">
-                              <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px; line-height: 1.2;">SUBTOTAL</span>
-                              <span style="font-size: 10px; font-weight: 700; color: #334155; display: block; white-space: nowrap;">R$ ${subT.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                           </div>
-                           <div style="text-align: right; margin-bottom: 2px;">
-                              <span style="font-size: 8px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; display: block;">BDI (${bdiR}%)</span>
-                              <span style="font-size: 10px; font-weight: 700; color: #10b981; display: block; white-space: nowrap;">+ R$ ${bdiV.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                           </div>
-                           <div style="text-align: right; margin-bottom: 2px;">
-                              <span style="font-size: 8px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; display: block;">Impostos (${taxR}%)</span>
-                              <span style="font-size: 10px; font-weight: 700; color: #3b82f6; display: block; white-space: nowrap;">+ R$ ${taxV.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                           </div>
-                           <div style="text-align: right; margin-top: 6px; padding-top: 4px; border-top: 1.5px solid #f1f5f9;">
-                              <span style="font-size: 9px; font-weight: 800; color: #1e3a8a; text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 2px;">Total do Orçamento</span>
-                           <span style="font-size: 28px; font-weight: 800; letter-spacing: -0.05em; line-height: 1.2; padding-bottom: 4px; white-space: nowrap;">R$ ${finalT.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                       </div>
-                 </div>
+                  <!-- Total Bar (Restaurada para Estilo de Barra Escura) -->
+                  <div style="margin-top: 32px; margin-bottom: 40px; break-inside: avoid;">
+                        <!-- Resumo Superior: Subtotal, BDI e Impostos -->
+                        <div style="display: flex; justify-content: flex-end; margin-bottom: 12px; gap: 40px; padding-right: 12px;">
+                            <div style="text-align: right;">
+                               <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px; line-height: 1.2;">SUBTOTAL</span>
+                               <span style="font-size: 11px; font-weight: 700; color: #334155; display: block; white-space: nowrap;">R$ ${subT.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            </div>
+                            <div style="text-align: right;">
+                               <span style="font-size: 8px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 3px;">BDI (${bdiR}%)</span>
+                               <span style="font-size: 11px; font-weight: 700; color: #10b981; display: block; white-space: nowrap;">+ R$ ${bdiV.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            </div>
+                            <div style="text-align: right;">
+                               <span style="font-size: 8px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 3px;">IMPOSTOS (${taxR}%)</span>
+                               <span style="font-size: 11px; font-weight: 700; color: #3b82f6; display: block; white-space: nowrap;">+ R$ ${taxV.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            </div>
+                        </div>
+
+                        <!-- Barra de Total (Cinza Escuro / Estilo Premium) -->
+                        <div style="background: #0f172a; border-radius: 20px; padding: 25px 40px; display: flex; justify-content: space-between; align-items: center; color: white;">
+                            <span style="font-size: 16px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase;">INVESTIMENTO TOTAL:</span>
+                            <span style="font-size: 42px; font-weight: 900; letter-spacing: -0.05em; white-space: nowrap;">R$ ${finalT.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        </div>
+                  </div>
   
                  <!-- Terms & Payment -->
                  <div style="margin-bottom: 24px; break-inside: avoid;">
