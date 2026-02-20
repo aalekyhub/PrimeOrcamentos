@@ -619,8 +619,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 <td style="padding: 12px; font-size: 12px; color: #334155; font-weight: 600;">${m.quantity}</td>
                                 <td style="padding: 12px; font-size: 12px; color: #64748b;">${m.unit}</td>
                                 <td style="padding: 12px; font-size: 12px; color: #0f172a; font-weight: 700;">${m.material_name}</td>
-                                <td style="padding: 12px; font-size: 12px; color: #64748b; text-align: right;">R$ ${m.unit_cost.toFixed(2)}</td>
-                                <td style="padding: 12px; font-size: 12px; color: #0f172a; font-weight: 700; text-align: right;">R$ ${m.total_cost.toFixed(2)}</td>
+                                <td style="padding: 12px; font-size: 12px; color: #64748b; text-align: right;">R$ ${m.unit_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                <td style="padding: 12px; font-size: 12px; color: #0f172a; font-weight: 700; text-align: right;">R$ ${m.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -629,7 +629,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                 <div style="display: flex; justify-content: flex-end;">
                     <div style="background-color: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; min-width: 250px; text-align: right;">
                         <p style="margin: 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 0.05em;">Total Investido em Materiais</p>
-                        <p style="margin: 0; font-size: 24px; font-weight: 800; color: #059669;">R$ ${totalMaterial.toFixed(2)}</p>
+                        <p style="margin: 0; font-size: 24px; font-weight: 800; color: #059669;">R$ ${totalMaterial.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                     </div>
                 </div>
                 
@@ -645,7 +645,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         if (!currentWork) return '';
 
         // Helper to format currency
-        const formatCurrency = (val: number | undefined | null) => (val || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const formatCurrency = (val: number | undefined | null) => (val || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
         const customer = customers.find(c => c.id === currentWork.client_id);
 
@@ -694,7 +694,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 <span style="color: #059669; font-size: 10px; font-weight: 800;">M</span>
                                             </div>
                                         </div>
-                                        <span style="font-size: 18px; font-weight: 800; color: #064e3b; display: block;">R$ ${totalMaterial.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                        <span style="font-size: 18px; font-weight: 800; color: #064e3b; display: block;">R$ ${totalMaterial.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                     </div>
                                     ` : ''}
 
@@ -707,7 +707,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 <span style="color: #d97706; font-size: 10px; font-weight: 800;">MO</span>
                                             </div>
                                         </div>
-                                        <span style="font-size: 18px; font-weight: 800; color: #78350f; display: block;">R$ ${totalLabor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                        <span style="font-size: 18px; font-weight: 800; color: #78350f; display: block;">R$ ${totalLabor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                     </div>
                                     ` : ''}
 
@@ -720,7 +720,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 <span style="color: #475569; font-size: 10px; font-weight: 800;">I</span>
                                             </div>
                                         </div>
-                                        <span style="font-size: 18px; font-weight: 800; color: #1e293b; display: block;">R$ ${totalIndirect.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                        <span style="font-size: 18px; font-weight: 800; color: #1e293b; display: block;">R$ ${totalIndirect.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                     </div>
                                     ` : ''}
 
@@ -733,7 +733,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 <span style="color: #2563eb; font-size: 10px; font-weight: 800;">%</span>
                                             </div>
                                         </div>
-                                        <span style="font-size: 18px; font-weight: 800; color: #1e3a8a; display: block;">R$ ${totalTaxes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                        <span style="font-size: 18px; font-weight: 800; color: #1e3a8a; display: block;">R$ ${totalTaxes.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                     </div>
                                     ` : ''}
                                 </div>
@@ -741,7 +741,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 <!-- TOTAL COST FOOTER CARD -->
                                 <div style="margin-bottom: 32px; background: #064e3b; color: white; padding: 12px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); -webkit-print-color-adjust: exact; print-color-adjust: exact;">
                                     <p style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin: 0; color: #a7f3d0;">CUSTO TOTAL EXECUTADO</p>
-                                    <p style="font-size: 22px; font-weight: 800; margin: 0;">R$ ${totalGeneral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                    <p style="font-size: 22px; font-weight: 800; margin: 0;">R$ ${totalGeneral.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                                 </div>
                 
                                 <!-- SEÇÃO SERVIÇOS -->
@@ -815,8 +815,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             ${labor.map(l => `
                                                 <tr>
                                                     <td style="padding: 12px 0; font-size: 11px; font-weight: 600; border-bottom: 1px solid #f1f5f9;">${l.role} | (${l.cost_type})</td>
-                                                    <td style="padding: 12px 0; font-size: 11px; text-align: center; border-bottom: 1px solid #f1f5f9;">${l.days_worked}</td>
-                                                    <td style="padding: 12px 0; font-size: 11px; text-align: center; border-bottom: 1px solid #f1f5f9;">-</td>
+                                                    <td style="padding: 12px 0; font-size: 11px; text-align: center; border-bottom: 1px solid #f1f5f9;">${l.quantity}</td>
+                                                    <td style="padding: 12px 0; font-size: 11px; text-align: center; border-bottom: 1px solid #f1f5f9;">${l.unit || '-'}</td>
                                                     <td style="padding: 12px 0; font-size: 11px; text-align: right; font-weight: 700; border-bottom: 1px solid #f1f5f9;">R$ ${l.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                                 </tr>
                                             `).join('')}
@@ -980,7 +980,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 </div>
                                 <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase mb-4">
                                     <Calendar size={12} className="text-slate-300" />
-                                    <span>Criada em {new Date(work.start_date).toLocaleDateString()}</span>
+                                    <span>Criada em ${new Date(work.start_date).toLocaleDateString()}</span>
                                 </div>
                                 <div className="pt-4 border-t border-slate-100 flex justify-end">
                                     <button
@@ -1498,12 +1498,12 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         <div>
                                                             <p className="font-bold text-slate-800">{svc.description}</p>
                                                             <p className="text-xs text-slate-500">
-                                                                {svc.quantity} {svc.unit} • Mat: R$ {svc.unit_material_cost.toFixed(2)} • M.O: R$ {svc.unit_labor_cost.toFixed(2)}
+                                                                {svc.quantity} {svc.unit} • Mat: R$ {svc.unit_material_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} • M.O: R$ {svc.unit_labor_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                             </p>
                                                         </div>
                                                     </div>
                                                     <div className="text-right flex items-center gap-4">
-                                                        <p className="font-bold text-emerald-600">R$ {svc.total_cost.toFixed(2)}</p>
+                                                        <p className="font-bold text-emerald-600">R$ {svc.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                                                         <div className="flex flex-col gap-0 -mr-2">
                                                             <button onClick={() => (window as any).moveItemWork(services, setServices, index, 'up')} disabled={index === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronUp size={14} /></button>
                                                             <button onClick={() => (window as any).moveItemWork(services, setServices, index, 'down')} disabled={index === services.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronDown size={14} /></button>
@@ -1711,12 +1711,12 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                 <span className="flex items-center">
                                                                     <b>{m.material_name}</b>
                                                                     <span className="text-slate-400 mx-2">|</span>
-                                                                    <span className="text-[10px] text-slate-400 mr-2">(R$ {m.unit_cost.toFixed(2)})</span>
+                                                                    <span className="text-[10px] text-slate-400 mr-2">(R$ {m.unit_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</span>
                                                                     <span>{m.quantity}{m.unit}</span>
                                                                 </span>
                                                             </div>
                                                             <div className="flex items-center gap-4 shrink-0">
-                                                                <span className="font-bold">R$ {m.total_cost.toFixed(2)}</span>
+                                                                <span className="font-bold">R$ {m.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                                                 <div className="flex gap-1">
                                                                     <button onClick={() => (window as any).moveItemWork(materials, setMaterials, index, 'up')} disabled={index === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronUp size={14} /></button>
                                                                     <button onClick={() => (window as any).moveItemWork(materials, setMaterials, index, 'down')} disabled={index === materials.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronDown size={14} /></button>
@@ -1830,11 +1830,11 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                     <span className="text-slate-400 mx-2">|</span>
                                                                     <span className="text-[10px] text-slate-400 mr-2">({l.cost_type})</span>
                                                                     <span>{l.quantity}{l.unit || 'un'}</span>
-                                                                    <span className="text-[10px] text-slate-400 ml-2">(R$ {l.unit_cost.toFixed(2)})</span>
+                                                                    <span className="text-[10px] text-slate-400 ml-2">(R$ {l.unit_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</span>
                                                                 </span>
                                                             </div>
                                                             <div className="flex items-center gap-4 shrink-0">
-                                                                <span className="font-bold">R$ {l.total_cost.toFixed(2)}</span>
+                                                                <span className="font-bold">R$ {l.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                                                 <div className="flex gap-1">
                                                                     <button onClick={() => (window as any).moveItemWork(labor, setLabor, index, 'up')} disabled={index === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronUp size={14} /></button>
                                                                     <button onClick={() => (window as any).moveItemWork(labor, setLabor, index, 'down')} disabled={index === labor.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronDown size={14} /></button>
@@ -1932,7 +1932,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                 <span>[{i.category}] <b>{i.description}</b></span>
                                                             </div>
                                                             <div className="flex items-center gap-4 shrink-0">
-                                                                <span className="font-bold">R$ {i.value.toFixed(2)}</span>
+                                                                <span className="font-bold">R$ {i.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                                                 <div className="flex gap-1">
                                                                     <button onClick={() => (window as any).moveItemWork(indirects, setIndirects, index, 'up')} disabled={index === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronUp size={14} /></button>
                                                                     <button onClick={() => (window as any).moveItemWork(indirects, setIndirects, index, 'down')} disabled={index === indirects.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronDown size={14} /></button>
@@ -2012,12 +2012,12 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         <div>
                                                             <span className="font-black text-xs text-slate-700">{t.name}</span>
                                                             <span className="text-[10px] font-bold text-slate-400 ml-2">
-                                                                {t.rate > 0 ? `${t.rate}%` : `R$ ${t.value.toFixed(2)}`}
+                                                                {t.rate > 0 ? `${t.rate}%` : `R$ ${t.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                                                             </span>
                                                         </div>
                                                         <div className="flex items-center gap-4">
                                                             <span className="font-bold text-xs text-blue-600">
-                                                                R$ {(t.rate > 0 ? (t.name === 'BDI' ? totalDirect : totalGeneral) * (t.rate / 100) : t.value).toFixed(2)}
+                                                                R$ {(t.rate > 0 ? (t.name === 'BDI' ? totalDirect : totalGeneral) * (t.rate / 100) : t.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                             </span>
                                                             <button onClick={() => handleDeleteTax(t.id)} className="text-slate-300 hover:text-red-500 transition-colors">
                                                                 <Trash2 size={14} />
@@ -2044,7 +2044,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 <Truck size={16} className="text-emerald-600" />
                                             </div>
                                         </div>
-                                        <span className="text-2xl font-black text-emerald-900">R$ {totalMaterial.toFixed(2)}</span>
+                                        <span className="text-2xl font-black text-emerald-900">R$ {totalMaterial.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                         <p className="text-[10px] text-emerald-600 mt-1 font-medium">Insumos + Materiais de Serviços</p>
                                     </div>
 
@@ -2055,7 +2055,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 <HardHat size={16} className="text-amber-600" />
                                             </div>
                                         </div>
-                                        <span className="text-2xl font-black text-amber-900">R$ {totalLabor.toFixed(2)}</span>
+                                        <span className="text-2xl font-black text-amber-900">R$ {totalLabor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                         <p className="text-[10px] text-amber-600 mt-1 font-medium">Equipe Própria + Terceirizada</p>
                                     </div>
 
@@ -2066,7 +2066,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 <Archive size={16} className="text-slate-600" />
                                             </div>
                                         </div>
-                                        <span className="text-2xl font-black text-slate-800">R$ {totalIndirect.toFixed(2)}</span>
+                                        <span className="text-2xl font-black text-slate-800">R$ ${totalIndirect.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                         <p className="text-[10px] text-slate-500 mt-1 font-medium">Custos Administrativos</p>
                                     </div>
 
@@ -2077,7 +2077,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 <Percent size={16} className="text-blue-600" />
                                             </div>
                                         </div>
-                                        <span className="text-2xl font-black text-blue-900">R$ {totalTaxes.toFixed(2)}</span>
+                                        <span className="text-2xl font-black text-blue-900">R$ ${totalTaxes.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                         <p className="text-[10px] text-blue-600 mt-1 font-medium">Baseado no BDI e Taxas</p>
                                     </div>
                                 </div>

@@ -320,22 +320,22 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                    <div class="flex justify-end mb-2 gap-6 px-2">
                         <div class="text-right">
                            <span class="text-[8px] font-medium text-slate-400 uppercase block">Subtotal</span>
-                           <span class="text-[10px] font-bold text-slate-600 block">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                           <span class="text-[10px] font-bold text-slate-600 block">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>
                         ${order.bdiRate ? `
                         <div class="text-right">
                            <span class="text-[8px] font-medium text-slate-400 uppercase block">BDI (${order.bdiRate}%)</span>
-                           <span class="text-[10px] font-bold text-emerald-600 block">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                           <span class="text-[10px] font-bold text-emerald-600 block">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>` : ''}
                         ${order.taxRate ? `
                         <div class="text-right">
                            <span class="text-[8px] font-medium text-slate-400 uppercase block">Impostos (${order.taxRate}%)</span>
-                           <span class="text-[10px] font-bold text-blue-600 block">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                           <span class="text-[10px] font-bold text-blue-600 block">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>` : ''}
                    </div>
                    <div class="bg-slate-900 text-white p-6 rounded-xl flex justify-between items-center shadow-xl">
                        <span class="text-[12px] font-bold uppercase tracking-widest">Valor Total:</span>
-                       <span class="text-3xl font-bold text-white tracking-tighter text-right">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                       <span class="text-3xl font-bold text-white tracking-tighter text-right">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                    </div>
                </div>
 

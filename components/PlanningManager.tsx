@@ -414,7 +414,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 <span style="color: #d97706; font-size: 10px; font-weight: 800;">MO</span>
                                             </div>
                                         </div>
-                                        <span style="font-size: 18px; font-weight: 800; color: #78350f; display: block;">R$ ${totalLabor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                        <span style="font-size: 18px; font-weight: 800; color: #78350f; display: block;">R$ ${totalLabor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                     </div>
                                     ` : ''}
 
@@ -427,7 +427,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 <span style="color: #475569; font-size: 10px; font-weight: 800;">I</span>
                                             </div>
                                         </div>
-                                        <span style="font-size: 18px; font-weight: 800; color: #1e293b; display: block;">R$ ${totalIndirect.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                        <span style="font-size: 18px; font-weight: 800; color: #1e293b; display: block;">R$ ${totalIndirect.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                     </div>
                                     ` : ''}
 
@@ -440,7 +440,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 <span style="color: #2563eb; font-size: 10px; font-weight: 800;">%</span>
                                             </div>
                                         </div>
-                                        <span style="font-size: 18px; font-weight: 800; color: #1e3a8a; display: block;">R$ ${totalTaxes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                        <span style="font-size: 18px; font-weight: 800; color: #1e3a8a; display: block;">R$ ${totalTaxes.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                     </div>
                                     ` : ''}
                                 </div>
@@ -448,7 +448,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                 <!-- TOTAL COST FOOTER CARD -->
                                 <div style="margin-bottom: 32px; background: #064e3b; color: white; padding: 12px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); -webkit-print-color-adjust: exact; print-color-adjust: exact;">
                                     <p style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin: 0; color: #a7f3d0;">CUSTO TOTAL PREVISTO</p>
-                                    <p style="font-size: 22px; font-weight: 800; margin: 0;">R$ ${totalGeneral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                    <p style="font-size: 22px; font-weight: 800; margin: 0;">R$ ${totalGeneral.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                                 </div>
                 
                                 <!-- SEÇÃO SERVIÇOS -->

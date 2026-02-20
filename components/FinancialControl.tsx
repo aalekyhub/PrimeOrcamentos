@@ -157,9 +157,9 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
           <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-2">Saldo Realizado (Hoje)</p>
-          <h3 className="text-2xl font-black text-slate-900 dark:text-white">R$ {(totalIncome - totalExpense).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+          <h3 className="text-2xl font-black text-slate-900 dark:text-white">R$ {(totalIncome - totalExpense).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
           <p className="text-[9px] text-slate-400 mt-2 font-bold uppercase tracking-widest">
-            Projetado: <span className={projectedBalance >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}>R$ {projectedBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+            Projetado: <span className={projectedBalance >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}>R$ {projectedBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
           </p>
         </div>
         <div className="bg-emerald-50 dark:bg-emerald-900/20 p-6 rounded-3xl border border-emerald-100 dark:border-emerald-900/30 shadow-sm group">
@@ -167,21 +167,21 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
             <p className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.2em]">Faturamento Realizado</p>
             <ArrowUpRight className="w-4 h-4 text-emerald-600 dark:text-emerald-400 group-hover:scale-125 transition-transform" />
           </div>
-          <h3 className="text-2xl font-black text-emerald-700 dark:text-emerald-400">R$ {totalIncome.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+          <h3 className="text-2xl font-black text-emerald-700 dark:text-emerald-400">R$ {totalIncome.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
         </div>
         <div className="bg-rose-50 dark:bg-rose-900/20 p-6 rounded-3xl border border-rose-100 dark:border-rose-900/30 shadow-sm group">
           <div className="flex items-center justify-between mb-2">
             <p className="text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-[0.2em]">Gastos Realizados</p>
             <ArrowDownLeft className="w-4 h-4 text-rose-600 dark:text-rose-400 group-hover:scale-125 transition-transform" />
           </div>
-          <h3 className="text-2xl font-black text-rose-700 dark:text-rose-400">R$ {totalExpense.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+          <h3 className="text-2xl font-black text-rose-700 dark:text-rose-400">R$ {totalExpense.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
         </div>
         <div className="bg-blue-600 p-6 rounded-3xl border border-blue-700 shadow-xl shadow-blue-100 dark:shadow-none group">
           <div className="flex items-center justify-between mb-2">
             <p className="text-[10px] font-black text-blue-100 uppercase tracking-[0.2em]">Projeção de Saídas</p>
             <Calendar className="w-4 h-4 text-white group-hover:rotate-12 transition-transform" />
           </div>
-          <h3 className="text-2xl font-black text-white">R$ {projectedExpenses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+          <h3 className="text-2xl font-black text-white">R$ {projectedExpenses.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
           <p className="text-[9px] text-blue-200 mt-1 font-bold">Gastos atuais + Recorrência + Empréstimos</p>
         </div>
       </div>

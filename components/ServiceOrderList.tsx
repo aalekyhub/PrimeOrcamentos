@@ -276,11 +276,11 @@ const ServiceOrderList: React.FC<Props> = ({ orders, setOrders, setTransactions,
                             <span className={`w-2 h-2 rounded-full ${item.type === 'Serviço' ? 'bg-indigo-500' : 'bg-blue-500'}`}></span>
                             <div>
                               <p className="text-sm font-semibold text-slate-900">{item.description}</p>
-                              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">{item.type} • {item.quantity}x R$ {item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">{item.type} • {item.quantity}x R$ {item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-4">
-                            <p className="text-sm font-bold text-slate-900">R$ {(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                            <p className="text-sm font-bold text-slate-900">R$ {(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                             <button onClick={() => setNewOrder(prev => ({ ...prev, items: (prev.items || []).filter(i => i.id !== item.id) }))} className="p-1 hover:bg-rose-50 text-slate-300 hover:text-rose-500 rounded transition-colors">
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -309,7 +309,7 @@ const ServiceOrderList: React.FC<Props> = ({ orders, setOrders, setTransactions,
                           className="w-full text-left p-3 rounded-xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50 transition-all group"
                         >
                           <p className="text-xs font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{service.name}</p>
-                          <p className="text-[10px] text-slate-400">R$ {service.basePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                          <p className="text-[10px] text-slate-400">R$ {service.basePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                         </button>
                       ))}
                     </div>
@@ -392,7 +392,7 @@ const ServiceOrderList: React.FC<Props> = ({ orders, setOrders, setTransactions,
                     </div>
                   </td>
                   <td className="px-6 py-4 font-bold text-sm text-slate-900">
-                    R$ {order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    R$ {order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
                   <td className="px-6 py-4">
                     <span className={`px-3 py-1 rounded-full text-[10px] font-bold border ${getStatusColor(order.status)}`}>
