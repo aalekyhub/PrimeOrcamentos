@@ -163,8 +163,8 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
         <td style="padding: 12px 0; font-weight: 600; text-transform: uppercase; font-size: 10px; color: #0f172a;">${item.description}</td>
         <td style="padding: 12px 0; text-align: center; color: #94a3b8; font-size: 9px; font-weight: 600; text-transform: uppercase;">${item.unit || 'UN'}</td>
         <td style="padding: 12px 0; text-align: center; font-weight: 600; color: #0f172a; font-size: 10px;">${item.quantity}</td>
-        <td style="padding: 12px 0; text-align: right; color: #64748b; font-size: 10px;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-        <td style="padding: 12px 0; text-align: right; font-weight: 600; font-size: 11px; color: #0f172a;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        <td style="padding: 12px 0; text-align: right; color: #64748b; font-size: 10px; white-space: nowrap;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+        <td style="padding: 12px 0; text-align: right; font-weight: 600; font-size: 11px; color: #0f172a; white-space: nowrap;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
       </tr>`).join('');
 
     const html = `
@@ -320,22 +320,22 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                    <div class="flex justify-end mb-2 gap-6 px-2">
                         <div class="text-right">
                            <span class="text-[8px] font-medium text-slate-400 uppercase block">Subtotal</span>
-                           <span class="text-[10px] font-bold text-slate-600 block">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                           <span class="text-[10px] font-bold text-slate-600 block" style="white-space: nowrap;">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>
                         ${order.bdiRate ? `
                         <div class="text-right">
                            <span class="text-[8px] font-medium text-slate-400 uppercase block">BDI (${order.bdiRate}%)</span>
-                           <span class="text-[10px] font-bold text-emerald-600 block">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                           <span class="text-[10px] font-bold text-emerald-600 block" style="white-space: nowrap;">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>` : ''}
                         ${order.taxRate ? `
                         <div class="text-right">
                            <span class="text-[8px] font-medium text-slate-400 uppercase block">Impostos (${order.taxRate}%)</span>
-                           <span class="text-[10px] font-bold text-blue-600 block">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                           <span class="text-[10px] font-bold text-blue-600 block" style="white-space: nowrap;">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>` : ''}
                    </div>
                    <div class="bg-slate-900 text-white p-6 rounded-xl flex justify-between items-center shadow-xl">
                        <span class="text-[12px] font-bold uppercase tracking-widest">Valor Total:</span>
-                       <span class="text-3xl font-bold text-white tracking-tighter text-right">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                       <span class="text-3xl font-bold text-white tracking-tighter text-right" style="white-space: nowrap;">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                    </div>
                </div>
 
@@ -526,7 +526,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
         <div style="margin-bottom: 5mm; page-break-inside: avoid; break-inside: avoid-page;">
           <h4 style="font-size:16px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:0.5px; margin:0 0 10px 0; padding-top: 3mm;">CLÁUSULA 1ª – DO OBJETO</h4>
           <p style="font-size:13px; color:#475569; line-height:1.6; text-align:justify; margin:0 0 10px 0;">
-            1.1. O presente contrato tem por objeto a execução de reforma na unidade situada no endereço do CONTRATANTE, compreendendo os serviços descritos em memorial descritivo e/ou proposta comercial anexa, que passa a integrar este instrumento para todos os fins legais.
+            1.1. O presente contrato tem por objeto a execução de reforma na unidade situada no endereço do CONTRATANTE, compreendendo os serviços descritos em memorial descritivo e/o u proposta comercial anexa, que passa a integrar este instrumento para todos os fins legais.
           </p>
           <div style="background:#f8fafc; padding: 15px; border-radius: 8px; border-left: 5px solid #2563eb; margin: 15px 0;">
             <p style="font-size:14px; font-weight:800; color:#1e3a8a; text-transform:uppercase; letter-spacing:0.5px; margin:0;">${order.description}</p>
@@ -545,7 +545,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
 
         <div style="margin-bottom: 5mm; page-break-inside: avoid; break-inside: avoid-page;">
           <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 3mm 0; padding-top: 3mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">CLÁUSULA 3ª – DO PREÇO E FORMA DE PAGAMENTO</h4>
-          <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0 0 2mm 0;">3.1. Pelos serviços objeto deste contrato, o CONTRATANTE pagará à CONTRATADA o valor global de <b style="color:#0f172a;">R$ ${order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b>.</p>
+          <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0 0 2mm 0;">3.1. Pelos serviços objeto deste contrato, o CONTRATANTE pagará à CONTRATADA o valor global de <b style="color:#0f172a; white-space: nowrap;">R$ ${order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b>.</p>
           <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:2mm 0 2mm 0;">3.2. O pagamento será realizado da seguinte forma: <b>${order.paymentTerms || 'Conforme combinado'}</b>.</p>
           <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:2mm 0 0 0;">3.3. O valor contratado corresponde a preço fechado por obra certa, não estando vinculado a horas trabalhadas ou número de funcionários.</p>
         </div>
@@ -917,7 +917,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                       <div className="flex justify-end pt-2">
                         <div className="bg-white border-2 border-slate-100 rounded-2xl px-6 py-3 flex items-center gap-4 shadow-sm">
                           <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Subtotal dos Serviços</span>
-                          <span className="text-lg font-black text-slate-900">R$ {totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                          <span className="text-lg font-black text-slate-900 whitespace-nowrap">R$ {totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>
                       </div>
                     )}
@@ -939,7 +939,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                 <div className="mb-8 p-6 bg-white rounded-3xl border border-slate-100 shadow-sm text-center relative overflow-hidden group">
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Valor Total Estimado</p>
-                  <div className="text-4xl font-black text-slate-900 tracking-tighter mb-1">R$ {totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                  <div className="text-4xl font-black text-slate-900 tracking-tighter mb-1 whitespace-nowrap">R$ {totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Peças + MÃ o de Obra</p>
                 </div>
 

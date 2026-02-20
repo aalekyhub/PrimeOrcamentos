@@ -110,7 +110,7 @@ const Dashboard: React.FC<DashboardProps> = ({ stats, orders, transactions, curr
                   </div>
                   <span className="text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{stat.label}</span>
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tighter">
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tighter whitespace-nowrap">
                   {stat.isCurrency && typeof stat.value === 'number' ? `R$ ${stat.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : stat.value}
                 </h3>
                 <p className="text-sm mt-3 text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">{stat.sub}</p>

@@ -174,7 +174,7 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
                         {service.category}
                       </span>
                     </td>
-                    <td className="px-8 py-5 text-sm font-bold text-slate-700">
+                    <td className="px-8 py-5 text-sm font-bold text-slate-700 whitespace-nowrap">
                       R$ {service.basePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </td>
                     <td className="px-8 py-5 pr-10 text-right">

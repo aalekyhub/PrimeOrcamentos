@@ -294,8 +294,8 @@ const BudgetManager: React.FC<Props> = ({
       <tr style="border-bottom: 1px solid #e2e8f0;">
         <td style="padding: 16px 0; font-weight: 600; text-transform: uppercase; font-size: ${itemFBase}px; color: #334155; width: 55%; vertical-align: top;">${item.description}</td>
         <td style="padding: 16px 0; text-align: center; font-weight: 600; color: #475569; font-size: ${itemFBase}px; width: 10%; vertical-align: top;">${item.quantity} ${item.unit || ''}</td>
-        <td style="padding: 16px 0; text-align: right; color: #475569; font-size: ${itemFBase}px; width: 17.5%; vertical-align: top;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-        <td style="padding: 16px 0; text-align: right; font-weight: 700; font-size: ${itemFBase}px; color: #0f172a; width: 17.5%; vertical-align: top;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+        <td style="padding: 16px 0; text-align: right; color: #475569; font-size: ${itemFBase}px; width: 17.5%; vertical-align: top; white-space: nowrap;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+        <td style="padding: 16px 0; text-align: right; font-weight: 700; font-size: ${itemFBase}px; color: #0f172a; width: 17.5%; vertical-align: top; white-space: nowrap;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
       </tr>`).join('');
 
     return `
@@ -356,19 +356,19 @@ const BudgetManager: React.FC<Props> = ({
                        <div style="display: flex; justify-content: flex-end; margin-bottom: 12px; gap: 40px;">
                            <div style="text-align: right;">
                               <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 4px; line-height: 1.2;">SUBTOTAL</span>
-                              <span style="font-size: 10px; font-weight: 700; color: #334155; display: block;">R$ ${subT.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                              <span style="font-size: 10px; font-weight: 700; color: #334155; display: block; white-space: nowrap;">R$ ${subT.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                            </div>
                            <div style="text-align: right; margin-bottom: 2px;">
                               <span style="font-size: 8px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; display: block;">BDI (${bdiR}%)</span>
-                              <span style="font-size: 10px; font-weight: 700; color: #10b981; display: block;">+ R$ ${bdiV.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                              <span style="font-size: 10px; font-weight: 700; color: #10b981; display: block; white-space: nowrap;">+ R$ ${bdiV.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                            </div>
                            <div style="text-align: right; margin-bottom: 2px;">
                               <span style="font-size: 8px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; display: block;">Impostos (${taxR}%)</span>
-                              <span style="font-size: 10px; font-weight: 700; color: #3b82f6; display: block;">+ R$ ${taxV.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                              <span style="font-size: 10px; font-weight: 700; color: #3b82f6; display: block; white-space: nowrap;">+ R$ ${taxV.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                            </div>
                            <div style="text-align: right; margin-top: 6px; padding-top: 4px; border-top: 1.5px solid #f1f5f9;">
                               <span style="font-size: 9px; font-weight: 800; color: #1e3a8a; text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 2px;">Total do Orçamento</span>
-                           <span style="font-size: 28px; font-weight: 800; letter-spacing: -0.05em; line-height: 1.2; padding-bottom: 4px;">R$ ${finalT.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                           <span style="font-size: 28px; font-weight: 800; letter-spacing: -0.05em; line-height: 1.2; padding-bottom: 4px; white-space: nowrap;">R$ ${finalT.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                        </div>
                  </div>
   
@@ -866,7 +866,7 @@ const BudgetManager: React.FC<Props> = ({
                 </td>
                 <td className="px-8 py-5 text-sm font-black uppercase text-slate-900">{budget.customerName}</td>
                 <td className="px-8 py-5 text-xs font-bold text-slate-400 uppercase">{budget.description}</td>
-                <td className="px-8 py-5 text-sm font-black text-slate-900">R$ {budget.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                <td className="px-8 py-5 text-sm font-black text-slate-900 whitespace-nowrap">R$ {budget.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                 <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   {budget.status !== OrderStatus.APPROVED && (
                     <button onClick={async () => {
@@ -1121,7 +1121,7 @@ const BudgetManager: React.FC<Props> = ({
                       <div className="flex justify-end pt-2">
                         <div className="bg-white border-2 border-slate-100 rounded-2xl px-6 py-3 flex items-center gap-4 shadow-sm">
                           <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Subtotal dos Itens</span>
-                          <span className="text-lg font-black text-slate-900">R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                          <span className="text-lg font-black text-slate-900 whitespace-nowrap">R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>
                       </div>
                     )}
@@ -1155,22 +1155,22 @@ const BudgetManager: React.FC<Props> = ({
                   </div>
 
                   <div className="space-y-1 mb-4 text-[10px] text-slate-400">
-                    <div className="flex justify-between"><span>Subtotal:</span> <span>R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>
-                    {bdiRate > 0 && <div className="flex justify-between text-emerald-400"><span>+ BDI:</span> <span>R$ {(subtotal * (bdiRate / 100)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>}
+                    <div className="flex justify-between"><span>Subtotal:</span> <span className="whitespace-nowrap">R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>
+                    {bdiRate > 0 && <div className="flex justify-between text-emerald-400"><span>+ BDI:</span> <span className="whitespace-nowrap">R$ {(subtotal * (bdiRate / 100)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>}
                     {taxRate > 0 && (
                       <div className="flex justify-between text-blue-400">
                         <span>+ Impostos:</span>
-                        <span>R$ {(totalAmount - (subtotal + (subtotal * (bdiRate / 100)))).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        <span className="whitespace-nowrap">R$ {(totalAmount - (subtotal + (subtotal * (bdiRate / 100)))).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                       </div>
                     )}
                     <div className="flex justify-between text-lg font-black border-t border-slate-700 pt-2 mt-2">
                       <span>Total:</span>
-                      <span>R$ {totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      <span className="whitespace-nowrap">R$ {totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
                   </div>
 
                   <div className="flex justify-between items-baseline border-b border-slate-800 pb-4">
-                    <span style={{ fontSize: '32px', fontWeight: '800', color: '#60a5fa', letterSpacing: '-0.05em', lineHeight: '1.2', paddingBottom: '4px' }}>R$ {totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <span style={{ fontSize: '32px', fontWeight: '800', color: '#60a5fa', letterSpacing: '-0.05em', lineHeight: '1.2', paddingBottom: '4px', whiteSpace: 'nowrap' }}>R$ {totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   </div>
                 </div>
 
@@ -1326,7 +1326,7 @@ const PaymentTypeModal: React.FC<{
   // Update preview effect
   React.useEffect(() => {
     let text = '';
-    const currency = (val: number) => `R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const currency = (val: number) => `R$${'\u00A0'}${val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
     if (type === 'vista') {
       text = `Pagamento + vista com desconto na aprovao do Orçamento. Total: ${currency(totalValue)}.`;
@@ -1365,7 +1365,7 @@ const PaymentTypeModal: React.FC<{
           {type === 'parcelado' && (
             <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
               <div className="col-span-2">
-                <div className="flex justify-between mb-1"><span className="text-[10px] font-bold text-slate-400 uppercase">Valor Total</span> <span className="text-[10px] font-black text-slate-900">{totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span></div>
+                <div className="flex justify-between mb-1"><span className="text-[10px] font-bold text-slate-400 uppercase">Valor Total</span> <span className="text-[10px] font-black text-slate-900 whitespace-nowrap">{totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span></div>
                 <div className="h-1 w-full bg-slate-200 rounded-full overflow-hidden"><div className="h-full bg-blue-500" style={{ width: `${Math.min(100, (entryValue / totalValue) * 100)}%` }}></div></div>
               </div>
               <div className="grid grid-cols-2 gap-2 col-span-2">

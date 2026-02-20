@@ -401,7 +401,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 <span style="color: #059669; font-size: 10px; font-weight: 800;">M</span>
                                             </div>
                                         </div>
-                                        <span style="font-size: 18px; font-weight: 800; color: #064e3b; display: block;">R$ ${totalMaterials.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                        <span style="font-size: 18px; font-weight: 800; color: #064e3b; display: block; white-space: nowrap;">R$ ${totalMaterials.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                                     </div>
                                     ` : ''}
 
@@ -414,7 +414,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 <span style="color: #d97706; font-size: 10px; font-weight: 800;">MO</span>
                                             </div>
                                         </div>
-                                        <span style="font-size: 18px; font-weight: 800; color: #78350f; display: block;">R$ ${totalLabor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                        <span style="font-size: 18px; font-weight: 800; color: #78350f; display: block; white-space: nowrap;">R$ ${totalLabor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                     </div>
                                     ` : ''}
 
@@ -427,7 +427,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 <span style="color: #475569; font-size: 10px; font-weight: 800;">I</span>
                                             </div>
                                         </div>
-                                        <span style="font-size: 18px; font-weight: 800; color: #1e293b; display: block;">R$ ${totalIndirect.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                        <span style="font-size: 18px; font-weight: 800; color: #1e293b; display: block; white-space: nowrap;">R$ ${totalIndirect.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                     </div>
                                     ` : ''}
 
@@ -440,7 +440,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 <span style="color: #2563eb; font-size: 10px; font-weight: 800;">%</span>
                                             </div>
                                         </div>
-                                        <span style="font-size: 18px; font-weight: 800; color: #1e3a8a; display: block;">R$ ${totalTaxes.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                        <span style="font-size: 18px; font-weight: 800; color: #1e3a8a; display: block; white-space: nowrap;">R$ ${totalTaxes.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                     </div>
                                     ` : ''}
                                 </div>
@@ -448,7 +448,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                 <!-- TOTAL COST FOOTER CARD -->
                                 <div style="margin-bottom: 32px; background: #064e3b; color: white; padding: 12px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); -webkit-print-color-adjust: exact; print-color-adjust: exact;">
                                     <p style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin: 0; color: #a7f3d0;">CUSTO TOTAL PREVISTO</p>
-                                    <p style="font-size: 22px; font-weight: 800; margin: 0;">R$ ${totalGeneral.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                    <p style="font-size: 22px; font-weight: 800; margin: 0; white-space: nowrap;">R$ ${totalGeneral.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                                 </div>
                 
                                 <!-- SEÇÃO SERVIÇOS -->
@@ -470,7 +470,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                     <td style="padding: 12px 0; font-size: 11px; font-weight: 600; border-bottom: 1px solid #f1f5f9;">${s.description}</td>
                                                     <td style="padding: 12px 0; font-size: 11px; text-align: center; border-bottom: 1px solid #f1f5f9;">${s.quantity}</td>
                                                     <td style="padding: 12px 0; font-size: 11px; text-align: center; border-bottom: 1px solid #f1f5f9;">${s.unit}</td>
-                                                    <td style="padding: 12px 0; font-size: 11px; text-align: right; font-weight: 700; border-bottom: 1px solid #f1f5f9;">R$ ${s.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                                    <td style="padding: 12px 0; font-size: 11px; text-align: right; font-weight: 700; border-bottom: 1px solid #f1f5f9; white-space: nowrap;">R$ ${s.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                                 </tr>
                                             `).join('')}
                                         </tbody>
@@ -497,7 +497,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                     <td style="padding: 12px 0; font-size: 11px; font-weight: 600; border-bottom: 1px solid #f1f5f9;">${m.material_name}</td>
                                                     <td style="padding: 12px 0; font-size: 11px; text-align: center; border-bottom: 1px solid #f1f5f9;">${m.quantity}</td>
                                                     <td style="padding: 12px 0; font-size: 11px; text-align: center; border-bottom: 1px solid #f1f5f9;">${m.unit}</td>
-                                                    <td style="padding: 12px 0; font-size: 11px; text-align: right; font-weight: 700; border-bottom: 1px solid #f1f5f9;">R$ ${m.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                                    <td style="padding: 12px 0; font-size: 11px; text-align: right; font-weight: 700; border-bottom: 1px solid #f1f5f9; white-space: nowrap;">R$ ${m.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                                 </tr>
                                             `).join('')}
                                         </tbody>
@@ -524,7 +524,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                     <td style="padding: 12px 0; font-size: 11px; font-weight: 600; border-bottom: 1px solid #f1f5f9;">${l.role} | (${l.cost_type})</td>
                                                     <td style="padding: 12px 0; font-size: 11px; text-align: center; border-bottom: 1px solid #f1f5f9;">${l.quantity}</td>
                                                     <td style="padding: 12px 0; font-size: 11px; text-align: center; border-bottom: 1px solid #f1f5f9;">${l.unit || '-'}</td>
-                                                    <td style="padding: 12px 0; font-size: 11px; text-align: right; font-weight: 700; border-bottom: 1px solid #f1f5f9;">R$ ${l.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                                    <td style="padding: 12px 0; font-size: 11px; text-align: right; font-weight: 700; border-bottom: 1px solid #f1f5f9; white-space: nowrap;">R$ ${l.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                                 </tr>
                                             `).join('')}
                                         </tbody>
@@ -549,7 +549,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 <tr>
                                                     <td style="padding: 12px 0; font-size: 11px; font-weight: 600; color: #64748b; border-bottom: 1px solid #f1f5f9;">${i.category}</td>
                                                     <td style="padding: 12px 0; font-size: 11px; border-bottom: 1px solid #f1f5f9;">${i.description}</td>
-                                                    <td style="padding: 12px 0; font-size: 11px; text-align: right; font-weight: 700; border-bottom: 1px solid #f1f5f9;">R$ ${i.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                                                    <td style="padding: 12px 0; font-size: 11px; text-align: right; font-weight: 700; border-bottom: 1px solid #f1f5f9; white-space: nowrap;">R$ ${i.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                                 </tr>
                                             `).join('')}
                                         </tbody>
@@ -1348,7 +1348,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             </p>
                                                         </div>
                                                     </div>
-                                                    <div className="text-right mr-4 shrink-0">
+                                                    <div className="text-right mr-4 shrink-0 whitespace-nowrap">
                                                         <p className="text-sm font-bold text-slate-800">R$ {svc.total_cost.toFixed(2)}</p>
                                                     </div>
                                                     <div className="flex gap-1 shrink-0">
@@ -1529,10 +1529,10 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                 <GripVertical size={16} />
                                                             </div>
                                                             <div className="grow">
-                                                                <span><b>{m.material_name}</b> | (R$ {m.unit_cost.toFixed(2)}) {m.quantity}{m.unit}</span>
+                                                                <span className="whitespace-nowrap"><b>{m.material_name}</b> | (R$ {m.unit_cost.toFixed(2)}) {m.quantity}{m.unit}</span>
                                                             </div>
                                                         </div>
-                                                        <div className="flex items-center gap-4 text-xs shrink-0">
+                                                        <div className="flex items-center gap-4 text-xs shrink-0 whitespace-nowrap">
                                                             <span className="font-bold">R$ {m.total_cost.toFixed(2)}</span>
                                                             <div className="flex gap-1 mr-2">
                                                                 <button onClick={() => (window as any).moveItem(materials, setMaterials, index, 'up')} disabled={index === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronUp size={14} /></button>
@@ -1655,10 +1655,10 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                 <GripVertical size={16} />
                                                             </div>
                                                             <div className="grow">
-                                                                <span><b>{l.role}</b> | ({l.cost_type}) {l.quantity}{l.unit || 'un'}</span>
+                                                                <span className="whitespace-nowrap"><b>{l.role}</b> | ({l.cost_type}) {l.quantity}{l.unit || 'un'}</span>
                                                             </div>
                                                         </div>
-                                                        <div className="flex items-center gap-4 text-xs shrink-0">
+                                                        <div className="flex items-center gap-4 text-xs shrink-0 whitespace-nowrap">
                                                             <span className="font-bold">R$ {l.total_cost.toFixed(2)}</span>
                                                             <div className="flex gap-1 mr-2">
                                                                 <button onClick={() => (window as any).moveItem(labor, setLabor, index, 'up')} disabled={index === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronUp size={14} /></button>
@@ -1765,7 +1765,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                 <span>[{i.category}] <b>{i.description}</b></span>
                                                             </div>
                                                         </div>
-                                                        <div className="flex items-center gap-4 text-xs shrink-0">
+                                                        <div className="flex items-center gap-4 text-xs shrink-0 whitespace-nowrap">
                                                             <span className="font-bold">R$ {i.value.toFixed(2)}</span>
                                                             <div className="flex gap-1 mr-2">
                                                                 <button onClick={() => (window as any).moveItem(indirects, setIndirects, index, 'up')} disabled={index === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronUp size={14} /></button>
@@ -1808,7 +1808,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 <Truck size={16} className="text-emerald-600" />
                                             </div>
                                         </div>
-                                        <span className="text-2xl font-black text-emerald-900">R$ {totalMaterial.toFixed(2)}</span>
+                                        <span className="text-2xl font-black text-emerald-900 whitespace-nowrap">R$ {totalMaterial.toFixed(2)}</span>
                                         <p className="text-[10px] text-emerald-600 mt-1 font-medium">Insumos + Materiais de Serviços</p>
                                     </div>
 
@@ -1819,7 +1819,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 <HardHat size={16} className="text-amber-600" />
                                             </div>
                                         </div>
-                                        <span className="text-2xl font-black text-amber-900">R$ {totalLabor.toFixed(2)}</span>
+                                        <span className="text-2xl font-black text-amber-900 whitespace-nowrap">R$ {totalLabor.toFixed(2)}</span>
                                         <p className="text-[10px] text-amber-600 mt-1 font-medium">Equipe Própria + Terceirizada</p>
                                     </div>
 
@@ -1830,7 +1830,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 <Archive size={16} className="text-slate-600" />
                                             </div>
                                         </div>
-                                        <span className="text-2xl font-black text-slate-800">R$ {totalIndirect.toFixed(2)}</span>
+                                        <span className="text-2xl font-black text-slate-800 whitespace-nowrap">R$ {totalIndirect.toFixed(2)}</span>
                                         <p className="text-[10px] text-slate-500 mt-1 font-medium">Custos Administrativos</p>
                                     </div>
 
@@ -1841,7 +1841,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 <Percent size={16} className="text-blue-600" />
                                             </div>
                                         </div>
-                                        <span className="text-2xl font-black text-blue-900">R$ {totalTaxes.toFixed(2)}</span>
+                                        <span className="text-2xl font-black text-blue-900 whitespace-nowrap">R$ {totalTaxes.toFixed(2)}</span>
                                         <p className="text-[10px] text-blue-600 mt-1 font-medium">Baseado no BDI e Taxas</p>
                                     </div>
                                 </div>
@@ -1864,7 +1864,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                 <div className="bg-slate-900 text-white p-8 rounded-2xl flex justify-between items-center shadow-xl">
                                     <div>
                                         <p className="text-slate-400 text-sm font-bold uppercase tracking-widest mb-1">Custo Previsto Total</p>
-                                        <p className="text-4xl font-bold">R$ {totalGeneral.toFixed(2)}</p>
+                                        <p className="text-4xl font-bold whitespace-nowrap">R$ {totalGeneral.toFixed(2)}</p>
                                     </div>
                                     <button
                                         type="button"
