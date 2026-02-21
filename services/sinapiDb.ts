@@ -45,7 +45,15 @@ export interface SinapiComposicaoItemRecord {
 }
 
 const DB_NAME = 'primeorcamentos_sinapi';
-const DB_VERSION = 3; // Updated to add more fields to composition_itens
+const DB_VERSION = 3;
+
+// Helper to normalize text for search (remove accents and lowercase)
+const normalizeText = (text: string) => {
+    return text
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+};
 
 export const sinapiDb = {
     async getDb(): Promise<IDBPDatabase> {
@@ -126,11 +134,18 @@ export const sinapiDb = {
         // usando o índice 'query' composto por [mes_ref, uf, modo]
         const all = await db.getAllFromIndex('sinapi_composicoes', 'query', IDBKeyRange.only([filters.mes_ref, filters.uf, filters.modo]));
 
+        const normalizedQuery = normalizeText(query);
+        const queryTerms = normalizedQuery.split(/\s+/).filter(t => t.length > 0);
+
         return all.filter(item => {
-            const matchQuery = !query ||
-                item.descricao.toLowerCase().includes(query.toLowerCase()) ||
-                item.codigo.includes(query);
-            return matchQuery;
+            const normalizedDesc = normalizeText(item.descricao);
+            const itemCode = item.codigo;
+
+            // Check if code matches OR if all terms are in the description
+            const matchesCode = queryTerms.length === 1 && itemCode.includes(queryTerms[0]);
+            const matchesDescription = queryTerms.every(term => normalizedDesc.includes(term));
+
+            return matchesCode || matchesDescription;
         }).slice(0, 50);
     },
 
