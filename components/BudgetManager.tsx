@@ -301,12 +301,12 @@ const BudgetManager: React.FC<Props> = ({
     return `
                  <!-- Boxes Grid -->
                  <div style="display: flex; gap: 24px; margin-bottom: 40px;">
-                     <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
+                     <div style="flex: 1; background: #eff6ff; border-radius: 12px; padding: 24px; border: 1px solid #bfdbfe;">
                          <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">CLIENTE / DESTINATÁRIO</span>
                          <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${cust.name}</div>
                          <div style="font-size: 11px; color: #64748b; font-weight: 500; margin-top: 4px;">${cust.document || 'CPF/CNPJ não informado'}</div>
                      </div>
-                     <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
+                     <div style="flex: 1; background: #eff6ff; border-radius: 12px; padding: 24px; border: 1px solid #bfdbfe;">
                          <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">REFERÊNCIA DO ORÇAMENTO</span>
                          <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${b.description || 'PROPOSTA COMERCIAL'}</div>
                      </div>
