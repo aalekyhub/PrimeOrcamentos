@@ -938,7 +938,7 @@ const BudgetManager: React.FC<Props> = ({
                     if (confirm("Deseja excluir este Orçamento? Esta ação também removerá os dados da nuvem.")) {
                       const idToDelete = budget.id;
                       setOrders(prev => prev.filter(o => o.id !== idToDelete));
-                      const result = await db.remove('orders', idToDelete);
+                      const result = await db.remove('serviflow_orders', idToDelete);
                       if (result?.success) { notify("Orçamento removido da nuvem com sucesso."); }
                       else { notify("Removido localmente, mas houve um erro ao sincronizar com a nuvem.", "error"); }
                     }

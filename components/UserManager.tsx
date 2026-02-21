@@ -122,7 +122,7 @@ const UserManager: React.FC<Props> = ({ users, setUsers }) => {
     }
     if (confirm("Deseja realmente remover o acesso deste usuário? Esta ação também removerá os dados da nuvem.")) {
       setUsers(prev => prev.filter(u => u.id !== id));
-      const result = await db.remove('users', id);
+      const result = await db.remove('serviflow_users', id);
       if (result?.success) notify("Usuário removido da nuvem.");
       else notify("Removido localmente. Erro na nuvem.", "warning");
     }

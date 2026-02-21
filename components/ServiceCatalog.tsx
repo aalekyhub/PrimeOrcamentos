@@ -182,9 +182,8 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
                         <button onClick={() => { setEditingService(service); setFormData(service); setShowForm(true); }} className="p-2 text-slate-400 hover:text-indigo-600 transition-colors"><Pencil className="w-4 h-4" /></button>
                         <button onClick={async () => {
                           if (confirm("Excluir item do catálogo?")) {
-                            const newList = services.filter(s => s.id !== service.id);
-                            setServices(newList);
-                            await db.save('serviflow_catalog', newList);
+                            setServices(services.filter(s => s.id !== service.id));
+                            await db.remove('serviflow_catalog', service.id);
                             notify("Item removido.");
                           }
                         }} className="p-2 text-slate-400 hover:text-rose-500 transition-colors"><Trash2 className="w-4 h-4" /></button>

@@ -51,7 +51,7 @@ const DataCleanup: React.FC<Props> = ({ customers, setCustomers, services, setSe
         const removeIds = group.slice(1).map(c => c.id);
 
         setCustomers(prev => prev.filter(c => !removeIds.includes(c.id)));
-        removeIds.forEach(id => db.remove('customers', id));
+        removeIds.forEach(id => db.remove('serviflow_customers', id));
         notify(`Clientes mesclados. ${removeIds.length} registros duplicados removidos.`);
     };
 
@@ -62,7 +62,7 @@ const DataCleanup: React.FC<Props> = ({ customers, setCustomers, services, setSe
         const removeIds = group.slice(1).map(s => s.id);
 
         setServices(prev => prev.filter(s => !removeIds.includes(s.id)));
-        removeIds.forEach(id => db.remove('catalog', id));
+        removeIds.forEach(id => db.remove('serviflow_catalog', id));
         notify(`Serviços mesclados. ${removeIds.length} registros duplicados removidos.`);
     };
 
@@ -115,7 +115,7 @@ const DataCleanup: React.FC<Props> = ({ customers, setCustomers, services, setSe
                                                 onClick={() => {
                                                     if (confirm("Excluir este registro?")) {
                                                         setCustomers(prev => prev.filter(c => c.id !== customer.id));
-                                                        db.remove('customers', customer.id);
+                                                        db.remove('serviflow_customers', customer.id);
                                                     }
                                                 }}
                                                 className="p-2 text-rose-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
@@ -164,7 +164,7 @@ const DataCleanup: React.FC<Props> = ({ customers, setCustomers, services, setSe
                                                 onClick={() => {
                                                     if (confirm("Excluir este serviço?")) {
                                                         setServices(prev => prev.filter(s => s.id !== service.id));
-                                                        db.remove('catalog', service.id);
+                                                        db.remove('serviflow_catalog', service.id);
                                                     }
                                                 }}
                                                 className="p-2 text-rose-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"

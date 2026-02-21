@@ -109,7 +109,7 @@ const AppContent: React.FC = () => {
             else { customerMap.set(key, c); }
           });
           setCustomers(Array.from(customerMap.values()) as Customer[]);
-          if (duplicatesToRemove.length > 0) { duplicatesToRemove.forEach(id => db.remove('customers', id)); }
+          if (duplicatesToRemove.length > 0) { duplicatesToRemove.forEach(id => db.remove('serviflow_customers', id)); }
         }
 
         if (cloudData.catalog) {
@@ -121,7 +121,7 @@ const AppContent: React.FC = () => {
             else { serviceMap.set(key, s); }
           });
           setCatalog(Array.from(serviceMap.values()) as CatalogService[]);
-          if (duplicatesToRemove.length > 0) { duplicatesToRemove.forEach(id => db.remove('catalog', id)); }
+          if (duplicatesToRemove.length > 0) { duplicatesToRemove.forEach(id => db.remove('serviflow_catalog', id)); }
         }
 
         if (cloudData.orders) {

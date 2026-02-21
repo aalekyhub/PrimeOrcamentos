@@ -780,7 +780,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                     if (confirm("Excluir esta O.S.? Esta açÃ o também removerÃ¡ os dados da nuvem.")) {
                       const idToDelete = order.id;
                       setOrders(p => p.filter(x => x.id !== idToDelete));
-                      const result = await db.remove('orders', idToDelete);
+                      const result = await db.remove('serviflow_orders', idToDelete);
                       if (result?.success) {
                         notify("O.S. removida da nuvem com sucesso.");
                       } else {

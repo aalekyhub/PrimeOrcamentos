@@ -100,7 +100,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
     }
     if (confirm("Deseja realmente excluir este lançamento financeiro? Esta ação também removerá os dados da nuvem.")) {
       setTransactions(prev => prev.filter(t => t.id !== id));
-      const result = await db.remove('transactions', id);
+      const result = await db.remove('serviflow_transactions', id);
       if (result?.success) {
         notify("Lançamento removido da nuvem.");
       } else {
@@ -366,9 +366,8 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
                 </div>
                 <button onClick={async () => {
                   if (confirm("Remover este compromisso financeiro?")) {
-                    const newList = loans.filter(l => l.id !== loan.id);
-                    setLoans(newList);
-                    await db.save('serviflow_loans', newList);
+                    setLoans(loans.filter(l => l.id !== loan.id));
+                    await db.remove('serviflow_loans', loan.id);
                   }
                 }} className="p-2 text-slate-300 hover:text-rose-500 transition-colors">
                   <Trash2 className="w-4 h-4" />

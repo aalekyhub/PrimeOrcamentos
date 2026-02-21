@@ -310,7 +310,7 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
                     <button onClick={async () => {
                       if (confirm("Deseja realmente excluir este cliente? Esta ação também removerá os dados da nuvem.")) {
                         setCustomers(p => p.filter(x => x.id !== c.id));
-                        const result = await db.remove('customers', c.id);
+                        const result = await db.remove('serviflow_customers', c.id);
                         if (result?.success) notify("Cliente removido da nuvem.");
                         else notify("Removido localmente. Erro na nuvem.", "warning");
                       }

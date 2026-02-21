@@ -895,7 +895,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                         if (confirm("Excluir esta OS de Obra?")) {
                                             const idToDelete = order.id;
                                             setOrders(p => p.filter(x => x.id !== idToDelete));
-                                            await db.remove('orders', idToDelete);
+                                            await db.remove('serviflow_orders', idToDelete);
                                             notify("OS removida.");
                                         }
                                     }} className="p-2 text-rose-300 hover:text-rose-600 transition-colors"><Trash2 className="w-4 h-4" /></button>
