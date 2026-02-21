@@ -56,6 +56,15 @@ const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
         setEditingItemId(null);
         try {
             const result = await sinapiAnalitico.build(config.mes_ref, config.uf, config.modo, code);
+
+            // Auto-heal: If the master price stored for search differs from the analytical calculation, sync it.
+            if (result.composicao && Math.abs(result.composicao.custo_unitario - result.total) > 0.01) {
+                const masterCompId = `${config.mes_ref}_${config.uf}_${config.modo}_COMP_${result.composicao.codigo}`;
+                await sinapiDb.updateComposicaoPrice(masterCompId, result.total);
+                // Also update the local state record so it stays correct
+                result.composicao.custo_unitario = result.total;
+            }
+
             setAns(result);
             if (forcedCode) setSearchTerm(forcedCode);
         } finally {
@@ -88,6 +97,11 @@ const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
                     return it;
                 });
                 const newTotal = Math.round(newItens.reduce((acc, it) => acc + (it.custo_total || 0), 0) * 100) / 100;
+
+                // CRITICAL: Update the parent composition record so search results match the new calculated total
+                const masterCompId = `${config.mes_ref}_${config.uf}_${config.modo}_COMP_${ans.composicao?.codigo || searchTerm}`;
+                await sinapiDb.updateComposicaoPrice(masterCompId, newTotal);
+
                 setAns({ ...ans, itens: newItens, total: newTotal });
             }
 
