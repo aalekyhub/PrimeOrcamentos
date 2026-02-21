@@ -33,13 +33,8 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
     description: '',
     basePrice: 0,
     unit: 'un',
-    category: 'Geral',
-    isComposition: false,
-    compositionItems: []
+    category: 'Geral'
   });
-
-  const [compSearch, setCompSearch] = useState('');
-  const [compResults, setCompResults] = useState<CatalogService[]>([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,8 +60,6 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
         basePrice: formData.basePrice || 0,
         unit: formData.unit || 'un',
         category: formData.category || 'Geral',
-        isComposition: formData.isComposition,
-        compositionItems: formData.compositionItems
       };
       newList = [serviceResult, ...services];
     }
@@ -88,54 +81,14 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
   const handleSinapiCopy = (result: AnaliticoResult) => {
     setFormData({
       name: result.composicao?.descricao || (result.itens.length > 0 ? result.itens[0].descricao_item : ''),
-      description: `Ref. SINAPI: ${result.composicao?.codigo || 'N/A'}`,
+      description: `Ref. SINAPI (BOM Calc): ${result.composicao?.codigo || 'N/A'}. Custo Analítico Base: R$ ${result.total.toFixed(2)}`,
       basePrice: result.total,
       unit: result.composicao?.unidade || 'un',
-      category: 'SINAPI (Analítico)',
-      isComposition: true,
-      compositionItems: result.itens.map(item => ({
-        id: Math.random().toString(36).substr(2, 9),
-        itemId: item.codigo_item,
-        description: item.descricao_item,
-        unit: item.unidade_item,
-        coefficient: item.coeficiente,
-        price: item.custo_unitario,
-        type: item.tipo_item as any,
-        source: 'SINAPI'
-      }))
+      category: 'SINAPI (Analítico)'
     });
     setActiveTab('catalog');
     setShowForm(true);
-    notify("Composição analítica personalizada importada!");
-  };
-
-  const addCompItem = (service: CatalogService) => {
-    const newItem = {
-      id: Math.random().toString(36).substr(2, 9),
-      itemId: service.id,
-      description: service.name,
-      unit: service.unit,
-      coefficient: 1,
-      price: service.basePrice,
-      type: 'COMPOSICAO' as any,
-      source: 'CATALOG' as any
-    };
-    const newItems = [...(formData.compositionItems || []), newItem];
-    const newTotal = newItems.reduce((acc, i) => acc + (i.price * i.coefficient), 0);
-    setFormData({ ...formData, compositionItems: newItems, basePrice: newTotal });
-    setCompSearch('');
-  };
-
-  const removeCompItem = (id: string) => {
-    const newItems = (formData.compositionItems || []).filter(i => i.id !== id);
-    const newTotal = newItems.reduce((acc, i) => acc + (i.price * i.coefficient), 0);
-    setFormData({ ...formData, compositionItems: newItems, basePrice: newTotal });
-  };
-
-  const updateCompCoef = (id: string, coef: number) => {
-    const newItems = (formData.compositionItems || []).map(i => i.id === id ? { ...i, coefficient: coef } : i);
-    const newTotal = newItems.reduce((acc, i) => acc + (i.price * i.coefficient), 0);
-    setFormData({ ...formData, compositionItems: newItems, basePrice: newTotal });
+    notify("Composição analítica copiada para o catálogo!");
   };
 
   const filtered = services.filter(s => s.name.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -211,13 +164,8 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
                 {filtered.map(service => (
                   <tr key={service.id} className="hover:bg-slate-50/80 transition-colors group">
                     <td className="px-8 py-5 pl-10">
-                      <div className="flex items-center gap-2">
-                        {service.isComposition && <List className="w-3.5 h-3.5 text-indigo-500" title="Item Composto" />}
-                        <div>
-                          <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{service.name}</p>
-                          <p className="text-[11px] text-slate-400 font-medium line-clamp-1">{service.description || 'Sem descrição.'}</p>
-                        </div>
-                      </div>
+                      <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{service.name}</p>
+                      <p className="text-[11px] text-slate-400 font-medium line-clamp-1">{service.description || 'Sem descrição.'}</p>
                     </td>
                     <td className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase">{service.unit}</td>
                     <td className="px-8 py-5">
@@ -225,28 +173,13 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
                         }`}>
                         {service.category}
                       </span>
-                      {service.isComposition && (
-                        <span className="ml-2 px-2 py-0.5 rounded bg-blue-50 text-blue-600 text-[8px] font-black tracking-widest uppercase border border-blue-100">
-                          Analítico
-                        </span>
-                      )}
                     </td>
                     <td className="px-8 py-5 text-sm font-bold text-slate-700 whitespace-nowrap">
                       R$ {service.basePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </td>
                     <td className="px-8 py-5 pr-10 text-right">
                       <div className="flex justify-end gap-2">
-                        <button onClick={() => {
-                          setEditingService(service);
-                          setFormData({
-                            ...service,
-                            isComposition: service.isComposition || false,
-                            compositionItems: service.compositionItems || []
-                          });
-                          setShowForm(true);
-                        }} className="p-2 text-slate-400 hover:text-indigo-600 transition-colors">
-                          <Pencil className="w-4 h-4" />
-                        </button>
+                        <button onClick={() => { setEditingService(service); setFormData(service); setShowForm(true); }} className="p-2 text-slate-400 hover:text-indigo-600 transition-colors"><Pencil className="w-4 h-4" /></button>
                         <button onClick={async () => {
                           if (confirm("Excluir item do catálogo?")) {
                             const newList = services.filter(s => s.id !== service.id);
@@ -307,7 +240,7 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
       {/* Item Form Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <form onSubmit={handleSubmit} className="bg-white rounded-[2.5rem] p-10 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in zoom-in-95 duration-300">
+          <form onSubmit={handleSubmit} className="bg-white rounded-[2.5rem] p-10 w-full max-w-xl shadow-2xl animate-in zoom-in-95 duration-300">
             <div className="flex items-center justify-between mb-8">
               <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">
                 {editingService ? 'Editar Item' : 'Novo Item de Catálogo'}
@@ -317,154 +250,52 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
               </button>
             </div>
 
-            <div className="space-y-8">
-              {/* Toggle Mode */}
-              <div className="flex gap-4 p-1.5 bg-slate-50 border border-slate-200 rounded-2xl w-fit">
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, isComposition: false })}
-                  className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${!formData.isComposition ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400'}`}
-                >
-                  Item Simples
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, isComposition: true })}
-                  className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${formData.isComposition ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400'}`}
-                >
-                  Composição (Analítica)
-                </button>
+            <div className="space-y-6">
+              <div>
+                <label className="block text-[11px] font-black text-indigo-600 uppercase tracking-widest mb-2 ml-1">Descrição do Serviço/Material</label>
+                <input
+                  type="text"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                  value={formData.name}
+                  onChange={e => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="Ex: Alvenaria de tijolo, Pintura..."
+                  required
+                />
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-[11px] font-black text-indigo-600 uppercase tracking-widest mb-2 ml-1">Descrição do Serviço/Material</label>
-                    <input
-                      type="text"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
-                      value={formData.name}
-                      onChange={e => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="Ex: Alvenaria de tijolo, Pintura..."
-                      required
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[11px] font-black text-indigo-600 uppercase tracking-widest mb-2 ml-1">Preço/Custo Base (R$)</label>
-                      <input
-                        type="number"
-                        step="0.0001"
-                        readOnly={formData.isComposition}
-                        className={`w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-900 outline-none ${formData.isComposition ? 'opacity-60 cursor-not-allowed' : 'focus:ring-2 focus:ring-indigo-500'}`}
-                        value={formData.basePrice}
-                        onChange={e => setFormData({ ...formData, basePrice: Number(e.target.value) })}
-                        required
-                      />
-                      {formData.isComposition && <p className="text-[10px] text-indigo-500 font-bold uppercase tracking-widest mt-1 ml-1">Calculado Automaticamente</p>}
-                    </div>
-                    <div>
-                      <label className="block text-[11px] font-black text-indigo-600 uppercase tracking-widest mb-2 ml-1">Medida</label>
-                      <input
-                        type="text"
-                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none uppercase"
-                        value={formData.unit}
-                        onChange={e => setFormData({ ...formData, unit: e.target.value })}
-                        placeholder="UND, M2, M3..."
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-black text-indigo-600 uppercase tracking-widest mb-2 ml-1">Notas Adicionais / Referência</label>
-                    <textarea
-                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none h-24 resize-none"
-                      value={formData.description}
-                      onChange={e => setFormData({ ...formData, description: e.target.value })}
-                      placeholder="Detalhes técnicos, referências..."
-                    />
-                  </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[11px] font-black text-indigo-600 uppercase tracking-widest mb-2 ml-1">Preço/Custo Base (R$)</label>
+                  <input
+                    type="number"
+                    step="0.0001"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none"
+                    value={formData.basePrice}
+                    onChange={e => setFormData({ ...formData, basePrice: Number(e.target.value) })}
+                    required
+                  />
                 </div>
+                <div>
+                  <label className="block text-[11px] font-black text-indigo-600 uppercase tracking-widest mb-2 ml-1">Medida</label>
+                  <input
+                    type="text"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none uppercase"
+                    value={formData.unit}
+                    onChange={e => setFormData({ ...formData, unit: e.target.value })}
+                    placeholder="UND, M2, M3..."
+                    required
+                  />
+                </div>
+              </div>
 
-                {formData.isComposition && (
-                  <div className="space-y-4 border-l border-slate-100 pl-8">
-                    <div>
-                      <label className="block text-[11px] font-black text-indigo-600 uppercase tracking-widest mb-2 ml-1">Compor com Itens do Catálogo</label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          placeholder="Pesquisar insumo p/ adicionar..."
-                          className="w-full bg-slate-900 text-white rounded-xl p-3 text-xs font-bold outline-none ring-offset-2 focus:ring-2 ring-indigo-500"
-                          value={compSearch}
-                          onChange={e => {
-                            setCompSearch(e.target.value);
-                            setCompResults(services.filter(s => s.name.toLowerCase().includes(e.target.value.toLowerCase())).slice(0, 5));
-                          }}
-                        />
-                        {compSearch && compResults.length > 0 && (
-                          <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-2xl border border-slate-100 z-[60] overflow-hidden">
-                            {compResults.map(r => (
-                              <button
-                                key={r.id}
-                                type="button"
-                                onClick={() => addCompItem(r)}
-                                className="w-full text-left p-3 hover:bg-slate-50 border-b border-slate-50 last:border-none flex justify-between items-center"
-                              >
-                                <span className="text-xs font-bold text-slate-700 uppercase">{r.name}</span>
-                                <span className="text-[10px] font-black text-indigo-600">R$ {r.basePrice.toFixed(2)}</span>
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden">
-                      <table className="w-full text-[10px] text-left">
-                        <thead className="bg-slate-100/50 border-b border-slate-200">
-                          <tr>
-                            <th className="px-4 py-2 font-black text-slate-400 uppercase tracking-widest">Item</th>
-                            <th className="px-4 py-2 font-black text-slate-400 uppercase tracking-widest text-right">Coef.</th>
-                            <th className="px-4 py-2 font-black text-slate-400 uppercase tracking-widest text-right">Ação</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {formData.compositionItems?.map(item => (
-                            <tr key={item.id} className="border-b border-slate-100 last:border-none">
-                              <td className="px-4 py-2">
-                                <p className="font-bold text-slate-900 uppercase leading-tight">{item.description}</p>
-                                <p className="text-[9px] text-slate-400 font-medium">{item.unit} • R$ {item.price.toFixed(2)}</p>
-                              </td>
-                              <td className="px-4 py-2 text-right">
-                                <input
-                                  type="number"
-                                  step="any"
-                                  className="w-16 bg-white border border-slate-200 rounded-lg p-1 text-center font-bold text-slate-900 outline-none focus:ring-1 focus:ring-indigo-500"
-                                  value={item.coefficient}
-                                  onChange={e => updateCompCoef(item.id, Number(e.target.value))}
-                                />
-                              </td>
-                              <td className="px-4 py-2 text-right">
-                                <button type="button" onClick={() => removeCompItem(item.id)} className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-all">
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                          {(!formData.compositionItems || formData.compositionItems.length === 0) && (
-                            <tr>
-                              <td colSpan={3} className="px-4 py-8 text-center text-slate-400 font-medium uppercase tracking-widest text-[9px]">
-                                Nenhum insumo adicionado à composição.
-                              </td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                )}
+              <div>
+                <label className="block text-[11px] font-black text-indigo-600 uppercase tracking-widest mb-2 ml-1">Notas Adicionais / Referência</label>
+                <textarea
+                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none h-24 resize-none"
+                  value={formData.description}
+                  onChange={e => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Detalhes técnicos, referências..."
+                />
               </div>
             </div>
 
