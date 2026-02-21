@@ -75,7 +75,8 @@ const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
             }
 
             // Update the snapshot table (Analítico)
-            const anaId = `${config.mes_ref}_${config.uf}_${config.modo}_ANA_${searchTerm}_${item.tipo_item}_${item.codigo_item}`;
+            const compCode = ans.composicao?.codigo || searchTerm;
+            const anaId = `${config.mes_ref}_${config.uf}_${config.modo}_ANA_${compCode}_${item.tipo_item}_${item.codigo_item}`;
             await sinapiDb.updateComposicaoItemPrice(anaId, newPrice);
 
             // Refresh the local result (ans) to update calculations
@@ -87,7 +88,7 @@ const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
                     }
                     return it;
                 });
-                const newTotal = newItens.reduce((acc, it) => acc + (it.custo_total || 0), 0);
+                const newTotal = Math.round(newItens.reduce((acc, it) => acc + (it.custo_total || 0), 0) * 100) / 100;
                 setAns({ ...ans, itens: newItens, total: newTotal });
             }
 
@@ -258,7 +259,14 @@ const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
                                                         if (e.key === 'Escape') setEditingItemId(null);
                                                     }}
                                                     onClick={e => e.stopPropagation()}
-                                                    onBlur={() => setEditingItemId(null)}
+                                                    onBlur={() => {
+                                                        const cleaned = editValue.trim();
+                                                        if (cleaned && cleaned !== item.custo_unitario.toFixed(2)) {
+                                                            handleUpdatePrice(item);
+                                                        } else {
+                                                            setEditingItemId(null);
+                                                        }
+                                                    }}
                                                 />
                                             ) : (
                                                 <div className="flex items-center justify-end gap-1 group/price">

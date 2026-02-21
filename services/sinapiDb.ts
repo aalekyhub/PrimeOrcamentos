@@ -218,6 +218,8 @@ export const sinapiDb = {
             record.custo_unitario = newPrice;
             record.custo_total = record.coeficiente * newPrice;
             await db.put('sinapi_composicao_itens', record);
+        } else {
+            console.warn(`[sinapiDb] Registro não encontrado para atualização: ${id}`);
         }
     }
 };
