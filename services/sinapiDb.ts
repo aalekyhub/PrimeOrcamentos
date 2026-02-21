@@ -121,13 +121,16 @@ export const sinapiDb = {
 
     async searchComposicoes(query: string, filters: { uf: string; mes_ref: string; modo: string }) {
         const db = await this.getDb();
-        const all = await db.getAll('sinapi_composicoes');
+
+        // Otimização: Busca apenas registros que batem com o mês, UF e modo selecionados
+        // usando o índice 'query' composto por [mes_ref, uf, modo]
+        const all = await db.getAllFromIndex('sinapi_composicoes', 'query', IDBKeyRange.only([filters.mes_ref, filters.uf, filters.modo]));
+
         return all.filter(item => {
-            const matchQuery = !query || item.descricao.toLowerCase().includes(query.toLowerCase()) || item.codigo.includes(query);
-            const matchUf = !filters.uf || item.uf === filters.uf;
-            const matchMes = !filters.mes_ref || item.mes_ref === filters.mes_ref;
-            const matchModo = !filters.modo || item.modo === filters.modo;
-            return matchQuery && matchUf && matchMes && matchModo;
+            const matchQuery = !query ||
+                item.descricao.toLowerCase().includes(query.toLowerCase()) ||
+                item.codigo.includes(query);
+            return matchQuery;
         }).slice(0, 50);
     },
 

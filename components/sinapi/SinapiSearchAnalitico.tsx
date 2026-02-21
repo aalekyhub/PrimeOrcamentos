@@ -104,31 +104,32 @@ const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
             {/* Config Bar */}
             <div ref={containerRef} className="bg-slate-100 p-2 rounded-2xl flex flex-wrap gap-2 items-center">
                 <select
-                    className="bg-white border-none rounded-xl px-4 py-2 text-[10px] font-black uppercase outline-none"
+                    className="bg-white dark:bg-slate-700 border-none rounded-xl px-4 py-2 text-[10px] font-black uppercase outline-none text-slate-900 dark:text-white"
                     value={config.uf} onChange={e => setConfig({ ...config, uf: e.target.value })}
                 >
                     {['AC', 'AL', 'AM', 'AP', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MG', 'MS', 'MT', 'PA', 'PB', 'PE', 'PI', 'PR', 'RJ', 'RN', 'RO', 'RR', 'RS', 'SC', 'SE', 'SP', 'TO'].map(uf => (
-                        <option key={uf} value={uf}>{uf}</option>
+                        <option key={uf} value={uf} className="bg-white dark:bg-slate-800">{uf}</option>
                     ))}
                 </select>
                 <input
                     type="text" placeholder="MM/AAAA"
-                    className="bg-white border-none rounded-xl px-4 py-2 text-[10px] font-black outline-none w-24"
+                    className="bg-white dark:bg-slate-700 border-none rounded-xl px-4 py-2 text-[10px] font-black outline-none w-24 text-slate-900 dark:text-white"
                     value={config.mes_ref} onChange={e => setConfig({ ...config, mes_ref: e.target.value })}
+                    autoComplete="off"
                 />
                 <select
-                    className="bg-white border-none rounded-xl px-4 py-2 text-[10px] font-black uppercase outline-none"
+                    className="bg-white dark:bg-slate-700 border-none rounded-xl px-4 py-2 text-[10px] font-black uppercase outline-none text-slate-900 dark:text-white"
                     value={config.modo} onChange={e => setConfig({ ...config, modo: e.target.value })}
                 >
-                    <option value="SE">SEM ENCARGOS (SE)</option>
-                    <option value="SD">SEM DESONERAÇÃO (SD)</option>
-                    <option value="CD">COM DESONERAÇÃO (CD)</option>
+                    <option value="SE" className="bg-white dark:bg-slate-800">SEM ENCARGOS (SE)</option>
+                    <option value="SD" className="bg-white dark:bg-slate-800">SEM DESONERAÇÃO (SD)</option>
+                    <option value="CD" className="bg-white dark:bg-slate-800">COM DESONERAÇÃO (CD)</option>
                 </select>
 
                 <div className="flex-1 min-w-[200px] relative">
                     <input
                         type="text" placeholder="Digite o Código ou Nome da Composição..."
-                        className="w-full bg-white border-none rounded-xl pl-4 pr-10 py-2 text-xs font-bold outline-none"
+                        className="w-full bg-white dark:bg-slate-700 border-none rounded-xl pl-4 pr-10 py-2 text-xs font-bold outline-none text-slate-900 dark:text-white shadow-sm focus:ring-2 focus:ring-indigo-500/20"
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                         onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
@@ -136,6 +137,7 @@ const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
                             if (e.key === 'Enter') handleSearch();
                             if (e.key === 'Escape') setShowSuggestions(false);
                         }}
+                        autoComplete="off"
                     />
                     <button onClick={() => handleSearch()} className="absolute right-2 top-1.5 p-1 bg-indigo-50 text-indigo-600 rounded-lg">
                         <Search className="w-4 h-4" />
@@ -143,21 +145,21 @@ const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
 
                     {/* Suggestions Dropdown */}
                     {showSuggestions && suggestions.length > 0 && (
-                        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 z-50 max-h-[400px] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 z-50 max-h-[400px] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
                             {suggestions.map(s => (
                                 <button
                                     key={s.id}
                                     onClick={() => handleSearch(s.codigo)}
-                                    className="w-full text-left px-5 py-4 hover:bg-slate-50 border-b border-slate-50 last:border-none group transition-colors"
+                                    className="w-full text-left px-5 py-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 border-b border-slate-50 dark:border-slate-700 last:border-none group transition-colors"
                                 >
                                     <div className="flex items-start justify-between gap-4">
                                         <div className="flex-1">
-                                            <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">{s.codigo}</p>
-                                            <p className="text-[11px] font-bold text-slate-800 uppercase leading-tight group-hover:text-indigo-600 transition-colors">{s.descricao}</p>
+                                            <p className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-1">{s.codigo}</p>
+                                            <p className="text-[11px] font-bold text-slate-800 dark:text-slate-200 uppercase leading-tight group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{s.descricao}</p>
                                         </div>
                                         <div className="text-right shrink-0">
-                                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{s.unidade}</p>
-                                            <p className="text-[11px] font-black text-slate-900">R$ {s.custo_unitario?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                            <p className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{s.unidade}</p>
+                                            <p className="text-[11px] font-black text-slate-900 dark:text-white">R$ {s.custo_unitario?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                                         </div>
                                     </div>
                                 </button>
