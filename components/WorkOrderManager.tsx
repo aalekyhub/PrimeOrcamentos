@@ -208,9 +208,9 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
             
             @media print {
-                @page { size: A4; margin: 10mm 0; }
+                @page { size: A4; margin: 10mm 0 15mm 0; }
                 body { background: white !important; margin: 0 !important; padding: 0 !important; }
-                .a4-container { width: 100% !important; margin: 0 !important; padding: 0 15mm !important; }
+                .a4-container { width: 210mm !important; margin: 0 auto !important; padding: 0 15mm !important; }
             }
         </style>
     `;
@@ -474,43 +474,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         <title>Contrato - ${order.id.replace('OS-', 'OS')} - ${order.description || 'Proposta'}</title>
         ${getContractStyles()}
     </head>
-    <body>
-        ${getContractHtml(order, customer)}
-        
-        <script>
-            function optimizePageBreaks() {
-                const container = document.querySelector('.a4-container');
-                if (!container) return;
-
-                const titles = container.querySelectorAll('h1, h2, h3, h4, h5, h6');
-                const pageHeight = 297 * 3.78; // A4 height in px approx (~1122px)
-                const marginLimit = 100; // px from bottom
-
-                titles.forEach(title => {
-                    const rect = title.getBoundingClientRect();
-                    const distanceFromBottom = pageHeight - (rect.top % pageHeight);
-                    
-                    if (distanceFromBottom < marginLimit) {
-                        title.style.pageBreakBefore = 'always';
-                    }
-
-                    // Se for uma cláusula (Cláusula Xª), tentar manter com o próximo parágrafo
-                    if (title.textContent.includes('CLÁUSULA')) {
-                        title.classList.add('keep-together');
-                        let next = title.nextElementSibling;
-                        if (next) next.classList.add('keep-together');
-                    }
-                });
-            }
-
-            window.onload = function() {
-                optimizePageBreaks();
-                setTimeout(() => {
-                    window.print();
-                    setTimeout(() => { window.close(); }, 500);
-                }, 500);
-            }
-        </script>
+    <body onload="setTimeout(() => { window.print(); window.close(); }, 800);">
+        ${getContractHtml(order, customer).replace('crossorigin="anonymous"', '')}
     </body>
 </html>`;
         printWindow.document.write(html);
@@ -565,26 +530,26 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             const diffColor = diff > 0 ? '#e11d48' : diff < 0 ? '#059669' : '#64748b';
 
             return `
-    < tr style = "border-bottom: 1px solid #f1f5f9;" >
-                    <td style="padding: 12px 0; text-align: left; vertical-align: top;">
-                        <div style="font-weight: 700; text-transform: uppercase; font-size: 11px; color: #0f172a;">${item.description}</div>
-                        <div style="font-size: 9px; color: #94a3b8; font-weight: 600;">${item.type || 'GERAL'}</div>
-                    </td>
-                    <td style="padding: 12px 0; text-align: center; vertical-align: top; color: #64748b; font-size: 11px; font-weight: 600; text-transform: uppercase;">${item.unit || 'UN'}</td>
-                    <td style="padding: 12px 0; text-align: center; vertical-align: top;">
-                        <div style="font-weight: 700; color: #94a3b8; font-size: 8px; margin-bottom: 2px; text-transform: uppercase;">Est: ${item.quantity}</div>
-                        <div style="font-weight: 800; color: #0f172a; font-size: 10px;">REAL: ${item.actualQuantity || 0}</div>
-                    </td>
-                    <td style="padding: 12px 0; text-align: right; vertical-align: top;">
-                        <div style="color: #94a3b8; font-size: 8px; margin-bottom: 2px; font-weight: 700; text-transform: uppercase; white-space: nowrap;">Est: R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                        <div style="color: #0f172a; font-size: 10.5px; font-weight: 800; white-space: nowrap;">REAL: R$ ${(item.actualUnitPrice || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                    </td>
-                    <td style="padding: 12px 0; text-align: right; vertical-align: top;">
-                        <div style="font-weight: 700; font-size: 8px; color: #94a3b8; margin-bottom: 2px; text-transform: uppercase; white-space: nowrap;">Est: R$ ${plannedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                        <div style="font-weight: 900; font-size: 12px; color: #0f172a; white-space: nowrap;">REAL: R$ ${actualTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                        ${diff !== 0 ? `<div style="font-size: 9.5px; font-weight: 900; color: ${diffColor}; margin-top: 3px; font-variant-numeric: tabular-nums; white-space: nowrap;">${diff > 0 ? '+' : ''} R$ ${diff.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>` : ''}
-                    </td>
-                </tr > `;
+            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                        <td style="padding: 12px 0; text-align: left; vertical-align: top;">
+                                            <div style="font-weight: 700; text-transform: uppercase; font-size: 11px; color: #0f172a;">${item.description}</div>
+                                            <div style="font-size: 9px; color: #94a3b8; font-weight: 600;">${item.type || 'GERAL'}</div>
+                                        </td>
+                                        <td style="padding: 12px 0; text-align: center; vertical-align: top; color: #64748b; font-size: 11px; font-weight: 600; text-transform: uppercase;">${item.unit || 'UN'}</td>
+                                        <td style="padding: 12px 0; text-align: center; vertical-align: top;">
+                                            <div style="font-weight: 700; color: #94a3b8; font-size: 8px; margin-bottom: 2px; text-transform: uppercase;">Est: ${item.quantity}</div>
+                                            <div style="font-weight: 800; color: #0f172a; font-size: 10px;">REAL: ${item.actualQuantity || 0}</div>
+                                        </td>
+                                        <td style="padding: 12px 0; text-align: right; vertical-align: top;">
+                                            <div style="color: #94a3b8; font-size: 8px; margin-bottom: 2px; font-weight: 700; text-transform: uppercase; white-space: nowrap;">Est: R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                            <div style="color: #0f172a; font-size: 10.5px; font-weight: 800; white-space: nowrap;">REAL: R$ ${(item.actualUnitPrice || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                        </td>
+                                        <td style="padding: 12px 0; text-align: right; vertical-align: top;">
+                                            <div style="font-weight: 700; font-size: 8px; color: #94a3b8; margin-bottom: 2px; text-transform: uppercase; white-space: nowrap;">Est: R$ ${plannedTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                            <div style="font-weight: 900; font-size: 12px; color: #0f172a; white-space: nowrap;">REAL: R$ ${actualTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                            ${diff !== 0 ? `<div style="font-size: 9.5px; font-weight: 900; color: ${diffColor}; margin-top: 3px; font-variant-numeric: tabular-nums; white-space: nowrap;">${diff > 0 ? '+' : ''} R$ ${diff.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>` : ''}
+                                        </td>
+                                    </tr> `;
         }).join('');
 
         const html = `
@@ -595,10 +560,10 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                 <script src="https://cdn.tailwindcss.com"></script>
                 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Roboto:wght@400;700&family=Montserrat:wght@400;700&family=Open+Sans:wght@400;700&family=Lato:wght@400;700&family=Poppins:wght@400;700&family=Oswald:wght@400;700&family=Playfair+Display:wght@400;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
                     <style>
-                        * { box-sizing: border-box; }
-                        body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; color: #0f172a; }
-                        @page { size: A4; margin: 0 !important; }
-                        .a4-container { width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
+                        * {box - sizing: border-box; }
+                        body {font - family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; color: #0f172a; }
+                        @page {size: A4; margin: 0 !important; }
+                        .a4-container {width: 100%; margin: 0; background: white; padding-left: 15mm !important; padding-right: 15mm !important; }
                         .avoid-break { break-inside: avoid; page-break-inside: avoid; }
                         .info-box { background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
                         .info-label { font-size: 11px; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block; }
@@ -606,22 +571,22 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         .section-title { font-size: 14px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 2px solid #f1f5f9; margin-bottom: 16px; margin-top: 32px; }
                         .card-summary { padding: 12px; border-radius: 12px; border: 1px solid transparent; }
                         @media print {
-                            body { background: white !important; margin: 0 !important; }
-                            .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; width: 100% !important; padding-left: 15mm !important; padding-right: 15mm !important; }
-                            .no-print { display: none !important; }
-                            .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; } 
-                            .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
+                            body {background: white !important; margin: 0 !important; }
+                        .a4-container { box-shadow: none !important; border: none !important; min-height: auto; position: relative; width: 100% !important; padding-left: 15mm !important; padding-right: 15mm !important; }
+                        .no-print {display: none !important; }
+                        .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
+                        .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
                         }
-           
+
                         /* Styles for Rich Text (Quill) */
-                        .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
-                        .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
-                        .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; }
-                        .ql-editor-print strong { font-weight: bold !important; }
-                        .ql-editor-print em { font-style: italic !important; }
-                        .ql-editor-print .ql-align-center { text-align: center !important; }
-                        .ql-editor-print .ql-align-right { text-align: right !important; }
-                        .ql-editor-print .ql-align-justify { text-align: justify !important; }
+                        .ql-editor-print ul {list - style - type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; }
+                        .ql-editor-print ol {list - style - type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; }
+                        .ql-editor-print li {display: list-item !important; margin-bottom: 4px !important; }
+                        .ql-editor-print strong {font - weight: bold !important; }
+                        .ql-editor-print em {font - style: italic !important; }
+                        .ql-editor-print .ql-align-center {text - align: center !important; }
+                        .ql-editor-print .ql-align-right {text - align: right !important; }
+                        .ql-editor-print .ql-align-justify {text - align: justify !important; }
 
                         /* Font Classes for Print */
                         .ql-font-inter { font-family: 'Inter', sans-serif !important; }
@@ -689,19 +654,19 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                 <!-- Card 1: Valor do Orçamento (Receita) -->
                                 <div class="card-summary bg-blue-50/50 border-blue-100 px-6 py-4">
                                     <span class="text-[10px] font-black text-blue-600 uppercase tracking-widest block mb-1">Valor do Orçamento</span>
-                                    <span class="text-xl font-black text-blue-700 block; white-space: nowrap;">R$ ${revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                    <span class="text-xl font-black text-blue-700 block" style="white-space: nowrap;">R$ ${revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                 </div>
 
                                 <!-- Card 2: Despesas (Previstas ou Reais baseadas em Medição) -->
                                 <div class="card-summary bg-rose-50/50 border-rose-100 px-6 py-4">
                                     <span class="text-[10px] font-black text-rose-600 uppercase tracking-widest block mb-1">${reportMode === 'estimated' ? 'Despesas Previstas' : 'Despesas Reais (Medição)'}</span>
-                                    <span class="text-xl font-black text-rose-700 block; white-space: nowrap;">R$ ${(reportMode === 'estimated' ? plannedCost : totalActualExpenses).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                    <span class="text-xl font-black text-rose-700 block" style="white-space: nowrap;">R$ ${(reportMode === 'estimated' ? plannedCost : totalActualExpenses).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                 </div>
 
                                 <!-- Card 3: Lucro (Previsto ou Real) -->
                                 <div class="card-summary ${(reportMode === 'estimated' ? (revenue - plannedCost) : profitValue) >= 0 ? 'bg-emerald-50/50 border-emerald-100' : 'bg-red-50/50 border-red-100'} px-6 py-4">
                                     <span class="text-[10px] font-black ${(reportMode === 'estimated' ? (revenue - plannedCost) : profitValue) >= 0 ? 'text-emerald-600' : 'text-red-600'} uppercase tracking-widest block mb-1">${reportMode === 'estimated' ? 'Lucro Previsto' : 'Lucro Real'}</span>
-                                    <span class="text-xl font-black ${(reportMode === 'estimated' ? (revenue - plannedCost) : profitValue) >= 0 ? 'text-emerald-700' : 'text-red-700'} block; white-space: nowrap;">R$ ${(reportMode === 'estimated' ? (revenue - plannedCost) : profitValue).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                    <span class="text-xl font-black ${(reportMode === 'estimated' ? (revenue - plannedCost) : profitValue) >= 0 ? 'text-emerald-700' : 'text-red-700'} block" style="white-space: nowrap;">R$ ${(reportMode === 'estimated' ? (revenue - plannedCost) : profitValue).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                 </div>
                             </div>
 
@@ -783,58 +748,58 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                 <script>
                     function optimizePageBreaks() {
                         const root = document.querySelector('.print-description-content .space-y-6');
-                        if (!root) return;
+                    if (!root) return;
 
-                        const allNodes = [];
+                    const allNodes = [];
                         Array.from(root.children).forEach(block => {
                             if (block.classList.contains('ql-editor-print')) {
-                                allNodes.push(...Array.from(block.children));
+                        allNodes.push(...Array.from(block.children));
                             } else {
-                                allNodes.push(block);
+                        allNodes.push(block);
                             }
                         });
 
-                        for (let i = 0; i < allNodes.length - 1; i++) {
+                    for (let i = 0; i < allNodes.length - 1; i++) {
                             const el = allNodes[i];
-                            let isTitle = false;
-                            
-                            if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
-                            else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
+                    let isTitle = false;
+
+                    if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
+                    else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
                                 const text = el.innerText.trim();
-                                const isNumbered = /^\d+[\.\)]/.test(text);
+                    const isNumbered = /^\d+[\.\)]/.test(text);
                                 const isBold = el.querySelector('strong, b') || (el.style && parseInt(el.style.fontWeight) > 500) || el.tagName === 'STRONG';
-                                const isShort = text.length < 150;
+                    const isShort = text.length < 150;
                                 if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
-                                    isTitle = true;
+                        isTitle = true;
                                 }
                             }
 
-                            if (isTitle) {
+                    if (isTitle) {
                                 const nodesToWrap = [el];
-                                let j = i + 1;
-                                while (j < allNodes.length && nodesToWrap.length < 3) {
+                    let j = i + 1;
+                    while (j < allNodes.length && nodesToWrap.length < 3) {
                                     const next = allNodes[j];
-                                    const nText = next.innerText.trim();
-                                    const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') || 
-                                                        (/^\d+[\.\)]/.test(nText) && (next.querySelector('strong, b') || nText === nText.toUpperCase()));
-                                    if (nextIsTitle) break;
-                                    nodesToWrap.push(next);
-                                    j++;
+                    const nText = next.innerText.trim();
+                    const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') ||
+                    (/^\d+[\.\)]/.test(nText) && (next.querySelector('strong, b') || nText === nText.toUpperCase()));
+                    if (nextIsTitle) break;
+                    nodesToWrap.push(next);
+                    j++;
                                 }
 
                                 if (nodesToWrap.length > 1) {
                                     const wrapper = document.createElement('div');
-                                    wrapper.className = 'keep-together';
-                                    el.parentNode.insertBefore(wrapper, el);
+                    wrapper.className = 'keep-together';
+                    el.parentNode.insertBefore(wrapper, el);
                                     nodesToWrap.forEach(node => wrapper.appendChild(node));
-                                    i = j - 1;
+                    i = j - 1;
                                 }
                             }
                         }
                     }
-                    window.onload = function() { 
+                    window.onload = function() {
                         optimizePageBreaks();
-                        setTimeout(() => { window.print(); window.close(); }, 2000); 
+                        setTimeout(() => {window.print(); window.close(); }, 2000); 
                     }
                 </script>
             </body>
@@ -959,8 +924,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         {/* Tabs */}
                         {editingOrderId && (
                             <div className="bg-white px-8 border-b flex gap-6">
-                                <button onClick={() => setActiveTab('details')} className={`py-3 text-xs font-black uppercase tracking-widest border-b-2 transition-colors ${activeTab === 'details' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>Detalhes da Obra</button>
-                                <button onClick={() => setActiveTab('financial')} className={`py-3 text-xs font-black uppercase tracking-widest border-b-2 transition-colors ${activeTab === 'financial' ? 'border-purple-600 text-purple-600' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>Gestão Financeira</button>
+                                <button onClick={() => setActiveTab('details')} className={`py - 3 text - xs font - black uppercase tracking - widest border - b - 2 transition - colors ${activeTab === 'details' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-400 hover:text-slate-600'} `}>Detalhes da Obra</button>
+                                <button onClick={() => setActiveTab('financial')} className={`py - 3 text - xs font - black uppercase tracking - widest border - b - 2 transition - colors ${activeTab === 'financial' ? 'border-purple-600 text-purple-600' : 'border-transparent text-slate-400 hover:text-slate-600'} `}>Gestão Financeira</button>
                             </div>
                         )}
 
@@ -1062,7 +1027,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                 label="Lucro Real"
                                                 value={<span className="whitespace-nowrap">R$ {actualProfit.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>}
                                                 className={actualProfit >= 0 ? 'bg-emerald-50/50 border-emerald-100' : 'bg-rose-50/50 border-rose-100'}
-                                                icon={<div className={`absolute top-0 left-0 w-full h-1 ${actualProfit >= 0 ? 'bg-emerald-500' : 'bg-rose-500'}`}></div>}
+                                                icon={<div className={`absolute top - 0 left - 0 w - full h - 1 ${actualProfit >= 0 ? 'bg-emerald-500' : 'bg-rose-500'} `}></div>}
                                                 labelClassName={actualProfit >= 0 ? 'text-emerald-600' : 'text-rose-600'}
                                                 valueClassName={actualProfit >= 0 ? 'text-emerald-700' : 'text-rose-700'}
                                             />
@@ -1114,14 +1079,14 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                             <input type="text" className="w-full bg-transparent text-xs font-bold text-slate-400 outline-none text-center uppercase" value={item.unit || 'un'} onChange={e => updateItem(item.id, 'unit', e.target.value)} />
                                                         </div>
                                                         <div className="col-span-1">
-                                                            <div className="flex items-center justify-end gap-1" onClick={() => setActiveEditField(`${item.id}-price`)}>
+                                                            <div className="flex items-center justify-end gap-1" onClick={() => setActiveEditField(`${item.id} -price`)}>
                                                                 <span className="text-xs text-blue-600 font-bold">R$</span>
-                                                                {activeEditField === `${item.id}-price` ? (
+                                                                {activeEditField === `${item.id} -price` ? (
                                                                     <input
                                                                         autoFocus
                                                                         type="number"
                                                                         className="bg-transparent text-xs font-bold text-blue-600 outline-none text-right appearance-none"
-                                                                        style={{ width: `${(item.unitPrice.toString().length + 2) * 8}px` }}
+                                                                        style={{ width: `${(item.unitPrice.toString().length + 2) * 8} px` }}
                                                                         value={item.unitPrice}
                                                                         onChange={e => updateItem(item.id, 'unitPrice', Number(e.target.value))}
                                                                         onBlur={() => setActiveEditField(null)}
@@ -1144,14 +1109,14 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                             <span className="text-[10px] font-bold text-slate-400 uppercase">{item.unit || 'un'}</span>
                                                         </div>
                                                         <div className="col-span-1">
-                                                            <div className="flex items-center justify-end gap-1" onClick={() => setActiveEditField(`${item.id}-actualPrice`)}>
+                                                            <div className="flex items-center justify-end gap-1" onClick={() => setActiveEditField(`${item.id} -actualPrice`)}>
                                                                 <span className="text-xs text-amber-700 font-bold">R$</span>
-                                                                {activeEditField === `${item.id}-actualPrice` ? (
+                                                                {activeEditField === `${item.id} -actualPrice` ? (
                                                                     <input
                                                                         autoFocus
                                                                         type="number"
                                                                         className="bg-transparent text-xs font-bold text-amber-700 outline-none text-right appearance-none"
-                                                                        style={{ width: `${((item.actualUnitPrice || 0).toString().length + 2) * 8}px` }}
+                                                                        style={{ width: `${((item.actualUnitPrice || 0).toString().length + 2) * 8} px` }}
                                                                         value={item.actualUnitPrice || 0}
                                                                         onChange={e => updateItem(item.id, 'actualUnitPrice', Number(e.target.value))}
                                                                         onBlur={() => setActiveEditField(null)}
@@ -1179,8 +1144,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         </div>
 
                         <div className="bg-white px-8 py-5 border-t flex justify-end shrink-0">
-                            <button onClick={handleSaveOS} disabled={isSaving} className={`bg-slate-900 text-white px-12 py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-slate-200 hover:shadow-2xl transition-all flex items-center justify-center gap-3 ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                                <Save className={`w-4 h-4 ${isSaving ? 'animate-pulse' : ''}`} /> {isSaving ? 'Salvando...' : 'Salvar OS de Obra'}
+                            <button onClick={handleSaveOS} disabled={isSaving} className={`bg - slate - 900 text - white px - 12 py - 4 rounded - 2xl font - black uppercase tracking - widest text - xs shadow - xl shadow - slate - 200 hover: shadow - 2xl transition - all flex items - center justify - center gap - 3 ${isSaving ? 'opacity-50 cursor-not-allowed' : ''} `}>
+                                <Save className={`w - 4 h - 4 ${isSaving ? 'animate-pulse' : ''} `} /> {isSaving ? 'Salvando...' : 'Salvar OS de Obra'}
                             </button>
                         </div>
                     </div>
