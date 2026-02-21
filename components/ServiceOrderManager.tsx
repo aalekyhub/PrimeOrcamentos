@@ -502,20 +502,18 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin-bottom: 15px;">
-          <div style="background:#eff6ff; padding: 15px; border-radius: 12px; border: 1px solid #dbeafe;">
+          <div style="background:#f8fafc; padding: 18px; border-radius: 12px; border: 1px solid #dbeafe;">
             <h4 style="font-size:10px; font-weight:900; color:#3b82f6; text-transform:uppercase; letter-spacing:1px; margin:0 0 2mm 0;">CONTRATADA</h4>
             <p style="font-size:14px; font-weight:900; color:#0f172a; text-transform:uppercase; margin:0;">${company.name}</p>
-            <p style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; margin:1mm 0 0 0;">${company.address || ""}</p>
-            <p style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; margin:0;">${company.email || ""}</p>
+            <p style="font-size:11px; font-weight:600; color:#64748b; margin:1mm 0 0 0;">${company.address || ""}</p>
+            <p style="font-size:11px; font-weight:600; color:#64748b; margin:0;">${company.email || ""}</p>
           </div>
-          <div style="background:#eff6ff; padding: 15px; border-radius: 12px; border: 1px solid #dbeafe;">
+          <div style="background:#f8fafc; padding: 18px; border-radius: 12px; border: 1px solid #dbeafe;">
             <h4 style="font-size:10px; font-weight:900; color:#3b82f6; text-transform:uppercase; letter-spacing:1px; margin:0 0 2mm 0;">CONTRATANTE</h4>
             <p style="font-size:14px; font-weight:900; color:#0f172a; text-transform:uppercase; margin:0;">${customer.name}</p>
-            <p style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; margin:1mm 0 0 0;">CNPJ: ${customer.document || 'N/A'}</p>
-            <p style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; margin:0;">${customer.address || ''}, ${customer.number || ''} - ${customer.city || ''}</p>
+            <p style="font-size:11px; font-weight:600; color:#64748b; margin:1mm 0 0 0;">CNPJ: ${customer.document || 'N/A'}</p>
+            <p style="font-size:11px; font-weight:600; color:#64748b; margin:0;">${customer.address || ''}, ${customer.number || ''} - ${customer.city || ''}</p>
           </div>
-        </div>
 
         <div style="margin-bottom: 3mm;">
           <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0;">
