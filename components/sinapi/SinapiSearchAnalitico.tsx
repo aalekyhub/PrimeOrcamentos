@@ -193,14 +193,14 @@ const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
 
             {ans && (
                 <div className="space-y-6 animate-in slide-in-from-bottom-5 duration-500">
-                    <div className="bg-indigo-600 rounded-[2rem] p-8 text-white shadow-xl shadow-indigo-100">
+                    <div className="bg-indigo-600 rounded-[2rem] p-8 text-white shadow-lg shadow-indigo-900/20">
                         <div className="flex justify-between items-start mb-6">
                             <div className="bg-white/20 px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase">
                                 Composição Encontrada
                             </div>
                             <button
                                 onClick={handleCopy}
-                                className="bg-white text-indigo-600 px-6 py-2.5 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center gap-2 hover:bg-slate-50 transition-all shadow-lg"
+                                className="bg-white text-indigo-600 px-6 py-2.5 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center gap-2 hover:bg-slate-50 transition-all shadow-md shadow-black/5"
                             >
                                 <Plus className="w-4 h-4" /> Copiar para Catálogo
                             </button>
@@ -319,7 +319,7 @@ const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
             )}
 
             {showBdiModal && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+                <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
                     <div className="w-full max-w-2xl animate-in zoom-in-95 duration-300 relative">
                         <button
                             onClick={() => setShowBdiModal(false)}

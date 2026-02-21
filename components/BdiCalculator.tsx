@@ -40,7 +40,7 @@ const BdiCalculator: React.FC<Props> = ({ initialConfig, onSave }) => {
     };
 
     return (
-        <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xl shadow-slate-100">
+        <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-2xl shadow-black/10">
             <div className="bg-indigo-600 p-6 text-white">
                 <div className="flex items-center gap-3 mb-2">
                     <Calculator className="w-6 h-6" />
@@ -102,7 +102,7 @@ const BdiCalculator: React.FC<Props> = ({ initialConfig, onSave }) => {
                             onSave({ ...config, id: initialConfig?.id || 'default', total: totalBdi } as BdiConfig);
                             notify('Configuração de BDI calculada!');
                         }}
-                        className="w-full sm:w-auto bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200 flex items-center justify-center gap-2"
+                        className="w-full sm:w-auto bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/30 flex items-center justify-center gap-2"
                     >
                         <Save className="w-4 h-4" /> Aplicar BDI
                     </button>
