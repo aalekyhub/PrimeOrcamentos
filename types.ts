@@ -63,6 +63,17 @@ export interface Customer {
   createdAt: string;
 }
 
+export interface CompositionItem {
+  id: string;
+  itemId: string;
+  description: string;
+  unit: string;
+  coefficient: number;
+  price: number;
+  type: 'INSUMO' | 'COMPOSICAO';
+  source: 'CATALOG' | 'SINAPI';
+}
+
 export interface CatalogService {
   id: string;
   name: string;
@@ -70,6 +81,8 @@ export interface CatalogService {
   basePrice: number;
   unit: string;
   category: string;
+  isComposition?: boolean;
+  compositionItems?: CompositionItem[];
 }
 
 export interface ServiceItem {
