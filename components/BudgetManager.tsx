@@ -370,7 +370,7 @@ const BudgetManager: React.FC<Props> = ({
                         </div>
 
                         <!-- Barra de Total (Cinza Escuro / Estilo Premium) -->
-                        <div style="background: #0f172a; border-radius: 20px; padding: 25px 40px; display: flex; justify-content: space-between; align-items: center; color: white;">
+                        <div style="background: #0f172a; border-radius: 20px; padding: 12px 40px; display: flex; justify-content: space-between; align-items: center; color: white;">
                             <span style="font-size: 16px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase;">INVESTIMENTO TOTAL:</span>
                             <span style="font-size: 42px; font-weight: 900; letter-spacing: -0.05em; white-space: nowrap;">R$ ${finalT.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>
