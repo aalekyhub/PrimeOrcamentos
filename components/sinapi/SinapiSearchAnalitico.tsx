@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
-import { Search, Loader2, Table, Plus, ChevronRight, Calculator, ExternalLink, Pencil, Check, X } from 'lucide-react';
+import { Search, Loader2, Plus, Calculator, Pencil, X } from 'lucide-react';
 import { sinapiAnalitico, AnaliticoResult } from '../../services/sinapiAnalitico';
 import { sinapiDb } from '../../services/sinapiDb';
 import { useNotify } from '../ToastProvider';
+import BdiCalculator from '../BdiCalculator';
 
 interface Props {
     onCopyComposition: (result: AnaliticoResult) => void;
@@ -16,6 +17,8 @@ const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
     const [ans, setAns] = useState<AnaliticoResult | null>(null);
+    const [bdiRate, setBdiRate] = useState<number>(0);
+    const [showBdiModal, setShowBdiModal] = useState(false);
     const [editingItemId, setEditingItemId] = useState<string | null>(null);
     const [editValue, setEditValue] = useState<string>('');
     const { notify } = useNotify();
@@ -65,7 +68,6 @@ const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
         if (isNaN(newPrice)) return;
 
         try {
-            // Update the main source tables (Insumo or Composição)
             if (item.tipo_item === 'INSUMO') {
                 const id = `${config.mes_ref}_${config.uf}_${config.modo}_INS_${item.codigo_item}`;
                 await sinapiDb.updateInsumoPrice(id, newPrice);
@@ -74,17 +76,14 @@ const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
                 await sinapiDb.updateComposicaoPrice(id, newPrice);
             }
 
-            // Update the snapshot table (Analítico)
-            const compCode = ans.composicao?.codigo || searchTerm;
+            const compCode = ans?.composicao?.codigo || searchTerm;
             const anaId = `${config.mes_ref}_${config.uf}_${config.modo}_ANA_${compCode}_${item.tipo_item}_${item.codigo_item}`;
             await sinapiDb.updateComposicaoItemPrice(anaId, newPrice);
 
-            // Refresh the local result (ans) to update calculations
             if (ans) {
                 const newItens = ans.itens.map(it => {
                     if (it.codigo_item === item.codigo_item) {
-                        const updated = { ...it, custo_unitario: newPrice, custo_total: it.coeficiente * newPrice };
-                        return updated;
+                        return { ...it, custo_unitario: newPrice, custo_total: it.coeficiente * newPrice };
                     }
                     return it;
                 });
@@ -100,31 +99,35 @@ const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
         }
     };
 
+    const handleCopy = () => {
+        if (!ans) return;
+        const finalPrice = bdiRate > 0 ? ans.total * (1 + bdiRate / 100) : ans.total;
+        onCopyComposition({ ...ans, total: finalPrice });
+    };
+
     return (
         <div className="space-y-6">
-            {/* Config Bar */}
             <div ref={containerRef} className="bg-slate-100 p-2 rounded-2xl flex flex-wrap gap-2 items-center">
                 <select
                     className="bg-white dark:bg-slate-700 border-none rounded-xl px-4 py-2 text-[10px] font-black uppercase outline-none text-slate-900 dark:text-white"
                     value={config.uf} onChange={e => setConfig({ ...config, uf: e.target.value })}
                 >
                     {['AC', 'AL', 'AM', 'AP', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MG', 'MS', 'MT', 'PA', 'PB', 'PE', 'PI', 'PR', 'RJ', 'RN', 'RO', 'RR', 'RS', 'SC', 'SE', 'SP', 'TO'].map(uf => (
-                        <option key={uf} value={uf} className="bg-white dark:bg-slate-800">{uf}</option>
+                        <option key={uf} value={uf}>{uf}</option>
                     ))}
                 </select>
                 <input
                     type="text" placeholder="MM/AAAA"
                     className="bg-white dark:bg-slate-700 border-none rounded-xl px-4 py-2 text-[10px] font-black outline-none w-24 text-slate-900 dark:text-white"
                     value={config.mes_ref} onChange={e => setConfig({ ...config, mes_ref: e.target.value })}
-                    autoComplete="off"
                 />
                 <select
                     className="bg-white dark:bg-slate-700 border-none rounded-xl px-4 py-2 text-[10px] font-black uppercase outline-none text-slate-900 dark:text-white"
                     value={config.modo} onChange={e => setConfig({ ...config, modo: e.target.value })}
                 >
-                    <option value="SE" className="bg-white dark:bg-slate-800">SEM ENCARGOS (SE)</option>
-                    <option value="SD" className="bg-white dark:bg-slate-800">SEM DESONERAÇÃO (SD)</option>
-                    <option value="CD" className="bg-white dark:bg-slate-800">COM DESONERAÇÃO (CD)</option>
+                    <option value="SE">SEM ENCARGOS (SE)</option>
+                    <option value="SD">SEM DESONERAÇÃO (SD)</option>
+                    <option value="CD">COM DESONERAÇÃO (CD)</option>
                 </select>
 
                 <div className="flex-1 min-w-[200px] relative">
@@ -138,15 +141,13 @@ const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
                             if (e.key === 'Enter') handleSearch();
                             if (e.key === 'Escape') setShowSuggestions(false);
                         }}
-                        autoComplete="off"
                     />
                     <button onClick={() => handleSearch()} className="absolute right-2 top-1.5 p-1 bg-indigo-50 text-indigo-600 rounded-lg">
                         <Search className="w-4 h-4" />
                     </button>
 
-                    {/* Suggestions Dropdown */}
                     {showSuggestions && suggestions.length > 0 && (
-                        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 z-50 max-h-[400px] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 z-50 max-h-[400px] overflow-y-auto anima-in fade-in slide-in-from-top-2 duration-200">
                             {suggestions.map(s => (
                                 <button
                                     key={s.id}
@@ -155,11 +156,10 @@ const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
                                 >
                                     <div className="flex items-start justify-between gap-4">
                                         <div className="flex-1">
-                                            <p className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-1">{s.codigo}</p>
-                                            <p className="text-[11px] font-bold text-slate-800 dark:text-slate-200 uppercase leading-tight group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{s.descricao}</p>
+                                            <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">{s.codigo}</p>
+                                            <p className="text-[11px] font-bold text-slate-800 dark:text-slate-200 uppercase leading-tight group-hover:text-indigo-600 transition-colors">{s.descricao}</p>
                                         </div>
                                         <div className="text-right shrink-0">
-                                            <p className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{s.unidade}</p>
                                             <p className="text-[11px] font-black text-slate-900 dark:text-white">R$ {s.custo_unitario?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                                         </div>
                                     </div>
@@ -179,28 +179,27 @@ const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
 
             {ans && (
                 <div className="space-y-6 animate-in slide-in-from-bottom-5 duration-500">
-                    {/* Header Info */}
                     <div className="bg-indigo-600 rounded-[2rem] p-8 text-white shadow-xl shadow-indigo-100">
                         <div className="flex justify-between items-start mb-6">
                             <div className="bg-white/20 px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase">
-                                {ans.composicao?.id ? 'Composição Encontrada' : 'Estrutura BOM Independente'}
+                                Composição Encontrada
                             </div>
                             <button
-                                onClick={() => onCopyComposition(ans)}
+                                onClick={handleCopy}
                                 className="bg-white text-indigo-600 px-6 py-2.5 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center gap-2 hover:bg-slate-50 transition-all shadow-lg"
                             >
                                 <Plus className="w-4 h-4" /> Copiar para Catálogo
                             </button>
                         </div>
 
-                        <h3 className="text-2xl font-black tracking-tighter uppercase mb-2">
+                        <h3 className="text-2xl font-black tracking-tighter uppercase mb-6">
                             {ans.composicao?.descricao || (ans.itens.length > 0 ? ans.itens[0].descricao_item : 'N/A')}
                         </h3>
 
-                        <div className="flex gap-10">
+                        <div className="flex flex-wrap gap-10">
                             <div>
                                 <p className="text-indigo-200 text-[10px] font-black uppercase tracking-widest mb-1">Código</p>
-                                <p className="text-xl font-black">{searchTerm}</p>
+                                <p className="text-xl font-black">{ans.composicao?.codigo || searchTerm}</p>
                             </div>
                             <div>
                                 <p className="text-indigo-200 text-[10px] font-black uppercase tracking-widest mb-1">Unidade</p>
@@ -208,12 +207,32 @@ const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
                             </div>
                             <div>
                                 <p className="text-indigo-200 text-[10px] font-black uppercase tracking-widest mb-1">Custo Total Calc.</p>
-                                <p className="text-3xl font-black">R$ {ans.total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                <p className={`text-3xl font-black ${bdiRate > 0 ? 'text-indigo-200 line-through decoration-white/30 text-xl' : ''}`}>R$ {ans.total.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                            </div>
+
+                            {bdiRate > 0 && (
+                                <div className="bg-white/10 px-6 py-3 rounded-2xl border border-white/20 animate-in zoom-in duration-300">
+                                    <p className="text-indigo-200 text-[10px] font-black uppercase tracking-widest mb-1 flex items-center gap-2">
+                                        Venda com BDI ({bdiRate.toFixed(2)}%)
+                                        <button onClick={() => setBdiRate(0)} className="hover:text-white transition-colors" title="Remover BDI">
+                                            <X className="w-3 h-3" />
+                                        </button>
+                                    </p>
+                                    <p className="text-3xl font-black">R$ {(ans.total * (1 + bdiRate / 100)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                </div>
+                            )}
+
+                            <div className="flex items-center">
+                                <button
+                                    onClick={() => setShowBdiModal(true)}
+                                    className="bg-indigo-500 hover:bg-indigo-400 text-white px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-all border border-indigo-400/30 shadow-lg"
+                                >
+                                    <Calculator className="w-4 h-4" /> {bdiRate > 0 ? 'Alterar BDI' : 'Aplicar BDI'}
+                                </button>
                             </div>
                         </div>
                     </div>
 
-                    {/* Breakdown Table */}
                     <div className="bg-white border border-slate-200 rounded-[2.5rem] overflow-hidden shadow-sm">
                         <table className="w-full text-left">
                             <thead>
@@ -229,7 +248,7 @@ const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
                             </thead>
                             <tbody className="divide-y divide-slate-50">
                                 {ans.itens.map(item => (
-                                    <tr key={item.codigo_item} className="hover:bg-slate-50/50 transition-colors">
+                                    <tr key={item.codigo_item} className="hover:bg-slate-50/50 transition-colors group">
                                         <td className="px-8 py-4 pl-10">
                                             <span className={`px-2 py-0.5 rounded text-[8px] font-black tracking-widest uppercase ${item.tipo_item === 'INSUMO' ? 'bg-blue-50 text-blue-600' :
                                                 item.tipo_item === 'COMPOSICAO' ? 'bg-purple-50 text-purple-600' : 'bg-rose-50 text-rose-600'
@@ -258,7 +277,6 @@ const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
                                                         if (e.key === 'Enter') handleUpdatePrice(item);
                                                         if (e.key === 'Escape') setEditingItemId(null);
                                                     }}
-                                                    onClick={e => e.stopPropagation()}
                                                     onBlur={() => {
                                                         const cleaned = editValue.trim();
                                                         if (cleaned && cleaned !== item.custo_unitario.toFixed(2)) {
@@ -282,6 +300,25 @@ const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
                                 ))}
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            )}
+
+            {showBdiModal && (
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+                    <div className="w-full max-w-2xl animate-in zoom-in-95 duration-300 relative">
+                        <button
+                            onClick={() => setShowBdiModal(false)}
+                            className="absolute -top-4 -right-4 bg-white text-slate-400 hover:text-slate-600 p-2 rounded-full shadow-xl z-10 transition-colors"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                        <BdiCalculator
+                            onSave={(config) => {
+                                setBdiRate(config.total);
+                                setShowBdiModal(false);
+                            }}
+                        />
                     </div>
                 </div>
             )}
