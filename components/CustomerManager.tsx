@@ -132,18 +132,18 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
     c.document.includes(searchTerm)
   );
 
-  const inputClass = "w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-500";
-  const labelClass = "text-[11px] font-black text-blue-700 uppercase tracking-widest mb-1.5 block ml-1";
+  const inputClass = "w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-500 dark:placeholder:text-slate-400";
+  const labelClass = "text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase tracking-widest mb-1.5 block ml-1";
 
   return (
     <div className="space-y-6">
       {!defaultOpenForm && (
         <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">Clientes</h2>
-            <p className="text-slate-500 text-sm">Gerenciamento de base de dados.</p>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Clientes</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">Gerenciamento de base de dados.</p>
           </div>
-          <button onClick={() => { setShowForm(true); setEditingCustomerId(null); setNewCustomer(initialFormState); }} className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold shadow-lg hover:bg-blue-700 flex items-center gap-2">
+          <button onClick={() => { setShowForm(true); setEditingCustomerId(null); setNewCustomer(initialFormState); }} className="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-blue-900/20 hover:bg-blue-700 flex items-center gap-2">
             <UserPlus className="w-4 h-4" /> Novo Cliente
           </button>
         </div>
@@ -151,17 +151,17 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
 
       {(showForm || defaultOpenForm) && (
         <div className={defaultOpenForm ? "" : "fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 overflow-y-auto"}>
-          <form onSubmit={handleSubmit} className={`bg-white rounded-[2rem] shadow-2xl p-8 space-y-6 animate-in zoom-in-95 relative ${defaultOpenForm ? 'w-full' : 'w-full max-w-[900px]'}`}>
+          <form onSubmit={handleSubmit} className={`bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl p-8 space-y-6 animate-in zoom-in-95 relative ${defaultOpenForm ? 'w-full' : 'w-full max-w-[900px] border border-slate-200 dark:border-slate-800'}`}>
             {!defaultOpenForm && (
-              <button type="button" onClick={() => { setShowForm(false); if (onCancel) onCancel(); }} className="absolute right-6 top-6 p-2 text-slate-300 hover:text-slate-600 transition-colors"><X className="w-6 h-6" /></button>
+              <button type="button" onClick={() => { setShowForm(false); if (onCancel) onCancel(); }} className="absolute right-6 top-6 p-2 text-slate-300 hover:text-slate-600 dark:hover:text-white transition-colors"><X className="w-6 h-6" /></button>
             )}
 
-            <div className="flex justify-between items-center border-b pb-4">
-              <div className="flex p-1 bg-slate-100 rounded-xl w-fit">
-                <button type="button" onClick={() => setPersonType('PF')} className={`px-8 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all ${personType === 'PF' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400'}`}>PF</button>
-                <button type="button" onClick={() => setPersonType('PJ')} className={`px-8 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all ${personType === 'PJ' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400'}`}>PJ</button>
+            <div className="flex justify-between items-center border-b dark:border-slate-800 pb-4">
+              <div className="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl w-fit">
+                <button type="button" onClick={() => setPersonType('PF')} className={`px-8 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all ${personType === 'PF' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-400'}`}>PF</button>
+                <button type="button" onClick={() => setPersonType('PJ')} className={`px-8 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all ${personType === 'PJ' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-400'}`}>PJ</button>
               </div>
-              {loadingApi && <div className="flex items-center gap-2 text-blue-600 text-[10px] font-bold"><RefreshCw className="w-3 h-3 animate-spin" /> CONSULTANDO API...</div>}
+              {loadingApi && <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-[10px] font-bold"><RefreshCw className="w-3 h-3 animate-spin" /> CONSULTANDO API...</div>}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -266,7 +266,7 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
             </div>
 
             <div className="flex justify-end pt-4">
-              <button type="submit" className="bg-blue-600 text-white px-12 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-xl hover:scale-[1.02] active:scale-95 transition-all">
+              <button type="submit" className="bg-blue-600 text-white px-12 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-xl shadow-blue-900/20 hover:scale-[1.02] active:scale-95 transition-all">
                 Salvar Cliente
               </button>
             </div>
@@ -274,14 +274,14 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
         </div>
       )}
       {!defaultOpenForm && (
-        <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden overflow-x-auto">
-          <div className="p-8 border-b border-slate-100 flex items-center gap-4">
+        <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden overflow-x-auto">
+          <div className="p-8 border-b dark:border-slate-800 border-slate-100 flex items-center gap-4">
             <div className="relative w-full max-w-md">
               <Search className="absolute left-4 top-3.5 w-4 h-4 text-slate-400" />
               <input
                 type="text"
                 placeholder="Buscar por nome, CPF ou CNPJ..."
-                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400"
+                className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400"
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
               />
@@ -289,21 +289,21 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
           </div>
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-100">
+              <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
                 <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest pl-10">Cliente</th>
                 <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Localização</th>
                 <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right pr-10">Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50">
+            <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
               {filtered.map(c => (
-                <tr key={c.id} className="hover:bg-slate-50 group transition-colors">
+                <tr key={c.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 group transition-colors">
                   <td className="px-8 py-6 pl-10">
-                    <p className="text-sm font-black text-slate-900 uppercase mb-1">{c.name}</p>
+                    <p className="text-sm font-black text-slate-900 dark:text-slate-100 uppercase mb-1">{c.name}</p>
                     <p className="text-[10px] text-slate-400 font-bold tracking-wide">{c.document}</p>
                   </td>
-                  <td className="px-8 py-6 text-xs text-slate-600 font-bold uppercase tracking-wide">
-                    {c.city && c.state ? `${c.city} - ${c.state}` : <span className="text-slate-300 italic">Localização n/d</span>}
+                  <td className="px-8 py-6 text-xs text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wide">
+                    {c.city && c.state ? `${c.city} - ${c.state}` : <span className="text-slate-300 dark:text-slate-600 italic">Localização n/d</span>}
                   </td>
                   <td className="px-8 py-6 pr-10 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button onClick={() => { setEditingCustomerId(c.id); setNewCustomer(c); setPersonType(c.type); setShowForm(true); }} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Editar"><Pencil className="w-4 h-4" /></button>
