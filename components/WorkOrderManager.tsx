@@ -928,8 +928,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         {/* Tabs */}
                         {editingOrderId && (
                             <div className="bg-white dark:bg-slate-900 px-8 border-b dark:border-slate-800 flex gap-6">
-                                <button onClick={() => setActiveTab('details')} className={`py - 3 text - xs font - black uppercase tracking - widest border - b - 2 transition - colors ${activeTab === 'details' ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400' : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'} `}>Detalhes da Obra</button>
-                                <button onClick={() => setActiveTab('financial')} className={`py - 3 text - xs font - black uppercase tracking - widest border - b - 2 transition - colors ${activeTab === 'financial' ? 'border-purple-600 text-purple-600 dark:text-purple-400 dark:border-purple-400' : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'} `}>Gestão Financeira</button>
+                                <button onClick={() => setActiveTab('details')} className={`py-3 text-[10px] font-black uppercase tracking-widest border-b-2 transition-colors ${activeTab === 'details' ? 'border-blue-600 text-blue-600 dark:text-blue-400 dark:border-blue-400' : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>Detalhes da Obra</button>
+                                <button onClick={() => setActiveTab('financial')} className={`py-3 text-[10px] font-black uppercase tracking-widest border-b-2 transition-colors ${activeTab === 'financial' ? 'border-purple-600 text-purple-600 dark:text-purple-400 dark:border-purple-400' : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}>Gestão Financeira</button>
                             </div>
                         )}
 
@@ -1101,9 +1101,9 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                             </div>
                                             <div className="max-h-[300px] overflow-y-auto no-scrollbar">
                                                 {items.map(item => (
-                                                    <div key={item.id} className="grid grid-cols-12 gap-1 items-center py-2 border-b border-slate-100 dark:border-slate-800 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors px-3">
+                                                    <div key={item.id} className="grid grid-cols-12 gap-1 items-center py-2 border-b border-slate-100 dark:border-slate-800/60 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors px-3">
                                                         <div className="col-span-2">
-                                                            <input type="text" className="w-full bg-transparent text-xs font-bold text-slate-700 dark:text-slate-300 uppercase outline-none" value={item.description} onChange={e => updateItem(item.id, 'description', e.target.value)} />
+                                                            <input type="text" className="w-full bg-transparent text-xs font-bold text-slate-700 dark:text-slate-100 uppercase outline-none" value={item.description} onChange={e => updateItem(item.id, 'description', e.target.value)} />
                                                         </div>
                                                         <div className="col-span-1 pl-1">
                                                             <input type="number" className="w-full bg-transparent text-xs font-bold text-slate-600 dark:text-slate-300 outline-none text-center appearance-none" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', Number(e.target.value))} />
@@ -1112,14 +1112,14 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                             <input type="text" className="w-full bg-transparent text-xs font-bold text-slate-400 dark:text-slate-500 outline-none text-center uppercase" value={item.unit || 'un'} onChange={e => updateItem(item.id, 'unit', e.target.value)} />
                                                         </div>
                                                         <div className="col-span-1">
-                                                            <div className="flex items-center justify-end gap-1" onClick={() => setActiveEditField(`${item.id} -price`)}>
+                                                            <div className="flex items-center justify-end gap-1" onClick={() => setActiveEditField(`${item.id}-price`)}>
                                                                 <span className="text-xs text-blue-600 dark:text-blue-400 font-bold">R$</span>
-                                                                {activeEditField === `${item.id} -price` ? (
+                                                                {activeEditField === `${item.id}-price` ? (
                                                                     <input
                                                                         autoFocus
                                                                         type="number"
                                                                         className="bg-transparent text-xs font-bold text-blue-600 dark:text-blue-400 outline-none text-right appearance-none"
-                                                                        style={{ width: `${(item.unitPrice.toString().length + 2) * 8} px` }}
+                                                                        style={{ width: `${(item.unitPrice.toString().length + 2) * 8}px` }}
                                                                         value={item.unitPrice}
                                                                         onChange={e => updateItem(item.id, 'unitPrice', Number(e.target.value))}
                                                                         onBlur={() => setActiveEditField(null)}
@@ -1142,27 +1142,27 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                             <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">{item.unit || 'un'}</span>
                                                         </div>
                                                         <div className="col-span-1">
-                                                            <div className="flex items-center justify-end gap-1" onClick={() => setActiveEditField(`${item.id} -actualPrice`)}>
-                                                                <span className="text-xs text-amber-700 dark:text-amber-400 font-bold">R$</span>
-                                                                {activeEditField === `${item.id} -actualPrice` ? (
+                                                            <div className="flex items-center justify-end gap-1" onClick={() => setActiveEditField(`${item.id}-actualPrice`)}>
+                                                                <span className="text-xs text-amber-700 dark:text-amber-500 font-bold">R$</span>
+                                                                {activeEditField === `${item.id}-actualPrice` ? (
                                                                     <input
                                                                         autoFocus
                                                                         type="number"
-                                                                        className="bg-transparent text-xs font-bold text-amber-700 dark:text-amber-400 outline-none text-right appearance-none"
-                                                                        style={{ width: `${((item.actualUnitPrice || 0).toString().length + 2) * 8} px` }}
+                                                                        className="bg-transparent text-xs font-bold text-amber-700 dark:text-amber-500 outline-none text-right appearance-none"
+                                                                        style={{ width: `${((item.actualUnitPrice || 0).toString().length + 2) * 8}px` }}
                                                                         value={item.actualUnitPrice || 0}
                                                                         onChange={e => updateItem(item.id, 'actualUnitPrice', Number(e.target.value))}
                                                                         onBlur={() => setActiveEditField(null)}
                                                                     />
                                                                 ) : (
-                                                                    <span className="text-xs font-bold text-amber-700 dark:text-amber-400 text-right cursor-pointer whitespace-nowrap">
+                                                                    <span className="text-xs font-bold text-amber-700 dark:text-amber-500 text-right cursor-pointer whitespace-nowrap">
                                                                         {(item.actualUnitPrice || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                                     </span>
                                                                 )}
                                                             </div>
                                                         </div>
                                                         <div className="col-span-2 pl-1 text-right px-2">
-                                                            <span className="text-xs font-bold text-amber-700 dark:text-amber-400 whitespace-nowrap">R$ {((item.actualQuantity || 0) * (item.actualUnitPrice || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                                            <span className="text-xs font-bold text-amber-700 dark:text-amber-500 whitespace-nowrap">R$ {((item.actualQuantity || 0) * (item.actualUnitPrice || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                                         </div>
                                                         <div className="col-span-1 flex justify-center">
                                                             <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="text-slate-300 dark:text-slate-600 hover:text-rose-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
@@ -1222,7 +1222,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         <div className="bg-white dark:bg-slate-900 w-full max-w-2xl max-h-[90vh] rounded-3xl overflow-hidden shadow-2xl flex flex-col border border-slate-200 dark:border-slate-800">
                             <div className="p-4 border-b dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
                                 <h3 className="font-bold text-slate-900 dark:text-white">Novo Cliente</h3>
-                                <button onClick={() => setShowFullClientForm(false)} className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full transition-colors"><X className="w-5 h-5 text-slate-400" /></button>
+                                <button onClick={() => setShowFullClientForm(false)} className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full transition-colors"><X className="w-5 h-5 text-slate-400 dark:text-slate-500" /></button>
                             </div>
                             <div className="flex-1 overflow-y-auto p-0 no-scrollbar">
                                 <CustomerManager

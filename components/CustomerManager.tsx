@@ -277,11 +277,11 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
         <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden overflow-x-auto">
           <div className="p-8 border-b dark:border-slate-800 border-slate-100 flex items-center gap-4">
             <div className="relative w-full max-w-md">
-              <Search className="absolute left-4 top-3.5 w-4 h-4 text-slate-400" />
+              <Search className="absolute left-4 top-3.5 w-4 h-4 text-slate-400 dark:text-slate-500" />
               <input
                 type="text"
                 placeholder="Buscar por nome, CPF ou CNPJ..."
-                className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400"
+                className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
               />
@@ -299,14 +299,14 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
               {filtered.map(c => (
                 <tr key={c.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 group transition-colors">
                   <td className="px-8 py-6 pl-10">
-                    <p className="text-sm font-black text-slate-900 dark:text-slate-100 uppercase mb-1">{c.name}</p>
-                    <p className="text-[10px] text-slate-400 font-bold tracking-wide">{c.document}</p>
+                    <p className="text-sm font-black text-slate-900 dark:text-white uppercase mb-1">{c.name}</p>
+                    <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold tracking-wide">{c.document}</p>
                   </td>
                   <td className="px-8 py-6 text-xs text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wide">
                     {c.city && c.state ? `${c.city} - ${c.state}` : <span className="text-slate-300 dark:text-slate-600 italic">Localização n/d</span>}
                   </td>
                   <td className="px-8 py-6 pr-10 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => { setEditingCustomerId(c.id); setNewCustomer(c); setPersonType(c.type); setShowForm(true); }} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Editar"><Pencil className="w-4 h-4" /></button>
+                    <button onClick={() => { setEditingCustomerId(c.id); setNewCustomer(c); setPersonType(c.type); setShowForm(true); }} className="p-2 text-slate-400 dark:text-slate-600 hover:text-blue-600 dark:hover:text-blue-400 transition-colors" title="Editar"><Pencil className="w-4 h-4" /></button>
                     <button onClick={async () => {
                       if (confirm("Deseja realmente excluir este cliente? Esta ação também removerá os dados da nuvem.")) {
                         setCustomers(p => p.filter(x => x.id !== c.id));

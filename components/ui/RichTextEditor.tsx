@@ -24,7 +24,7 @@ interface RichTextEditorProps {
 }
 
 const CustomToolbar: React.FC<{ id: string; onAddText?: () => void; onAddImage?: () => void }> = ({ id, onAddText, onAddImage }) => (
-  <div id={id} className="ql-toolbar-custom sticky top-0 z-[100] flex flex-wrap items-center gap-2 p-2 pr-12 bg-slate-50 border-b border-slate-200 backdrop-blur-sm bg-white/95">
+  <div id={id} className="ql-toolbar-custom sticky top-0 z-[100] flex flex-wrap items-center gap-2 p-2 pr-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 backdrop-blur-sm bg-white/95 dark:bg-slate-900/95">
     <div className="flex flex-wrap items-center gap-1">
       <span className="ql-formats">
         <select className="ql-font" defaultValue="inter">
@@ -84,12 +84,12 @@ const CustomToolbar: React.FC<{ id: string; onAddText?: () => void; onAddImage?:
     </div>
 
     {(onAddText || onAddImage) && (
-      <div className="flex items-center gap-4 px-4 border-l border-slate-200 flex-shrink-0">
+      <div className="flex items-center gap-4 px-4 border-l border-slate-200 dark:border-slate-800 flex-shrink-0">
         {onAddText && (
           <button
             type="button"
             onClick={onAddText}
-            className="!w-auto !h-auto flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-black uppercase hover:bg-blue-100 transition-all active:scale-95 shadow-sm border border-blue-100 whitespace-nowrap"
+            className="!w-auto !h-auto flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg text-[10px] font-black uppercase hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all active:scale-95 shadow-sm border border-blue-100 dark:border-blue-900/30 whitespace-nowrap"
             title="Adicionar Bloco de Texto"
           >
             <Type className="w-3.5 h-3.5" /> + TEXTO
@@ -99,7 +99,7 @@ const CustomToolbar: React.FC<{ id: string; onAddText?: () => void; onAddImage?:
           <button
             type="button"
             onClick={onAddImage}
-            className="!w-auto !h-auto flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-black uppercase hover:bg-emerald-100 transition-all active:scale-95 shadow-sm border border-emerald-100 whitespace-nowrap"
+            className="!w-auto !h-auto flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-lg text-[10px] font-black uppercase hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-all active:scale-95 shadow-sm border border-emerald-100 dark:border-emerald-900/30 whitespace-nowrap"
             title="Adicionar Bloco de Imagem"
           >
             <ImageIcon className="w-3.5 h-3.5" /> + IMAGEM
@@ -138,11 +138,15 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeh
   ];
 
   return (
-    <div className="rich-text-editor bg-white dark:bg-slate-800 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm">
+    <div className="rich-text-editor bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm">
       <style>{`
         .rich-text-editor .ql-toolbar-custom {
           border: none !important;
           background: #f8fafc !important;
+        }
+        .dark .rich-text-editor .ql-toolbar-custom {
+          background: #0f172a !important;
+          border-bottom: 1px solid #1e293b !important;
         }
         .rich-text-editor .ql-font {
           width: 90px !important;
@@ -154,6 +158,40 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeh
         .ql-snow.ql-toolbar .ql-formats {
           margin-right: 8px !important;
         }
+        
+        /* Dark mode icons and pickers */
+        .dark .ql-snow.ql-toolbar button, 
+        .dark .ql-snow .ql-toolbar button {
+          color: #94a3b8 !important;
+        }
+        .dark .ql-snow.ql-toolbar button:hover, 
+        .dark .ql-snow .ql-toolbar button:hover,
+        .dark .ql-snow.ql-toolbar button.ql-active,
+        .dark .ql-snow .ql-toolbar button.ql-active {
+          color: #3b82f6 !important;
+        }
+        .dark .ql-snow.ql-toolbar button .ql-stroke,
+        .dark .ql-snow .ql-toolbar button .ql-stroke {
+          stroke: #94a3b8 !important;
+        }
+        .dark .ql-snow.ql-toolbar button:hover .ql-stroke, 
+        .dark .ql-snow .ql-toolbar button:hover .ql-stroke,
+        .dark .ql-snow.ql-toolbar button.ql-active .ql-stroke,
+        .dark .ql-snow .ql-toolbar button.ql-active .ql-stroke {
+          stroke: #3b82f6 !important;
+        }
+        .dark .ql-snow.ql-toolbar .ql-picker {
+          color: #94a3b8 !important;
+        }
+        .dark .ql-snow.ql-toolbar .ql-picker-label .ql-stroke {
+          stroke: #94a3b8 !important;
+        }
+        .dark .ql-snow.ql-toolbar .ql-picker-options {
+          background-color: #0f172a !important;
+          border-color: #1e293b !important;
+          color: #f1f5f9 !important;
+        }
+
         .ql-snow .ql-picker.ql-font .ql-picker-label::before,
         .ql-snow .ql-picker.ql-font .ql-picker-item::before {
           content: 'Inter';

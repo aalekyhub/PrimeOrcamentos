@@ -125,16 +125,16 @@ const CompanySettings: React.FC<Props> = ({ company, setCompany }) => {
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">Configurações da Empresa</h2>
-          <p className="text-slate-500 text-sm">Personalize os dados e garanta a segurança das suas informações.</p>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Configurações da Empresa</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">Personalize os dados e garanta a segurança das suas informações.</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1 space-y-6">
-          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm text-center space-y-6">
-            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Identidade Visual</h4>
-            <div className="relative group mx-auto w-full h-40 flex items-center justify-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm text-center space-y-6">
+            <h4 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Identidade Visual</h4>
+            <div className="relative group mx-auto w-full h-40 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700">
               {company.logo ? (
                 <div className="relative flex items-center justify-center p-4 w-full h-full">
                   <img src={company.logo} alt="Logo" style={{ height: `${company.logoSize}px` }} className="max-w-full object-contain" />
@@ -150,22 +150,22 @@ const CompanySettings: React.FC<Props> = ({ company, setCompany }) => {
               )}
             </div>
             <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleLogoUpload} />
-            <div className="pt-4 border-t border-slate-50 text-left space-y-4">
+            <div className="pt-4 border-t border-slate-50 dark:border-slate-800 text-left space-y-4">
               <div className="space-y-2">
-                <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase"><span>Tamanho Logo</span><span>{company.logoSize}px</span></div>
-                <input type="range" min="40" max="200" step="5" className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-blue-600" value={company.logoSize} onChange={e => setCompany({ ...company, logoSize: Number(e.target.value) })} />
+                <div className="flex justify-between text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase"><span>Tamanho Logo</span><span>{company.logoSize}px</span></div>
+                <input type="range" min="40" max="200" step="5" className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-600" value={company.logoSize} onChange={e => setCompany({ ...company, logoSize: Number(e.target.value) })} />
               </div>
               <div className="space-y-2">
-                <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase"><span>Tamanho Fonte</span><span>{company.nameFontSize}px</span></div>
-                <input type="range" min="16" max="48" step="1" className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-blue-600" value={company.nameFontSize} onChange={e => setCompany({ ...company, nameFontSize: Number(e.target.value) })} />
+                <div className="flex justify-between text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase"><span>Tamanho Fonte</span><span>{company.nameFontSize}px</span></div>
+                <input type="range" min="16" max="48" step="1" className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-600" value={company.nameFontSize} onChange={e => setCompany({ ...company, nameFontSize: Number(e.target.value) })} />
               </div>
               <div className="space-y-2">
-                <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase"><span>Tamanho Fonte (Descrição)</span><span>{company.descriptionFontSize || 10}px</span></div>
-                <input type="range" min="8" max="16" step="1" className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-blue-600" value={company.descriptionFontSize || 10} onChange={e => setCompany({ ...company, descriptionFontSize: Number(e.target.value) })} />
+                <div className="flex justify-between text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase"><span>Tamanho Fonte (Descrição)</span><span>{company.descriptionFontSize || 10}px</span></div>
+                <input type="range" min="8" max="16" step="1" className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-600" value={company.descriptionFontSize || 10} onChange={e => setCompany({ ...company, descriptionFontSize: Number(e.target.value) })} />
               </div>
               <div className="space-y-2">
-                <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase"><span>Tamanho Fonte (Itens)</span><span>{company.itemsFontSize || 10}px</span></div>
-                <input type="range" min="8" max="14" step="1" className="w-full h-1.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-blue-600" value={company.itemsFontSize || 10} onChange={e => setCompany({ ...company, itemsFontSize: Number(e.target.value) })} />
+                <div className="flex justify-between text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase"><span>Tamanho Fonte (Itens)</span><span>{company.itemsFontSize || 10}px</span></div>
+                <input type="range" min="8" max="14" step="1" className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-600" value={company.itemsFontSize || 10} onChange={e => setCompany({ ...company, itemsFontSize: Number(e.target.value) })} />
               </div>
             </div>
           </div>
@@ -188,51 +188,51 @@ const CompanySettings: React.FC<Props> = ({ company, setCompany }) => {
         </div>
 
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+          <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
-                <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-tighter">Nome da Empresa</label>
-                <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-bold text-slate-900" value={company.name} onChange={e => setCompany({ ...company, name: e.target.value })} />
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-tighter">Nome da Empresa</label>
+                <input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-bold text-slate-900 dark:text-white" value={company.name} onChange={e => setCompany({ ...company, name: e.target.value })} />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-tighter">CNPJ</label>
-                <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" value={company.cnpj} onChange={e => setCompany({ ...company, cnpj: e.target.value })} />
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-tighter">CNPJ</label>
+                <input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-slate-100" value={company.cnpj} onChange={e => setCompany({ ...company, cnpj: e.target.value })} />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-tighter">Slogan</label>
-                <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" value={company.tagline} onChange={e => setCompany({ ...company, tagline: e.target.value })} />
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-tighter">Slogan</label>
+                <input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-slate-100" value={company.tagline} onChange={e => setCompany({ ...company, tagline: e.target.value })} />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-tighter">E-mail</label>
-                <input type="email" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" value={company.email} onChange={e => setCompany({ ...company, email: e.target.value })} />
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-tighter">E-mail</label>
+                <input type="email" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-slate-100" value={company.email} onChange={e => setCompany({ ...company, email: e.target.value })} />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-tighter">WhatsApp</label>
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-tighter">WhatsApp</label>
                 <div className="relative">
-                  <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 pr-10 text-sm focus:ring-2 focus:ring-blue-500 outline-none" value={company.phone} onChange={e => setCompany({ ...company, phone: formatPhone(e.target.value) })} />
+                  <input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 pr-10 text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-slate-100" value={company.phone} onChange={e => setCompany({ ...company, phone: formatPhone(e.target.value) })} />
                   <button onClick={openWhatsApp} className="absolute right-3 top-3 text-emerald-500"><MessageCircle className="w-5 h-5" /></button>
                 </div>
               </div>
               <div className="md:col-span-1">
-                <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-tighter">Validade da Proposta (Dias)</label>
-                <input type="number" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-bold text-slate-900" value={company.defaultProposalValidity || 15} onChange={e => setCompany({ ...company, defaultProposalValidity: Number(e.target.value) })} />
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-tighter">Validade da Proposta (Dias)</label>
+                <input type="number" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-bold text-slate-900 dark:text-white" value={company.defaultProposalValidity || 15} onChange={e => setCompany({ ...company, defaultProposalValidity: Number(e.target.value) })} />
               </div>
               <div className="md:col-span-1">
-                <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-tighter">Margem Superior PDF (mm)</label>
-                <input type="number" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-bold text-slate-900" value={company.printMarginTop || 15} onChange={e => setCompany({ ...company, printMarginTop: Number(e.target.value) })} />
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-tighter">Margem Superior PDF (mm)</label>
+                <input type="number" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-bold text-slate-900 dark:text-white" value={company.printMarginTop || 15} onChange={e => setCompany({ ...company, printMarginTop: Number(e.target.value) })} />
               </div>
               <div className="md:col-span-1">
-                <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-tighter">Margem Inferior PDF (mm)</label>
-                <input type="number" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-bold text-slate-900" value={company.printMarginBottom || 15} onChange={e => setCompany({ ...company, printMarginBottom: Number(e.target.value) })} />
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-tighter">Margem Inferior PDF (mm)</label>
+                <input type="number" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-bold text-slate-900 dark:text-white" value={company.printMarginBottom || 15} onChange={e => setCompany({ ...company, printMarginBottom: Number(e.target.value) })} />
               </div>
-              <div class="md:col-span-2">
-                <label className="block text-xs font-bold text-slate-500 mb-2 uppercase tracking-tighter">Endereço</label>
-                <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" value={company.address} onChange={e => setCompany({ ...company, address: e.target.value })} />
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-tighter">Endereço</label>
+                <input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-slate-100" value={company.address} onChange={e => setCompany({ ...company, address: e.target.value })} />
               </div>
             </div>
 
             <div className="flex justify-end pt-4">
-              <button onClick={handleSave} disabled={saveStatus !== 'idle'} className={`px-10 py-4 rounded-2xl font-bold flex items-center gap-2 transition-all shadow-xl ${saveStatus === 'saved' ? 'bg-emerald-600 text-white' : 'bg-slate-900 text-white hover:bg-slate-800'}`}>
+              <button onClick={handleSave} disabled={saveStatus !== 'idle'} className={`px-10 py-4 rounded-2xl font-bold flex items-center gap-2 transition-all shadow-xl ${saveStatus === 'saved' ? 'bg-emerald-600 text-white shadow-emerald-900/20' : 'bg-slate-900 dark:bg-blue-600 text-white hover:bg-slate-800 dark:hover:bg-blue-700 shadow-blue-900/20'}`}>
                 {saveStatus === 'idle' && <><Save className="w-5 h-5" /> Salvar Alterações</>}
                 {saveStatus === 'saving' && <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> Salvando...</>}
                 {saveStatus === 'saved' && <><CheckCircle2 className="w-5 h-5" /> Dados Salvos!</>}
