@@ -176,7 +176,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
           </div>
           <h3 className="text-2xl font-black text-rose-700 dark:text-rose-400 whitespace-nowrap">R$ {totalExpense.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
         </div>
-        <div className="bg-blue-600 p-6 rounded-3xl border border-blue-700 shadow-xl shadow-blue-100 dark:shadow-none group">
+        <div className="bg-blue-600 p-6 rounded-3xl border border-blue-700 shadow-xl shadow-blue-900/20 dark:shadow-none group">
           <div className="flex items-center justify-between mb-2">
             <p className="text-[10px] font-black text-blue-100 uppercase tracking-[0.2em]">Projeção de Saídas</p>
             <Calendar className="w-4 h-4 text-white group-hover:rotate-12 transition-transform" />

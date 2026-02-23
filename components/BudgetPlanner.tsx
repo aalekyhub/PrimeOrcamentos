@@ -75,7 +75,7 @@ const BudgetPlanner: React.FC<Props> = ({ setOrders, customers }) => {
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in zoom-in-95 duration-500">
       <div className="text-center space-y-2">
-        <div className="bg-blue-600 w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-200">
+        <div className="bg-blue-600 w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-900/20">
           <Target className="w-6 h-6 text-white" />
         </div>
         <h2 className="text-3xl font-bold text-slate-900">Planejador de Orçamentos IA</h2>
@@ -155,7 +155,7 @@ const BudgetPlanner: React.FC<Props> = ({ setOrders, customers }) => {
                 </div>
                 <button
                   onClick={convertToOrder}
-                  className="w-full mt-4 bg-blue-600 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
+                  className="w-full mt-4 bg-blue-600 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-900/20"
                 >
                   <Send className="w-4 h-4" />
                   Aprovar e Criar O.S.

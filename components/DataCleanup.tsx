@@ -99,7 +99,7 @@ const DataCleanup: React.FC<Props> = ({ customers, setCustomers, services, setSe
                                     </div>
                                     <button
                                         onClick={() => mergeCustomers(group)}
-                                        className="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
+                                        className="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-900/20"
                                     >
                                         <Merge className="w-4 h-4" /> Mesclar Registros
                                     </button>
