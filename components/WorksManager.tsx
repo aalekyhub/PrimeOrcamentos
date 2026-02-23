@@ -941,31 +941,31 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             {(!activeWorkId && !embeddedPlanId) ? (
                 <div>
                     <div className="flex justify-between items-center mb-6">
-                        <h1 className="text-2xl font-bold text-emerald-800">Gestão de Obras</h1>
-                        <button onClick={handleCreateWork} className="bg-emerald-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-emerald-700">
+                        <h1 className="text-2xl font-bold text-emerald-800 dark:text-emerald-400">Gestão de Obras</h1>
+                        <button onClick={handleCreateWork} className="bg-emerald-600 dark:bg-emerald-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-emerald-700 dark:hover:bg-emerald-400 shadow-md shadow-emerald-950/20">
                             <Plus size={20} /> Nova Obra
                         </button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {works.map(work => (
                             <div key={work.id}
-                                className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-emerald-400 transition-all group relative">
+                                className="bg-white dark:bg-slate-900/50 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 hover:border-emerald-400 transition-all group relative">
                                 <div className="flex justify-between items-start mb-2">
                                     <div className="flex-1 min-w-0">
-                                        <span className="font-black text-lg text-slate-800 block truncate leading-tight">{work.name}</span>
-                                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{work.id}</span>
+                                        <span className="font-black text-lg text-slate-800 dark:text-slate-100 block truncate leading-tight">{work.name}</span>
+                                        <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest">{work.id}</span>
                                     </div>
                                     <div className="flex gap-1 ml-2 shrink-0">
                                         <button
                                             onClick={(e) => handleDuplicateWork(work.id, e)}
-                                            className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                                            className="p-1.5 text-slate-400 dark:text-slate-600 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-all"
                                             title="Duplicar Obra"
                                         >
                                             <Archive size={16} />
                                         </button>
                                         <button
                                             onClick={(e) => handleDeleteWork(work.id, e)}
-                                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                            className="p-1.5 text-slate-400 dark:text-slate-600 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-all"
                                             title="Excluir Obra"
                                         >
                                             <Trash2 size={16} />
@@ -973,19 +973,19 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     </div>
                                 </div>
                                 <div className="flex justify-between items-center mb-4">
-                                    <p className="text-xs text-slate-500 truncate flex-1 pr-2">{work.address || 'Sem endereço'}</p>
-                                    <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-tighter ${work.status === 'Concluída' ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-50 text-orange-700'}`}>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate flex-1 pr-2">{work.address || 'Sem endereço'}</p>
+                                    <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-tighter ${work.status === 'Concluída' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400'}`}>
                                         {work.status}
                                     </span>
                                 </div>
-                                <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase mb-4">
-                                    <Calendar size={12} className="text-slate-300" />
-                                    <span>Criada em ${new Date(work.start_date).toLocaleDateString()}</span>
+                                <div className="flex items-center gap-1.5 text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase mb-4">
+                                    <Calendar size={12} className="text-slate-300 dark:text-slate-600" />
+                                    <span>Criada em {new Date(work.start_date).toLocaleDateString()}</span>
                                 </div>
-                                <div className="pt-4 border-t border-slate-100 flex justify-end">
+                                <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">
                                     <button
                                         onClick={() => { setActiveWorkId(work.id); setCurrentWork(work); loadWorkDetails(work.id); }}
-                                        className="text-emerald-700 font-black text-xs uppercase tracking-widest bg-emerald-50 px-4 py-2.5 rounded-xl hover:bg-emerald-100 transition-all w-full flex items-center justify-center gap-2 group"
+                                        className="text-emerald-700 dark:text-emerald-400 font-black text-xs uppercase tracking-widest bg-emerald-50 dark:bg-emerald-900/20 px-4 py-2.5 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all w-full flex items-center justify-center gap-2 group"
                                     >
                                         Gerenciar Obra <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                                     </button>
@@ -995,56 +995,42 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                     </div>
                 </div>
             ) : (
-                <div className="bg-white rounded-2xl shadow-xl min-h-[80vh] flex flex-col">
+                <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl min-h-[80vh] flex flex-col border dark:border-slate-800 overflow-hidden">
                     {/* Fixed Editor Header & Tabs */}
-                    <div className="sticky top-0 z-20 bg-white border-b border-slate-200 shadow-sm">
+                    <div className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
                         {/* Editor Header */}
-                        <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-emerald-50 rounded-t-2xl">
+                        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-emerald-50 dark:bg-emerald-900/20">
                             <div className="flex items-center gap-4">
                                 {!embeddedPlanId && (
-                                    <button onClick={() => setActiveWorkId(null)} className="text-emerald-400 hover:text-emerald-600">
+                                    <button onClick={() => setActiveWorkId(null)} className="text-emerald-400 dark:text-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400">
                                         <ArrowRight className="rotate-180" />
                                     </button>
                                 )}
                                 <div>
-                                    <h2 className="text-xl font-bold text-emerald-900 flex items-center gap-2">
-                                        <HardHat className="text-emerald-600" />
+                                    <h2 className="text-xl font-bold text-emerald-900 dark:text-emerald-100 flex items-center gap-2">
+                                        <HardHat className="text-emerald-600 dark:text-emerald-400" />
                                         {currentWork?.name}
                                     </h2>
-                                    <p className="text-xs text-emerald-600 uppercase tracking-widest font-semibold">{currentWork?.type} • PLANEJAMENTO DE CUSTO</p>
+                                    <p className="text-xs text-emerald-600 dark:text-emerald-400 uppercase tracking-widest font-semibold">{currentWork?.type} • GESTÃO DE EXECUÇÃO</p>
                                 </div>
-                            </div>
-                            {/* Helper Functions */}
-                            <div className="hidden">
-                                {(() => {
-                                    (window as any).moveItemWork = (list: any[], setList: Function, index: number, direction: 'up' | 'down') => {
-                                        const newIndex = direction === 'up' ? index - 1 : index + 1;
-                                        if (newIndex < 0 || newIndex >= list.length) return;
-                                        const newList = [...list];
-                                        [newList[index], newList[newIndex]] = [newList[newIndex], newList[index]];
-                                        setList(newList);
-                                    };
-                                    return null;
-                                })()}
                             </div>
                             <div className="flex gap-2">
                                 {/* MANUAL IMPORT BUTTON */}
                                 {currentWork?.plan_id && (services.length === 0 || materials.length === 0 || labor.length === 0) && (
                                     <button
                                         onClick={() => importPlanItems(currentWork.plan_id!, currentWork.id)}
-                                        className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-blue-700 shadow-md animate-pulse"
+                                        className="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-blue-700 dark:hover:bg-blue-400 shadow-md animate-pulse"
                                     >
                                         <ArrowRight size={16} /> Importar/Sincronizar Planejamento
                                     </button>
                                 )}
-                                <button onClick={handleSave} className="px-4 py-2 bg-emerald-700 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-emerald-800 shadow-md">
+                                <button onClick={handleSave} className="px-4 py-2 bg-emerald-700 dark:bg-emerald-600 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-emerald-800 dark:hover:bg-emerald-500 shadow-md">
                                     <Save size={16} /> Salvar
                                 </button>
                             </div>
                         </div>
 
-                        {/* Tabs */}
-                        <div className="flex px-6 bg-white overflow-x-auto">
+                        <div className="flex px-6 bg-white dark:bg-slate-900 overflow-x-auto">
                             {[
                                 { id: 'dados', label: 'Dados da Obra', icon: FileText },
                                 { id: 'servicos', label: 'Serviços', icon: Building2 },
@@ -1056,7 +1042,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     key={tab.id}
                                     type="button"
                                     onClick={() => setActiveTab(tab.id as any)}
-                                    className={`px-6 py-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+                                    className={`px-6 py-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id ? 'border-emerald-600 dark:border-emerald-500 text-emerald-600 dark:text-emerald-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300'}`}
                                 >
                                     <tab.icon size={16} /> {tab.label}
                                 </button>
@@ -1065,28 +1051,28 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
                         {/* Sub-Header forms for Add (Fixed) */}
                         {activeTab === 'servicos' && (
-                            <div className="p-6 border-t border-slate-100 bg-white">
-                                <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider"><Building2 size={16} /> Adicionar Serviço</h3>
+                            <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+                                <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider"><Building2 size={16} /> Adicionar Serviço</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                     <div className="md:col-span-4">
-                                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Descrição</label>
-                                        <input type="text" id="svc_desc" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="Ex: Pintura Realizada" />
+                                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Descrição</label>
+                                        <input type="text" id="svc_desc" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900 outline-none text-slate-700 dark:text-slate-100" placeholder="Ex: Pintura Realizada" />
                                     </div>
                                     <div className="md:col-span-1">
-                                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Un</label>
-                                        <input type="text" id="svc_unit" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="m²" />
+                                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Un</label>
+                                        <input type="text" id="svc_unit" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900 outline-none text-slate-700 dark:text-slate-100" placeholder="m²" />
                                     </div>
                                     <div className="md:col-span-1">
-                                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Qtd</label>
-                                        <input type="number" id="svc_qty" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="0" />
+                                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Qtd</label>
+                                        <input type="number" id="svc_qty" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900 outline-none text-slate-700 dark:text-slate-100" placeholder="0" />
                                     </div>
                                     <div className="md:col-span-2">
-                                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">R$ Mat (Real)</label>
-                                        <input type="number" id="svc_mat" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="0.00" />
+                                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">R$ Mat (Real)</label>
+                                        <input type="number" id="svc_mat" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900 outline-none text-slate-700 dark:text-slate-100" placeholder="0.00" />
                                     </div>
                                     <div className="md:col-span-2">
-                                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">R$ M.O. (Real)</label>
-                                        <input type="number" id="svc_lab" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="0.00" />
+                                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">R$ M.O. (Real)</label>
+                                        <input type="number" id="svc_lab" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900 outline-none text-slate-700 dark:text-slate-100" placeholder="0.00" />
                                     </div>
                                     <div className="md:col-span-2">
                                         <button
@@ -1119,7 +1105,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 (document.getElementById('svc_mat') as HTMLInputElement).value = '';
                                                 (document.getElementById('svc_lab') as HTMLInputElement).value = '';
                                             }}
-                                            className="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 font-bold text-xs h-9 flex items-center justify-center gap-1 shadow-sm"
+                                            className="w-full bg-emerald-600 dark:bg-emerald-500 text-white p-2 rounded hover:bg-emerald-700 dark:hover:bg-emerald-400 font-bold text-xs h-9 flex items-center justify-center gap-1 shadow-sm"
                                         >
                                             <Plus size={14} /> ADICIONAR SERVIÇO
                                         </button>
@@ -1129,38 +1115,38 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         )}
 
                         {activeTab === 'recursos' && (
-                            <div className="px-6 pb-4 border-t border-slate-100 bg-white">
+                            <div className="px-6 pb-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
                                 <div className="flex gap-1.5 my-3 justify-center">
                                     {[{ id: 'material', label: 'Materiais' }, { id: 'mo', label: 'Mão de Obra' }, { id: 'indireto', label: 'Indiretos' }, { id: 'impostos', label: 'Impostos' }].map(r => (
                                         <button
                                             key={r.id}
                                             type="button"
                                             onClick={() => setResourceTab(r.id as any)}
-                                            className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all uppercase tracking-wider ${resourceTab === r.id ? 'bg-emerald-800 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-500 hover:bg-emerald-50'}`}
+                                            className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all uppercase tracking-wider ${resourceTab === r.id ? 'bg-emerald-800 dark:bg-emerald-600 text-white shadow-md' : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30'}`}
                                         >
                                             {r.label}
                                         </button>
                                     ))}
                                 </div>
 
-                                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
                                     {resourceTab === 'material' && (
                                         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                             <div className="md:col-span-5">
-                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Material</label>
-                                                <input type="text" id="mat_name" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="Ex: Cimento CP-II" />
+                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Material</label>
+                                                <input type="text" id="mat_name" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900 outline-none text-slate-700 dark:text-slate-100" placeholder="Ex: Cimento CP-II" />
                                             </div>
                                             <div className="md:col-span-2">
-                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Qtd</label>
-                                                <input type="number" id="mat_qty" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="0" />
+                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Qtd</label>
+                                                <input type="number" id="mat_qty" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900 outline-none text-slate-700 dark:text-slate-100" placeholder="0" />
                                             </div>
                                             <div className="md:col-span-1">
-                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Und</label>
-                                                <input type="text" id="mat_unit" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="un" />
+                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Und</label>
+                                                <input type="text" id="mat_unit" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900 outline-none text-slate-700 dark:text-slate-100" placeholder="un" />
                                             </div>
                                             <div className="md:col-span-1">
-                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Custo Unit.</label>
-                                                <input type="number" id="mat_cost" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="0.00" />
+                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Custo Unit.</label>
+                                                <input type="number" id="mat_cost" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900 outline-none text-slate-700 dark:text-slate-100" placeholder="0.00" />
                                             </div>
                                             <div className="md:col-span-3">
                                                 <button
@@ -1186,7 +1172,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         (document.getElementById('mat_unit') as HTMLInputElement).value = '';
                                                         (document.getElementById('mat_cost') as HTMLInputElement).value = '';
                                                     }}
-                                                    className="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 font-bold text-xs h-9 shadow-sm"
+                                                    className="w-full bg-emerald-600 dark:bg-emerald-500 text-white p-2 rounded hover:bg-emerald-700 dark:hover:bg-emerald-400 font-bold text-xs h-9 shadow-sm"
                                                 >
                                                     ADICIONAR MATERIAL
                                                 </button>
@@ -1197,28 +1183,28 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     {resourceTab === 'mo' && (
                                         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                             <div className="md:col-span-4">
-                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Função</label>
-                                                <input type="text" id="mo_role" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="Ex: Pedreiro" />
+                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Função</label>
+                                                <input type="text" id="mo_role" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900 outline-none text-slate-700 dark:text-slate-100" placeholder="Ex: Pedreiro" />
                                             </div>
                                             <div className="md:col-span-2">
-                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Tipo</label>
-                                                <select id="mo_type" className="w-full p-2 border border-slate-200 rounded text-sm h-9 outline-none">
+                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Tipo</label>
+                                                <select id="mo_type" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 outline-none text-slate-700 dark:text-slate-100">
                                                     <option value="Diária">Diária</option>
                                                     <option value="Hora">Hora</option>
                                                     <option value="Empreitada">Empreitada</option>
                                                 </select>
                                             </div>
                                             <div className="md:col-span-1">
-                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Qtd</label>
-                                                <input type="number" id="mo_qty" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="0" />
+                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Qtd</label>
+                                                <input type="number" id="mo_qty" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900 outline-none text-slate-700 dark:text-slate-100" placeholder="0" />
                                             </div>
                                             <div className="md:col-span-1">
-                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">UN</label>
-                                                <input type="text" id="mo_un" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="un" />
+                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">UN</label>
+                                                <input type="text" id="mo_un" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900 outline-none text-slate-700 dark:text-slate-100" placeholder="un" />
                                             </div>
                                             <div className="md:col-span-2">
-                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Custo Unit.</label>
-                                                <input type="number" id="mo_cost" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="0.00" />
+                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Custo Unit.</label>
+                                                <input type="number" id="mo_cost" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900 outline-none text-slate-700 dark:text-slate-100" placeholder="0.00" />
                                             </div>
                                             <div className="md:col-span-2">
                                                 <button
@@ -1247,7 +1233,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         (document.getElementById('mo_un') as HTMLInputElement).value = '';
                                                         (document.getElementById('mo_cost') as HTMLInputElement).value = '';
                                                     }}
-                                                    className="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 font-bold text-xs h-9 shadow-sm"
+                                                    className="w-full bg-emerald-600 dark:bg-emerald-500 text-white p-2 rounded hover:bg-emerald-700 dark:hover:bg-emerald-400 font-bold text-xs h-9 shadow-sm"
                                                 >
                                                     ADICIONAR M.O.
                                                 </button>
@@ -1258,8 +1244,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     {resourceTab === 'indireto' && (
                                         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                             <div className="md:col-span-3">
-                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Categoria</label>
-                                                <select id="ind_cat" className="w-full p-2 border border-slate-200 rounded text-sm h-9 outline-none">
+                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Categoria</label>
+                                                <select id="ind_cat" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 outline-none text-slate-700 dark:text-slate-100">
                                                     <option>Transporte</option>
                                                     <option>Alimentação</option>
                                                     <option>EPI</option>
@@ -1269,12 +1255,12 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 </select>
                                             </div>
                                             <div className="md:col-span-6">
-                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Descrição</label>
-                                                <input type="text" id="ind_desc" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="Ex: Combustível ida/volta" />
+                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Descrição</label>
+                                                <input type="text" id="ind_desc" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900 outline-none text-slate-700 dark:text-slate-100" placeholder="Ex: Combustível ida/volta" />
                                             </div>
                                             <div className="md:col-span-2">
-                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Valor</label>
-                                                <input type="number" id="ind_val" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="0.00" />
+                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Valor</label>
+                                                <input type="number" id="ind_val" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900 outline-none text-slate-700 dark:text-slate-100" placeholder="0.00" />
                                             </div>
                                             <div className="md:col-span-1">
                                                 <button
@@ -1294,7 +1280,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         (document.getElementById('ind_desc') as HTMLInputElement).value = '';
                                                         (document.getElementById('ind_val') as HTMLInputElement).value = '';
                                                     }}
-                                                    className="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 font-bold text-xs h-9 flex items-center justify-center shadow-sm"
+                                                    className="w-full bg-emerald-600 dark:bg-emerald-500 text-white p-2 rounded hover:bg-emerald-700 dark:hover:bg-emerald-400 font-bold text-xs h-9 flex items-center justify-center shadow-sm"
                                                 >
                                                     <Plus size={14} />
                                                 </button>
@@ -1305,15 +1291,15 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     {resourceTab === 'impostos' && (
                                         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                             <div className="md:col-span-7">
-                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Imposto / Taxa</label>
-                                                <input type="text" id="tax_name" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none" placeholder="Ex: BDI ou ISS" />
+                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Imposto / Taxa</label>
+                                                <input type="text" id="tax_name" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900 outline-none text-slate-700 dark:text-slate-100" placeholder="Ex: BDI ou ISS" />
                                             </div>
                                             <div className="md:col-span-3">
-                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Valor (%)</label>
+                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Valor (%)</label>
                                                 <input
                                                     type="number"
                                                     id="tax_rate"
-                                                    className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 outline-none"
+                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900 outline-none text-slate-700 dark:text-slate-100"
                                                     placeholder="0.00"
                                                 />
                                             </div>
@@ -1339,7 +1325,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         (document.getElementById('tax_name') as HTMLInputElement).value = '';
                                                         (document.getElementById('tax_rate') as HTMLInputElement).value = '';
                                                     }}
-                                                    className="w-full bg-emerald-600 text-white p-2 rounded hover:bg-emerald-700 font-bold text-xs h-9 shadow-sm flex items-center justify-center gap-2"
+                                                    className="w-full bg-emerald-600 dark:bg-emerald-500 text-white p-2 rounded hover:bg-emerald-700 dark:hover:bg-emerald-400 font-bold text-xs h-9 shadow-sm flex items-center justify-center gap-2"
                                                 >
                                                     <Plus size={16} /> ADICIONAR
                                                 </button>
@@ -1350,25 +1336,25 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                             </div>
                         )}
                     </div>
-                    <div className="p-8 flex-1 bg-slate-50/50">
+                    <div className="p-8 flex-1 bg-slate-50/50 dark:bg-slate-900/30">
                         {activeTab === 'dados' && currentWork && (
                             <div className="max-w-2xl mx-auto space-y-6">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Nome da Obra</label>
+                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Nome da Obra</label>
                                         <input
                                             type="text"
                                             value={currentWork.name}
                                             onChange={e => setCurrentWork({ ...currentWork, name: e.target.value.toUpperCase() })}
-                                            className="w-full p-2 border border-slate-200 rounded-lg font-semibold text-slate-700 focus:ring-2 focus:ring-emerald-200 outline-none"
+                                            className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-semibold text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-900 outline-none"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Status</label>
+                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Status</label>
                                         <select
                                             value={currentWork.status}
                                             onChange={e => setCurrentWork({ ...currentWork, status: e.target.value as any })}
-                                            className="w-full p-2 border border-slate-200 rounded-lg font-semibold text-slate-700 outline-none"
+                                            className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-semibold text-slate-700 dark:text-slate-100 outline-none"
                                         >
                                             <option value="Em Andamento">Em Andamento</option>
                                             <option value="Pausada">Pausada</option>
@@ -1378,7 +1364,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 </div>
                                 {/* Customer Select */}
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Cliente</label>
+                                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Cliente</label>
                                     <select
                                         value={currentWork.client_id}
                                         onChange={e => {
@@ -1390,19 +1376,19 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 client_name: customer ? customer.name : ''
                                             });
                                         }}
-                                        className="w-full p-2 border border-slate-200 rounded-lg font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-emerald-100"
+                                        className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-semibold text-slate-700 dark:text-slate-100 outline-none focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900"
                                     >
                                         <option value="">Selecione...</option>
                                         {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Endereço da Obra</label>
+                                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Endereço da Obra</label>
                                     <input
                                         type="text"
                                         value={currentWork.address}
                                         onChange={e => setCurrentWork({ ...currentWork, address: e.target.value })}
-                                        className="w-full p-2 border border-slate-200 rounded-lg font-semibold text-slate-700"
+                                        className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-semibold text-slate-700 dark:text-slate-100 outline-none"
                                         placeholder="Local da execução"
                                     />
                                 </div>
@@ -1420,13 +1406,13 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             onDragStart={() => setDraggedSvcIndex(index)}
                                             onDragOver={(e) => (window as any).handleDragOver(e, index, draggedSvcIndex, services, setServices, setDraggedSvcIndex)}
                                             onDragEnd={() => setDraggedSvcIndex(null)}
-                                            className={`bg-white p-4 rounded-lg shadow-sm border flex justify-between items-center group transition-all ${draggedSvcIndex === index ? 'opacity-50 bg-blue-50 border-blue-200 shadow-inner' : 'border-slate-100'}`}
+                                            className={`bg-white dark:bg-slate-900 p-4 rounded-lg shadow-sm border flex justify-between items-center group transition-all ${draggedSvcIndex === index ? 'opacity-50 bg-blue-50 dark:bg-blue-900/50 border-blue-200 dark:border-blue-800 shadow-inner' : 'border-slate-100 dark:border-slate-800'}`}
                                         >
                                             {editingId === svc.id ? (
                                                 <div className="flex-1 grid grid-cols-12 gap-2 items-center">
                                                     <div className="col-span-4">
                                                         <input
-                                                            className="w-full text-xs p-1 border rounded"
+                                                            className="w-full text-xs p-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-700 dark:text-slate-100 focus:ring-1 focus:ring-emerald-500"
                                                             defaultValue={svc.description}
                                                             id={`edit_desc_${svc.id} `}
                                                         />
@@ -1434,7 +1420,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                     <div className="col-span-2">
                                                         <input
                                                             type="number"
-                                                            className="w-full text-xs p-1 border rounded"
+                                                            className="w-full text-xs p-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-700 dark:text-slate-100 focus:ring-1 focus:ring-emerald-500"
                                                             defaultValue={svc.quantity}
                                                             placeholder="Qtd"
                                                             id={`edit_qty_${svc.id} `}
@@ -1443,7 +1429,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                     <div className="col-span-2">
                                                         <input
                                                             type="number"
-                                                            className="w-full text-xs p-1 border rounded"
+                                                            className="w-full text-xs p-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-700 dark:text-slate-100 focus:ring-1 focus:ring-emerald-500"
                                                             defaultValue={svc.unit_material_cost}
                                                             placeholder="Mat"
                                                             id={`edit_mat_${svc.id} `}
@@ -1452,7 +1438,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                     <div className="col-span-2">
                                                         <input
                                                             type="number"
-                                                            className="w-full text-xs p-1 border rounded"
+                                                            className="w-full text-xs p-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-700 dark:text-slate-100 focus:ring-1 focus:ring-emerald-500"
                                                             defaultValue={svc.unit_labor_cost}
                                                             placeholder="M.O."
                                                             id={`edit_lab_${svc.id} `}
@@ -1492,26 +1478,26 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             ) : (
                                                 <>
                                                     <div className="flex items-center gap-2 flex-1">
-                                                        <div className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 shrink-0">
+                                                        <div className="cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 shrink-0">
                                                             <GripVertical size={16} />
                                                         </div>
                                                         <div>
-                                                            <p className="font-bold text-slate-800">{svc.description}</p>
-                                                            <p className="text-xs text-slate-500">
+                                                            <p className="font-bold text-slate-800 dark:text-slate-100">{svc.description}</p>
+                                                            <p className="text-xs text-slate-500 dark:text-slate-400">
                                                                 {svc.quantity} {svc.unit} • <span className="whitespace-nowrap">Mat: R$ {svc.unit_material_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span> • <span className="whitespace-nowrap">M.O: R$ {svc.unit_labor_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                                             </p>
                                                         </div>
                                                     </div>
                                                     <div className="text-right flex items-center gap-4">
-                                                        <p className="font-bold text-emerald-600 whitespace-nowrap">R$ {svc.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                                        <p className="font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">R$ {svc.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                                                         <div className="flex flex-col gap-0 -mr-2">
-                                                            <button onClick={() => (window as any).moveItemWork(services, setServices, index, 'up')} disabled={index === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronUp size={14} /></button>
-                                                            <button onClick={() => (window as any).moveItemWork(services, setServices, index, 'down')} disabled={index === services.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronDown size={14} /></button>
+                                                            <button onClick={() => (window as any).moveItemWork(services, setServices, index, 'up')} disabled={index === 0} className="text-slate-300 dark:text-slate-600 hover:text-blue-500 dark:hover:text-blue-400 disabled:opacity-0 transition-all"><ChevronUp size={14} /></button>
+                                                            <button onClick={() => (window as any).moveItemWork(services, setServices, index, 'down')} disabled={index === services.length - 1} className="text-slate-300 dark:text-slate-600 hover:text-blue-500 dark:hover:text-blue-400 disabled:opacity-0 transition-all"><ChevronDown size={14} /></button>
                                                         </div>
-                                                        <button onClick={() => setEditingId(svc.id)} className="text-blue-400 hover:text-blue-600">
+                                                        <button onClick={() => setEditingId(svc.id)} className="text-blue-400 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400">
                                                             <Pencil size={16} />
                                                         </button>
-                                                        <button onClick={() => handleDeleteService(svc.id)} className="text-slate-300 hover:text-red-500">
+                                                        <button onClick={() => handleDeleteService(svc.id)} className="text-slate-300 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400">
                                                             <Trash2 size={16} />
                                                         </button>
                                                     </div>
@@ -1544,25 +1530,25 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 {resourceTab === 'material' && (
                                     <div>
                                         <div className="flex justify-between items-center mb-4">
-                                            <h3 className="font-bold text-slate-800 flex items-center gap-2"><Truck size={18} /> Materiais da Obra</h3>
+                                            <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2"><Truck size={18} /> Materiais da Obra</h3>
                                             <div className="flex gap-2">
                                                 {materials.length > 0 && (
                                                     <button
                                                         onClick={handlePreviewMaterials}
-                                                        className="bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 hover:bg-slate-50 transition-all shadow-sm"
+                                                        className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm"
                                                     >
-                                                        <Eye size={16} className="text-emerald-600" /> Visualizar Lista
+                                                        <Eye size={16} className="text-emerald-600 dark:text-emerald-400" /> Visualizar Lista
                                                     </button>
                                                 )}
                                             </div>
                                         </div>
 
                                         {materials.length > 0 && (
-                                            <div className="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-200 mb-2">
+                                            <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-900/50 p-2 rounded-lg border border-slate-200 dark:border-slate-800 mb-2">
                                                 <div className="flex items-center gap-3">
                                                     <input
                                                         type="checkbox"
-                                                        className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                                        className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-blue-600 focus:ring-blue-500"
                                                         checked={selectedMaterials.length === materials.length && materials.length > 0}
                                                         onChange={(e) => {
                                                             if (e.target.checked) {
@@ -1572,7 +1558,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             }
                                                         }}
                                                     />
-                                                    <span className="text-xs font-semibold text-slate-600">
+                                                    <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">
                                                         {selectedMaterials.length} selecionado(s)
                                                     </span>
                                                 </div>
@@ -1586,7 +1572,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                     notify("Materiais removidos!");
                                                                 }
                                                             }}
-                                                            className="flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 rounded text-[10px] font-bold hover:bg-red-100 transition-colors border border-red-100"
+                                                            className="flex items-center gap-1 px-2 py-1 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded text-[10px] font-bold hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors border border-red-100 dark:border-red-900/50"
                                                         >
                                                             <Trash2 size={12} /> Excluir Selecionados
                                                         </button>
@@ -1599,7 +1585,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                 notify("Lista de materiais limpa!");
                                                             }
                                                         }}
-                                                        className="flex items-center gap-1 px-2 py-1 bg-slate-200 text-slate-700 rounded text-[10px] font-bold hover:bg-slate-300 transition-colors"
+                                                        className="flex items-center gap-1 px-2 py-1 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded text-[10px] font-bold hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors"
                                                     >
                                                         <Archive size={12} /> Limpar Lista
                                                     </button>
@@ -1614,7 +1600,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                     onDragStart={() => setDraggedMatIndex(index)}
                                                     onDragOver={(e) => (window as any).handleDragOver(e, index, draggedMatIndex, materials, setMaterials, setDraggedMatIndex)}
                                                     onDragEnd={() => setDraggedMatIndex(null)}
-                                                    className={`bg-white p-3 rounded-lg border flex justify-between items-center text-sm transition-all ${draggedMatIndex === index ? 'opacity-50 bg-blue-50 border-blue-200 shadow-inner' : (selectedMaterials.includes(m.id) ? 'border-blue-300 bg-blue-50/30' : 'border-slate-200 shadow-sm')}`}
+                                                    className={`bg-white dark:bg-slate-900 p-3 rounded-lg border flex justify-between items-center text-sm transition-all ${draggedMatIndex === index ? 'opacity-50 bg-blue-50 dark:bg-blue-900/50 border-blue-200 dark:border-blue-800 shadow-inner' : (selectedMaterials.includes(m.id) ? 'border-blue-300 dark:border-blue-700 bg-blue-50/30 dark:bg-blue-900/20' : 'border-slate-200 dark:border-slate-800 shadow-sm')}`}
                                                 >
                                                     {editingId === m.id ? (
                                                         <div className="flex-1 grid grid-cols-12 gap-2 items-center">
@@ -1622,13 +1608,13 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                 <input
                                                                     type="checkbox"
                                                                     disabled
-                                                                    className="w-4 h-4 rounded border-slate-300 text-blue-600 opacity-30"
+                                                                    className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-blue-600 opacity-30"
                                                                     checked={selectedMaterials.includes(m.id)}
                                                                 />
                                                             </div>
                                                             <div className="col-span-4">
                                                                 <input
-                                                                    className="w-full text-xs p-1 border rounded"
+                                                                    className="w-full text-xs p-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-700 dark:text-slate-100"
                                                                     defaultValue={m.material_name}
                                                                     id={`edit_mname_${m.id} `}
                                                                 />
@@ -1636,7 +1622,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             <div className="col-span-1">
                                                                 <input
                                                                     type="number"
-                                                                    className="w-full text-xs p-1 border rounded"
+                                                                    className="w-full text-xs p-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-700 dark:text-slate-100"
                                                                     defaultValue={m.quantity}
                                                                     placeholder="Qtd"
                                                                     id={`edit_mqty_${m.id} `}
@@ -1644,7 +1630,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             </div>
                                                             <div className="col-span-1">
                                                                 <input
-                                                                    className="w-full text-xs p-1 border rounded"
+                                                                    className="w-full text-xs p-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-700 dark:text-slate-100"
                                                                     defaultValue={m.unit}
                                                                     placeholder="Und"
                                                                     id={`edit_munit_${m.id} `}
@@ -1653,7 +1639,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             <div className="col-span-2">
                                                                 <input
                                                                     type="number"
-                                                                    className="w-full text-xs p-1 border rounded"
+                                                                    className="w-full text-xs p-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-700 dark:text-slate-100"
                                                                     defaultValue={m.unit_cost}
                                                                     placeholder="Unit"
                                                                     id={`edit_mcost_${m.id} `}
@@ -1695,7 +1681,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             <div className="flex items-center gap-3 grow">
                                                                 <input
                                                                     type="checkbox"
-                                                                    className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                                                    className="w-4 h-4 rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-blue-600 focus:ring-blue-500"
                                                                     checked={selectedMaterials.includes(m.id)}
                                                                     onChange={(e) => {
                                                                         if (e.target.checked) {
@@ -1705,24 +1691,24 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                         }
                                                                     }}
                                                                 />
-                                                                <div className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 shrink-0">
+                                                                <div className="cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 shrink-0">
                                                                     <GripVertical size={16} />
                                                                 </div>
                                                                 <span className="flex items-center">
-                                                                    <b>{m.material_name}</b>
-                                                                    <span className="text-slate-400 mx-2">|</span>
-                                                                    <span className="text-[10px] text-slate-400 mr-2 whitespace-nowrap">(R$ {m.unit_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</span>
-                                                                    <span>{m.quantity}{m.unit}</span>
+                                                                    <b className="text-slate-800 dark:text-slate-100">{m.material_name}</b>
+                                                                    <span className="text-slate-400 dark:text-slate-600 mx-2">|</span>
+                                                                    <span className="text-[10px] text-slate-400 dark:text-slate-500 mr-2 whitespace-nowrap">(R$ {m.unit_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</span>
+                                                                    <span className="text-slate-600 dark:text-slate-400">{m.quantity}{m.unit}</span>
                                                                 </span>
                                                             </div>
                                                             <div className="flex items-center gap-4 shrink-0">
-                                                                <span className="font-bold whitespace-nowrap">R$ {m.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                                                <span className="font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap">R$ {m.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                                                 <div className="flex gap-1">
-                                                                    <button onClick={() => (window as any).moveItemWork(materials, setMaterials, index, 'up')} disabled={index === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronUp size={14} /></button>
-                                                                    <button onClick={() => (window as any).moveItemWork(materials, setMaterials, index, 'down')} disabled={index === materials.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronDown size={14} /></button>
+                                                                    <button onClick={() => (window as any).moveItemWork(materials, setMaterials, index, 'up')} disabled={index === 0} className="text-slate-300 dark:text-slate-600 hover:text-blue-500 dark:hover:text-blue-400 disabled:opacity-0 transition-all"><ChevronUp size={14} /></button>
+                                                                    <button onClick={() => (window as any).moveItemWork(materials, setMaterials, index, 'down')} disabled={index === materials.length - 1} className="text-slate-300 dark:text-slate-600 hover:text-blue-500 dark:hover:text-blue-400 disabled:opacity-0 transition-all"><ChevronDown size={14} /></button>
                                                                 </div>
-                                                                <Pencil size={14} className="cursor-pointer text-blue-400 hover:text-blue-600" onClick={() => setEditingId(m.id)} />
-                                                                <Trash2 size={14} className="cursor-pointer text-slate-400 hover:text-red-500" onClick={() => handleDeleteMaterial(m.id)} />
+                                                                <Pencil size={14} className="cursor-pointer text-blue-400 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400" onClick={() => setEditingId(m.id)} />
+                                                                <Trash2 size={14} className="cursor-pointer text-slate-400 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400" onClick={() => handleDeleteMaterial(m.id)} />
                                                             </div>
                                                         </>
                                                     )}
@@ -1743,20 +1729,20 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                     onDragStart={() => setDraggedLabIndex(index)}
                                                     onDragOver={(e) => (window as any).handleDragOver(e, index, draggedLabIndex, labor, setLabor, setDraggedLabIndex)}
                                                     onDragEnd={() => setDraggedLabIndex(null)}
-                                                    className={`bg-white p-3 rounded-lg border flex justify-between items-center text-sm transition-all ${draggedLabIndex === index ? 'opacity-50 bg-blue-50 border-blue-200 shadow-inner' : 'border-slate-200'}`}
+                                                    className={`bg-white dark:bg-slate-900 p-3 rounded-lg border flex justify-between items-center text-sm transition-all ${draggedLabIndex === index ? 'opacity-50 bg-blue-50 dark:bg-blue-900/50 border-blue-200 dark:border-blue-800 shadow-inner' : 'border-slate-200 dark:border-slate-800 shadow-sm'}`}
                                                 >
                                                     {editingId === l.id ? (
                                                         <div className="flex-1 grid grid-cols-12 gap-2 items-center">
                                                             <div className="col-span-4">
                                                                 <input
-                                                                    className="w-full text-xs p-1 border rounded"
+                                                                    className="w-full text-xs p-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-700 dark:text-slate-100"
                                                                     defaultValue={l.role}
                                                                     id={`edit_lrole_${l.id}`}
                                                                 />
                                                             </div>
                                                             <div className="col-span-2">
                                                                 <select
-                                                                    className="w-full text-xs p-1 border rounded"
+                                                                    className="w-full text-xs p-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-700 dark:text-slate-100"
                                                                     defaultValue={l.cost_type}
                                                                     id={`edit_ltype_${l.id}`}
                                                                 >
@@ -1768,7 +1754,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             <div className="col-span-1">
                                                                 <input
                                                                     type="number"
-                                                                    className="w-full text-xs p-1 border rounded"
+                                                                    className="w-full text-xs p-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-700 dark:text-slate-100"
                                                                     defaultValue={l.quantity}
                                                                     id={`edit_lqty_${l.id}`}
                                                                 />
@@ -1776,7 +1762,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             <div className="col-span-1">
                                                                 <input
                                                                     type="text"
-                                                                    className="w-full text-xs p-1 border rounded"
+                                                                    className="w-full text-xs p-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-700 dark:text-slate-100"
                                                                     defaultValue={l.unit || 'un'}
                                                                     id={`edit_lunit_${l.id}`}
                                                                 />
@@ -1784,7 +1770,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             <div className="col-span-2">
                                                                 <input
                                                                     type="number"
-                                                                    className="w-full text-xs p-1 border rounded"
+                                                                    className="w-full text-xs p-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-700 dark:text-slate-100"
                                                                     defaultValue={l.unit_cost}
                                                                     id={`edit_lcost_${l.id}`}
                                                                 />
@@ -1822,25 +1808,25 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                     ) : (
                                                         <>
                                                             <div className="flex items-center gap-2 grow">
-                                                                <div className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 shrink-0">
+                                                                <div className="cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 shrink-0">
                                                                     <GripVertical size={16} />
                                                                 </div>
                                                                 <span className="flex items-center">
-                                                                    <b>{l.role}</b>
-                                                                    <span className="text-slate-400 mx-2">|</span>
-                                                                    <span className="text-[10px] text-slate-400 mr-2">({l.cost_type})</span>
-                                                                    <span>{l.quantity}{l.unit || 'un'}</span>
-                                                                    <span className="text-[10px] text-slate-400 ml-2 whitespace-nowrap">(R$ {l.unit_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</span>
+                                                                    <b className="text-slate-800 dark:text-slate-100">{l.role}</b>
+                                                                    <span className="text-slate-400 dark:text-slate-600 mx-2">|</span>
+                                                                    <span className="text-[10px] text-slate-400 dark:text-slate-500 mr-2">({l.cost_type})</span>
+                                                                    <span className="text-slate-600 dark:text-slate-400">{l.quantity}{l.unit || 'un'}</span>
+                                                                    <span className="text-[10px] text-slate-400 dark:text-slate-500 ml-2 whitespace-nowrap">(R$ {l.unit_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</span>
                                                                 </span>
                                                             </div>
                                                             <div className="flex items-center gap-4 shrink-0">
-                                                                <span className="font-bold whitespace-nowrap">R$ {l.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                                                <span className="font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap">R$ {l.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                                                 <div className="flex gap-1">
-                                                                    <button onClick={() => (window as any).moveItemWork(labor, setLabor, index, 'up')} disabled={index === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronUp size={14} /></button>
-                                                                    <button onClick={() => (window as any).moveItemWork(labor, setLabor, index, 'down')} disabled={index === labor.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronDown size={14} /></button>
+                                                                    <button onClick={() => (window as any).moveItemWork(labor, setLabor, index, 'up')} disabled={index === 0} className="text-slate-300 dark:text-slate-600 hover:text-blue-500 dark:hover:text-blue-400 disabled:opacity-0 transition-all"><ChevronUp size={14} /></button>
+                                                                    <button onClick={() => (window as any).moveItemWork(labor, setLabor, index, 'down')} disabled={index === labor.length - 1} className="text-slate-300 dark:text-slate-600 hover:text-blue-500 dark:hover:text-blue-400 disabled:opacity-0 transition-all"><ChevronDown size={14} /></button>
                                                                 </div>
-                                                                <Pencil size={14} className="cursor-pointer text-blue-400 hover:text-blue-600" onClick={() => setEditingId(l.id)} />
-                                                                <Trash2 size={14} className="cursor-pointer text-slate-400 hover:text-red-500" onClick={() => handleDeleteLabor(l.id)} />
+                                                                <Pencil size={14} className="cursor-pointer text-blue-400 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400" onClick={() => setEditingId(l.id)} />
+                                                                <Trash2 size={14} className="cursor-pointer text-slate-400 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400" onClick={() => handleDeleteLabor(l.id)} />
                                                             </div>
                                                         </>
                                                     )}
@@ -1861,13 +1847,13 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                     onDragStart={() => setDraggedIndIndex(index)}
                                                     onDragOver={(e) => (window as any).handleDragOver(e, index, draggedIndIndex, indirects, setIndirects, setDraggedIndIndex)}
                                                     onDragEnd={() => setDraggedIndIndex(null)}
-                                                    className={`bg-white p-3 rounded-lg border flex justify-between items-center text-sm transition-all ${draggedIndIndex === index ? 'opacity-50 bg-blue-50 border-blue-200 shadow-inner' : 'border-slate-200'}`}
+                                                    className={`bg-white dark:bg-slate-900 p-3 rounded-lg border flex justify-between items-center text-sm transition-all ${draggedIndIndex === index ? 'opacity-50 bg-blue-50 dark:bg-blue-900/50 border-blue-200 dark:border-blue-800 shadow-inner' : 'border-slate-200 dark:border-slate-800 shadow-sm'}`}
                                                 >
                                                     {editingId === i.id ? (
                                                         <div className="flex-1 grid grid-cols-12 gap-2 items-center">
                                                             <div className="col-span-3">
                                                                 <select
-                                                                    className="w-full text-xs p-1 border rounded"
+                                                                    className="w-full text-xs p-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-700 dark:text-slate-100"
                                                                     defaultValue={i.category}
                                                                     id={`edit_icat_${i.id} `}
                                                                 >
@@ -1881,7 +1867,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             </div>
                                                             <div className="col-span-6">
                                                                 <input
-                                                                    className="w-full text-xs p-1 border rounded"
+                                                                    className="w-full text-xs p-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-700 dark:text-slate-100"
                                                                     defaultValue={i.description}
                                                                     id={`edit_idesc_${i.id} `}
                                                                 />
@@ -1889,7 +1875,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             <div className="col-span-2">
                                                                 <input
                                                                     type="number"
-                                                                    className="w-full text-xs p-1 border rounded"
+                                                                    className="w-full text-xs p-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-700 dark:text-slate-100"
                                                                     defaultValue={i.value}
                                                                     placeholder="Valor"
                                                                     id={`edit_ival_${i.id} `}
@@ -1926,19 +1912,19 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                     ) : (
                                                         <>
                                                             <div className="flex items-center gap-2 grow">
-                                                                <div className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 shrink-0">
+                                                                <div className="cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 shrink-0">
                                                                     <GripVertical size={16} />
                                                                 </div>
-                                                                <span>[{i.category}] <b>{i.description}</b></span>
+                                                                <span className="text-slate-700 dark:text-slate-300">[{i.category}] <b className="text-slate-800 dark:text-slate-100">{i.description}</b></span>
                                                             </div>
                                                             <div className="flex items-center gap-4 shrink-0">
-                                                                <span className="font-bold whitespace-nowrap">R$ {i.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                                                <span className="font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap">R$ {i.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                                                 <div className="flex gap-1">
-                                                                    <button onClick={() => (window as any).moveItemWork(indirects, setIndirects, index, 'up')} disabled={index === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronUp size={14} /></button>
-                                                                    <button onClick={() => (window as any).moveItemWork(indirects, setIndirects, index, 'down')} disabled={index === indirects.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronDown size={14} /></button>
+                                                                    <button onClick={() => (window as any).moveItemWork(indirects, setIndirects, index, 'up')} disabled={index === 0} className="text-slate-300 dark:text-slate-600 hover:text-blue-500 dark:hover:text-blue-400 disabled:opacity-0 transition-all"><ChevronUp size={14} /></button>
+                                                                    <button onClick={() => (window as any).moveItemWork(indirects, setIndirects, index, 'down')} disabled={index === indirects.length - 1} className="text-slate-300 dark:text-slate-600 hover:text-blue-500 dark:hover:text-blue-400 disabled:opacity-0 transition-all"><ChevronDown size={14} /></button>
                                                                 </div>
-                                                                <Pencil size={14} className="cursor-pointer text-blue-400 hover:text-blue-600" onClick={() => setEditingId(i.id)} />
-                                                                <Trash2 size={14} className="cursor-pointer text-slate-400 hover:text-red-500" onClick={() => handleDeleteIndirect(i.id)} />
+                                                                <Pencil size={14} className="cursor-pointer text-blue-400 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400" onClick={() => setEditingId(i.id)} />
+                                                                <Trash2 size={14} className="cursor-pointer text-slate-400 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400" onClick={() => handleDeleteIndirect(i.id)} />
                                                             </div>
                                                         </>
                                                     )}
@@ -1952,34 +1938,34 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     <div className="space-y-6">
 
                                         <div className="flex justify-between items-center mb-4">
-                                            <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Configuração de Impostos Padrão</h4>
+                                            <h4 className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Configuração de Impostos Padrão</h4>
                                             <button
                                                 onClick={handleLoadDefaultTaxes}
-                                                className="text-[10px] font-bold text-blue-600 hover:text-blue-800 uppercase tracking-tighter bg-blue-50 px-2 py-1 rounded"
+                                                className="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 uppercase tracking-tighter bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded transition-colors"
                                             >
                                                 Carregar Padrão (ISS/PIS/COF/INS)
                                             </button>
                                         </div>
 
-                                        <div className="text-xs text-slate-500 mb-4 bg-yellow-50 p-3 rounded-lg border border-yellow-100">
-                                            <p className="font-bold text-yellow-700 mb-1">Nota sobre cálculo de impostos:</p>
+                                        <div className="text-xs text-slate-500 dark:text-slate-400 mb-4 bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg border border-yellow-100 dark:border-yellow-900/30">
+                                            <p className="font-bold text-yellow-700 dark:text-yellow-500 mb-1">Nota sobre cálculo de impostos:</p>
                                             <p>O sistema utiliza o cálculo "por dentro" (Gross Up) para determinar o valor da Nota Fiscal, garantindo que o valor líquido recebido seja exatamente o custo direto + BDI.</p>
                                         </div>
 
                                         {/* Custom Tax Form */}
-                                        <div className="bg-slate-100 p-4 rounded-xl border border-slate-200">
-                                            <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Outras Taxas / Impostos Personalizados</h4>
+                                        <div className="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                                            <h4 className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3">Outras Taxas / Impostos Personalizados</h4>
                                             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                                 <div className="md:col-span-7">
-                                                    <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nome do Item</label>
-                                                    <input type="text" id="tax_name" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none" placeholder="Ex: Taxa Administrativa" />
+                                                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Nome do Item</label>
+                                                    <input type="text" id="tax_name" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30 outline-none text-slate-700 dark:text-slate-100" placeholder="Ex: Taxa Administrativa" />
                                                 </div>
                                                 <div className="md:col-span-3">
-                                                    <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Taxa (%)</label>
+                                                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Taxa (%)</label>
                                                     <input
                                                         type="number"
                                                         id="tax_rate"
-                                                        className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none"
+                                                        className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30 outline-none text-slate-700 dark:text-slate-100"
                                                         placeholder="0.00"
                                                     />
                                                 </div>
@@ -2005,27 +1991,27 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         </div>
 
                                         <div className="col-span-full mt-2">
-                                            <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Detalhamento dos Custos Indiretos / BDI</h4>
+                                            <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">Detalhamento dos Custos Indiretos / BDI</h4>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                                 {taxes.filter(t => (t.rate > 0 || t.value > 0)).map(t => (
-                                                    <div key={t.id} className="bg-white p-3 rounded-lg border border-slate-100 flex justify-between items-center shadow-sm">
+                                                    <div key={t.id} className="bg-white dark:bg-slate-900 p-3 rounded-lg border border-slate-100 dark:border-slate-800 flex justify-between items-center shadow-sm">
                                                         <div>
-                                                            <span className="font-black text-xs text-slate-700">{t.name}</span>
-                                                            <span className="text-[10px] font-bold text-slate-400 ml-2 whitespace-nowrap">
+                                                            <span className="font-black text-xs text-slate-700 dark:text-slate-200">{t.name}</span>
+                                                            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 ml-2 whitespace-nowrap">
                                                                 {t.rate > 0 ? `${t.rate}%` : `R$ ${t.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                                                             </span>
                                                         </div>
                                                         <div className="flex items-center gap-4">
-                                                            <span className="font-bold text-xs text-blue-600 whitespace-nowrap">
+                                                            <span className="font-bold text-xs text-blue-600 dark:text-blue-400 whitespace-nowrap">
                                                                 R$ {(t.rate > 0 ? (t.name === 'BDI' ? totalDirect : totalGeneral) * (t.rate / 100) : t.value).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                                             </span>
-                                                            <button onClick={() => handleDeleteTax(t.id)} className="text-slate-300 hover:text-red-500 transition-colors">
+                                                            <button onClick={() => handleDeleteTax(t.id)} className="text-slate-300 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400 transition-colors">
                                                                 <Trash2 size={14} />
                                                             </button>
                                                         </div>
                                                     </div>
                                                 ))}
-                                                {taxes.filter(t => (t.rate > 0 || t.value > 0)).length === 0 && <p className="col-span-full text-center py-4 text-xs text-slate-400 italic">Nenhum custo indireto configurado.</p>}
+                                                {taxes.filter(t => (t.rate > 0 || t.value > 0)).length === 0 && <p className="col-span-full text-center py-4 text-xs text-slate-400 dark:text-slate-500 italic">Nenhum custo indireto configurado.</p>}
                                             </div>
                                         </div>
                                     </div>
@@ -2037,67 +2023,67 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                             <div className="max-w-4xl mx-auto space-y-6">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
 
-                                    <div className="bg-emerald-50 p-6 rounded-xl border border-emerald-200 shadow-sm transition-all hover:shadow-md">
+                                    <div className="bg-emerald-50 dark:bg-emerald-900/20 p-6 rounded-xl border border-emerald-200 dark:border-emerald-800 shadow-sm transition-all hover:shadow-md">
                                         <div className="flex justify-between items-start mb-2">
-                                            <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Total Materiais</span>
-                                            <div className="bg-emerald-100 p-1.5 rounded-lg">
-                                                <Truck size={16} className="text-emerald-600" />
+                                            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Total Materiais</span>
+                                            <div className="bg-emerald-100 dark:bg-emerald-800/50 p-1.5 rounded-lg">
+                                                <Truck size={16} className="text-emerald-600 dark:text-emerald-400" />
                                             </div>
                                         </div>
-                                        <span className="text-2xl font-black text-emerald-900 whitespace-nowrap">R$ {totalMaterial.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                        <p className="text-[10px] text-emerald-600 mt-1 font-medium">Insumos + Materiais de Serviços</p>
+                                        <span className="text-2xl font-black text-emerald-900 dark:text-emerald-100 whitespace-nowrap">R$ {totalMaterial.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                        <p className="text-[10px] text-emerald-600 dark:text-emerald-500 mt-1 font-medium">Insumos + Materiais de Serviços</p>
                                     </div>
 
-                                    <div className="bg-amber-50 p-6 rounded-xl border border-amber-200 shadow-sm transition-all hover:shadow-md">
+                                    <div className="bg-amber-50 dark:bg-amber-900/20 p-6 rounded-xl border border-amber-200 dark:border-amber-800 shadow-sm transition-all hover:shadow-md">
                                         <div className="flex justify-between items-start mb-2">
-                                            <span className="text-xs font-bold text-amber-600 uppercase tracking-wider">Total Mão de Obra</span>
-                                            <div className="bg-amber-100 p-1.5 rounded-lg">
-                                                <HardHat size={16} className="text-amber-600" />
+                                            <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Total Mão de Obra</span>
+                                            <div className="bg-amber-100 dark:bg-amber-800/50 p-1.5 rounded-lg">
+                                                <HardHat size={16} className="text-amber-600 dark:text-amber-400" />
                                             </div>
                                         </div>
-                                        <span className="text-2xl font-black text-amber-900 whitespace-nowrap">R$ {totalLabor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                        <p className="text-[10px] text-amber-600 mt-1 font-medium">Equipe Própria + Terceirizada</p>
+                                        <span className="text-2xl font-black text-amber-900 dark:text-amber-100 whitespace-nowrap">R$ {totalLabor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                        <p className="text-[10px] text-amber-600 dark:text-amber-500 mt-1 font-medium">Equipe Própria + Terceirizada</p>
                                     </div>
 
-                                    <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md">
+                                    <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:shadow-md">
                                         <div className="flex justify-between items-start mb-2">
-                                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Indiretos</span>
-                                            <div className="bg-slate-200 p-1.5 rounded-lg">
-                                                <Archive size={16} className="text-slate-600" />
+                                            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Indiretos</span>
+                                            <div className="bg-slate-200 dark:bg-slate-700 p-1.5 rounded-lg">
+                                                <Archive size={16} className="text-slate-600 dark:text-slate-300" />
                                             </div>
                                         </div>
-                                        <span className="text-2xl font-black text-slate-800 whitespace-nowrap">R$ ${totalIndirect.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                        <p className="text-[10px] text-slate-500 mt-1 font-medium">Custos Administrativos</p>
+                                        <span className="text-2xl font-black text-slate-800 dark:text-slate-100 whitespace-nowrap">R$ {totalIndirect.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                        <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-medium">Custos Administrativos</p>
                                     </div>
 
-                                    <div className="bg-blue-50 p-6 rounded-xl border border-blue-200 shadow-sm transition-all hover:shadow-md">
+                                    <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-xl border border-blue-200 dark:border-blue-800 shadow-sm transition-all hover:shadow-md">
                                         <div className="flex justify-between items-start mb-2">
-                                            <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">Total Impostos</span>
-                                            <div className="bg-blue-100 p-1.5 rounded-lg">
-                                                <Percent size={16} className="text-blue-600" />
+                                            <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Total Impostos</span>
+                                            <div className="bg-blue-100 dark:bg-blue-800/50 p-1.5 rounded-lg">
+                                                <Percent size={16} className="text-blue-600 dark:text-blue-400" />
                                             </div>
                                         </div>
-                                        <span className="text-2xl font-black text-blue-900 whitespace-nowrap">R$ ${totalTaxes.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                        <p className="text-[10px] text-blue-600 mt-1 font-medium">Baseado no BDI e Taxas</p>
+                                        <span className="text-2xl font-black text-blue-900 dark:text-blue-100 whitespace-nowrap">R$ {totalTaxes.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                        <p className="text-[10px] text-blue-600 dark:text-blue-500 mt-1 font-medium">Baseado no BDI e Taxas</p>
                                     </div>
                                 </div>
 
                                 <div className="flex justify-end gap-2 mb-6">
                                     <button
                                         onClick={handlePreviewFull}
-                                        className="bg-white border border-slate-200 text-slate-600 px-6 py-4 rounded-2xl text-base font-black flex items-center gap-4 hover:bg-slate-50 transition-all shadow-md group border-b-4 border-b-blue-600 active:border-b-0 active:translate-y-1"
+                                        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 px-6 py-4 rounded-2xl text-base font-black flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-md group border-b-4 border-b-blue-600 dark:border-b-blue-500 active:border-b-0 active:translate-y-1"
                                     >
-                                        <div className="bg-blue-100 p-2 rounded-xl group-hover:scale-110 transition-transform">
-                                            <Eye size={24} className="text-blue-600" />
+                                        <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-xl group-hover:scale-110 transition-transform">
+                                            <Eye size={24} className="text-blue-600 dark:text-blue-400" />
                                         </div>
                                         <div className="text-left">
-                                            <span className="block text-slate-800 leading-none">Visualizar e Gerar PDF</span>
-                                            <span className="text-[10px] text-slate-400 uppercase tracking-widest leading-none font-bold">Relatório Completo</span>
+                                            <span className="block text-slate-800 dark:text-slate-100 leading-none">Visualizar e Gerar PDF</span>
+                                            <span className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none font-bold">Relatório Completo</span>
                                         </div>
                                     </button>
                                 </div>
 
-                                <div className="bg-slate-900 text-white p-8 rounded-2xl flex justify-between items-center shadow-xl">
+                                <div className="bg-slate-900 dark:bg-black text-white p-8 rounded-2xl flex justify-between items-center shadow-xl border border-slate-800">
                                     <div>
                                         <p className="text-slate-400 text-sm font-bold uppercase tracking-widest mb-1">Custo Realizado Total</p>
                                         <p className="text-4xl font-bold whitespace-nowrap">R$ {totalGeneral.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>

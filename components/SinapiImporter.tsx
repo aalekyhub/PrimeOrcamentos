@@ -87,7 +87,7 @@ const SinapiImporter: React.FC = () => {
                         <p className="text-slate-500 text-sm mb-8 max-w-sm mx-auto">
                             Selecione os arquivos originais (.xlsx) de <b>Insumos</b> ou <b>Composições</b> baixados da CAIXA.
                         </p>
-                        <label className="bg-indigo-600 text-white px-10 py-3.5 rounded-2xl font-black uppercase tracking-widest text-xs cursor-pointer hover:bg-indigo-700 transition-all inline-block shadow-lg shadow-indigo-100">
+                        <label className="bg-indigo-600 text-white px-10 py-3.5 rounded-2xl font-black uppercase tracking-widest text-xs cursor-pointer hover:bg-indigo-700 transition-all inline-block shadow-lg shadow-indigo-950/30">
                             Escolher Arquivo
                             <input type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleFileUpload} />
                         </label>

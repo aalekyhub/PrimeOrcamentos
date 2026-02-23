@@ -98,11 +98,11 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
       {/* Header with Navigation */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div>
-          <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase">Gestão de Custos</h2>
-          <p className="text-slate-500 text-sm font-medium">Catálogo próprio e Referências Analíticas SINAPI.</p>
+          <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter uppercase">Gestão de Custos</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Catálogo próprio e Referências Analíticas SINAPI.</p>
         </div>
 
-        <div className="flex bg-slate-100 p-1.5 rounded-2xl shadow-inner">
+        <div className="flex bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl shadow-inner">
           <TabButton
             active={activeTab === 'catalog'}
             onClick={() => setActiveTab('catalog')}
@@ -126,13 +126,13 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
 
       {activeTab === 'catalog' && (
         <div className="space-y-6">
-          <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-200">
+          <div className="flex justify-between items-center bg-white dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-4 top-3 w-4 h-4 text-slate-400" />
               <input
                 type="text"
                 placeholder="Buscar em serviços..."
-                className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full pl-11 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500"
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
               />
@@ -143,38 +143,38 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
                 setFormData({ name: '', description: '', basePrice: 0, unit: 'un', category: 'Geral' });
                 setShowForm(true);
               }}
-              className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 font-bold text-sm"
+              className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 hover:bg-indigo-700 transition-all shadow-md shadow-indigo-950/20 font-bold text-sm"
             >
               <Plus className="w-4 h-4" /> Novo Item
             </button>
           </div>
 
-          <div className="bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden overflow-x-auto">
+          <div className="bg-white dark:bg-slate-900/50 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="bg-slate-50/50 border-b border-slate-100">
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest pl-10">Descrição</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Und</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Categoria</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Preço Base</th>
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right pr-10">Ações</th>
+                <tr className="bg-slate-50/50 dark:bg-slate-800/30 border-b border-slate-100 dark:border-slate-800">
+                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-10">Descrição</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center">Und</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Categoria</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Preço Base</th>
+                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest text-right pr-10">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-50">
+              <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
                 {filtered.map(service => (
-                  <tr key={service.id} className="hover:bg-slate-50/80 transition-colors group">
+                  <tr key={service.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/30 transition-colors group">
                     <td className="px-8 py-5 pl-10">
-                      <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{service.name}</p>
-                      <p className="text-[11px] text-slate-400 font-medium line-clamp-1">{service.description || 'Sem descrição.'}</p>
+                      <p className="text-sm font-black text-slate-900 dark:text-slate-100 uppercase tracking-tight">{service.name}</p>
+                      <p className="text-[11px] text-slate-400 dark:text-slate-500 font-medium line-clamp-1">{service.description || 'Sem descrição.'}</p>
                     </td>
-                    <td className="px-8 py-5 text-center text-[10px] font-black text-slate-400 uppercase">{service.unit}</td>
+                    <td className="px-8 py-5 text-center text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase">{service.unit}</td>
                     <td className="px-8 py-5">
-                      <span className={`px-2 py-0.5 rounded text-[8px] font-black tracking-widest uppercase ${service.category.includes('SINAPI') ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-500'
+                      <span className={`px-2 py-0.5 rounded text-[8px] font-black tracking-widest uppercase ${service.category.includes('SINAPI') ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
                         }`}>
                         {service.category}
                       </span>
                     </td>
-                    <td className="px-8 py-5 text-sm font-bold text-slate-700 whitespace-nowrap">
+                    <td className="px-8 py-5 text-sm font-bold text-slate-700 dark:text-slate-300 whitespace-nowrap">
                       R$ {service.basePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </td>
                     <td className="px-8 py-5 pr-10 text-right">
@@ -200,17 +200,17 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
       {activeTab === 'sinapi' && (
         <div className="space-y-6">
           <div className="flex justify-center mb-4">
-            <div className="flex bg-white p-1 rounded-2xl border border-slate-200 shadow-sm">
+            <div className="flex bg-white dark:bg-slate-800 p-1 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
               <button
                 onClick={() => setSinapiView('search')}
-                className={`px-8 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${sinapiView === 'search' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400'
+                className={`px-8 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${sinapiView === 'search' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-950/30' : 'text-slate-400'
                   }`}
               >
                 Consultar Analítico
               </button>
               <button
                 onClick={() => setSinapiView('import')}
-                className={`px-8 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${sinapiView === 'import' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400'
+                className={`px-8 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${sinapiView === 'import' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-950/30' : 'text-slate-400'
                   }`}
               >
                 Gerenciar Tabelas
@@ -239,22 +239,22 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
       {/* Item Form Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <form onSubmit={handleSubmit} className="bg-white rounded-[2.5rem] p-10 w-full max-w-xl shadow-2xl animate-in zoom-in-95 duration-300">
+          <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-10 w-full max-w-xl shadow-2xl border border-white/5 animate-in zoom-in-95 duration-300">
             <div className="flex items-center justify-between mb-8">
-              <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">
+              <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
                 {editingService ? 'Editar Item' : 'Novo Item de Catálogo'}
               </h3>
-              <button type="button" onClick={() => { setShowForm(false); setEditingService(null); }} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
+              <button type="button" onClick={() => { setShowForm(false); setEditingService(null); }} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
                 <X className="w-6 h-6 text-slate-400" />
               </button>
             </div>
 
             <div className="space-y-6">
               <div>
-                <label className="block text-[11px] font-black text-indigo-600 uppercase tracking-widest mb-2 ml-1">Descrição do Serviço/Material</label>
+                <label className="block text-[11px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-2 ml-1">Descrição do Serviço/Material</label>
                 <input
                   type="text"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-sm font-bold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                   value={formData.name}
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
                   placeholder="Ex: Alvenaria de tijolo, Pintura..."
@@ -264,21 +264,21 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[11px] font-black text-indigo-600 uppercase tracking-widest mb-2 ml-1">Preço/Custo Base (R$)</label>
+                  <label className="block text-[11px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-2 ml-1">Preço/Custo Base (R$)</label>
                   <input
                     type="number"
                     step="0.0001"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-sm font-bold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none"
                     value={formData.basePrice}
                     onChange={e => setFormData({ ...formData, basePrice: Number(e.target.value) })}
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-black text-indigo-600 uppercase tracking-widest mb-2 ml-1">Medida</label>
+                  <label className="block text-[11px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-2 ml-1">Medida</label>
                   <input
                     type="text"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none uppercase"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-sm font-bold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none uppercase"
                     value={formData.unit}
                     onChange={e => setFormData({ ...formData, unit: e.target.value })}
                     placeholder="UND, M2, M3..."
@@ -288,9 +288,9 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
               </div>
 
               <div>
-                <label className="block text-[11px] font-black text-indigo-600 uppercase tracking-widest mb-2 ml-1">Notas Adicionais / Referência</label>
+                <label className="block text-[11px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-2 ml-1">Notas Adicionais / Referência</label>
                 <textarea
-                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none h-24 resize-none"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-sm font-bold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none h-24 resize-none"
                   value={formData.description}
                   onChange={e => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Detalhes técnicos, referências..."
@@ -302,11 +302,11 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
               <button
                 type="button"
                 onClick={() => { setShowForm(false); setEditingService(null); }}
-                className="flex-1 px-6 py-4 rounded-2xl font-black uppercase text-xs text-slate-500 hover:bg-slate-50 transition-all"
+                className="flex-1 px-6 py-4 rounded-2xl font-black uppercase text-xs text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
               >
                 Descartar
               </button>
-              <button type="submit" className="flex-[2] bg-indigo-600 text-white px-6 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200">
+              <button type="submit" className="flex-[2] bg-indigo-600 text-white px-6 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-indigo-700 transition-all shadow-md shadow-indigo-950/20">
                 {editingService ? 'Salvar Mudanças' : 'Confirmar e Adicionar'}
               </button>
             </div>
@@ -327,7 +327,7 @@ interface TabButtonProps {
 const TabButton: React.FC<TabButtonProps> = ({ active, onClick, icon, label }) => (
   <button
     onClick={onClick}
-    className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${active ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+    className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all ${active ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-white shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
       }`}
   >
     {icon} {label}

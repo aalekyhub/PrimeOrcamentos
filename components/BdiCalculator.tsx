@@ -102,7 +102,7 @@ const BdiCalculator: React.FC<Props> = ({ initialConfig, onSave }) => {
                             onSave({ ...config, id: initialConfig?.id || 'default', total: totalBdi } as BdiConfig);
                             notify('Configuração de BDI calculada!');
                         }}
-                        className="w-full sm:w-auto bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/30 flex items-center justify-center gap-2"
+                        className="w-full sm:w-auto bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-950/40 flex items-center justify-center gap-2"
                     >
                         <Save className="w-4 h-4" /> Aplicar BDI
                     </button>

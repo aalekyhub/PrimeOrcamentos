@@ -148,7 +148,7 @@ const DataCleanup: React.FC<Props> = ({ customers, setCustomers, services, setSe
                                     </div>
                                     <button
                                         onClick={() => mergeServices(group)}
-                                        className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
+                                        className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-950/20"
                                     >
                                         <Merge className="w-4 h-4" /> Mesclar Serviços
                                     </button>

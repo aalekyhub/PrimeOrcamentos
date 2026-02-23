@@ -134,7 +134,7 @@ const SinapiSearch: React.FC<Props> = ({ onSelect }) => {
                                                 </span>
                                                 <button
                                                     onClick={() => onSelect(item, activeType)}
-                                                    className="bg-indigo-600 text-white p-2 rounded-xl hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100"
+                                                    className="bg-indigo-600 text-white p-2 rounded-xl hover:bg-indigo-700 transition-all shadow-md shadow-indigo-900/20"
                                                 >
                                                     <Plus className="w-4 h-4" />
                                                 </button>

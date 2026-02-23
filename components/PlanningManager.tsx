@@ -685,30 +685,30 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
             {(!activePlanId && !embeddedPlanId) ? (
                 <div>
                     <div className="flex justify-between items-center mb-6">
-                        <h1 className="text-2xl font-bold text-slate-800">Planejamento de Obras</h1>
-                        <button onClick={handleCreatePlan} className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700">
+                        <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Planejamento de Obras</h1>
+                        <button onClick={handleCreatePlan} className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 shadow-md shadow-blue-950/20">
                             <Plus size={20} /> Nova Obra
                         </button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {plans.map(plan => (
                             <div key={plan.id}
-                                className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 hover:border-blue-400 transition-all group relative">
+                                className="bg-white dark:bg-slate-900/50 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 hover:border-blue-400 transition-all group relative">
                                 <div className="flex justify-between items-start mb-2">
-                                    <span className="font-bold text-lg text-slate-800">{plan.name}</span>
-                                    <span className={`px - 2 py - 1 rounded text - xs font - bold ${plan.status === 'Concluído' ? 'bg-green-100 text-green-700' : 'bg-blue-50 text-blue-700'} `}>
+                                    <span className="font-bold text-lg text-slate-800 dark:text-slate-100">{plan.name}</span>
+                                    <span className={`px-2 py-1 rounded text-xs font-bold ${plan.status === 'Concluído' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'} `}>
                                         {plan.status}
                                     </span>
                                 </div>
-                                <p className="text-sm text-slate-500 mb-4">{plan.type}</p>
-                                <div className="flex justify-between text-xs text-slate-400 mb-4">
+                                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">{plan.type}</p>
+                                <div className="flex justify-between text-xs text-slate-400 dark:text-slate-500 mb-4">
                                     <span>{new Date(plan.created_at).toLocaleDateString()}</span>
                                     <span>ID: {plan.id}</span>
                                 </div>
-                                <div className="pt-4 border-t border-slate-100 flex justify-end">
+                                <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">
                                     <button
                                         onClick={() => { setActivePlanId(plan.id); setCurrentPlan(plan); }}
-                                        className="text-blue-600 font-bold text-sm bg-blue-50 px-4 py-2 rounded-lg hover:bg-blue-100 transition-colors w-full"
+                                        className="text-blue-600 dark:text-blue-400 font-bold text-sm bg-blue-50 dark:bg-blue-900/20 px-4 py-2 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors w-full"
                                     >
                                         Editar Planejamento
                                     </button>
@@ -718,11 +718,11 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                     </div>
                 </div>
             ) : (
-                <div className="bg-white rounded-2xl shadow-xl min-h-[80vh] flex flex-col">
+                <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl min-h-[80vh] flex flex-col border dark:border-slate-800 overflow-hidden">
                     {/* Fixed Editor Header & Tabs & Forms */}
-                    <div className="sticky top-0 z-20 bg-white border-b border-slate-200 shadow-sm">
+                    <div className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
                         {/* Editor Header */}
-                        <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-blue-50 rounded-t-2xl">
+                        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-blue-50 dark:bg-blue-900/20">
                             <div className="flex items-center gap-4">
                                 {!embeddedPlanId && (
                                     <button onClick={() => setActivePlanId(null)} className="text-blue-400 hover:text-blue-600">
@@ -730,22 +730,22 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                     </button>
                                 )}
                                 <div>
-                                    <h2 className="text-xl font-bold text-blue-900 flex items-center gap-2">
-                                        <HardHat className="text-blue-600" />
+                                    <h2 className="text-xl font-bold text-blue-900 dark:text-blue-100 flex items-center gap-2">
+                                        <HardHat className="text-blue-600 dark:text-blue-400" />
                                         {currentPlan?.name}
                                     </h2>
-                                    <p className="text-xs text-blue-600 uppercase tracking-widest font-semibold">{currentPlan?.type} • PLANEJAMENTO DE CUSTO</p>
+                                    <p className="text-xs text-blue-600 dark:text-blue-400 uppercase tracking-widest font-semibold">{currentPlan?.type} • PLANEJAMENTO DE CUSTO</p>
                                 </div>
                             </div>
                             <div className="flex gap-2">
-                                <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-blue-700 shadow-md">
+                                <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-blue-700 shadow-md shadow-blue-950/20">
                                     <Save size={16} /> Salvar
                                 </button>
                             </div>
                         </div>
 
                         {/* Tabs */}
-                        <div className="flex px-6 bg-white overflow-x-auto">
+                        <div className="flex px-6 bg-white dark:bg-slate-900 overflow-x-auto">
                             {[
                                 { id: 'dados', label: 'Dados da Obra', icon: FileText },
                                 { id: 'servicos', label: 'Serviços', icon: Building2 },
@@ -756,7 +756,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                     key={tab.id}
                                     type="button"
                                     onClick={() => setActiveTab(tab.id as any)}
-                                    className={`px-6 py-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'
+                                    className={`px-6 py-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                                         }`}
                                 >
                                     <tab.icon size={16} /> {tab.label}
@@ -766,28 +766,28 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
 
                         {/* Sub-Header forms for Add (Fixed) */}
                         {activeTab === 'servicos' && (
-                            <div className="p-6 border-t border-slate-100 bg-white">
-                                <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider"><Building2 size={16} /> Adicionar Serviço</h3>
+                            <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+                                <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider"><Building2 size={16} /> Adicionar Serviço</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                     <div className="md:col-span-4">
-                                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Descrição</label>
-                                        <input type="text" id="svc_desc" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none" placeholder="Ex: Pintura de Parede" />
+                                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Descrição</label>
+                                        <input type="text" id="svc_desc" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100" placeholder="Ex: Pintura de Parede" />
                                     </div>
                                     <div className="md:col-span-1">
-                                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Un</label>
-                                        <input type="text" id="svc_unit" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none" placeholder="m²" />
+                                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Un</label>
+                                        <input type="text" id="svc_unit" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100" placeholder="m²" />
                                     </div>
                                     <div className="md:col-span-1">
-                                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Qtd</label>
-                                        <input type="number" id="svc_qty" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none" placeholder="0" />
+                                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Qtd</label>
+                                        <input type="number" id="svc_qty" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100" placeholder="0" />
                                     </div>
                                     <div className="md:col-span-2">
-                                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Unit. Mat.</label>
-                                        <input type="number" id="svc_mat" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none" placeholder="0.00" />
+                                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Unit. Mat.</label>
+                                        <input type="number" id="svc_mat" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100" placeholder="0.00" />
                                     </div>
                                     <div className="md:col-span-2">
-                                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Unit. M.O.</label>
-                                        <input type="number" id="svc_lab" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none" placeholder="0.00" />
+                                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Unit. M.O.</label>
+                                        <input type="number" id="svc_lab" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100" placeholder="0.00" />
                                     </div>
                                     <div className="md:col-span-2">
                                         <button
@@ -820,7 +820,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 (document.getElementById('svc_mat') as HTMLInputElement).value = '';
                                                 (document.getElementById('svc_lab') as HTMLInputElement).value = '';
                                             }}
-                                            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-bold text-xs h-9 flex items-center justify-center gap-1 shadow-sm"
+                                            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-bold text-xs h-9 flex items-center justify-center gap-1 shadow-md shadow-blue-950/20"
                                         >
                                             <Plus size={14} /> ADICIONAR
                                         </button>
@@ -1009,10 +1009,10 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                     {resourceTab === 'impostos' && (
                                         <div className="space-y-6">
                                             {/* Predefined Taxes Grid */}
-                                            <div className="bg-white p-4 rounded-xl border border-slate-200">
+                                            <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
                                                 <div className="flex justify-between items-center mb-4">
-                                                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                                        <Percent size={14} className="text-blue-500" /> Impostos e BDI Padrãonizados
+                                                    <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                                                        <Percent size={14} className="text-blue-500 dark:text-blue-400" /> Impostos e BDI Padronizados
                                                     </h4>
                                                     <button
                                                         type="button"
@@ -1042,7 +1042,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             setTaxes(newTaxes);
                                                             notify("Impostos padrão carregados!", "success");
                                                         }}
-                                                        className="text-[10px] font-bold text-blue-600 hover:text-blue-800 uppercase tracking-tighter bg-blue-50 px-2 py-1 rounded"
+                                                        className="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 uppercase tracking-tighter bg-blue-50 dark:bg-blue-900/40 px-2 py-1 rounded"
                                                     >
                                                         Carregar Padrão (ISS/PIS/COF/INS)
                                                     </button>
@@ -1050,18 +1050,18 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
 
                                                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                                                     {[
-                                                        { name: 'BDI', label: 'BDI (%)', color: 'bg-indigo-50 text-indigo-700 border-indigo-100' },
-                                                        { name: 'ISS', label: 'ISS (%)', color: 'bg-blue-50 text-blue-700 border-blue-100' },
-                                                        { name: 'PIS', label: 'PIS (%)', color: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
-                                                        { name: 'COFINS', label: 'COFINS (%)', color: 'bg-slate-50 text-slate-700 border-slate-100' },
-                                                        { name: 'INSS', label: 'INSS (%)', color: 'bg-orange-50 text-orange-700 border-orange-100' }
+                                                        { name: 'BDI', label: 'BDI (%)', color: 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 border-indigo-100 dark:border-indigo-800' },
+                                                        { name: 'ISS', label: 'ISS (%)', color: 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-100 dark:border-blue-800' },
+                                                        { name: 'PIS', label: 'PIS (%)', color: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800' },
+                                                        { name: 'COFINS', label: 'COFINS (%)', color: 'bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 border-slate-100 dark:border-slate-700' },
+                                                        { name: 'INSS', label: 'INSS (%)', color: 'bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 border-orange-100 dark:border-orange-800' }
                                                     ].map(tax => (
-                                                        <div key={tax.name} className={`p - 3 rounded - lg border ${tax.color} `}>
+                                                        <div key={tax.name} className={`p-3 rounded-lg border ${tax.color} `}>
                                                             <label className="block text-[10px] font-bold uppercase mb-1 opacity-70">{tax.label}</label>
                                                             <input
                                                                 type="number"
                                                                 step="0.01"
-                                                                className="w-full bg-white/50 border border-black/5 rounded p-1 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5"
+                                                                className="w-full bg-white/50 dark:bg-slate-900/50 border border-black/5 dark:border-white/5 rounded p-1 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5 text-slate-900 dark:text-slate-100"
                                                                 value={taxes.find(t => t.name === tax.name)?.rate || ''}
                                                                 placeholder="0.00"
                                                                 onChange={(e) => {
@@ -1088,19 +1088,19 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                             </div>
 
                                             {/* Custom Tax Form */}
-                                            <div className="bg-slate-100 p-4 rounded-xl border border-slate-200">
-                                                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Outras Taxas / Impostos Personalizados</h4>
+                                            <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                                                <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">Outras Taxas / Impostos Personalizados</h4>
                                                 <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                                     <div className="md:col-span-7">
-                                                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nome do Item</label>
-                                                        <input type="text" id="tax_name" className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none" placeholder="Ex: Taxa Administrativa" />
+                                                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Nome do Item</label>
+                                                        <input type="text" id="tax_name" className="w-full p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100" placeholder="Ex: Taxa Administrativa" />
                                                     </div>
                                                     <div className="md:col-span-3">
-                                                        <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Taxa (%)</label>
+                                                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Taxa (%)</label>
                                                         <input
                                                             type="number"
                                                             id="tax_rate"
-                                                            className="w-full p-2 border border-slate-200 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none"
+                                                            className="w-full p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100"
                                                             placeholder="0"
                                                         />
                                                     </div>
@@ -1124,7 +1124,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                 (document.getElementById('tax_name') as HTMLInputElement).value = '';
                                                                 (document.getElementById('tax_rate') as HTMLInputElement).value = '';
                                                             }}
-                                                            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-bold text-xs h-9 shadow-sm flex items-center justify-center gap-2"
+                                                            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-bold text-xs h-9 shadow-md shadow-blue-950/20 flex items-center justify-center gap-2"
                                                         >
                                                             <Plus size={16} /> ADICIONAR
                                                         </button>
@@ -1133,21 +1133,21 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                             </div>
 
                                             <div className="col-span-full mt-2">
-                                                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Detalhamento dos Custos Indiretos / BDI</h4>
+                                                <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">Detalhamento dos Custos Indiretos / BDI</h4>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                                     {taxes.filter(t => (t.rate > 0 || t.value > 0)).map(t => (
-                                                        <div key={t.id} className="bg-white p-3 rounded-lg border border-slate-100 flex justify-between items-center shadow-sm">
+                                                        <div key={t.id} className="bg-white dark:bg-slate-900 p-3 rounded-lg border border-slate-100 dark:border-slate-800 flex justify-between items-center shadow-sm">
                                                             <div>
-                                                                <span className="font-black text-xs text-slate-700">{t.name}</span>
-                                                                <span className="text-[10px] font-bold text-slate-400 ml-2">
+                                                                <span className="font-black text-xs text-slate-700 dark:text-slate-200">{t.name}</span>
+                                                                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 ml-2">
                                                                     {t.rate > 0 ? `${t.rate}% ` : `R$ ${t.value.toFixed(2)} `}
                                                                 </span>
                                                             </div>
                                                             <div className="flex items-center gap-4">
-                                                                <span className="font-bold text-xs text-blue-600">
+                                                                <span className="font-bold text-xs text-blue-600 dark:text-blue-400">
                                                                     R$ {(t.rate > 0 ? (t.name === 'BDI' ? totalDirect : totalGeneral) * (t.rate / 100) : t.value).toFixed(2)}
                                                                 </span>
-                                                                <button onClick={() => handleDeleteTax(t.id)} className="text-slate-300 hover:text-red-500 transition-colors">
+                                                                <button onClick={() => handleDeleteTax(t.id)} className="text-slate-300 dark:text-slate-600 hover:text-red-500 transition-colors">
                                                                     <Trash2 size={14} />
                                                                 </button>
                                                             </div>
@@ -1190,25 +1190,25 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
 
 
                     {/* Content */}
-                    <div className="p-8 flex-1 bg-slate-50/50">
+                    <div className="p-8 flex-1 bg-slate-50/50 dark:bg-slate-900/50">
                         {activeTab === 'dados' && currentPlan && (
                             <div className="max-w-2xl mx-auto space-y-6">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Nome da Obra</label>
+                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Nome da Obra</label>
                                         <input
                                             type="text"
                                             value={currentPlan.name}
                                             onChange={e => setCurrentPlan({ ...currentPlan, name: e.target.value.toUpperCase() })}
-                                            className="w-full p-2 border border-slate-200 rounded-lg font-semibold text-slate-700"
+                                            className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-semibold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Tipo</label>
+                                        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Tipo</label>
                                         <select
                                             value={currentPlan.type}
                                             onChange={e => setCurrentPlan({ ...currentPlan, type: e.target.value })}
-                                            className="w-full p-2 border border-slate-200 rounded-lg font-semibold text-slate-700"
+                                            className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-semibold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900"
                                         >
                                             <option>Reforma</option>
                                             <option>Manutenção</option>
@@ -1220,7 +1220,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                 </div>
                                 {/* Customer Select */}
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Cliente</label>
+                                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Cliente</label>
                                     <select
                                         value={currentPlan.client_id}
                                         onChange={e => {
@@ -1232,19 +1232,19 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 client_name: customer ? customer.name : ''
                                             });
                                         }}
-                                        className="w-full p-2 border border-slate-200 rounded-lg font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-blue-100"
+                                        className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-semibold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900"
                                     >
                                         <option value="">Selecione...</option>
                                         {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Endereço</label>
+                                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Endereço</label>
                                     <input
                                         type="text"
                                         value={currentPlan.address}
                                         onChange={e => setCurrentPlan({ ...currentPlan, address: e.target.value })}
-                                        className="w-full p-2 border border-slate-200 rounded-lg font-semibold text-slate-700"
+                                        className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-semibold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900"
                                         placeholder="Local da execução"
                                     />
                                 </div>
@@ -1262,7 +1262,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                             onDragStart={() => setDraggedSvcIndex(index)}
                                             onDragOver={(e) => (window as any).handleDragOver(e, index, draggedSvcIndex, services, setServices, setDraggedSvcIndex)}
                                             onDragEnd={() => setDraggedSvcIndex(null)}
-                                            className={`bg-white p-4 rounded-xl border transition-all flex justify-between items-center group hover:border-blue-300 ${draggedSvcIndex === index ? 'opacity-50 bg-blue-50 border-blue-200 shadow-inner' : 'border-slate-200 shadow-sm'}`}
+                                            className={`bg-white dark:bg-slate-900/50 p-4 rounded-xl border transition-all flex justify-between items-center group hover:border-blue-300 dark:hover:border-blue-500 ${draggedSvcIndex === index ? 'opacity-50 bg-blue-50 dark:bg-blue-900/20 border-blue-200 shadow-inner' : 'border-slate-200 dark:border-slate-800 shadow-sm'}`}
                                         >
                                             {editingId === svc.id ? (
                                                 <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center">
@@ -1271,7 +1271,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             type="text"
                                                             value={editDesc}
                                                             onChange={e => setEditDesc(e.target.value.toUpperCase())}
-                                                            className="w-full p-2 border border-slate-200 rounded text-sm font-bold"
+                                                            className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm font-bold text-slate-900 dark:text-slate-100"
                                                         />
                                                     </div>
                                                     <div className="md:col-span-1">
@@ -1279,7 +1279,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             type="text"
                                                             value={editUnit}
                                                             onChange={e => setEditUnit(e.target.value)}
-                                                            className="w-full p-2 border border-slate-200 rounded text-sm"
+                                                            className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm text-slate-900 dark:text-slate-100"
                                                         />
                                                     </div>
                                                     <div className="md:col-span-2">
@@ -1287,7 +1287,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             type="number"
                                                             value={editQty}
                                                             onChange={e => setEditQty(parseFloat(e.target.value) || 0)}
-                                                            className="w-full p-2 border border-slate-200 rounded text-sm"
+                                                            className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm text-slate-900 dark:text-slate-100"
                                                         />
                                                     </div>
                                                     <div className="md:col-span-2">
@@ -1295,7 +1295,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             type="number"
                                                             value={editPrice1}
                                                             onChange={e => setEditPrice1(parseFloat(e.target.value) || 0)}
-                                                            className="w-full p-2 border border-slate-200 rounded text-sm"
+                                                            className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm text-slate-900 dark:text-slate-100"
                                                             placeholder="Mat."
                                                         />
                                                     </div>
@@ -1304,7 +1304,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             type="number"
                                                             value={editPrice2}
                                                             onChange={e => setEditPrice2(parseFloat(e.target.value) || 0)}
-                                                            className="w-full p-2 border border-slate-200 rounded text-sm"
+                                                            className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm text-slate-900 dark:text-slate-100"
                                                             placeholder="M.O."
                                                         />
                                                     </div>
@@ -1323,13 +1323,13 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                 setServices(updated);
                                                                 setEditingId(null);
                                                             }}
-                                                            className="text-green-600 p-1 hover:bg-green-50 rounded"
+                                                            className="text-green-600 p-1 hover:bg-green-50 dark:hover:bg-green-900/30 rounded"
                                                         >
                                                             <Check size={18} />
                                                         </button>
                                                         <button
                                                             onClick={() => setEditingId(null)}
-                                                            className="text-red-600 p-1 hover:bg-red-50 rounded"
+                                                            className="text-red-600 p-1 hover:bg-red-50 dark:hover:bg-red-900/30 rounded"
                                                         >
                                                             <X size={18} />
                                                         </button>
@@ -1338,23 +1338,23 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                             ) : (
                                                 <>
                                                     <div className="flex items-center gap-3 grow">
-                                                        <div className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 shrink-0">
+                                                        <div className="cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 shrink-0">
                                                             <GripVertical size={18} />
                                                         </div>
                                                         <div className="grow">
-                                                            <p className="font-bold text-slate-800">{svc.description}</p>
-                                                            <p className="text-xs text-slate-500">
+                                                            <p className="font-bold text-slate-800 dark:text-slate-100">{svc.description}</p>
+                                                            <p className="text-xs text-slate-500 dark:text-slate-400">
                                                                 {svc.quantity} {svc.unit} x (Mat: {svc.unit_material_cost.toFixed(2)} + MO: {svc.unit_labor_cost.toFixed(2)})
                                                             </p>
                                                         </div>
                                                     </div>
                                                     <div className="text-right mr-4 shrink-0 whitespace-nowrap">
-                                                        <p className="text-sm font-bold text-slate-800">R$ {svc.total_cost.toFixed(2)}</p>
+                                                        <p className="text-sm font-bold text-slate-800 dark:text-slate-100">R$ {svc.total_cost.toFixed(2)}</p>
                                                     </div>
                                                     <div className="flex gap-1 shrink-0">
                                                         <div className="flex items-center gap-1 mr-2">
-                                                            <button onClick={() => (window as any).moveItem(services, setServices, index, 'up')} disabled={index === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronUp size={16} /></button>
-                                                            <button onClick={() => (window as any).moveItem(services, setServices, index, 'down')} disabled={index === services.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronDown size={16} /></button>
+                                                            <button onClick={() => (window as any).moveItem(services, setServices, index, 'up')} disabled={index === 0} className="text-slate-300 dark:text-slate-600 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronUp size={16} /></button>
+                                                            <button onClick={() => (window as any).moveItem(services, setServices, index, 'down')} disabled={index === services.length - 1} className="text-slate-300 dark:text-slate-600 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronDown size={16} /></button>
                                                         </div>
                                                         <button
                                                             onClick={() => {
@@ -1365,13 +1365,13 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                 setEditPrice1(svc.unit_material_cost);
                                                                 setEditPrice2(svc.unit_labor_cost);
                                                             }}
-                                                            className="text-slate-300 hover:text-blue-500 p-2"
+                                                            className="text-slate-300 dark:text-slate-600 hover:text-blue-500 p-2"
                                                         >
                                                             <Pencil size={16} />
                                                         </button>
                                                         <button
                                                             onClick={() => handleDeleteService(svc.id)}
-                                                            className="text-slate-300 hover:text-red-500 p-2"
+                                                            className="text-slate-300 dark:text-slate-600 hover:text-red-500 p-2"
                                                         >
                                                             <Trash2 size={16} />
                                                         </button>
@@ -1392,11 +1392,11 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                 {resourceTab === 'material' && (
                                     <div className="space-y-2">
                                         {materials.length > 0 && (
-                                            <div className="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-200 mb-2">
+                                            <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-2 rounded-lg border border-slate-200 dark:border-slate-700 mb-2">
                                                 <div className="flex items-center gap-3">
                                                     <input
                                                         type="checkbox"
-                                                        className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                                        className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-slate-900"
                                                         checked={selectedMaterials.length === materials.length && materials.length > 0}
                                                         onChange={(e) => {
                                                             if (e.target.checked) {
@@ -1406,7 +1406,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             }
                                                         }}
                                                     />
-                                                    <span className="text-xs font-semibold text-slate-600">
+                                                    <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">
                                                         {selectedMaterials.length} selecionado(s)
                                                     </span>
                                                 </div>
@@ -1420,7 +1420,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                     notify("Materiais removidos!");
                                                                 }
                                                             }}
-                                                            className="flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 rounded text-[10px] font-bold hover:bg-red-100 transition-colors border border-red-100"
+                                                            className="flex items-center gap-1 px-2 py-1 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded text-[10px] font-bold hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors border border-red-100 dark:border-red-800"
                                                         >
                                                             <Trash2 size={12} /> Excluir Selecionados
                                                         </button>
@@ -1433,7 +1433,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                 notify("Lista de materiais limpa!");
                                                             }
                                                         }}
-                                                        className="flex items-center gap-1 px-2 py-1 bg-slate-200 text-slate-700 rounded text-[10px] font-bold hover:bg-slate-300 transition-colors"
+                                                        className="flex items-center gap-1 px-2 py-1 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded text-[10px] font-bold hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
                                                     >
                                                         <Archive size={12} /> Limpar Lista
                                                     </button>
@@ -1447,7 +1447,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 onDragStart={() => setDraggedMatIndex(index)}
                                                 onDragOver={(e) => (window as any).handleDragOver(e, index, draggedMatIndex, materials, setMaterials, setDraggedMatIndex)}
                                                 onDragEnd={() => setDraggedMatIndex(null)}
-                                                className={`bg-white p-3 rounded-lg border flex justify-between items-center text-sm transition-all ${draggedMatIndex === index ? 'opacity-50 bg-blue-50 border-blue-200 shadow-inner' : (selectedMaterials.includes(m.id) ? 'border-blue-300 bg-blue-50/30' : 'border-slate-200 shadow-sm')}`}
+                                                className={`bg-white dark:bg-slate-900/50 p-3 rounded-lg border flex justify-between items-center text-sm transition-all ${draggedMatIndex === index ? 'opacity-50 bg-blue-50 dark:bg-blue-900/20 border-blue-200 shadow-inner' : (selectedMaterials.includes(m.id) ? 'border-blue-300 dark:border-blue-500 bg-blue-50/30 dark:bg-blue-900/10' : 'border-slate-200 dark:border-slate-800 shadow-sm')}`}
                                             >
                                                 {editingId === m.id ? (
                                                     <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center mr-2">
@@ -1456,7 +1456,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                 type="text"
                                                                 value={editDesc}
                                                                 onChange={e => setEditDesc(e.target.value.toUpperCase())}
-                                                                className="w-full p-2 border border-slate-200 rounded text-xs font-bold"
+                                                                className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-900 dark:text-slate-100"
                                                             />
                                                         </div>
                                                         <div className="md:col-span-2">
@@ -1464,7 +1464,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                 type="number"
                                                                 value={editQty}
                                                                 onChange={e => setEditQty(parseFloat(e.target.value) || 0)}
-                                                                className="w-full p-2 border border-slate-200 rounded text-xs"
+                                                                className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs text-slate-900 dark:text-slate-100"
                                                             />
                                                         </div>
                                                         <div className="md:col-span-1">
@@ -1472,7 +1472,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                 type="text"
                                                                 value={editUnit}
                                                                 onChange={e => setEditUnit(e.target.value)}
-                                                                className="w-full p-2 border border-slate-200 rounded text-xs"
+                                                                className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs text-slate-900 dark:text-slate-100"
                                                             />
                                                         </div>
                                                         <div className="md:col-span-3">
@@ -1480,7 +1480,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                 type="number"
                                                                 value={editPrice1}
                                                                 onChange={e => setEditPrice1(parseFloat(e.target.value) || 0)}
-                                                                className="w-full p-2 border border-slate-200 rounded text-xs font-bold"
+                                                                className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-900 dark:text-slate-100"
                                                                 placeholder="Custo Unit."
                                                             />
                                                         </div>
@@ -1498,13 +1498,13 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                     setMaterials(updated);
                                                                     setEditingId(null);
                                                                 }}
-                                                                className="text-green-600 p-1 hover:bg-green-50 rounded"
+                                                                className="text-green-600 p-1 hover:bg-green-50 dark:hover:bg-green-900/30 rounded"
                                                             >
                                                                 <Check size={16} />
                                                             </button>
                                                             <button
                                                                 onClick={() => setEditingId(null)}
-                                                                className="text-red-600 p-1 hover:bg-red-50 rounded"
+                                                                className="text-red-600 p-1 hover:bg-red-50 dark:hover:bg-red-900/30 rounded"
                                                             >
                                                                 <X size={16} />
                                                             </button>
@@ -1515,7 +1515,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                         <div className="flex items-center gap-3 grow">
                                                             <input
                                                                 type="checkbox"
-                                                                className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                                                className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-slate-900"
                                                                 checked={selectedMaterials.includes(m.id)}
                                                                 onChange={(e) => {
                                                                     if (e.target.checked) {
@@ -1525,22 +1525,22 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                     }
                                                                 }}
                                                             />
-                                                            <div className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 shrink-0">
+                                                            <div className="cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 shrink-0">
                                                                 <GripVertical size={16} />
                                                             </div>
-                                                            <div className="grow">
-                                                                <span className="whitespace-nowrap"><b>{m.material_name}</b> | (R$ {m.unit_cost.toFixed(2)}) {m.quantity}{m.unit}</span>
+                                                            <div className="grow text-slate-900 dark:text-slate-100">
+                                                                <span className="whitespace-nowrap"><b className="dark:text-blue-400">{m.material_name}</b> | (R$ {m.unit_cost.toFixed(2)}) {m.quantity}{m.unit}</span>
                                                             </div>
                                                         </div>
                                                         <div className="flex items-center gap-4 text-xs shrink-0 whitespace-nowrap">
-                                                            <span className="font-bold">R$ {m.total_cost.toFixed(2)}</span>
+                                                            <span className="font-bold text-slate-900 dark:text-slate-100">R$ {m.total_cost.toFixed(2)}</span>
                                                             <div className="flex gap-1 mr-2">
-                                                                <button onClick={() => (window as any).moveItem(materials, setMaterials, index, 'up')} disabled={index === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronUp size={14} /></button>
-                                                                <button onClick={() => (window as any).moveItem(materials, setMaterials, index, 'down')} disabled={index === materials.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronDown size={14} /></button>
+                                                                <button onClick={() => (window as any).moveItem(materials, setMaterials, index, 'up')} disabled={index === 0} className="text-slate-300 dark:text-slate-600 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronUp size={14} /></button>
+                                                                <button onClick={() => (window as any).moveItem(materials, setMaterials, index, 'down')} disabled={index === materials.length - 1} className="text-slate-300 dark:text-slate-600 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronDown size={14} /></button>
                                                             </div>
                                                             <Pencil
                                                                 size={14}
-                                                                className="cursor-pointer text-slate-400 hover:text-blue-500"
+                                                                className="cursor-pointer text-slate-400 dark:text-slate-600 hover:text-blue-500"
                                                                 onClick={() => {
                                                                     setEditingId(m.id);
                                                                     setEditDesc(m.material_name);
@@ -1551,7 +1551,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             />
                                                             <Trash2
                                                                 size={14}
-                                                                className="cursor-pointer text-slate-400 hover:text-red-500"
+                                                                className="cursor-pointer text-slate-400 dark:text-slate-600 hover:text-red-500"
                                                                 onClick={() => handleDeleteMaterial(m.id)}
                                                             />
                                                         </div>
@@ -1571,7 +1571,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 onDragStart={() => setDraggedLabIndex(index)}
                                                 onDragOver={(e) => (window as any).handleDragOver(e, index, draggedLabIndex, labor, setLabor, setDraggedLabIndex)}
                                                 onDragEnd={() => setDraggedLabIndex(null)}
-                                                className={`bg-white p-3 rounded-lg border flex justify-between items-center text-sm transition-all ${draggedLabIndex === index ? 'opacity-50 bg-blue-50 border-blue-200 shadow-inner' : 'border-slate-200 shadow-sm'}`}
+                                                className={`bg-white dark:bg-slate-900/50 p-3 rounded-lg border flex justify-between items-center text-sm transition-all ${draggedLabIndex === index ? 'opacity-50 bg-blue-50 dark:bg-blue-900/20 border-blue-200 shadow-inner' : 'border-slate-200 dark:border-slate-800 shadow-sm'}`}
                                             >
                                                 {editingId === l.id ? (
                                                     <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center mr-2">
@@ -1580,7 +1580,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                 type="text"
                                                                 value={editDesc}
                                                                 onChange={e => setEditDesc(e.target.value.toUpperCase())}
-                                                                className="w-full p-2 border border-slate-200 rounded text-xs font-bold"
+                                                                className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-900 dark:text-slate-100"
                                                             />
                                                         </div>
                                                         <div className="md:col-span-2">
@@ -1590,7 +1590,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                     const updated = labor.map(item => item.id === l.id ? { ...item, cost_type: e.target.value as any } : item);
                                                                     setLabor(updated);
                                                                 }}
-                                                                className="w-full p-2 border border-slate-200 rounded text-xs"
+                                                                className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs text-slate-900 dark:text-slate-100"
                                                             >
                                                                 <option value="Diária">Diária</option>
                                                                 <option value="Hora">Hora</option>
@@ -1602,7 +1602,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                 type="number"
                                                                 value={editQty}
                                                                 onChange={e => setEditQty(parseFloat(e.target.value) || 0)}
-                                                                className="w-full p-2 border border-slate-200 rounded text-xs"
+                                                                className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs text-slate-900 dark:text-slate-100"
                                                             />
                                                         </div>
                                                         <div className="md:col-span-1">
@@ -1611,7 +1611,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                 value={editUnit}
                                                                 onChange={e => setEditUnit(e.target.value)}
                                                                 placeholder="un"
-                                                                className="w-full p-2 border border-slate-200 rounded text-xs"
+                                                                className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs text-slate-900 dark:text-slate-100"
                                                             />
                                                         </div>
                                                         <div className="md:col-span-2">
@@ -1619,7 +1619,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                 type="number"
                                                                 value={editPrice1}
                                                                 onChange={e => setEditPrice1(parseFloat(e.target.value) || 0)}
-                                                                className="w-full p-2 border border-slate-200 rounded text-xs font-bold"
+                                                                className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-900 dark:text-slate-100"
                                                             />
                                                         </div>
                                                         <div className="md:col-span-1 flex gap-1">
@@ -1636,13 +1636,13 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                     setLabor(updated);
                                                                     setEditingId(null);
                                                                 }}
-                                                                className="text-green-600 p-1 hover:bg-green-50 rounded"
+                                                                className="text-green-600 p-1 hover:bg-green-50 dark:hover:bg-green-900/30 rounded"
                                                             >
                                                                 <Check size={16} />
                                                             </button>
                                                             <button
                                                                 onClick={() => setEditingId(null)}
-                                                                className="text-red-600 p-1 hover:bg-red-50 rounded"
+                                                                className="text-red-600 p-1 hover:bg-red-50 dark:hover:bg-red-900/30 rounded"
                                                             >
                                                                 <X size={16} />
                                                             </button>
@@ -1651,22 +1651,22 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 ) : (
                                                     <>
                                                         <div className="flex items-center gap-2 grow">
-                                                            <div className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 shrink-0">
+                                                            <div className="cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 shrink-0">
                                                                 <GripVertical size={16} />
                                                             </div>
-                                                            <div className="grow">
-                                                                <span className="whitespace-nowrap"><b>{l.role}</b> | ({l.cost_type}) {l.quantity}{l.unit || 'un'}</span>
+                                                            <div className="grow text-slate-900 dark:text-slate-100">
+                                                                <span className="whitespace-nowrap"><b className="dark:text-amber-400">{l.role}</b> | ({l.cost_type}) {l.quantity}{l.unit || 'un'}</span>
                                                             </div>
                                                         </div>
                                                         <div className="flex items-center gap-4 text-xs shrink-0 whitespace-nowrap">
-                                                            <span className="font-bold">R$ {l.total_cost.toFixed(2)}</span>
+                                                            <span className="font-bold text-slate-900 dark:text-slate-100">R$ {l.total_cost.toFixed(2)}</span>
                                                             <div className="flex gap-1 mr-2">
-                                                                <button onClick={() => (window as any).moveItem(labor, setLabor, index, 'up')} disabled={index === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronUp size={14} /></button>
-                                                                <button onClick={() => (window as any).moveItem(labor, setLabor, index, 'down')} disabled={index === labor.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronDown size={14} /></button>
+                                                                <button onClick={() => (window as any).moveItem(labor, setLabor, index, 'up')} disabled={index === 0} className="text-slate-300 dark:text-slate-600 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronUp size={14} /></button>
+                                                                <button onClick={() => (window as any).moveItem(labor, setLabor, index, 'down')} disabled={index === labor.length - 1} className="text-slate-300 dark:text-slate-600 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronDown size={14} /></button>
                                                             </div>
                                                             <Pencil
                                                                 size={14}
-                                                                className="cursor-pointer text-slate-400 hover:text-blue-500"
+                                                                className="cursor-pointer text-slate-400 dark:text-slate-600 hover:text-blue-500"
                                                                 onClick={() => {
                                                                     setEditingId(l.id);
                                                                     setEditDesc(l.role);
@@ -1677,7 +1677,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             />
                                                             <Trash2
                                                                 size={14}
-                                                                className="cursor-pointer text-slate-400 hover:text-red-500"
+                                                                className="cursor-pointer text-slate-400 dark:text-slate-600 hover:text-red-500"
                                                                 onClick={() => handleDeleteLabor(l.id)}
                                                             />
                                                         </div>
@@ -1697,7 +1697,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 onDragStart={() => setDraggedIndIndex(index)}
                                                 onDragOver={(e) => (window as any).handleDragOver(e, index, draggedIndIndex, indirects, setIndirects, setDraggedIndIndex)}
                                                 onDragEnd={() => setDraggedIndIndex(null)}
-                                                className={`bg-white p-3 rounded-lg border flex justify-between items-center text-sm transition-all ${draggedIndIndex === index ? 'opacity-50 bg-blue-50 border-blue-200 shadow-inner' : 'border-slate-200 shadow-sm'}`}
+                                                className={`bg-white dark:bg-slate-900/50 p-3 rounded-lg border flex justify-between items-center text-sm transition-all ${draggedIndIndex === index ? 'opacity-50 bg-blue-50 dark:bg-blue-900/20 border-blue-200 shadow-inner' : 'border-slate-200 dark:border-slate-800 shadow-sm'}`}
                                             >
                                                 {editingId === i.id ? (
                                                     <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center mr-2">
@@ -1705,7 +1705,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             <select
                                                                 value={editUnit}
                                                                 onChange={e => setEditUnit(e.target.value)}
-                                                                className="w-full p-2 border border-slate-200 rounded text-xs"
+                                                                className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs text-slate-900 dark:text-slate-100"
                                                             >
                                                                 <option>Transporte</option>
                                                                 <option>Alimentação</option>
@@ -1720,7 +1720,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                 type="text"
                                                                 value={editDesc}
                                                                 onChange={e => setEditDesc(e.target.value.toUpperCase())}
-                                                                className="w-full p-2 border border-slate-200 rounded text-xs font-bold"
+                                                                className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-900 dark:text-slate-100"
                                                             />
                                                         </div>
                                                         <div className="md:col-span-2">
@@ -1728,7 +1728,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                 type="number"
                                                                 value={editPrice1}
                                                                 onChange={e => setEditPrice1(parseFloat(e.target.value) || 0)}
-                                                                className="w-full p-2 border border-slate-200 rounded text-xs font-bold"
+                                                                className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-900 dark:text-slate-100"
                                                             />
                                                         </div>
                                                         <div className="md:col-span-1 flex gap-1">
@@ -1743,13 +1743,13 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                     setIndirects(updated);
                                                                     setEditingId(null);
                                                                 }}
-                                                                className="text-green-600 p-1 hover:bg-green-50 rounded"
+                                                                className="text-green-600 p-1 hover:bg-green-50 dark:hover:bg-green-900/30 rounded"
                                                             >
                                                                 <Check size={16} />
                                                             </button>
                                                             <button
                                                                 onClick={() => setEditingId(null)}
-                                                                className="text-red-600 p-1 hover:bg-red-50 rounded"
+                                                                className="text-red-600 p-1 hover:bg-red-50 dark:hover:bg-red-900/30 rounded"
                                                             >
                                                                 <X size={16} />
                                                             </button>
@@ -1758,22 +1758,22 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 ) : (
                                                     <>
                                                         <div className="flex items-center gap-2 grow">
-                                                            <div className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 shrink-0">
+                                                            <div className="cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 shrink-0">
                                                                 <GripVertical size={16} />
                                                             </div>
-                                                            <div className="grow">
-                                                                <span>[{i.category}] <b>{i.description}</b></span>
+                                                            <div className="grow text-slate-900 dark:text-slate-100">
+                                                                <span><b className="text-slate-400 dark:text-slate-500">[{i.category}]</b> <b>{i.description}</b></span>
                                                             </div>
                                                         </div>
                                                         <div className="flex items-center gap-4 text-xs shrink-0 whitespace-nowrap">
-                                                            <span className="font-bold">R$ {i.value.toFixed(2)}</span>
+                                                            <span className="font-bold text-slate-900 dark:text-slate-100">R$ {i.value.toFixed(2)}</span>
                                                             <div className="flex gap-1 mr-2">
-                                                                <button onClick={() => (window as any).moveItem(indirects, setIndirects, index, 'up')} disabled={index === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronUp size={14} /></button>
-                                                                <button onClick={() => (window as any).moveItem(indirects, setIndirects, index, 'down')} disabled={index === indirects.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronDown size={14} /></button>
+                                                                <button onClick={() => (window as any).moveItem(indirects, setIndirects, index, 'up')} disabled={index === 0} className="text-slate-300 dark:text-slate-600 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronUp size={14} /></button>
+                                                                <button onClick={() => (window as any).moveItem(indirects, setIndirects, index, 'down')} disabled={index === indirects.length - 1} className="text-slate-300 dark:text-slate-600 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronDown size={14} /></button>
                                                             </div>
                                                             <Pencil
                                                                 size={14}
-                                                                className="cursor-pointer text-slate-400 hover:text-blue-500"
+                                                                className="cursor-pointer text-slate-400 dark:text-slate-600 hover:text-blue-500"
                                                                 onClick={() => {
                                                                     setEditingId(i.id);
                                                                     setEditUnit(i.category);
@@ -1783,7 +1783,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             />
                                                             <Trash2
                                                                 size={14}
-                                                                className="cursor-pointer text-slate-400 hover:text-red-500"
+                                                                className="cursor-pointer text-slate-400 dark:text-slate-600 hover:text-red-500"
                                                                 onClick={() => handleDeleteIndirect(i.id)}
                                                             />
                                                         </div>
@@ -1801,62 +1801,62 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                             <div className="max-w-4xl mx-auto">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-8">
 
-                                    <div className="bg-emerald-50 p-6 rounded-xl border border-emerald-200 shadow-sm transition-all hover:shadow-md">
+                                    <div className="bg-emerald-50 dark:bg-emerald-900/20 p-6 rounded-xl border border-emerald-200 dark:border-emerald-800 shadow-sm transition-all hover:shadow-md">
                                         <div className="flex justify-between items-start mb-2">
-                                            <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Total Materiais</span>
-                                            <div className="bg-emerald-100 p-1.5 rounded-lg">
-                                                <Truck size={16} className="text-emerald-600" />
+                                            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Total Materiais</span>
+                                            <div className="bg-emerald-100 dark:bg-emerald-900/40 p-1.5 rounded-lg">
+                                                <Truck size={16} className="text-emerald-600 dark:text-emerald-400" />
                                             </div>
                                         </div>
-                                        <span className="text-2xl font-black text-emerald-900 whitespace-nowrap">R$ {totalMaterial.toFixed(2)}</span>
-                                        <p className="text-[10px] text-emerald-600 mt-1 font-medium">Insumos + Materiais de Serviços</p>
+                                        <span className="text-2xl font-black text-emerald-900 dark:text-emerald-100 whitespace-nowrap">R$ {totalMaterial.toFixed(2)}</span>
+                                        <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-1 font-medium">Insumos + Materiais de Serviços</p>
                                     </div>
 
-                                    <div className="bg-amber-50 p-6 rounded-xl border border-amber-200 shadow-sm transition-all hover:shadow-md">
+                                    <div className="bg-amber-50 dark:bg-amber-900/20 p-6 rounded-xl border border-amber-200 dark:border-amber-800 shadow-sm transition-all hover:shadow-md">
                                         <div className="flex justify-between items-start mb-2">
-                                            <span className="text-xs font-bold text-amber-600 uppercase tracking-wider">Total Mão de Obra</span>
-                                            <div className="bg-amber-100 p-1.5 rounded-lg">
-                                                <HardHat size={16} className="text-amber-600" />
+                                            <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Total Mão de Obra</span>
+                                            <div className="bg-amber-100 dark:bg-amber-900/40 p-1.5 rounded-lg">
+                                                <HardHat size={16} className="text-amber-600 dark:text-amber-400" />
                                             </div>
                                         </div>
-                                        <span className="text-2xl font-black text-amber-900 whitespace-nowrap">R$ {totalLabor.toFixed(2)}</span>
-                                        <p className="text-[10px] text-amber-600 mt-1 font-medium">Equipe Própria + Terceirizada</p>
+                                        <span className="text-2xl font-black text-amber-900 dark:text-amber-100 whitespace-nowrap">R$ {totalLabor.toFixed(2)}</span>
+                                        <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-1 font-medium">Equipe Própria + Terceirizada</p>
                                     </div>
 
-                                    <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-sm transition-all hover:shadow-md">
+                                    <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:shadow-md">
                                         <div className="flex justify-between items-start mb-2">
-                                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Indiretos</span>
-                                            <div className="bg-slate-200 p-1.5 rounded-lg">
-                                                <Archive size={16} className="text-slate-600" />
+                                            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Indiretos</span>
+                                            <div className="bg-slate-200 dark:bg-slate-700 p-1.5 rounded-lg">
+                                                <Archive size={16} className="text-slate-600 dark:text-slate-300" />
                                             </div>
                                         </div>
-                                        <span className="text-2xl font-black text-slate-800 whitespace-nowrap">R$ {totalIndirect.toFixed(2)}</span>
-                                        <p className="text-[10px] text-slate-500 mt-1 font-medium">Custos Administrativos</p>
+                                        <span className="text-2xl font-black text-slate-800 dark:text-slate-100 whitespace-nowrap">R$ {totalIndirect.toFixed(2)}</span>
+                                        <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-medium">Custos Administrativos</p>
                                     </div>
 
-                                    <div className="bg-blue-50 p-6 rounded-xl border border-blue-200 shadow-sm transition-all hover:shadow-md">
+                                    <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-xl border border-blue-200 dark:border-blue-800 shadow-sm transition-all hover:shadow-md">
                                         <div className="flex justify-between items-start mb-2">
-                                            <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">Total Impostos</span>
-                                            <div className="bg-blue-100 p-1.5 rounded-lg">
-                                                <Percent size={16} className="text-blue-600" />
+                                            <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Total Impostos</span>
+                                            <div className="bg-blue-100 dark:bg-blue-900/40 p-1.5 rounded-lg">
+                                                <Percent size={16} className="text-blue-600 dark:text-blue-400" />
                                             </div>
                                         </div>
-                                        <span className="text-2xl font-black text-blue-900 whitespace-nowrap">R$ {totalTaxes.toFixed(2)}</span>
-                                        <p className="text-[10px] text-blue-600 mt-1 font-medium">Baseado no BDI e Taxas</p>
+                                        <span className="text-2xl font-black text-blue-900 dark:text-blue-100 whitespace-nowrap">R$ {totalTaxes.toFixed(2)}</span>
+                                        <p className="text-[10px] text-blue-600 dark:text-blue-400 mt-1 font-medium">Baseado no BDI e Taxas</p>
                                     </div>
                                 </div>
 
                                 <div className="flex justify-end gap-2 mb-6">
                                     <button
                                         onClick={handlePreviewFull}
-                                        className="bg-white border border-slate-200 text-slate-600 px-6 py-4 rounded-2xl text-base font-black flex items-center gap-4 hover:bg-slate-50 transition-all shadow-md group border-b-4 border-b-blue-600 active:border-b-0 active:translate-y-1"
+                                        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 px-6 py-4 rounded-2xl text-base font-black flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-md group border-b-4 border-b-blue-600 active:border-b-0 active:translate-y-1"
                                     >
-                                        <div className="bg-blue-100 p-2 rounded-xl group-hover:scale-110 transition-transform">
-                                            <Eye size={24} className="text-blue-600" />
+                                        <div className="bg-blue-100 dark:bg-blue-900/40 p-2 rounded-xl group-hover:scale-110 transition-transform">
+                                            <Eye size={24} className="text-blue-600 dark:text-blue-400" />
                                         </div>
                                         <div className="text-left">
-                                            <span className="block text-slate-800 leading-none">Visualizar e Gerar PDF</span>
-                                            <span className="text-[10px] text-slate-400 uppercase tracking-widest leading-none font-bold">Relatório Completo</span>
+                                            <span className="block text-slate-800 dark:text-slate-100 leading-none">Visualizar e Gerar PDF</span>
+                                            <span className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none font-bold">Relatório Completo</span>
                                         </div>
                                     </button>
                                 </div>
@@ -1880,7 +1880,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 notify("Função de gerar orçamento não disponível neste modo.", "info");
                                             }
                                         }}
-                                        className={`bg - blue - 600 hover: bg - blue - 500 text - white px - 6 py - 3 rounded - xl font - bold shadow - lg flex items - center gap - 2 transition - all transform hover: scale - 105 ${!onGenerateBudget ? 'opacity-50 cursor-not-allowed' : ''} `}
+                                        className={`bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg flex items-center gap-2 transition-all transform hover:scale-105 ${!onGenerateBudget ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     >
                                         <Calculator size={20} /> Gerar Orçamento
                                     </button>
@@ -1888,7 +1888,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                             </div>
                         )}
                     </div>
-                </div >
+                </div>
             )
             }
             <ReportPreview
@@ -1898,7 +1898,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                 htmlContent={previewContent.html}
                 filename={previewContent.filename}
             />
-        </div >
+        </div>
     );
 };
 
