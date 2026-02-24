@@ -5,229 +5,253 @@ import { SinapiComposicaoItemRecord } from './sinapiDb';
 export interface AnaliticoParserParams {
     file: File;
     uf: string;
-    mes_ref: string;
-    modo: string; // "SE" or others
+    mes_ref: string; // "YYYY/MM"
+    modo: string; // "SE", "SD", "CD"
 }
 
-export const sinapiAnaliticoParser = {
-    async parseAnalitico({ file, uf, mes_ref, modo }: AnaliticoParserParams): Promise<SinapiComposicaoItemRecord[]> {
-        const rows = await this.readSheet(file, 'Analítico');
-        const {
-            compCodeIdx,
-            tipoItemIdx,
-            itemCodeIdx,
-            descIdx,
-            unitIdx,
-            coefIdx,
-            groupIdx,
-            situacaoIdx,
-            priceIdx,
-            totalIdx,
-            lblIdx
-        } = this.detectHeaders(rows);
+type HeaderDetection = {
+    headerRowIndex: number;
+    compCodeIdx: number;
+    tipoItemIdx: number;
+    itemCodeIdx: number;
+    descIdx: number;
+    unitIdx: number;
+    coefIdx: number;
+    groupIdx: number;
+    situacaoIdx: number;
+    priceIdx: number;
+    totalIdx: number;
+};
 
-        if (compCodeIdx === -1 || tipoItemIdx === -1 || itemCodeIdx === -1 || coefIdx === -1) {
-            throw new Error(`Colunas obrigatórias não encontradas no arquivo "Analítico". Verifique o formato do arquivo.`);
+const normalize = (v: any) =>
+    String(v ?? "")
+        .trim()
+        .toUpperCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, ""); // remove acentos
+
+const isNumericCode = (v: string) => /^\d+$/.test(v);
+
+export const sinapiAnaliticoParser = {
+    async parseAnalitico({
+        file,
+        uf,
+        mes_ref,
+        modo,
+    }: AnaliticoParserParams): Promise<SinapiComposicaoItemRecord[]> {
+        const rows = await this.readSheet(file, "ANALITICO");
+
+        const det = this.detectHeaders(rows);
+
+        // Obrigatórias mínimas
+        if (det.compCodeIdx === -1 || det.tipoItemIdx === -1 || det.itemCodeIdx === -1 || det.coefIdx === -1) {
+            throw new Error(`Colunas obrigatórias não encontradas na aba/arquivo "Analítico".`);
         }
 
         const records: SinapiComposicaoItemRecord[] = [];
+        let lastSeenCompCode = "";
 
-        let lastSeenCompCode = '';
-
-        // Start from the row after headers
-        for (let i = lblIdx + 1; i < rows.length; i++) {
+        for (let i = det.headerRowIndex + 1; i < rows.length; i++) {
             const r = rows[i];
-            if (!r) continue;
+            if (!r || r.length === 0) continue;
 
-            const tipo_item = String(r[tipoItemIdx] || '').toUpperCase().trim();
-            const raw_comp_code = String(r[compCodeIdx] || '').trim();
-            const item_code = String(r[itemCodeIdx] || '').trim();
+            const tipo_item_raw = normalize(r[det.tipoItemIdx]);
+            const raw_comp_code = String(r[det.compCodeIdx] ?? "").trim();
+            const item_code = String(r[det.itemCodeIdx] ?? "").trim();
 
-            // If we find a code in the comp column but no item code, it's the start of a new block
-            if (raw_comp_code && !item_code && /^\d+$/.test(raw_comp_code)) {
+            // Linha "título" da composição (código da composição aparece sozinho)
+            if (raw_comp_code && !item_code && isNumericCode(raw_comp_code)) {
                 lastSeenCompCode = raw_comp_code;
                 continue;
             }
 
-            // If it's an item row, we need a composition code to attach it to
-            if (tipo_item === 'INSUMO' || tipo_item === 'COMPOSICAO') {
+            // Linhas de item
+            if (tipo_item_raw === "INSUMO" || tipo_item_raw === "COMPOSICAO" || tipo_item_raw === "COMPOSIÇÃO") {
                 const codigo_composicao = lastSeenCompCode || raw_comp_code;
-                const codigo_item = item_code;
-                const coeficiente = this.parseNumber(r[coefIdx]);
+                if (!codigo_composicao || !isNumericCode(codigo_composicao)) continue;
+                if (!item_code || !isNumericCode(item_code)) continue;
 
-                if (!codigo_composicao || !codigo_item || !/^\d+$/.test(codigo_item)) continue;
+                const coeficiente = this.parseNumber(r[det.coefIdx]);
+                if (!Number.isFinite(coeficiente) || coeficiente === 0) {
+                    // coef 0 acontece em ruídos — ignore
+                    continue;
+                }
 
-                const record: SinapiComposicaoItemRecord = {
-                    id: `${mes_ref}_${uf}_${modo}_ANA_${codigo_composicao}_${tipo_item}_${codigo_item}`,
+                const tipo_item = (tipo_item_raw.startsWith("INS") ? "INSUMO" : "COMPOSICAO") as "INSUMO" | "COMPOSICAO";
+
+                records.push({
+                    id: `${mes_ref}_${uf}_${modo}_ANA_${codigo_composicao}_${tipo_item}_${item_code}`,
                     mes_ref,
                     uf,
                     modo,
                     codigo_composicao,
-                    grupo: groupIdx !== -1 ? String(r[groupIdx] || '').trim() : '',
-                    tipo_item: tipo_item as 'INSUMO' | 'COMPOSICAO',
-                    codigo_item,
-                    descricao_item: descIdx !== -1 ? String(r[descIdx] || '').trim() : '',
-                    unidade_item: unitIdx !== -1 ? String(r[unitIdx] || '').trim() : '',
+                    grupo: det.groupIdx !== -1 ? String(r[det.groupIdx] ?? "").trim() : "",
+                    tipo_item,
+                    codigo_item: item_code,
+                    descricao_item: det.descIdx !== -1 ? String(r[det.descIdx] ?? "").trim() : "",
+                    unidade_item: det.unitIdx !== -1 ? String(r[det.unitIdx] ?? "").trim() : "",
                     coeficiente,
-                    custo_unitario: priceIdx !== -1 ? this.parseNumber(r[priceIdx]) : undefined,
-                    custo_total: totalIdx !== -1 ? this.parseNumber(r[totalIdx]) : undefined,
-                    situacao: situacaoIdx !== -1 ? String(r[situacaoIdx] || '').trim() : ''
-                };
-
-                records.push(record);
+                    custo_unitario: det.priceIdx !== -1 ? this.parseNumber(r[det.priceIdx]) : undefined,
+                    custo_total: det.totalIdx !== -1 ? this.parseNumber(r[det.totalIdx]) : undefined,
+                    situacao: det.situacaoIdx !== -1 ? String(r[det.situacaoIdx] ?? "").trim() : "",
+                });
             }
+        }
+
+        if (records.length === 0) {
+            throw new Error(
+                `Importação resultou em 0 itens. Verifique se o arquivo está na aba "Analítico" e se contém linhas de INSUMO/COMPOSICAO.`
+            );
         }
 
         return records;
     },
 
-    async readSheet(file: File, sheetName: string): Promise<any[][]> {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            const isCsv = file.name.toLowerCase().endsWith('.csv');
+    detectHeaders(rows: any[][]): HeaderDetection {
+        // sinônimos (normalize remove acentos)
+        const synonyms: Record<string, string[]> = {
+            comp: ["CODIGO DA COMPOSICAO", "CODIGO COMPOSICAO", "COD COMPOSICAO", "CODIGO", "COMPOSICAO", "COD COMPOSICAO SINAPI"],
+            tipo: ["TIPO", "TIPO ITEM", "TIPO DO ITEM", "TIPO_DE_ITEM"],
+            item: ["CODIGO DO ITEM", "CODIGO ITEM", "COD ITEM", "CODIGO INSUMO", "COD INSUMO", "ITEM"],
+            desc: ["DESCRICAO DO ITEM", "DESCRICAO ITEM", "DESCRICAO", "DESCRICAO DO INSUMO"],
+            unit: ["UNIDADE", "UN", "UNID"],
+            coef: ["COEFICIENTE", "COEF", "COEFICIENTE (QTDE)", "QUANTIDADE", "QTD"],
+            grupo: ["GRUPO", "GRUPO/CLASSE", "GRUPO CLASSE", "CLASSE"],
+            situ: ["SITUACAO", "SITUACAO DO ITEM", "SIT", "STATUS"],
+            price: ["CUSTO UNITARIO", "CUSTO UNITARIO (R$)", "PRECO UNITARIO", "PRECO", "VALOR UNITARIO", "CUSTO UNIT"],
+            total: ["CUSTO TOTAL", "CUSTO TOTAL (R$)", "VALOR TOTAL", "PRECO TOTAL", "TOTAL"],
+        };
 
-            reader.onload = (e) => {
-                try {
-                    const result = e.target?.result;
-                    if (!result) return resolve([]);
+        let headerRowIndex = -1;
+        let bestScore = -1;
+        let bestMap: Partial<HeaderDetection> = {};
 
-                    const data = new Uint8Array(result as ArrayBuffer);
-                    let workbook;
+        const scanMax = Math.min(rows.length, 80);
 
-                    if (isCsv) {
-                        const decoder = new TextDecoder('utf-8');
-                        const sample = decoder.decode(data.slice(0, 5000));
-                        const semiCount = (sample.match(/;/g) || []).length;
-                        const commaCount = (sample.match(/,/g) || []).length;
+        for (let i = 0; i < scanMax; i++) {
+            const row = rows[i] || [];
+            const normRow = row.map(normalize);
 
-                        const options: any = { type: 'array' };
-                        if (semiCount > commaCount) options.FS = ';';
-
-                        workbook = XLSX.read(data, options);
-                    } else {
-                        workbook = XLSX.read(data, { type: 'array' });
-                    }
-
-                    let worksheet = workbook.Sheets[sheetName];
-                    if (!worksheet) {
-                        // Fallback to first sheet if "Analítico" not found by name
-                        worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    }
-
-                    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false, defval: "" }) as any[][];
-
-                    if (isCsv && rows.length > 0 && rows[0].length === 1 && String(rows[0][0]).includes(';')) {
-                        const manualRows = rows.map(r => String(r[0]).split(';'));
-                        return resolve(manualRows);
-                    }
-
-                    resolve(rows);
-                } catch (err) { reject(err); }
+            const findIdx = (keys: string[]) => {
+                for (let c = 0; c < normRow.length; c++) {
+                    const cell = normRow[c];
+                    if (!cell) continue;
+                    if (keys.some(k => cell === k || cell.includes(k))) return c;
+                }
+                return -1;
             };
-            reader.onerror = reject;
-            reader.readAsArrayBuffer(file);
-        });
-    },
 
-    detectHeaders(rows: any[][]) {
-        let compCodeIdx = -1, tipoItemIdx = -1, itemCodeIdx = -1, descIdx = -1, unitIdx = -1, coefIdx = -1, groupIdx = -1, situacaoIdx = -1, priceIdx = -1, totalIdx = -1;
+            const map: Partial<HeaderDetection> = {
+                compCodeIdx: findIdx(synonyms.comp),
+                tipoItemIdx: findIdx(synonyms.tipo),
+                itemCodeIdx: findIdx(synonyms.item),
+                descIdx: findIdx(synonyms.desc),
+                unitIdx: findIdx(synonyms.unit),
+                coefIdx: findIdx(synonyms.coef),
+                groupIdx: findIdx(synonyms.grupo),
+                situacaoIdx: findIdx(synonyms.situ),
+                priceIdx: findIdx(synonyms.price),
+                totalIdx: findIdx(synonyms.total),
+            };
 
-        // Find the header row by looking for unique SINAPI column combinations
-        const lblIdx = rows.findIndex(r => {
-            const s = r.map(c => String(c || '').toUpperCase()).join(' ');
-            const hasCod = s.includes('CÓD') || s.includes('COD');
-            const hasItem = s.includes('ITEM') || s.includes('INSUMO');
-            const hasCoef = s.includes('COEF');
-            return hasCod && hasItem && hasCoef;
-        });
+            const score =
+                ((map.compCodeIdx ?? -1) !== -1 ? 1 : 0) +
+                ((map.tipoItemIdx ?? -1) !== -1 ? 1 : 0) +
+                ((map.itemCodeIdx ?? -1) !== -1 ? 1 : 0) +
+                ((map.coefIdx ?? -1) !== -1 ? 1 : 0) +
+                ((map.descIdx ?? -1) !== -1 ? 1 : 0);
 
-        if (lblIdx !== -1) {
-            const rowMain = rows[lblIdx];
-            const rowSub = (lblIdx + 1 < rows.length) ? rows[lblIdx + 1] : [];
-
-            // Search columns from right to left to prioritize 'Total' costs/prices (the ones with charges)
-            for (let i = rowMain.length - 1; i >= 0; i--) {
-                const cell = rowMain[i];
-                const sub = rowSub[i] || '';
-                const l1 = String(cell || '').toUpperCase().trim();
-                const l2 = String(sub || '').toUpperCase().trim();
-                const combined = `${l1} ${l2}`.trim();
-
-                if (groupIdx === -1 && combined.includes('GRUPO')) groupIdx = i;
-
-                // Specific keyword or position based detection
-                if (compCodeIdx === -1 && (combined.includes('CÓD') || combined.includes('COD')) && combined.includes('COMP')) {
-                    compCodeIdx = i;
-                } else if (itemCodeIdx === -1 && (combined.includes('CÓD') || combined.includes('COD')) && (combined.includes('ITEM') || combined.includes('INSUMO'))) {
-                    itemCodeIdx = i;
-                }
-
-                if (tipoItemIdx === -1 && combined.includes('TIPO') && combined.includes('ITEM')) tipoItemIdx = i;
-                if (descIdx === -1 && combined.includes('DESC')) descIdx = i;
-                if (unitIdx === -1 && (combined.includes('UNID') || combined === 'UN')) unitIdx = i;
-                if (coefIdx === -1 && combined.includes('COEF')) coefIdx = i;
-                if (situacaoIdx === -1 && (combined.includes('SITUAC') || combined.includes('SITUAÇ'))) situacaoIdx = i;
-
-                if (priceIdx === -1 && (combined.includes('UNIT') || combined.includes('UNID')) && (combined.includes('CUSTO') || combined.includes('PREÇO') || combined.includes('PRECO') || combined.includes('VALOR'))) {
-                    priceIdx = i;
-                }
-                if (totalIdx === -1 && (combined.includes('TOTAL') || combined.includes('SUBTOTAL')) && (combined.includes('CUSTO') || combined.includes('PREÇO') || combined.includes('PRECO') || combined.includes('VALOR'))) {
-                    totalIdx = i;
-                }
-
-                // Super fallback: if one is 'UNITARIO' and another is 'TOTAL'
-                if (priceIdx === -1 && combined === 'UNITARIO') priceIdx = i;
-                if (totalIdx === -1 && combined === 'TOTAL') totalIdx = i;
+            if (score > bestScore) {
+                bestScore = score;
+                headerRowIndex = i;
+                bestMap = map;
             }
 
-            // Specific layout fallback for "Relatório Analítico" PDF-to-Excel (which often has Price at index 6 and Total at index 7)
-            if (priceIdx === -1 && coefIdx !== -1 && rowMain.length > coefIdx + 1) priceIdx = coefIdx + 1;
-            if (totalIdx === -1 && priceIdx !== -1 && rowMain.length > priceIdx + 1) totalIdx = priceIdx + 1;
-
-            // Manual Fallback for the standard 7-8 column layouts seen in images
-            if (compCodeIdx === -1) {
-                if (rowMain.length === 7) {
-                    compCodeIdx = 0; tipoItemIdx = 1; itemCodeIdx = 2; descIdx = 3; unitIdx = 4; coefIdx = 5; situacaoIdx = 6;
-                } else if (rowMain.length >= 8) {
-                    groupIdx = 0; compCodeIdx = 1; tipoItemIdx = 2; itemCodeIdx = 3; descIdx = 4; unitIdx = 5; coefIdx = 6; situacaoIdx = 7;
-                }
-            }
-
-            // Absolute fail-safes
-            if (compCodeIdx === -1) compCodeIdx = 0;
-            if (tipoItemIdx === -1) tipoItemIdx = 1;
-            if (itemCodeIdx === -1) itemCodeIdx = 2;
+            if (score >= 4) break;
         }
 
-        return { compCodeIdx, tipoItemIdx, itemCodeIdx, descIdx, unitIdx, coefIdx, groupIdx, situacaoIdx, priceIdx, totalIdx, lblIdx };
+        return {
+            headerRowIndex: headerRowIndex === -1 ? 0 : headerRowIndex,
+            compCodeIdx: (bestMap.compCodeIdx ?? -1),
+            tipoItemIdx: (bestMap.tipoItemIdx ?? -1),
+            itemCodeIdx: (bestMap.itemCodeIdx ?? -1),
+            descIdx: (bestMap.descIdx ?? -1),
+            unitIdx: (bestMap.unitIdx ?? -1),
+            coefIdx: (bestMap.coefIdx ?? -1),
+            groupIdx: (bestMap.groupIdx ?? -1),
+            situacaoIdx: (bestMap.situacaoIdx ?? -1),
+            priceIdx: (bestMap.priceIdx ?? -1),
+            totalIdx: (bestMap.totalIdx ?? -1),
+        };
     },
 
-    parseNumber(val: any): number {
-        if (val === undefined || val === null || val === '') return 0;
-        if (val === '-') return 0;
+    parseNumber(v: any): number {
+        if (v === null || v === undefined || v === '') return 0;
+        if (typeof v === "number") return v;
 
-        if (typeof val === 'number') return val;
+        let s = String(v).trim();
+        if (!s || s === '-') return 0;
 
-        let s = String(val).toUpperCase().replace(/R\$/g, '').replace(/\s/g, '').trim();
+        // remove R$, espaços e etc
+        s = s.replace(/[^\d.,-]/g, "");
 
-        // Remove trailing dash if it follows a number (common in BR reports like '158,23 -')
-        if (s.endsWith('-') && s.length > 1) {
-            s = s.substring(0, s.length - 1).trim();
+        // pt-BR: 1.234,56 -> 1234.56
+        const hasComma = s.includes(",");
+        const hasDot = s.includes(".");
+
+        if (hasComma && hasDot) {
+            s = s.replace(/\./g, "").replace(",", ".");
+        } else if (hasComma && !hasDot) {
+            s = s.replace(",", ".");
+        }
+        const n = Number(s);
+        return Number.isFinite(n) ? n : 0;
+    },
+
+    async readSheet(file: File, sheetName: string): Promise<any[][]> {
+        const ext = (file.name.split(".").pop() || "").toLowerCase();
+
+        if (ext === "csv") {
+            const text = await this.readFileAsTextSmart(file);
+            const wb = XLSX.read(text, { type: "string" });
+            const ws = wb.Sheets[wb.SheetNames[0]];
+            return XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" }) as any[][];
         }
 
-        let multiplier = 1;
-        if (s.startsWith('-')) {
-            multiplier = -1;
-            s = s.substring(1).trim();
+        // xlsx
+        const data = await file.arrayBuffer();
+        const wb = XLSX.read(data, { type: "array" });
+
+        // tenta com e sem acento
+        const candidates = [
+            sheetName,
+            "ANALÍTICO",
+            "ANALITICO",
+            "Analítico",
+            "Analitico",
+        ];
+
+        const foundName =
+            wb.SheetNames.find((n) => candidates.includes(n)) ||
+            wb.SheetNames.find((n) => normalize(n) === "ANALITICO") ||
+            wb.SheetNames[0];
+
+        const ws = wb.Sheets[foundName];
+        return XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" }) as any[][];
+    },
+
+    async readFileAsTextSmart(file: File): Promise<string> {
+        try {
+            return await file.text();
+        } catch {
+            // ignore
         }
 
-        if (s.includes(',')) {
-            s = s.replace(/\./g, '').replace(',', '.');
-        } else if ((s.match(/\./g) || []).length > 1) {
-            s = s.replace(/\./g, '');
+        const buf = await file.arrayBuffer();
+        try {
+            return new TextDecoder("utf-8").decode(buf);
+        } catch {
+            return new TextDecoder("latin1").decode(buf);
         }
-
-        const num = parseFloat(s);
-        return (isNaN(num) ? 0 : num) * multiplier;
-    }
+    },
 };
