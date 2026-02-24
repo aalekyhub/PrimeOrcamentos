@@ -80,6 +80,15 @@ export const sinapiDb = {
         });
     },
 
+    async clearData() {
+        const db = await this.getDb();
+        const tx = db.transaction(['sinapi_insumos', 'sinapi_composicoes', 'sinapi_composicao_itens'], 'readwrite');
+        await tx.objectStore('sinapi_insumos').clear();
+        await tx.objectStore('sinapi_composicoes').clear();
+        await tx.objectStore('sinapi_composicao_itens').clear();
+        await tx.done;
+    },
+
     async clearDataset(storeName: 'sinapi_insumos' | 'sinapi_composicoes' | 'sinapi_composicao_itens', mes_ref: string, uf: string, modo: string) {
         const db = await this.getDb();
         const tx = db.transaction(storeName, 'readwrite');
@@ -107,6 +116,14 @@ export const sinapiDb = {
             await tx.store.put(record);
         }
         await tx.done;
+    },
+
+    async saveInsumos(records: SinapiInsumoRecord[]) {
+        return this.saveBatch('sinapi_insumos', records);
+    },
+
+    async saveComposicoes(records: SinapiComposicaoRecord[]) {
+        return this.saveBatch('sinapi_composicoes', records);
     },
 
     async findInsumo(mes_ref: string, uf: string, modo: string, codigo: string): Promise<SinapiInsumoRecord | undefined> {

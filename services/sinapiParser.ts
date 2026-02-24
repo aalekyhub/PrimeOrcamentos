@@ -111,7 +111,7 @@ export const sinapiParser = {
                     if (!/^\d+$/.test(codigo)) continue;
 
                     data.push({
-                        id: `${meta.mes_ref}_${meta.uf}_${meta.modo}_INSUMO_${codigo}`,
+                        id: `${meta.mes_ref}_${meta.uf}_${meta.modo}_INS_${codigo}`,
                         ...meta,
                         codigo,
                         descricao: String(r[descIdx] || '').trim(),
@@ -155,7 +155,7 @@ export const sinapiParser = {
                     if (!/^\d+$/.test(codigo)) continue;
 
                     data.push({
-                        id: `${meta.mes_ref}_${meta.uf}_${meta.modo}_COMPOSICAO_${codigo}`,
+                        id: `${meta.mes_ref}_${meta.uf}_${meta.modo}_COMP_${codigo}`,
                         ...meta,
                         codigo,
                         grupo: groupIdx !== -1 ? String(r[groupIdx] || '').trim() : '',
