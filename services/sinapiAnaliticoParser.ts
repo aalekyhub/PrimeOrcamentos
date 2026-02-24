@@ -9,50 +9,63 @@ export interface AnaliticoParserParams {
     modo: string; // "SE", "SD", "CD"
 }
 
+type HeaderDetection = {
+    headerRowIndex: number;
+    compCodeIdx: number;
+    tipoItemIdx: number;
+    itemCodeIdx: number;
+    descIdx: number;
+    unitIdx: number;
+    coefIdx: number;
+    groupIdx: number;
+    situacaoIdx: number;
+    priceIdx: number;
+    totalIdx: number;
+};
+
+const normalize = (v: any) =>
+    String(v ?? "")
+        .trim()
+        .toUpperCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+
+const isNumericCode = (v: string) => /^\d+$/.test(v);
+
 export const sinapiAnaliticoParser = {
     async parseAnalitico({ file, uf, mes_ref, modo }: AnaliticoParserParams): Promise<SinapiComposicaoItemRecord[]> {
-        const rows = await this.readSheet(file, 'Analítico');
-        const {
-            compCodeIdx,
-            tipoItemIdx,
-            itemCodeIdx,
-            descIdx,
-            unitIdx,
-            coefIdx,
-            groupIdx,
-            situacaoIdx,
-            priceIdx,
-            totalIdx,
-            lblIdx
-        } = this.detectHeaders(rows);
+        const rows = await this.readSheet(file, "ANALITICO");
+        const det = this.detectHeaders(rows);
 
-        if (compCodeIdx === -1 || tipoItemIdx === -1 || itemCodeIdx === -1 || coefIdx === -1) {
-            throw new Error(`Colunas obrigatórias não encontradas no arquivo "Analítico".`);
+        if (det.compCodeIdx === -1 || det.tipoItemIdx === -1 || det.itemCodeIdx === -1 || det.coefIdx === -1) {
+            throw new Error(`Colunas obrigatórias não encontradas no arquivo "Analítico". Verifique os nomes das colunas.`);
         }
 
         const records: SinapiComposicaoItemRecord[] = [];
-        let lastSeenCompCode = '';
+        let lastSeenCompCode = "";
 
-        for (let i = lblIdx + 1; i < rows.length; i++) {
+        for (let i = det.headerRowIndex + 1; i < rows.length; i++) {
             const r = rows[i];
-            if (!r) continue;
+            if (!r || r.length === 0) continue;
 
-            const tipo_item = String(r[tipoItemIdx] || '').toUpperCase().trim();
-            const raw_comp_code = String(r[compCodeIdx] || '').trim();
-            const item_code = String(r[itemCodeIdx] || '').trim();
+            const tipo_item_raw = normalize(r[det.tipoItemIdx]);
+            const raw_comp_code = String(r[det.compCodeIdx] ?? "").trim();
+            const item_code = String(r[det.itemCodeIdx] ?? "").trim();
 
-            // Identifica início de nova composição
-            if (raw_comp_code && !item_code && /^\d+$/.test(raw_comp_code)) {
+            if (raw_comp_code && !item_code && isNumericCode(raw_comp_code)) {
                 lastSeenCompCode = raw_comp_code;
                 continue;
             }
 
-            // Processa linha de item (insumo ou composição filha)
-            if (tipo_item === 'INSUMO' || tipo_item === 'COMPOSICAO') {
+            if (tipo_item_raw === "INSUMO" || tipo_item_raw === "COMPOSICAO" || tipo_item_raw === "COMPOSIÇÃO") {
                 const codigo_composicao = lastSeenCompCode || raw_comp_code;
-                const coeficiente = this.parseNumber(r[coefIdx]);
+                if (!codigo_composicao || !isNumericCode(codigo_composicao)) continue;
+                if (!item_code || !isNumericCode(item_code)) continue;
 
-                if (!codigo_composicao || !item_code || !/^\d+$/.test(item_code)) continue;
+                const coeficiente = this.parseNumber(r[det.coefIdx]);
+                if (!Number.isFinite(coeficiente) || coeficiente === 0) continue;
+
+                const tipo_item = (tipo_item_raw.startsWith("INS") ? "INSUMO" : "COMPOSICAO") as "INSUMO" | "COMPOSICAO";
 
                 records.push({
                     id: `${mes_ref}_${uf}_${modo}_ANA_${codigo_composicao}_${tipo_item}_${item_code}`,
@@ -60,161 +73,129 @@ export const sinapiAnaliticoParser = {
                     uf,
                     modo,
                     codigo_composicao,
-                    grupo: groupIdx !== -1 ? String(r[groupIdx] || '').trim() : '',
-                    tipo_item: tipo_item as 'INSUMO' | 'COMPOSICAO',
+                    grupo: det.groupIdx !== -1 ? String(r[det.groupIdx] ?? "").trim() : "",
+                    tipo_item,
                     codigo_item: item_code,
-                    descricao_item: descIdx !== -1 ? String(r[descIdx] || '').trim() : '',
-                    unidade_item: unitIdx !== -1 ? String(r[unitIdx] || '').trim() : '',
+                    descricao_item: det.descIdx !== -1 ? String(r[det.descIdx] ?? "").trim() : "",
+                    unidade_item: det.unitIdx !== -1 ? String(r[det.unitIdx] ?? "").trim() : "",
                     coeficiente,
-                    custo_unitario: priceIdx !== -1 ? this.parseNumber(r[priceIdx]) : undefined,
-                    custo_total: totalIdx !== -1 ? this.parseNumber(r[totalIdx]) : undefined,
-                    situacao: situacaoIdx !== -1 ? String(r[situacaoIdx] || '').trim() : ''
+                    custo_unitario: det.priceIdx !== -1 ? this.parseNumber(r[det.priceIdx]) : undefined,
+                    custo_total: det.totalIdx !== -1 ? this.parseNumber(r[det.totalIdx]) : undefined,
+                    situacao: det.situacaoIdx !== -1 ? String(r[det.situacaoIdx] ?? "").trim() : "",
                 });
             }
+        }
+
+        if (records.length === 0) {
+            throw new Error(`Importação resultou em 0 itens. Verifique se o arquivo contém linhas identificadas como INSUMO ou COMPOSICAO.`);
         }
 
         return records;
     },
 
-    async readSheet(file: File, sheetName: string): Promise<any[][]> {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            const isCsv = file.name.toLowerCase().endsWith('.csv');
+    detectHeaders(rows: any[][]): HeaderDetection {
+        const synonyms: Record<string, string[]> = {
+            comp: ["CODIGO DA COMPOSICAO", "CODIGO COMPOSICAO", "COD COMPOSICAO", "CODIGO", "COMPOSICAO"],
+            tipo: ["TIPO ITEM", "TIPO DO ITEM", "TIPO"],
+            item: ["CODIGO DO ITEM", "CODIGO ITEM", "COD ITEM", "CODIGO INSUMO", "COD INSUMO", "ITEM"],
+            desc: ["DESCRICAO DO ITEM", "DESCRICAO ITEM", "DESCRICAO", "DESC"],
+            unit: ["UNIDADE", "UN", "UNID"],
+            coef: ["COEFICIENTE", "COEF", "QUANTIDADE", "QTD"],
+            grupo: ["GRUPO", "CLASSE"],
+            situ: ["SITUACAO", "SIT", "STATUS"],
+            price: ["CUSTO UNITARIO", "PRECO UNITARIO", "VALOR UNITARIO", "VALOR", "CUSTO UNIT"],
+            total: ["CUSTO TOTAL", "VALOR TOTAL", "TOTAL"],
+        };
 
-            reader.onload = (e) => {
-                try {
-                    const result = e.target?.result;
-                    if (!result) return resolve([]);
+        let headerRowIndex = -1;
+        let bestScore = -1;
+        let bestMap: Partial<HeaderDetection> = {};
 
-                    const data = new Uint8Array(result as ArrayBuffer);
-                    let workbook;
+        const scanMax = Math.min(rows.length, 60);
 
-                    if (isCsv) {
-                        const decoder = new TextDecoder('utf-8');
-                        const sample = decoder.decode(data.slice(0, 5000));
-                        const semiCount = (sample.match(/;/g) || []).length;
-                        const commaCount = (sample.match(/,/g) || []).length;
+        for (let i = 0; i < scanMax; i++) {
+            const row = rows[i] || [];
+            if (row.length < 4) continue;
 
-                        const options: any = { type: 'array' };
-                        if (semiCount > commaCount) options.FS = ';';
+            const normRow = row.map(normalize);
+            const used: number[] = [];
+            const map: Partial<HeaderDetection> = {};
 
-                        workbook = XLSX.read(data, options);
-                    } else {
-                        workbook = XLSX.read(data, { type: 'array' });
-                    }
-
-                    let worksheet = workbook.Sheets[sheetName];
-                    if (!worksheet) {
-                        // Fallback to first sheet if "Analítico" not found by name
-                        worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                    }
-
-                    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false, defval: "" }) as any[][];
-
-                    if (isCsv && rows.length > 0 && rows[0].length === 1 && String(rows[0][0]).includes(';')) {
-                        const manualRows = rows.map(r => String(r[0]).split(';'));
-                        return resolve(manualRows);
-                    }
-
-                    resolve(rows);
-                } catch (err) { reject(err); }
+            const findIdx = (keys: string[]) => {
+                // Exact match first
+                for (let c = 0; c < normRow.length; c++) {
+                    if (used.includes(c)) continue;
+                    if (keys.some(k => normRow[c] === k)) return c;
+                }
+                // Includes next
+                for (let c = 0; c < normRow.length; c++) {
+                    if (used.includes(c)) continue;
+                    if (keys.some(k => normRow[c].includes(k))) return c;
+                }
+                return -1;
             };
-            reader.onerror = reject;
-            reader.readAsArrayBuffer(file);
-        });
+
+            const fields: (keyof typeof synonyms)[] = ['tipo', 'comp', 'item', 'coef', 'desc', 'unit', 'grupo', 'situ', 'price', 'total'];
+            fields.forEach(f => {
+                const idx = findIdx(synonyms[f]);
+                if (idx !== -1) {
+                    used.push(idx);
+                    (map as any)[`${f}Idx`] = idx;
+                } else {
+                    (map as any)[`${f}Idx`] = -1;
+                }
+            });
+
+            const score =
+                ((map.compCodeIdx ?? -1) !== -1 ? 1 : 0) +
+                ((map.tipoItemIdx ?? -1) !== -1 ? 1 : 0) +
+                ((map.itemCodeIdx ?? -1) !== -1 ? 1 : 0) +
+                ((map.coefIdx ?? -1) !== -1 ? 1 : 0) +
+                ((map.descIdx ?? -1) !== -1 ? 1 : 0);
+
+            if (score > bestScore) {
+                bestScore = score;
+                headerRowIndex = i;
+                bestMap = map;
+            }
+            if (score >= 5) break;
+        }
+
+        return {
+            headerRowIndex: headerRowIndex === -1 ? 0 : headerRowIndex,
+            compCodeIdx: bestMap.compCodeIdx ?? -1,
+            tipoItemIdx: bestMap.tipoItemIdx ?? -1,
+            itemCodeIdx: bestMap.itemCodeIdx ?? -1,
+            descIdx: bestMap.descIdx ?? -1,
+            unitIdx: bestMap.unitIdx ?? -1,
+            coefIdx: bestMap.coefIdx ?? -1,
+            groupIdx: bestMap.groupIdx ?? -1,
+            situacaoIdx: bestMap.situacaoIdx ?? -1,
+            priceIdx: bestMap.priceIdx ?? -1,
+            totalIdx: bestMap.totalIdx ?? -1,
+        };
     },
 
-    detectHeaders(rows: any[][]) {
-        let compCodeIdx = -1, tipoItemIdx = -1, itemCodeIdx = -1, descIdx = -1, unitIdx = -1, coefIdx = -1, groupIdx = -1, situacaoIdx = -1, priceIdx = -1, totalIdx = -1;
-
-        const lblIdx = rows.findIndex(r => {
-            const s = r.map(c => String(c || '').toUpperCase()).join(' ');
-            const hasCod = s.includes('CÓD') || s.includes('COD');
-            const hasItem = s.includes('ITEM') || s.includes('INSUMO');
-            const hasCoef = s.includes('COEF');
-            return hasCod && hasItem && hasCoef;
-        });
-
-        if (lblIdx !== -1) {
-            const rowMain = rows[lblIdx];
-            const rowSub = (lblIdx + 1 < rows.length) ? rows[lblIdx + 1] : [];
-
-            for (let i = rowMain.length - 1; i >= 0; i--) {
-                const cell = rowMain[i];
-                const sub = rowSub[i] || '';
-                const l1 = String(cell || '').toUpperCase().trim();
-                const l2 = String(sub || '').toUpperCase().trim();
-                const combined = `${l1} ${l2}`.trim();
-
-                if (groupIdx === -1 && combined.includes('GRUPO')) groupIdx = i;
-
-                if (compCodeIdx === -1 && (combined.includes('CÓD') || combined.includes('COD')) && combined.includes('COMP')) {
-                    compCodeIdx = i;
-                } else if (itemCodeIdx === -1 && (combined.includes('CÓD') || combined.includes('COD')) && (combined.includes('ITEM') || combined.includes('INSUMO'))) {
-                    itemCodeIdx = i;
-                }
-
-                if (tipoItemIdx === -1 && combined.includes('TIPO') && combined.includes('ITEM')) tipoItemIdx = i;
-                if (descIdx === -1 && combined.includes('DESC')) descIdx = i;
-                if (unitIdx === -1 && (combined.includes('UNID') || combined === 'UN')) unitIdx = i;
-                if (coefIdx === -1 && combined.includes('COEF')) coefIdx = i;
-                if (situacaoIdx === -1 && (combined.includes('SITUAC') || combined.includes('SITUAÇ'))) situacaoIdx = i;
-
-                if (priceIdx === -1 && (combined.includes('UNIT') || combined.includes('UNID')) && (combined.includes('CUSTO') || combined.includes('PREÇO') || combined.includes('PRECO') || combined.includes('VALOR'))) {
-                    priceIdx = i;
-                }
-                if (totalIdx === -1 && (combined.includes('TOTAL') || combined.includes('SUBTOTAL')) && (combined.includes('CUSTO') || combined.includes('PREÇO') || combined.includes('PRECO') || combined.includes('VALOR'))) {
-                    totalIdx = i;
-                }
-
-                if (priceIdx === -1 && combined === 'UNITARIO') priceIdx = i;
-                if (totalIdx === -1 && combined === 'TOTAL') totalIdx = i;
-            }
-
-            if (priceIdx === -1 && coefIdx !== -1 && rowMain.length > coefIdx + 1) priceIdx = coefIdx + 1;
-            if (totalIdx === -1 && priceIdx !== -1 && rowMain.length > priceIdx + 1) totalIdx = priceIdx + 1;
-
-            if (compCodeIdx === -1) {
-                if (rowMain.length === 7) {
-                    compCodeIdx = 0; tipoItemIdx = 1; itemCodeIdx = 2; descIdx = 3; unitIdx = 4; coefIdx = 5; situacaoIdx = 6;
-                } else if (rowMain.length >= 8) {
-                    groupIdx = 0; compCodeIdx = 1; tipoItemIdx = 2; itemCodeIdx = 3; descIdx = 4; unitIdx = 5; coefIdx = 6; situacaoIdx = 7;
-                }
-            }
-
-            if (compCodeIdx === -1) compCodeIdx = 0;
-            if (tipoItemIdx === -1) tipoItemIdx = 1;
-            if (itemCodeIdx === -1) itemCodeIdx = 2;
+    parseNumber(v: any): number {
+        if (v === null || v === undefined || v === '') return 0;
+        if (typeof v === "number") return v;
+        let s = String(v).trim().replace(/[^\d.,-]/g, "");
+        if (!s || s === '-') return 0;
+        if (s.includes(",") && s.includes(".")) {
+            s = s.replace(/\./g, "").replace(",", ".");
+        } else if (s.includes(",")) {
+            s = s.replace(",", ".");
         }
-
-        return { compCodeIdx, tipoItemIdx, itemCodeIdx, descIdx, unitIdx, coefIdx, groupIdx, situacaoIdx, priceIdx, totalIdx, lblIdx };
+        const n = parseFloat(s);
+        return isFinite(n) ? n : 0;
     },
 
-    parseNumber(val: any): number {
-        if (val === undefined || val === null || val === '') return 0;
-        if (val === '-') return 0;
-
-        if (typeof val === 'number') return val;
-
-        let s = String(val).toUpperCase().replace(/R\$/g, '').replace(/\s/g, '').trim();
-
-        if (s.endsWith('-') && s.length > 1) {
-            s = s.substring(0, s.length - 1).trim();
-        }
-
-        let multiplier = 1;
-        if (s.startsWith('-')) {
-            multiplier = -1;
-            s = s.substring(1).trim();
-        }
-
-        if (s.includes(',')) {
-            s = s.replace(/\./g, '').replace(',', '.');
-        } else if ((s.match(/\./g) || []).length > 1) {
-            s = s.replace(/\./g, '');
-        }
-
-        const num = parseFloat(s);
-        return (isNaN(num) ? 0 : num) * multiplier;
+    async readSheet(file: File, sheetName: string): Promise<any[][]> {
+        const data = await file.arrayBuffer();
+        const wb = XLSX.read(data, { type: "array" });
+        const candidates = [sheetName, "ANALÍTICO", "ANALITICO", "Analítico", "Analitico"];
+        const foundName = wb.SheetNames.find((n) => candidates.includes(n.toUpperCase())) || wb.SheetNames[0];
+        const ws = wb.Sheets[foundName];
+        return XLSX.utils.sheet_to_json(ws, { header: 1, defval: "", raw: false }) as any[][];
     }
 };

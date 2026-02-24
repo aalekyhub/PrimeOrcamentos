@@ -10,6 +10,13 @@ export interface ParseResult {
     data: any[];
 }
 
+const normalize = (v: any) =>
+    String(v ?? "")
+        .trim()
+        .toUpperCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+
 export const sinapiParser = {
     async parseFile(file: File): Promise<ParseResult> {
         return new Promise((resolve, reject) => {
@@ -45,10 +52,9 @@ export const sinapiParser = {
         let uf = 'BR';
         let mes_ref = 'N/A';
         let modo: 'SD' | 'CD' | 'SE' = 'SD';
-
         const ufs = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'];
 
-        for (let i = 0; i < Math.min(rows.length, 20); i++) {
+        for (let i = 0; i < Math.min(rows.length, 25); i++) {
             const line = String(rows[i].join(' ')).toUpperCase();
             if (line.includes('SEM DESONERAÇÃO') || line.includes('SEM DESONERACAO')) modo = 'SD';
             if (line.includes('COM DESONERAÇÃO') || line.includes('COM DESONERACAO')) modo = 'CD';
@@ -73,33 +79,28 @@ export const sinapiParser = {
     },
 
     detectType(rows: any[][]): 'INSUMO' | 'COMPOSICAO' {
-        for (let i = 0; i < Math.min(rows.length, 30); i++) {
+        for (let i = 0; i < Math.min(rows.length, 40); i++) {
             const line = String(rows[i].join(' ')).toUpperCase();
             if (line.includes('COMPOSIÇÕES') || line.includes('COMPOSICOES') || line.includes('CÓDIGO DA COMPOSIÇÃO')) return 'COMPOSICAO';
-            if (line.includes('INSUMOS') || line.includes('CODIGO INSUMOS')) return 'INSUMO';
+            if (line.includes('INSUMOS') || line.includes('CODIGO INSUMOS') || line.includes('CÓDIGO DO INSUMO')) return 'INSUMO';
         }
         return 'INSUMO';
     },
 
     parseInsumos(rows: any[][], meta: any): SinapiInsumoRecord[] {
-        let codeIdx = -1, descIdx = -1, unitIdx = -1, priceIdx = -1;
         const ufs = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'];
+        let codeIdx = -1, descIdx = -1, unitIdx = -1, priceIdx = -1;
 
         for (let i = 0; i < Math.min(rows.length, 60); i++) {
             const row = rows[i];
-            if (!row) continue;
+            if (!row || row.length < 3) continue;
 
             row.forEach((cell, idx) => {
-                if (!cell) return;
-                const val = String(cell).toUpperCase().trim();
-
-                // Match specific CAIXA headers
+                const val = normalize(cell);
                 if (val.includes('CÓDIGO') || val.includes('CODIGO') || val === 'COD') codeIdx = idx;
                 if (val.includes('DESCRIÇÃO') || val.includes('DESCRICAO')) descIdx = idx;
                 if (val.includes('UNIDADE') || val === 'UND' || val === 'UN') unitIdx = idx;
-
-                // Price detection: Look for UF abbreviations or generic "PRECO", "VALOR" or "CUSTO"
-                if (val.includes('PREÇO') || val.includes('PRECO') || val.includes('CUSTO') || val.includes('VALOR') || ufs.includes(val)) priceIdx = idx;
+                if (val.includes('PRECO') || val.includes('VALOR') || val.includes('CUSTO') || ufs.includes(val)) priceIdx = idx;
             });
 
             if (codeIdx !== -1 && descIdx !== -1) {
@@ -130,19 +131,14 @@ export const sinapiParser = {
 
         for (let i = 0; i < Math.min(rows.length, 60); i++) {
             const row = rows[i];
-            if (!row) continue;
+            if (!row || row.length < 3) continue;
 
             row.forEach((cell, idx) => {
-                if (!cell) return;
-                const val = String(cell).toUpperCase().trim();
-
-                if (val.includes('CÓD') || val.includes('COD')) codeIdx = idx;
-                if (val.includes('DESC')) descIdx = idx;
-                if (val.includes('UNID') || val === 'UN') unitIdx = idx;
-                if (val.includes('CUSTO') || val.includes('PRECO') || val.includes('VALOR')) {
-                    // Avoid picking charges % column
-                    if (!val.includes('%') && !val.includes('ENCARG')) costIdx = idx;
-                }
+                const val = normalize(cell);
+                if (val.includes('CÓDIGO') || val.includes('CODIGO') || val === 'COD') codeIdx = idx;
+                if (val.includes('DESCRIÇÃO') || val.includes('DESCRICAO') || val === 'DESC') descIdx = idx;
+                if (val.includes('UNIDADE') || val.includes('UNID') || val === 'UN') unitIdx = idx;
+                if ((val.includes('PRECO') || val.includes('VALOR') || val.includes('CUSTO')) && !val.includes('%') && !val.includes('ENCARG')) costIdx = idx;
                 if (val.includes('GRUPO')) groupIdx = idx;
             });
 
@@ -173,15 +169,13 @@ export const sinapiParser = {
     parseNumber(val: any): number {
         if (val === undefined || val === null || val === '') return 0;
         if (typeof val === 'number') return val;
-
-        let s = String(val).toUpperCase().replace(/R\$/g, '').replace(/\s/g, '').trim();
+        let s = String(val).toUpperCase().replace(/[^\d.,-]/g, "").trim();
         if (s.includes(',')) {
-            s = s.replace(/\./g, '').replace(',', '.');
+            s = s.replace(/\./g, "").replace(",", ".");
         } else if ((s.match(/\./g) || []).length > 1) {
-            s = s.replace(/\./g, '');
+            s = s.replace(/\./g, "");
         }
-
         const num = parseFloat(s);
-        return isNaN(num) ? 0 : num;
+        return isFinite(num) ? num : 0;
     }
 };
