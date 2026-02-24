@@ -135,14 +135,26 @@ export const sinapiAnaliticoParser = {
                 return -1;
             };
 
-            const fields: (keyof typeof synonyms)[] = ['tipo', 'comp', 'item', 'coef', 'desc', 'unit', 'grupo', 'situ', 'price', 'total'];
+            const fields: { key: keyof typeof synonyms, target: keyof HeaderDetection }[] = [
+                { key: 'tipo', target: 'tipoItemIdx' },
+                { key: 'comp', target: 'compCodeIdx' },
+                { key: 'item', target: 'itemCodeIdx' },
+                { key: 'coef', target: 'coefIdx' },
+                { key: 'desc', target: 'descIdx' },
+                { key: 'unit', target: 'unitIdx' },
+                { key: 'grupo', target: 'groupIdx' },
+                { key: 'situ', target: 'situacaoIdx' },
+                { key: 'price', target: 'priceIdx' },
+                { key: 'total', target: 'totalIdx' }
+            ];
+
             fields.forEach(f => {
-                const idx = findIdx(synonyms[f]);
+                const idx = findIdx(synonyms[f.key]);
                 if (idx !== -1) {
                     used.push(idx);
-                    (map as any)[`${f}Idx`] = idx;
+                    (map as any)[f.target] = idx;
                 } else {
-                    (map as any)[`${f}Idx`] = -1;
+                    (map as any)[f.target] = -1;
                 }
             });
 
