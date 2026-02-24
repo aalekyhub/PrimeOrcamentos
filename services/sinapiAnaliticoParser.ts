@@ -108,18 +108,18 @@ export const sinapiAnaliticoParser = {
     },
 
     detectHeaders(rows: any[][]): HeaderDetection {
-        // sinônimos (normalize remove acentos)
+        // sinônimos (normalize remove acentos) - Ordem de importância: mais específico primeiro
         const synonyms: Record<string, string[]> = {
             comp: ["CODIGO DA COMPOSICAO", "CODIGO COMPOSICAO", "COD COMPOSICAO", "CODIGO", "COMPOSICAO", "COD COMPOSICAO SINAPI"],
-            tipo: ["TIPO", "TIPO ITEM", "TIPO DO ITEM", "TIPO_DE_ITEM"],
+            tipo: ["TIPO ITEM", "TIPO DO ITEM", "TIPO_DE_ITEM", "TIPO"],
             item: ["CODIGO DO ITEM", "CODIGO ITEM", "COD ITEM", "CODIGO INSUMO", "COD INSUMO", "ITEM"],
             desc: ["DESCRICAO DO ITEM", "DESCRICAO ITEM", "DESCRICAO", "DESCRICAO DO INSUMO"],
             unit: ["UNIDADE", "UN", "UNID"],
             coef: ["COEFICIENTE", "COEF", "COEFICIENTE (QTDE)", "QUANTIDADE", "QTD"],
             grupo: ["GRUPO", "GRUPO/CLASSE", "GRUPO CLASSE", "CLASSE"],
-            situ: ["SITUACAO", "SITUACAO DO ITEM", "SIT", "STATUS"],
-            price: ["CUSTO UNITARIO", "CUSTO UNITARIO (R$)", "PRECO UNITARIO", "PRECO", "VALOR UNITARIO", "CUSTO UNIT"],
-            total: ["CUSTO TOTAL", "CUSTO TOTAL (R$)", "VALOR TOTAL", "PRECO TOTAL", "TOTAL"],
+            situ: ["SITUACAO DO ITEM", "SITUACAO", "SIT", "STATUS"],
+            price: ["CUSTO UNITARIO", "PRECO UNITARIO", "PRECO", "VALOR UNITARIO", "CUSTO UNIT"],
+            total: ["CUSTO TOTAL", "VALOR TOTAL", "PRECO TOTAL", "TOTAL"],
         };
 
         let headerRowIndex = -1;
@@ -130,29 +130,49 @@ export const sinapiAnaliticoParser = {
 
         for (let i = 0; i < scanMax; i++) {
             const row = rows[i] || [];
+            if (row.length < 3) continue;
+
             const normRow = row.map(normalize);
 
-            const findIdx = (keys: string[]) => {
+            // Pass 1: Exata; Pass 2: Inclusão
+            const findIdx = (keys: string[], usedIndices: number[]) => {
+                // Tenta exato primeiro
                 for (let c = 0; c < normRow.length; c++) {
+                    if (usedIndices.includes(c)) continue;
                     const cell = normRow[c];
                     if (!cell) continue;
-                    if (keys.some(k => cell === k || cell.includes(k))) return c;
+                    if (keys.some(k => cell === k)) return c;
+                }
+                // Tenta inclusão
+                for (let c = 0; c < normRow.length; c++) {
+                    if (usedIndices.includes(c)) continue;
+                    const cell = normRow[c];
+                    if (!cell) continue;
+                    if (keys.some(k => cell.includes(k))) return c;
                 }
                 return -1;
             };
 
-            const map: Partial<HeaderDetection> = {
-                compCodeIdx: findIdx(synonyms.comp),
-                tipoItemIdx: findIdx(synonyms.tipo),
-                itemCodeIdx: findIdx(synonyms.item),
-                descIdx: findIdx(synonyms.desc),
-                unitIdx: findIdx(synonyms.unit),
-                coefIdx: findIdx(synonyms.coef),
-                groupIdx: findIdx(synonyms.grupo),
-                situacaoIdx: findIdx(synonyms.situ),
-                priceIdx: findIdx(synonyms.price),
-                totalIdx: findIdx(synonyms.total),
+            const used: number[] = [];
+            const map: Partial<HeaderDetection> = {};
+
+            // Ordem importa para evitar conflitos (ex: "TIPO ITEM" vs "ITEM")
+            const findAndMark = (key: keyof typeof synonyms) => {
+                const idx = findIdx(synonyms[key], used);
+                if (idx !== -1) used.push(idx);
+                return idx;
             };
+
+            map.tipoItemIdx = findAndMark('tipo');
+            map.compCodeIdx = findAndMark('comp');
+            map.itemCodeIdx = findAndMark('item');
+            map.coefIdx = findAndMark('coef');
+            map.descIdx = findAndMark('desc');
+            map.unitIdx = findAndMark('unit');
+            map.groupIdx = findAndMark('grupo');
+            map.situacaoIdx = findAndMark('situ');
+            map.priceIdx = findAndMark('price');
+            map.totalIdx = findAndMark('total');
 
             const score =
                 ((map.compCodeIdx ?? -1) !== -1 ? 1 : 0) +
@@ -167,7 +187,7 @@ export const sinapiAnaliticoParser = {
                 bestMap = map;
             }
 
-            if (score >= 4) break;
+            if (score >= 5) break;
         }
 
         return {
@@ -237,7 +257,7 @@ export const sinapiAnaliticoParser = {
             wb.SheetNames[0];
 
         const ws = wb.Sheets[foundName];
-        return XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" }) as any[][];
+        return XLSX.utils.sheet_to_json(ws, { header: 1, defval: "", raw: false }) as any[][];
     },
 
     async readFileAsTextSmart(file: File): Promise<string> {
