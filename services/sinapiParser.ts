@@ -98,8 +98,8 @@ export const sinapiParser = {
                 if (val.includes('DESCRIÇÃO') || val.includes('DESCRICAO')) descIdx = idx;
                 if (val.includes('UNIDADE') || val === 'UND' || val === 'UN') unitIdx = idx;
 
-                // Price detection: Look for UF abbreviations or generic "PRECO"
-                if (val.includes('PREÇO') || val.includes('PRECO') || val.includes('CUSTO') || ufs.includes(val)) priceIdx = idx;
+                // Price detection: Look for UF abbreviations or generic "PRECO", "VALOR" or "CUSTO"
+                if (val.includes('PREÇO') || val.includes('PRECO') || val.includes('CUSTO') || val.includes('VALOR') || ufs.includes(val)) priceIdx = idx;
             });
 
             if (codeIdx !== -1 && descIdx !== -1) {
@@ -116,7 +116,7 @@ export const sinapiParser = {
                         codigo,
                         descricao: String(r[descIdx] || '').trim(),
                         unidade: String(r[unitIdx] || '').trim(),
-                        preco: this.parseNumber(r[priceIdx])
+                        preco_unitario: this.parseNumber(r[priceIdx])
                     });
                 }
                 if (data.length > 0) return data as SinapiInsumoRecord[];
@@ -139,7 +139,7 @@ export const sinapiParser = {
                 if (val.includes('CÓD') || val.includes('COD')) codeIdx = idx;
                 if (val.includes('DESC')) descIdx = idx;
                 if (val.includes('UNID') || val === 'UN') unitIdx = idx;
-                if (val.includes('CUSTO') || val.includes('PRECO')) {
+                if (val.includes('CUSTO') || val.includes('PRECO') || val.includes('VALOR')) {
                     // Avoid picking charges % column
                     if (!val.includes('%') && !val.includes('ENCARG')) costIdx = idx;
                 }
@@ -161,7 +161,7 @@ export const sinapiParser = {
                         grupo: groupIdx !== -1 ? String(r[groupIdx] || '').trim() : '',
                         descricao: String(r[descIdx] || '').trim(),
                         unidade: String(r[unitIdx] || '').trim(),
-                        custo: this.parseNumber(r[costIdx])
+                        custo_unitario: this.parseNumber(r[costIdx])
                     });
                 }
                 if (data.length > 0) return data as SinapiComposicaoRecord[];
