@@ -32,16 +32,16 @@ const SinapiImporterAnalitico: React.FC = () => {
         try {
             const records = await sinapiAnaliticoParser.parseAnalitico({ file, ...config });
 
-            // Note: clearDataset in sinapiDb clears records for given mes_ref, uf, modo
+            // Limpa o conjunto de dados anterior antes de salvar o novo
             await sinapiDb.clearDataset('sinapi_composicao_itens', config.mes_ref, config.uf, config.modo);
             await sinapiDb.saveBatch('sinapi_composicao_itens', records);
+
             notify(`Sucesso: ${records.length} itens analíticos importados para ${config.uf} (${config.mes_ref})`);
             refreshCount();
         } catch (err: any) {
             notify(err.message || 'Erro ao importar itens analíticos', 'error');
         } finally {
             setIsProcessing(false);
-            // Reset input
             e.target.value = '';
         }
     };
@@ -98,7 +98,7 @@ const SinapiImporterAnalitico: React.FC = () => {
                     ))}
                 </select>
                 <input
-                    type="text" placeholder="MM/AAAA"
+                    type="text" placeholder="YYYY/MM"
                     className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold outline-none"
                     value={config.mes_ref} onChange={e => setConfig({ ...config, mes_ref: e.target.value })}
                 />
