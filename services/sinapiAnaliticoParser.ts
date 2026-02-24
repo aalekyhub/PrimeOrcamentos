@@ -38,6 +38,7 @@ export const sinapiAnaliticoParser = {
         const det = this.detectHeaders(rows);
 
         if (det.compCodeIdx === -1 || det.tipoItemIdx === -1 || det.itemCodeIdx === -1 || det.coefIdx === -1) {
+            console.error('[sinapiAnaliticoParser] Header detection failed:', det);
             throw new Error(`Colunas obrigatórias não encontradas no arquivo "Analítico". Verifique os nomes das colunas.`);
         }
 
@@ -109,7 +110,7 @@ export const sinapiAnaliticoParser = {
 
         let headerRowIndex = -1;
         let bestScore = -1;
-        let bestMap: Partial<HeaderDetection> = {};
+        let bestDet: Partial<HeaderDetection> = {};
 
         const scanMax = Math.min(rows.length, 60);
 
@@ -118,22 +119,8 @@ export const sinapiAnaliticoParser = {
             if (row.length < 4) continue;
 
             const normRow = row.map(normalize);
-            const used: number[] = [];
-            const map: Partial<HeaderDetection> = {};
-
-            const findIdx = (keys: string[]) => {
-                // Exact match first
-                for (let c = 0; c < normRow.length; c++) {
-                    if (used.includes(c)) continue;
-                    if (keys.some(k => normRow[c] === k)) return c;
-                }
-                // Includes next
-                for (let c = 0; c < normRow.length; c++) {
-                    if (used.includes(c)) continue;
-                    if (keys.some(k => normRow[c].includes(k))) return c;
-                }
-                return -1;
-            };
+            const usedIdx: number[] = [];
+            const currentDet: Partial<HeaderDetection> = {};
 
             const fields: { key: keyof typeof synonyms, target: keyof HeaderDetection }[] = [
                 { key: 'tipo', target: 'tipoItemIdx' },
@@ -149,42 +136,49 @@ export const sinapiAnaliticoParser = {
             ];
 
             fields.forEach(f => {
-                const idx = findIdx(synonyms[f.key]);
-                if (idx !== -1) {
-                    used.push(idx);
-                    (map as any)[f.target] = idx;
+                const keys = synonyms[f.key];
+                // Exact match first
+                let foundAt = normRow.findIndex((v, idx) => !usedIdx.includes(idx) && keys.includes(v));
+                // Include match second
+                if (foundAt === -1) {
+                    foundAt = normRow.findIndex((v, idx) => !usedIdx.includes(idx) && keys.some(k => v.includes(k)));
+                }
+
+                if (foundAt !== -1) {
+                    currentDet[f.target] = foundAt;
+                    usedIdx.push(foundAt);
                 } else {
-                    (map as any)[f.target] = -1;
+                    currentDet[f.target] = -1;
                 }
             });
 
             const score =
-                ((map.compCodeIdx ?? -1) !== -1 ? 1 : 0) +
-                ((map.tipoItemIdx ?? -1) !== -1 ? 1 : 0) +
-                ((map.itemCodeIdx ?? -1) !== -1 ? 1 : 0) +
-                ((map.coefIdx ?? -1) !== -1 ? 1 : 0) +
-                ((map.descIdx ?? -1) !== -1 ? 1 : 0);
+                ((currentDet.compCodeIdx ?? -1) !== -1 ? 2 : 0) +
+                ((currentDet.tipoItemIdx ?? -1) !== -1 ? 2 : 0) +
+                ((currentDet.itemCodeIdx ?? -1) !== -1 ? 2 : 0) +
+                ((currentDet.coefIdx ?? -1) !== -1 ? 2 : 0) +
+                ((currentDet.descIdx ?? -1) !== -1 ? 1 : 0);
 
             if (score > bestScore) {
                 bestScore = score;
                 headerRowIndex = i;
-                bestMap = map;
+                bestDet = currentDet;
             }
-            if (score >= 5) break;
+            if (score >= 9) break;
         }
 
         return {
             headerRowIndex: headerRowIndex === -1 ? 0 : headerRowIndex,
-            compCodeIdx: bestMap.compCodeIdx ?? -1,
-            tipoItemIdx: bestMap.tipoItemIdx ?? -1,
-            itemCodeIdx: bestMap.itemCodeIdx ?? -1,
-            descIdx: bestMap.descIdx ?? -1,
-            unitIdx: bestMap.unitIdx ?? -1,
-            coefIdx: bestMap.coefIdx ?? -1,
-            groupIdx: bestMap.groupIdx ?? -1,
-            situacaoIdx: bestMap.situacaoIdx ?? -1,
-            priceIdx: bestMap.priceIdx ?? -1,
-            totalIdx: bestMap.totalIdx ?? -1,
+            compCodeIdx: bestDet.compCodeIdx ?? -1,
+            tipoItemIdx: bestDet.tipoItemIdx ?? -1,
+            itemCodeIdx: bestDet.itemCodeIdx ?? -1,
+            descIdx: bestDet.descIdx ?? -1,
+            unitIdx: bestDet.unitIdx ?? -1,
+            coefIdx: bestDet.coefIdx ?? -1,
+            groupIdx: bestDet.groupIdx ?? -1,
+            situacaoIdx: bestDet.situacaoIdx ?? -1,
+            priceIdx: bestDet.priceIdx ?? -1,
+            totalIdx: bestDet.totalIdx ?? -1,
         };
     },
 
@@ -197,6 +191,8 @@ export const sinapiAnaliticoParser = {
             s = s.replace(/\./g, "").replace(",", ".");
         } else if (s.includes(",")) {
             s = s.replace(",", ".");
+        } else if ((s.match(/\./g) || []).length > 1) {
+            s = s.replace(/\./g, "");
         }
         const n = parseFloat(s);
         return isFinite(n) ? n : 0;

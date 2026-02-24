@@ -9,301 +9,177 @@ export interface ParserParams {
     modo: string;
 }
 
+const normalize = (v: any) =>
+    String(v ?? "")
+        .trim()
+        .toUpperCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+
 export const sinapiParsers = {
     async parseInsumos({ file, uf, mes_ref, modo }: ParserParams): Promise<SinapiInsumoRecord[]> {
         const rows = await this.readSheet(file);
-        const { codeIdx, descIdx, unitIdx, priceIdx, classIdx, lblIdx } = this.detectInsumoHeaders(rows, uf);
+        const det = this.detectHeaders(rows, 'INSUMO', uf);
 
-        if (codeIdx === -1 || descIdx === -1 || priceIdx === -1) {
-            throw new Error(`Colunas obrigatórias não encontradas. Verifique se a coluna "${uf}" e "Código" existem.`);
+        if (det.codeIdx === -1 || det.descIdx === -1 || det.priceIdx === -1) {
+            console.error('[sinapiParsers] Header detection failed for Insumos:', det);
+            throw new Error(`Colunas obrigatórias não encontradas no arquivo de Insumos. Verifique se as colunas de "Código" e "Preço" existem.`);
         }
 
-        return rows.slice(lblIdx + 1).map(r => {
-            const codigo = String(r[codeIdx] || '').trim();
-            if (!/^\d+$/.test(codigo)) return null;
+        const data: SinapiInsumoRecord[] = [];
+        for (let j = det.headerRowIndex + 1; j < rows.length; j++) {
+            const r = rows[j];
+            if (!r || !r[det.codeIdx]) continue;
+            const codigo = String(r[det.codeIdx]).trim();
+            if (!/^\d+$/.test(codigo)) continue;
 
-            return {
+            data.push({
                 id: `${mes_ref}_${uf}_${modo}_INS_${codigo}`,
                 mes_ref, uf, modo,
-                classificacao: classIdx !== -1 ? String(r[classIdx] || '').trim() : '',
                 codigo,
-                descricao: String(r[descIdx] || '').trim(),
-                unidade: String(r[unitIdx] || '').trim(),
-                origem_preco: '',
-                preco_unitario: this.parseNumber(r[priceIdx])
-            };
-        }).filter(r => r !== null) as SinapiInsumoRecord[];
+                descricao: String(r[det.descIdx] || '').trim(),
+                unidade: det.unitIdx !== -1 ? String(r[det.unitIdx] || '').trim() : '',
+                preco_unitario: this.parseNumber(r[det.priceIdx])
+            });
+        }
+        return data;
     },
 
     async parseComposicoes({ file, uf, mes_ref, modo }: ParserParams): Promise<SinapiComposicaoRecord[]> {
         const rows = await this.readSheet(file);
-        const { codeIdx, descIdx, unitIdx, costIdx, asIdx, groupIdx, lblIdx } = this.detectComposicaoHeaders(rows, uf);
+        const det = this.detectHeaders(rows, 'COMPOSICAO', uf);
 
-        if (codeIdx === -1 || descIdx === -1 || costIdx === -1) {
-            throw new Error(`Colunas obrigatórias não encontradas. Verifique se a coluna de custo para "${uf}" existe.`);
+        if (det.codeIdx === -1 || det.descIdx === -1 || det.priceIdx === -1) {
+            console.error('[sinapiParsers] Header detection failed for Composições:', det);
+            throw new Error(`Colunas obrigatórias não encontradas no arquivo de Composições. Verifique se as colunas de "Código" e "Custo" existem.`);
         }
 
-        return rows.slice(lblIdx + 1).map(r => {
-            const codigo = String(r[codeIdx] || '').trim();
-            if (!/^\d+$/.test(codigo)) return null;
+        const data: SinapiComposicaoRecord[] = [];
+        for (let j = det.headerRowIndex + 1; j < rows.length; j++) {
+            const r = rows[j];
+            if (!r || !r[det.codeIdx]) continue;
+            const codigo = String(r[det.codeIdx]).trim();
+            if (!/^\d+$/.test(codigo)) continue;
 
-            return {
+            data.push({
                 id: `${mes_ref}_${uf}_${modo}_COMP_${codigo}`,
                 mes_ref, uf, modo,
-                grupo: groupIdx !== -1 ? String(r[groupIdx] || '').trim() : '',
+                grupo: det.groupIdx !== -1 ? String(r[det.groupIdx] || '').trim() : '',
                 codigo,
-                descricao: String(r[descIdx] || '').trim(),
-                unidade: String(r[unitIdx] || '').trim(),
-                custo_unitario: this.parseNumber(r[costIdx]),
-                as_pct: asIdx !== -1 ? this.parseNumber(r[asIdx]) : null
-            };
-        }).filter(r => r !== null) as SinapiComposicaoRecord[];
+                descricao: String(r[det.descIdx] || '').trim(),
+                unidade: det.unitIdx !== -1 ? String(r[det.unitIdx] || '').trim() : '',
+                custo_unitario: this.parseNumber(r[det.priceIdx]),
+                as_pct: null
+            });
+        }
+        return data;
     },
 
-    async parseCoeficientes({ file, uf, mes_ref, modo }: ParserParams): Promise<SinapiComposicaoItemRecord[]> {
-        const rows = await this.readSheet(file);
-        const { compCodeIdx, itemCodeIdx, itemDescIdx, itemUnitIdx, coefIdx, catIdx, lblIdx } = this.detectCoeficienteHeaders(rows, uf);
+    async parseCoeficientes(params: ParserParams): Promise<SinapiComposicaoItemRecord[]> {
+        // Fallback or legacy support if needed
+        return [];
+    },
 
-        if (compCodeIdx === -1 || itemCodeIdx === -1 || coefIdx === -1) {
-            throw new Error(`Colunas obrigatórias não encontradas. Verifique se a coluna de coeficiente para "${uf}" existe.`);
+    detectHeaders(rows: any[][], type: 'INSUMO' | 'COMPOSICAO', uf: string) {
+        const targetUf = uf.toUpperCase().trim();
+        const synonyms: Record<string, string[]> = {
+            code: ["CODIGO", "COD", "CODIGO DA COMPOSICAO", "CODIGO DO INSUMO"],
+            desc: ["DESCRICAO", "DESC", "DESCRICAO DA COMPOSICAO", "DESCRICAO DO INSUMO"],
+            unit: ["UNIDADE", "UNID", "UN", "UND"],
+            group: ["GRUPO", "CLASSE"],
+            price: ["PRECO", "VALOR", "CUSTO", targetUf]
+        };
+
+        const scoreWeights = { code: 2, desc: 2, price: 2, unit: 1, group: 1 };
+
+        let bestScore = -1;
+        let bestDet = { headerRowIndex: 0, codeIdx: -1, descIdx: -1, unitIdx: -1, priceIdx: -1, groupIdx: -1 };
+
+        const scanMax = Math.min(rows.length, 60);
+        for (let i = 0; i < scanMax; i++) {
+            const row = rows[i];
+            if (!row || row.length < 3) continue;
+
+            const normRow = row.map(normalize);
+            const currentDet = { headerRowIndex: i, codeIdx: -1, descIdx: -1, unitIdx: -1, priceIdx: -1, groupIdx: -1 };
+            let currentScore = 0;
+
+            const usedIdx: number[] = [];
+
+            // Match fields
+            const fields: (keyof typeof synonyms)[] = ['code', 'desc', 'unit', 'group', 'price'];
+            for (const field of fields) {
+                const keys = synonyms[field];
+                // Exact match first
+                let foundAt = normRow.findIndex((v, idx) => !usedIdx.includes(idx) && keys.includes(v));
+
+                // If price and not found, try targetUf which might be in the keys
+                if (foundAt === -1) {
+                    // Inclusion match
+                    foundAt = normRow.findIndex((v, idx) => !usedIdx.includes(idx) && keys.some(k => v.includes(k)));
+                }
+
+                if (foundAt !== -1) {
+                    // Special checks for price: avoid %, ENCARGOS
+                    if (field === 'price') {
+                        const val = normRow[foundAt];
+                        if (val.includes('%') || val.includes('ENCARG') || val.includes('SOCIAL')) {
+                            // Try another one for price
+                            let altFoundAt = normRow.findIndex((v, idx) => !usedIdx.includes(idx) && idx > foundAt && keys.some(k => v.includes(k) && !v.includes('%') && !v.includes('ENCARG')));
+                            if (altFoundAt !== -1) foundAt = altFoundAt;
+                        }
+                    }
+
+                    (currentDet as any)[`${field}Idx`] = foundAt;
+                    usedIdx.push(foundAt);
+                    currentScore += (scoreWeights as any)[field];
+                }
+            }
+
+            if (currentScore > bestScore) {
+                bestScore = currentScore;
+                bestDet = currentDet;
+            }
+            if (currentScore >= 7) break; // Good enough match
         }
 
-        return rows.slice(lblIdx + 1).map(r => {
-            const codigo_composicao = String(r[compCodeIdx] || '').trim();
-            const codigo_item = String(r[itemCodeIdx] || '').trim();
-            if (!/^\d+$/.test(codigo_composicao) || !/^\d+$/.test(codigo_item)) return null;
+        return bestDet;
+    },
 
-            return {
-                id: `${mes_ref}_${uf}_${modo}_BOM_${codigo_composicao}_${codigo_item}`,
-                mes_ref, uf, modo,
-                codigo_composicao,
-                codigo_item,
-                descricao_item: String(r[itemDescIdx] || '').trim(),
-                unidade_item: String(r[itemUnitIdx] || '').trim(),
-                categoria: catIdx !== -1 ? String(r[catIdx] || '').trim() : '',
-                coeficiente: this.parseNumber(r[coefIdx])
-            };
-        }).filter(r => r !== null) as SinapiComposicaoItemRecord[];
+    parseNumber(val: any): number {
+        if (val === undefined || val === null || val === '') return 0;
+        if (typeof val === 'number') return val;
+
+        let s = String(val).toUpperCase().replace(/R\$/g, '').replace(/\s/g, '').trim();
+        if (s === '-' || !s) return 0;
+
+        // Brazilian format handling: 1.234,56
+        if (s.includes(',') && s.includes('.')) {
+            s = s.replace(/\./g, '').replace(',', '.');
+        } else if (s.includes(',')) {
+            s = s.replace(',', '.');
+        } else if ((s.match(/\./g) || []).length > 1) {
+            s = s.replace(/\./g, '');
+        }
+
+        const num = parseFloat(s);
+        return isFinite(num) ? num : 0;
     },
 
     async readSheet(file: File): Promise<any[][]> {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
-            const isCsv = file.name.toLowerCase().endsWith('.csv');
-
             reader.onload = (e) => {
                 try {
-                    const result = e.target?.result;
-                    if (!result) return resolve([]);
-
-                    const data = new Uint8Array(result as ArrayBuffer);
-                    let workbook;
-
-                    if (isCsv) {
-                        const decoder = new TextDecoder('utf-8');
-                        const sample = decoder.decode(data.slice(0, 5000));
-                        const semiCount = (sample.match(/;/g) || []).length;
-                        const commaCount = (sample.match(/,/g) || []).length;
-
-                        const options: any = { type: 'array' };
-                        if (semiCount > commaCount) options.FS = ';';
-
-                        workbook = XLSX.read(data, options);
-                    } else {
-                        workbook = XLSX.read(data, { type: 'array' });
-                    }
-
+                    const data = new Uint8Array(e.target?.result as ArrayBuffer);
+                    const workbook = XLSX.read(data, { type: 'array' });
                     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
                     const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false, defval: "" }) as any[][];
-
-                    if (isCsv && rows.length > 0 && rows[0].length === 1 && String(rows[0][0]).includes(';')) {
-                        const manualRows = rows.map(r => String(r[0]).split(';'));
-                        return resolve(manualRows);
-                    }
-
                     resolve(rows);
                 } catch (err) { reject(err); }
             };
             reader.onerror = reject;
             reader.readAsArrayBuffer(file);
         });
-    },
-
-    detectInsumoHeaders(rows: any[][], uf: string) {
-        let codeIdx = -1, descIdx = -1, unitIdx = -1, priceIdx = -1, classIdx = -1;
-        const target = uf.toUpperCase().trim();
-
-        const lblIdx = rows.findIndex(r => {
-            const s = r.join(' ').toUpperCase();
-            return (s.includes('CÓD') || s.includes('COD')) && s.includes('DESC') && (s.includes('INSUMO') || s.includes('PRECO') || s.includes('PREÇO'));
-        });
-
-        if (lblIdx === -1) return { codeIdx, descIdx, unitIdx, priceIdx, classIdx, lblIdx: -1 };
-
-        const labels = rows[lblIdx];
-        const top = lblIdx > 0 ? rows[lblIdx - 1] : [];
-        let curUf = '';
-
-        // Strategy skip: find the LAST column that matches the UF and seems like a price
-        // In SDReports, there are often 3 columns for each UF: Base, Direct, and Total. We want the Total.
-        for (let i = labels.length - 1; i >= 0; i--) {
-            const l = String(labels[i] || '').toUpperCase().trim();
-            const t = String(top[i] || '').toUpperCase().trim();
-
-            if (/^[A-Z]{2}$/.test(t)) curUf = t;
-            else if (/^[A-Z]{2}$/.test(l) && l.length === 2) curUf = l;
-
-            if (codeIdx === -1 && (l.includes('CÓD') || l.includes('COD'))) codeIdx = i;
-            if (descIdx === -1 && l.includes('DESC')) descIdx = i;
-            if (unitIdx === -1 && (l.includes('UNID') || l === 'UN')) unitIdx = i;
-            if (classIdx === -1 && l.includes('CLASSIF')) classIdx = i;
-
-            const isUfMatch = curUf === target || l.includes(target) || t.includes(target);
-            const isExclude = l.includes('%') || l.includes('AS ') || l === 'AS';
-
-            if (priceIdx === -1 && isUfMatch && !isExclude) {
-                // Prioritize columns that sound like the final price
-                if (l.includes('PRECO') || l.includes('PREÇO') || l.includes('CUSTO') || l.includes('VALOR') || l === target || t === target || !l) {
-                    priceIdx = i;
-                }
-            }
-        }
-
-        // Correct indices if search from right messed up mandatory ones
-        if (codeIdx === -1 || descIdx === -1) {
-            for (let i = 0; i < labels.length; i++) {
-                const l = String(labels[i] || '').toUpperCase();
-                if (codeIdx === -1 && (l.includes('CÓD') || l.includes('COD'))) codeIdx = i;
-                if (descIdx === -1 && l.includes('DESC')) descIdx = i;
-            }
-        }
-
-        return { codeIdx, descIdx, unitIdx, priceIdx, classIdx, lblIdx };
-    },
-
-    detectComposicaoHeaders(rows: any[][], uf: string) {
-        let codeIdx = -1, descIdx = -1, unitIdx = -1, costIdx = -1, asIdx = -1, groupIdx = -1;
-        const target = uf.toUpperCase().trim();
-
-        const lblIdx = rows.findIndex(r => {
-            const s = r.map(c => String(c || '')).join(' ').toUpperCase();
-            return (s.includes('CÓD') || s.includes('COD')) && (s.includes('COMP') || s.includes('ITEM')) && s.includes('DESC');
-        });
-
-        if (lblIdx === -1) return { codeIdx, descIdx, unitIdx, costIdx, asIdx, groupIdx, lblIdx: -1 };
-
-        const labels = rows[lblIdx];
-        const top = lblIdx > 0 ? rows[lblIdx - 1] : [];
-        let curUf = '';
-
-        // Search from right to left to find the "Total Cost with Social Charges" (last relevant UF column)
-        for (let i = labels.length - 1; i >= 0; i--) {
-            const l = String(labels[i] || '').toUpperCase().trim();
-            const t = String(top[i] || '').toUpperCase().trim();
-
-            if (/^[A-Z]{2}$/.test(t)) curUf = t;
-            else if (/^[A-Z]{2}$/.test(l) && l.length === 2) curUf = l;
-
-            if (codeIdx === -1 && (l.includes('CÓD') || l.includes('COD'))) codeIdx = i;
-            if (descIdx === -1 && l.includes('DESC')) descIdx = i;
-            if (unitIdx === -1 && (l.includes('UNID') || l === 'UN')) unitIdx = i;
-            if (groupIdx === -1 && l.includes('GRUP')) groupIdx = i;
-
-            const isUfMatch = curUf === target || l.includes(target) || t.includes(target);
-            const isEncargos = l.includes('%') || l.includes('AS') || l.includes('ENCARG');
-
-            if (costIdx === -1 && isUfMatch && !isEncargos) {
-                if (l.includes('CUSTO') || l.includes('PRECO') || l.includes('PREÇO') || l === target || t === target || !l) {
-                    costIdx = i;
-                }
-            } else if (asIdx === -1 && isEncargos) {
-                asIdx = i;
-            }
-        }
-
-        // Final fallback for missing required indices
-        if (groupIdx === -1) groupIdx = 0;
-        if (codeIdx === -1) {
-            for (let i = 0; i < labels.length; i++) {
-                const l = String(labels[i] || '').toUpperCase();
-                if (l.includes('CÓD') || l.includes('COD')) { codeIdx = i; break; }
-            }
-        }
-        if (descIdx === -1) {
-            for (let i = 0; i < labels.length; i++) {
-                const l = String(labels[i] || '').toUpperCase();
-                if (l.includes('DESC')) { descIdx = i; break; }
-            }
-        }
-        if (costIdx === -1 && labels.length >= 5) costIdx = labels.length - 2; // Usually the penultimate
-
-        return { codeIdx, descIdx, unitIdx, costIdx, asIdx, groupIdx, lblIdx };
-    },
-
-    detectCoeficienteHeaders(rows: any[][], uf: string) {
-        let compCodeIdx = -1, itemCodeIdx = -1, itemDescIdx = -1, itemUnitIdx = -1, coefIdx = -1, catIdx = -1;
-        const target = uf.toUpperCase().trim();
-
-        const lblIdx = rows.findIndex(r => {
-            // Safer join handling null/undefined
-            const s = r.map(c => String(c || '')).join(' ').toUpperCase();
-            return (s.includes('CÓD') || s.includes('COD')) && (s.includes('FAMIL') || s.includes('COMP'));
-        });
-
-        if (lblIdx === -1) return { compCodeIdx, itemCodeIdx, itemDescIdx, itemUnitIdx, coefIdx, catIdx, lblIdx: -1 };
-
-        const labels = rows[lblIdx];
-        const top = lblIdx > 0 ? rows[lblIdx - 1] : [];
-        let curUf = '';
-
-        for (let i = 0; i < labels.length; i++) {
-            const l = String(labels[i] || '').toUpperCase().trim();
-            const t = String(top[i] || '').toUpperCase().trim();
-
-            if (/^[A-Z]{2}$/.test(t)) curUf = t;
-            else if (/^[A-Z]{2}$/.test(l) && l.length === 2) curUf = l;
-
-            if ((l.includes('CÓD') || l.includes('COD')) && (l.includes('FAMIL') || l.includes('COMP'))) compCodeIdx = i;
-            if ((l.includes('CÓD') || l.includes('COD')) && (l.includes('INSUMO') || l.includes('ITEM'))) itemCodeIdx = i;
-            if (l.includes('DESC')) itemDescIdx = i;
-            if (l.includes('UNID') || l === 'UN') itemUnitIdx = i;
-            if (l.includes('CATEGOR')) catIdx = i;
-
-            if ((curUf === target || l === target || t === target) && coefIdx === -1) {
-                if (l === target || l.includes('COE') || l.includes('VALOR') || t === target || !l || /^[0-9,.]+$/.test(l)) {
-                    coefIdx = i;
-                }
-            }
-        }
-        return { compCodeIdx, itemCodeIdx, itemDescIdx, itemUnitIdx, coefIdx, catIdx, lblIdx };
-    },
-
-    parseNumber(val: any): number {
-        if (val === undefined || val === null || val === '') return 0;
-        if (val === '-') return 0;
-
-        if (typeof val === 'number') return val;
-
-        let s = String(val).toUpperCase().replace(/R\$/g, '').replace(/\s/g, '').trim();
-
-        // Remove trailing dash if it follows a number (common in BR reports like '158,23 -')
-        if (s.endsWith('-') && s.length > 1) {
-            s = s.substring(0, s.length - 1).trim();
-        }
-
-        let multiplier = 1;
-        if (s.startsWith('-')) {
-            multiplier = -1;
-            s = s.substring(1).trim();
-        }
-
-        if (s.includes(',')) {
-            s = s.replace(/\./g, '').replace(',', '.');
-        } else if ((s.match(/\./g) || []).length > 1) {
-            s = s.replace(/\./g, '');
-        }
-
-        const num = parseFloat(s);
-        return (isNaN(num) ? 0 : num) * multiplier;
     }
 };
