@@ -612,13 +612,11 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                     filename: `Planejamento_Obra_${currentPlan.name.replace(/\s+/g, '_')}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 } as any,
                     html2canvas: {
-                        scale: 4,
+                        scale: 3,
                         useCORS: true,
                         letterRendering: true,
-                        scrollX: 0,
-                        scrollY: 0,
-                        windowWidth: 1200,
-                        windowHeight: element.scrollHeight
+                        backgroundColor: "#ffffff",
+                        windowWidth: 1200
                     },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } as any,
                     pagebreak: { mode: ['css', 'legacy'] }
