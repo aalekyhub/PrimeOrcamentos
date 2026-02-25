@@ -336,7 +336,7 @@ const BudgetManager: React.FC<Props> = ({
                   </div>` : ''}
   
                   <!-- Items Table -->
-                   <div style="margin-bottom: 40px; break-inside: avoid;">
+                   <div style="page-break-before: always; break-before: page; margin-top: 40px; margin-bottom: 40px;">
                        <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; padding-bottom: 12px; margin-bottom: 8px;">DETALHAMENTO FINANCEIRO</div>
                        <table style="width: 100%; border-collapse: collapse;">
                           <thead>
