@@ -237,7 +237,7 @@ const BudgetManager: React.FC<Props> = ({
     const vDate = b.dueDate ? formatDate(b.dueDate) : formatDate(new Date(new Date(b.createdAt || Date.now()).getTime() + vDays * 24 * 60 * 60 * 1000).toISOString());
 
     return `
-      <div style="padding-bottom: 25px !important; border-bottom: 3px solid #000; margin-bottom: 40px;">
+      <div style="padding-bottom: 25px !important; border-bottom: 3px solid #000; margin-bottom: 25px;">
          <div style="display: flex; justify-content: space-between; align-items: center;">
              <div style="display: flex; gap: 24px; align-items: center;">
                  <div style="width: 80px; display: flex; align-items: center; justify: flex-start;">
@@ -704,7 +704,7 @@ const BudgetManager: React.FC<Props> = ({
         .toLowerCase()}.pdf`;
 
       const options = {
-        margin: [15, 0, 15, 0] as [number, number, number, number], // 15mm top/bottom constants
+        margin: [10, 0, 15, 0] as [number, number, number, number], // 10mm top to match others, 15mm bottom
         filename,
         image: { type: "jpeg" as const, quality: 0.98 },
         html2canvas: {
