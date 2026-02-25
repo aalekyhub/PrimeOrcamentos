@@ -77,11 +77,11 @@ export const db = {
     return `${prefix}-${random}`;
   },
 
-  async save(key: string, data: any) {
+  async save(key: string, data: any, singleItem?: any) {
     // 1. Update Cache immediately for synchronous consistency
     _cache[key] = data;
 
-    // 2. Save to IndexedDB
+    // 2. Save to IndexedDB (always full list for offline reliability)
     try {
       const idb = await getDB();
       await idb.put(STORE_NAME, data, key);
@@ -93,7 +93,9 @@ export const db = {
     if (supabase) {
       const tableName = key.replace('serviflow_', '');
       try {
-        const payload = Array.isArray(data) ? data : [data];
+        // Optimization: If singleItem is provided, sync ONLY that item for much better performance
+        const payload = singleItem ? [singleItem] : (Array.isArray(data) ? data : [data]);
+
         if (payload.length > 0) {
           const { error } = await supabase
             .from(tableName)

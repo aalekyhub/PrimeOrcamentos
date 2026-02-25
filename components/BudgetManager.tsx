@@ -777,7 +777,8 @@ const BudgetManager: React.FC<Props> = ({
 
     setIsSaving(true);
     try {
-      const result = await db.save('serviflow_orders', newList);
+      // Optimization: pass 'data' as third argument to sync ONLY this budget to Supabase
+      const result = await db.save('serviflow_orders', newList, data);
       if (result?.success) {
         notify("Orçamento salvo e sincronizado!");
         setTimeout(() => setShowForm(false), 1500);
@@ -885,6 +886,8 @@ const BudgetManager: React.FC<Props> = ({
                         );
 
                         let finalList;
+                        let itemToSync;
+
                         if (existingOSIndex !== -1) {
                           // Update existing OS
                           const previousOS = orders[existingOSIndex];
@@ -905,6 +908,7 @@ const BudgetManager: React.FC<Props> = ({
 
                           const newList = orders.map(o => o.id === budget.id ? approvedBudget : o);
                           finalList = newList.map(o => o.id === previousOS.id ? updatedOS : o);
+                          itemToSync = [approvedBudget, updatedOS];
                         } else {
                           // Create new OS
                           const newServiceOrder: ServiceOrder = {
@@ -919,10 +923,11 @@ const BudgetManager: React.FC<Props> = ({
                           };
                           const newList = orders.map(o => o.id === budget.id ? approvedBudget : o);
                           finalList = [...newList, newServiceOrder];
+                          itemToSync = [approvedBudget, newServiceOrder]; // Sync both the approved budget and the new OS
                         }
 
                         setOrders(finalList);
-                        const result = await db.save('serviflow_orders', finalList);
+                        const result = await db.save('serviflow_orders', finalList, itemToSync);
                         if (result?.success) notify(existingOSIndex !== -1 ? "O.S. atualizada com novos dados do Orçamento!" : "Orçamento APROVADO! Cópia gerada em O.S.");
                         else notify("Erro ao sincronizar.", "error");
                       }

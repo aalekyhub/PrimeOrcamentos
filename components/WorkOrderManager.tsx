@@ -151,7 +151,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
         setIsSaving(true);
         try {
-            const result = await db.save('serviflow_orders', newList);
+            const result = await db.save('serviflow_orders', newList, data);
             if (result?.success) { notify(editingOrderId ? "OS de Obra atualizada!" : "OS de Obra registrada!"); setEditingOrderId(null); setShowForm(false); }
             else { notify("Salvo localmente. Erro ao sincronizar.", "warning"); setEditingOrderId(null); setShowForm(false); }
         } finally { setIsSaving(false); }

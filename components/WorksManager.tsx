@@ -404,38 +404,42 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         }
 
         // Save to DB
-        await db.save('serviflow_works', updatedWorks);
+        await db.save('serviflow_works', updatedWorks, updatedWork);
 
         // 1. Services
         const allServices = db.load('serviflow_work_services', []) as WorkService[];
         const otherServices = allServices.filter(s => s.work_id !== currentWork.id);
-        const servicesToSave = [...otherServices, ...services.map(s => ({ ...s, work_id: currentWork.id }))];
-        await db.save('serviflow_work_services', servicesToSave);
+        const currentWorkServices = services.map(s => ({ ...s, work_id: currentWork.id }));
+        const servicesToSave = [...otherServices, ...currentWorkServices];
+        await db.save('serviflow_work_services', servicesToSave, currentWorkServices);
 
         // 2. Materials
         const allMaterials = db.load('serviflow_work_materials', []) as WorkMaterial[];
         const otherMaterials = allMaterials.filter(m => m.work_id !== currentWork.id);
-        const materialsToSave = [...otherMaterials, ...materials.map(m => ({ ...m, work_id: currentWork.id }))];
-        await db.save('serviflow_work_materials', materialsToSave);
+        const currentWorkMaterials = materials.map(m => ({ ...m, work_id: currentWork.id }));
+        const materialsToSave = [...otherMaterials, ...currentWorkMaterials];
+        await db.save('serviflow_work_materials', materialsToSave, currentWorkMaterials);
 
         // 3. Labor
         const allLabor = db.load('serviflow_work_labor', []) as WorkLabor[];
         const otherLabor = allLabor.filter(l => l.work_id !== currentWork.id);
-        const laborToSave = [...otherLabor, ...labor.map(l => ({ ...l, work_id: currentWork.id }))];
-        await db.save('serviflow_work_labor', laborToSave);
+        const currentWorkLabor = labor.map(l => ({ ...l, work_id: currentWork.id }));
+        const laborToSave = [...otherLabor, ...currentWorkLabor];
+        await db.save('serviflow_work_labor', laborToSave, currentWorkLabor);
 
         // 4. Indirects
         const allIndirects = db.load('serviflow_work_indirects', []) as WorkIndirect[];
         const otherIndirects = allIndirects.filter(i => i.work_id !== currentWork.id);
-        const indirectsToSave = [...otherIndirects, ...indirects.map(i => ({ ...i, work_id: currentWork.id }))];
-
-        await db.save('serviflow_work_indirects', indirectsToSave);
+        const currentWorkIndirects = indirects.map(i => ({ ...i, work_id: currentWork.id }));
+        const indirectsToSave = [...otherIndirects, ...currentWorkIndirects];
+        await db.save('serviflow_work_indirects', indirectsToSave, currentWorkIndirects);
 
         // 5. Taxes
         const allTaxes = db.load('serviflow_work_taxes', []) as WorkTax[];
         const otherTaxes = allTaxes.filter(t => t.work_id !== currentWork.id);
-        const taxesToSave = [...otherTaxes, ...taxes.map(t => ({ ...t, work_id: currentWork.id }))];
-        await db.save('serviflow_work_taxes', taxesToSave);
+        const currentWorkTaxes = taxes.map(t => ({ ...t, work_id: currentWork.id }));
+        const taxesToSave = [...otherTaxes, ...currentWorkTaxes];
+        await db.save('serviflow_work_taxes', taxesToSave, currentWorkTaxes);
 
         setWorks(updatedWorks);
 

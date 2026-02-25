@@ -181,7 +181,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
         }
 
         // Save to DB
-        await db.save('serviflow_plans', updatedPlans);
+        await db.save('serviflow_plans', updatedPlans, updatedPlanHeader);
 
         // Save sub-lists (materials, labor, indirects)
         // Need to load existing ones and merge/replace? 
@@ -191,32 +191,37 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
         // 1. Materials
         const allMaterials = db.load('serviflow_plan_materials', []) as PlannedMaterial[];
         const otherMaterials = allMaterials.filter(m => m.plan_id !== currentPlan.id);
-        const materialsToSave = [...otherMaterials, ...materials.map(m => ({ ...m, plan_id: currentPlan.id }))];
-        await db.save('serviflow_plan_materials', materialsToSave);
+        const currentPlanMaterials = materials.map(m => ({ ...m, plan_id: currentPlan.id }));
+        const materialsToSave = [...otherMaterials, ...currentPlanMaterials];
+        await db.save('serviflow_plan_materials', materialsToSave, currentPlanMaterials);
 
         // 2. Labor
         const allLabor = db.load('serviflow_plan_labor', []) as PlannedLabor[];
         const otherLabor = allLabor.filter(l => l.plan_id !== currentPlan.id);
-        const laborToSave = [...otherLabor, ...labor.map(l => ({ ...l, plan_id: currentPlan.id }))];
-        await db.save('serviflow_plan_labor', laborToSave);
+        const currentPlanLabor = labor.map(l => ({ ...l, plan_id: currentPlan.id }));
+        const laborToSave = [...otherLabor, ...currentPlanLabor];
+        await db.save('serviflow_plan_labor', laborToSave, currentPlanLabor);
 
         // 3. Indirects
         const allIndirects = db.load('serviflow_plan_indirects', []) as PlannedIndirect[];
         const otherIndirects = allIndirects.filter(i => i.plan_id !== currentPlan.id);
-        const indirectsToSave = [...otherIndirects, ...indirects.map(i => ({ ...i, plan_id: currentPlan.id }))];
-        await db.save('serviflow_plan_indirects', indirectsToSave);
+        const currentPlanIndirects = indirects.map(i => ({ ...i, plan_id: currentPlan.id }));
+        const indirectsToSave = [...otherIndirects, ...currentPlanIndirects];
+        await db.save('serviflow_plan_indirects', indirectsToSave, currentPlanIndirects);
 
         // 4. Taxes
         const allTaxes = db.load('serviflow_plan_taxes', []) as PlanTax[];
         const otherTaxes = allTaxes.filter(t => t.plan_id !== currentPlan.id);
-        const taxesToSave = [...otherTaxes, ...taxes.map(t => ({ ...t, plan_id: currentPlan.id }))];
-        await db.save('serviflow_plan_taxes', taxesToSave);
+        const currentPlanTaxes = taxes.map(t => ({ ...t, plan_id: currentPlan.id }));
+        const taxesToSave = [...otherTaxes, ...currentPlanTaxes];
+        await db.save('serviflow_plan_taxes', taxesToSave, currentPlanTaxes);
 
         // Also update Services correctly (filter out old, add new)
         const allServices = db.load('serviflow_plan_services', []) as PlannedService[];
         const otherServices = allServices.filter(s => s.plan_id !== currentPlan.id);
-        const servicesToSave = [...otherServices, ...services.map(s => ({ ...s, plan_id: currentPlan.id }))];
-        await db.save('serviflow_plan_services', servicesToSave);
+        const currentPlanServices = services.map(s => ({ ...s, plan_id: currentPlan.id }));
+        const servicesToSave = [...otherServices, ...currentPlanServices];
+        await db.save('serviflow_plan_services', servicesToSave, currentPlanServices);
 
         // Update local state so the list reflects changes immediately
         setPlans(updatedPlans);
