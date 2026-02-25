@@ -35,6 +35,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
     const [labor, setLabor] = useState<WorkLabor[]>([]);
     const [indirects, setIndirects] = useState<WorkIndirect[]>([]);
     const [taxes, setTaxes] = useState<WorkTax[]>([]);
+    const [company, setCompany] = useState<any>({});
 
     // Edit State
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -60,6 +61,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
     // Load works on mount
     useEffect(() => {
         loadWorks();
+        const storedCompany = db.load('serviflow_company', {});
+        setCompany(storedCompany);
     }, []);
 
     // Effect to handle Embedded Mode
@@ -658,21 +661,31 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                 <tbody>
                     <tr>
                         <td style="padding: 0;">
-                           <div class="a4-container" style="padding-bottom: 10px !important; border-bottom: 2px solid #e2e8f0; margin-bottom: 10px;">
-                                <div style="display: flex; justify-content: space-between; align-items: start;">
-                                    <div>
-                                        <h1 style="margin: 0; color: #1e40af; font-size: 26px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.025em;">Relatório Executivo de Obra</h1>
-                                        <p style="margin: 5px 0 0 0; color: #3b82f6; font-size: 16px; font-weight: 700;">${currentWork.name.toUpperCase()}</p>
+                           <div class="a4-container" style="padding-bottom: 8mm; border-bottom: 3px solid #0f172a; margin-bottom: 8mm;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                    <div style="display: flex; gap: 6mm; align-items: center;">
+                                        <div style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                                            ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>'}
+                                        </div>
+                                        <div>
+                                            <h1 style="font-size:18px; font-weight:900; color:#0f172a; margin:0 0 2mm 0; text-transform:uppercase; letter-spacing:-0.5px;">${company.name}</h1>
+                                            <p style="font-size:11px; font-weight:800; color:#2563eb; text-transform:uppercase; letter-spacing:1px; margin:0 0 2mm 0;">Executivo de Obra / Realizado</p>
+                                            <p style="font-size:9px; color:#94a3b8; font-weight:700; text-transform:uppercase; letter-spacing:-0.3px; margin:0;">${company.cnpj || ''} | ${company.phone || ''}</p>
+                                        </div>
                                     </div>
-                                    <div style="text-align: right;">
-                                        <p style="margin: 0; color: #94a3b8; font-size: 10px; font-weight: 800; text-transform: uppercase;">Emissão: ${new Date().toLocaleDateString('pt-BR')}</p>
-                                        <p style="margin: 5px 0 0 0; color: #475569; font-size: 11px;">ID: ${currentWork.id}</p>
+                                    <div style="text-align:right;">
+                                        <div style="background:#059669; color:white; padding:2mm 4mm; border-radius:2mm; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:1px; margin-bottom:2mm; display:inline-block;">EXECUÇÃO</div>
+                                        <p style="font-size:24px; font-weight:900; color:#0f172a; letter-spacing:-1px; margin:0 0 1mm 0; white-space:nowrap;">${currentWork.id}</p>
+                                        <p style="font-size:10px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1px; text-align:right; margin:0;">EMISSÃO: ${new Date().toLocaleDateString('pt-BR')}</p>
                                     </div>
+                                </div>
+                                <div style="margin-top: 4mm;">
+                                    <p style="margin: 0; color: #059669; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">${currentWork.name}</p>
                                 </div>
                             </div>
                             <div class="a4-container">
                                 <!-- INFO GRID -->
-                                <div style="display: flex; flex-wrap: wrap; gap: 24px; margin-bottom: 32px; background: #f1f5f9; padding: 24px; border-radius: 8px; border-bottom: 2px solid #cbd5e1; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                                <div style="display: flex; flex-wrap: wrap; gap: 24px; margin-bottom: 32px; background: #f8fafc; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
                                     <div style="flex: 1; min-width: 200px;">
                                         <p style="margin: 0 0 6px 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Cliente</p>
                                         <p style="margin: 0; font-size: 14px; color: #0f172a; font-weight: 700;">${customer?.name || 'Não Informado'}</p>
@@ -698,7 +711,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 <span style="color: #059669; font-size: 10px; font-weight: 800;">M</span>
                                             </div>
                                         </div>
-                                        <span style="font-size: 24px; font-weight: 900; color: #065f46; display: block; white-space: nowrap;">Total: R$ ${totalMaterial.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                        <span style="font-size: 18px; font-weight: 800; color: #064e3b; display: block; white-space: nowrap;">Total: R$ ${totalMaterial.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                     </div>
                                     ` : ''}
 
@@ -711,7 +724,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 <span style="color: #d97706; font-size: 10px; font-weight: 800;">MO</span>
                                             </div>
                                         </div>
-                                        <span style="font-size: 14px; font-weight: 800; color: #d97706; display: block; white-space: nowrap;">R$ ${totalLabor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                        <span style="font-size: 18px; font-weight: 800; color: #78350f; display: block; white-space: nowrap;">R$ ${totalLabor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                     </div>
                                     ` : ''}
 
@@ -724,7 +737,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 <span style="color: #475569; font-size: 10px; font-weight: 800;">I</span>
                                             </div>
                                         </div>
-                                        <span style="font-size: 14px; font-weight: 800; color: #475569; display: block; white-space: nowrap;">R$ ${totalIndirect.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                        <span style="font-size: 18px; font-weight: 800; color: #1e293b; display: block; white-space: nowrap;">R$ ${totalIndirect.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                     </div>
                                     ` : ''}
 
@@ -737,7 +750,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 <span style="color: #2563eb; font-size: 10px; font-weight: 800;">%</span>
                                             </div>
                                         </div>
-                                        <span style="font-size: 14px; font-weight: 800; color: #2563eb; display: block; white-space: nowrap;">R$ ${totalTaxes.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                        <span style="font-size: 18px; font-weight: 800; color: #1e3a8a; display: block; white-space: nowrap;">R$ ${totalTaxes.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                     </div>
                                     ` : ''}
                                 </div>
@@ -882,14 +895,56 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         setShowPreview(true);
     };
 
-    const handlePreviewFull = () => {
+    const handlePrintFull = () => {
         if (!currentWork) return;
-        setPreviewContent({
-            title: 'Relatório Executivo de Obra',
-            html: generateFullReportHtml(),
-            filename: `Relatorio_Obra_${currentWork.name.replace(/\s+/g, '_')}.pdf`
+        const html = generateFullReportHtml();
+        const element = document.createElement('div');
+        element.style.position = 'absolute';
+        element.style.left = '-10000px';
+        element.style.top = '0';
+        element.style.width = '210mm';
+        element.style.background = 'white';
+        element.style.zIndex = '1';
+        element.style.opacity = '1';
+        element.innerHTML = html;
+        document.body.appendChild(element);
+
+        // Ensure all images are loaded
+        const images = Array.from(element.querySelectorAll('img'));
+        const imagePromises = images.map(img => {
+            if (img.complete) return Promise.resolve();
+            return new Promise(resolve => {
+                img.onload = resolve;
+                img.onerror = resolve;
+            });
         });
-        setShowPreview(true);
+
+        Promise.all(imagePromises).finally(() => {
+            setTimeout(() => {
+                const opt = {
+                    margin: [15, 0, 15, 0] as [number, number, number, number],
+                    filename: `Relatorio_Execucao_Obra_${currentWork.name.replace(/\s+/g, '_')}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 } as any,
+                    html2canvas: {
+                        scale: 3,
+                        useCORS: true,
+                        letterRendering: true,
+                        backgroundColor: "#ffffff",
+                        windowWidth: 1200
+                    },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } as any,
+                    pagebreak: { mode: ['css', 'legacy'] }
+                };
+
+                // @ts-ignore
+                html2pdf().set(opt).from(element).save().then(() => {
+                    if (document.body.contains(element)) document.body.removeChild(element);
+                }).catch((err: any) => {
+                    console.error("PDF Error:", err);
+                    if (document.body.contains(element)) document.body.removeChild(element);
+                });
+            }, 2000);
+        });
     };
 
     const totalMaterial = useMemo(() => {
