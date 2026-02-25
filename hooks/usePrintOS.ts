@@ -23,14 +23,12 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
     const itemsHtml = order.items.map((item) => {
       const total = item.quantity * item.unitPrice;
       return `
-      <tr style="border-bottom: 1px solid #f1f5f9;">
-        <td style="padding: 10px 10px 10px 0; text-align: left; vertical-align: middle; width: 60%;">
-            <div style="font-weight: 700; text-transform: uppercase; font-size: ${itemFontBase}px; color: #0f172a;">${item.description}</div>
-        </td>
-        <td style="padding: 10px 10px; text-align: center; vertical-align: middle; color: #0f172a; font-size: ${itemFontBase}px; font-weight: 700; width: 10%;">${item.quantity} ${item.unit || 'un'}</td>
-        <td style="padding: 10px 10px; text-align: right; vertical-align: middle; color: #64748b; font-size: ${itemFontBase}px; font-weight: 700; width: 15%;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-        <td style="padding: 10px 0 10px 10px; text-align: right; vertical-align: middle; font-weight: 800; font-size: ${itemFontBase + 1}px; color: #0f172a; width: 15%;">R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-      </tr>`;
+                <tr style="border-bottom: 1px solid #e2e8f0;">
+                    <td style="padding: 6px 0; font-size: 10px; font-weight: 600; color: #1e293b; text-transform: uppercase; vertical-align: top;">${item.description}</td>
+                    <td style="padding: 6px 0; text-align: center; font-size: 10px; font-weight: 600; color: #475569; vertical-align: top;">${item.quantity} ${item.unit || ''}</td>
+                    <td style="padding: 6px 0; text-align: right; font-size: 10px; color: #475569; vertical-align: top;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    <td style="padding: 6px 0; text-align: right; font-size: 10px; font-weight: 700; color: #0f172a; vertical-align: top;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                </tr>`;
     }).join('');
 
     const html = `
@@ -178,10 +176,10 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
                         <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                             <thead>
                                 <tr style="border-bottom: 2px solid #0f172a;">
-                                    <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: left; font-weight: 800; width: 60%;">Item / Descrição</th>
-                                    <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: center; font-weight: 800; width: 10%;">Qtd</th>
-                                    <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 15%;">Unitário</th>
-                                    <th style="padding-bottom: 8px; font-size: 8px; text-transform: uppercase; color: #94a3b8; text-align: right; font-weight: 800; width: 15%;">Subtotal</th>
+                                    <th style="padding-bottom: 4px; text-align: left; font-size: 8px; font-weight: 800; color: #64748b; text-transform: uppercase; width: 55%;">Serviço / Item</th>
+                                    <th style="padding-bottom: 4px; text-align: center; font-size: 8px; font-weight: 800; color: #64748b; text-transform: uppercase; width: 10%;">Qtd</th>
+                                    <th style="padding-bottom: 4px; text-align: right; font-size: 8px; font-weight: 800; color: #64748b; text-transform: uppercase; width: 17.5%;">Unitário</th>
+                                    <th style="padding-bottom: 4px; text-align: right; font-size: 8px; font-weight: 800; color: #64748b; text-transform: uppercase; width: 17.5%;">Subtotal</th>
                                 </tr>
                             </thead>
                             <tbody>${itemsHtml}</tbody>
