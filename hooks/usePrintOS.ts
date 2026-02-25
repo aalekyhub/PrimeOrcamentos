@@ -187,7 +187,7 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
                             <tbody>${itemsHtml}</tbody>
                         </table>
 
-                        <div style="display: flex !important; flex-direction: row !important; justify-content: flex-end !important; gap: 40px !important; align-items: flex-end !important; margin-top: 16px; margin-bottom: 24px; padding: 0 16px;">
+                        <div style="display: flex !important; flex-direction: row !important; justify-content: flex-end !important; gap: 40px !important; align-items: flex-end !important; margin-top: 12px; margin-bottom: 20px; padding: 0 16px;">
                             <div style="text-align: right;">
                                 <p style="font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px;">Subtotal</p>
                                 <p style="font-size: 10px; font-weight: 800; color: #0f172a; margin: 0;">R$ ${subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
@@ -204,7 +204,7 @@ export const usePrintOS = (customers: Customer[], company: CompanyProfile) => {
                             </div>` : ''}
                         </div>
 
-                        <div class="bg-[#0f172a] text-white p-5 rounded-2xl shadow-xl mb-4" style="display: flex !important; flex-direction: row !important; justify-content: space-between !important; align-items: center !important;">
+                        <div class="bg-[#0f172a] text-white p-4 rounded-xl shadow-xl mb-4" style="display: flex !important; flex-direction: row !important; justify-content: space-between !important; align-items: center !important;">
                             <p style="font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; margin: 0; opacity: 0.8 !important;">INVESTIMENTO TOTAL:</p>
                             <p style="font-size: 32px; font-weight: 900; letter-spacing: -0.05em; margin: 0 !important; line-height: 1 !important;">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                         </div>
