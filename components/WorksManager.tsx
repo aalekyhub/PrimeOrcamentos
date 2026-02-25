@@ -1071,11 +1071,13 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     </button>
                                 )}
                                 <div>
-                                    <h2 className="text-xl font-bold text-blue-900 dark:text-blue-100 flex items-center gap-2">
+                                    <h2 className="text-xl font-bold text-blue-900 dark:text-blue-100 flex items-center gap-2 uppercase tracking-tighter">
                                         <HardHat className="text-blue-600 dark:text-blue-400" size={24} />
                                         {currentWork?.name}
                                     </h2>
-                                    <p className="text-xs text-blue-600 dark:text-blue-400 uppercase tracking-widest font-semibold">{currentWork?.status} • GESTÃO DE EXECUÇÃO</p>
+                                    <p className="text-xs text-blue-600 dark:text-blue-400 uppercase tracking-widest font-bold font-sans">
+                                        {currentWork?.status || 'EM ANDAMENTO'} • GESTÃO DE EXECUÇÃO
+                                    </p>
                                 </div>
                             </div>
                             <div className="flex gap-2">
@@ -1094,20 +1096,20 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                             </div>
                         </div>
 
-                        <div className="flex px-6 bg-white dark:bg-slate-900 overflow-x-auto no-scrollbar">
+                        <div className="flex px-6 bg-white dark:bg-slate-900 overflow-x-auto no-scrollbar border-b border-slate-100 dark:border-slate-800">
                             {[
                                 { id: 'dados', label: 'Dados da Obra', icon: FileText },
                                 { id: 'servicos', label: 'Serviços', icon: Building2 },
-                                { id: 'recursos', label: 'Gastos Detalhados', icon: Truck },
-                                { id: 'resumo', label: 'Resumo de Custo', icon: PieChart },
+                                { id: 'recursos', label: 'Insumos', icon: Truck },
+                                { id: 'resumo', label: 'Resumo', icon: PieChart },
                             ].map(tab => (
                                 <button
                                     key={tab.id}
                                     type="button"
                                     onClick={() => setActiveTab(tab.id as any)}
-                                    className={`px-6 py-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                                    className={`px-6 py-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap uppercase tracking-widest ${activeTab === tab.id ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
                                 >
-                                    <tab.icon size={16} /> {tab.label}
+                                    <tab.icon size={14} /> {tab.label}
                                 </button>
                             ))}
                         </div>
@@ -1168,7 +1170,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 (document.getElementById('svc_mat') as HTMLInputElement).value = '';
                                                 (document.getElementById('svc_lab') as HTMLInputElement).value = '';
                                             }}
-                                            className="w-full bg-emerald-600 dark:bg-emerald-500 text-white p-2 rounded hover:bg-emerald-700 dark:hover:bg-emerald-400 font-bold text-xs h-9 flex items-center justify-center gap-1 shadow-sm"
+                                            className="w-full bg-blue-600 dark:bg-emerald-500 text-white p-2 rounded hover:bg-emerald-700 dark:hover:bg-emerald-400 font-bold text-xs h-9 flex items-center justify-center gap-1 shadow-sm"
                                         >
                                             <Plus size={14} /> ADICIONAR SERVIÇO
                                         </button>
@@ -1404,7 +1406,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                             <div className="max-w-2xl mx-auto space-y-8 animate-in slide-in-from-bottom-4">
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="space-y-1.5">
-                                        <label className="block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Nome Identificador da Obra</label>
+                                        <label className="block text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Nome Identificador da Obra</label>
                                         <input
                                             type="text"
                                             value={currentWork.name}
@@ -1413,7 +1415,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         />
                                     </div>
                                     <div className="space-y-1.5">
-                                        <label className="block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Status de Execução</label>
+                                        <label className="block text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Status de Execução</label>
                                         <select
                                             value={currentWork.status}
                                             onChange={e => setCurrentWork({ ...currentWork, status: e.target.value as any })}
@@ -1427,7 +1429,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 </div>
                                 {/* Customer Select */}
                                 <div className="space-y-1.5">
-                                    <label className="block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Cliente Vinculado</label>
+                                    <label className="block text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Cliente Vinculado</label>
                                     <select
                                         value={currentWork.client_id}
                                         onChange={e => {
@@ -1446,7 +1448,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     </select>
                                 </div>
                                 <div className="space-y-1.5">
-                                    <label className="block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Endereço da Obra</label>
+                                    <label className="block text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Endereço da Obra</label>
                                     <input
                                         type="text"
                                         value={currentWork.address}
@@ -1592,8 +1594,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             key={tab}
                                             onClick={() => setResourceTab(tab)}
                                             className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${resourceTab === tab
-                                                    ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm'
-                                                    : 'text-slate-500 hover:text-slate-700'
+                                                ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm'
+                                                : 'text-slate-500 hover:text-slate-700'
                                                 }`}
                                         >
                                             {tab === 'material' ? 'Materiais' : tab === 'mo' ? 'Mão de Obra' : tab === 'indireto' ? 'Indiretos' : 'Impostos & BDI'}
@@ -1867,7 +1869,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 <div className="animate-in fade-in slide-in-from-left-4 duration-500">
                                     <div className="flex justify-between items-center mb-6">
                                         <div>
-                                            <h3 className="font-black text-slate-800 dark:text-slate-100 flex items-center gap-2 uppercase tracking-tighter text-lg"><Archive size={22} className="text-slate-500" /> Custos Indiretos</h3>
+                                            <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 uppercase tracking-tighter text-lg"><Archive size={22} className="text-slate-500" /> Custos Indiretos</h3>
                                             <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-8">Despesas administrativas e logísticas</p>
                                         </div>
                                     </div>
@@ -1909,7 +1911,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                     const updated = indirects.map(item => item.id === i.id ? { ...item, category: newCat, description: newDesc.toUpperCase(), value: newVal } : item);
                                                                     setIndirects(updated);
                                                                     setEditingId(null);
-                                                                }} className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 p-2 rounded-lg hover:bg-emerald-200 dark:hover:bg-emerald-900/50"><Check size={18} /></button>
+                                                                }} className="bg-emerald-100 dark:bg-emerald-900/30 text-blue-600 dark:text-emerald-400 p-2 rounded-lg hover:bg-emerald-200 dark:hover:bg-emerald-900/50"><Check size={18} /></button>
                                                                 <button onClick={() => setEditingId(null)} className="bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 p-2 rounded-lg hover:bg-rose-200 dark:hover:bg-rose-900/50"><X size={18} /></button>
                                                             </div>
                                                         </div>
@@ -1920,7 +1922,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                     <GripVertical size={20} />
                                                                 </div>
                                                                 <div className="space-y-0.5">
-                                                                    <p className="font-black text-xs text-slate-800 dark:text-slate-100 uppercase tracking-tight">{i.description}</p>
+                                                                    <p className="font-bold text-xs text-slate-800 dark:text-slate-100 uppercase tracking-tight">{i.description}</p>
                                                                     <div className="flex items-center gap-2 text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">
                                                                         <span className="bg-slate-50 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-100 dark:border-slate-700">{i.category}</span>
                                                                     </div>
@@ -1928,8 +1930,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             </div>
                                                             <div className="flex items-center gap-6 shrink-0">
                                                                 <div className="text-right">
-                                                                    <p className="text-[9px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest mb-0.5 text-right">Valor</p>
-                                                                    <p className="font-black text-sm text-slate-800 dark:text-slate-100 whitespace-nowrap tracking-tight">R$ {i.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                                                    <p className="text-[9px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-widest mb-0.5 text-right">Valor</p>
+                                                                    <p className="font-bold text-sm text-slate-800 dark:text-slate-100 whitespace-nowrap tracking-tight">R$ {i.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                                                                 </div>
                                                                 <div className="flex flex-col gap-0.5">
                                                                     <button onClick={() => (window as any).moveItemWork(indirects, setIndirects, index, 'up')} disabled={index === 0} className="text-slate-300 dark:text-slate-700 hover:text-emerald-500 dark:hover:text-emerald-400 disabled:opacity-0 transition-all p-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded"><ChevronUp size={14} /></button>
@@ -1961,12 +1963,12 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 <div className="animate-in fade-in slide-in-from-left-4 duration-500 space-y-8">
                                     <div className="flex justify-between items-center">
                                         <div>
-                                            <h3 className="font-black text-slate-800 dark:text-slate-100 flex items-center gap-2 uppercase tracking-tighter text-lg"><Percent size={22} className="text-blue-500" /> Impostos & BDI</h3>
+                                            <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 uppercase tracking-tighter text-lg"><Percent size={22} className="text-blue-500" /> Impostos & BDI</h3>
                                             <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-8">Cálculos tributários e margem de lucro</p>
                                         </div>
                                         <button
                                             onClick={handleLoadDefaultTaxes}
-                                            className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all border border-blue-100 dark:border-blue-900/50"
+                                            className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all border border-blue-100 dark:border-blue-900/50"
                                         >
                                             Carregar Padrão (ISS/PIS/COFINS)
                                         </button>
@@ -1975,7 +1977,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                         <div className="md:col-span-2 space-y-6">
                                             <div className="bg-white dark:bg-slate-900 p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm">
-                                                <h4 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-6">Detalhamento de Taxas</h4>
+                                                <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-6">Detalhamento de Taxas</h4>
                                                 <div className="space-y-3">
                                                     {taxes.filter(t => (t.rate > 0 || t.value > 0)).map(t => (
                                                         <div key={t.id} className="p-4 rounded-2xl bg-slate-50/50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800 flex justify-between items-center group hover:border-blue-200 dark:hover:border-blue-800/50 transition-all">
@@ -1984,7 +1986,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                     {t.rate > 0 ? `${t.rate}%` : 'R$'}
                                                                 </div>
                                                                 <div>
-                                                                    <p className="font-black text-xs text-slate-800 dark:text-slate-100 uppercase">{t.name}</p>
+                                                                    <p className="font-bold text-xs text-slate-800 dark:text-slate-100 uppercase">{t.name}</p>
                                                                     <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                                                                         {t.rate > 0 ? 'Alíquota sobre faturamento' : 'Custo fixo lançado'}
                                                                     </p>
@@ -1992,8 +1994,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             </div>
                                                             <div className="flex items-center gap-6">
                                                                 <div className="text-right">
-                                                                    <p className="text-[9px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest mb-0.5">Equivalente</p>
-                                                                    <p className="font-black text-sm text-blue-600 dark:text-blue-400 whitespace-nowrap tracking-tight">
+                                                                    <p className="text-[9px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-widest mb-0.5">Equivalente</p>
+                                                                    <p className="font-bold text-sm text-blue-600 dark:text-blue-400 whitespace-nowrap tracking-tight">
                                                                         R$ {(t.rate > 0 ? (t.name === 'BDI' ? totalDirect : totalGeneral) * (t.rate / 100) : t.value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                                                                     </p>
                                                                 </div>
@@ -2003,7 +2005,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                     ))}
                                                     {taxes.filter(t => (t.rate > 0 || t.value > 0)).length === 0 && (
                                                         <div className="text-center py-12 border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-2xl">
-                                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nenhuma taxa ativa</p>
+                                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nenhuma taxa ativa</p>
                                                         </div>
                                                     )}
                                                 </div>
@@ -2014,7 +2016,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             <div className="bg-blue-50/50 dark:bg-blue-900/10 p-6 rounded-[2rem] border border-blue-100/50 dark:border-blue-900/20">
                                                 <div className="flex items-center gap-3 mb-4 text-blue-600 dark:text-blue-400">
                                                     <AlertCircle size={20} />
-                                                    <h4 className="font-black text-[10px] uppercase tracking-widest">Cálculo por Dentro</h4>
+                                                    <h4 className="font-bold text-[10px] uppercase tracking-widest">Cálculo por Dentro</h4>
                                                 </div>
                                                 <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
                                                     O sistema utiliza o método <b>Gross Up</b>. Isso garante que os impostos incidam sobre o valor final da nota, mantendo sua margem líquida intacta.
@@ -2022,14 +2024,14 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             </div>
 
                                             <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm">
-                                                <h4 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4">Adicionar Taxa</h4>
+                                                <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4">Adicionar Taxa</h4>
                                                 <div className="space-y-4">
                                                     <div>
-                                                        <label className="block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Descrição</label>
+                                                        <label className="block text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Descrição</label>
                                                         <input type="text" id="tax_name" className="w-full text-xs font-bold p-3 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl text-slate-700 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="EX: ISS" />
                                                     </div>
                                                     <div>
-                                                        <label className="block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Alíquota (%)</label>
+                                                        <label className="block text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Alíquota (%)</label>
                                                         <input type="number" id="tax_rate" className="w-full text-xs font-bold p-3 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl text-slate-700 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="0.00" />
                                                     </div>
                                                     <button
@@ -2041,7 +2043,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             (document.getElementById('tax_name') as HTMLInputElement).value = '';
                                                             (document.getElementById('tax_rate') as HTMLInputElement).value = '';
                                                         }}
-                                                        className="w-full bg-slate-900 dark:bg-blue-600 text-white p-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-800 dark:hover:bg-blue-500 transition-all shadow-lg active:scale-95"
+                                                        className="w-full bg-slate-900 dark:bg-blue-600 text-white p-3 rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-slate-800 dark:hover:bg-blue-500 transition-all shadow-lg active:scale-95"
                                                     >
                                                         Adicionar
                                                     </button>
@@ -2055,95 +2057,99 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                     </div >
                     {activeTab === 'resumo' && (
                         <div className="max-w-4xl mx-auto space-y-8 pb-12">
-                            <div className="flex justify-between items-center mb-6">
+                            {/* Summary Cards Grid */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                                {/* Materiais */}
+                                <div className="bg-emerald-50 dark:bg-emerald-900/20 p-6 rounded-xl border border-emerald-200 dark:border-emerald-800 shadow-sm transition-all hover:shadow-md">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Total Materiais</span>
+                                        <div className="bg-emerald-100 dark:bg-emerald-900/40 p-1.5 rounded-lg">
+                                            <Truck size={16} className="text-emerald-600 dark:text-emerald-400" />
+                                        </div>
+                                    </div>
+                                    <span className="text-2xl font-bold text-emerald-900 dark:text-emerald-100 whitespace-nowrap">R$ {totalMaterial.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                    <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-1 font-medium">Insumos + Materiais de Serviços</p>
+                                </div>
+
+                                {/* Mão de Obra */}
+                                <div className="bg-amber-50 dark:bg-amber-900/20 p-6 rounded-xl border border-amber-200 dark:border-amber-800 shadow-sm transition-all hover:shadow-md">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Total Mão de Obra</span>
+                                        <div className="bg-amber-100 dark:bg-amber-900/40 p-1.5 rounded-lg">
+                                            <HardHat size={16} className="text-amber-600 dark:text-amber-400" />
+                                        </div>
+                                    </div>
+                                    <span className="text-2xl font-bold text-amber-900 dark:text-amber-100 whitespace-nowrap">R$ {totalLabor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                    <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-1 font-medium">Equipe Própria + Terceirizada</p>
+                                </div>
+
+                                {/* Indiretos */}
+                                <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:shadow-md">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Indiretos</span>
+                                        <div className="bg-slate-200 dark:bg-slate-700 p-1.5 rounded-lg">
+                                            <Archive size={16} className="text-slate-600 dark:text-slate-300" />
+                                        </div>
+                                    </div>
+                                    <span className="text-2xl font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap">R$ {totalIndirect.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-medium">Custos Administrativos</p>
+                                </div>
+
+                                {/* Impostos */}
+                                <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-xl border border-blue-200 dark:border-blue-800 shadow-sm transition-all hover:shadow-md">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Total Impostos</span>
+                                        <div className="bg-blue-100 dark:bg-blue-900/40 p-1.5 rounded-lg">
+                                            <Percent size={16} className="text-blue-600 dark:text-blue-400" />
+                                        </div>
+                                    </div>
+                                    <span className="text-2xl font-bold text-blue-900 dark:text-blue-100 whitespace-nowrap">R$ {totalTaxes.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                    <p className="text-[10px] text-blue-600 dark:text-blue-400 mt-1 font-medium">Baseado no BDI e Taxas</p>
+                                </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex justify-end gap-2">
+                                <button
+                                    onClick={handlePrintFull}
+                                    className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 px-6 py-4 rounded-2xl text-base font-bold flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-md group border-b-4 border-b-blue-600 active:border-b-0 active:translate-y-1"
+                                >
+                                    <div className="bg-blue-100 dark:bg-blue-900/40 p-2 rounded-xl group-hover:scale-110 transition-transform">
+                                        <Eye size={24} className="text-blue-600 dark:text-blue-400" />
+                                    </div>
+                                    <div className="text-left">
+                                        <span className="block text-slate-800 dark:text-slate-100 leading-none">Visualizar e Gerar PDF</span>
+                                        <span className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none font-bold">Relatório Completo</span>
+                                    </div>
+                                </button>
+                            </div>
+
+                            {/* Total Cost Block */}
+                            <div className="bg-slate-900 text-white p-8 rounded-2xl flex justify-between items-center shadow-xl">
                                 <div>
-                                    <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 uppercase tracking-tighter text-lg"><PieChart size={22} className="text-blue-600" /> Resumo Consolidado</h3>
-                                    <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-8">Visão geral financeira da execução</p>
+                                    <p className="text-slate-400 text-sm font-bold uppercase tracking-widest mb-1">Custo Executado Total</p>
+                                    <p className="text-4xl font-bold whitespace-nowrap">R$ {totalGeneral.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                                 </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
-                                            <Truck size={20} />
-                                        </div>
-                                        <div>
-                                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Materiais</p>
-                                            <p className="font-bold text-base text-slate-800 dark:text-slate-100">R$ {totalMaterial.toFixed(2)}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
-                                            <HardHat size={20} />
-                                        </div>
-                                        <div>
-                                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Mão de Obra</p>
-                                            <p className="font-bold text-base text-slate-800 dark:text-slate-100">R$ {totalLabor.toFixed(2)}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
-                                            <Archive size={20} />
-                                        </div>
-                                        <div>
-                                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Indiretos</p>
-                                            <p className="font-bold text-base text-slate-800 dark:text-slate-100">R$ {totalIndirect.toFixed(2)}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm relative overflow-hidden">
-                                    <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-6">Detalhamento Financeiro</h4>
-                                    <div className="space-y-4">
-                                        <div className="flex justify-between items-center text-sm font-bold">
-                                            <span className="text-slate-500">Custo Direto</span>
-                                            <span className="text-slate-800 dark:text-slate-200">R$ {totalDirect.toFixed(2)}</span>
-                                        </div>
-                                        <div className="h-px bg-slate-100 dark:bg-slate-800 my-2"></div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Tributos & BDI</span>
-                                            <span className="font-bold text-base text-blue-600">R$ {totalTaxes.toFixed(2)}</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="bg-slate-900 dark:bg-blue-600 p-8 rounded-3xl shadow-xl flex flex-col justify-center relative overflow-hidden">
-                                    <div className="relative z-10">
-                                        <p className="text-blue-400/60 dark:text-white/40 text-[10px] font-bold uppercase tracking-[0.3em] mb-2">Valor Final Realizado</p>
-                                        <h2 className="text-4xl font-bold text-white tracking-tighter mb-4">
-                                            R$ {totalGeneral.toFixed(2)}
-                                        </h2>
-                                        <p className="text-blue-100/60 dark:text-white/60 text-xs font-medium">
-                                            Considerando todos os custos diretos, indiretos e tributação aplicada.
-                                        </p>
-                                    </div>
-                                    <div className="absolute top-0 right-0 p-8 text-white/5">
-                                        <DollarSign size={120} strokeWidth={3} />
+                                <div className="text-right">
+                                    <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1 opacity-50">Baseado em Entradas Reais</p>
+                                    <div className="flex items-center gap-2 text-blue-400 font-bold">
+                                        <DollarSign size={20} />
+                                        <span>Valores Consolidados</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     )}
-                </div >
-                </div >
-    )
-}
-
-<ReportPreview
-    isOpen={showPreview}
-    onClose={() => setShowPreview(false)}
-    title={previewContent.title}
-    htmlContent={previewContent.html}
-    filename={previewContent.filename}
-/>
-        </div >
+                </div>
+            )}
+            <ReportPreview
+                isOpen={showPreview}
+                onClose={() => setShowPreview(false)}
+                title={previewContent.title}
+                htmlContent={previewContent.html}
+                filename={previewContent.filename}
+            />
+        </div>
     );
 };
 
