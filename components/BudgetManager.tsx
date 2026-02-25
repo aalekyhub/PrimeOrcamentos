@@ -262,12 +262,12 @@ const BudgetManager: React.FC<Props> = ({
     const vDays = company.defaultProposalValidity || 15;
     return `
       <div style="margin-top: 32px; break-inside: avoid;">
-          <div style="border: 1px solid #bfdbfe; background: #eff6ff; border-radius: 16px; padding: 32px;">
-               <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-                   <div style="background: #2563eb; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold;">?</div>
-                   <span style="font-size: 13px; font-weight: 800; color: #1e40af; text-transform: uppercase; letter-spacing: 0.05em;">TERMO DE ACEITE E AUTORIZAÇÃO PROFISSIONAL</span>
+          <div style="border: 1px solid #e2e8f0; background: #f8fafc; border-radius: 12px; padding: 24px;">
+               <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                   <div style="background: #2563eb; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; font-weight: bold;">?</div>
+                   <span style="font-size: 11px; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em;">TERMO DE ACEITE E AUTORIZAÇÃO PROFISSIONAL</span>
                </div>
-               <p style="margin: 0; font-size: 11px; color: #1e3a8a; line-height: 1.6; text-align: justify; font-weight: 500;">
+               <p style="margin: 0; font-size: 11px; color: #475569; line-height: 1.6; text-align: justify; font-weight: 600;">
                    "Este documento constitui uma proposta comercial formal. Ao assinar abaixo, o cliente declara estar ciente e de pleno acordo com os valores, prazos e especificações técnicas descritas. Esta aceitação autoriza o início imediato dos trabalhos sob as condições estabelecidas. A contratada reserva-se o direito de renegociar valores caso a aprovação ocorra após o prazo de validade de ${vDays} dias. Eventuais alterações de escopo solicitadas após o aceite estarão sujeitas a nova análise de custos."
                </p>
           </div>
@@ -301,12 +301,12 @@ const BudgetManager: React.FC<Props> = ({
     return `
                  <!-- Boxes Grid -->
                  <div style="display: flex; gap: 24px; margin-bottom: 40px;">
-                     <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #bfdbfe;">
+                     <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
                          <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">CLIENTE / DESTINATÁRIO</span>
                          <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${cust.name}</div>
                          <div style="font-size: 11px; color: #64748b; font-weight: 600; margin-top: 4px;">${cust.document || 'CPF/CNPJ não informado'}</div>
                      </div>
-                     <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #bfdbfe;">
+                     <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
                          <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">REFERÊNCIA DO ORÇAMENTO</span>
                          <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${b.description || 'PROPOSTA COMERCIAL'}</div>
                      </div>
