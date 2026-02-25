@@ -3,7 +3,7 @@ import {
     Building2, Users, Truck, HardHat, FileText,
     Plus, Trash2, Save, ChevronRight, Calculator,
     PieChart, ArrowRight, DollarSign, Calendar, Pencil, Check, X, Printer, Percent, Eye, Archive,
-    ChevronUp, ChevronDown, GripVertical, AlertCircle
+    ChevronUp, ChevronDown, GripVertical, AlertCircle, CheckCircle
 } from 'lucide-react';
 import { useNotify } from './ToastProvider';
 import { db } from '../services/db';
@@ -39,6 +39,11 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
     // Edit State
     const [editingId, setEditingId] = useState<string | null>(null);
+    const [editDesc, setEditDesc] = useState('');
+    const [editUnit, setEditUnit] = useState('');
+    const [editQty, setEditQty] = useState(0);
+    const [editPrice1, setEditPrice1] = useState(0);
+    const [editPrice2, setEditPrice2] = useState(0);
 
     const [activeTab, setActiveTab] = useState<'dados' | 'servicos' | 'recursos' | 'resumo'>('dados');
     const [resourceTab, setResourceTab] = useState<'material' | 'mo' | 'indireto' | 'impostos'>('material');
@@ -1000,20 +1005,19 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             {(!activeWorkId && !embeddedPlanId) ? (
                 <div>
                     <div className="flex justify-between items-center mb-6">
-                        <h1 className="text-2xl font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-tighter">Gestão de Obras</h1>
-                        <button onClick={handleCreateWork} className="bg-emerald-600 dark:bg-emerald-500 text-white px-6 py-2.5 rounded-xl font-black uppercase text-xs flex items-center gap-2 hover:bg-emerald-700 dark:hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-900/20 dark:shadow-none">
-                            <Plus size={18} /> Nova Obra
+                        <h1 className="text-2xl font-bold text-slate-800 dark:text-white uppercase tracking-tighter">Gestão de Obras</h1>
+                        <button onClick={handleCreateWork} className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 shadow-md shadow-blue-950/20">
+                            <Plus size={20} /> Nova Obra
                         </button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {works.map(work => (
                             <div key={work.id}
-                                className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800 hover:border-emerald-400 dark:hover:border-emerald-500 transition-all group relative overflow-hidden">
-                                <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500/10 dark:bg-emerald-500/20 group-hover:bg-emerald-500 transition-colors"></div>
-                                <div className="flex justify-between items-start mb-4">
+                                className="bg-white dark:bg-slate-900/50 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 hover:border-blue-400 transition-all group relative">
+                                <div className="flex justify-between items-start mb-2">
                                     <div className="flex-1 min-w-0">
-                                        <span className="font-black text-lg text-slate-800 dark:text-slate-100 block truncate leading-tight uppercase tracking-tight">{work.name}</span>
-                                        <span className="text-[10px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-[0.2em]">{work.id}</span>
+                                        <span className="font-bold text-lg text-slate-800 dark:text-slate-100 block truncate leading-tight uppercase tracking-tight">{work.name}</span>
+                                        <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-[0.2em]">{work.id}</span>
                                     </div>
                                     <div className="flex gap-1 ml-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <button
@@ -1034,20 +1038,20 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 </div>
                                 <div className="flex justify-between items-center mb-5">
                                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400 truncate flex-1 pr-2">{work.address || 'Sem endereço configurado'}</p>
-                                    <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${work.status === 'Concluída' ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/50' : 'bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-orange-900/50'}`}>
+                                    <span className={`px-2 py-1 rounded text-[10px] font-bold ${work.status === 'Concluída' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'}`}>
                                         {work.status}
                                     </span>
                                 </div>
-                                <div className="flex items-center gap-2 text-[10px] text-slate-400 dark:text-slate-500 font-black uppercase mb-6 bg-slate-50/50 dark:bg-slate-800/30 p-2 rounded-lg w-fit">
-                                    <Calendar size={12} className="text-emerald-500" />
+                                <div className="flex items-center gap-2 text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase mb-4">
+                                    <Calendar size={12} className="text-blue-500" />
                                     <span>Iniciada em {new Date(work.start_date).toLocaleDateString()}</span>
                                 </div>
-                                <div className="pt-2 border-t border-slate-50 dark:border-slate-800/50 flex justify-end">
+                                <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">
                                     <button
                                         onClick={() => { setActiveWorkId(work.id); setCurrentWork(work); loadWorkDetails(work.id); }}
-                                        className="text-emerald-600 dark:text-emerald-400 font-black text-[10px] uppercase tracking-[0.2em] bg-slate-50 dark:bg-slate-800/50 px-6 py-3 rounded-2xl hover:bg-emerald-600 dark:hover:bg-emerald-500 hover:text-white dark:hover:text-white transition-all w-full flex items-center justify-center gap-3 group border border-slate-100 dark:border-slate-800"
+                                        className="text-blue-600 dark:text-blue-400 font-bold text-sm bg-blue-50 dark:bg-blue-900/20 px-4 py-2 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors w-full"
                                     >
-                                        Gerenciar Obra <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                                        Editar Execução
                                     </button>
                                 </div>
                             </div>
@@ -1055,42 +1059,42 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                     </div>
                 </div>
             ) : (
-                <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl min-h-[80vh] flex flex-col border border-slate-200 dark:border-slate-800 overflow-hidden animate-in zoom-in-95">
+                <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl min-h-[80vh] flex flex-col border dark:border-slate-800 overflow-hidden animate-in zoom-in-95">
                     {/* Fixed Editor Header & Tabs */}
                     <div className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
                         {/* Editor Header */}
-                        <div className="p-8 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-emerald-50/50 dark:bg-emerald-900/20">
-                            <div className="flex items-center gap-6">
+                        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-blue-50 dark:bg-blue-900/20">
+                            <div className="flex items-center gap-4">
                                 {!embeddedPlanId && (
-                                    <button onClick={() => setActiveWorkId(null)} className="text-emerald-500 dark:text-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400 p-2 bg-white dark:bg-slate-800 rounded-full shadow-md transition-all">
+                                    <button onClick={() => setActiveWorkId(null)} className="text-blue-400 hover:text-blue-600 p-1">
                                         <ArrowRight className="rotate-180" size={20} />
                                     </button>
                                 )}
                                 <div>
-                                    <h2 className="text-2xl font-black text-emerald-900 dark:text-emerald-100 flex items-center gap-3 uppercase tracking-tighter">
-                                        <HardHat className="text-emerald-600 dark:text-emerald-400" size={28} />
+                                    <h2 className="text-xl font-bold text-blue-900 dark:text-blue-100 flex items-center gap-2">
+                                        <HardHat className="text-blue-600 dark:text-blue-400" size={24} />
                                         {currentWork?.name}
                                     </h2>
-                                    <p className="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.3em] font-black">{currentWork?.status} • GESTÃO DE EXECUÇÃO</p>
+                                    <p className="text-xs text-blue-600 dark:text-blue-400 uppercase tracking-widest font-semibold">{currentWork?.status} • GESTÃO DE EXECUÇÃO</p>
                                 </div>
                             </div>
-                            <div className="flex gap-3">
+                            <div className="flex gap-2">
                                 {/* MANUAL IMPORT BUTTON */}
                                 {currentWork?.plan_id && (services.length === 0 || materials.length === 0 || labor.length === 0) && (
                                     <button
                                         onClick={() => importPlanItems(currentWork.plan_id!, currentWork.id)}
-                                        className="px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-2xl flex items-center gap-2 text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 dark:hover:bg-blue-400 shadow-lg shadow-blue-900/20 transition-all animate-pulse"
+                                        className="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-blue-700 dark:hover:bg-blue-400 shadow-md shadow-blue-950/20 transition-all animate-pulse"
                                     >
-                                        <ArrowRight size={16} /> Sincronizar Planejamento
+                                        <ArrowRight size={16} /> Sincronizar
                                     </button>
                                 )}
-                                <button onClick={handleSave} className="px-6 py-3 bg-slate-900 dark:bg-emerald-600 text-white rounded-2xl flex items-center gap-2 text-[10px] font-black uppercase tracking-widest hover:bg-slate-800 dark:hover:bg-emerald-500 shadow-xl transition-all">
-                                    <Save size={16} /> Salvar Obra
+                                <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-blue-700 shadow-md shadow-blue-950/20">
+                                    <Save size={16} /> Salvar
                                 </button>
                             </div>
                         </div>
 
-                        <div className="flex px-8 bg-white dark:bg-slate-900 overflow-x-auto no-scrollbar">
+                        <div className="flex px-6 bg-white dark:bg-slate-900 overflow-x-auto no-scrollbar">
                             {[
                                 { id: 'dados', label: 'Dados da Obra', icon: FileText },
                                 { id: 'servicos', label: 'Serviços', icon: Building2 },
@@ -1101,7 +1105,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     key={tab.id}
                                     type="button"
                                     onClick={() => setActiveTab(tab.id as any)}
-                                    className={`px-8 py-5 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${activeTab === tab.id ? 'border-emerald-600 dark:border-emerald-500 text-emerald-600 dark:text-emerald-400' : 'border-transparent text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 hover:border-slate-200 dark:hover:border-slate-800'}`}
+                                    className={`px-6 py-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
                                 >
                                     <tab.icon size={16} /> {tab.label}
                                 </button>
@@ -1110,28 +1114,28 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
                         {/* Sub-Header forms for Add (Fixed) */}
                         {activeTab === 'servicos' && (
-                            <div className="p-8 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
-                                <h3 className="font-black text-slate-800 dark:text-slate-200 mb-6 flex items-center gap-2 text-[10px] uppercase tracking-[0.2em]"><Building2 size={16} className="text-emerald-500" /> Adicionar Novo Serviço na Obra</h3>
+                            <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+                                <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider"><Building2 size={16} className="text-blue-600" /> Adicionar Serviço Realizado</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                     <div className="md:col-span-4">
-                                        <label className="block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 ml-1">Descrição do Serviço</label>
-                                        <input type="text" id="svc_desc" className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-500/10 outline-none text-slate-700 dark:text-slate-100 transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600" placeholder="Ex: Pintura Realizada" />
+                                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Descrição</label>
+                                        <input type="text" id="svc_desc" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100" placeholder="Ex: Pintura de Parede" />
                                     </div>
                                     <div className="md:col-span-1">
-                                        <label className="block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 ml-1">Un</label>
-                                        <input type="text" id="svc_unit" className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-center focus:ring-2 focus:ring-emerald-500/20 outline-none text-slate-700 dark:text-slate-100 transition-all uppercase" placeholder="un" />
+                                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Un</label>
+                                        <input type="text" id="svc_unit" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100" placeholder="m²" />
                                     </div>
                                     <div className="md:col-span-1">
-                                        <label className="block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 ml-1">Qtd</label>
-                                        <input type="number" id="svc_qty" className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-center focus:ring-2 focus:ring-emerald-500/20 outline-none text-slate-700 dark:text-slate-100 transition-all" placeholder="0" />
+                                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Qtd</label>
+                                        <input type="number" id="svc_qty" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100" placeholder="0" />
                                     </div>
                                     <div className="md:col-span-2">
-                                        <label className="block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 ml-1">R$ Mat (Real)</label>
-                                        <input type="number" id="svc_mat" className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-emerald-500/20 outline-none text-slate-700 dark:text-slate-100 transition-all" placeholder="0.00" />
+                                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Unit. Mat. (Real)</label>
+                                        <input type="number" id="svc_mat" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100" placeholder="0.00" />
                                     </div>
                                     <div className="md:col-span-2">
-                                        <label className="block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2 ml-1">R$ M.O. (Real)</label>
-                                        <input type="number" id="svc_lab" className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold focus:ring-2 focus:ring-emerald-500/20 outline-none text-slate-700 dark:text-slate-100 transition-all" placeholder="0.00" />
+                                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Unit. M.O. (Real)</label>
+                                        <input type="number" id="svc_lab" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100" placeholder="0.00" />
                                     </div>
                                     <div className="md:col-span-2">
                                         <button
@@ -1181,7 +1185,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             key={r.id}
                                             type="button"
                                             onClick={() => setResourceTab(r.id as any)}
-                                            className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all uppercase tracking-wider ${resourceTab === r.id ? 'bg-emerald-800 dark:bg-emerald-600 text-white shadow-md' : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30'}`}
+                                            className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all uppercase tracking-wider ${resourceTab === r.id ? 'bg-blue-600 dark:bg-blue-600 text-white shadow-md' : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-blue-900/30'}`}
                                         >
                                             {r.label}
                                         </button>
@@ -1193,19 +1197,19 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                             <div className="md:col-span-5">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Material</label>
-                                                <input type="text" id="mat_name" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900 outline-none text-slate-700 dark:text-slate-100" placeholder="Ex: Cimento CP-II" />
+                                                <input type="text" id="mat_name" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100" placeholder="Ex: Cimento CP-II" />
                                             </div>
                                             <div className="md:col-span-2">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Qtd</label>
-                                                <input type="number" id="mat_qty" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900 outline-none text-slate-700 dark:text-slate-100" placeholder="0" />
+                                                <input type="number" id="mat_qty" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100" placeholder="0" />
                                             </div>
                                             <div className="md:col-span-1">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Und</label>
-                                                <input type="text" id="mat_unit" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900 outline-none text-slate-700 dark:text-slate-100" placeholder="un" />
+                                                <input type="text" id="mat_unit" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100" placeholder="un" />
                                             </div>
                                             <div className="md:col-span-1">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Custo Unit.</label>
-                                                <input type="number" id="mat_cost" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900 outline-none text-slate-700 dark:text-slate-100" placeholder="0.00" />
+                                                <input type="number" id="mat_cost" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100" placeholder="0.00" />
                                             </div>
                                             <div className="md:col-span-3">
                                                 <button
@@ -1231,7 +1235,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         (document.getElementById('mat_unit') as HTMLInputElement).value = '';
                                                         (document.getElementById('mat_cost') as HTMLInputElement).value = '';
                                                     }}
-                                                    className="w-full bg-emerald-600 dark:bg-emerald-500 text-white p-2 rounded hover:bg-emerald-700 dark:hover:bg-emerald-400 font-bold text-xs h-9 shadow-sm"
+                                                    className="w-full bg-blue-600 dark:bg-blue-500 text-white p-2 rounded hover:bg-blue-700 dark:hover:bg-blue-400 font-bold text-xs h-9 shadow-sm"
                                                 >
                                                     ADICIONAR MATERIAL
                                                 </button>
@@ -1243,7 +1247,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                             <div className="md:col-span-4">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Função</label>
-                                                <input type="text" id="mo_role" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900 outline-none text-slate-700 dark:text-slate-100" placeholder="Ex: Pedreiro" />
+                                                <input type="text" id="mo_role" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100" placeholder="Ex: Pedreiro" />
                                             </div>
                                             <div className="md:col-span-2">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Tipo</label>
@@ -1255,15 +1259,15 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             </div>
                                             <div className="md:col-span-1">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Qtd</label>
-                                                <input type="number" id="mo_qty" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900 outline-none text-slate-700 dark:text-slate-100" placeholder="0" />
+                                                <input type="number" id="mo_qty" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100" placeholder="0" />
                                             </div>
                                             <div className="md:col-span-1">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">UN</label>
-                                                <input type="text" id="mo_un" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900 outline-none text-slate-700 dark:text-slate-100" placeholder="un" />
+                                                <input type="text" id="mo_un" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100" placeholder="un" />
                                             </div>
                                             <div className="md:col-span-2">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Custo Unit.</label>
-                                                <input type="number" id="mo_cost" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900 outline-none text-slate-700 dark:text-slate-100" placeholder="0.00" />
+                                                <input type="number" id="mo_cost" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100" placeholder="0.00" />
                                             </div>
                                             <div className="md:col-span-2">
                                                 <button
@@ -1292,7 +1296,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         (document.getElementById('mo_un') as HTMLInputElement).value = '';
                                                         (document.getElementById('mo_cost') as HTMLInputElement).value = '';
                                                     }}
-                                                    className="w-full bg-emerald-600 dark:bg-emerald-500 text-white p-2 rounded hover:bg-emerald-700 dark:hover:bg-emerald-400 font-bold text-xs h-9 shadow-sm"
+                                                    className="w-full bg-blue-600 dark:bg-blue-500 text-white p-2 rounded hover:bg-blue-700 dark:hover:bg-blue-400 font-bold text-xs h-9 shadow-sm"
                                                 >
                                                     ADICIONAR M.O.
                                                 </button>
@@ -1315,11 +1319,11 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             </div>
                                             <div className="md:col-span-6">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Descrição</label>
-                                                <input type="text" id="ind_desc" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900 outline-none text-slate-700 dark:text-slate-100" placeholder="Ex: Combustível ida/volta" />
+                                                <input type="text" id="ind_desc" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100" placeholder="Ex: Combustível ida/volta" />
                                             </div>
                                             <div className="md:col-span-2">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Valor</label>
-                                                <input type="number" id="ind_val" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900 outline-none text-slate-700 dark:text-slate-100" placeholder="0.00" />
+                                                <input type="number" id="ind_val" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100" placeholder="0.00" />
                                             </div>
                                             <div className="md:col-span-1">
                                                 <button
@@ -1339,7 +1343,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         (document.getElementById('ind_desc') as HTMLInputElement).value = '';
                                                         (document.getElementById('ind_val') as HTMLInputElement).value = '';
                                                     }}
-                                                    className="w-full bg-emerald-600 dark:bg-emerald-500 text-white p-2 rounded hover:bg-emerald-700 dark:hover:bg-emerald-400 font-bold text-xs h-9 flex items-center justify-center shadow-sm"
+                                                    className="w-full bg-blue-600 dark:bg-blue-500 text-white p-2 rounded hover:bg-blue-700 dark:hover:bg-blue-400 font-bold text-xs h-9 flex items-center justify-center shadow-sm"
                                                 >
                                                     <Plus size={14} />
                                                 </button>
@@ -1351,14 +1355,14 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                             <div className="md:col-span-7">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Imposto / Taxa</label>
-                                                <input type="text" id="tax_name" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900 outline-none text-slate-700 dark:text-slate-100" placeholder="Ex: BDI ou ISS" />
+                                                <input type="text" id="tax_name" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100" placeholder="Ex: BDI ou ISS" />
                                             </div>
                                             <div className="md:col-span-3">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Valor (%)</label>
                                                 <input
                                                     type="number"
                                                     id="tax_rate"
-                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-emerald-100 dark:focus:ring-emerald-900 outline-none text-slate-700 dark:text-slate-100"
+                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100"
                                                     placeholder="0.00"
                                                 />
                                             </div>
@@ -1384,7 +1388,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         (document.getElementById('tax_name') as HTMLInputElement).value = '';
                                                         (document.getElementById('tax_rate') as HTMLInputElement).value = '';
                                                     }}
-                                                    className="w-full bg-emerald-600 dark:bg-emerald-500 text-white p-2 rounded hover:bg-emerald-700 dark:hover:bg-emerald-400 font-bold text-xs h-9 shadow-sm flex items-center justify-center gap-2"
+                                                    className="w-full bg-blue-600 dark:bg-blue-500 text-white p-2 rounded hover:bg-blue-700 dark:hover:bg-blue-400 font-bold text-xs h-9 shadow-sm flex items-center justify-center gap-2"
                                                 >
                                                     <Plus size={16} /> ADICIONAR
                                                 </button>
@@ -1405,7 +1409,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             type="text"
                                             value={currentWork.name}
                                             onChange={e => setCurrentWork({ ...currentWork, name: e.target.value.toUpperCase() })}
-                                            className="w-full p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500/20 dark:focus:ring-emerald-500/10 outline-none shadow-sm transition-all"
+                                            className="w-full p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/10 outline-none shadow-sm transition-all"
                                         />
                                     </div>
                                     <div className="space-y-1.5">
@@ -1413,7 +1417,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         <select
                                             value={currentWork.status}
                                             onChange={e => setCurrentWork({ ...currentWork, status: e.target.value as any })}
-                                            className="w-full p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-800 dark:text-slate-100 outline-none shadow-sm cursor-pointer appearance-none transition-all focus:ring-2 focus:ring-emerald-500/20"
+                                            className="w-full p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-800 dark:text-slate-100 outline-none shadow-sm cursor-pointer appearance-none transition-all focus:ring-2 focus:ring-blue-500/20"
                                         >
                                             <option value="Em Andamento">Em Andamento</option>
                                             <option value="Pausada">Pausada</option>
@@ -1435,7 +1439,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 client_name: customer ? customer.name : ''
                                             });
                                         }}
-                                        className="w-full p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-800 dark:text-slate-100 outline-none shadow-sm cursor-pointer transition-all focus:ring-2 focus:ring-emerald-500/20"
+                                        className="w-full p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-800 dark:text-slate-100 outline-none shadow-sm cursor-pointer transition-all focus:ring-2 focus:ring-blue-500/20"
                                     >
                                         <option value="">Selecione um cliente...</option>
                                         {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -1447,7 +1451,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         type="text"
                                         value={currentWork.address}
                                         onChange={e => setCurrentWork({ ...currentWork, address: e.target.value })}
-                                        className="w-full p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-800 dark:text-slate-100 outline-none shadow-sm transition-all focus:ring-2 focus:ring-emerald-500/20"
+                                        className="w-full p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-800 dark:text-slate-100 outline-none shadow-sm transition-all focus:ring-2 focus:ring-blue-500/20"
                                         placeholder="Ex: Rua, Número, Bairro, Cidade..."
                                     />
                                 </div>
@@ -1460,295 +1464,216 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         )}
 
                         {activeTab === 'servicos' && (
-                            <div className="max-w-4xl mx-auto">
-
-                                <div className="space-y-3 pb-8">
+                            <div className="max-w-4xl mx-auto p-4 flex-1">
+                                <div className="space-y-2">
                                     {services.map((svc, index) => (
                                         <div
                                             key={svc.id}
-                                            draggable={editingId !== svc.id}
-                                            onDragStart={() => setDraggedSvcIndex(index)}
-                                            onDragOver={(e) => (window as any).handleDragOver(e, index, draggedSvcIndex, services, setServices, setDraggedSvcIndex)}
-                                            onDragEnd={() => setDraggedSvcIndex(null)}
-                                            className={`bg-white dark:bg-slate-900 p-5 rounded-2xl shadow-sm border flex justify-between items-center group transition-all ${draggedSvcIndex === index ? 'opacity-50 bg-blue-50 dark:bg-blue-900/50 border-blue-200 dark:border-blue-800 shadow-inner' : 'border-slate-100 dark:border-slate-800 hover:border-emerald-200 dark:hover:border-emerald-800'}`}
+                                            className={`bg-white dark:bg-slate-900/50 p-4 rounded-xl border transition-all flex justify-between items-center group hover:border-blue-300 dark:hover:border-blue-500 border-slate-200 dark:border-slate-800 shadow-sm`}
                                         >
                                             {editingId === svc.id ? (
-                                                <div className="flex-1 grid grid-cols-12 gap-4 items-center animate-in fade-in zoom-in-95">
-                                                    <div className="col-span-4">
+                                                <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center">
+                                                    <div className="md:col-span-4">
                                                         <input
-                                                            className="w-full text-xs font-bold p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500/20 outline-none"
-                                                            defaultValue={svc.description}
-                                                            id={`edit_desc_${svc.id}`}
+                                                            type="text"
+                                                            value={editDesc}
+                                                            onChange={e => setEditDesc(e.target.value.toUpperCase())}
+                                                            className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm font-bold text-slate-900 dark:text-slate-100"
                                                         />
                                                     </div>
-                                                    <div className="col-span-2">
+                                                    <div className="md:col-span-1">
                                                         <input
-                                                            type="number"
-                                                            className="w-full text-xs font-bold p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500/20 outline-none text-center"
-                                                            defaultValue={svc.quantity}
-                                                            placeholder="Qtd"
-                                                            id={`edit_qty_${svc.id}`}
+                                                            type="text"
+                                                            value={editUnit}
+                                                            onChange={e => setEditUnit(e.target.value)}
+                                                            className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm text-slate-900 dark:text-slate-100"
                                                         />
                                                     </div>
-                                                    <div className="col-span-2">
+                                                    <div className="md:col-span-2">
                                                         <input
                                                             type="number"
-                                                            className="w-full text-xs font-bold p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500/20 outline-none"
-                                                            defaultValue={svc.unit_material_cost}
+                                                            value={editQty}
+                                                            onChange={e => setEditQty(parseFloat(e.target.value) || 0)}
+                                                            className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm text-slate-900 dark:text-slate-100"
+                                                        />
+                                                    </div>
+                                                    <div className="md:col-span-2">
+                                                        <input
+                                                            type="number"
+                                                            value={editPrice1}
+                                                            onChange={e => setEditPrice1(parseFloat(e.target.value) || 0)}
+                                                            className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-300"
                                                             placeholder="Mat"
-                                                            id={`edit_material_${svc.id}`}
                                                         />
                                                     </div>
-                                                    <div className="col-span-2">
+                                                    <div className="md:col-span-2">
                                                         <input
                                                             type="number"
-                                                            className="w-full text-xs font-bold p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500/20 outline-none"
-                                                            defaultValue={svc.unit_labor_cost}
-                                                            placeholder="M.O."
-                                                            id={`edit_labor_${svc.id}`}
+                                                            value={editPrice2}
+                                                            onChange={e => setEditPrice2(parseFloat(e.target.value) || 0)}
+                                                            className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-300"
+                                                            placeholder="MO"
                                                         />
                                                     </div>
-                                                    <div className="col-span-2 flex gap-2 justify-end">
+                                                    <div className="md:col-span-1 flex gap-1">
                                                         <button
                                                             onClick={() => {
-                                                                const newDesc = (document.getElementById(`edit_desc_${svc.id}`) as HTMLInputElement).value;
-                                                                const newQty = parseFloat((document.getElementById(`edit_qty_${svc.id}`) as HTMLInputElement).value) || 0;
-                                                                const newMat = parseFloat((document.getElementById(`edit_material_${svc.id}`) as HTMLInputElement).value) || 0;
-                                                                const newLab = parseFloat((document.getElementById(`edit_labor_${svc.id}`) as HTMLInputElement).value) || 0;
-
                                                                 const updated = services.map(s => s.id === svc.id ? {
                                                                     ...s,
-                                                                    description: newDesc.toUpperCase(),
-                                                                    quantity: newQty,
-                                                                    unit_material_cost: newMat,
-                                                                    unit_labor_cost: newLab,
-                                                                    total_cost: newQty * (newMat + newLab)
+                                                                    description: editDesc,
+                                                                    unit: editUnit,
+                                                                    quantity: editQty,
+                                                                    unit_material_cost: editPrice1,
+                                                                    unit_labor_cost: editPrice2,
+                                                                    total_cost: editQty * (editPrice1 + editPrice2)
                                                                 } : s);
                                                                 setServices(updated);
                                                                 setEditingId(null);
                                                             }}
-                                                            className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 p-2 rounded-lg hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition-colors"
+                                                            className="text-blue-600 p-1 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded"
                                                         >
-                                                            <Check size={18} />
+                                                            <CheckCircle size={16} />
                                                         </button>
-                                                        <button
-                                                            onClick={() => setEditingId(null)}
-                                                            className="bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 p-2 rounded-lg hover:bg-rose-200 dark:hover:bg-rose-900/50 transition-colors"
-                                                        >
-                                                            <X size={18} />
+                                                        <button onClick={() => setEditingId(null)} className="text-red-600 p-1 hover:bg-red-50 dark:hover:bg-red-900/30 rounded">
+                                                            <X className="w-4 h-4" />
                                                         </button>
                                                     </div>
                                                 </div>
                                             ) : (
                                                 <>
                                                     <div className="flex items-center gap-4 flex-1">
-                                                        <div className="cursor-grab active:cursor-grabbing text-slate-200 dark:text-slate-700 hover:text-slate-400 dark:hover:text-slate-500 shrink-0 transition-colors">
-                                                            <GripVertical size={20} />
+                                                        <div className="h-10 w-10 bg-blue-50 dark:bg-blue-900/40 rounded-xl flex items-center justify-center shrink-0">
+                                                            <Building2 className="text-blue-600 dark:text-blue-400" size={18} />
                                                         </div>
-                                                        <div className="space-y-0.5">
-                                                            <p className="font-black text-sm text-slate-800 dark:text-slate-100 tracking-tight uppercase">{svc.description}</p>
-                                                            <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">
-                                                                <span className="bg-slate-50 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-100 dark:border-slate-700">{svc.quantity} {svc.unit}</span>
-                                                                <span className="w-1 h-1 bg-slate-200 dark:bg-slate-700 rounded-full"></span>
-                                                                <span>Mat: <b className="text-slate-600 dark:text-slate-400">R$ {svc.unit_material_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b></span>
-                                                                <span className="w-1 h-1 bg-slate-200 dark:bg-slate-700 rounded-full"></span>
-                                                                <span>M.O: <b className="text-slate-600 dark:text-slate-400">R$ {svc.unit_labor_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b></span>
+                                                        <div className="flex-1 min-w-0">
+                                                            <p className="font-bold text-slate-800 dark:text-slate-100 text-sm truncate uppercase tracking-tight">{svc.description}</p>
+                                                            <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                                                <span className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded font-semibold text-[10px]">{svc.quantity} {svc.unit}</span>
+                                                                <span className="w-1 h-1 bg-slate-300 dark:bg-slate-600 rounded-full"></span>
+                                                                <span>(Mat: R$ {svc.unit_material_cost.toFixed(2)} + MO: R$ {svc.unit_labor_cost.toFixed(2)})</span>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div className="text-right flex items-center gap-6">
-                                                        <div className="text-right">
-                                                            <p className="text-[9px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest mb-0.5">Subtotal Direto</p>
-                                                            <p className="font-black text-sm text-emerald-600 dark:text-emerald-400 whitespace-nowrap tracking-tight">R$ {svc.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                                                        </div>
-                                                        <div className="flex flex-col gap-0.5 -mr-2">
-                                                            <button onClick={() => (window as any).moveItemWork(services, setServices, index, 'up')} disabled={index === 0} className="text-slate-300 dark:text-slate-700 hover:text-emerald-500 dark:hover:text-emerald-400 disabled:opacity-0 transition-all p-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded"><ChevronUp size={14} /></button>
-                                                            <button onClick={() => (window as any).moveItemWork(services, setServices, index, 'down')} disabled={index === services.length - 1} className="text-slate-300 dark:text-slate-700 hover:text-emerald-500 dark:hover:text-emerald-400 disabled:opacity-0 transition-all p-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded"><ChevronDown size={14} /></button>
-                                                        </div>
-                                                        <div className="flex items-center gap-2 border-l border-slate-50 dark:border-slate-800 pl-4">
-                                                            <button onClick={() => setEditingId(svc.id)} className="p-2 text-blue-400 hover:text-blue-600 dark:text-blue-500/50 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-all" title="Editar Serviço">
-                                                                <Pencil size={18} />
-                                                            </button>
-                                                            <button onClick={() => handleDeleteService(svc.id)} className="p-2 text-slate-300 hover:text-red-500 dark:text-slate-700 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all" title="Excluir Serviço">
-                                                                <Trash2 size={18} />
-                                                            </button>
-                                                        </div>
+                                                    <div className="text-right mr-4 shrink-0 whitespace-nowrap">
+                                                        <p className="text-sm font-bold text-slate-800 dark:text-slate-100">R$ {svc.total_cost.toFixed(2)}</p>
+                                                    </div>
+                                                    <div className="flex gap-1 shrink-0">
+                                                        <button
+                                                            onClick={() => {
+                                                                setEditingId(svc.id);
+                                                                setEditDesc(svc.description);
+                                                                setEditUnit(svc.unit);
+                                                                setEditQty(svc.quantity);
+                                                                setEditPrice1(svc.unit_material_cost);
+                                                                setEditPrice2(svc.unit_labor_cost);
+                                                            }}
+                                                            className="text-slate-300 dark:text-slate-600 hover:text-blue-500 p-2"
+                                                        >
+                                                            <Pencil size={18} />
+                                                        </button>
+                                                        <button onClick={() => handleDeleteService(svc.id)} className="text-slate-300 dark:text-slate-600 hover:text-red-500 p-2">
+                                                            <Trash2 size={18} />
+                                                        </button>
                                                     </div>
                                                 </>
                                             )}
                                         </div>
                                     ))}
-                                    {services.length === 0 && (
-                                        <div className="text-center py-8">
-                                            <p className="text-slate-400 mb-2">Nenhum serviço lançado ainda.</p>
-                                            {!currentWork?.plan_id && <p className="text-xs text-slate-300">Essa obra não está vinculada a um planejamento.</p>}
-                                            {currentWork?.plan_id && (
-                                                <button
-                                                    onClick={() => importPlanItems(currentWork.plan_id!, currentWork.id)}
-                                                    className="text-blue-500 hover:underline text-sm font-bold"
-                                                >
-                                                    Importar Itens do Planejamento
-                                                </button>
-                                            )}
-                                        </div>
-                                    )}
                                 </div>
                             </div>
                         )}
 
                         {activeTab === 'recursos' && (
-                            <div className="max-w-4xl mx-auto">
+                            <div className="max-w-4xl mx-auto space-y-6">
+                                {/* SUB-TABS para Recursos */}
+                                <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl w-fit mb-6">
+                                    {(['material', 'mo', 'indireto', 'impostos'] as const).map((tab) => (
+                                        <button
+                                            key={tab}
+                                            onClick={() => setResourceTab(tab)}
+                                            className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${resourceTab === tab
+                                                    ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm'
+                                                    : 'text-slate-500 hover:text-slate-700'
+                                                }`}
+                                        >
+                                            {tab === 'material' ? 'Materiais' : tab === 'mo' ? 'Mão de Obra' : tab === 'indireto' ? 'Indiretos' : 'Impostos & BDI'}
+                                        </button>
+                                    ))}
+                                </div>
 
-                                {/* MATERIAIS CABEÇALHO COM BOTÃO IMPRIMIR */}
+                                {/* MATERIAL TAB */}
                                 {resourceTab === 'material' && (
                                     <div className="animate-in fade-in slide-in-from-left-4 duration-500">
                                         <div className="flex justify-between items-center mb-6">
                                             <div>
-                                                <h3 className="font-black text-slate-800 dark:text-slate-100 flex items-center gap-2 uppercase tracking-tighter text-lg"><Truck size={22} className="text-emerald-600 dark:text-emerald-400" /> Materiais & Insumos</h3>
-                                                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-8">Controle de gastos com materiais direto na obra</p>
+                                                <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 uppercase tracking-tighter text-lg"><Truck size={22} className="text-blue-600" /> Materiais & Insumos</h3>
+                                                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-8">Controle de gastos com materiais na obra</p>
                                             </div>
                                             <div className="flex gap-2">
                                                 {materials.length > 0 && (
                                                     <button
                                                         onClick={handlePreviewMaterials}
-                                                        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm border-b-2 active:border-b-0 active:translate-y-0.5"
+                                                        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-slate-50 transition-all shadow-sm"
                                                     >
-                                                        <Eye size={18} className="text-blue-600 dark:text-blue-400" /> Visualizar Lista
+                                                        <Eye size={18} className="text-blue-600" /> Visualizar Lista
                                                     </button>
                                                 )}
                                             </div>
                                         </div>
 
                                         {materials.length > 0 ? (
-                                            <div className="bg-white dark:bg-slate-900 p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
-                                                <div className="flex items-center justify-between mb-8 pb-6 border-b border-slate-50 dark:border-slate-800">
-                                                    <div className="flex items-center gap-4">
+                                            <div className="bg-white dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
+                                                <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-50 dark:border-slate-800">
+                                                    <div className="flex items-center gap-3">
                                                         <input
                                                             type="checkbox"
-                                                            className="w-5 h-5 rounded-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-emerald-600 focus:ring-emerald-500 transition-all cursor-pointer"
+                                                            className="w-4 h-4 rounded-md border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-blue-600 focus:ring-blue-500 cursor-pointer"
                                                             checked={selectedMaterials.length === materials.length && materials.length > 0}
                                                             onChange={(e) => {
-                                                                if (e.target.checked) {
-                                                                    setSelectedMaterials(materials.map(m => m.id));
-                                                                } else {
-                                                                    setSelectedMaterials([]);
-                                                                }
+                                                                if (e.target.checked) setSelectedMaterials(materials.map(m => m.id));
+                                                                else setSelectedMaterials([]);
                                                             }}
                                                         />
-                                                        <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                                                            {selectedMaterials.length} ITEM(NS) SELECIONADO(S)
+                                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                                            {selectedMaterials.length} SELECIONADO(S)
                                                         </span>
-                                                    </div>
-                                                    <div className="flex gap-3">
-                                                        {selectedMaterials.length > 0 && (
-                                                            <button
-                                                                onClick={() => {
-                                                                    if (window.confirm(`Excluir ${selectedMaterials.length} materiais selecionados?`)) {
-                                                                        setMaterials(materials.filter(m => !selectedMaterials.includes(m.id)));
-                                                                        setSelectedMaterials([]);
-                                                                        notify("Materiais removidos!");
-                                                                    }
-                                                                }}
-                                                                className="flex items-center gap-2 px-4 py-2 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-all border border-rose-100 dark:border-rose-900/50"
-                                                            >
-                                                                <Trash2 size={14} /> Excluir Seleção
-                                                            </button>
-                                                        )}
-                                                        <button
-                                                            onClick={() => {
-                                                                if (window.confirm("Deseja realmente excluir TODOS os materiais desta lista?")) {
-                                                                    setMaterials([]);
-                                                                    setSelectedMaterials([]);
-                                                                    notify("Lista de materiais limpa!");
-                                                                }
-                                                            }}
-                                                            className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
-                                                        >
-                                                            <Archive size={14} /> Limpar Tudo
-                                                        </button>
                                                     </div>
                                                 </div>
 
-                                                <div className="space-y-3">
-                                                    {materials.map((m, index) => (
+                                                <div className="space-y-2">
+                                                    {materials.map((m) => (
                                                         <div
                                                             key={m.id}
-                                                            draggable={editingId !== m.id}
-                                                            onDragStart={() => setDraggedMatIndex(index)}
-                                                            onDragOver={(e) => (window as any).handleDragOver(e, index, draggedMatIndex, materials, setMaterials, setDraggedMatIndex)}
-                                                            onDragEnd={() => setDraggedMatIndex(null)}
-                                                            className={`p-4 rounded-2xl border flex justify-between items-center transition-all ${draggedMatIndex === index ? 'opacity-50 bg-blue-50 dark:bg-blue-900/50 border-blue-200 dark:border-blue-800 shadow-inner' : (selectedMaterials.includes(m.id) ? 'border-emerald-300 dark:border-emerald-700 bg-emerald-50/30 dark:bg-emerald-900/20' : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 shadow-sm hover:border-emerald-200 dark:hover:border-emerald-800/50')}`}
+                                                            className={`p-3 rounded-xl border flex justify-between items-center transition-all ${selectedMaterials.includes(m.id) ? 'bg-blue-50/50 border-blue-200' : 'bg-white border-slate-50 dark:bg-slate-900'}`}
                                                         >
-                                                            {editingId === m.id ? (
-                                                                <div className="flex-1 grid grid-cols-12 gap-4 items-center animate-in zoom-in-95">
-                                                                    <div className="col-span-1 flex justify-center">
-                                                                        <input type="checkbox" disabled className="w-5 h-5 rounded-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 opacity-20" checked={selectedMaterials.includes(m.id)} />
-                                                                    </div>
-                                                                    <div className="col-span-4">
-                                                                        <input className="w-full text-xs font-bold p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500/20 outline-none" defaultValue={m.material_name} id={`edit_mname_${m.id}`} />
-                                                                    </div>
-                                                                    <div className="col-span-2">
-                                                                        <input type="number" className="w-full text-xs font-bold p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500/20 outline-none text-center" defaultValue={m.quantity} id={`edit_mqty_${m.id}`} />
-                                                                    </div>
-                                                                    <div className="col-span-1">
-                                                                        <input className="w-full text-xs font-bold p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500/20 outline-none text-center" defaultValue={m.unit} id={`edit_munit_${m.id}`} />
-                                                                    </div>
-                                                                    <div className="col-span-2">
-                                                                        <input type="number" className="w-full text-xs font-bold p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500/20 outline-none" defaultValue={m.unit_cost} id={`edit_mcost_${m.id}`} />
-                                                                    </div>
-                                                                    <div className="col-span-2 flex gap-2 justify-end">
-                                                                        <button onClick={() => {
-                                                                            const newName = (document.getElementById(`edit_mname_${m.id}`) as HTMLInputElement).value;
-                                                                            const newQty = parseFloat((document.getElementById(`edit_mqty_${m.id}`) as HTMLInputElement).value) || 0;
-                                                                            const newUnit = (document.getElementById(`edit_munit_${m.id}`) as HTMLInputElement).value || 'un';
-                                                                            const newCost = parseFloat((document.getElementById(`edit_mcost_${m.id}`) as HTMLInputElement).value) || 0;
-                                                                            const updated = materials.map(item => item.id === m.id ? { ...item, material_name: newName.toUpperCase(), unit: newUnit, quantity: newQty, unit_cost: newCost, total_cost: newQty * newCost } : item);
-                                                                            setMaterials(updated);
-                                                                            setEditingId(null);
-                                                                        }} className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 p-2 rounded-lg hover:bg-emerald-200 dark:hover:bg-emerald-900/50"><Check size={18} /></button>
-                                                                        <button onClick={() => setEditingId(null)} className="bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 p-2 rounded-lg hover:bg-rose-200 dark:hover:bg-rose-900/50"><X size={18} /></button>
+                                                            <div className="flex items-center gap-3 grow">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    className="w-4 h-4 rounded-md border-slate-200 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                                                    checked={selectedMaterials.includes(m.id)}
+                                                                    onChange={(e) => {
+                                                                        if (e.target.checked) setSelectedMaterials([...selectedMaterials, m.id]);
+                                                                        else setSelectedMaterials(selectedMaterials.filter(id => id !== m.id));
+                                                                    }}
+                                                                />
+                                                                <div>
+                                                                    <p className="font-bold text-sm text-slate-800 dark:text-slate-100 uppercase leading-none mb-1">{m.material_name}</p>
+                                                                    <div className="flex items-center gap-2 text-[10px] text-slate-400 uppercase font-semibold">
+                                                                        <span>{m.quantity} {m.unit}</span>
+                                                                        <span className="w-1 h-1 bg-slate-200 rounded-full"></span>
+                                                                        <span>UN: R$ {m.unit_cost.toFixed(2)}</span>
                                                                     </div>
                                                                 </div>
-                                                            ) : (
-                                                                <>
-                                                                    <div className="flex items-center gap-4 grow">
-                                                                        <input
-                                                                            type="checkbox"
-                                                                            className="w-5 h-5 rounded-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-emerald-600 focus:ring-emerald-500 transition-all cursor-pointer"
-                                                                            checked={selectedMaterials.includes(m.id)}
-                                                                            onChange={(e) => {
-                                                                                if (e.target.checked) setSelectedMaterials([...selectedMaterials, m.id]);
-                                                                                else setSelectedMaterials(selectedMaterials.filter(id => id !== m.id));
-                                                                            }}
-                                                                        />
-                                                                        <div className="cursor-grab active:cursor-grabbing text-slate-200 dark:text-slate-700 hover:text-slate-400 dark:hover:text-slate-500 shrink-0 transition-colors">
-                                                                            <GripVertical size={20} />
-                                                                        </div>
-                                                                        <div className="space-y-0.5">
-                                                                            <p className="font-black text-xs text-slate-800 dark:text-slate-100 uppercase tracking-tight">{m.material_name}</p>
-                                                                            <div className="flex items-center gap-2 text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">
-                                                                                <span className="bg-slate-50 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-100 dark:border-slate-700">{m.quantity}{m.unit}</span>
-                                                                                <span className="w-1 h-1 bg-slate-200 dark:bg-slate-700 rounded-full"></span>
-                                                                                <span>Unitário: <b>R$ {m.unit_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b></span>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="flex items-center gap-6 shrink-0">
-                                                                        <div className="text-right">
-                                                                            <p className="text-[9px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest mb-0.5 text-right">Custo Total</p>
-                                                                            <p className="font-black text-sm text-slate-800 dark:text-slate-100 whitespace-nowrap tracking-tight">R$ {m.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                                                                        </div>
-                                                                        <div className="flex flex-col gap-0.5">
-                                                                            <button onClick={() => (window as any).moveItemWork(materials, setMaterials, index, 'up')} disabled={index === 0} className="text-slate-300 dark:text-slate-700 hover:text-emerald-500 dark:hover:text-emerald-400 disabled:opacity-0 transition-all p-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded"><ChevronUp size={14} /></button>
-                                                                            <button onClick={() => (window as any).moveItemWork(materials, setMaterials, index, 'down')} disabled={index === materials.length - 1} className="text-slate-300 dark:text-slate-700 hover:text-emerald-500 dark:hover:text-emerald-400 disabled:opacity-0 transition-all p-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded"><ChevronDown size={14} /></button>
-                                                                        </div>
-                                                                        <div className="flex items-center gap-2 border-l border-slate-50 dark:border-slate-800 pl-4">
-                                                                            <button onClick={() => setEditingId(m.id)} className="p-2 text-blue-400 hover:text-blue-600 dark:text-blue-500/50 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-all" title="Editar Material"><Pencil size={18} /></button>
-                                                                            <button onClick={() => handleDeleteMaterial(m.id)} className="p-2 text-slate-300 hover:text-red-500 dark:text-slate-700 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all" title="Excluir Material"><Trash2 size={18} /></button>
-                                                                        </div>
-                                                                    </div>
-                                                                </>
-                                                            )}
+                                                            </div>
+                                                            <div className="text-right flex items-center gap-4">
+                                                                <div className="text-right">
+                                                                    <p className="font-bold text-sm text-slate-800 dark:text-slate-100">R$ {m.total_cost.toFixed(2)}</p>
+                                                                </div>
+                                                                <div className="flex gap-1 border-l pl-3 border-slate-100 dark:border-slate-800">
+                                                                    <button onClick={() => setEditingId(m.id)} className="p-1.5 text-slate-300 hover:text-blue-500"><Pencil size={16} /></button>
+                                                                    <button onClick={() => handleDeleteMaterial(m.id)} className="p-1.5 text-slate-300 hover:text-red-500"><Trash2 size={16} /></button>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     ))}
                                                 </div>
@@ -1770,95 +1695,44 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     <div className="animate-in fade-in slide-in-from-left-4 duration-500">
                                         <div className="flex justify-between items-center mb-6">
                                             <div>
-                                                <h3 className="font-black text-slate-800 dark:text-slate-100 flex items-center gap-2 uppercase tracking-tighter text-lg"><HardHat size={22} className="text-amber-500" /> Mão de Obra</h3>
-                                                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-8">Gestão de equipes e custos operacionais</p>
+                                                <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 uppercase tracking-tighter text-lg"><HardHat size={22} className="text-blue-600" /> Mão de Obra</h3>
+                                                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-8">Gestão de equipes e profissionais</p>
                                             </div>
                                         </div>
 
-                                        <div className="bg-white dark:bg-slate-900 p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
-                                            <div className="space-y-3">
-                                                {labor.length > 0 ? labor.map((l, index) => (
+                                        <div className="bg-white dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
+                                            <div className="space-y-2">
+                                                {labor.length > 0 ? labor.map((l) => (
                                                     <div
                                                         key={l.id}
-                                                        draggable={editingId !== l.id}
-                                                        onDragStart={() => setDraggedLabIndex(index)}
-                                                        onDragOver={(e) => (window as any).handleDragOver(e, index, draggedLabIndex, labor, setLabor, setDraggedLabIndex)}
-                                                        onDragEnd={() => setDraggedLabIndex(null)}
-                                                        className={`p-4 rounded-2xl border flex justify-between items-center transition-all ${draggedLabIndex === index ? 'opacity-50 bg-blue-50 dark:bg-blue-900/50 border-blue-200 dark:border-blue-800 shadow-inner' : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 shadow-sm hover:border-emerald-200 dark:hover:border-emerald-800/50'}`}
+                                                        className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-between items-center group transition-all"
                                                     >
-                                                        {editingId === l.id ? (
-                                                            <div className="flex-1 grid grid-cols-12 gap-4 items-center animate-in zoom-in-95">
-                                                                <div className="col-span-4">
-                                                                    <input className="w-full text-xs font-bold p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500/20 outline-none" defaultValue={l.role} id={`edit_lrole_${l.id}`} />
-                                                                </div>
-                                                                <div className="col-span-2">
-                                                                    <select className="w-full text-xs font-bold p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500/20 outline-none" defaultValue={l.cost_type} id={`edit_ltype_${l.id}`}>
-                                                                        <option value="Diária">Diária</option>
-                                                                        <option value="Hora">Hora</option>
-                                                                        <option value="Empreitada">Empreitada</option>
-                                                                    </select>
-                                                                </div>
-                                                                <div className="col-span-1">
-                                                                    <input type="number" className="w-full text-xs font-bold p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500/20 outline-none" defaultValue={l.quantity} id={`edit_lqty_${l.id}`} />
-                                                                </div>
-                                                                <div className="col-span-1">
-                                                                    <input className="w-full text-xs font-bold p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500/20 outline-none" defaultValue={l.unit || 'un'} id={`edit_lunit_${l.id}`} />
-                                                                </div>
-                                                                <div className="col-span-2">
-                                                                    <input type="number" className="w-full text-xs font-bold p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500/20 outline-none" defaultValue={l.unit_cost} id={`edit_lcost_${l.id}`} />
-                                                                </div>
-                                                                <div className="col-span-2 flex gap-2 justify-end">
-                                                                    <button onClick={() => {
-                                                                        const role = (document.getElementById(`edit_lrole_${l.id}`) as HTMLInputElement).value;
-                                                                        const type = (document.getElementById(`edit_ltype_${l.id}`) as HTMLSelectElement).value as any;
-                                                                        const qty = parseFloat((document.getElementById(`edit_lqty_${l.id}`) as HTMLInputElement).value) || 0;
-                                                                        const unit = (document.getElementById(`edit_lunit_${l.id}`) as HTMLInputElement).value || 'un';
-                                                                        const cost = parseFloat((document.getElementById(`edit_lcost_${l.id}`) as HTMLInputElement).value) || 0;
-                                                                        const updated = labor.map(item => item.id === l.id ? { ...item, role: role.toUpperCase(), cost_type: type, unit: unit, quantity: qty, unit_cost: cost, total_cost: qty * cost } : item);
-                                                                        setLabor(updated);
-                                                                        setEditingId(null);
-                                                                    }} className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 p-2 rounded-lg hover:bg-emerald-200 dark:hover:bg-emerald-900/50"><Check size={18} /></button>
-                                                                    <button onClick={() => setEditingId(null)} className="bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 p-2 rounded-lg hover:bg-rose-200 dark:hover:bg-rose-900/50"><X size={18} /></button>
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="h-8 w-8 bg-blue-50 dark:bg-blue-900/30 rounded-lg flex items-center justify-center shrink-0">
+                                                                <Users className="text-blue-600 dark:text-blue-400" size={16} />
+                                                            </div>
+                                                            <div>
+                                                                <p className="font-bold text-sm text-slate-800 dark:text-slate-100 uppercase leading-none mb-1">{l.role}</p>
+                                                                <div className="flex items-center gap-2 text-[10px] text-slate-400 uppercase font-semibold">
+                                                                    <span>{l.quantity} {l.unit || 'un'}</span>
+                                                                    <span className="w-1 h-1 bg-slate-200 dark:bg-slate-700 rounded-full"></span>
+                                                                    <span>{l.cost_type}</span>
                                                                 </div>
                                                             </div>
-                                                        ) : (
-                                                            <>
-                                                                <div className="flex items-center gap-4 grow">
-                                                                    <div className="cursor-grab active:cursor-grabbing text-slate-200 dark:text-slate-700 hover:text-slate-400 dark:hover:text-slate-500 shrink-0 transition-colors">
-                                                                        <GripVertical size={20} />
-                                                                    </div>
-                                                                    <div className="space-y-0.5">
-                                                                        <p className="font-black text-xs text-slate-800 dark:text-slate-100 uppercase tracking-tight">{l.role}</p>
-                                                                        <div className="flex items-center gap-2 text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">
-                                                                            <span className="bg-slate-50 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-100 dark:border-slate-700">{l.cost_type}</span>
-                                                                            <span className="w-1 h-1 bg-slate-200 dark:bg-slate-700 rounded-full"></span>
-                                                                            <span>{l.quantity} {l.unit || 'un'}</span>
-                                                                            <span className="w-1 h-1 bg-slate-200 dark:bg-slate-700 rounded-full"></span>
-                                                                            <span>Unit: <b className="text-slate-600 dark:text-slate-400">R$ {l.unit_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b></span>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="text-right flex items-center gap-6">
-                                                                    <div className="text-right">
-                                                                        <p className="text-[9px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest mb-0.5">Total</p>
-                                                                        <p className="font-black text-sm text-slate-800 dark:text-slate-100 whitespace-nowrap tracking-tight">R$ {l.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                                                                    </div>
-                                                                    <div className="flex flex-col gap-0.5">
-                                                                        <button onClick={() => (window as any).moveItemWork(labor, setLabor, index, 'up')} disabled={index === 0} className="text-slate-300 dark:text-slate-700 hover:text-emerald-500 dark:hover:text-emerald-400 disabled:opacity-0 transition-all p-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded"><ChevronUp size={14} /></button>
-                                                                        <button onClick={() => (window as any).moveItemWork(labor, setLabor, index, 'down')} disabled={index === labor.length - 1} className="text-slate-300 dark:text-slate-700 hover:text-emerald-500 dark:hover:text-emerald-400 disabled:opacity-0 transition-all p-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded"><ChevronDown size={14} /></button>
-                                                                    </div>
-                                                                    <div className="flex items-center gap-2 border-l border-slate-50 dark:border-slate-800 pl-4">
-                                                                        <button onClick={() => setEditingId(l.id)} className="p-2 text-blue-400 hover:text-blue-600 dark:text-blue-500/50 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-all"><Pencil size={18} /></button>
-                                                                        <button onClick={() => handleDeleteLabor(l.id)} className="p-2 text-slate-300 hover:text-red-500 dark:text-slate-700 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all"><Trash2 size={18} /></button>
-                                                                    </div>
-                                                                </div>
-                                                            </>
-                                                        )}
+                                                        </div>
+                                                        <div className="text-right flex items-center gap-4">
+                                                            <div className="text-right">
+                                                                <p className="font-bold text-sm text-slate-800 dark:text-slate-100">R$ {l.total_cost.toFixed(2)}</p>
+                                                            </div>
+                                                            <div className="flex gap-1 border-l pl-3 border-slate-100 dark:border-slate-800">
+                                                                <button onClick={() => setEditingId(l.id)} className="p-1.5 text-slate-300 hover:text-blue-500"><Pencil size={16} /></button>
+                                                                <button onClick={() => handleDeleteLabor(l.id)} className="p-1.5 text-slate-300 hover:text-red-500"><Trash2 size={16} /></button>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 )) : (
-                                                    <div className="text-center py-12 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800">
-                                                        <HardHat size={32} className="text-slate-300 dark:text-slate-600 mx-auto mb-2" />
-                                                        <p className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-[10px]">Nenhuma mão de obra lançada</p>
+                                                    <div className="text-center py-10">
+                                                        <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Nenhuma mão de obra lançada</p>
                                                     </div>
                                                 )}
                                             </div>
@@ -1871,86 +1745,42 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     <div className="animate-in fade-in slide-in-from-left-4 duration-500">
                                         <div className="flex justify-between items-center mb-6">
                                             <div>
-                                                <h3 className="font-black text-slate-800 dark:text-slate-100 flex items-center gap-2 uppercase tracking-tighter text-lg"><Archive size={22} className="text-slate-500" /> Custos Indiretos</h3>
-                                                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-8">Despesas administrativas e logísticas</p>
+                                                <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 uppercase tracking-tighter text-lg"><Archive size={22} className="text-blue-600" /> Custos Indiretos</h3>
+                                                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-8">Gastos gerais e administrativos</p>
                                             </div>
                                         </div>
 
-                                        <div className="bg-white dark:bg-slate-900 p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
-                                            <div className="space-y-3">
-                                                {indirects.length > 0 ? indirects.map((i, index) => (
+                                        <div className="bg-white dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
+                                            <div className="space-y-2">
+                                                {indirects.length > 0 ? indirects.map((i) => (
                                                     <div
                                                         key={i.id}
-                                                        draggable={editingId !== i.id}
-                                                        onDragStart={() => setDraggedIndIndex(index)}
-                                                        onDragOver={(e) => (window as any).handleDragOver(e, index, draggedIndIndex, indirects, setIndirects, setDraggedIndIndex)}
-                                                        onDragEnd={() => setDraggedIndIndex(null)}
-                                                        className={`p-4 rounded-2xl border flex justify-between items-center transition-all ${draggedIndIndex === index ? 'opacity-50 bg-blue-50 dark:bg-blue-900/50 border-blue-200 dark:border-blue-800 shadow-inner' : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 shadow-sm hover:border-emerald-200 dark:hover:border-emerald-800/50'}`}
+                                                        className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-between items-center group transition-all"
                                                     >
-                                                        {editingId === i.id ? (
-                                                            <div className="flex-1 grid grid-cols-12 gap-4 items-center animate-in zoom-in-95">
-                                                                <div className="col-span-3">
-                                                                    <select className="w-full text-xs font-bold p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500/20 outline-none" defaultValue={i.category} id={`edit_icat_${i.id}`}>
-                                                                        <option>Transporte</option>
-                                                                        <option>Alimentação</option>
-                                                                        <option>EPI</option>
-                                                                        <option>Equipamentos</option>
-                                                                        <option>Taxas</option>
-                                                                        <option>Outros</option>
-                                                                    </select>
-                                                                </div>
-                                                                <div className="col-span-6">
-                                                                    <input className="w-full text-xs font-bold p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500/20 outline-none" defaultValue={i.description} id={`edit_idesc_${i.id}`} />
-                                                                </div>
-                                                                <div className="col-span-2">
-                                                                    <input type="number" className="w-full text-xs font-bold p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500/20 outline-none" defaultValue={i.value} id={`edit_ival_${i.id}`} />
-                                                                </div>
-                                                                <div className="col-span-1 flex gap-2 justify-end">
-                                                                    <button onClick={() => {
-                                                                        const newCat = (document.getElementById(`edit_icat_${i.id}`) as HTMLInputElement).value;
-                                                                        const newDesc = (document.getElementById(`edit_idesc_${i.id}`) as HTMLInputElement).value;
-                                                                        const newVal = parseFloat((document.getElementById(`edit_ival_${i.id}`) as HTMLInputElement).value) || 0;
-                                                                        const updated = indirects.map(item => item.id === i.id ? { ...item, category: newCat, description: newDesc.toUpperCase(), value: newVal } : item);
-                                                                        setIndirects(updated);
-                                                                        setEditingId(null);
-                                                                    }} className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 p-2 rounded-lg hover:bg-emerald-200 dark:hover:bg-emerald-900/50"><Check size={18} /></button>
-                                                                    <button onClick={() => setEditingId(null)} className="bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 p-2 rounded-lg hover:bg-rose-200 dark:hover:bg-rose-900/50"><X size={18} /></button>
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="h-8 w-8 bg-blue-50 dark:bg-blue-900/30 rounded-lg flex items-center justify-center shrink-0">
+                                                                <Archive className="text-blue-600 dark:text-blue-400" size={16} />
+                                                            </div>
+                                                            <div>
+                                                                <p className="font-bold text-sm text-slate-800 dark:text-slate-100 uppercase leading-none mb-1">{i.description}</p>
+                                                                <div className="flex items-center gap-2 text-[10px] text-slate-400 uppercase font-semibold">
+                                                                    <span>{i.category}</span>
                                                                 </div>
                                                             </div>
-                                                        ) : (
-                                                            <>
-                                                                <div className="flex items-center gap-4 grow">
-                                                                    <div className="cursor-grab active:cursor-grabbing text-slate-200 dark:text-slate-700 hover:text-slate-400 dark:hover:text-slate-500 shrink-0 transition-colors">
-                                                                        <GripVertical size={20} />
-                                                                    </div>
-                                                                    <div className="space-y-0.5">
-                                                                        <p className="font-black text-xs text-slate-800 dark:text-slate-100 uppercase tracking-tight">{i.description}</p>
-                                                                        <div className="flex items-center gap-2 text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">
-                                                                            <span className="bg-slate-50 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-100 dark:border-slate-700">{i.category}</span>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="flex items-center gap-6 shrink-0">
-                                                                    <div className="text-right">
-                                                                        <p className="text-[9px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest mb-0.5 text-right">Valor</p>
-                                                                        <p className="font-black text-sm text-slate-800 dark:text-slate-100 whitespace-nowrap tracking-tight">R$ {i.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                                                                    </div>
-                                                                    <div className="flex flex-col gap-0.5">
-                                                                        <button onClick={() => (window as any).moveItemWork(indirects, setIndirects, index, 'up')} disabled={index === 0} className="text-slate-300 dark:text-slate-700 hover:text-emerald-500 dark:hover:text-emerald-400 disabled:opacity-0 transition-all p-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded"><ChevronUp size={14} /></button>
-                                                                        <button onClick={() => (window as any).moveItemWork(indirects, setIndirects, index, 'down')} disabled={index === indirects.length - 1} className="text-slate-300 dark:text-slate-700 hover:text-emerald-500 dark:hover:text-emerald-400 disabled:opacity-0 transition-all p-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded"><ChevronDown size={14} /></button>
-                                                                    </div>
-                                                                    <div className="flex items-center gap-2 border-l border-slate-50 dark:border-slate-800 pl-4">
-                                                                        <button onClick={() => setEditingId(i.id)} className="p-2 text-blue-400 hover:text-blue-600 dark:text-blue-500/50 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-all"><Pencil size={18} /></button>
-                                                                        <button onClick={() => handleDeleteIndirect(i.id)} className="p-2 text-slate-300 hover:text-red-500 dark:text-slate-700 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all"><Trash2 size={18} /></button>
-                                                                    </div>
-                                                                </div>
-                                                            </>
-                                                        )}
+                                                        </div>
+                                                        <div className="text-right flex items-center gap-4">
+                                                            <div className="text-right">
+                                                                <p className="font-bold text-sm text-slate-800 dark:text-slate-100">R$ {i.value.toFixed(2)}</p>
+                                                            </div>
+                                                            <div className="flex gap-1 border-l pl-3 border-slate-100 dark:border-slate-800">
+                                                                <button onClick={() => setEditingId(i.id)} className="p-1.5 text-slate-300 hover:text-blue-500"><Pencil size={16} /></button>
+                                                                <button onClick={() => handleDeleteIndirect(i.id)} className="p-1.5 text-slate-300 hover:text-red-500"><Trash2 size={16} /></button>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 )) : (
-                                                    <div className="text-center py-12 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800">
-                                                        <Archive size={32} className="text-slate-300 dark:text-slate-600 mx-auto mb-2" />
-                                                        <p className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-[10px]">Nenhum custo indireto lançado</p>
+                                                    <div className="text-center py-10">
+                                                        <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Nenhum custo indireto lançado</p>
                                                     </div>
                                                 )}
                                             </div>
@@ -1960,92 +1790,67 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
                                 {/* TAXES TAB */}
                                 {resourceTab === 'impostos' && (
-                                    <div className="animate-in fade-in slide-in-from-left-4 duration-500 space-y-8">
+                                    <div className="animate-in fade-in slide-in-from-left-4 duration-500 space-y-6">
                                         <div className="flex justify-between items-center">
                                             <div>
-                                                <h3 className="font-black text-slate-800 dark:text-slate-100 flex items-center gap-2 uppercase tracking-tighter text-lg"><Percent size={22} className="text-blue-500" /> Impostos & BDI</h3>
-                                                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-8">Cálculos tributários e margem de lucro</p>
+                                                <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 uppercase tracking-tighter text-lg"><Percent size={22} className="text-blue-600" /> Impostos & BDI</h3>
+                                                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-8">Configuração tributária e margens</p>
                                             </div>
                                             <button
                                                 onClick={handleLoadDefaultTaxes}
-                                                className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all border border-blue-100 dark:border-blue-900/50"
+                                                className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all border border-blue-100 dark:border-blue-800"
                                             >
-                                                Carregar Padrão (ISS/PIS/COFINS)
+                                                Carregar Padrão
                                             </button>
                                         </div>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                            <div className="md:col-span-2 space-y-6">
-                                                <div className="bg-white dark:bg-slate-900 p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm">
-                                                    <h4 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-6">Detalhamento de Taxas</h4>
-                                                    <div className="space-y-3">
-                                                        {taxes.filter(t => (t.rate > 0 || t.value > 0)).map(t => (
-                                                            <div key={t.id} className="p-4 rounded-2xl bg-slate-50/50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800 flex justify-between items-center group hover:border-blue-200 dark:hover:border-blue-800/50 transition-all">
-                                                                <div className="flex items-center gap-4">
-                                                                    <div className="w-10 h-10 bg-white dark:bg-slate-900 rounded-xl flex items-center justify-center border border-slate-100 dark:border-slate-800 text-blue-500 font-bold text-xs shadow-sm">
-                                                                        {t.rate > 0 ? `${t.rate}%` : 'R$'}
-                                                                    </div>
-                                                                    <div>
-                                                                        <p className="font-black text-xs text-slate-800 dark:text-slate-100 uppercase">{t.name}</p>
-                                                                        <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                                                                            {t.rate > 0 ? 'Alíquota sobre faturamento' : 'Custo fixo lançado'}
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="flex items-center gap-6">
-                                                                    <div className="text-right">
-                                                                        <p className="text-[9px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest mb-0.5">Equivalente</p>
-                                                                        <p className="font-black text-sm text-blue-600 dark:text-blue-400 whitespace-nowrap tracking-tight">
-                                                                            R$ {(t.rate > 0 ? (t.name === 'BDI' ? totalDirect : totalGeneral) * (t.rate / 100) : t.value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                                                                        </p>
-                                                                    </div>
-                                                                    <button onClick={() => handleDeleteTax(t.id)} className="p-2 text-slate-300 hover:text-red-500 dark:text-slate-700 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all"><Trash2 size={16} /></button>
-                                                                </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                                            <div className="md:col-span-8 space-y-3">
+                                                {taxes.map(t => (
+                                                    <div key={t.id} className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-between items-center group transition-all">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="h-8 w-8 bg-blue-50 dark:bg-blue-900/30 rounded-lg flex items-center justify-center shrink-0">
+                                                                <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400">{t.rate > 0 ? `${t.rate}%` : 'R$'}</span>
                                                             </div>
-                                                        ))}
-                                                        {taxes.filter(t => (t.rate > 0 || t.value > 0)).length === 0 && (
-                                                            <div className="text-center py-12 border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-2xl">
-                                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nenhuma taxa ativa</p>
+                                                            <div>
+                                                                <p className="font-bold text-sm text-slate-800 dark:text-slate-100 uppercase leading-none mb-1">{t.name}</p>
+                                                                <p className="text-[10px] text-slate-400 font-semibold uppercase">{t.rate > 0 ? 'Alíquota' : 'Valor Fixo'}</p>
                                                             </div>
-                                                        )}
+                                                        </div>
+                                                        <div className="text-right flex items-center gap-4">
+                                                            <div className="text-right">
+                                                                <p className="font-bold text-sm text-slate-800 dark:text-slate-100">
+                                                                    R$ {(t.rate > 0 ? (t.name === 'BDI' ? totalDirect : totalGeneral) * (t.rate / 100) : t.value).toFixed(2)}
+                                                                </p>
+                                                            </div>
+                                                            <div className="flex gap-1 border-l pl-3 border-slate-100 dark:border-slate-800">
+                                                                <button onClick={() => handleDeleteTax(t.id)} className="p-1.5 text-slate-300 hover:text-red-500"><Trash2 size={16} /></button>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                </div>
+                                                ))}
                                             </div>
 
-                                            <div className="space-y-6">
-                                                <div className="bg-blue-50/50 dark:bg-blue-900/10 p-6 rounded-[2rem] border border-blue-100/50 dark:border-blue-900/20">
-                                                    <div className="flex items-center gap-3 mb-4 text-blue-600 dark:text-blue-400">
-                                                        <AlertCircle size={20} />
-                                                        <h4 className="font-black text-[10px] uppercase tracking-widest">Cálculo por Dentro</h4>
-                                                    </div>
-                                                    <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
-                                                        O sistema utiliza o método <b>Gross Up</b>. Isso garante que os impostos incidam sobre o valor final da nota, mantendo sua margem líquida intacta.
-                                                    </p>
-                                                </div>
-
-                                                <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm">
-                                                    <h4 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4">Adicionar Taxa</h4>
-                                                    <div className="space-y-4">
-                                                        <div>
-                                                            <label className="block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Descrição</label>
-                                                            <input type="text" id="tax_name" className="w-full text-xs font-bold p-3 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl text-slate-700 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="EX: ISS" />
-                                                        </div>
-                                                        <div>
-                                                            <label className="block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Alíquota (%)</label>
-                                                            <input type="number" id="tax_rate" className="w-full text-xs font-bold p-3 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl text-slate-700 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="0.00" />
-                                                        </div>
+                                            <div className="md:col-span-4 space-y-4">
+                                                <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
+                                                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Adicionar Taxa</h4>
+                                                    <div className="space-y-3">
+                                                        <input type="text" id="tax_name" placeholder="NOME" className="w-full text-xs font-bold p-2 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30" />
+                                                        <input type="number" id="tax_rate" placeholder="ALÍQUOTA %" className="w-full text-xs font-bold p-2 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30" />
                                                         <button
                                                             onClick={() => {
-                                                                const name = (document.getElementById('tax_name') as HTMLInputElement).value;
-                                                                const rate = parseFloat((document.getElementById('tax_rate') as HTMLInputElement).value) || 0;
+                                                                const nameInput = document.getElementById('tax_name') as HTMLInputElement;
+                                                                const rateInput = document.getElementById('tax_rate') as HTMLInputElement;
+                                                                const name = nameInput.value;
+                                                                const rate = parseFloat(rateInput.value) || 0;
                                                                 if (!name) return notify("Nome obrigatório", "error");
                                                                 handleAddTax(name.toUpperCase(), rate, 0);
-                                                                (document.getElementById('tax_name') as HTMLInputElement).value = '';
-                                                                (document.getElementById('tax_rate') as HTMLInputElement).value = '';
+                                                                nameInput.value = '';
+                                                                rateInput.value = '';
                                                             }}
-                                                            className="w-full bg-slate-900 dark:bg-blue-600 text-white p-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-800 dark:hover:bg-blue-500 transition-all shadow-lg active:scale-95"
+                                                            className="w-full bg-slate-900 dark:bg-blue-600 text-white p-2 rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-slate-800 dark:hover:bg-blue-500"
                                                         >
-                                                            Adicionar
+                                                            ADICIONAR
                                                         </button>
                                                     </div>
                                                 </div>
@@ -2056,111 +1861,289 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                             </div>
                         )}
 
-                        {activeTab === 'resumo' && (
-                            <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700 space-y-8 pb-12">
-                                <div className="flex justify-between items-center mb-6">
-                                    <div>
-                                        <h3 className="font-black text-slate-800 dark:text-slate-100 flex items-center gap-2 uppercase tracking-tighter text-lg"><PieChart size={22} className="text-emerald-500" /> Resumo Consolidado</h3>
-                                        <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-8">Visão geral financeira da execução</p>
+                        {/* INDIRECTS TAB */}
+                        {
+                            resourceTab === 'indireto' && (
+                                <div className="animate-in fade-in slide-in-from-left-4 duration-500">
+                                    <div className="flex justify-between items-center mb-6">
+                                        <div>
+                                            <h3 className="font-black text-slate-800 dark:text-slate-100 flex items-center gap-2 uppercase tracking-tighter text-lg"><Archive size={22} className="text-slate-500" /> Custos Indiretos</h3>
+                                            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-8">Despesas administrativas e logísticas</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white dark:bg-slate-900 p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
+                                        <div className="space-y-3">
+                                            {indirects.length > 0 ? indirects.map((i, index) => (
+                                                <div
+                                                    key={i.id}
+                                                    draggable={editingId !== i.id}
+                                                    onDragStart={() => setDraggedIndIndex(index)}
+                                                    onDragOver={(e) => (window as any).handleDragOver(e, index, draggedIndIndex, indirects, setIndirects, setDraggedIndIndex)}
+                                                    onDragEnd={() => setDraggedIndIndex(null)}
+                                                    className={`p-4 rounded-2xl border flex justify-between items-center transition-all ${draggedIndIndex === index ? 'opacity-50 bg-blue-50 dark:bg-blue-900/50 border-blue-200 dark:border-blue-800 shadow-inner' : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 shadow-sm hover:border-emerald-200 dark:hover:border-emerald-800/50'}`}
+                                                >
+                                                    {editingId === i.id ? (
+                                                        <div className="flex-1 grid grid-cols-12 gap-4 items-center animate-in zoom-in-95">
+                                                            <div className="col-span-3">
+                                                                <select className="w-full text-xs font-bold p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500/20 outline-none" defaultValue={i.category} id={`edit_icat_${i.id}`}>
+                                                                    <option>Transporte</option>
+                                                                    <option>Alimentação</option>
+                                                                    <option>EPI</option>
+                                                                    <option>Equipamentos</option>
+                                                                    <option>Taxas</option>
+                                                                    <option>Outros</option>
+                                                                </select>
+                                                            </div>
+                                                            <div className="col-span-6">
+                                                                <input className="w-full text-xs font-bold p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500/20 outline-none" defaultValue={i.description} id={`edit_idesc_${i.id}`} />
+                                                            </div>
+                                                            <div className="col-span-2">
+                                                                <input type="number" className="w-full text-xs font-bold p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500/20 outline-none" defaultValue={i.value} id={`edit_ival_${i.id}`} />
+                                                            </div>
+                                                            <div className="col-span-1 flex gap-2 justify-end">
+                                                                <button onClick={() => {
+                                                                    const newCat = (document.getElementById(`edit_icat_${i.id}`) as HTMLInputElement).value;
+                                                                    const newDesc = (document.getElementById(`edit_idesc_${i.id}`) as HTMLInputElement).value;
+                                                                    const newVal = parseFloat((document.getElementById(`edit_ival_${i.id}`) as HTMLInputElement).value) || 0;
+                                                                    const updated = indirects.map(item => item.id === i.id ? { ...item, category: newCat, description: newDesc.toUpperCase(), value: newVal } : item);
+                                                                    setIndirects(updated);
+                                                                    setEditingId(null);
+                                                                }} className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 p-2 rounded-lg hover:bg-emerald-200 dark:hover:bg-emerald-900/50"><Check size={18} /></button>
+                                                                <button onClick={() => setEditingId(null)} className="bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 p-2 rounded-lg hover:bg-rose-200 dark:hover:bg-rose-900/50"><X size={18} /></button>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            <div className="flex items-center gap-4 grow">
+                                                                <div className="cursor-grab active:cursor-grabbing text-slate-200 dark:text-slate-700 hover:text-slate-400 dark:hover:text-slate-500 shrink-0 transition-colors">
+                                                                    <GripVertical size={20} />
+                                                                </div>
+                                                                <div className="space-y-0.5">
+                                                                    <p className="font-black text-xs text-slate-800 dark:text-slate-100 uppercase tracking-tight">{i.description}</p>
+                                                                    <div className="flex items-center gap-2 text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">
+                                                                        <span className="bg-slate-50 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-100 dark:border-slate-700">{i.category}</span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center gap-6 shrink-0">
+                                                                <div className="text-right">
+                                                                    <p className="text-[9px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest mb-0.5 text-right">Valor</p>
+                                                                    <p className="font-black text-sm text-slate-800 dark:text-slate-100 whitespace-nowrap tracking-tight">R$ {i.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                                                </div>
+                                                                <div className="flex flex-col gap-0.5">
+                                                                    <button onClick={() => (window as any).moveItemWork(indirects, setIndirects, index, 'up')} disabled={index === 0} className="text-slate-300 dark:text-slate-700 hover:text-emerald-500 dark:hover:text-emerald-400 disabled:opacity-0 transition-all p-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded"><ChevronUp size={14} /></button>
+                                                                    <button onClick={() => (window as any).moveItemWork(indirects, setIndirects, index, 'down')} disabled={index === indirects.length - 1} className="text-slate-300 dark:text-slate-700 hover:text-emerald-500 dark:hover:text-emerald-400 disabled:opacity-0 transition-all p-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded"><ChevronDown size={14} /></button>
+                                                                </div>
+                                                                <div className="flex items-center gap-2 border-l border-slate-50 dark:border-slate-800 pl-4">
+                                                                    <button onClick={() => setEditingId(i.id)} className="p-2 text-blue-400 hover:text-blue-600 dark:text-blue-500/50 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-all"><Pencil size={18} /></button>
+                                                                    <button onClick={() => handleDeleteIndirect(i.id)} className="p-2 text-slate-300 hover:text-red-500 dark:text-slate-700 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all"><Trash2 size={18} /></button>
+                                                                </div>
+                                                            </div>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            )) : (
+                                                <div className="text-center py-12 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800">
+                                                    <Archive size={32} className="text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+                                                    <p className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-[10px]">Nenhum custo indireto lançado</p>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
+                            )
+                        }
 
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm">
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <div className="w-10 h-10 rounded-xl bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center text-orange-500">
-                                                <Truck size={20} />
-                                            </div>
-                                            <div>
-                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Materiais</p>
-                                                <p className="font-black text-base text-slate-800 dark:text-slate-100">R$ {totalMaterial.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                                            </div>
+                        {/* TAXES TAB */}
+                        {
+                            resourceTab === 'impostos' && (
+                                <div className="animate-in fade-in slide-in-from-left-4 duration-500 space-y-8">
+                                    <div className="flex justify-between items-center">
+                                        <div>
+                                            <h3 className="font-black text-slate-800 dark:text-slate-100 flex items-center gap-2 uppercase tracking-tighter text-lg"><Percent size={22} className="text-blue-500" /> Impostos & BDI</h3>
+                                            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-8">Cálculos tributários e margem de lucro</p>
                                         </div>
+                                        <button
+                                            onClick={handleLoadDefaultTaxes}
+                                            className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all border border-blue-100 dark:border-blue-900/50"
+                                        >
+                                            Carregar Padrão (ISS/PIS/COFINS)
+                                        </button>
                                     </div>
-                                    <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm">
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-amber-500">
-                                                <HardHat size={20} />
-                                            </div>
-                                            <div>
-                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Mão de Obra</p>
-                                                <p className="font-black text-base text-slate-800 dark:text-slate-100">R$ {totalLabor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm">
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-500">
-                                                <Archive size={20} />
-                                            </div>
-                                            <div>
-                                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Indiretos</p>
-                                                <p className="font-black text-base text-slate-800 dark:text-slate-100">R$ {totalIndirect.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm relative overflow-hidden">
-                                        <div className="relative z-10">
-                                            <h4 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-6">Detalhamento de Impostos & Margem</h4>
-                                            <div className="space-y-4">
-                                                <div className="flex justify-between items-center text-sm font-bold">
-                                                    <span className="text-slate-500">Custo Direto Total</span>
-                                                    <span className="text-slate-800 dark:text-slate-200">R$ {totalDirect.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        <div className="md:col-span-2 space-y-6">
+                                            <div className="bg-white dark:bg-slate-900 p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm">
+                                                <h4 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-6">Detalhamento de Taxas</h4>
+                                                <div className="space-y-3">
+                                                    {taxes.filter(t => (t.rate > 0 || t.value > 0)).map(t => (
+                                                        <div key={t.id} className="p-4 rounded-2xl bg-slate-50/50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800 flex justify-between items-center group hover:border-blue-200 dark:hover:border-blue-800/50 transition-all">
+                                                            <div className="flex items-center gap-4">
+                                                                <div className="w-10 h-10 bg-white dark:bg-slate-900 rounded-xl flex items-center justify-center border border-slate-100 dark:border-slate-800 text-blue-500 font-bold text-xs shadow-sm">
+                                                                    {t.rate > 0 ? `${t.rate}%` : 'R$'}
+                                                                </div>
+                                                                <div>
+                                                                    <p className="font-black text-xs text-slate-800 dark:text-slate-100 uppercase">{t.name}</p>
+                                                                    <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                                                                        {t.rate > 0 ? 'Alíquota sobre faturamento' : 'Custo fixo lançado'}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center gap-6">
+                                                                <div className="text-right">
+                                                                    <p className="text-[9px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest mb-0.5">Equivalente</p>
+                                                                    <p className="font-black text-sm text-blue-600 dark:text-blue-400 whitespace-nowrap tracking-tight">
+                                                                        R$ {(t.rate > 0 ? (t.name === 'BDI' ? totalDirect : totalGeneral) * (t.rate / 100) : t.value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                                                    </p>
+                                                                </div>
+                                                                <button onClick={() => handleDeleteTax(t.id)} className="p-2 text-slate-300 hover:text-red-500 dark:text-slate-700 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all"><Trash2 size={16} /></button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    {taxes.filter(t => (t.rate > 0 || t.value > 0)).length === 0 && (
+                                                        <div className="text-center py-12 border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-2xl">
+                                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nenhuma taxa ativa</p>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                <div className="flex justify-between items-center text-sm font-bold">
-                                                    <span className="text-slate-500">BDI Consolidado</span>
-                                                    <span className="text-blue-500">R$ {bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-6">
+                                            <div className="bg-blue-50/50 dark:bg-blue-900/10 p-6 rounded-[2rem] border border-blue-100/50 dark:border-blue-900/20">
+                                                <div className="flex items-center gap-3 mb-4 text-blue-600 dark:text-blue-400">
+                                                    <AlertCircle size={20} />
+                                                    <h4 className="font-black text-[10px] uppercase tracking-widest">Cálculo por Dentro</h4>
                                                 </div>
-                                                <div className="h-px bg-slate-100 dark:bg-slate-800 my-2"></div>
-                                                {otherTaxes.map(t => (
-                                                    <div key={t.id} className="flex justify-between items-center text-xs font-bold transition-all hover:bg-slate-50 dark:hover:bg-slate-800/50 p-1 rounded-lg">
-                                                        <span className="text-slate-400 uppercase">{t.name} {t.rate > 0 && `(${t.rate}%)`}</span>
-                                                        <span className="text-slate-600 dark:text-slate-400">R$ {(t.rate > 0 ? totalGeneral * (t.rate / 100) : t.value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
+                                                    O sistema utiliza o método <b>Gross Up</b>. Isso garante que os impostos incidam sobre o valor final da nota, mantendo sua margem líquida intacta.
+                                                </p>
+                                            </div>
+
+                                            <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm">
+                                                <h4 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4">Adicionar Taxa</h4>
+                                                <div className="space-y-4">
+                                                    <div>
+                                                        <label className="block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Descrição</label>
+                                                        <input type="text" id="tax_name" className="w-full text-xs font-bold p-3 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl text-slate-700 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="EX: ISS" />
                                                     </div>
-                                                ))}
-                                                <div className="h-px bg-slate-100 dark:bg-slate-800 my-2"></div>
-                                                <div className="flex justify-between items-center">
-                                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Tributos</span>
-                                                    <span className="font-black text-base text-blue-600 dark:text-blue-400">R$ {totalTaxes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                                    <div>
+                                                        <label className="block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Alíquota (%)</label>
+                                                        <input type="number" id="tax_rate" className="w-full text-xs font-bold p-3 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl text-slate-700 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="0.00" />
+                                                    </div>
+                                                    <button
+                                                        onClick={() => {
+                                                            const name = (document.getElementById('tax_name') as HTMLInputElement).value;
+                                                            const rate = parseFloat((document.getElementById('tax_rate') as HTMLInputElement).value) || 0;
+                                                            if (!name) return notify("Nome obrigatório", "error");
+                                                            handleAddTax(name.toUpperCase(), rate, 0);
+                                                            (document.getElementById('tax_name') as HTMLInputElement).value = '';
+                                                            (document.getElementById('tax_rate') as HTMLInputElement).value = '';
+                                                        }}
+                                                        className="w-full bg-slate-900 dark:bg-blue-600 text-white p-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-800 dark:hover:bg-blue-500 transition-all shadow-lg active:scale-95"
+                                                    >
+                                                        Adicionar
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50/50 dark:bg-blue-900/10 rounded-full -mr-16 -mt-16 blur-3xl"></div>
                                     </div>
+                                </div>
+                            )
+                        }
+                    </div >
+                    {activeTab === 'resumo' && (
+                        <div className="max-w-4xl mx-auto space-y-8 pb-12">
+                            <div className="flex justify-between items-center mb-6">
+                                <div>
+                                    <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 uppercase tracking-tighter text-lg"><PieChart size={22} className="text-blue-600" /> Resumo Consolidado</h3>
+                                    <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-8">Visão geral financeira da execução</p>
+                                </div>
+                            </div>
 
-                                    <div className="bg-slate-900 dark:bg-emerald-600 p-8 rounded-[2.5rem] shadow-2xl flex flex-col justify-center relative overflow-hidden group">
-                                        <div className="relative z-10">
-                                            <p className="text-emerald-400/60 dark:text-white/40 text-[10px] font-black uppercase tracking-[0.3em] mb-2">Valor Final da Obra</p>
-                                            <h2 className="text-4xl font-black text-white tracking-tighter mb-4">
-                                                R$ {totalGeneral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                                            </h2>
-                                            <p className="text-emerald-100/60 dark:text-white/60 text-xs font-medium leading-relaxed max-w-[240px]">
-                                                Valor total com impostos inclusos e margem BDI aplicada.
-                                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
+                                            <Truck size={20} />
                                         </div>
-                                        <div className="absolute bottom-0 right-0 p-8 text-white/5 group-hover:text-white/10 transition-colors">
-                                            <DollarSign size={120} strokeWidth={3} />
+                                        <div>
+                                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Materiais</p>
+                                            <p className="font-bold text-base text-slate-800 dark:text-slate-100">R$ {totalMaterial.toFixed(2)}</p>
                                         </div>
-                                        <div className="absolute -left-12 -bottom-12 w-48 h-48 bg-white/5 rounded-full blur-3xl"></div>
+                                    </div>
+                                </div>
+                                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
+                                            <HardHat size={20} />
+                                        </div>
+                                        <div>
+                                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Mão de Obra</p>
+                                            <p className="font-bold text-base text-slate-800 dark:text-slate-100">R$ {totalLabor.toFixed(2)}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
+                                            <Archive size={20} />
+                                        </div>
+                                        <div>
+                                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Indiretos</p>
+                                            <p className="font-bold text-base text-slate-800 dark:text-slate-100">R$ {totalIndirect.toFixed(2)}</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        )}
-                    </div>
-                </div>
-            )}
 
-            <ReportPreview
-                isOpen={showPreview}
-                onClose={() => setShowPreview(false)}
-                title={previewContent.title}
-                htmlContent={previewContent.html}
-                filename={previewContent.filename}
-            />
-        </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm relative overflow-hidden">
+                                    <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-6">Detalhamento Financeiro</h4>
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center text-sm font-bold">
+                                            <span className="text-slate-500">Custo Direto</span>
+                                            <span className="text-slate-800 dark:text-slate-200">R$ {totalDirect.toFixed(2)}</span>
+                                        </div>
+                                        <div className="h-px bg-slate-100 dark:bg-slate-800 my-2"></div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Tributos & BDI</span>
+                                            <span className="font-bold text-base text-blue-600">R$ {totalTaxes.toFixed(2)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-slate-900 dark:bg-blue-600 p-8 rounded-3xl shadow-xl flex flex-col justify-center relative overflow-hidden">
+                                    <div className="relative z-10">
+                                        <p className="text-blue-400/60 dark:text-white/40 text-[10px] font-bold uppercase tracking-[0.3em] mb-2">Valor Final Realizado</p>
+                                        <h2 className="text-4xl font-bold text-white tracking-tighter mb-4">
+                                            R$ {totalGeneral.toFixed(2)}
+                                        </h2>
+                                        <p className="text-blue-100/60 dark:text-white/60 text-xs font-medium">
+                                            Considerando todos os custos diretos, indiretos e tributação aplicada.
+                                        </p>
+                                    </div>
+                                    <div className="absolute top-0 right-0 p-8 text-white/5">
+                                        <DollarSign size={120} strokeWidth={3} />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div >
+                </div >
+    )
+}
+
+<ReportPreview
+    isOpen={showPreview}
+    onClose={() => setShowPreview(false)}
+    title={previewContent.title}
+    htmlContent={previewContent.html}
+    filename={previewContent.filename}
+/>
+        </div >
     );
 };
 
