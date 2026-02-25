@@ -368,7 +368,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             filename: `Contrato - ${order.id.replace("OS-", "OS")} - ${order.description || "Proposta"}.pdf`,
             image: { type: "jpeg" as const, quality: 0.98 },
             html2canvas: {
-                scale: 3,
+                scale: 4,
                 useCORS: true,
                 allowTaint: false,
                 backgroundColor: "#ffffff",

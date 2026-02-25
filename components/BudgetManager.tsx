@@ -709,12 +709,13 @@ const BudgetManager: React.FC<Props> = ({
         filename,
         image: { type: "jpeg" as const, quality: 0.98 },
         html2canvas: {
-          scale: 3,
+          scale: 4,
           useCORS: true,
           allowTaint: false,
           backgroundColor: "#ffffff",
           logging: false,
-          windowWidth: 794, // 210mm fixed width at 96dpi
+          letterRendering: true,
+          windowWidth: 1200,
         },
         jsPDF: { unit: "mm" as const, format: "a4" as const, orientation: "portrait" as const },
         pagebreak: { mode: ["css", "legacy"] as any },
