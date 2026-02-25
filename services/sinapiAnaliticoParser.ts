@@ -44,6 +44,8 @@ export const sinapiAnaliticoParser = {
 
         const records: SinapiComposicaoItemRecord[] = [];
         let lastSeenCompCode = "";
+        let headerRowsCount = 0;
+        let skippedRowsCount = 0;
 
         for (let i = det.headerRowIndex + 1; i < rows.length; i++) {
             const r = rows[i];
@@ -53,20 +55,29 @@ export const sinapiAnaliticoParser = {
             const raw_comp_code = String(r[det.compCodeIdx] ?? "").trim();
             const item_code = String(r[det.itemCodeIdx] ?? "").trim();
 
+            // Case: Title row for a composition (has comp code, no item code)
             if (raw_comp_code && !item_code && isNumericCode(raw_comp_code)) {
                 lastSeenCompCode = raw_comp_code;
+                headerRowsCount++;
                 continue;
             }
 
-            if (tipo_item_raw === "INSUMO" || tipo_item_raw === "COMPOSICAO" || tipo_item_raw === "COMPOSIÇÃO") {
+            // Case: Item row inside a composition (must have an item code)
+            if (item_code && isNumericCode(item_code)) {
                 const codigo_composicao = lastSeenCompCode || raw_comp_code;
-                if (!codigo_composicao || !isNumericCode(codigo_composicao)) continue;
-                if (!item_code || !isNumericCode(item_code)) continue;
+                if (!codigo_composicao || !isNumericCode(codigo_composicao)) {
+                    skippedRowsCount++;
+                    continue;
+                }
 
                 const coeficiente = this.parseNumber(r[det.coefIdx]);
-                if (!Number.isFinite(coeficiente) || coeficiente === 0) continue;
+                if (!Number.isFinite(coeficiente) || coeficiente === 0) {
+                    skippedRowsCount++;
+                    continue;
+                }
 
-                const tipo_item = (tipo_item_raw.startsWith("INS") ? "INSUMO" : "COMPOSICAO") as "INSUMO" | "COMPOSICAO";
+                // Map any type that doesn't start with 'COMP' as 'INSUMO' for simplicity
+                const tipo_item = tipo_item_raw.includes("COMP") ? "COMPOSICAO" : "INSUMO";
 
                 records.push({
                     id: `${mes_ref}_${uf}_${modo}_ANA_${codigo_composicao}_${tipo_item}_${item_code}`,
@@ -78,14 +89,18 @@ export const sinapiAnaliticoParser = {
                     tipo_item,
                     codigo_item: item_code,
                     descricao_item: det.descIdx !== -1 ? String(r[det.descIdx] ?? "").trim() : "",
-                    unidade_item: det.unitIdx !== -1 ? String(r[det.unitIdx] ?? "").trim() : "",
+                    unidade_item: det.unitIdx !== -1 ? String(r[det.unitIdx] || "").trim() : "",
                     coeficiente,
                     custo_unitario: det.priceIdx !== -1 ? this.parseNumber(r[det.priceIdx]) : undefined,
                     custo_total: det.totalIdx !== -1 ? this.parseNumber(r[det.totalIdx]) : undefined,
-                    situacao: det.situacaoIdx !== -1 ? String(r[det.situacaoIdx] ?? "").trim() : "",
+                    situacao: det.situacaoIdx !== -1 ? String(r[det.situacaoIdx] || "").trim() : "",
                 });
+            } else {
+                if (tipo_item_raw || item_code) skippedRowsCount++;
             }
         }
+
+        console.log(`[sinapiAnaliticoParser] Import summary: ${records.length} items, ${headerRowsCount} composition headers, ${skippedRowsCount} skipped rows.`);
 
         if (records.length === 0) {
             throw new Error(`Importação resultou em 0 itens. Verifique se o arquivo contém linhas identificadas como INSUMO ou COMPOSICAO.`);
