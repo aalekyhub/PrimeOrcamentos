@@ -699,9 +699,10 @@ const BudgetManager: React.FC<Props> = ({
       // 6) Um raf duplo ajuda o layout final antes de capturar
       await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
 
-      const filename = `${budget.id}_${(budget.customerName || "cliente")
-        .replace(/[^a-z0-9]/gi, "_")
-        .toLowerCase()}.pdf`;
+      const safeDescription = (budget.description || "Proposta")
+        .replace(/[\\/:"*?<>|]/g, "_") // Remove invalid Windows filename chars
+        .trim();
+      const filename = `${budget.id} - ${safeDescription}.pdf`;
 
       const options = {
         margin: [10, 0, 15, 0] as [number, number, number, number], // 10mm top to match others, 15mm bottom
