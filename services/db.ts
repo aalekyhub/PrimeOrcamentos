@@ -77,7 +77,7 @@ export const db = {
     return `${prefix}-${random}`;
   },
 
-  async save(key: string, data: any, singleItem?: any) {
+  async save(key: string, data: any, singleItem?: any, skipCloud: boolean = false) {
     // 1. Update Cache immediately for synchronous consistency
     _cache[key] = data;
 
@@ -89,8 +89,8 @@ export const db = {
       console.error(`[IDB Error] Falha ao salvar ${key} no IndexedDB:`, e);
     }
 
-    // 3. Sync to Supabase if available
-    if (supabase) {
+    // 3. Sync to Supabase if available and skipCloud is false
+    if (supabase && !skipCloud) {
       const tableName = key.replace('serviflow_', '');
       try {
         // Optimization: If singleItem is provided, sync ONLY that item for much better performance
@@ -113,6 +113,11 @@ export const db = {
       }
     }
     return { success: true };
+  },
+
+  // Helper for local-only saves (useful during cloud sync to avoid feedback loops)
+  async saveLocal(key: string, data: any) {
+    return this.save(key, data, null, true);
   },
 
   load(key: string, defaultValue: any) {

@@ -169,7 +169,7 @@ const AppContent: React.FC = () => {
             planMap.set(p.id, p);
           });
           const mergedPlans = Array.from(planMap.values());
-          db.save('serviflow_plans', mergedPlans);
+          db.saveLocal('serviflow_plans', mergedPlans);
         }
 
         // Merge Works (Execution)
@@ -180,7 +180,7 @@ const AppContent: React.FC = () => {
             workMap.set(w.id, w);
           });
           const mergedWorks = Array.from(workMap.values());
-          db.save('serviflow_works', mergedWorks);
+          db.saveLocal('serviflow_works', mergedWorks);
         }
 
         // Sub-items for Plan/Work (Services, Materials, etc.)
@@ -197,7 +197,7 @@ const AppContent: React.FC = () => {
               itemMap.set(item.id, item);
             });
             const merged = Array.from(itemMap.values());
-            db.save(`serviflow_${tableName}`, merged);
+            db.saveLocal(`serviflow_${tableName}`, merged);
           }
         });
 
@@ -217,16 +217,11 @@ const AppContent: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    db.save(STORAGE_KEYS.ORDERS, orders);
-    db.save(STORAGE_KEYS.TRANSACTIONS, transactions);
-    db.save(STORAGE_KEYS.CUSTOMERS, customers);
-    db.save(STORAGE_KEYS.CATALOG, catalog);
-    db.save(STORAGE_KEYS.COMPANY, company);
-    db.save(STORAGE_KEYS.USERS, users);
-    db.save(STORAGE_KEYS.LOANS, loans);
-    db.save('serviflow_dark_mode', darkMode);
-    if (currentUser) db.save(STORAGE_KEYS.SESSION, currentUser);
-  }, [orders, transactions, customers, catalog, company, users, loans, currentUser, darkMode]);
+    // Only save UI/Session state locally. 
+    // Business data (orders, transactions, etc.) is saved by individual components.
+    db.saveLocal('serviflow_dark_mode', darkMode);
+    if (currentUser) db.saveLocal(STORAGE_KEYS.SESSION, currentUser);
+  }, [darkMode, currentUser]);
 
   const stats = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];

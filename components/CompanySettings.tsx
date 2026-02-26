@@ -6,6 +6,7 @@ import {
   MessageCircle, Download, Database, RefreshCw, AlertTriangle
 } from 'lucide-react';
 import { CompanyProfile, MeasurementUnit } from '../types';
+import { db } from '../services/db';
 import { useNotify } from './ToastProvider';
 
 interface Props {
@@ -112,13 +113,18 @@ const CompanySettings: React.FC<Props> = ({ company, setCompany }) => {
     setNewUnitLabel(''); setNewUnitValue('');
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setSaveStatus('saving');
-    setTimeout(() => {
+    const result = await db.save('serviflow_company', company);
+
+    if (result?.success) {
       setSaveStatus('saved');
-      notify("Configurações salvas!");
+      notify("Configurações salvas e sincronizadas!");
       setTimeout(() => setSaveStatus('idle'), 3000);
-    }, 600);
+    } else {
+      setSaveStatus('idle');
+      notify("Salvo localmente. Erro ao sincronizar.", "warning");
+    }
   };
 
   return (
