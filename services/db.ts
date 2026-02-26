@@ -142,16 +142,27 @@ export const db = {
     const results: any = {};
 
     try {
-      for (const table of tables) {
+      // Parallelize fetching for significantly better performance
+      const fetchPromises = tables.map(async (table) => {
         const { data, error } = await supabase.from(table).select('*');
-        if (!error && data) {
-          results[table] = data;
-          // Note: App.tsx merges these and calls db.save(), which updates IDB and cache.
-        } else if (error) {
+        if (error) {
           console.error(`Erro ao baixar ${table}:`, error.message);
-          return { error: `Erro na tabela ${table}: ${error.message}` };
+          return { table, error };
         }
+        return { table, data };
+      });
+
+      const responses = await Promise.all(fetchPromises);
+
+      for (const response of responses) {
+        if ('error' in response) {
+          // If any critical table fails, we might want to know, but let's keep going for others
+          // Unless it's a critical error we want to bubble up
+          continue;
+        }
+        results[response.table] = response.data;
       }
+
       return results;
     } catch (err) {
       console.error("[Cloud Sync] Erro ao baixar dados:", err);

@@ -670,11 +670,11 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                                     <div style="display: flex; gap: 6mm; align-items: center;">
                                         <div style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
-                                            ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>'}
+                                            ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#059669;">PO</div>'}
                                         </div>
                                         <div>
                                             <h1 style="font-size:18px; font-weight:900; color:#0f172a; margin:0 0 2mm 0; text-transform:uppercase; letter-spacing:-0.5px;">${company.name}</h1>
-                                            <p style="font-size:11px; font-weight:800; color:#2563eb; text-transform:uppercase; letter-spacing:1px; margin:0 0 2mm 0;">Executivo de Obra / Realizado</p>
+                                            <p style="font-size:11px; font-weight:800; color:#059669; text-transform:uppercase; letter-spacing:1px; margin:0 0 2mm 0;">Executivo de Obra / Realizado</p>
                                             <p style="font-size:9px; color:#94a3b8; font-weight:700; text-transform:uppercase; letter-spacing:-0.3px; margin:0;">${company.cnpj || ''} | ${company.phone || ''}</p>
                                         </div>
                                     </div>
@@ -746,16 +746,16 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     </div>
                                     ` : ''}
 
-                                    <!-- Taxes (Blue) - Conditional Render -->
+                                    <!-- Taxes (Green) - Conditional Render -->
                                     ${totalTaxes > 0 ? `
-                                    <div style="flex: 1; min-width: 140px; background: #eff6ff; border-bottom: 3px solid #3b82f6; border-radius: 8px; padding: 16px; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                                    <div style="flex: 1; min-width: 140px; background: #ecfdf5; border-bottom: 3px solid #10b981; border-radius: 8px; padding: 16px; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
                                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                            <span style="font-size: 9px; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: 0.05em;">Impostos</span>
-                                            <div style="background: #dbeafe; padding: 4px; border-radius: 4px;">
-                                                <span style="color: #2563eb; font-size: 10px; font-weight: 800;">%</span>
+                                            <span style="font-size: 9px; font-weight: 700; color: #059669; text-transform: uppercase; letter-spacing: 0.05em;">Impostos</span>
+                                            <div style="background: #d1fae5; padding: 4px; border-radius: 4px;">
+                                                <span style="color: #059669; font-size: 10px; font-weight: 800;">%</span>
                                             </div>
                                         </div>
-                                        <span style="font-size: 18px; font-weight: 800; color: #1e3a8a; display: block; white-space: nowrap;">R$ ${totalTaxes.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                        <span style="font-size: 18px; font-weight: 800; color: #064e3b; display: block; white-space: nowrap;">R$ ${totalTaxes.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                     </div>
                                     ` : ''}
                                 </div>
@@ -769,7 +769,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 <!-- SEÇÃO SERVIÇOS -->
                                 ${services.length > 0 ? `
                                 <div style="margin-bottom: 40px;">
-                                    <h3 style="font-size: 14px; font-weight: 800; color: #1e3a8a; text-transform: uppercase; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0;">1. Serviços Executados</h3>
+                                    <h3 style="font-size: 14px; font-weight: 800; color: #064e3b; text-transform: uppercase; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0;">1. Serviços Executados</h3>
                                     <table style="width: 100%; border-collapse: collapse;">
                                         <thead>
                                             <tr>
@@ -796,7 +796,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 <!-- SEÇÃO MATERIAIS -->
                                 ${materials.length > 0 ? `
                                 <div style="margin-bottom: 40px;">
-                                    <h3 style="font-size: 14px; font-weight: 800; color: #1e3a8a; text-transform: uppercase; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0;">2. Insumos e Materiais</h3>
+                                    <h3 style="font-size: 14px; font-weight: 800; color: #064e3b; text-transform: uppercase; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0;">2. Insumos e Materiais</h3>
                                     <table style="width: 100%; border-collapse: collapse;">
                                         <thead>
                                             <tr>
@@ -823,7 +823,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 <!-- SEÇÃO MÃO DE OBRA -->
                                 ${labor.length > 0 ? `
                                 <div style="margin-bottom: 40px;">
-                                    <h3 style="font-size: 14px; font-weight: 800; color: #1e3a8a; text-transform: uppercase; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0;">3. Recursos Humanos / Mão de Obra</h3>
+                                    <h3 style="font-size: 14px; font-weight: 800; color: #064e3b; text-transform: uppercase; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0;">3. Recursos Humanos / Mão de Obra</h3>
                                     <table style="width: 100%; border-collapse: collapse;">
                                         <thead>
                                             <tr>
@@ -850,7 +850,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 <!-- SEÇÃO CUSTOS INDIRETOS -->
                                 ${indirects.length > 0 ? `
                                 <div style="margin-bottom: 40px;">
-                                    <h3 style="font-size: 14px; font-weight: 800; color: #1e3a8a; text-transform: uppercase; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0;">4. Custos Indiretos e Operacionais</h3>
+                                    <h3 style="font-size: 14px; font-weight: 800; color: #064e3b; text-transform: uppercase; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0;">4. Custos Indiretos e Operacionais</h3>
                                     <table style="width: 100%; border-collapse: collapse;">
                                         <thead>
                                             <tr>
@@ -1006,7 +1006,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                 <div>
                     <div className="flex justify-between items-center mb-6">
                         <h1 className="text-2xl font-bold text-slate-800 dark:text-white uppercase tracking-tighter">Gestão de Obras</h1>
-                        <button onClick={handleCreateWork} className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 shadow-md shadow-blue-950/20">
+                        <button onClick={handleCreateWork} className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-green-700 shadow-md shadow-green-950/20">
                             <Plus size={20} /> Nova Obra
                         </button>
                     </div>
@@ -1038,7 +1038,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 </div>
                                 <div className="flex justify-between items-center mb-5">
                                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400 truncate flex-1 pr-2">{work.address || 'Sem endereço configurado'}</p>
-                                    <span className={`px-2 py-1 rounded text-[10px] font-bold ${work.status === 'Concluída' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'}`}>
+                                    <span className={`px-2 py-1 rounded text-[10px] font-bold ${work.status === 'Concluída' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400'}`}>
                                         {work.status}
                                     </span>
                                 </div>
@@ -1049,7 +1049,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">
                                     <button
                                         onClick={() => { setActiveWorkId(work.id); setCurrentWork(work); loadWorkDetails(work.id); }}
-                                        className="text-blue-600 dark:text-blue-400 font-bold text-sm bg-blue-50 dark:bg-blue-900/20 px-4 py-2 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors w-full"
+                                        className="text-green-600 dark:text-green-400 font-bold text-sm bg-green-50 dark:bg-green-900/20 px-4 py-2 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors w-full"
                                     >
                                         Editar Execução
                                     </button>
@@ -1063,33 +1063,33 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                     {/* Fixed Editor Header & Tabs */}
                     <div className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
                         {/* Editor Header */}
-                        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-blue-50 dark:bg-blue-900/20">
+                        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-green-50 dark:bg-green-900/20">
                             <div className="flex items-center gap-4">
                                 {!embeddedPlanId && (
-                                    <button onClick={() => setActiveWorkId(null)} className="text-blue-400 hover:text-blue-600 p-1">
+                                    <button onClick={() => setActiveWorkId(null)} className="text-green-400 hover:text-green-600 p-1">
                                         <ArrowRight className="rotate-180" size={20} />
                                     </button>
                                 )}
                                 <div>
-                                    <h2 className="text-xl font-bold text-blue-900 dark:text-blue-100 flex items-center gap-2">
-                                        <HardHat className="text-blue-600 dark:text-blue-400" />
+                                    <h2 className="text-xl font-bold text-green-900 dark:text-green-100 flex items-center gap-2">
+                                        <HardHat className="text-green-600 dark:text-green-400" />
                                         {currentWork.name}
                                     </h2>
-                                    <p className="text-xs text-blue-600 dark:text-blue-400 uppercase tracking-widest font-semibold">{currentWork.status} • GESTÃO DE EXECUÇÃO</p>
+                                    <p className="text-xs text-green-600 dark:text-green-400 uppercase tracking-widest font-semibold">{currentWork.status} • GESTÃO DE EXECUÇÃO</p>
                                 </div>
                             </div>
                             <div className="flex gap-2">
                                 {currentWork?.plan_id && (
                                     <button
                                         onClick={() => importPlanItems(currentWork.plan_id!, currentWork.id)}
-                                        className="px-4 py-2 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-blue-200 transition-all border border-blue-200 dark:border-blue-800"
+                                        className="px-4 py-2 bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-green-200 transition-all border border-green-200 dark:border-green-800"
                                     >
                                         <ArrowRight className="rotate-180" size={16} /> Sincronizar
                                     </button>
                                 )}
                                 <button
                                     onClick={handleSave}
-                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-blue-700 shadow-md shadow-blue-950/20"
+                                    className="px-4 py-2 bg-green-600 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-green-700 shadow-md shadow-green-950/20"
                                 >
                                     <Save size={16} /> Salvar
                                 </button>
@@ -1107,7 +1107,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     key={tab.id}
                                     type="button"
                                     onClick={() => setActiveTab(tab.id as any)}
-                                    className={`px-6 py-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                                    className={`px-6 py-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id ? 'border-green-600 text-green-600 dark:text-green-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
                                 >
                                     <tab.icon size={16} /> {tab.label}
                                 </button>
@@ -1170,7 +1170,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 (document.getElementById('svc_mat') as HTMLInputElement).value = '';
                                                 (document.getElementById('svc_lab') as HTMLInputElement).value = '';
                                             }}
-                                            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-bold text-xs h-9 flex items-center justify-center gap-1 shadow-md shadow-blue-950/20"
+                                            className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700 font-bold text-xs h-9 flex items-center justify-center gap-1 shadow-md shadow-green-950/20"
                                         >
                                             <Plus size={14} /> ADICIONAR
                                         </button>
@@ -1187,7 +1187,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             key={r.id}
                                             type="button"
                                             onClick={() => setResourceTab(r.id as any)}
-                                            className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all uppercase tracking-wider ${resourceTab === r.id ? 'bg-blue-600 dark:bg-blue-600 text-white shadow-md' : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-blue-900/30'}`}
+                                            className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all uppercase tracking-wider ${resourceTab === r.id ? 'bg-green-600 dark:bg-green-600 text-white shadow-md' : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-green-50 dark:hover:bg-green-900/30'}`}
                                         >
                                             {r.label}
                                         </button>
@@ -1237,7 +1237,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         (document.getElementById('mat_unit') as HTMLInputElement).value = '';
                                                         (document.getElementById('mat_cost') as HTMLInputElement).value = '';
                                                     }}
-                                                    className="w-full bg-blue-600 dark:bg-blue-500 text-white p-2 rounded hover:bg-blue-700 dark:hover:bg-blue-400 font-bold text-xs h-9 shadow-sm"
+                                                    className="w-full bg-green-600 dark:bg-green-500 text-white p-2 rounded hover:bg-green-700 dark:hover:bg-green-400 font-bold text-xs h-9 shadow-sm"
                                                 >
                                                     ADICIONAR MATERIAL
                                                 </button>
@@ -1298,7 +1298,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         (document.getElementById('mo_un') as HTMLInputElement).value = '';
                                                         (document.getElementById('mo_cost') as HTMLInputElement).value = '';
                                                     }}
-                                                    className="w-full bg-blue-600 dark:bg-blue-500 text-white p-2 rounded hover:bg-blue-700 dark:hover:bg-blue-400 font-bold text-xs h-9 shadow-sm"
+                                                    className="w-full bg-green-600 dark:bg-green-500 text-white p-2 rounded hover:bg-green-700 dark:hover:bg-green-400 font-bold text-xs h-9 shadow-sm"
                                                 >
                                                     ADICIONAR M.O.
                                                 </button>
@@ -1345,7 +1345,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         (document.getElementById('ind_desc') as HTMLInputElement).value = '';
                                                         (document.getElementById('ind_val') as HTMLInputElement).value = '';
                                                     }}
-                                                    className="w-full bg-blue-600 dark:bg-blue-500 text-white p-2 rounded hover:bg-blue-700 dark:hover:bg-blue-400 font-bold text-xs h-9 flex items-center justify-center shadow-sm"
+                                                    className="w-full bg-green-600 dark:bg-green-500 text-white p-2 rounded hover:bg-green-700 dark:hover:bg-green-400 font-bold text-xs h-9 flex items-center justify-center shadow-sm"
                                                 >
                                                     <Plus size={14} />
                                                 </button>
@@ -1390,7 +1390,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         (document.getElementById('tax_name') as HTMLInputElement).value = '';
                                                         (document.getElementById('tax_rate') as HTMLInputElement).value = '';
                                                     }}
-                                                    className="w-full bg-blue-600 dark:bg-blue-500 text-white p-2 rounded hover:bg-blue-700 dark:hover:bg-blue-400 font-bold text-xs h-9 shadow-sm flex items-center justify-center gap-2"
+                                                    className="w-full bg-green-600 dark:bg-green-500 text-white p-2 rounded hover:bg-green-700 dark:hover:bg-green-400 font-bold text-xs h-9 shadow-sm flex items-center justify-center gap-2"
                                                 >
                                                     <Plus size={16} /> ADICIONAR
                                                 </button>
@@ -1411,7 +1411,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             type="text"
                                             value={currentWork.name}
                                             onChange={e => setCurrentWork({ ...currentWork, name: e.target.value.toUpperCase() })}
-                                            className="w-full p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/10 outline-none shadow-sm transition-all"
+                                            className="w-full p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-green-500/20 dark:focus:ring-green-500/10 outline-none shadow-sm transition-all"
                                         />
                                     </div>
                                     <div className="space-y-1.5">
@@ -1419,7 +1419,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         <select
                                             value={currentWork.status}
                                             onChange={e => setCurrentWork({ ...currentWork, status: e.target.value as any })}
-                                            className="w-full p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-800 dark:text-slate-100 outline-none shadow-sm cursor-pointer appearance-none transition-all focus:ring-2 focus:ring-blue-500/20"
+                                            className="w-full p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-800 dark:text-slate-100 outline-none shadow-sm cursor-pointer appearance-none transition-all focus:ring-2 focus:ring-green-500/20"
                                         >
                                             <option value="Em Andamento">Em Andamento</option>
                                             <option value="Pausada">Pausada</option>
@@ -1441,7 +1441,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 client_name: customer ? customer.name : ''
                                             });
                                         }}
-                                        className="w-full p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-800 dark:text-slate-100 outline-none shadow-sm cursor-pointer transition-all focus:ring-2 focus:ring-blue-500/20"
+                                        className="w-full p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-800 dark:text-slate-100 outline-none shadow-sm cursor-pointer transition-all focus:ring-2 focus:ring-green-500/20"
                                     >
                                         <option value="">Selecione um cliente...</option>
                                         {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -1453,7 +1453,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         type="text"
                                         value={currentWork.address}
                                         onChange={e => setCurrentWork({ ...currentWork, address: e.target.value })}
-                                        className="w-full p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-800 dark:text-slate-100 outline-none shadow-sm transition-all focus:ring-2 focus:ring-blue-500/20"
+                                        className="w-full p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-800 dark:text-slate-100 outline-none shadow-sm transition-all focus:ring-2 focus:ring-green-500/20"
                                         placeholder="Ex: Rua, Número, Bairro, Cidade..."
                                     />
                                 </div>
@@ -1470,7 +1470,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 {services.map((svc) => (
                                     <div
                                         key={svc.id}
-                                        className="p-3 rounded-lg border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-between items-center transition-all group hover:border-blue-300 dark:hover:border-blue-500 shadow-sm"
+                                        className="p-3 rounded-lg border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-between items-center transition-all group hover:border-green-300 dark:hover:border-green-500 shadow-sm"
                                     >
                                         {editingId === svc.id ? (
                                             <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center">
@@ -1531,7 +1531,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             setServices(updated);
                                                             setEditingId(null);
                                                         }}
-                                                        className="text-blue-600 p-1 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded"
+                                                        className="text-green-600 p-1 hover:bg-green-50 dark:hover:bg-green-900/30 rounded"
                                                     >
                                                         <CheckCircle size={16} />
                                                     </button>
@@ -1545,7 +1545,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 <div className="flex items-center gap-3 grow">
                                                     <div className="grow text-slate-900 dark:text-slate-100 text-sm">
                                                         <span className="whitespace-nowrap">
-                                                            <b className="dark:text-blue-400 uppercase">{svc.description}</b> | {svc.quantity} {svc.unit} x R$ {(svc.unit_material_cost + svc.unit_labor_cost).toFixed(2)}
+                                                            <b className="dark:text-green-400 uppercase">{svc.description}</b> | {svc.quantity} {svc.unit} x R$ {(svc.unit_material_cost + svc.unit_labor_cost).toFixed(2)}
                                                         </span>
                                                         <div className="flex items-center gap-2 text-[10px] text-slate-400 uppercase font-semibold mt-0.5 opacity-60">
                                                             <span>Mat: R$ {svc.unit_material_cost.toFixed(2)}</span>
@@ -1568,7 +1568,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                 setEditPrice1(svc.unit_material_cost);
                                                                 setEditPrice2(svc.unit_labor_cost);
                                                             }}
-                                                            className="p-1.5 text-slate-300 hover:text-blue-500 transition-colors"
+                                                            className="p-1.5 text-slate-300 hover:text-green-500 transition-colors"
                                                         >
                                                             <Pencil size={18} />
                                                         </button>
@@ -1601,7 +1601,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                     onClick={handlePreviewMaterials}
                                                     className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-slate-50 transition-all shadow-sm"
                                                 >
-                                                    <Eye size={18} className="text-blue-600" /> Visualizar Lista
+                                                    <Eye size={18} className="text-green-600" /> Visualizar Lista
                                                 </button>
                                             )}
                                         </div>
@@ -1611,7 +1611,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 <div className="flex items-center gap-3">
                                                     <input
                                                         type="checkbox"
-                                                        className="w-4 h-4 rounded-md border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                                        className="w-4 h-4 rounded-md border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-green-600 focus:ring-green-500 cursor-pointer"
                                                         checked={selectedMaterials.length === materials.length && materials.length > 0}
                                                         onChange={(e) => {
                                                             if (e.target.checked) setSelectedMaterials(materials.map(m => m.id));
@@ -1629,12 +1629,12 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             {materials.map((m) => (
                                                 <div
                                                     key={m.id}
-                                                    className={`p-3 rounded-xl border flex justify-between items-center transition-all ${selectedMaterials.includes(m.id) ? 'bg-blue-50/50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-500' : 'bg-white border-slate-100 dark:bg-slate-900 dark:border-slate-800'}`}
+                                                    className={`p-3 rounded-xl border flex justify-between items-center transition-all ${selectedMaterials.includes(m.id) ? 'bg-green-50/50 border-green-200 dark:bg-green-900/20 dark:border-green-500' : 'bg-white border-slate-100 dark:bg-slate-900 dark:border-slate-800'}`}
                                                 >
                                                     <div className="flex items-center gap-3 grow">
                                                         <input
                                                             type="checkbox"
-                                                            className="w-4 h-4 rounded-md border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                                            className="w-4 h-4 rounded-md border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-green-600 focus:ring-green-500 cursor-pointer"
                                                             checked={selectedMaterials.includes(m.id)}
                                                             onChange={(e) => {
                                                                 if (e.target.checked) setSelectedMaterials([...selectedMaterials, m.id]);
@@ -1642,7 +1642,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             }}
                                                         />
                                                         <div className="grow text-slate-900 dark:text-slate-100 text-sm">
-                                                            <span className="whitespace-nowrap"><b className="dark:text-blue-400 uppercase">{m.material_name}</b> | (R$ {m.unit_cost.toFixed(2)}) {m.quantity} {m.unit}</span>
+                                                            <span className="whitespace-nowrap"><b className="dark:text-green-400 uppercase">{m.material_name}</b> | (R$ {m.unit_cost.toFixed(2)}) {m.quantity} {m.unit}</span>
                                                         </div>
                                                     </div>
                                                     <div className="text-right flex items-center gap-4">
@@ -1656,7 +1656,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                 setEditQty(m.quantity);
                                                                 setEditUnit(m.unit);
                                                                 setEditPrice1(m.unit_cost);
-                                                            }} className="p-1.5 text-slate-300 hover:text-blue-500 transition-colors"><Pencil size={16} /></button>
+                                                            }} className="p-1.5 text-slate-300 hover:text-green-500 transition-colors"><Pencil size={16} /></button>
                                                             <button onClick={() => handleDeleteMaterial(m.id)} className="p-1.5 text-slate-300 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
                                                         </div>
                                                     </div>
@@ -1700,7 +1700,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                 setEditUnit(l.unit || 'un');
                                                                 setEditQty(l.quantity);
                                                                 setEditPrice1(l.unit_cost);
-                                                            }} className="p-1.5 text-slate-300 hover:text-blue-500 transition-colors"><Pencil size={16} /></button>
+                                                            }} className="p-1.5 text-slate-300 hover:text-green-500 transition-colors"><Pencil size={16} /></button>
                                                             <button onClick={() => handleDeleteLabor(l.id)} className="p-1.5 text-slate-300 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
                                                         </div>
                                                     </div>
@@ -1767,7 +1767,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 >
                                                     <div className="flex items-center gap-3 grow">
                                                         <div className="grow text-slate-900 dark:text-slate-100 text-sm">
-                                                            <span className="whitespace-nowrap"><b className="text-blue-500 uppercase">{t.name}</b> | {t.rate > 0 ? `Alíquota: ${t.rate}%` : 'Valor Fixo'}</span>
+                                                            <span className="whitespace-nowrap"><b className="text-green-500 uppercase">{t.name}</b> | {t.rate > 0 ? `Alíquota: ${t.rate}%` : 'Valor Fixo'}</span>
                                                         </div>
                                                     </div>
                                                     <div className="text-right flex items-center gap-4">

@@ -434,7 +434,7 @@ const AppContent: React.FC = () => {
 
               return (
                 <div key={item.id} className={isVisible ? 'block h-full' : 'hidden'}>
-                  {item.id === 'dashboard' && <Dashboard stats={stats} orders={orders} transactions={transactions} currentUser={currentUser} company={company} isLoading={isSyncing} onNavigate={(target) => {
+                  {item.id === 'dashboard' && <Dashboard stats={stats} orders={orders} transactions={transactions} currentUser={currentUser} company={company} isLoading={isSyncing && (orders.length === 0 && transactions.length === 0)} onNavigate={(target) => {
                     if (!openTabs.includes(target)) setOpenTabs([...openTabs, target]);
                     setActiveTab(target);
                   }} />}
