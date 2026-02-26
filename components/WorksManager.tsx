@@ -1059,7 +1059,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                     </div>
                 </div>
             ) : (
-                <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl min-h-[80vh] flex flex-col border dark:border-slate-800 overflow-hidden animate-in zoom-in-95">
+                <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl min-h-[80vh] flex flex-col border dark:border-slate-800 overflow-hidden">
                     {/* Fixed Editor Header & Tabs */}
                     <div className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
                         {/* Editor Header */}
@@ -1071,45 +1071,45 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     </button>
                                 )}
                                 <div>
-                                    <h2 className="text-xl font-bold text-blue-900 dark:text-blue-100 flex items-center gap-2 uppercase tracking-tighter">
-                                        <HardHat className="text-blue-600 dark:text-blue-400" size={24} />
-                                        {currentWork?.name}
+                                    <h2 className="text-xl font-bold text-blue-900 dark:text-blue-100 flex items-center gap-2">
+                                        <HardHat className="text-blue-600 dark:text-blue-400" />
+                                        {currentWork.name}
                                     </h2>
-                                    <p className="text-xs text-blue-600 dark:text-blue-400 uppercase tracking-widest font-bold font-sans">
-                                        {currentWork?.status || 'EM ANDAMENTO'} • GESTÃO DE EXECUÇÃO
-                                    </p>
+                                    <p className="text-xs text-blue-600 dark:text-blue-400 uppercase tracking-widest font-semibold">{currentWork.status} • GESTÃO DE EXECUÇÃO</p>
                                 </div>
                             </div>
                             <div className="flex gap-2">
-                                {/* MANUAL IMPORT BUTTON */}
-                                {currentWork?.plan_id && (services.length === 0 || materials.length === 0 || labor.length === 0) && (
+                                {currentWork?.plan_id && (
                                     <button
                                         onClick={() => importPlanItems(currentWork.plan_id!, currentWork.id)}
-                                        className="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-blue-700 dark:hover:bg-blue-400 shadow-md shadow-blue-950/20 transition-all animate-pulse"
+                                        className="px-4 py-2 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-blue-200 transition-all border border-blue-200 dark:border-blue-800"
                                     >
-                                        <ArrowRight size={16} /> Sincronizar
+                                        <ArrowRight className="rotate-180" size={16} /> Sincronizar
                                     </button>
                                 )}
-                                <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-blue-700 shadow-md shadow-blue-950/20">
+                                <button
+                                    onClick={handleSave}
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-blue-700 shadow-md shadow-blue-950/20"
+                                >
                                     <Save size={16} /> Salvar
                                 </button>
                             </div>
                         </div>
 
-                        <div className="flex px-6 bg-white dark:bg-slate-900 overflow-x-auto no-scrollbar border-b border-slate-100 dark:border-slate-800">
+                        <div className="flex px-6 bg-white dark:bg-slate-900 overflow-x-auto no-scrollbar">
                             {[
                                 { id: 'dados', label: 'Dados da Obra', icon: FileText },
                                 { id: 'servicos', label: 'Serviços', icon: Building2 },
-                                { id: 'recursos', label: 'Insumos', icon: Truck },
-                                { id: 'resumo', label: 'Resumo', icon: PieChart },
+                                { id: 'recursos', label: 'Gastos Detalhados', icon: Truck },
+                                { id: 'resumo', label: 'Resumo de Custo', icon: PieChart },
                             ].map(tab => (
                                 <button
                                     key={tab.id}
                                     type="button"
                                     onClick={() => setActiveTab(tab.id as any)}
-                                    className={`px-6 py-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap uppercase tracking-widest ${activeTab === tab.id ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
+                                    className={`px-6 py-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
                                 >
-                                    <tab.icon size={14} /> {tab.label}
+                                    <tab.icon size={16} /> {tab.label}
                                 </button>
                             ))}
                         </div>
@@ -1117,7 +1117,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         {/* Sub-Header forms for Add (Fixed) */}
                         {activeTab === 'servicos' && (
                             <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
-                                <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider"><Building2 size={16} className="text-blue-600" /> Adicionar Serviço Realizado</h3>
+                                <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">Adicionar Serviço</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                     <div className="md:col-span-4">
                                         <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Descrição</label>
@@ -1132,11 +1132,11 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         <input type="number" id="svc_qty" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100" placeholder="0" />
                                     </div>
                                     <div className="md:col-span-2">
-                                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Unit. Mat. (Real)</label>
+                                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Unit. Mat.</label>
                                         <input type="number" id="svc_mat" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100" placeholder="0.00" />
                                     </div>
                                     <div className="md:col-span-2">
-                                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Unit. M.O. (Real)</label>
+                                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Unit. M.O.</label>
                                         <input type="number" id="svc_lab" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100" placeholder="0.00" />
                                     </div>
                                     <div className="md:col-span-2">
@@ -1170,9 +1170,9 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 (document.getElementById('svc_mat') as HTMLInputElement).value = '';
                                                 (document.getElementById('svc_lab') as HTMLInputElement).value = '';
                                             }}
-                                            className="w-full bg-blue-600 dark:bg-emerald-500 text-white p-2 rounded hover:bg-emerald-700 dark:hover:bg-emerald-400 font-bold text-xs h-9 flex items-center justify-center gap-1 shadow-sm"
+                                            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-bold text-xs h-9 flex items-center justify-center gap-1 shadow-md shadow-blue-950/20"
                                         >
-                                            <Plus size={14} /> ADICIONAR SERVIÇO
+                                            <Plus size={14} /> ADICIONAR
                                         </button>
                                     </div>
                                 </div>
@@ -1466,100 +1466,99 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         )}
 
                         {activeTab === 'servicos' && (
-                            <div className="max-w-4xl mx-auto p-4 flex-1">
-                                <div className="space-y-2">
-                                    {services.map((svc, index) => (
-                                        <div
-                                            key={svc.id}
-                                            className={`bg-white dark:bg-slate-900/50 p-4 rounded-xl border transition-all flex justify-between items-center group hover:border-blue-300 dark:hover:border-blue-500 border-slate-200 dark:border-slate-800 shadow-sm`}
-                                        >
-                                            {editingId === svc.id ? (
-                                                <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center">
-                                                    <div className="md:col-span-4">
-                                                        <input
-                                                            type="text"
-                                                            value={editDesc}
-                                                            onChange={e => setEditDesc(e.target.value.toUpperCase())}
-                                                            className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm font-bold text-slate-900 dark:text-slate-100"
-                                                        />
-                                                    </div>
-                                                    <div className="md:col-span-1">
-                                                        <input
-                                                            type="text"
-                                                            value={editUnit}
-                                                            onChange={e => setEditUnit(e.target.value)}
-                                                            className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm text-slate-900 dark:text-slate-100"
-                                                        />
-                                                    </div>
-                                                    <div className="md:col-span-2">
-                                                        <input
-                                                            type="number"
-                                                            value={editQty}
-                                                            onChange={e => setEditQty(parseFloat(e.target.value) || 0)}
-                                                            className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm text-slate-900 dark:text-slate-100"
-                                                        />
-                                                    </div>
-                                                    <div className="md:col-span-2">
-                                                        <input
-                                                            type="number"
-                                                            value={editPrice1}
-                                                            onChange={e => setEditPrice1(parseFloat(e.target.value) || 0)}
-                                                            className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-300"
-                                                            placeholder="Mat"
-                                                        />
-                                                    </div>
-                                                    <div className="md:col-span-2">
-                                                        <input
-                                                            type="number"
-                                                            value={editPrice2}
-                                                            onChange={e => setEditPrice2(parseFloat(e.target.value) || 0)}
-                                                            className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-300"
-                                                            placeholder="MO"
-                                                        />
-                                                    </div>
-                                                    <div className="md:col-span-1 flex gap-1">
-                                                        <button
-                                                            onClick={() => {
-                                                                const updated = services.map(s => s.id === svc.id ? {
-                                                                    ...s,
-                                                                    description: editDesc,
-                                                                    unit: editUnit,
-                                                                    quantity: editQty,
-                                                                    unit_material_cost: editPrice1,
-                                                                    unit_labor_cost: editPrice2,
-                                                                    total_cost: editQty * (editPrice1 + editPrice2)
-                                                                } : s);
-                                                                setServices(updated);
-                                                                setEditingId(null);
-                                                            }}
-                                                            className="text-blue-600 p-1 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded"
-                                                        >
-                                                            <CheckCircle size={16} />
-                                                        </button>
-                                                        <button onClick={() => setEditingId(null)} className="text-red-600 p-1 hover:bg-red-50 dark:hover:bg-red-900/30 rounded">
-                                                            <X className="w-4 h-4" />
-                                                        </button>
+                            <div className="max-w-4xl mx-auto space-y-2 p-4">
+                                {services.map((svc) => (
+                                    <div
+                                        key={svc.id}
+                                        className="p-3 rounded-lg border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-between items-center transition-all group hover:border-blue-300 dark:hover:border-blue-500 shadow-sm"
+                                    >
+                                        {editingId === svc.id ? (
+                                            <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center">
+                                                <div className="md:col-span-4">
+                                                    <input
+                                                        type="text"
+                                                        value={editDesc}
+                                                        onChange={e => setEditDesc(e.target.value.toUpperCase())}
+                                                        className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm font-bold text-slate-900 dark:text-slate-100"
+                                                    />
+                                                </div>
+                                                <div className="md:col-span-1">
+                                                    <input
+                                                        type="text"
+                                                        value={editUnit}
+                                                        onChange={e => setEditUnit(e.target.value)}
+                                                        className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm text-slate-900 dark:text-slate-100"
+                                                    />
+                                                </div>
+                                                <div className="md:col-span-2">
+                                                    <input
+                                                        type="number"
+                                                        value={editQty}
+                                                        onChange={e => setEditQty(parseFloat(e.target.value) || 0)}
+                                                        className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm text-slate-900 dark:text-slate-100"
+                                                    />
+                                                </div>
+                                                <div className="md:col-span-2">
+                                                    <input
+                                                        type="number"
+                                                        value={editPrice1}
+                                                        onChange={e => setEditPrice1(parseFloat(e.target.value) || 0)}
+                                                        className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-300"
+                                                        placeholder="Mat"
+                                                    />
+                                                </div>
+                                                <div className="md:col-span-2">
+                                                    <input
+                                                        type="number"
+                                                        value={editPrice2}
+                                                        onChange={e => setEditPrice2(parseFloat(e.target.value) || 0)}
+                                                        className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-300"
+                                                        placeholder="MO"
+                                                    />
+                                                </div>
+                                                <div className="md:col-span-1 flex gap-1">
+                                                    <button
+                                                        onClick={() => {
+                                                            const updated = services.map(s => s.id === svc.id ? {
+                                                                ...s,
+                                                                description: editDesc,
+                                                                unit: editUnit,
+                                                                quantity: editQty,
+                                                                unit_material_cost: editPrice1,
+                                                                unit_labor_cost: editPrice2,
+                                                                total_cost: editQty * (editPrice1 + editPrice2)
+                                                            } : s);
+                                                            setServices(updated);
+                                                            setEditingId(null);
+                                                        }}
+                                                        className="text-blue-600 p-1 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded"
+                                                    >
+                                                        <CheckCircle size={16} />
+                                                    </button>
+                                                    <button onClick={() => setEditingId(null)} className="text-red-600 p-1 hover:bg-red-50 dark:hover:bg-red-900/30 rounded">
+                                                        <X size={18} />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div className="flex items-center gap-3 grow">
+                                                    <div className="grow text-slate-900 dark:text-slate-100 text-sm">
+                                                        <span className="whitespace-nowrap">
+                                                            <b className="dark:text-blue-400 uppercase">{svc.description}</b> | {svc.quantity} {svc.unit} x R$ {(svc.unit_material_cost + svc.unit_labor_cost).toFixed(2)}
+                                                        </span>
+                                                        <div className="flex items-center gap-2 text-[10px] text-slate-400 uppercase font-semibold mt-0.5 opacity-60">
+                                                            <span>Mat: R$ {svc.unit_material_cost.toFixed(2)}</span>
+                                                            <span className="w-1 h-1 bg-slate-200 dark:bg-slate-700 rounded-full"></span>
+                                                            <span>MO: R$ {svc.unit_labor_cost.toFixed(2)}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            ) : (
-                                                <>
-                                                    <div className="flex items-center gap-4 flex-1">
-                                                        <div className="h-10 w-10 bg-blue-50 dark:bg-blue-900/40 rounded-xl flex items-center justify-center shrink-0">
-                                                            <Building2 className="text-blue-600 dark:text-blue-400" size={18} />
-                                                        </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <p className="font-bold text-slate-800 dark:text-slate-100 text-sm truncate uppercase tracking-tight">{svc.description}</p>
-                                                            <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                                                <span className="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded font-semibold text-[10px]">{svc.quantity} {svc.unit}</span>
-                                                                <span className="w-1 h-1 bg-slate-300 dark:bg-slate-600 rounded-full"></span>
-                                                                <span>(Mat: R$ {svc.unit_material_cost.toFixed(2)} + MO: R$ {svc.unit_labor_cost.toFixed(2)})</span>
-                                                            </div>
-                                                        </div>
+                                                <div className="text-right flex items-center gap-4">
+                                                    <div className="text-right">
+                                                        <p className="font-bold text-sm text-slate-800 dark:text-slate-100">R$ {svc.total_cost.toFixed(2)}</p>
                                                     </div>
-                                                    <div className="text-right mr-4 shrink-0 whitespace-nowrap">
-                                                        <p className="text-sm font-bold text-slate-800 dark:text-slate-100">R$ {svc.total_cost.toFixed(2)}</p>
-                                                    </div>
-                                                    <div className="flex gap-1 shrink-0">
+                                                    <div className="flex gap-1 border-l pl-3 border-slate-100 dark:border-slate-800">
                                                         <button
                                                             onClick={() => {
                                                                 setEditingId(svc.id);
@@ -1569,586 +1568,323 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                 setEditPrice1(svc.unit_material_cost);
                                                                 setEditPrice2(svc.unit_labor_cost);
                                                             }}
-                                                            className="text-slate-300 dark:text-slate-600 hover:text-blue-500 p-2"
+                                                            className="p-1.5 text-slate-300 hover:text-blue-500 transition-colors"
                                                         >
                                                             <Pencil size={18} />
                                                         </button>
-                                                        <button onClick={() => handleDeleteService(svc.id)} className="text-slate-300 dark:text-slate-600 hover:text-red-500 p-2">
+                                                        <button onClick={() => handleDeleteService(svc.id)} className="p-1.5 text-slate-300 hover:text-red-500 transition-colors">
                                                             <Trash2 size={18} />
                                                         </button>
                                                     </div>
-                                                </>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                ))}
+                                {services.length === 0 && (
+                                    <div className="text-center py-10 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                                        <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Nenhum serviço lançado.</p>
+                                    </div>
+                                )}
                             </div>
                         )}
 
                         {activeTab === 'recursos' && (
                             <div className="max-w-4xl mx-auto space-y-6">
-                                {/* SUB-TABS para Recursos */}
-                                <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl w-fit mb-6">
-                                    {(['material', 'mo', 'indireto', 'impostos'] as const).map((tab) => (
-                                        <button
-                                            key={tab}
-                                            onClick={() => setResourceTab(tab)}
-                                            className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${resourceTab === tab
-                                                ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm'
-                                                : 'text-slate-500 hover:text-slate-700'
-                                                }`}
-                                        >
-                                            {tab === 'material' ? 'Materiais' : tab === 'mo' ? 'Mão de Obra' : tab === 'indireto' ? 'Indiretos' : 'Impostos & BDI'}
-                                        </button>
-                                    ))}
-                                </div>
-
-                                {/* MATERIAL TAB */}
+                                {/* MATERIAL TAB CONTENT */}
                                 {resourceTab === 'material' && (
-                                    <div className="animate-in fade-in slide-in-from-left-4 duration-500">
-                                        <div className="flex justify-between items-center mb-6">
-                                            <div>
-                                                <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 uppercase tracking-tighter text-lg"><Truck size={22} className="text-blue-600" /> Materiais & Insumos</h3>
-                                                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-8">Controle de gastos com materiais na obra</p>
-                                            </div>
-                                            <div className="flex gap-2">
-                                                {materials.length > 0 && (
-                                                    <button
-                                                        onClick={handlePreviewMaterials}
-                                                        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-slate-50 transition-all shadow-sm"
-                                                    >
-                                                        <Eye size={18} className="text-blue-600" /> Visualizar Lista
-                                                    </button>
-                                                )}
-                                            </div>
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-tighter text-lg">Insumos e Materiais</h3>
+                                            {materials.length > 0 && (
+                                                <button
+                                                    onClick={handlePreviewMaterials}
+                                                    className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-slate-50 transition-all shadow-sm"
+                                                >
+                                                    <Eye size={18} className="text-blue-600" /> Visualizar Lista
+                                                </button>
+                                            )}
                                         </div>
 
-                                        {materials.length > 0 ? (
-                                            <div className="bg-white dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
-                                                <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-50 dark:border-slate-800">
-                                                    <div className="flex items-center gap-3">
+                                        {materials.length > 0 && (
+                                            <div className="flex items-center justify-between bg-white dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800 mb-4 shadow-sm">
+                                                <div className="flex items-center gap-3">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="w-4 h-4 rounded-md border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                                        checked={selectedMaterials.length === materials.length && materials.length > 0}
+                                                        onChange={(e) => {
+                                                            if (e.target.checked) setSelectedMaterials(materials.map(m => m.id));
+                                                            else setSelectedMaterials([]);
+                                                        }}
+                                                    />
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                                        {selectedMaterials.length} SELECIONADO(S)
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <div className="space-y-2">
+                                            {materials.map((m) => (
+                                                <div
+                                                    key={m.id}
+                                                    className={`p-3 rounded-xl border flex justify-between items-center transition-all ${selectedMaterials.includes(m.id) ? 'bg-blue-50/50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-500' : 'bg-white border-slate-100 dark:bg-slate-900 dark:border-slate-800'}`}
+                                                >
+                                                    <div className="flex items-center gap-3 grow">
                                                         <input
                                                             type="checkbox"
                                                             className="w-4 h-4 rounded-md border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                                                            checked={selectedMaterials.length === materials.length && materials.length > 0}
+                                                            checked={selectedMaterials.includes(m.id)}
                                                             onChange={(e) => {
-                                                                if (e.target.checked) setSelectedMaterials(materials.map(m => m.id));
-                                                                else setSelectedMaterials([]);
+                                                                if (e.target.checked) setSelectedMaterials([...selectedMaterials, m.id]);
+                                                                else setSelectedMaterials(selectedMaterials.filter(id => id !== m.id));
                                                             }}
                                                         />
-                                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                                            {selectedMaterials.length} SELECIONADO(S)
-                                                        </span>
+                                                        <div className="grow text-slate-900 dark:text-slate-100 text-sm">
+                                                            <span className="whitespace-nowrap"><b className="dark:text-blue-400 uppercase">{m.material_name}</b> | (R$ {m.unit_cost.toFixed(2)}) {m.quantity} {m.unit}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-right flex items-center gap-4">
+                                                        <div className="text-right">
+                                                            <p className="font-bold text-sm text-slate-800 dark:text-slate-100">R$ {m.total_cost.toFixed(2)}</p>
+                                                        </div>
+                                                        <div className="flex gap-1 border-l pl-3 border-slate-100 dark:border-slate-800">
+                                                            <button onClick={() => {
+                                                                setEditingId(m.id);
+                                                                setEditDesc(m.material_name);
+                                                                setEditQty(m.quantity);
+                                                                setEditUnit(m.unit);
+                                                                setEditPrice1(m.unit_cost);
+                                                            }} className="p-1.5 text-slate-300 hover:text-blue-500 transition-colors"><Pencil size={16} /></button>
+                                                            <button onClick={() => handleDeleteMaterial(m.id)} className="p-1.5 text-slate-300 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
+                                                        </div>
                                                     </div>
                                                 </div>
-
-                                                <div className="space-y-2">
-                                                    {materials.map((m) => (
-                                                        <div
-                                                            key={m.id}
-                                                            className={`p-3 rounded-xl border flex justify-between items-center transition-all ${selectedMaterials.includes(m.id) ? 'bg-blue-50/50 border-blue-200' : 'bg-white border-slate-50 dark:bg-slate-900'}`}
-                                                        >
-                                                            <div className="flex items-center gap-3 grow">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    className="w-4 h-4 rounded-md border-slate-200 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                                                                    checked={selectedMaterials.includes(m.id)}
-                                                                    onChange={(e) => {
-                                                                        if (e.target.checked) setSelectedMaterials([...selectedMaterials, m.id]);
-                                                                        else setSelectedMaterials(selectedMaterials.filter(id => id !== m.id));
-                                                                    }}
-                                                                />
-                                                                <div>
-                                                                    <p className="font-bold text-sm text-slate-800 dark:text-slate-100 uppercase leading-none mb-1">{m.material_name}</p>
-                                                                    <div className="flex items-center gap-2 text-[10px] text-slate-400 uppercase font-semibold">
-                                                                        <span>{m.quantity} {m.unit}</span>
-                                                                        <span className="w-1 h-1 bg-slate-200 rounded-full"></span>
-                                                                        <span>UN: R$ {m.unit_cost.toFixed(2)}</span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div className="text-right flex items-center gap-4">
-                                                                <div className="text-right">
-                                                                    <p className="font-bold text-sm text-slate-800 dark:text-slate-100">R$ {m.total_cost.toFixed(2)}</p>
-                                                                </div>
-                                                                <div className="flex gap-1 border-l pl-3 border-slate-100 dark:border-slate-800">
-                                                                    <button onClick={() => setEditingId(m.id)} className="p-1.5 text-slate-300 hover:text-blue-500"><Pencil size={16} /></button>
-                                                                    <button onClick={() => handleDeleteMaterial(m.id)} className="p-1.5 text-slate-300 hover:text-red-500"><Trash2 size={16} /></button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    ))}
+                                            ))}
+                                            {materials.length === 0 && (
+                                                <div className="text-center py-10 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                                                    <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Nenhum material lançado ainda.</p>
                                                 </div>
-                                            </div>
-                                        ) : (
-                                            <div className="text-center py-20 bg-slate-50 dark:bg-slate-900/50 rounded-[2rem] border-2 border-dashed border-slate-200 dark:border-slate-800">
-                                                <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                                                    <Truck size={32} className="text-slate-300 dark:text-slate-600" />
-                                                </div>
-                                                <p className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-[10px]">Nenhum material lançado</p>
-                                                <p className="text-slate-300 dark:text-slate-600 text-[10px] mt-1">Utilize o formulário acima para adicionar materiais à obra.</p>
-                                            </div>
-                                        )}
+                                            )}
+                                        </div>
                                     </div>
                                 )}
 
-                                {/* LABOR TAB */}
+                                {/* LABOR TAB CONTENT */}
                                 {resourceTab === 'mo' && (
-                                    <div className="animate-in fade-in slide-in-from-left-4 duration-500">
-                                        <div className="flex justify-between items-center mb-6">
-                                            <div>
-                                                <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 uppercase tracking-tighter text-lg"><HardHat size={22} className="text-blue-600" /> Mão de Obra</h3>
-                                                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-8">Gestão de equipes e profissionais</p>
-                                            </div>
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-tighter text-lg">Mão de Obra</h3>
                                         </div>
 
-                                        <div className="bg-white dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
-                                            <div className="space-y-2">
-                                                {labor.length > 0 ? labor.map((l) => (
-                                                    <div
-                                                        key={l.id}
-                                                        className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-between items-center group transition-all"
-                                                    >
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="h-8 w-8 bg-blue-50 dark:bg-blue-900/30 rounded-lg flex items-center justify-center shrink-0">
-                                                                <Users className="text-blue-600 dark:text-blue-400" size={16} />
-                                                            </div>
-                                                            <div>
-                                                                <p className="font-bold text-sm text-slate-800 dark:text-slate-100 uppercase leading-none mb-1">{l.role}</p>
-                                                                <div className="flex items-center gap-2 text-[10px] text-slate-400 uppercase font-semibold">
-                                                                    <span>{l.quantity} {l.unit || 'un'}</span>
-                                                                    <span className="w-1 h-1 bg-slate-200 dark:bg-slate-700 rounded-full"></span>
-                                                                    <span>{l.cost_type}</span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div className="text-right flex items-center gap-4">
-                                                            <div className="text-right">
-                                                                <p className="font-bold text-sm text-slate-800 dark:text-slate-100">R$ {l.total_cost.toFixed(2)}</p>
-                                                            </div>
-                                                            <div className="flex gap-1 border-l pl-3 border-slate-100 dark:border-slate-800">
-                                                                <button onClick={() => setEditingId(l.id)} className="p-1.5 text-slate-300 hover:text-blue-500"><Pencil size={16} /></button>
-                                                                <button onClick={() => handleDeleteLabor(l.id)} className="p-1.5 text-slate-300 hover:text-red-500"><Trash2 size={16} /></button>
-                                                            </div>
+                                        <div className="space-y-2">
+                                            {labor.map((l) => (
+                                                <div
+                                                    key={l.id}
+                                                    className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-between items-center transition-all"
+                                                >
+                                                    <div className="flex items-center gap-3 grow">
+                                                        <div className="grow text-slate-900 dark:text-slate-100 text-sm">
+                                                            <span className="whitespace-nowrap"><b className="dark:text-amber-400 uppercase">{l.role}</b> | ({l.cost_type}) {l.quantity} {l.unit || 'un'}</span>
                                                         </div>
                                                     </div>
-                                                )) : (
-                                                    <div className="text-center py-10">
-                                                        <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Nenhuma mão de obra lançada</p>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* INDIRECTS TAB */}
-                                {resourceTab === 'indireto' && (
-                                    <div className="animate-in fade-in slide-in-from-left-4 duration-500">
-                                        <div className="flex justify-between items-center mb-6">
-                                            <div>
-                                                <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 uppercase tracking-tighter text-lg"><Archive size={22} className="text-blue-600" /> Custos Indiretos</h3>
-                                                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-8">Gastos gerais e administrativos</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="bg-white dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
-                                            <div className="space-y-2">
-                                                {indirects.length > 0 ? indirects.map((i) => (
-                                                    <div
-                                                        key={i.id}
-                                                        className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-between items-center group transition-all"
-                                                    >
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="h-8 w-8 bg-blue-50 dark:bg-blue-900/30 rounded-lg flex items-center justify-center shrink-0">
-                                                                <Archive className="text-blue-600 dark:text-blue-400" size={16} />
-                                                            </div>
-                                                            <div>
-                                                                <p className="font-bold text-sm text-slate-800 dark:text-slate-100 uppercase leading-none mb-1">{i.description}</p>
-                                                                <div className="flex items-center gap-2 text-[10px] text-slate-400 uppercase font-semibold">
-                                                                    <span>{i.category}</span>
-                                                                </div>
-                                                            </div>
+                                                    <div className="text-right flex items-center gap-4">
+                                                        <div className="text-right">
+                                                            <p className="font-bold text-sm text-slate-800 dark:text-slate-100">R$ {l.total_cost.toFixed(2)}</p>
                                                         </div>
-                                                        <div className="text-right flex items-center gap-4">
-                                                            <div className="text-right">
-                                                                <p className="font-bold text-sm text-slate-800 dark:text-slate-100">R$ {i.value.toFixed(2)}</p>
-                                                            </div>
-                                                            <div className="flex gap-1 border-l pl-3 border-slate-100 dark:border-slate-800">
-                                                                <button onClick={() => setEditingId(i.id)} className="p-1.5 text-slate-300 hover:text-blue-500"><Pencil size={16} /></button>
-                                                                <button onClick={() => handleDeleteIndirect(i.id)} className="p-1.5 text-slate-300 hover:text-red-500"><Trash2 size={16} /></button>
-                                                            </div>
+                                                        <div className="flex gap-1 border-l pl-3 border-slate-100 dark:border-slate-800">
+                                                            <button onClick={() => {
+                                                                setEditingId(l.id);
+                                                                setEditDesc(l.role);
+                                                                setEditUnit(l.unit || 'un');
+                                                                setEditQty(l.quantity);
+                                                                setEditPrice1(l.unit_cost);
+                                                            }} className="p-1.5 text-slate-300 hover:text-blue-500 transition-colors"><Pencil size={16} /></button>
+                                                            <button onClick={() => handleDeleteLabor(l.id)} className="p-1.5 text-slate-300 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
                                                         </div>
-                                                    </div>
-                                                )) : (
-                                                    <div className="text-center py-10">
-                                                        <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Nenhum custo indireto lançado</p>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* TAXES TAB */}
-                                {resourceTab === 'impostos' && (
-                                    <div className="animate-in fade-in slide-in-from-left-4 duration-500 space-y-6">
-                                        <div className="flex justify-between items-center">
-                                            <div>
-                                                <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 uppercase tracking-tighter text-lg"><Percent size={22} className="text-blue-600" /> Impostos & BDI</h3>
-                                                <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-8">Configuração tributária e margens</p>
-                                            </div>
-                                            <button
-                                                onClick={handleLoadDefaultTaxes}
-                                                className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all border border-blue-100 dark:border-blue-800"
-                                            >
-                                                Carregar Padrão
-                                            </button>
-                                        </div>
-
-                                        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                                            <div className="md:col-span-8 space-y-3">
-                                                {taxes.map(t => (
-                                                    <div key={t.id} className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-between items-center group transition-all">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="h-8 w-8 bg-blue-50 dark:bg-blue-900/30 rounded-lg flex items-center justify-center shrink-0">
-                                                                <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400">{t.rate > 0 ? `${t.rate}%` : 'R$'}</span>
-                                                            </div>
-                                                            <div>
-                                                                <p className="font-bold text-sm text-slate-800 dark:text-slate-100 uppercase leading-none mb-1">{t.name}</p>
-                                                                <p className="text-[10px] text-slate-400 font-semibold uppercase">{t.rate > 0 ? 'Alíquota' : 'Valor Fixo'}</p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="text-right flex items-center gap-4">
-                                                            <div className="text-right">
-                                                                <p className="font-bold text-sm text-slate-800 dark:text-slate-100">
-                                                                    R$ {(t.rate > 0 ? (t.name === 'BDI' ? totalDirect : totalGeneral) * (t.rate / 100) : t.value).toFixed(2)}
-                                                                </p>
-                                                            </div>
-                                                            <div className="flex gap-1 border-l pl-3 border-slate-100 dark:border-slate-800">
-                                                                <button onClick={() => handleDeleteTax(t.id)} className="p-1.5 text-slate-300 hover:text-red-500"><Trash2 size={16} /></button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-
-                                            <div className="md:col-span-4 space-y-4">
-                                                <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
-                                                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Adicionar Taxa</h4>
-                                                    <div className="space-y-3">
-                                                        <input type="text" id="tax_name" placeholder="NOME" className="w-full text-xs font-bold p-2 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30" />
-                                                        <input type="number" id="tax_rate" placeholder="ALÍQUOTA %" className="w-full text-xs font-bold p-2 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/30" />
-                                                        <button
-                                                            onClick={() => {
-                                                                const nameInput = document.getElementById('tax_name') as HTMLInputElement;
-                                                                const rateInput = document.getElementById('tax_rate') as HTMLInputElement;
-                                                                const name = nameInput.value;
-                                                                const rate = parseFloat(rateInput.value) || 0;
-                                                                if (!name) return notify("Nome obrigatório", "error");
-                                                                handleAddTax(name.toUpperCase(), rate, 0);
-                                                                nameInput.value = '';
-                                                                rateInput.value = '';
-                                                            }}
-                                                            className="w-full bg-slate-900 dark:bg-blue-600 text-white p-2 rounded-lg font-bold text-[10px] uppercase tracking-widest hover:bg-slate-800 dark:hover:bg-blue-500"
-                                                        >
-                                                            ADICIONAR
-                                                        </button>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            ))}
+                                            {labor.length === 0 && (
+                                                <div className="text-center py-10 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                                                    <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Nenhuma mão de obra lançada.</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* INDIRECT TAB CONTENT */}
+                                {resourceTab === 'indireto' && (
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-tighter text-lg">Custos Indiretos</h3>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            {indirects.map((i) => (
+                                                <div
+                                                    key={i.id}
+                                                    className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-between items-center transition-all"
+                                                >
+                                                    <div className="flex items-center gap-3 grow">
+                                                        <div className="grow text-slate-900 dark:text-slate-100 text-sm">
+                                                            <span className="whitespace-nowrap"><b className="text-slate-400 dark:text-slate-500 uppercase">[{i.category}]</b> <b className="uppercase">{i.description}</b></span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-right flex items-center gap-4">
+                                                        <div className="text-right">
+                                                            <p className="font-bold text-sm text-slate-800 dark:text-slate-100">R$ {i.value.toFixed(2)}</p>
+                                                        </div>
+                                                        <div className="flex gap-1 border-l pl-3 border-slate-100 dark:border-slate-800">
+                                                            <button onClick={() => handleDeleteIndirect(i.id)} className="p-1.5 text-slate-300 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            {indirects.length === 0 && (
+                                                <div className="text-center py-10 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                                                    <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Nenhum custo indireto lançado.</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* TAXES TAB CONTENT */}
+                                {resourceTab === 'impostos' && (
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-tighter text-lg">Impostos & BDI</h3>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            {taxes.map((t) => (
+                                                <div
+                                                    key={t.id}
+                                                    className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-between items-center transition-all"
+                                                >
+                                                    <div className="flex items-center gap-3 grow">
+                                                        <div className="grow text-slate-900 dark:text-slate-100 text-sm">
+                                                            <span className="whitespace-nowrap"><b className="text-blue-500 uppercase">{t.name}</b> | {t.rate > 0 ? `Alíquota: ${t.rate}%` : 'Valor Fixo'}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-right flex items-center gap-4">
+                                                        <div className="text-right">
+                                                            <p className="font-bold text-sm text-slate-800 dark:text-slate-100">
+                                                                R$ {(t.rate > 0 ? (t.name === 'BDI' ? totalDirect : totalGeneral) * (t.rate / 100) : t.value).toFixed(2)}
+                                                            </p>
+                                                        </div>
+                                                        <div className="flex gap-1 border-l pl-3 border-slate-100 dark:border-slate-800">
+                                                            <button onClick={() => handleDeleteTax(t.id)} className="p-1.5 text-slate-300 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            {taxes.length === 0 && (
+                                                <div className="text-center py-10 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                                                    <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Nenhum imposto lançado.</p>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 )}
                             </div>
                         )}
 
-                        {/* INDIRECTS TAB */}
-                        {
-                            resourceTab === 'indireto' && (
-                                <div className="animate-in fade-in slide-in-from-left-4 duration-500">
-                                    <div className="flex justify-between items-center mb-6">
-                                        <div>
-                                            <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 uppercase tracking-tighter text-lg"><Archive size={22} className="text-slate-500" /> Custos Indiretos</h3>
-                                            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-8">Despesas administrativas e logísticas</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="bg-white dark:bg-slate-900 p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
-                                        <div className="space-y-3">
-                                            {indirects.length > 0 ? indirects.map((i, index) => (
-                                                <div
-                                                    key={i.id}
-                                                    draggable={editingId !== i.id}
-                                                    onDragStart={() => setDraggedIndIndex(index)}
-                                                    onDragOver={(e) => (window as any).handleDragOver(e, index, draggedIndIndex, indirects, setIndirects, setDraggedIndIndex)}
-                                                    onDragEnd={() => setDraggedIndIndex(null)}
-                                                    className={`p-4 rounded-2xl border flex justify-between items-center transition-all ${draggedIndIndex === index ? 'opacity-50 bg-blue-50 dark:bg-blue-900/50 border-blue-200 dark:border-blue-800 shadow-inner' : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 shadow-sm hover:border-emerald-200 dark:hover:border-emerald-800/50'}`}
-                                                >
-                                                    {editingId === i.id ? (
-                                                        <div className="flex-1 grid grid-cols-12 gap-4 items-center animate-in zoom-in-95">
-                                                            <div className="col-span-3">
-                                                                <select className="w-full text-xs font-bold p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500/20 outline-none" defaultValue={i.category} id={`edit_icat_${i.id}`}>
-                                                                    <option>Transporte</option>
-                                                                    <option>Alimentação</option>
-                                                                    <option>EPI</option>
-                                                                    <option>Equipamentos</option>
-                                                                    <option>Taxas</option>
-                                                                    <option>Outros</option>
-                                                                </select>
-                                                            </div>
-                                                            <div className="col-span-6">
-                                                                <input className="w-full text-xs font-bold p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500/20 outline-none" defaultValue={i.description} id={`edit_idesc_${i.id}`} />
-                                                            </div>
-                                                            <div className="col-span-2">
-                                                                <input type="number" className="w-full text-xs font-bold p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-700 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500/20 outline-none" defaultValue={i.value} id={`edit_ival_${i.id}`} />
-                                                            </div>
-                                                            <div className="col-span-1 flex gap-2 justify-end">
-                                                                <button onClick={() => {
-                                                                    const newCat = (document.getElementById(`edit_icat_${i.id}`) as HTMLInputElement).value;
-                                                                    const newDesc = (document.getElementById(`edit_idesc_${i.id}`) as HTMLInputElement).value;
-                                                                    const newVal = parseFloat((document.getElementById(`edit_ival_${i.id}`) as HTMLInputElement).value) || 0;
-                                                                    const updated = indirects.map(item => item.id === i.id ? { ...item, category: newCat, description: newDesc.toUpperCase(), value: newVal } : item);
-                                                                    setIndirects(updated);
-                                                                    setEditingId(null);
-                                                                }} className="bg-emerald-100 dark:bg-emerald-900/30 text-blue-600 dark:text-emerald-400 p-2 rounded-lg hover:bg-emerald-200 dark:hover:bg-emerald-900/50"><Check size={18} /></button>
-                                                                <button onClick={() => setEditingId(null)} className="bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 p-2 rounded-lg hover:bg-rose-200 dark:hover:bg-rose-900/50"><X size={18} /></button>
-                                                            </div>
-                                                        </div>
-                                                    ) : (
-                                                        <>
-                                                            <div className="flex items-center gap-4 grow">
-                                                                <div className="cursor-grab active:cursor-grabbing text-slate-200 dark:text-slate-700 hover:text-slate-400 dark:hover:text-slate-500 shrink-0 transition-colors">
-                                                                    <GripVertical size={20} />
-                                                                </div>
-                                                                <div className="space-y-0.5">
-                                                                    <p className="font-bold text-xs text-slate-800 dark:text-slate-100 uppercase tracking-tight">{i.description}</p>
-                                                                    <div className="flex items-center gap-2 text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">
-                                                                        <span className="bg-slate-50 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-100 dark:border-slate-700">{i.category}</span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex items-center gap-6 shrink-0">
-                                                                <div className="text-right">
-                                                                    <p className="text-[9px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-widest mb-0.5 text-right">Valor</p>
-                                                                    <p className="font-bold text-sm text-slate-800 dark:text-slate-100 whitespace-nowrap tracking-tight">R$ {i.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                                                                </div>
-                                                                <div className="flex flex-col gap-0.5">
-                                                                    <button onClick={() => (window as any).moveItemWork(indirects, setIndirects, index, 'up')} disabled={index === 0} className="text-slate-300 dark:text-slate-700 hover:text-emerald-500 dark:hover:text-emerald-400 disabled:opacity-0 transition-all p-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded"><ChevronUp size={14} /></button>
-                                                                    <button onClick={() => (window as any).moveItemWork(indirects, setIndirects, index, 'down')} disabled={index === indirects.length - 1} className="text-slate-300 dark:text-slate-700 hover:text-emerald-500 dark:hover:text-emerald-400 disabled:opacity-0 transition-all p-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded"><ChevronDown size={14} /></button>
-                                                                </div>
-                                                                <div className="flex items-center gap-2 border-l border-slate-50 dark:border-slate-800 pl-4">
-                                                                    <button onClick={() => setEditingId(i.id)} className="p-2 text-blue-400 hover:text-blue-600 dark:text-blue-500/50 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-all"><Pencil size={18} /></button>
-                                                                    <button onClick={() => handleDeleteIndirect(i.id)} className="p-2 text-slate-300 hover:text-red-500 dark:text-slate-700 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all"><Trash2 size={18} /></button>
-                                                                </div>
-                                                            </div>
-                                                        </>
-                                                    )}
-                                                </div>
-                                            )) : (
-                                                <div className="text-center py-12 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800">
-                                                    <Archive size={32} className="text-slate-300 dark:text-slate-600 mx-auto mb-2" />
-                                                    <p className="text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest text-[10px]">Nenhum custo indireto lançado</p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            )
-                        }
-
-                        {/* TAXES TAB */}
-                        {
-                            resourceTab === 'impostos' && (
-                                <div className="animate-in fade-in slide-in-from-left-4 duration-500 space-y-8">
-                                    <div className="flex justify-between items-center">
-                                        <div>
-                                            <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 uppercase tracking-tighter text-lg"><Percent size={22} className="text-blue-500" /> Impostos & BDI</h3>
-                                            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-8">Cálculos tributários e margem de lucro</p>
-                                        </div>
-                                        <button
-                                            onClick={handleLoadDefaultTaxes}
-                                            className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all border border-blue-100 dark:border-blue-900/50"
-                                        >
-                                            Carregar Padrão (ISS/PIS/COFINS)
-                                        </button>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                        <div className="md:col-span-2 space-y-6">
-                                            <div className="bg-white dark:bg-slate-900 p-8 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm">
-                                                <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-6">Detalhamento de Taxas</h4>
-                                                <div className="space-y-3">
-                                                    {taxes.filter(t => (t.rate > 0 || t.value > 0)).map(t => (
-                                                        <div key={t.id} className="p-4 rounded-2xl bg-slate-50/50 dark:bg-slate-800/30 border border-slate-100 dark:border-slate-800 flex justify-between items-center group hover:border-blue-200 dark:hover:border-blue-800/50 transition-all">
-                                                            <div className="flex items-center gap-4">
-                                                                <div className="w-10 h-10 bg-white dark:bg-slate-900 rounded-xl flex items-center justify-center border border-slate-100 dark:border-slate-800 text-blue-500 font-bold text-xs shadow-sm">
-                                                                    {t.rate > 0 ? `${t.rate}%` : 'R$'}
-                                                                </div>
-                                                                <div>
-                                                                    <p className="font-bold text-xs text-slate-800 dark:text-slate-100 uppercase">{t.name}</p>
-                                                                    <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                                                                        {t.rate > 0 ? 'Alíquota sobre faturamento' : 'Custo fixo lançado'}
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex items-center gap-6">
-                                                                <div className="text-right">
-                                                                    <p className="text-[9px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-widest mb-0.5">Equivalente</p>
-                                                                    <p className="font-bold text-sm text-blue-600 dark:text-blue-400 whitespace-nowrap tracking-tight">
-                                                                        R$ {(t.rate > 0 ? (t.name === 'BDI' ? totalDirect : totalGeneral) * (t.rate / 100) : t.value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                                                                    </p>
-                                                                </div>
-                                                                <button onClick={() => handleDeleteTax(t.id)} className="p-2 text-slate-300 hover:text-red-500 dark:text-slate-700 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all"><Trash2 size={16} /></button>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                    {taxes.filter(t => (t.rate > 0 || t.value > 0)).length === 0 && (
-                                                        <div className="text-center py-12 border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-2xl">
-                                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Nenhuma taxa ativa</p>
-                                                        </div>
-                                                    )}
-                                                </div>
+                        {activeTab === 'resumo' && (
+                            <div className="max-w-4xl mx-auto space-y-8 pb-12">
+                                {/* Summary Cards Grid */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                                    {/* Materiais */}
+                                    <div className="bg-emerald-50 dark:bg-emerald-900/20 p-6 rounded-xl border border-emerald-200 dark:border-emerald-800 shadow-sm transition-all hover:shadow-md">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Total Materiais</span>
+                                            <div className="bg-emerald-100 dark:bg-emerald-900/40 p-1.5 rounded-lg">
+                                                <Truck size={16} className="text-emerald-600 dark:text-emerald-400" />
                                             </div>
                                         </div>
-
-                                        <div className="space-y-6">
-                                            <div className="bg-blue-50/50 dark:bg-blue-900/10 p-6 rounded-[2rem] border border-blue-100/50 dark:border-blue-900/20">
-                                                <div className="flex items-center gap-3 mb-4 text-blue-600 dark:text-blue-400">
-                                                    <AlertCircle size={20} />
-                                                    <h4 className="font-bold text-[10px] uppercase tracking-widest">Cálculo por Dentro</h4>
-                                                </div>
-                                                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
-                                                    O sistema utiliza o método <b>Gross Up</b>. Isso garante que os impostos incidam sobre o valor final da nota, mantendo sua margem líquida intacta.
-                                                </p>
-                                            </div>
-
-                                            <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm">
-                                                <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4">Adicionar Taxa</h4>
-                                                <div className="space-y-4">
-                                                    <div>
-                                                        <label className="block text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Descrição</label>
-                                                        <input type="text" id="tax_name" className="w-full text-xs font-bold p-3 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl text-slate-700 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="EX: ISS" />
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Alíquota (%)</label>
-                                                        <input type="number" id="tax_rate" className="w-full text-xs font-bold p-3 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl text-slate-700 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="0.00" />
-                                                    </div>
-                                                    <button
-                                                        onClick={() => {
-                                                            const name = (document.getElementById('tax_name') as HTMLInputElement).value;
-                                                            const rate = parseFloat((document.getElementById('tax_rate') as HTMLInputElement).value) || 0;
-                                                            if (!name) return notify("Nome obrigatório", "error");
-                                                            handleAddTax(name.toUpperCase(), rate, 0);
-                                                            (document.getElementById('tax_name') as HTMLInputElement).value = '';
-                                                            (document.getElementById('tax_rate') as HTMLInputElement).value = '';
-                                                        }}
-                                                        className="w-full bg-slate-900 dark:bg-blue-600 text-white p-3 rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-slate-800 dark:hover:bg-blue-500 transition-all shadow-lg active:scale-95"
-                                                    >
-                                                        Adicionar
-                                                    </button>
-                                                </div>
+                                        <span className="text-2xl font-black text-emerald-900 dark:text-emerald-100 whitespace-nowrap">R$ {totalMaterial.toFixed(2)}</span>
+                                        <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-1 font-medium">Insumos + Materiais de Serviços</p>
+                                    </div>
+                                    {/* Mão de Obra */}
+                                    <div className="bg-amber-50 dark:bg-amber-900/20 p-6 rounded-xl border border-amber-200 dark:border-amber-800 shadow-sm transition-all hover:shadow-md">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Total Mão de Obra</span>
+                                            <div className="bg-amber-100 dark:bg-amber-900/40 p-1.5 rounded-lg">
+                                                <HardHat size={16} className="text-amber-600 dark:text-amber-400" />
                                             </div>
                                         </div>
+                                        <span className="text-2xl font-black text-amber-900 dark:text-amber-100 whitespace-nowrap">R$ {totalLabor.toFixed(2)}</span>
+                                        <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-1 font-medium">Equipe Própria + Terceirizada</p>
                                     </div>
-                                </div>
-                            )
-                        }
-                    </div >
-                    {activeTab === 'resumo' && (
-                        <div className="max-w-4xl mx-auto space-y-8 pb-12">
-                            {/* Summary Cards Grid */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-                                {/* Materiais */}
-                                <div className="bg-emerald-50 dark:bg-emerald-900/20 p-6 rounded-xl border border-emerald-200 dark:border-emerald-800 shadow-sm transition-all hover:shadow-md">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Total Materiais</span>
-                                        <div className="bg-emerald-100 dark:bg-emerald-900/40 p-1.5 rounded-lg">
-                                            <Truck size={16} className="text-emerald-600 dark:text-emerald-400" />
+                                    {/* Indiretos */}
+                                    <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:shadow-md">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Indiretos</span>
+                                            <div className="bg-slate-200 dark:bg-slate-700 p-1.5 rounded-lg">
+                                                <Archive size={16} className="text-slate-600 dark:text-slate-300" />
+                                            </div>
                                         </div>
+                                        <span className="text-2xl font-black text-slate-800 dark:text-slate-100 whitespace-nowrap">R$ {totalIndirect.toFixed(2)}</span>
+                                        <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-medium">Custos Administrativos</p>
                                     </div>
-                                    <span className="text-2xl font-bold text-emerald-900 dark:text-emerald-100 whitespace-nowrap">R$ {totalMaterial.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                    <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-1 font-medium">Insumos + Materiais de Serviços</p>
-                                </div>
-
-                                {/* Mão de Obra */}
-                                <div className="bg-amber-50 dark:bg-amber-900/20 p-6 rounded-xl border border-amber-200 dark:border-amber-800 shadow-sm transition-all hover:shadow-md">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Total Mão de Obra</span>
-                                        <div className="bg-amber-100 dark:bg-amber-900/40 p-1.5 rounded-lg">
-                                            <HardHat size={16} className="text-amber-600 dark:text-amber-400" />
+                                    {/* Impostos */}
+                                    <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-xl border border-blue-200 dark:border-blue-800 shadow-sm transition-all hover:shadow-md">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Total Impostos</span>
+                                            <div className="bg-blue-100 dark:bg-blue-900/40 p-1.5 rounded-lg">
+                                                <Percent size={16} className="text-blue-600 dark:text-blue-400" />
+                                            </div>
                                         </div>
+                                        <span className="text-2xl font-black text-blue-900 dark:text-blue-100 whitespace-nowrap">R$ {totalTaxes.toFixed(2)}</span>
+                                        <p className="text-[10px] text-blue-600 dark:text-blue-400 mt-1 font-medium">Baseado no BDI e Taxas</p>
                                     </div>
-                                    <span className="text-2xl font-bold text-amber-900 dark:text-amber-100 whitespace-nowrap">R$ {totalLabor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                    <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-1 font-medium">Equipe Própria + Terceirizada</p>
                                 </div>
 
-                                {/* Indiretos */}
-                                <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:shadow-md">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Indiretos</span>
-                                        <div className="bg-slate-200 dark:bg-slate-700 p-1.5 rounded-lg">
-                                            <Archive size={16} className="text-slate-600 dark:text-slate-300" />
+                                {/* Action Buttons */}
+                                <div className="flex justify-end gap-2">
+                                    <button
+                                        onClick={handlePrintFull}
+                                        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 px-6 py-4 rounded-2xl text-base font-bold flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-md group border-b-4 border-b-blue-600 active:border-b-0 active:translate-y-1"
+                                    >
+                                        <div className="bg-blue-100 dark:bg-blue-900/40 p-2 rounded-xl group-hover:scale-110 transition-transform">
+                                            <Eye size={24} className="text-blue-600 dark:text-blue-400" />
                                         </div>
-                                    </div>
-                                    <span className="text-2xl font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap">R$ {totalIndirect.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-medium">Custos Administrativos</p>
-                                </div>
-
-                                {/* Impostos */}
-                                <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-xl border border-blue-200 dark:border-blue-800 shadow-sm transition-all hover:shadow-md">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Total Impostos</span>
-                                        <div className="bg-blue-100 dark:bg-blue-900/40 p-1.5 rounded-lg">
-                                            <Percent size={16} className="text-blue-600 dark:text-blue-400" />
+                                        <div className="text-left">
+                                            <span className="block text-slate-800 dark:text-slate-100 leading-none">Visualizar e Gerar PDF</span>
+                                            <span className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none font-bold">Relatório Completo</span>
                                         </div>
-                                    </div>
-                                    <span className="text-2xl font-bold text-blue-900 dark:text-blue-100 whitespace-nowrap">R$ {totalTaxes.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                    <p className="text-[10px] text-blue-600 dark:text-blue-400 mt-1 font-medium">Baseado no BDI e Taxas</p>
+                                    </button>
                                 </div>
-                            </div>
 
-                            {/* Action Buttons */}
-                            <div className="flex justify-end gap-2">
-                                <button
-                                    onClick={handlePrintFull}
-                                    className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 px-6 py-4 rounded-2xl text-base font-bold flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-md group border-b-4 border-b-blue-600 active:border-b-0 active:translate-y-1"
-                                >
-                                    <div className="bg-blue-100 dark:bg-blue-900/40 p-2 rounded-xl group-hover:scale-110 transition-transform">
-                                        <Eye size={24} className="text-blue-600 dark:text-blue-400" />
+                                {/* Total Cost Block */}
+                                <div className="bg-slate-900 text-white p-8 rounded-2xl flex justify-between items-center shadow-xl">
+                                    <div>
+                                        <p className="text-slate-400 text-sm font-bold uppercase tracking-widest mb-1">Custo Executado Total</p>
+                                        <p className="text-4xl font-bold whitespace-nowrap">R$ {totalGeneral.toFixed(2)}</p>
                                     </div>
-                                    <div className="text-left">
-                                        <span className="block text-slate-800 dark:text-slate-100 leading-none">Visualizar e Gerar PDF</span>
-                                        <span className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none font-bold">Relatório Completo</span>
-                                    </div>
-                                </button>
-                            </div>
-
-                            {/* Total Cost Block */}
-                            <div className="bg-slate-900 text-white p-8 rounded-2xl flex justify-between items-center shadow-xl">
-                                <div>
-                                    <p className="text-slate-400 text-sm font-bold uppercase tracking-widest mb-1">Custo Executado Total</p>
-                                    <p className="text-4xl font-bold whitespace-nowrap">R$ {totalGeneral.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-                                </div>
-                                <div className="text-right">
-                                    <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1 opacity-50">Baseado em Entradas Reais</p>
-                                    <div className="flex items-center gap-2 text-blue-400 font-bold">
-                                        <DollarSign size={20} />
-                                        <span>Valores Consolidados</span>
+                                    <div className="text-right">
+                                        <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1 opacity-50">Baseado em Entradas Reais</p>
+                                        <div className="flex items-center gap-2 text-blue-400 font-bold">
+                                            <Calculator size={20} />
+                                            <span>Valores Consolidados</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
+                    <ReportPreview
+                        isOpen={showPreview}
+                        onClose={() => setShowPreview(false)}
+                        title={previewContent.title}
+                        htmlContent={previewContent.html}
+                        filename={previewContent.filename}
+                    />
                 </div>
             )}
-            <ReportPreview
-                isOpen={showPreview}
-                onClose={() => setShowPreview(false)}
-                title={previewContent.title}
-                htmlContent={previewContent.html}
-                filename={previewContent.filename}
-            />
         </div>
     );
 };
