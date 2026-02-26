@@ -12,7 +12,7 @@ import {
     WorkHeader, WorkService, WorkMaterial,
     WorkLabor, WorkIndirect, Customer,
     PlannedService, PlannedMaterial,
-    PlannedLabor, PlannedIndirect, WorkTax
+    PlannedLabor, PlannedIndirect, WorkTax, PlanTax
 } from '../types';
 
 interface Props {
@@ -148,11 +148,11 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                 plan_service_id: s.id,
                 description: s.description,
                 unit: s.unit,
-                quantity: 0,
-                unit_labor_cost: 0,
-                unit_material_cost: 0,
-                unit_indirect_cost: 0,
-                total_cost: 0,
+                quantity: s.quantity || 0,
+                unit_labor_cost: s.unit_labor_cost || 0,
+                unit_material_cost: s.unit_material_cost || 0,
+                unit_indirect_cost: s.unit_indirect_cost || 0,
+                total_cost: s.total_cost || 0,
                 status: 'Pendente'
             }));
 
@@ -183,9 +183,9 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                 work_id: workId,
                 material_name: m.material_name,
                 unit: m.unit || 'un',
-                quantity: 0,
-                unit_cost: 0,
-                total_cost: 0
+                quantity: m.quantity || 0,
+                unit_cost: m.unit_cost || 0,
+                total_cost: m.total_cost || 0
             }));
 
         if (newWorkMaterials.length > 0) {
@@ -205,9 +205,9 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                 work_id: workId,
                 role: l.role,
                 cost_type: l.cost_type,
-                quantity: 0,
-                unit_cost: 0,
-                total_cost: 0
+                quantity: l.quantity || 0,
+                unit_cost: l.unit_cost || 0,
+                total_cost: l.total_cost || 0
             }));
 
         if (newWorkLabor.length > 0) {
@@ -227,12 +227,32 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                 work_id: workId,
                 category: i.category,
                 description: i.description,
-                value: 0
+                value: i.value || 0
             }));
 
         if (newWorkIndirects.length > 0) {
             db.save('serviflow_work_indirects', [...allWorkIndirects, ...newWorkIndirects]);
             importedCount += newWorkIndirects.length;
+        }
+
+        // 5. Taxes (Newly added)
+        const planTaxes = (db.load('serviflow_plan_taxes', []) as PlanTax[]).filter(t => t.plan_id === planId);
+        const allWorkTaxes = db.load('serviflow_work_taxes', []) as WorkTax[];
+        const existingTaxNames = new Set(allWorkTaxes.filter(t => t.work_id === workId).map(t => t.name));
+
+        const newWorkTaxes: WorkTax[] = planTaxes
+            .filter(t => !existingTaxNames.has(t.name))
+            .map(t => ({
+                id: db.generateId('WTAX'),
+                work_id: workId,
+                name: t.name,
+                rate: t.rate,
+                value: t.value || 0
+            }));
+
+        if (newWorkTaxes.length > 0) {
+            db.save('serviflow_work_taxes', [...allWorkTaxes, ...newWorkTaxes]);
+            importedCount += newWorkTaxes.length;
         }
 
         // Update local state
