@@ -677,7 +677,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         const customer = customers.find(c => c.id === currentWork.client_id);
 
         return `
-            <!-- HEADER SECTION -->
+            <div style="width: 100%; background: white; font-family: sans-serif;">
+                <!-- HEADER SECTION -->
                 <div class="report-header" style="padding-bottom: 8mm; border-bottom: 3px solid #059669; margin-bottom: 8mm;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <div style="display: flex; gap: 6mm; align-items: center;">
@@ -729,15 +730,10 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         <span style="font-size: 9px; font-weight: 700; color: #d97706; text-transform: uppercase;">Mão de Obra</span>
                         <span style="font-size: 18px; font-weight: 800; color: #78350f; display: block; white-space: nowrap;">R$ ${totalLabor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                     </div>` : ''}
-                    ${totalIndirect > 0 ? `
-                    <div style="flex: 1; background: #f8fafc; border-bottom: 3px solid #94a3b8; border-radius: 8px; padding: 16px; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
-                        <span style="font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase;">Indiretos</span>
-                        <span style="font-size: 18px; font-weight: 800; color: #1e293b; display: block; white-space: nowrap;">R$ ${totalIndirect.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                    </div>` : ''}
-                    ${totalTaxes > 0 ? `
+                    ${(totalIndirect + totalTaxes) > 0 ? `
                     <div style="flex: 1; background: #ecfdf5; border-bottom: 3px solid #10b981; border-radius: 8px; padding: 16px; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
                         <span style="font-size: 9px; font-weight: 700; color: #059669; text-transform: uppercase;">Impostos</span>
-                        <span style="font-size: 18px; font-weight: 800; color: #064e3b; display: block; white-space: nowrap;">R$ ${totalTaxes.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                        <span style="font-size: 18px; font-weight: 800; color: #064e3b; display: block; white-space: nowrap;">R$ ${(totalIndirect + totalTaxes).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                     </div>` : ''}
                 </div>
 
@@ -827,6 +823,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                     <p style="margin: 0; font-size: 9px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.2em; font-weight: 700;">Este documento é um registro de custos parciais da execução da obra.</p>
                     <p style="margin: 10px 0 0 0; font-size: 10px; color: #64748b; font-weight: 800;">${company.name.toUpperCase()} - GESTÃO DE OBRAS</p>
                 </div>
+            </div>
         `;
     };
 
@@ -877,11 +874,11 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         Promise.all(imagePromises).finally(() => {
             setTimeout(() => {
                 const opt = {
-                    margin: [10, 10, 10, 10],
+                    margin: [5, 5, 5, 5],
                     filename: `Execucao_${currentWork.name.replace(/\s+/g, '_')}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: {
-                        scale: 2.5,
+                        scale: 2,
                         useCORS: true,
                         letterRendering: true,
                         backgroundColor: "#ffffff",

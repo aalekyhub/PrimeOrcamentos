@@ -173,6 +173,7 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
 
                     @page { margin: 15mm; size: A4; }
 
+                    /* Standardize styles for the wrapped structure */
                     .report-header, .report-footer {
                         break-inside: avoid !important;
                         page-break-inside: avoid !important;
@@ -183,13 +184,21 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
 
                     .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; }
                     .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; }
-                    .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4 { 
-                        page-break-after: avoid !important;
-                        break-after: avoid !important;
+                    
+                    /* Prevent blank pages */
+                    * { 
+                        box-sizing: border-box !important;
                     }
 
-                    /* Prevent blank pages by cutting off trailing whitespace */
-                    #report-preview-content div:last-child {
+                    #report-preview-content, #report-preview-wrapper {
+                        height: auto !important;
+                        min-height: 0 !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        overflow: visible !important;
+                    }
+
+                    #report-preview-content > div:last-child {
                         margin-bottom: 0 !important;
                         padding-bottom: 0 !important;
                     }
