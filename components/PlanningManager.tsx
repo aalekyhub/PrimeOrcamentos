@@ -393,7 +393,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                 <!-- TOTAL BOX -->
                 <div style="margin-bottom: 20px; background: #064e3b; color: white; padding: 12px 16px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
                     <p style="font-size: 9px; font-weight: 800; text-transform: uppercase; margin: 0; letter-spacing: 0.1em; color: #a7f3d0;">CUSTO TOTAL PREVISTO</p>
-                    <p style="font-size: 18px; font-weight: 900; margin: 0; white-space: nowrap;">R$ ${totalGeneral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                    <p style="font-size: 18px; font-weight: 900; margin: 0; white-space: nowrap;">R$ ${totalGeneral.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 </div>
 
                 <!-- SERVICES -->
@@ -520,7 +520,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                         scrollX: 0,
                     },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                    pagebreak: { mode: ['css', 'avoid-all'] }
+                    pagebreak: { mode: 'css' }
                 };
 
                 // @ts-ignore

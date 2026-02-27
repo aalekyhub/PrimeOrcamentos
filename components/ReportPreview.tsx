@@ -120,7 +120,7 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                 scrollX: 0,
             },
             jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-            pagebreak: { mode: ["css", "avoid-all"] },
+            pagebreak: { mode: "css" },
         };
 
         try {
