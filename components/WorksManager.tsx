@@ -55,6 +55,9 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
     const [draggedIndIndex, setDraggedIndIndex] = useState<number | null>(null);
 
     const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
+    const [selectedLabor, setSelectedLabor] = useState<string[]>([]);
+    const [selectedIndirects, setSelectedIndirects] = useState<string[]>([]);
+    const [selectedTaxes, setSelectedTaxes] = useState<string[]>([]);
 
     // Preview UI State
     const [showPreview, setShowPreview] = useState(false);
@@ -1033,7 +1036,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {works.map(work => (
                             <div key={work.id}
-                                className="bg-white dark:bg-slate-900/50 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 hover:border-blue-400 transition-all group relative">
+                                className="bg-white dark:bg-slate-900/50 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 hover:border-green-400 transition-all group relative">
                                 <div className="flex justify-between items-start mb-2">
                                     <div className="flex-1 min-w-0">
                                         <span className="font-bold text-lg text-slate-800 dark:text-slate-100 block truncate leading-tight uppercase tracking-tight">{work.name}</span>
@@ -1042,7 +1045,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     <div className="flex gap-1 ml-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <button
                                             onClick={(e) => handleDuplicateWork(work.id, e)}
-                                            className="p-2 text-slate-400 dark:text-slate-600 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full transition-all"
+                                            className="p-2 text-slate-400 dark:text-slate-600 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-full transition-all"
                                             title="Duplicar Obra"
                                         >
                                             <Archive size={16} />
@@ -1063,7 +1066,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-2 text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase mb-4">
-                                    <Calendar size={12} className="text-blue-500" />
+                                    <Calendar size={12} className="text-green-500" />
                                     <span>Iniciada em {new Date(work.start_date).toLocaleDateString()}</span>
                                 </div>
                                 <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">
@@ -1141,23 +1144,23 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                     <div className="md:col-span-4">
                                         <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Descrição</label>
-                                        <input type="text" id="svc_desc" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100" placeholder="Ex: Pintura de Parede" />
+                                        <input type="text" id="svc_desc" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100" placeholder="Ex: Pintura de Parede" />
                                     </div>
                                     <div className="md:col-span-1">
                                         <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Un</label>
-                                        <input type="text" id="svc_unit" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100" placeholder="m²" />
+                                        <input type="text" id="svc_unit" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100" placeholder="m²" />
                                     </div>
                                     <div className="md:col-span-1">
                                         <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Qtd</label>
-                                        <input type="number" id="svc_qty" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100" placeholder="0" />
+                                        <input type="number" id="svc_qty" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100" placeholder="0" />
                                     </div>
                                     <div className="md:col-span-2">
                                         <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Unit. Mat.</label>
-                                        <input type="number" id="svc_mat" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100" placeholder="0.00" />
+                                        <input type="number" id="svc_mat" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100" placeholder="0.00" />
                                     </div>
                                     <div className="md:col-span-2">
                                         <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Unit. M.O.</label>
-                                        <input type="number" id="svc_lab" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100" placeholder="0.00" />
+                                        <input type="number" id="svc_lab" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100" placeholder="0.00" />
                                     </div>
                                     <div className="md:col-span-2">
                                         <button
@@ -1219,19 +1222,19 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                             <div className="md:col-span-5">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Material</label>
-                                                <input type="text" id="mat_name" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100" placeholder="Ex: Cimento CP-II" />
+                                                <input type="text" id="mat_name" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-700 dark:text-slate-100" placeholder="Ex: Cimento CP-II" />
                                             </div>
                                             <div className="md:col-span-2">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Qtd</label>
-                                                <input type="number" id="mat_qty" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100" placeholder="0" />
+                                                <input type="number" id="mat_qty" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-700 dark:text-slate-100" placeholder="0" />
                                             </div>
                                             <div className="md:col-span-1">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Und</label>
-                                                <input type="text" id="mat_unit" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100" placeholder="un" />
+                                                <input type="text" id="mat_unit" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-700 dark:text-slate-100" placeholder="un" />
                                             </div>
                                             <div className="md:col-span-1">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Custo Unit.</label>
-                                                <input type="number" id="mat_cost" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100" placeholder="0.00" />
+                                                <input type="number" id="mat_cost" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-700 dark:text-slate-100" placeholder="0.00" />
                                             </div>
                                             <div className="md:col-span-3">
                                                 <button
@@ -1269,7 +1272,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                             <div className="md:col-span-4">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Função</label>
-                                                <input type="text" id="mo_role" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100" placeholder="Ex: Pedreiro" />
+                                                <input type="text" id="mo_role" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-700 dark:text-slate-100" placeholder="Ex: Pedreiro" />
                                             </div>
                                             <div className="md:col-span-2">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Tipo</label>
@@ -1281,15 +1284,15 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             </div>
                                             <div className="md:col-span-1">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Qtd</label>
-                                                <input type="number" id="mo_qty" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100" placeholder="0" />
+                                                <input type="number" id="mo_qty" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-700 dark:text-slate-100" placeholder="0" />
                                             </div>
                                             <div className="md:col-span-1">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">UN</label>
-                                                <input type="text" id="mo_un" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100" placeholder="un" />
+                                                <input type="text" id="mo_un" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-700 dark:text-slate-100" placeholder="un" />
                                             </div>
                                             <div className="md:col-span-2">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Custo Unit.</label>
-                                                <input type="number" id="mo_cost" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100" placeholder="0.00" />
+                                                <input type="number" id="mo_cost" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-700 dark:text-slate-100" placeholder="0.00" />
                                             </div>
                                             <div className="md:col-span-2">
                                                 <button
@@ -1341,11 +1344,11 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             </div>
                                             <div className="md:col-span-6">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Descrição</label>
-                                                <input type="text" id="ind_desc" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100" placeholder="Ex: Combustível ida/volta" />
+                                                <input type="text" id="ind_desc" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-700 dark:text-slate-100" placeholder="Ex: Combustível ida/volta" />
                                             </div>
                                             <div className="md:col-span-2">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Valor</label>
-                                                <input type="number" id="ind_val" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100" placeholder="0.00" />
+                                                <input type="number" id="ind_val" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-700 dark:text-slate-100" placeholder="0.00" />
                                             </div>
                                             <div className="md:col-span-1">
                                                 <button
@@ -1377,14 +1380,14 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                             <div className="md:col-span-7">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Imposto / Taxa</label>
-                                                <input type="text" id="tax_name" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100" placeholder="Ex: BDI ou ISS" />
+                                                <input type="text" id="tax_name" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-700 dark:text-slate-100" placeholder="Ex: BDI ou ISS" />
                                             </div>
                                             <div className="md:col-span-3">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Valor (%)</label>
                                                 <input
                                                     type="number"
                                                     id="tax_rate"
-                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100"
+                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-700 dark:text-slate-100"
                                                     placeholder="0.00"
                                                 />
                                             </div>
@@ -1642,6 +1645,34 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         {selectedMaterials.length} SELECIONADO(S)
                                                     </span>
                                                 </div>
+                                                <div className="flex gap-2">
+                                                    {selectedMaterials.length > 0 && (
+                                                        <button
+                                                            onClick={() => {
+                                                                if (window.confirm(`Excluir ${selectedMaterials.length} materiais selecionados?`)) {
+                                                                    setMaterials(materials.filter(m => !selectedMaterials.includes(m.id)));
+                                                                    setSelectedMaterials([]);
+                                                                    notify("Materiais removidos!");
+                                                                }
+                                                            }}
+                                                            className="flex items-center gap-1 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-[10px] font-bold hover:bg-red-100 dark:hover:bg-red-900/40 transition-all border border-red-100 dark:border-red-800"
+                                                        >
+                                                            <Trash2 size={12} /> Excluir Selecionados
+                                                        </button>
+                                                    )}
+                                                    <button
+                                                        onClick={() => {
+                                                            if (window.confirm("Deseja realmente excluir TODOS os materiais desta lista?")) {
+                                                                setMaterials([]);
+                                                                setSelectedMaterials([]);
+                                                                notify("Lista de materiais limpa!");
+                                                            }
+                                                        }}
+                                                        className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[10px] font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-all border border-slate-200 dark:border-slate-700"
+                                                    >
+                                                        <Archive size={12} /> Limpar Lista
+                                                    </button>
+                                                </div>
                                             </div>
                                         )}
 
@@ -1698,13 +1729,69 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-tighter text-lg">Mão de Obra</h3>
                                         </div>
 
+                                        {labor.length > 0 && (
+                                            <div className="flex items-center justify-between bg-white dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800 mb-4 shadow-sm">
+                                                <div className="flex items-center gap-3">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="w-4 h-4 rounded-md border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-green-600 focus:ring-green-500 cursor-pointer"
+                                                        checked={selectedLabor.length === labor.length && labor.length > 0}
+                                                        onChange={(e) => {
+                                                            if (e.target.checked) setSelectedLabor(labor.map(l => l.id));
+                                                            else setSelectedLabor([]);
+                                                        }}
+                                                    />
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                                        {selectedLabor.length} SELECIONADO(S)
+                                                    </span>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    {selectedLabor.length > 0 && (
+                                                        <button
+                                                            onClick={() => {
+                                                                if (window.confirm(`Excluir ${selectedLabor.length} itens de mão de obra selecionados?`)) {
+                                                                    setLabor(labor.filter(l => !selectedLabor.includes(l.id)));
+                                                                    setSelectedLabor([]);
+                                                                    notify("Mão de obra removida!");
+                                                                }
+                                                            }}
+                                                            className="flex items-center gap-1 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-[10px] font-bold hover:bg-red-100 dark:hover:bg-red-900/40 transition-all border border-red-100 dark:border-red-800"
+                                                        >
+                                                            <Trash2 size={12} /> Excluir Selecionados
+                                                        </button>
+                                                    )}
+                                                    <button
+                                                        onClick={() => {
+                                                            if (window.confirm("Deseja realmente excluir TODA a mão de obra desta lista?")) {
+                                                                setLabor([]);
+                                                                setSelectedLabor([]);
+                                                                notify("Lista de mão de obra limpa!");
+                                                            }
+                                                        }}
+                                                        className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[10px] font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-all border border-slate-200 dark:border-slate-700"
+                                                    >
+                                                        <Archive size={12} /> Limpar Lista
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+
                                         <div className="space-y-2">
                                             {labor.map((l) => (
                                                 <div
                                                     key={l.id}
-                                                    className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-between items-center transition-all"
+                                                    className={`p-3 rounded-xl border flex justify-between items-center transition-all ${selectedLabor.includes(l.id) ? 'bg-green-50/50 border-green-200 dark:bg-green-900/20 dark:border-green-500' : 'bg-white border-slate-100 dark:bg-slate-900 dark:border-slate-800 shadow-sm'}`}
                                                 >
                                                     <div className="flex items-center gap-3 grow">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="w-4 h-4 rounded-md border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-green-600 focus:ring-green-500 cursor-pointer"
+                                                            checked={selectedLabor.includes(l.id)}
+                                                            onChange={(e) => {
+                                                                if (e.target.checked) setSelectedLabor([...selectedLabor, l.id]);
+                                                                else setSelectedLabor(selectedLabor.filter(id => id !== l.id));
+                                                            }}
+                                                        />
                                                         <div className="grow text-slate-900 dark:text-slate-100 text-sm">
                                                             <span className="whitespace-nowrap"><b className="dark:text-amber-400 uppercase">{l.role}</b> | ({l.cost_type}) {l.quantity} {l.unit || 'un'}</span>
                                                         </div>
@@ -1742,13 +1829,69 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-tighter text-lg">Custos Indiretos</h3>
                                         </div>
 
+                                        {indirects.length > 0 && (
+                                            <div className="flex items-center justify-between bg-white dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800 mb-4 shadow-sm">
+                                                <div className="flex items-center gap-3">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="w-4 h-4 rounded-md border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-green-600 focus:ring-green-500 cursor-pointer"
+                                                        checked={selectedIndirects.length === indirects.length && indirects.length > 0}
+                                                        onChange={(e) => {
+                                                            if (e.target.checked) setSelectedIndirects(indirects.map(i => i.id));
+                                                            else setSelectedIndirects([]);
+                                                        }}
+                                                    />
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                                        {selectedIndirects.length} SELECIONADO(S)
+                                                    </span>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    {selectedIndirects.length > 0 && (
+                                                        <button
+                                                            onClick={() => {
+                                                                if (window.confirm(`Excluir ${selectedIndirects.length} custos indiretos selecionados?`)) {
+                                                                    setIndirects(indirects.filter(i => !selectedIndirects.includes(i.id)));
+                                                                    setSelectedIndirects([]);
+                                                                    notify("Custos indiretos removidos!");
+                                                                }
+                                                            }}
+                                                            className="flex items-center gap-1 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-[10px] font-bold hover:bg-red-100 dark:hover:bg-red-900/40 transition-all border border-red-100 dark:border-red-800"
+                                                        >
+                                                            <Trash2 size={12} /> Excluir Selecionados
+                                                        </button>
+                                                    )}
+                                                    <button
+                                                        onClick={() => {
+                                                            if (window.confirm("Deseja realmente excluir TODOS os custos indiretos desta lista?")) {
+                                                                setIndirects([]);
+                                                                setSelectedIndirects([]);
+                                                                notify("Lista de custos indiretos limpa!");
+                                                            }
+                                                        }}
+                                                        className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[10px] font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-all border border-slate-200 dark:border-slate-700"
+                                                    >
+                                                        <Archive size={12} /> Limpar Lista
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+
                                         <div className="space-y-2">
                                             {indirects.map((i) => (
                                                 <div
                                                     key={i.id}
-                                                    className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-between items-center transition-all"
+                                                    className={`p-3 rounded-xl border flex justify-between items-center transition-all ${selectedIndirects.includes(i.id) ? 'bg-green-50/50 border-green-200 dark:bg-green-900/20 dark:border-green-500' : 'bg-white border-slate-100 dark:bg-slate-900 dark:border-slate-800 shadow-sm'}`}
                                                 >
                                                     <div className="flex items-center gap-3 grow">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="w-4 h-4 rounded-md border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-green-600 focus:ring-green-500 cursor-pointer"
+                                                            checked={selectedIndirects.includes(i.id)}
+                                                            onChange={(e) => {
+                                                                if (e.target.checked) setSelectedIndirects([...selectedIndirects, i.id]);
+                                                                else setSelectedIndirects(selectedIndirects.filter(id => id !== i.id));
+                                                            }}
+                                                        />
                                                         <div className="grow text-slate-900 dark:text-slate-100 text-sm">
                                                             <span className="whitespace-nowrap"><b className="text-slate-400 dark:text-slate-500 uppercase">[{i.category}]</b> <b className="uppercase">{i.description}</b></span>
                                                         </div>
@@ -1779,13 +1922,69 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-tighter text-lg">Impostos & BDI</h3>
                                         </div>
 
+                                        {taxes.length > 0 && (
+                                            <div className="flex items-center justify-between bg-white dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800 mb-4 shadow-sm">
+                                                <div className="flex items-center gap-3">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="w-4 h-4 rounded-md border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-green-600 focus:ring-green-500 cursor-pointer"
+                                                        checked={selectedTaxes.length === taxes.length && taxes.length > 0}
+                                                        onChange={(e) => {
+                                                            if (e.target.checked) setSelectedTaxes(taxes.map(t => t.id));
+                                                            else setSelectedTaxes([]);
+                                                        }}
+                                                    />
+                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                                                        {selectedTaxes.length} SELECIONADO(S)
+                                                    </span>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    {selectedTaxes.length > 0 && (
+                                                        <button
+                                                            onClick={() => {
+                                                                if (window.confirm(`Excluir ${selectedTaxes.length} taxas/impostos selecionadas?`)) {
+                                                                    setTaxes(taxes.filter(t => !selectedTaxes.includes(t.id)));
+                                                                    setSelectedTaxes([]);
+                                                                    notify("Taxas removidas!");
+                                                                }
+                                                            }}
+                                                            className="flex items-center gap-1 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-[10px] font-bold hover:bg-red-100 dark:hover:bg-red-900/40 transition-all border border-red-100 dark:border-red-800"
+                                                        >
+                                                            <Trash2 size={12} /> Excluir Selecionados
+                                                        </button>
+                                                    )}
+                                                    <button
+                                                        onClick={() => {
+                                                            if (window.confirm("Deseja realmente excluir TODOS os impostos/taxas desta lista?")) {
+                                                                setTaxes([]);
+                                                                setSelectedTaxes([]);
+                                                                notify("Lista de impostos limpa!");
+                                                            }
+                                                        }}
+                                                        className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[10px] font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-all border border-slate-200 dark:border-slate-700"
+                                                    >
+                                                        <Archive size={12} /> Limpar Lista
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+
                                         <div className="space-y-2">
                                             {taxes.map((t) => (
                                                 <div
                                                     key={t.id}
-                                                    className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-between items-center transition-all"
+                                                    className={`p-3 rounded-xl border flex justify-between items-center transition-all ${selectedTaxes.includes(t.id) ? 'bg-green-50/50 border-green-200 dark:bg-green-900/20 dark:border-green-500' : 'bg-white border-slate-100 dark:bg-slate-900 dark:border-slate-800 shadow-sm'}`}
                                                 >
                                                     <div className="flex items-center gap-3 grow">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="w-4 h-4 rounded-md border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-green-600 focus:ring-green-500 cursor-pointer"
+                                                            checked={selectedTaxes.includes(t.id)}
+                                                            onChange={(e) => {
+                                                                if (e.target.checked) setSelectedTaxes([...selectedTaxes, t.id]);
+                                                                else setSelectedTaxes(selectedTaxes.filter(id => id !== t.id));
+                                                            }}
+                                                        />
                                                         <div className="grow text-slate-900 dark:text-slate-100 text-sm">
                                                             <span className="whitespace-nowrap"><b className="text-green-500 uppercase">{t.name}</b> | {t.rate > 0 ? `Alíquota: ${t.rate}%` : 'Valor Fixo'}</span>
                                                         </div>
@@ -1851,15 +2050,15 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-medium">Custos Administrativos</p>
                                     </div>
                                     {/* Impostos */}
-                                    <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-xl border border-blue-200 dark:border-blue-800 shadow-sm transition-all hover:shadow-md">
+                                    <div className="bg-green-50 dark:bg-green-900/20 p-6 rounded-xl border border-green-200 dark:border-green-800 shadow-sm transition-all hover:shadow-md">
                                         <div className="flex justify-between items-start mb-2">
-                                            <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Total Impostos</span>
-                                            <div className="bg-blue-100 dark:bg-blue-900/40 p-1.5 rounded-lg">
-                                                <Percent size={16} className="text-blue-600 dark:text-blue-400" />
+                                            <span className="text-xs font-bold text-green-600 dark:text-green-400 uppercase tracking-wider">Total Impostos</span>
+                                            <div className="bg-green-100 dark:bg-green-900/40 p-1.5 rounded-lg">
+                                                <Percent size={16} className="text-green-600 dark:text-green-400" />
                                             </div>
                                         </div>
-                                        <span className="text-2xl font-black text-blue-900 dark:text-blue-100 whitespace-nowrap">R$ {totalTaxes.toFixed(2)}</span>
-                                        <p className="text-[10px] text-blue-600 dark:text-blue-400 mt-1 font-medium">Baseado no BDI e Taxas</p>
+                                        <span className="text-2xl font-black text-green-900 dark:text-green-100 whitespace-nowrap">R$ {totalTaxes.toFixed(2)}</span>
+                                        <p className="text-[10px] text-green-600 dark:text-green-400 mt-1 font-medium">Baseado no BDI e Taxas</p>
                                     </div>
                                 </div>
 
@@ -1867,10 +2066,10 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 <div className="flex justify-end gap-2">
                                     <button
                                         onClick={handlePrintFull}
-                                        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 px-6 py-4 rounded-2xl text-base font-bold flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-md group border-b-4 border-b-blue-600 active:border-b-0 active:translate-y-1"
+                                        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 px-6 py-4 rounded-2xl text-base font-bold flex items-center gap-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-md group border-b-4 border-b-green-600 active:border-b-0 active:translate-y-1"
                                     >
-                                        <div className="bg-blue-100 dark:bg-blue-900/40 p-2 rounded-xl group-hover:scale-110 transition-transform">
-                                            <Eye size={24} className="text-blue-600 dark:text-blue-400" />
+                                        <div className="bg-green-100 dark:bg-green-900/40 p-2 rounded-xl group-hover:scale-110 transition-transform">
+                                            <Eye size={24} className="text-green-600 dark:text-green-400" />
                                         </div>
                                         <div className="text-left">
                                             <span className="block text-slate-800 dark:text-slate-100 leading-none">Visualizar e Gerar PDF</span>
@@ -1887,7 +2086,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     </div>
                                     <div className="text-right">
                                         <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1 opacity-50">Baseado em Entradas Reais</p>
-                                        <div className="flex items-center gap-2 text-blue-400 font-bold">
+                                        <div className="flex items-center gap-2 text-green-400 font-bold">
                                             <Calculator size={20} />
                                             <span>Valores Consolidados</span>
                                         </div>
