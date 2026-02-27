@@ -751,7 +751,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 <th style="padding: 10px 0; text-align: left; font-size: 10px; color: #64748b;">DESCRIÇÃO</th>
                                 <th style="padding: 10px 0; text-align: center; font-size: 10px; color: #64748b; width: 60px;">QTD</th>
                                 <th style="padding: 10px 0; text-align: center; font-size: 10px; color: #64748b; width: 40px;">UND</th>
-                                <th style="padding: 10px 0; text-align: right; font-size: 10px; color: #64748b; width: 120px;">TOTAL</th>
+                                <th style="padding: 10px 0; text-align: right; font-size: 10px; color: #64748b; width: 80px;">VALOR UN.</th>
+                                <th style="padding: 10px 0; text-align: right; font-size: 10px; color: #64748b; width: 100px;">TOTAL</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -760,6 +761,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     <td style="padding: 10px 0; font-size: 11px; font-weight: 600;">${s.description}</td>
                                     <td style="padding: 10px 0; font-size: 11px; text-align: center;">${s.quantity}</td>
                                     <td style="padding: 10px 0; font-size: 11px; text-align: center;">${s.unit}</td>
+                                    <td style="padding: 10px 0; font-size: 11px; text-align: right;">R$ ${s.unit_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
                                     <td style="padding: 10px 0; font-size: 11px; text-align: right; font-weight: 700;">R$ ${s.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
                                 </tr>
                             `).join('')}
@@ -777,7 +779,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 <th style="padding: 10px 0; text-align: left; font-size: 10px; color: #64748b;">MATERIAL</th>
                                 <th style="padding: 10px 0; text-align: center; font-size: 10px; color: #64748b; width: 60px;">QTD</th>
                                 <th style="padding: 10px 0; text-align: center; font-size: 10px; color: #64748b; width: 40px;">UND</th>
-                                <th style="padding: 10px 0; text-align: right; font-size: 10px; color: #64748b; width: 120px;">VALOR</th>
+                                <th style="padding: 10px 0; text-align: right; font-size: 10px; color: #64748b; width: 80px;">VALOR UN.</th>
+                                <th style="padding: 10px 0; text-align: right; font-size: 10px; color: #64748b; width: 100px;">VALOR</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -786,6 +789,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     <td style="padding: 10px 0; font-size: 11px; font-weight: 600;">${m.material_name}</td>
                                     <td style="padding: 10px 0; font-size: 11px; text-align: center;">${m.quantity}</td>
                                     <td style="padding: 10px 0; font-size: 11px; text-align: center;">${m.unit}</td>
+                                    <td style="padding: 10px 0; font-size: 11px; text-align: right;">R$ ${m.unit_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
                                     <td style="padding: 10px 0; font-size: 11px; text-align: right; font-weight: 700;">R$ ${m.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
                                 </tr>
                             `).join('')}
