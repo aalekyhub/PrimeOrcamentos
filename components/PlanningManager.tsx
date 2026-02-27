@@ -334,8 +334,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
         const totalMaterials = totalMaterial;
 
         return `
-            <div style="width: 100%; background: white; font-family: sans-serif;">
-                <!-- HEADER SECTION -->
+            <!-- HEADER SECTION -->
                 <div class="report-header" style="padding-bottom: 8mm; border-bottom: 3px solid #0f172a; margin-bottom: 8mm;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <div style="display: flex; gap: 6mm; align-items: center;">
@@ -481,12 +480,58 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                     </table>
                 </div>` : ''}
 
-                <!-- FOOTER -->
+                <!-- INDIRECTS -->
+                ${indirects.length > 0 ? `
+                <div style="margin-bottom: 30px; page-break-inside: auto;">
+                    <h3 style="font-size: 14px; font-weight: 800; color: #1e3a8a; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 2px solid #e2e8f0;">4. Custos Indiretos</h3>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid #e2e8f0;">
+                                <th style="padding: 10px 0; text-align: left; font-size: 10px; color: #64748b;">CATEGORIA</th>
+                                <th style="padding: 10px 0; text-align: left; font-size: 10px; color: #64748b;">DESCRIÇÃO</th>
+                                <th style="padding: 10px 0; text-align: right; font-size: 10px; color: #64748b; width: 120px;">VALOR</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${indirects.map(i => `
+                                <tr style="border-bottom: 1px solid #f1f5f9; page-break-inside: avoid;">
+                                    <td style="padding: 10px 0; font-size: 11px; font-weight: 600; color: #64748b;">${i.category}</td>
+                                    <td style="padding: 10px 0; font-size: 11px;">${i.description}</td>
+                                    <td style="padding: 10px 0; font-size: 11px; text-align: right; font-weight: 700;">R$ ${i.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>` : ''}
+
+                <!-- TAXES -->
+                ${taxes.length > 0 ? `
+                <div style="margin-bottom: 30px; page-break-inside: auto;">
+                    <h3 style="font-size: 14px; font-weight: 800; color: #1e3a8a; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 2px solid #e2e8f0;">5. Detalhamento de Taxas e Impostos</h3>
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid #e2e8f0;">
+                                <th style="padding: 10px 0; text-align: left; font-size: 10px; color: #64748b;">NOME DA TAXA</th>
+                                <th style="padding: 10px 0; text-align: center; font-size: 10px; color: #64748b; width: 80px;">TIPO</th>
+                                <th style="padding: 10px 0; text-align: right; font-size: 10px; color: #64748b; width: 120px;">PERCENTUAL / VALOR</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${taxes.map(t => `
+                                <tr style="border-bottom: 1px solid #f1f5f9; page-break-inside: avoid;">
+                                    <td style="padding: 10px 0; font-size: 11px; font-weight: 600;">${t.name}</td>
+                                    <td style="padding: 10px 0; font-size: 11px; text-align: center;">${t.rate > 0 ? 'Percentual' : 'Fixo'}</td>
+                                    <td style="padding: 10px 0; font-size: 11px; text-align: right; font-weight: 700;">${t.rate > 0 ? `${t.rate.toFixed(2)}%` : `R$ ${t.value.toFixed(2)}`}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>` : ''}
+
                 <div class="report-footer" style="padding-top: 20px; border-top: 1px solid #e2e8f0; margin-top: 20px; text-align: center; page-break-inside: avoid;">
                     <p style="margin: 0; font-size: 9px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.2em; font-weight: 700;">Este documento é um planejamento estimativo da execução da obra.</p>
                     <p style="margin: 10px 0 0 0; font-size: 10px; color: #64748b; font-weight: 800;">${company.name.toUpperCase()} - PLANEJAMENTO DE OBRAS</p>
                 </div>
-            </div>
         `;
     };
 

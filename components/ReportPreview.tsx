@@ -29,6 +29,9 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
         Array.from(content.children).forEach(block => {
             if (block.classList.contains('ql-editor-print')) {
                 allNodes.push(...Array.from(block.children) as Element[]);
+            } else if (block.tagName === 'DIV' && (block as HTMLElement).style.display !== 'none') {
+                // If it's a flattened section, add it directly or its relevant children
+                allNodes.push(block);
             } else {
                 allNodes.push(block);
             }
@@ -161,6 +164,13 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                         overflow: visible !important;
                     }
 
+                    /* Flattened structure optimization */
+                    #report-preview-content > * {
+                        display: block !important;
+                        width: 100% !important;
+                        height: auto !important;
+                    }
+
                     @page { margin: 15mm; size: A4; }
 
                     .report-header, .report-footer {
@@ -260,7 +270,7 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                 <div className="flex-1 overflow-y-auto bg-slate-50 p-6 md:p-10 flex justify-center">
                     <div
                         id="report-preview-content"
-                        className="bg-white shadow-xl w-full max-w-[210mm] min-h-[297mm] p-[15mm] overflow-x-hidden rounded-sm"
+                        className="bg-white shadow-xl w-full max-w-[210mm] p-[15mm] overflow-x-hidden rounded-sm"
                         dangerouslySetInnerHTML={{ __html: htmlContent }}
                     />
                 </div>

@@ -677,8 +677,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         const customer = customers.find(c => c.id === currentWork.client_id);
 
         return `
-            <div style="width: 100%; background: white; font-family: sans-serif;">
-                <!-- HEADER SECTION -->
+            <!-- HEADER SECTION -->
                 <div class="report-header" style="padding-bottom: 8mm; border-bottom: 3px solid #059669; margin-bottom: 8mm;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <div style="display: flex; gap: 6mm; align-items: center;">
@@ -824,12 +823,10 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                     </table>
                 </div>` : ''}
 
-                <!-- FOOTER -->
                 <div class="report-footer" style="padding-top: 20px; border-top: 1px solid #e2e8f0; margin-top: 20px; text-align: center; page-break-inside: avoid;">
                     <p style="margin: 0; font-size: 9px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.2em; font-weight: 700;">Este documento é um registro de custos parciais da execução da obra.</p>
                     <p style="margin: 10px 0 0 0; font-size: 10px; color: #64748b; font-weight: 800;">${company.name.toUpperCase()} - GESTÃO DE OBRAS</p>
                 </div>
-            </div>
         `;
     };
 
