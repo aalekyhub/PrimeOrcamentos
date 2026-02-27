@@ -173,7 +173,53 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
 
                     @page { margin: 15mm; size: A4; }
 
-                    /* Standardize styles for the wrapped structure */
+                    /* Force visibility and clear parent interference */
+                    #root, .no-print, [role="dialog"] > :not(#print-modal-portal), .backdrop-blur-sm:not(#print-modal-portal) {
+                        display: none !important;
+                    }
+
+                    body {
+                        visibility: hidden !important;
+                        background: white !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+
+                    #print-modal-portal {
+                        visibility: visible !important;
+                        display: block !important;
+                        position: absolute !important;
+                        top: 0 !important;
+                        left: 0 !important;
+                        width: 100% !important;
+                        height: auto !important;
+                        background: white !important;
+                        padding: 0 !important;
+                        margin: 0 !important;
+                    }
+
+                    #report-preview-wrapper {
+                        display: block !important;
+                        width: 100% !important;
+                        height: auto !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        box-shadow: none !important;
+                        border: none !important;
+                        overflow: visible !important;
+                    }
+
+                    #report-preview-content {
+                        visibility: visible !important;
+                        display: block !important;
+                        width: 100% !important;
+                        height: auto !important;
+                        margin: 0 !important;
+                        padding: 0 !important; /* Managed by @page margin */
+                        overflow: visible !important;
+                        background: white !important;
+                    }
+
                     .report-header, .report-footer {
                         break-inside: avoid !important;
                         page-break-inside: avoid !important;
@@ -182,22 +228,9 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                     tr { page-break-inside: avoid !important; }
                     thead { display: table-header-group !important; }
 
-                    .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; }
-                    .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; }
-                    
                     /* Prevent blank pages */
-                    * { 
-                        box-sizing: border-box !important;
-                    }
-
-                    #report-preview-content, #report-preview-wrapper {
-                        height: auto !important;
-                        min-height: 0 !important;
-                        margin: 0 !important;
-                        padding: 0 !important;
-                        overflow: visible !important;
-                    }
-
+                    * { box-sizing: border-box !important; }
+                    
                     #report-preview-content > div:last-child {
                         margin-bottom: 0 !important;
                         padding-bottom: 0 !important;
@@ -209,15 +242,12 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                     font-family: 'Inter', system-ui, -apple-system, sans-serif;
                     color: #1e293b;
                     line-height: 1.5;
-                    print-color-adjust: exact !important;
-                    -webkit-print-color-adjust: exact !important;
                 }
 
                 #report-preview-content table { 
                     border-collapse: collapse; 
                     width: 100%; 
                     margin-bottom: 24px;
-                    border: none !important;
                 }
 
                 #report-preview-content th {
@@ -230,19 +260,13 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                     text-align: left;
                     padding: 12px 0;
                     border-bottom: 2px solid #e2e8f0;
+                    -webkit-print-color-adjust: exact;
                 }
 
                 #report-preview-content td {
                     padding: 12px 0;
                     font-size: 11px;
                     border-bottom: 1px solid #f1f5f9;
-                }
-
-                #report-preview-content h1, 
-                #report-preview-content h2, 
-                #report-preview-content h3 {
-                    margin-top: 1.5em;
-                    margin-bottom: 0.8em;
                 }
 
                 .keep-together {
@@ -279,7 +303,7 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                 <div className="flex-1 overflow-y-auto bg-slate-50 p-6 md:p-10 flex justify-center">
                     <div
                         id="report-preview-content"
-                        className="bg-white shadow-xl w-full max-w-[210mm] overflow-x-hidden rounded-sm"
+                        className="bg-white shadow-xl w-full max-w-[210mm] p-[15mm] overflow-x-hidden rounded-sm"
                         dangerouslySetInnerHTML={{ __html: htmlContent }}
                     />
                 </div>

@@ -677,7 +677,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         const customer = customers.find(c => c.id === currentWork.client_id);
 
         return `
-            <div style="width: 210mm; background: white; font-family: sans-serif; padding: 15mm; box-sizing: border-box;">
+            <div style="width: 100%; background: white; font-family: sans-serif;">
                 <!-- HEADER SECTION -->
                 <div class="report-header" style="padding-bottom: 8mm; border-bottom: 3px solid #059669; margin-bottom: 8mm;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
@@ -874,11 +874,11 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         Promise.all(imagePromises).finally(() => {
             setTimeout(() => {
                 const opt = {
-                    margin: 0,
+                    margin: [10, 10, 10, 10],
                     filename: `Execucao_${currentWork.name.replace(/\s+/g, '_')}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: {
-                        scale: 2,
+                        scale: 2.5,
                         useCORS: true,
                         letterRendering: true,
                         backgroundColor: "#ffffff",
