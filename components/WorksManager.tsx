@@ -135,7 +135,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         }
     }, [embeddedPlanId, works, activeWorkId]); // Added activeWorkId to dependencies
 
-    const importPlanItems = (planId: string, workId: string) => {
+    const importPlanItems = async (planId: string, workId: string) => {
         let importedCount = 0;
 
         // 1. Services
@@ -160,7 +160,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             }));
 
         if (newWorkServices.length > 0) {
-            db.save('serviflow_work_services', [...allWorkServices, ...newWorkServices], newWorkServices);
+            await db.save('serviflow_work_services', [...allWorkServices, ...newWorkServices], newWorkServices);
             importedCount += newWorkServices.length;
         }
 
@@ -183,7 +183,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             }));
 
         if (newWorkMaterials.length > 0) {
-            db.save('serviflow_work_materials', [...allWorkMaterials, ...newWorkMaterials], newWorkMaterials);
+            await db.save('serviflow_work_materials', [...allWorkMaterials, ...newWorkMaterials], newWorkMaterials);
             importedCount += newWorkMaterials.length;
         }
 
@@ -200,14 +200,14 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                 plan_labor_id: l.id,
                 role: l.role,
                 cost_type: l.cost_type,
-                unit: l.unit || 'un', // Corrigido: Incluído unit
+                unit: l.unit || 'un',
                 quantity: l.quantity || 0,
                 unit_cost: l.unit_cost || 0,
                 total_cost: l.total_cost || 0
             }));
 
         if (newWorkLabor.length > 0) {
-            db.save('serviflow_work_labor', [...allWorkLabor, ...newWorkLabor], newWorkLabor);
+            await db.save('serviflow_work_labor', [...allWorkLabor, ...newWorkLabor], newWorkLabor);
             importedCount += newWorkLabor.length;
         }
 
@@ -228,7 +228,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             }));
 
         if (newWorkIndirects.length > 0) {
-            db.save('serviflow_work_indirects', [...allWorkIndirects, ...newWorkIndirects], newWorkIndirects);
+            await db.save('serviflow_work_indirects', [...allWorkIndirects, ...newWorkIndirects], newWorkIndirects);
             importedCount += newWorkIndirects.length;
         }
 
@@ -249,7 +249,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             }));
 
         if (newWorkTaxes.length > 0) {
-            db.save('serviflow_work_taxes', [...allWorkTaxes, ...newWorkTaxes], newWorkTaxes);
+            await db.save('serviflow_work_taxes', [...allWorkTaxes, ...newWorkTaxes], newWorkTaxes);
             importedCount += newWorkTaxes.length;
         }
 
