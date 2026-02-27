@@ -1359,31 +1359,33 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                             >
                                                 {editingId === m.id ? (
                                                     <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center mr-2">
-                                                        <div className="md:col-span-5">
+                                                        <div className="md:col-span-8">
                                                             <input
                                                                 type="text"
                                                                 value={editDesc}
                                                                 onChange={e => setEditDesc(e.target.value.toUpperCase())}
-                                                                className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-900 dark:text-slate-100"
-                                                            />
-                                                        </div>
-                                                        <div className="md:col-span-2">
-                                                            <input
-                                                                type="number"
-                                                                value={editQty}
-                                                                onChange={e => setEditQty(parseFloat(e.target.value) || 0)}
-                                                                className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs text-slate-900 dark:text-slate-100"
+                                                                className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-900 dark:text-slate-100 placeholder:text-slate-400"
+                                                                placeholder="DESCRIÇÃO DO MATERIAL"
                                                             />
                                                         </div>
                                                         <div className="md:col-span-1">
                                                             <input
                                                                 type="text"
                                                                 value={editUnit}
-                                                                onChange={e => setEditUnit(e.target.value)}
-                                                                className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs text-slate-900 dark:text-slate-100"
+                                                                onChange={e => setEditUnit(e.target.value.toUpperCase())}
+                                                                className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-900 dark:text-slate-100 placeholder:text-slate-400"
+                                                                placeholder="UN"
                                                             />
                                                         </div>
-                                                        <div className="md:col-span-3">
+                                                        <div className="md:col-span-1">
+                                                            <input
+                                                                type="number"
+                                                                value={editQty}
+                                                                onChange={e => setEditQty(parseFloat(e.target.value) || 0)}
+                                                                className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-900 dark:text-slate-100"
+                                                            />
+                                                        </div>
+                                                        <div className="md:col-span-1">
                                                             <input
                                                                 type="number"
                                                                 value={editPrice1}
@@ -1420,24 +1422,21 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                     </div>
                                                 ) : (
                                                     <>
-                                                        <div className="flex items-center gap-3 grow">
+                                                        <div className="flex items-center gap-2 grow">
                                                             <input
                                                                 type="checkbox"
-                                                                className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-slate-900"
+                                                                className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-slate-900 mr-1"
                                                                 checked={selectedMaterials.includes(m.id)}
                                                                 onChange={(e) => {
-                                                                    if (e.target.checked) {
-                                                                        setSelectedMaterials([...selectedMaterials, m.id]);
-                                                                    } else {
-                                                                        setSelectedMaterials(selectedMaterials.filter(id => id !== m.id));
-                                                                    }
+                                                                    if (e.target.checked) setSelectedMaterials([...selectedMaterials, m.id]);
+                                                                    else setSelectedMaterials(selectedMaterials.filter(id => id !== m.id));
                                                                 }}
                                                             />
                                                             <div className="cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 shrink-0">
                                                                 <GripVertical size={16} />
                                                             </div>
                                                             <div className="grow text-slate-900 dark:text-slate-100">
-                                                                <span className="whitespace-nowrap"><b className="dark:text-blue-400">{m.material_name}</b> | (R$ {m.unit_cost.toFixed(2)}) {m.quantity}{m.unit}</span>
+                                                                <span className="whitespace-nowrap"><b className="dark:text-blue-400 uppercase">{m.material_name}</b> | (R$ {m.unit_cost.toFixed(2)}) {m.quantity} {m.unit}</span>
                                                             </div>
                                                         </div>
                                                         <div className="flex items-center gap-4 text-xs shrink-0 whitespace-nowrap">
@@ -1452,8 +1451,8 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                 onClick={() => {
                                                                     setEditingId(m.id);
                                                                     setEditDesc(m.material_name);
-                                                                    setEditQty(m.quantity);
                                                                     setEditUnit(m.unit);
+                                                                    setEditQty(m.quantity);
                                                                     setEditPrice1(m.unit_cost);
                                                                 }}
                                                             />
@@ -1467,6 +1466,14 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 )}
                                             </div>
                                         ))}
+                                        {materials.length > 0 && (
+                                            <div className="flex justify-end items-center p-4 bg-blue-50/50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-900/30 mt-4">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[10px] font-bold text-blue-600/60 dark:text-blue-400/60 uppercase tracking-[0.2em]">Total Materiais</span>
+                                                    <span className="text-xl font-black text-blue-700 dark:text-blue-400">R$ {totalMaterial.toFixed(2)}</span>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 
@@ -1651,6 +1658,14 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 )}
                                             </div>
                                         ))}
+                                        {labor.length > 0 && (
+                                            <div className="flex justify-end items-center p-4 bg-amber-50/50 dark:bg-amber-900/10 rounded-xl border border-amber-100 dark:border-amber-900/30 mt-4">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[10px] font-bold text-amber-600/60 dark:text-amber-400/60 uppercase tracking-[0.2em]">Total Mão de Obra</span>
+                                                    <span className="text-xl font-black text-amber-700 dark:text-amber-400">R$ {totalLabor.toFixed(2)}</span>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
 
@@ -1815,6 +1830,14 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 )}
                                             </div>
                                         ))}
+                                        {indirects.length > 0 && (
+                                            <div className="flex justify-end items-center p-4 bg-slate-100/50 dark:bg-slate-800/30 rounded-xl border border-slate-200 dark:border-slate-700 mt-4">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[10px] font-bold text-slate-500/60 dark:text-slate-400/60 uppercase tracking-[0.2em]">Total Indiretos</span>
+                                                    <span className="text-xl font-black text-slate-700 dark:text-slate-200">R$ {totalIndirect.toFixed(2)}</span>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>

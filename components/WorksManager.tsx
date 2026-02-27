@@ -1559,42 +1559,47 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         )}
 
                                         <div className="space-y-2">
-                                            {materials.map((m) => (
-                                                <div
-                                                    key={m.id}
-                                                    className={`p-3 rounded-xl border flex justify-between items-center transition-all ${selectedMaterials.includes(m.id) ? 'bg-green-50/50 border-green-200 dark:bg-green-900/20 dark:border-green-500' : 'bg-white border-slate-100 dark:bg-slate-900 dark:border-slate-800'}`}
-                                                >
+                                            {materials.map((m, index) => (
+                                                <div key={m.id} className="bg-white dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center text-sm shadow-sm transition-all hover:border-green-400 group">
                                                     <div className="flex items-center gap-3 grow">
                                                         <input
                                                             type="checkbox"
-                                                            className="w-4 h-4 rounded-md border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-green-600 focus:ring-green-500 cursor-pointer"
+                                                            className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-green-600 focus:ring-green-500 bg-white dark:bg-slate-900"
                                                             checked={selectedMaterials.includes(m.id)}
                                                             onChange={(e) => {
                                                                 if (e.target.checked) setSelectedMaterials([...selectedMaterials, m.id]);
                                                                 else setSelectedMaterials(selectedMaterials.filter(id => id !== m.id));
                                                             }}
                                                         />
-                                                        <div className="grow text-slate-900 dark:text-slate-100 text-sm">
+                                                        <div className="grow text-slate-900 dark:text-slate-100">
                                                             <span className="whitespace-nowrap"><b className="dark:text-green-400 uppercase">{m.material_name}</b> | (R$ {m.unit_cost.toFixed(2)}) {m.quantity} {m.unit}</span>
                                                         </div>
                                                     </div>
-                                                    <div className="text-right flex items-center gap-4">
-                                                        <div className="text-right">
-                                                            <p className="font-bold text-sm text-slate-800 dark:text-slate-100">R$ {m.total_cost.toFixed(2)}</p>
-                                                        </div>
-                                                        <div className="flex gap-1 border-l pl-3 border-slate-100 dark:border-slate-800">
+                                                    <div className="flex items-center gap-4 text-xs shrink-0 whitespace-nowrap">
+                                                        <span className="font-bold text-slate-900 dark:text-slate-100">R$ {m.total_cost.toFixed(2)}</span>
+                                                        <div className="flex gap-1 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                             <button onClick={() => {
                                                                 setEditingId(m.id);
                                                                 setEditDesc(m.material_name);
                                                                 setEditQty(m.quantity);
                                                                 setEditUnit(m.unit);
                                                                 setEditPrice1(m.unit_cost);
-                                                            }} className="p-1.5 text-slate-300 hover:text-green-500 transition-colors"><Pencil size={16} /></button>
-                                                            <button onClick={() => handleDeleteMaterial(m.id)} className="p-1.5 text-slate-300 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
+                                                            }} className="p-1.5 text-slate-400 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-900/30 rounded transition-all"><Pencil size={14} /></button>
+                                                            <button onClick={() => handleDeleteMaterial(m.id)} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-all">
+                                                                <Trash2 size={14} />
+                                                            </button>
                                                         </div>
                                                     </div>
                                                 </div>
                                             ))}
+                                            {materials.length > 0 && (
+                                                <div className="flex justify-end items-center p-4 bg-green-50/50 dark:bg-green-900/10 rounded-xl border border-green-100 dark:border-green-900/30 mt-4">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-[10px] font-bold text-green-600/60 dark:text-green-400/60 uppercase tracking-[0.2em]">Total Materiais</span>
+                                                        <span className="text-xl font-black text-green-700 dark:text-green-400">R$ {totalMaterial.toFixed(2)}</span>
+                                                    </div>
+                                                </div>
+                                            )}
                                             {materials.length === 0 && (
                                                 <div className="text-center py-10 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
                                                     <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Nenhum material lançado ainda.</p>
@@ -1662,42 +1667,47 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         )}
 
                                         <div className="space-y-2">
-                                            {labor.map((l) => (
-                                                <div
-                                                    key={l.id}
-                                                    className={`p-3 rounded-xl border flex justify-between items-center transition-all ${selectedLabor.includes(l.id) ? 'bg-green-50/50 border-green-200 dark:bg-green-900/20 dark:border-green-500' : 'bg-white border-slate-100 dark:bg-slate-900 dark:border-slate-800 shadow-sm'}`}
-                                                >
+                                            {labor.map((l, index) => (
+                                                <div key={l.id} className="bg-white dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center text-sm shadow-sm transition-all hover:border-green-400 group">
                                                     <div className="flex items-center gap-3 grow">
                                                         <input
                                                             type="checkbox"
-                                                            className="w-4 h-4 rounded-md border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-green-600 focus:ring-green-500 cursor-pointer"
+                                                            className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-green-600 focus:ring-green-500 bg-white dark:bg-slate-900"
                                                             checked={selectedLabor.includes(l.id)}
                                                             onChange={(e) => {
                                                                 if (e.target.checked) setSelectedLabor([...selectedLabor, l.id]);
                                                                 else setSelectedLabor(selectedLabor.filter(id => id !== l.id));
                                                             }}
                                                         />
-                                                        <div className="grow text-slate-900 dark:text-slate-100 text-sm">
-                                                            <span className="whitespace-nowrap"><b className="dark:text-amber-400 uppercase">{l.role}</b> | ({l.cost_type}) {l.quantity} {l.unit || 'un'}</span>
+                                                        <div className="grow text-slate-900 dark:text-slate-100">
+                                                            <span className="whitespace-nowrap"><b className="dark:text-amber-400 uppercase">{l.role}</b> | ({l.cost_type}) {l.quantity}{l.unit || 'un'}</span>
                                                         </div>
                                                     </div>
-                                                    <div className="text-right flex items-center gap-4">
-                                                        <div className="text-right">
-                                                            <p className="font-bold text-sm text-slate-800 dark:text-slate-100">R$ {l.total_cost.toFixed(2)}</p>
-                                                        </div>
-                                                        <div className="flex gap-1 border-l pl-3 border-slate-100 dark:border-slate-800">
+                                                    <div className="flex items-center gap-4 text-xs shrink-0 whitespace-nowrap">
+                                                        <span className="font-bold text-slate-900 dark:text-slate-100">R$ {l.total_cost.toFixed(2)}</span>
+                                                        <div className="flex gap-1 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                             <button onClick={() => {
                                                                 setEditingId(l.id);
                                                                 setEditDesc(l.role);
                                                                 setEditUnit(l.unit || 'un');
                                                                 setEditQty(l.quantity);
                                                                 setEditPrice1(l.unit_cost);
-                                                            }} className="p-1.5 text-slate-300 hover:text-green-500 transition-colors"><Pencil size={16} /></button>
-                                                            <button onClick={() => handleDeleteLabor(l.id)} className="p-1.5 text-slate-300 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
+                                                            }} className="p-1.5 text-slate-400 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-900/30 rounded transition-all"><Pencil size={14} /></button>
+                                                            <button onClick={() => handleDeleteLabor(l.id)} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-all">
+                                                                <Trash2 size={14} />
+                                                            </button>
                                                         </div>
                                                     </div>
                                                 </div>
                                             ))}
+                                            {labor.length > 0 && (
+                                                <div className="flex justify-end items-center p-4 bg-amber-50/50 dark:bg-amber-900/10 rounded-xl border border-amber-100 dark:border-amber-900/30 mt-4">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-[10px] font-bold text-amber-600/60 dark:text-amber-400/60 uppercase tracking-[0.2em]">Total Mão de Obra</span>
+                                                        <span className="text-xl font-black text-amber-700 dark:text-amber-400">R$ {totalLabor.toFixed(2)}</span>
+                                                    </div>
+                                                </div>
+                                            )}
                                             {labor.length === 0 && (
                                                 <div className="text-center py-10 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
                                                     <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Nenhuma mão de obra lançada.</p>
@@ -1765,35 +1775,40 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         )}
 
                                         <div className="space-y-2">
-                                            {indirects.map((i) => (
-                                                <div
-                                                    key={i.id}
-                                                    className={`p-3 rounded-xl border flex justify-between items-center transition-all ${selectedIndirects.includes(i.id) ? 'bg-green-50/50 border-green-200 dark:bg-green-900/20 dark:border-green-500' : 'bg-white border-slate-100 dark:bg-slate-900 dark:border-slate-800 shadow-sm'}`}
-                                                >
+                                            {indirects.map((i, index) => (
+                                                <div key={i.id} className="bg-white dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center text-sm shadow-sm transition-all hover:border-green-400 group">
                                                     <div className="flex items-center gap-3 grow">
                                                         <input
                                                             type="checkbox"
-                                                            className="w-4 h-4 rounded-md border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-green-600 focus:ring-green-500 cursor-pointer"
+                                                            className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-green-600 focus:ring-green-500 bg-white dark:bg-slate-900"
                                                             checked={selectedIndirects.includes(i.id)}
                                                             onChange={(e) => {
                                                                 if (e.target.checked) setSelectedIndirects([...selectedIndirects, i.id]);
                                                                 else setSelectedIndirects(selectedIndirects.filter(id => id !== i.id));
                                                             }}
                                                         />
-                                                        <div className="grow text-slate-900 dark:text-slate-100 text-sm">
-                                                            <span className="whitespace-nowrap"><b className="text-slate-400 dark:text-slate-500 uppercase">[{i.category}]</b> <b className="uppercase">{i.description}</b></span>
+                                                        <div className="grow text-slate-900 dark:text-slate-100">
+                                                            <span><b className="text-slate-400 dark:text-slate-500">[{i.category}]</b> <b>{i.description}</b></span>
                                                         </div>
                                                     </div>
-                                                    <div className="text-right flex items-center gap-4">
-                                                        <div className="text-right">
-                                                            <p className="font-bold text-sm text-slate-800 dark:text-slate-100">R$ {i.value.toFixed(2)}</p>
-                                                        </div>
-                                                        <div className="flex gap-1 border-l pl-3 border-slate-100 dark:border-slate-800">
-                                                            <button onClick={() => handleDeleteIndirect(i.id)} className="p-1.5 text-slate-300 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
+                                                    <div className="flex items-center gap-4 text-xs shrink-0 whitespace-nowrap">
+                                                        <span className="font-bold text-slate-900 dark:text-slate-100">R$ {i.value.toFixed(2)}</span>
+                                                        <div className="flex gap-1 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <button onClick={() => handleDeleteIndirect(i.id)} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-all">
+                                                                <Trash2 size={14} />
+                                                            </button>
                                                         </div>
                                                     </div>
                                                 </div>
                                             ))}
+                                            {indirects.length > 0 && (
+                                                <div className="flex justify-end items-center p-4 bg-slate-100/50 dark:bg-slate-800/30 rounded-xl border border-slate-200 dark:border-slate-700 mt-4">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-[10px] font-bold text-slate-500/60 dark:text-slate-400/60 uppercase tracking-[0.2em]">Total Indiretos</span>
+                                                        <span className="text-xl font-black text-slate-700 dark:text-slate-200">R$ {totalIndirect.toFixed(2)}</span>
+                                                    </div>
+                                                </div>
+                                            )}
                                             {indirects.length === 0 && (
                                                 <div className="text-center py-10 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
                                                     <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Nenhum custo indireto lançado.</p>
