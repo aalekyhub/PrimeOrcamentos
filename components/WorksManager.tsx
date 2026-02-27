@@ -751,8 +751,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 <th style="padding: 10px 0; text-align: left; font-size: 10px; color: #64748b;">DESCRIÇÃO</th>
                                 <th style="padding: 10px 0; text-align: center; font-size: 10px; color: #64748b; width: 60px;">QTD</th>
                                 <th style="padding: 10px 0; text-align: center; font-size: 10px; color: #64748b; width: 40px;">UND</th>
-                                <th style="padding: 10px 0; text-align: right; font-size: 10px; color: #64748b; width: 80px;">VALOR UN.</th>
-                                <th style="padding: 10px 0; text-align: right; font-size: 10px; color: #64748b; width: 100px;">TOTAL</th>
+                                <th style="padding: 10px 0; text-align: right; font-size: 10px; color: #64748b; width: 80px;">VL. UNIT.</th>
+                                <th style="padding: 10px 0; text-align: right; font-size: 10px; color: #64748b; width: 100px;">VL. TOTAL</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -779,8 +779,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 <th style="padding: 10px 0; text-align: left; font-size: 10px; color: #64748b;">MATERIAL</th>
                                 <th style="padding: 10px 0; text-align: center; font-size: 10px; color: #64748b; width: 60px;">QTD</th>
                                 <th style="padding: 10px 0; text-align: center; font-size: 10px; color: #64748b; width: 40px;">UND</th>
-                                <th style="padding: 10px 0; text-align: right; font-size: 10px; color: #64748b; width: 80px;">VALOR UN.</th>
-                                <th style="padding: 10px 0; text-align: right; font-size: 10px; color: #64748b; width: 100px;">VALOR</th>
+                                <th style="padding: 10px 0; text-align: right; font-size: 10px; color: #64748b; width: 80px;">VL. UNIT.</th>
+                                <th style="padding: 10px 0; text-align: right; font-size: 10px; color: #64748b; width: 100px;">VL. TOTAL</th>
                             </tr>
                         </thead>
                         <tbody>
