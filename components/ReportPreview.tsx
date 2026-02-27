@@ -88,14 +88,59 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
 
     if (!isOpen) return null;
 
-    const handlePrint = () => {
-        if (filename) {
+    const handlePrint = async () => {
+        const el = document.getElementById("report-preview-content");
+        if (!el) return;
+
+        // 1) Salva estilos atuais
+        const prev = {
+            height: el.style.height,
+            overflow: el.style.overflow,
+            maxHeight: el.style.maxHeight,
+            padding: el.style.padding
+        };
+
+        // 2) Remove qualquer limitação/scroll do preview para captura total
+        el.style.height = "auto";
+        el.style.maxHeight = "none";
+        el.style.overflow = "visible";
+        el.style.padding = "20mm"; // Margem consistente na captura
+
+        const opt = {
+            margin: 0,
+            filename: filename || "Relatorio_Obra.pdf",
+            image: { type: "jpeg", quality: 0.98 },
+            html2canvas: {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: "#ffffff",
+                windowWidth: el.scrollWidth,
+                windowHeight: el.scrollHeight,
+                scrollY: 0,
+                scrollX: 0,
+            },
+            jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+            pagebreak: { mode: ["css", "avoid-all"] },
+        };
+
+        try {
             const originalTitle = document.title;
-            document.title = filename.replace('.pdf', '');
+            if (filename) document.title = filename.replace('.pdf', '');
+
+            // @ts-ignore
+            await html2pdf().set(opt).from(el).save();
+
+            if (filename) setTimeout(() => { document.title = originalTitle; }, 1000);
+        } catch (err) {
+            console.error("Erro ao gerar PDF:", err);
+            // Fallback para o print padrão se o html2pdf falhar
             window.print();
-            setTimeout(() => { document.title = originalTitle; }, 1000);
-        } else {
-            window.print();
+        } finally {
+            // 3) Restaura estilos originais
+            el.style.height = prev.height;
+            el.style.maxHeight = prev.maxHeight;
+            el.style.overflow = prev.overflow;
+            el.style.padding = prev.padding;
         }
     };
 
