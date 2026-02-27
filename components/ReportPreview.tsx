@@ -94,21 +94,20 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
         if (!el) return;
 
         // 1) Salva estilos atuais
+        // 1) Salva estilos atuais
         const prev = {
             height: el.style.height,
             overflow: el.style.overflow,
-            maxHeight: el.style.maxHeight,
-            padding: el.style.padding
+            maxHeight: el.style.maxHeight
         };
 
         // 2) Remove qualquer limitação/scroll do preview para captura total
         el.style.height = "auto";
         el.style.maxHeight = "none";
         el.style.overflow = "visible";
-        el.style.padding = "20mm"; // Margem consistente na captura
 
         const opt = {
-            margin: 0,
+            margin: 10,
             filename: filename || "Relatorio_Obra.pdf",
             image: { type: "jpeg", quality: 0.98 },
             html2canvas: {
@@ -141,7 +140,6 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
             el.style.height = prev.height;
             el.style.maxHeight = prev.maxHeight;
             el.style.overflow = prev.overflow;
-            el.style.padding = prev.padding;
         }
     };
 
