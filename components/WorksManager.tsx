@@ -1529,8 +1529,10 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         <button
                                                             onClick={() => {
                                                                 if (window.confirm(`Excluir ${selectedMaterials.length} materiais selecionados?`)) {
-                                                                    setMaterials(materials.filter(m => !selectedMaterials.includes(m.id)));
+                                                                    const idsToRemove = [...selectedMaterials];
+                                                                    setMaterials(materials.filter(m => !idsToRemove.includes(m.id)));
                                                                     setSelectedMaterials([]);
+                                                                    Promise.all(idsToRemove.map(id => db.remove('serviflow_work_materials', id)));
                                                                     notify("Materiais removidos!");
                                                                 }
                                                             }}
@@ -1544,6 +1546,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             if (window.confirm("Deseja realmente excluir TODOS os materiais desta lista?")) {
                                                                 setMaterials([]);
                                                                 setSelectedMaterials([]);
+                                                                db.deleteByCondition('serviflow_work_materials', 'work_id', currentWork.id);
                                                                 notify("Lista de materiais limpa!");
                                                             }
                                                         }}
@@ -1629,8 +1632,10 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         <button
                                                             onClick={() => {
                                                                 if (window.confirm(`Excluir ${selectedLabor.length} itens de mão de obra selecionados?`)) {
-                                                                    setLabor(labor.filter(l => !selectedLabor.includes(l.id)));
+                                                                    const idsToRemove = [...selectedLabor];
+                                                                    setLabor(labor.filter(l => !idsToRemove.includes(l.id)));
                                                                     setSelectedLabor([]);
+                                                                    Promise.all(idsToRemove.map(id => db.remove('serviflow_work_labor', id)));
                                                                     notify("Mão de obra removida!");
                                                                 }
                                                             }}
@@ -1644,6 +1649,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             if (window.confirm("Deseja realmente excluir TODA a mão de obra desta lista?")) {
                                                                 setLabor([]);
                                                                 setSelectedLabor([]);
+                                                                db.deleteByCondition('serviflow_work_labor', 'work_id', currentWork.id);
                                                                 notify("Lista de mão de obra limpa!");
                                                             }
                                                         }}
@@ -1729,8 +1735,10 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         <button
                                                             onClick={() => {
                                                                 if (window.confirm(`Excluir ${selectedIndirects.length} custos indiretos selecionados?`)) {
-                                                                    setIndirects(indirects.filter(i => !selectedIndirects.includes(i.id)));
+                                                                    const idsToRemove = [...selectedIndirects];
+                                                                    setIndirects(indirects.filter(i => !idsToRemove.includes(i.id)));
                                                                     setSelectedIndirects([]);
+                                                                    Promise.all(idsToRemove.map(id => db.remove('serviflow_work_indirects', id)));
                                                                     notify("Custos indiretos removidos!");
                                                                 }
                                                             }}
@@ -1744,6 +1752,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                             if (window.confirm("Deseja realmente excluir TODOS os custos indiretos desta lista?")) {
                                                                 setIndirects([]);
                                                                 setSelectedIndirects([]);
+                                                                db.deleteByCondition('serviflow_work_indirects', 'work_id', currentWork.id);
                                                                 notify("Lista de custos indiretos limpa!");
                                                             }
                                                         }}
