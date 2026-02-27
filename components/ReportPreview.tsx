@@ -1,6 +1,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { X, Printer } from 'lucide-react';
+import html2pdf from 'html2pdf.js';
 
 interface Props {
     isOpen: boolean;
