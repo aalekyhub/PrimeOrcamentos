@@ -609,7 +609,6 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                     rate: def.rate,
                     value: 0
                 });
-                addedCount++;
             }
         });
 
@@ -1371,104 +1370,6 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             </div>
                                         </div>
                                     )}
-
-                                    {resourceTab === 'impostos' && (
-                                        <div className="space-y-6">
-                                            <div className="bg-green-50/50 dark:bg-green-900/10 p-4 rounded-xl border border-green-100 dark:border-green-800/50">
-                                                <div className="flex justify-between items-center mb-4">
-                                                    <h4 className="text-[10px] font-black text-green-600 dark:text-green-400 uppercase tracking-widest flex items-center gap-2">
-                                                        <Percent size={14} /> Impostos e BDI Padronizados
-                                                    </h4>
-                                                    <button
-                                                        type="button"
-                                                        onClick={handleLoadDefaultTaxes}
-                                                        className="text-[10px] font-bold text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 uppercase tracking-tighter bg-green-100 dark:bg-green-900/40 px-2 py-1 rounded transition-colors"
-                                                    >
-                                                        Carregar Padrão (ISS/PIS/COF/INS)
-                                                    </button>
-                                                </div>
-
-                                                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                                                    {[
-                                                        { name: 'BDI', label: 'BDI (%)', color: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800' },
-                                                        { name: 'ISS', label: 'ISS (%)', color: 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-100 dark:border-green-800' },
-                                                        { name: 'PIS', label: 'PIS (%)', color: 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 border-teal-100 dark:border-teal-800' },
-                                                        { name: 'COFINS', label: 'COFINS (%)', color: 'bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 border-slate-100 dark:border-slate-700' },
-                                                        { name: 'INSS', label: 'INSS (%)', color: 'bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 border-orange-100 dark:border-orange-800' }
-                                                    ].map(tax => (
-                                                        <div key={tax.name} className={`p-3 rounded-lg border ${tax.color} `}>
-                                                            <label className="block text-[10px] font-bold uppercase mb-1 opacity-70">{tax.label}</label>
-                                                            <input
-                                                                type="number"
-                                                                step="0.01"
-                                                                className="w-full bg-white/50 dark:bg-slate-900/50 border border-black/5 dark:border-white/5 rounded p-1 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5 text-slate-900 dark:text-slate-100"
-                                                                value={taxes.find(t => t.name === tax.name)?.rate || ''}
-                                                                placeholder="0.00"
-                                                                onChange={(e) => {
-                                                                    const val = parseFloat(e.target.value) || 0;
-                                                                    const newTaxes = [...taxes];
-                                                                    const idx = newTaxes.findIndex(t => t.name === tax.name);
-                                                                    if (idx !== -1) {
-                                                                        newTaxes[idx] = { ...newTaxes[idx], rate: val, value: 0 };
-                                                                    } else {
-                                                                        newTaxes.push({
-                                                                            id: db.generateId('WTAX'),
-                                                                            work_id: currentWork?.id || '',
-                                                                            name: tax.name,
-                                                                            rate: val,
-                                                                            value: 0
-                                                                        });
-                                                                    }
-                                                                    setTaxes(newTaxes);
-                                                                }}
-                                                            />
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-
-                                            <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
-                                                <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">Outras Taxas / Impostos Personalizados</h4>
-                                                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                                                    <div className="md:col-span-7">
-                                                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Nome do Item</label>
-                                                        <input type="text" id="tax_name" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-700 dark:text-slate-100" placeholder="Ex: Taxa Administrativa" />
-                                                    </div>
-                                                    <div className="md:col-span-3">
-                                                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Taxa (%)</label>
-                                                        <input
-                                                            type="number"
-                                                            id="tax_rate"
-                                                            className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-700 dark:text-slate-100"
-                                                            placeholder="0.00"
-                                                        />
-                                                    </div>
-                                                    <div className="md:col-span-2">
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => {
-                                                                const name = (document.getElementById('tax_name') as HTMLInputElement).value;
-                                                                const rate = parseFloat((document.getElementById('tax_rate') as HTMLInputElement).value) || 0;
-                                                                if (!name) return notify("Nome obrigatório", "error");
-                                                                setTaxes([...taxes, {
-                                                                    id: db.generateId('WTAX'),
-                                                                    work_id: currentWork?.id || '',
-                                                                    name: name.toUpperCase(),
-                                                                    rate: rate,
-                                                                    value: 0
-                                                                }]);
-                                                                (document.getElementById('tax_name') as HTMLInputElement).value = '';
-                                                                (document.getElementById('tax_rate') as HTMLInputElement).value = '';
-                                                            }}
-                                                            className="w-full bg-green-600 dark:bg-green-500 text-white p-2 rounded hover:bg-green-700 dark:hover:bg-green-400 font-bold text-xs h-9 shadow-sm flex items-center justify-center gap-2"
-                                                        >
-                                                            <Plus size={16} /> ADICIONAR
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
                                 </div>
                             </div>
                         )}
@@ -1964,97 +1865,130 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     </div>
                                 )}
 
-                                {/* TAXES TAB CONTENT */}
                                 {resourceTab === 'impostos' && (
-                                    <div className="space-y-4">
-                                        <div className="flex justify-between items-center mb-4">
-                                            <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-tighter text-lg">Impostos & BDI</h3>
+                                    <div className="space-y-6">
+                                        {/* Predefined Taxes Grid */}
+                                        <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                                            <div className="flex justify-between items-center mb-4">
+                                                <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                                                    <Percent size={14} className="text-green-500 dark:text-green-400" /> Impostos e BDI Padronizados
+                                                </h4>
+                                                <button
+                                                    type="button"
+                                                    onClick={handleLoadDefaultTaxes}
+                                                    className="text-[10px] font-bold text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 uppercase tracking-tighter bg-green-50 dark:bg-green-900/40 px-2 py-1 rounded transition-colors"
+                                                >
+                                                    Carregar Padrão (ISS/PIS/COF/INS)
+                                                </button>
+                                            </div>
+
+                                            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                                                {[
+                                                    { name: 'BDI', label: 'BDI (%)', color: 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 border-indigo-100 dark:border-indigo-800' },
+                                                    { name: 'ISS', label: 'ISS (%)', color: 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-100 dark:border-blue-800' },
+                                                    { name: 'PIS', label: 'PIS (%)', color: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800' },
+                                                    { name: 'COFINS', label: 'COFINS (%)', color: 'bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 border-slate-100 dark:border-slate-700' },
+                                                    { name: 'INSS', label: 'INSS (%)', color: 'bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 border-orange-100 dark:border-orange-800' }
+                                                ].map(tax => (
+                                                    <div key={tax.name} className={`p-3 rounded-lg border ${tax.color} `}>
+                                                        <label className="block text-[10px] font-bold uppercase mb-1 opacity-70">{tax.label}</label>
+                                                        <input
+                                                            type="number"
+                                                            step="0.01"
+                                                            className="w-full bg-white/50 dark:bg-slate-900/50 border border-black/5 dark:border-white/5 rounded p-1 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5 text-slate-900 dark:text-slate-100"
+                                                            value={taxes.find(t => t.name === tax.name)?.rate || ''}
+                                                            placeholder="0.00"
+                                                            onChange={(e) => {
+                                                                const val = parseFloat(e.target.value) || 0;
+                                                                const newTaxes = [...taxes];
+                                                                const idx = newTaxes.findIndex(t => t.name === tax.name);
+                                                                if (idx !== -1) {
+                                                                    newTaxes[idx] = { ...newTaxes[idx], rate: val, value: 0 };
+                                                                } else {
+                                                                    newTaxes.push({
+                                                                        id: db.generateId('WTAX'),
+                                                                        work_id: currentWork?.id || '',
+                                                                        name: tax.name,
+                                                                        rate: val,
+                                                                        value: 0
+                                                                    });
+                                                                }
+                                                                setTaxes(newTaxes);
+                                                            }}
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
 
-                                        {taxes.length > 0 && (
-                                            <div className="flex items-center justify-between bg-white dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800 mb-4 shadow-sm">
-                                                <div className="flex items-center gap-3">
-                                                    <input
-                                                        type="checkbox"
-                                                        className="w-4 h-4 rounded-md border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-green-600 focus:ring-green-500 cursor-pointer"
-                                                        checked={selectedTaxes.length === taxes.length && taxes.length > 0}
-                                                        onChange={(e) => {
-                                                            if (e.target.checked) setSelectedTaxes(taxes.map(t => t.id));
-                                                            else setSelectedTaxes([]);
-                                                        }}
-                                                    />
-                                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                                        {selectedTaxes.length} SELECIONADO(S)
-                                                    </span>
+                                        {/* Custom Tax Form */}
+                                        <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                                            <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">Outras Taxas / Impostos Personalizados</h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                                                <div className="md:col-span-7">
+                                                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Nome do Item</label>
+                                                    <input type="text" id="tax_name" className="w-full p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100" placeholder="Ex: Taxa Administrativa" />
                                                 </div>
-                                                <div className="flex gap-2">
-                                                    {selectedTaxes.length > 0 && (
-                                                        <button
-                                                            onClick={() => {
-                                                                if (window.confirm(`Excluir ${selectedTaxes.length} taxas/impostos selecionadas?`)) {
-                                                                    setTaxes(taxes.filter(t => !selectedTaxes.includes(t.id)));
-                                                                    setSelectedTaxes([]);
-                                                                    notify("Taxas removidas!");
-                                                                }
-                                                            }}
-                                                            className="flex items-center gap-1 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-[10px] font-bold hover:bg-red-100 dark:hover:bg-red-900/40 transition-all border border-red-100 dark:border-red-800"
-                                                        >
-                                                            <Trash2 size={12} /> Excluir Selecionados
-                                                        </button>
-                                                    )}
+                                                <div className="md:col-span-3">
+                                                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Taxa (%)</label>
+                                                    <input
+                                                        type="number"
+                                                        id="tax_rate"
+                                                        className="w-full p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100"
+                                                        placeholder="0"
+                                                    />
+                                                </div>
+                                                <div className="md:col-span-2">
                                                     <button
+                                                        type="button"
                                                         onClick={() => {
-                                                            if (window.confirm("Deseja realmente excluir TODOS os impostos/taxas desta lista?")) {
-                                                                setTaxes([]);
-                                                                setSelectedTaxes([]);
-                                                                notify("Lista de impostos limpa!");
-                                                            }
+                                                            const name = (document.getElementById('tax_name') as HTMLInputElement).value;
+                                                            const rate = parseFloat((document.getElementById('tax_rate') as HTMLInputElement).value) || 0;
+
+                                                            if (!name) return notify("Nome obrigatório", "error");
+
+                                                            setTaxes([...taxes, {
+                                                                id: db.generateId('WTAX'),
+                                                                work_id: currentWork?.id || '',
+                                                                name: name.toUpperCase(),
+                                                                rate: rate,
+                                                                value: 0
+                                                            }]);
+
+                                                            (document.getElementById('tax_name') as HTMLInputElement).value = '';
+                                                            (document.getElementById('tax_rate') as HTMLInputElement).value = '';
                                                         }}
-                                                        className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[10px] font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-all border border-slate-200 dark:border-slate-700"
+                                                        className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700 font-bold text-xs h-9 shadow-md shadow-green-950/20 flex items-center justify-center gap-2"
                                                     >
-                                                        <Archive size={12} /> Limpar Lista
+                                                        <Plus size={16} /> ADICIONAR
                                                     </button>
                                                 </div>
                                             </div>
-                                        )}
+                                        </div>
 
-                                        <div className="space-y-2">
-                                            {taxes.map((t) => (
-                                                <div
-                                                    key={t.id}
-                                                    className={`p-3 rounded-xl border flex justify-between items-center transition-all ${selectedTaxes.includes(t.id) ? 'bg-green-50/50 border-green-200 dark:bg-green-900/20 dark:border-green-500' : 'bg-white border-slate-100 dark:bg-slate-900 dark:border-slate-800 shadow-sm'}`}
-                                                >
-                                                    <div className="flex items-center gap-3 grow">
-                                                        <input
-                                                            type="checkbox"
-                                                            className="w-4 h-4 rounded-md border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-green-600 focus:ring-green-500 cursor-pointer"
-                                                            checked={selectedTaxes.includes(t.id)}
-                                                            onChange={(e) => {
-                                                                if (e.target.checked) setSelectedTaxes([...selectedTaxes, t.id]);
-                                                                else setSelectedTaxes(selectedTaxes.filter(id => id !== t.id));
-                                                            }}
-                                                        />
-                                                        <div className="grow text-slate-900 dark:text-slate-100 text-sm">
-                                                            <span className="whitespace-nowrap"><b className="text-green-500 uppercase">{t.name}</b> | {t.rate > 0 ? `Alíquota: ${t.rate}%` : 'Valor Fixo'}</span>
+                                        <div className="col-span-full mt-2">
+                                            <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">Detalhamento dos Custos Indiretos / BDI</h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                                {taxes.filter(t => (t.rate > 0 || t.value > 0)).map(t => (
+                                                    <div key={t.id} className="bg-white dark:bg-slate-900 p-3 rounded-lg border border-slate-100 dark:border-slate-800 flex justify-between items-center shadow-sm">
+                                                        <div>
+                                                            <span className="font-black text-xs text-slate-700 dark:text-slate-200">{t.name}</span>
+                                                            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 ml-2">
+                                                                {t.rate > 0 ? `${t.rate}% ` : `R$ ${t.value.toFixed(2)} `}
+                                                            </span>
                                                         </div>
-                                                    </div>
-                                                    <div className="text-right flex items-center gap-4">
-                                                        <div className="text-right">
-                                                            <p className="font-bold text-sm text-slate-800 dark:text-slate-100">
+                                                        <div className="flex items-center gap-4">
+                                                            <span className="font-bold text-xs text-green-600 dark:text-green-400">
                                                                 R$ {(t.rate > 0 ? (t.name === 'BDI' ? totalDirect : totalGeneral) * (t.rate / 100) : t.value).toFixed(2)}
-                                                            </p>
-                                                        </div>
-                                                        <div className="flex gap-1 border-l pl-3 border-slate-100 dark:border-slate-800">
-                                                            <button onClick={() => handleDeleteTax(t.id)} className="p-1.5 text-slate-300 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
+                                                            </span>
+                                                            <button onClick={() => handleDeleteTax(t.id)} className="text-slate-300 dark:text-slate-600 hover:text-red-500 transition-colors">
+                                                                <Trash2 size={14} />
+                                                            </button>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            ))}
-                                            {taxes.length === 0 && (
-                                                <div className="text-center py-10 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
-                                                    <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Nenhum imposto lançado.</p>
-                                                </div>
-                                            )}
+                                                ))}
+                                                {taxes.filter(t => (t.rate > 0 || t.value > 0)).length === 0 && <p className="col-span-full text-center py-4 text-xs text-slate-400 italic">Nenhum custo indireto configurado.</p>}
+                                            </div>
                                         </div>
                                     </div>
                                 )}
