@@ -317,7 +317,6 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
         notify("Imposto excluído", "success");
     };
 
-
     const generateFullReportHtml = () => {
         if (!currentPlan) return '';
 
@@ -334,7 +333,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
         const totalMaterials = totalMaterial;
 
         return `
-            <div style="width: 100%; background: white; font-family: sans-serif;">
+            <div style="width: 210mm; background: white; font-family: sans-serif; padding: 15mm; box-sizing: border-box;">
                 <!-- HEADER SECTION -->
                 <div class="report-header" style="padding-bottom: 8mm; border-bottom: 3px solid #0f172a; margin-bottom: 8mm;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
@@ -511,7 +510,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
         Promise.all(imagePromises).finally(() => {
             setTimeout(() => {
                 const opt = {
-                    margin: [5, 5, 5, 5],
+                    margin: 0,
                     filename: `Planejamento_${currentPlan.name.replace(/\s+/g, '_')}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: {
