@@ -135,17 +135,16 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         }
     }, [embeddedPlanId, works, activeWorkId]); // Added activeWorkId to dependencies
 
-    // Helper to clone items
     const importPlanItems = (planId: string, workId: string) => {
         let importedCount = 0;
 
         // 1. Services
         const planServices = (db.load('serviflow_plan_services', []) as PlannedService[]).filter(s => s.plan_id === planId);
         const allWorkServices = db.load('serviflow_work_services', []) as WorkService[];
-        const existingServiceIds = new Set(allWorkServices.filter(s => s.work_id === workId).map(s => s.plan_service_id));
+        const existingServicePlanIds = new Set(allWorkServices.filter(s => s.work_id === workId).map(s => s.plan_service_id));
 
         const newWorkServices: WorkService[] = planServices
-            .filter(s => !existingServiceIds.has(s.id))
+            .filter(s => !existingServicePlanIds.has(s.id))
             .map(s => ({
                 id: db.generateId('WSVC'),
                 work_id: workId,
@@ -168,23 +167,14 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         // 2. Materials
         const planMaterials = (db.load('serviflow_plan_materials', []) as PlannedMaterial[]).filter(m => m.plan_id === planId);
         const allWorkMaterials = db.load('serviflow_work_materials', []) as WorkMaterial[];
-        // We can't easily track by ID since materials don't have a specific `plan_material_id` field in WorkMaterial type yet,
-        // but we can check if we already have materials for this work. 
-        // If the list is empty locally (which is the case we are fixing), we import.
-        // If not empty, we might duplicate. Ideally we should add `plan_material_id` to WorkMaterial.
-        // For now, let's just check if ANY materials exist for this work. If so, we assume they are imported.
-        // BUT user might have added some manually?
-        // Let's rely on the button logic: it shows if materials.length === 0.
-        // So we only import if we really have 0 materials?
-        // Or better: Check if the specific material name already exists? Not perfect but better.
-
-        const existingMaterialNames = new Set(allWorkMaterials.filter(m => m.work_id === workId).map(m => m.material_name));
+        const existingMaterialPlanIds = new Set(allWorkMaterials.filter(m => m.work_id === workId && m.plan_material_id).map(m => m.plan_material_id));
 
         const newWorkMaterials: WorkMaterial[] = planMaterials
-            .filter(m => !existingMaterialNames.has(m.material_name)) // Avoid exact duplicates by name
+            .filter(m => !existingMaterialPlanIds.has(m.id))
             .map(m => ({
                 id: db.generateId('WMAT'),
                 work_id: workId,
+                plan_material_id: m.id,
                 material_name: m.material_name,
                 unit: m.unit || 'un',
                 quantity: m.quantity || 0,
@@ -200,15 +190,17 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         // 3. Labor
         const planLabor = (db.load('serviflow_plan_labor', []) as PlannedLabor[]).filter(l => l.plan_id === planId);
         const allWorkLabor = db.load('serviflow_work_labor', []) as WorkLabor[];
-        const existingLaborRoles = new Set(allWorkLabor.filter(l => l.work_id === workId).map(l => l.role));
+        const existingLaborPlanIds = new Set(allWorkLabor.filter(l => l.work_id === workId && l.plan_labor_id).map(l => l.plan_labor_id));
 
         const newWorkLabor: WorkLabor[] = planLabor
-            .filter(l => !existingLaborRoles.has(l.role))
+            .filter(l => !existingLaborPlanIds.has(l.id))
             .map(l => ({
                 id: db.generateId('WLBR'),
                 work_id: workId,
+                plan_labor_id: l.id,
                 role: l.role,
                 cost_type: l.cost_type,
+                unit: l.unit || 'un', // Corrigido: Incluído unit
                 quantity: l.quantity || 0,
                 unit_cost: l.unit_cost || 0,
                 total_cost: l.total_cost || 0
@@ -222,13 +214,14 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         // 4. Indirects
         const planIndirects = (db.load('serviflow_plan_indirects', []) as PlannedIndirect[]).filter(i => i.plan_id === planId);
         const allWorkIndirects = db.load('serviflow_work_indirects', []) as WorkIndirect[];
-        const existingIndirects = new Set(allWorkIndirects.filter(i => i.work_id === workId).map(i => i.description));
+        const existingIndirectPlanIds = new Set(allWorkIndirects.filter(i => i.work_id === workId && i.plan_indirect_id).map(i => i.plan_indirect_id));
 
         const newWorkIndirects: WorkIndirect[] = planIndirects
-            .filter(i => !existingIndirects.has(i.description))
+            .filter(i => !existingIndirectPlanIds.has(i.id))
             .map(i => ({
                 id: db.generateId('WIND'),
                 work_id: workId,
+                plan_indirect_id: i.id,
                 category: i.category,
                 description: i.description,
                 value: i.value || 0
@@ -239,16 +232,17 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             importedCount += newWorkIndirects.length;
         }
 
-        // 5. Taxes (Newly added)
+        // 5. Taxes
         const planTaxes = (db.load('serviflow_plan_taxes', []) as PlanTax[]).filter(t => t.plan_id === planId);
         const allWorkTaxes = db.load('serviflow_work_taxes', []) as WorkTax[];
-        const existingTaxNames = new Set(allWorkTaxes.filter(t => t.work_id === workId).map(t => t.name));
+        const existingTaxPlanIds = new Set(allWorkTaxes.filter(t => t.work_id === workId && t.plan_tax_id).map(t => t.plan_tax_id));
 
         const newWorkTaxes: WorkTax[] = planTaxes
-            .filter(t => !existingTaxNames.has(t.name))
+            .filter(t => !existingTaxPlanIds.has(t.id))
             .map(t => ({
                 id: db.generateId('WTAX'),
                 work_id: workId,
+                plan_tax_id: t.id,
                 name: t.name,
                 rate: t.rate,
                 value: t.value || 0
@@ -640,8 +634,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                             <th style="padding: 12px; text-align: left; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; width: 60px;">Qtd</th>
                             <th style="padding: 12px; text-align: left; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; width: 60px;">Und</th>
                             <th style="padding: 12px; text-align: left; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;">Descrição do Material</th>
-                            <th style="padding: 12px; text-align: right; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; width: 100px;">Unitário</th>
-                            <th style="padding: 12px; text-align: right; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; width: 120px;">Total</th>
+                            <th style="padding: 12px; text-align: right; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; width: 100px;">Vl. Unit.</th>
+                            <th style="padding: 12px; text-align: right; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; width: 120px;">Vl. Total</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -805,8 +799,9 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         <thead>
                             <tr style="border-bottom: 2px solid #e2e8f0;">
                                 <th style="padding: 10px 0; text-align: left; font-size: 10px; color: #64748b;">FUNÇÃO / TIPO</th>
-                                <th style="padding: 10px 0; text-align: center; font-size: 10px; color: #64748b; width: 60px;">DIAS</th>
-                                <th style="padding: 10px 0; text-align: right; font-size: 10px; color: #64748b; width: 120px;">CUSTO TOTAL</th>
+                                <th style="padding: 10px 0; text-align: center; font-size: 10px; color: #64748b; width: 60px;">QTD</th>
+                                <th style="padding: 10px 0; text-align: center; font-size: 10px; color: #64748b; width: 40px;">UND</th>
+                                <th style="padding: 10px 0; text-align: right; font-size: 10px; color: #64748b; width: 100px;">VL. TOTAL</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -814,6 +809,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 <tr style="border-bottom: 1px solid #f1f5f9; page-break-inside: avoid;">
                                     <td style="padding: 10px 0; font-size: 11px; font-weight: 600;">${l.role} | (${l.cost_type})</td>
                                     <td style="padding: 10px 0; font-size: 11px; text-align: center;">${l.quantity}</td>
+                                    <td style="padding: 10px 0; font-size: 11px; text-align: center;">${l.unit || 'un'}</td>
                                     <td style="padding: 10px 0; font-size: 11px; text-align: right; font-weight: 700;">R$ ${l.total_cost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
                                 </tr>
                             `).join('')}

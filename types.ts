@@ -219,6 +219,7 @@ export interface PlanningHeader {
 export interface WorkMaterial {
   id: string;
   work_id?: string; // Link to Work
+  plan_material_id?: string; // Link to Planning Material
   work_services_id?: string;
   material_name: string;
   unit: string; // Adicionado
@@ -233,6 +234,7 @@ export interface WorkMaterial {
 export interface WorkLabor {
   id: string;
   work_id?: string; // Link to Work
+  plan_labor_id?: string; // Link to Planning Labor
   work_services_id?: string;
   role: string;
   worker_name?: string;
@@ -247,6 +249,7 @@ export interface WorkLabor {
 export interface WorkIndirect {
   id: string;
   work_id?: string; // Linked to Work directly
+  plan_indirect_id?: string; // Link to Planning Indirect
   category: string;
   description: string;
   value: number;
@@ -290,6 +293,7 @@ export interface WorkHeader {
 export interface WorkTax {
   id: string;
   work_id: string;
+  plan_tax_id?: string; // Link to Planning Tax
   name: string;
   rate: number;
   value: number;
