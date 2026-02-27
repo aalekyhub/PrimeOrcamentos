@@ -33,15 +33,17 @@ const getDB = () => {
 // Initialize cache from IDB and LocalStorage (migration)
 const initCache = async () => {
   const db = await getDB();
-  const allKeys = await db.getAllKeys(STORE_NAME);
+  const [keys, values] = await Promise.all([
+    db.getAllKeys(STORE_NAME),
+    db.getAll(STORE_NAME)
+  ]);
 
-  // Load everything from IDB into cache
-  for (const key of allKeys) {
-    const value = await db.get(STORE_NAME, key);
-    _cache[key as string] = value;
-  }
+  // Load everything into cache in one go
+  keys.forEach((key, index) => {
+    _cache[key as string] = values[index];
+  });
 
-  // Check for migration from LocalStorage
+  // Check for migration from LocalStorage (Legacy)
   const localStorageKeys = Object.keys(localStorage);
   const migratableKeys = localStorageKeys.filter(k => k.startsWith('serviflow_'));
 
@@ -89,32 +91,34 @@ export const db = {
       console.error(`[IDB Error] Falha ao salvar ${key} no IndexedDB:`, e);
     }
 
-    // 3. Sync to Supabase if available and skipCloud is false
+    // 3. Sync to Supabase in the background if available and skipCloud is false
     if (supabase && !skipCloud) {
-      const tableName = key.replace('serviflow_', '');
-      try {
-        // Optimization: If singleItem is provided, sync ONLY that item for much better performance
-        // If not provided, we fall back to the full list (payload)
-        const payload = singleItem ? [singleItem] : (Array.isArray(data) ? data : [data]);
+      // Create an IIFE to handle the background sync without awaiting it
+      (async () => {
+        const tableName = key.replace('serviflow_', '');
+        try {
+          // Optimization: If singleItem is provided, sync ONLY that item
+          const payload = singleItem ? [singleItem] : (Array.isArray(data) ? data : [data]);
 
-        if (payload.length > 0) {
-          console.log(`[Sync] Enviando ${payload.length} item(ns) para a nuvem (${tableName})...`);
-          const { error } = await supabase
-            .from(tableName)
-            .upsert(payload, { onConflict: 'id' });
+          if (payload.length > 0) {
+            console.log(`[Sync Background] Iniciando para ${tableName}...`);
+            const { error } = await supabase
+              .from(tableName)
+              .upsert(payload, { onConflict: 'id' });
 
-          if (error) {
-            console.error(`[Supabase Error] Tabela: ${tableName}. Erro: ${error.message}`);
-            return { success: false, error };
+            if (error) {
+              console.error(`[Supabase Error] Tabela: ${tableName}. Erro: ${error.message}`);
+            } else {
+              console.log(`[Sync Background] ${tableName} atualizado com sucesso.`);
+            }
           }
-          console.log(`[Sync] ${tableName} atualizado com sucesso.`);
-          return { success: true };
+        } catch (err) {
+          console.error(`[Sync Error Background] Falha crítica no Supabase para ${tableName}:`, err);
         }
-      } catch (err) {
-        console.error(`[Sync Error] Falha crítica no Supabase:`, err);
-        return { success: false, error: err };
-      }
+      })();
     }
+
+    // Return success immediately after local save
     return { success: true };
   },
 

@@ -93,18 +93,16 @@ const AppContent: React.FC = () => {
 
       if (cloudData && cloudData.error) {
         notify(cloudData.error, "error");
-        if (cloudData.error.includes('users')) {
-          console.error("Erro crítico ao sincronizar users:", cloudData.error);
-        }
         return;
       }
 
       if (cloudData) {
+        // Prepare local updates without blocking the main thread too much
+
         if (cloudData.customers) {
           const customerMap = new Map();
           cloudData.customers.forEach((c: Customer) => {
             const doc = c.document.replace(/\D/g, '');
-            // Prioritize keeping the record if it has more info or just use last one found
             customerMap.set(doc, c);
           });
           const deduplicatedCustomers = Array.from(customerMap.values()) as Customer[];
@@ -143,9 +141,11 @@ const AppContent: React.FC = () => {
             (cloudData.transactions as Transaction[]).forEach((t: Transaction) => {
               localMap.set(t.id, t);
             });
-            return Array.from(localMap.values()).sort((a, b) =>
+            const merged = Array.from(localMap.values()).sort((a, b) =>
               new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()
             );
+            db.saveLocal(STORAGE_KEYS.TRANSACTIONS, merged);
+            return merged;
           });
         }
 
@@ -155,11 +155,15 @@ const AppContent: React.FC = () => {
             (cloudData.users as UserAccount[]).forEach((u: UserAccount) => {
               localMap.set(u.id, u);
             });
-            return Array.from(localMap.values());
+            const merged = Array.from(localMap.values());
+            db.saveLocal(STORAGE_KEYS.USERS, merged);
+            return merged;
           });
         }
+
         if (cloudData.loans) {
           setLoans(cloudData.loans as Loan[]);
+          db.saveLocal(STORAGE_KEYS.LOANS, cloudData.loans);
         }
 
         // Merge Plans (Planning)
@@ -184,10 +188,10 @@ const AppContent: React.FC = () => {
           db.saveLocal('serviflow_works', mergedWorks);
         }
 
-        // Sub-items for Plan/Work (Services, Materials, etc.)
+        // Sub-items for Plan/Work (Services, Materials, etc.) - Run background IDB saves for these
         const subTables = [
-          'plan_services', 'plan_materials', 'plan_labor', 'plan_indirects',
-          'work_services', 'work_materials', 'work_labor', 'work_indirects'
+          'plan_services', 'plan_materials', 'plan_labor', 'plan_indirects', 'plan_taxes',
+          'work_services', 'work_materials', 'work_labor', 'work_indirects', 'work_taxes'
         ];
 
         subTables.forEach(tableName => {
@@ -207,7 +211,8 @@ const AppContent: React.FC = () => {
         notify("Falha ao baixar dados da nuvem.", "error");
       }
     } catch (e) {
-      notify("Erro de rede ao sincronizar.", "error");
+      console.error("[Sync Error]", e);
+      notify("Erro de rede ao sincronizar. Verifique sua conexão.", "error");
     } finally {
       setIsSyncing(false);
     }
