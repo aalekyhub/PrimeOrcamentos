@@ -163,6 +163,11 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
 
                     @page { margin: 15mm; size: A4; }
 
+                    .report-header, .report-footer {
+                        break-inside: avoid !important;
+                        page-break-inside: avoid !important;
+                    }
+
                     tr { page-break-inside: avoid !important; }
                     thead { display: table-header-group !important; }
 
@@ -171,6 +176,12 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                     .ql-editor-print h1, .ql-editor-print h2, .ql-editor-print h3, .ql-editor-print h4 { 
                         page-break-after: avoid !important;
                         break-after: avoid !important;
+                    }
+
+                    /* Prevent blank pages by cutting off trailing whitespace */
+                    #report-preview-content div:last-child {
+                        margin-bottom: 0 !important;
+                        padding-bottom: 0 !important;
                     }
                 }
 
@@ -192,7 +203,7 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
 
                 #report-preview-content th {
                     background: #f8fafc;
-                    color: #64748b;
+                    color: #64748b !important;
                     font-size: 10px;
                     font-weight: 700;
                     text-transform: uppercase;
@@ -211,9 +222,8 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                 #report-preview-content h1, 
                 #report-preview-content h2, 
                 #report-preview-content h3 {
-                    color: #1e3a8a;
-                    margin-top: 2em;
-                    margin-bottom: 1em;
+                    margin-top: 1.5em;
+                    margin-bottom: 0.8em;
                 }
 
                 .keep-together {
