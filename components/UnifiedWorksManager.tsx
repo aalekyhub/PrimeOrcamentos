@@ -122,10 +122,11 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, onGenerateBudget }) =
                     id: db.generateId(map.idPrefix),
                     plan_id: newPlanId
                 }));
+                // Using full list here since it's multiple new items, but still better than nothing
                 await db.save(map.table, [...allItems, ...newItems]);
             }
 
-            await db.save('serviflow_plans', [newPlan, ...allPlans]);
+            await db.save('serviflow_plans', [newPlan, ...allPlans], newPlan);
             loadPlans();
             alert('Projeto duplicado com sucesso!');
         } catch (error) {

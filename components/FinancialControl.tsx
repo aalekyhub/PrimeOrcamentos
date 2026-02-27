@@ -63,7 +63,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
     setShowForm(false);
     setFormData({ type: 'RECEITA', date: new Date().toISOString().split('T')[0], isRecurring: false, frequency: 'NONE' });
 
-    const result = await db.save('serviflow_transactions', newList);
+    const result = await db.save('serviflow_transactions', newList, newT);
     if (result?.success) notify("Transação lançada!");
   };
 
@@ -89,7 +89,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
     setShowForm(false);
     setLoanFormData({ bankName: '', totalAmount: 0, installmentsCount: 1, installmentValue: 0, startDate: new Date().toISOString().split('T')[0] });
 
-    const result = await db.save('serviflow_loans', newList);
+    const result = await db.save('serviflow_loans', newList, newLoan);
     if (result?.success) notify("Empréstimo registrado!");
   };
 

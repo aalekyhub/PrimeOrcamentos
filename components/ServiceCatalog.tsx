@@ -65,7 +65,7 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
     }
 
     setServices(newList);
-    const result = await db.save('serviflow_catalog', newList);
+    const result = await db.save('serviflow_catalog', newList, serviceResult);
 
     if (result?.success) {
       notify(editingService ? "Serviço atualizado!" : "Serviço adicionado!");

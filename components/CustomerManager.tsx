@@ -110,7 +110,8 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
     setCustomers(newList);
 
     // Salva e aguarda nuvem
-    const result = await db.save('serviflow_customers', newList);
+    // Otmização: envia apenas o item atual para o Supabase
+    const result = await db.save('serviflow_customers', newList, customerData);
 
     if (result?.success) {
       notify(editingCustomerId ? "Cliente atualizado e sincronizado!" : "Cliente cadastrado!");

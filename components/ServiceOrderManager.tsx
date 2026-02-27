@@ -131,7 +131,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
 
     setIsSaving(true);
     try {
-      const result = await db.save('serviflow_orders', newList);
+      const result = await db.save('serviflow_orders', newList, data);
       if (result?.success) { notify(editingOrderId ? "O.S. atualizada e sincronizada!" : "Ordem de Serviço registrada e sincronizada!"); setEditingOrderId(null); setShowForm(false); }
       else { notify("Salvo localmente. Erro ao sincronizar (veja o console)", "warning"); setEditingOrderId(null); setShowForm(false); }
     } finally { setIsSaving(false); }

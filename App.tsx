@@ -102,26 +102,25 @@ const AppContent: React.FC = () => {
       if (cloudData) {
         if (cloudData.customers) {
           const customerMap = new Map();
-          const duplicatesToRemove: string[] = [];
           cloudData.customers.forEach((c: Customer) => {
-            const key = c.document.replace(/\D/g, '');
-            if (customerMap.has(key)) { duplicatesToRemove.push(c.id); }
-            else { customerMap.set(key, c); }
+            const doc = c.document.replace(/\D/g, '');
+            // Prioritize keeping the record if it has more info or just use last one found
+            customerMap.set(doc, c);
           });
-          setCustomers(Array.from(customerMap.values()) as Customer[]);
-          if (duplicatesToRemove.length > 0) { duplicatesToRemove.forEach(id => db.remove('serviflow_customers', id)); }
+          const deduplicatedCustomers = Array.from(customerMap.values()) as Customer[];
+          setCustomers(deduplicatedCustomers);
+          db.saveLocal('serviflow_customers', deduplicatedCustomers);
         }
 
         if (cloudData.catalog) {
           const serviceMap = new Map();
-          const duplicatesToRemove: string[] = [];
           cloudData.catalog.forEach((s: CatalogService) => {
             const key = s.name.trim().toLowerCase();
-            if (serviceMap.has(key)) { duplicatesToRemove.push(s.id); }
-            else { serviceMap.set(key, s); }
+            serviceMap.set(key, s);
           });
-          setCatalog(Array.from(serviceMap.values()) as CatalogService[]);
-          if (duplicatesToRemove.length > 0) { duplicatesToRemove.forEach(id => db.remove('serviflow_catalog', id)); }
+          const deduplicatedCatalog = Array.from(serviceMap.values()) as CatalogService[];
+          setCatalog(deduplicatedCatalog);
+          db.saveLocal('serviflow_catalog', deduplicatedCatalog);
         }
 
         if (cloudData.orders) {
@@ -130,9 +129,11 @@ const AppContent: React.FC = () => {
             (cloudData.orders as ServiceOrder[]).forEach((o: ServiceOrder) => {
               localMap.set(o.id, o);
             });
-            return Array.from(localMap.values()).sort((a, b) =>
+            const merged = Array.from(localMap.values()).sort((a, b) =>
               new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
             );
+            db.saveLocal(STORAGE_KEYS.ORDERS, merged);
+            return merged;
           });
         }
 

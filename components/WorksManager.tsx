@@ -114,7 +114,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
                         // Save Work Header
                         const newWorks = [...localWorks, work];
-                        db.save('serviflow_works', newWorks);
+                        db.save('serviflow_works', newWorks, work);
                         setWorks(newWorks);
                     }
                 }
@@ -160,7 +160,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             }));
 
         if (newWorkServices.length > 0) {
-            db.save('serviflow_work_services', [...allWorkServices, ...newWorkServices]);
+            db.save('serviflow_work_services', [...allWorkServices, ...newWorkServices], newWorkServices);
             importedCount += newWorkServices.length;
         }
 
@@ -192,7 +192,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             }));
 
         if (newWorkMaterials.length > 0) {
-            db.save('serviflow_work_materials', [...allWorkMaterials, ...newWorkMaterials]);
+            db.save('serviflow_work_materials', [...allWorkMaterials, ...newWorkMaterials], newWorkMaterials);
             importedCount += newWorkMaterials.length;
         }
 
@@ -214,7 +214,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             }));
 
         if (newWorkLabor.length > 0) {
-            db.save('serviflow_work_labor', [...allWorkLabor, ...newWorkLabor]);
+            db.save('serviflow_work_labor', [...allWorkLabor, ...newWorkLabor], newWorkLabor);
             importedCount += newWorkLabor.length;
         }
 
@@ -234,7 +234,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             }));
 
         if (newWorkIndirects.length > 0) {
-            db.save('serviflow_work_indirects', [...allWorkIndirects, ...newWorkIndirects]);
+            db.save('serviflow_work_indirects', [...allWorkIndirects, ...newWorkIndirects], newWorkIndirects);
             importedCount += newWorkIndirects.length;
         }
 
@@ -254,7 +254,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             }));
 
         if (newWorkTaxes.length > 0) {
-            db.save('serviflow_work_taxes', [...allWorkTaxes, ...newWorkTaxes]);
+            db.save('serviflow_work_taxes', [...allWorkTaxes, ...newWorkTaxes], newWorkTaxes);
             importedCount += newWorkTaxes.length;
         }
 
@@ -383,12 +383,12 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             const newTaxes = sourceTaxes.map(t => ({ ...t, id: db.generateId('WTAX'), work_id: newWorkId }));
 
             // 4. Save everything
-            await db.save('serviflow_works', [newWork, ...allWorks]);
-            await db.save('serviflow_work_services', [...allServices, ...newServices]);
-            await db.save('serviflow_work_materials', [...allMaterials, ...newMaterials]);
-            await db.save('serviflow_work_labor', [...allLabor, ...newLabor]);
-            await db.save('serviflow_work_indirects', [...allIndirects, ...newIndirects]);
-            await db.save('serviflow_work_taxes', [...allTaxes, ...newTaxes]);
+            await db.save('serviflow_works', [newWork, ...allWorks], newWork);
+            await db.save('serviflow_work_services', [...allServices, ...newServices], newServices);
+            await db.save('serviflow_work_materials', [...allMaterials, ...newMaterials], newMaterials);
+            await db.save('serviflow_work_labor', [...allLabor, ...newLabor], newLabor);
+            await db.save('serviflow_work_indirects', [...allIndirects, ...newIndirects], newIndirects);
+            await db.save('serviflow_work_taxes', [...allTaxes, ...newTaxes], newTaxes);
 
             // 5. Update state
             setWorks(prev => [newWork, ...prev]);
