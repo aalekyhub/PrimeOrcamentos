@@ -590,18 +590,18 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
     const handleLoadDefaultTaxes = () => {
         if (!currentWork) return;
         const defaults = [
-            { name: 'BDI', rate: 0 },
-            { name: 'ISS', rate: 0 },
-            { name: 'PIS', rate: 0 },
-            { name: 'COFINS', rate: 0 },
-            { name: 'INSS', rate: 0 }
+            { name: 'ISS', rate: 5 },
+            { name: 'PIS', rate: 0.65 },
+            { name: 'COFINS', rate: 3 },
+            { name: 'INSS', rate: 3.5 }
         ];
 
-        const newTaxes = [...taxes];
-        let addedCount = 0;
-
+        let newTaxes = [...taxes];
         defaults.forEach(def => {
-            if (!newTaxes.some(t => t.name === def.name)) {
+            const idx = newTaxes.findIndex(t => t.name === def.name);
+            if (idx !== -1) {
+                newTaxes[idx] = { ...newTaxes[idx], rate: def.rate, value: 0 };
+            } else {
                 newTaxes.push({
                     id: db.generateId('WTAX'),
                     work_id: currentWork.id,
@@ -613,12 +613,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             }
         });
 
-        if (addedCount > 0) {
-            setTaxes(newTaxes);
-            notify(`${addedCount} taxas padrão adicionadas.`, "success");
-        } else {
-            notify("Taxas padrão já configuradas.", "info");
-        }
+        setTaxes(newTaxes);
+        notify("Impostos padrão carregados!", "success");
     };
 
 
@@ -1377,46 +1373,99 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     )}
 
                                     {resourceTab === 'impostos' && (
-                                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                                            <div className="md:col-span-7">
-                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Imposto / Taxa</label>
-                                                <input type="text" id="tax_name" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-700 dark:text-slate-100" placeholder="Ex: BDI ou ISS" />
+                                        <div className="space-y-6">
+                                            <div className="bg-green-50/50 dark:bg-green-900/10 p-4 rounded-xl border border-green-100 dark:border-green-800/50">
+                                                <div className="flex justify-between items-center mb-4">
+                                                    <h4 className="text-[10px] font-black text-green-600 dark:text-green-400 uppercase tracking-widest flex items-center gap-2">
+                                                        <Percent size={14} /> Impostos e BDI Padronizados
+                                                    </h4>
+                                                    <button
+                                                        type="button"
+                                                        onClick={handleLoadDefaultTaxes}
+                                                        className="text-[10px] font-bold text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 uppercase tracking-tighter bg-green-100 dark:bg-green-900/40 px-2 py-1 rounded transition-colors"
+                                                    >
+                                                        Carregar Padrão (ISS/PIS/COF/INS)
+                                                    </button>
+                                                </div>
+
+                                                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                                                    {[
+                                                        { name: 'BDI', label: 'BDI (%)', color: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800' },
+                                                        { name: 'ISS', label: 'ISS (%)', color: 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-100 dark:border-green-800' },
+                                                        { name: 'PIS', label: 'PIS (%)', color: 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 border-teal-100 dark:border-teal-800' },
+                                                        { name: 'COFINS', label: 'COFINS (%)', color: 'bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 border-slate-100 dark:border-slate-700' },
+                                                        { name: 'INSS', label: 'INSS (%)', color: 'bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 border-orange-100 dark:border-orange-800' }
+                                                    ].map(tax => (
+                                                        <div key={tax.name} className={`p-3 rounded-lg border ${tax.color} `}>
+                                                            <label className="block text-[10px] font-bold uppercase mb-1 opacity-70">{tax.label}</label>
+                                                            <input
+                                                                type="number"
+                                                                step="0.01"
+                                                                className="w-full bg-white/50 dark:bg-slate-900/50 border border-black/5 dark:border-white/5 rounded p-1 text-sm font-bold outline-none focus:ring-2 focus:ring-black/5 text-slate-900 dark:text-slate-100"
+                                                                value={taxes.find(t => t.name === tax.name)?.rate || ''}
+                                                                placeholder="0.00"
+                                                                onChange={(e) => {
+                                                                    const val = parseFloat(e.target.value) || 0;
+                                                                    const newTaxes = [...taxes];
+                                                                    const idx = newTaxes.findIndex(t => t.name === tax.name);
+                                                                    if (idx !== -1) {
+                                                                        newTaxes[idx] = { ...newTaxes[idx], rate: val, value: 0 };
+                                                                    } else {
+                                                                        newTaxes.push({
+                                                                            id: db.generateId('WTAX'),
+                                                                            work_id: currentWork?.id || '',
+                                                                            name: tax.name,
+                                                                            rate: val,
+                                                                            value: 0
+                                                                        });
+                                                                    }
+                                                                    setTaxes(newTaxes);
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
-                                            <div className="md:col-span-3">
-                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Valor (%)</label>
-                                                <input
-                                                    type="number"
-                                                    id="tax_rate"
-                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-700 dark:text-slate-100"
-                                                    placeholder="0.00"
-                                                />
-                                            </div>
-                                            <div className="md:col-span-2">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        const name = (document.getElementById('tax_name') as HTMLInputElement).value;
-                                                        const rate = parseFloat((document.getElementById('tax_rate') as HTMLInputElement).value) || 0;
 
-                                                        if (!name) return notify("Nome da taxa obrigatório", "error");
-
-                                                        const newTax: WorkTax = {
-                                                            id: db.generateId('TAX'),
-                                                            work_id: currentWork?.id || '',
-                                                            name: name.toUpperCase(),
-                                                            rate: rate,
-                                                            value: 0
-                                                        };
-
-                                                        setTaxes([...taxes, newTax]);
-
-                                                        (document.getElementById('tax_name') as HTMLInputElement).value = '';
-                                                        (document.getElementById('tax_rate') as HTMLInputElement).value = '';
-                                                    }}
-                                                    className="w-full bg-green-600 dark:bg-green-500 text-white p-2 rounded hover:bg-green-700 dark:hover:bg-green-400 font-bold text-xs h-9 shadow-sm flex items-center justify-center gap-2"
-                                                >
-                                                    <Plus size={16} /> ADICIONAR
-                                                </button>
+                                            <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                                                <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">Outras Taxas / Impostos Personalizados</h4>
+                                                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                                                    <div className="md:col-span-7">
+                                                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Nome do Item</label>
+                                                        <input type="text" id="tax_name" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-700 dark:text-slate-100" placeholder="Ex: Taxa Administrativa" />
+                                                    </div>
+                                                    <div className="md:col-span-3">
+                                                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Taxa (%)</label>
+                                                        <input
+                                                            type="number"
+                                                            id="tax_rate"
+                                                            className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-700 dark:text-slate-100"
+                                                            placeholder="0.00"
+                                                        />
+                                                    </div>
+                                                    <div className="md:col-span-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const name = (document.getElementById('tax_name') as HTMLInputElement).value;
+                                                                const rate = parseFloat((document.getElementById('tax_rate') as HTMLInputElement).value) || 0;
+                                                                if (!name) return notify("Nome obrigatório", "error");
+                                                                setTaxes([...taxes, {
+                                                                    id: db.generateId('WTAX'),
+                                                                    work_id: currentWork?.id || '',
+                                                                    name: name.toUpperCase(),
+                                                                    rate: rate,
+                                                                    value: 0
+                                                                }]);
+                                                                (document.getElementById('tax_name') as HTMLInputElement).value = '';
+                                                                (document.getElementById('tax_rate') as HTMLInputElement).value = '';
+                                                            }}
+                                                            className="w-full bg-green-600 dark:bg-green-500 text-white p-2 rounded hover:bg-green-700 dark:hover:bg-green-400 font-bold text-xs h-9 shadow-sm flex items-center justify-center gap-2"
+                                                        >
+                                                            <Plus size={16} /> ADICIONAR
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     )}

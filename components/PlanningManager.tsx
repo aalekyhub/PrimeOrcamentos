@@ -54,6 +54,8 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
     const [draggedIndIndex, setDraggedIndIndex] = useState<number | null>(null);
 
     const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
+    const [selectedLabor, setSelectedLabor] = useState<string[]>([]);
+    const [selectedIndirects, setSelectedIndirects] = useState<string[]>([]);
 
     // Preview UI State
     const [showPreview, setShowPreview] = useState(false);
@@ -1567,6 +1569,55 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
 
                                 {resourceTab === 'mo' && (
                                     <div className="space-y-2">
+                                        {labor.length > 0 && (
+                                            <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-2 rounded-lg border border-slate-200 dark:border-slate-700 mb-2">
+                                                <div className="flex items-center gap-3">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-slate-900"
+                                                        checked={selectedLabor.length === labor.length && labor.length > 0}
+                                                        onChange={(e) => {
+                                                            if (e.target.checked) {
+                                                                setSelectedLabor(labor.map(l => l.id));
+                                                            } else {
+                                                                setSelectedLabor([]);
+                                                            }
+                                                        }}
+                                                    />
+                                                    <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                                                        {selectedLabor.length} selecionado(s)
+                                                    </span>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    {selectedLabor.length > 0 && (
+                                                        <button
+                                                            onClick={() => {
+                                                                if (window.confirm(`Excluir ${selectedLabor.length} itens de mão de obra selecionados?`)) {
+                                                                    setLabor(labor.filter(l => !selectedLabor.includes(l.id)));
+                                                                    setSelectedLabor([]);
+                                                                    notify("Mão de obra removida!");
+                                                                }
+                                                            }}
+                                                            className="flex items-center gap-1 px-2 py-1 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded text-[10px] font-bold hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors border border-red-100 dark:border-red-800"
+                                                        >
+                                                            <Trash2 size={12} /> Excluir Selecionados
+                                                        </button>
+                                                    )}
+                                                    <button
+                                                        onClick={() => {
+                                                            if (window.confirm("Deseja realmente excluir TODA a mão de obra desta lista?")) {
+                                                                setLabor([]);
+                                                                setSelectedLabor([]);
+                                                                notify("Lista de mão de obra limpa!");
+                                                            }
+                                                        }}
+                                                        className="flex items-center gap-1 px-2 py-1 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded text-[10px] font-bold hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
+                                                    >
+                                                        <Archive size={12} /> Limpar Lista
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
                                         {labor.map((l, index) => (
                                             <div
                                                 key={l.id}
@@ -1574,7 +1625,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 onDragStart={() => setDraggedLabIndex(index)}
                                                 onDragOver={(e) => (window as any).handleDragOver(e, index, draggedLabIndex, labor, setLabor, setDraggedLabIndex)}
                                                 onDragEnd={() => setDraggedLabIndex(null)}
-                                                className={`bg-white dark:bg-slate-900/50 p-3 rounded-lg border flex justify-between items-center text-sm transition-all ${draggedLabIndex === index ? 'opacity-50 bg-blue-50 dark:bg-blue-900/20 border-blue-200 shadow-inner' : 'border-slate-200 dark:border-slate-800 shadow-sm'}`}
+                                                className={`bg-white dark:bg-slate-900/50 p-3 rounded-lg border flex justify-between items-center text-sm transition-all ${draggedLabIndex === index ? 'opacity-50 bg-blue-50 dark:bg-blue-900/20 border-blue-200 shadow-inner' : (selectedLabor.includes(l.id) ? 'border-blue-300 dark:border-blue-500 bg-blue-50/30 dark:bg-blue-900/10' : 'border-slate-200 dark:border-slate-800 shadow-sm')}`}
                                             >
                                                 {editingId === l.id ? (
                                                     <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center mr-2">
@@ -1654,6 +1705,15 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 ) : (
                                                     <>
                                                         <div className="flex items-center gap-2 grow">
+                                                            <input
+                                                                type="checkbox"
+                                                                className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-slate-900 mr-1"
+                                                                checked={selectedLabor.includes(l.id)}
+                                                                onChange={(e) => {
+                                                                    if (e.target.checked) setSelectedLabor([...selectedLabor, l.id]);
+                                                                    else setSelectedLabor(selectedLabor.filter(id => id !== l.id));
+                                                                }}
+                                                            />
                                                             <div className="cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 shrink-0">
                                                                 <GripVertical size={16} />
                                                             </div>
@@ -1693,6 +1753,55 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
 
                                 {resourceTab === 'indireto' && (
                                     <div className="space-y-2">
+                                        {indirects.length > 0 && (
+                                            <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-2 rounded-lg border border-slate-200 dark:border-slate-700 mb-2">
+                                                <div className="flex items-center gap-3">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-slate-900"
+                                                        checked={selectedIndirects.length === indirects.length && indirects.length > 0}
+                                                        onChange={(e) => {
+                                                            if (e.target.checked) {
+                                                                setSelectedIndirects(indirects.map(i => i.id));
+                                                            } else {
+                                                                setSelectedIndirects([]);
+                                                            }
+                                                        }}
+                                                    />
+                                                    <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                                                        {selectedIndirects.length} selecionado(s)
+                                                    </span>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    {selectedIndirects.length > 0 && (
+                                                        <button
+                                                            onClick={() => {
+                                                                if (window.confirm(`Excluir ${selectedIndirects.length} custos indiretos selecionados?`)) {
+                                                                    setIndirects(indirects.filter(i => !selectedIndirects.includes(i.id)));
+                                                                    setSelectedIndirects([]);
+                                                                    notify("Custos indiretos removidos!");
+                                                                }
+                                                            }}
+                                                            className="flex items-center gap-1 px-2 py-1 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded text-[10px] font-bold hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors border border-red-100 dark:border-red-800"
+                                                        >
+                                                            <Trash2 size={12} /> Excluir Selecionados
+                                                        </button>
+                                                    )}
+                                                    <button
+                                                        onClick={() => {
+                                                            if (window.confirm("Deseja realmente excluir TODOS os custos indiretos desta lista?")) {
+                                                                setIndirects([]);
+                                                                setSelectedIndirects([]);
+                                                                notify("Lista de custos indiretos limpa!");
+                                                            }
+                                                        }}
+                                                        className="flex items-center gap-1 px-2 py-1 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded text-[10px] font-bold hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
+                                                    >
+                                                        <Archive size={12} /> Limpar Lista
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
                                         {indirects.map((i, index) => (
                                             <div
                                                 key={i.id}
@@ -1700,7 +1809,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 onDragStart={() => setDraggedIndIndex(index)}
                                                 onDragOver={(e) => (window as any).handleDragOver(e, index, draggedIndIndex, indirects, setIndirects, setDraggedIndIndex)}
                                                 onDragEnd={() => setDraggedIndIndex(null)}
-                                                className={`bg-white dark:bg-slate-900/50 p-3 rounded-lg border flex justify-between items-center text-sm transition-all ${draggedIndIndex === index ? 'opacity-50 bg-blue-50 dark:bg-blue-900/20 border-blue-200 shadow-inner' : 'border-slate-200 dark:border-slate-800 shadow-sm'}`}
+                                                className={`bg-white dark:bg-slate-900/50 p-3 rounded-lg border flex justify-between items-center text-sm transition-all ${draggedIndIndex === index ? 'opacity-50 bg-blue-50 dark:bg-blue-900/20 border-blue-200 shadow-inner' : (selectedIndirects.includes(i.id) ? 'border-blue-300 dark:border-blue-500 bg-blue-50/30 dark:bg-blue-900/10' : 'border-slate-200 dark:border-slate-800 shadow-sm')}`}
                                             >
                                                 {editingId === i.id ? (
                                                     <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center mr-2">
@@ -1761,6 +1870,15 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                 ) : (
                                                     <>
                                                         <div className="flex items-center gap-2 grow">
+                                                            <input
+                                                                type="checkbox"
+                                                                className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 bg-white dark:bg-slate-900 mr-1"
+                                                                checked={selectedIndirects.includes(i.id)}
+                                                                onChange={(e) => {
+                                                                    if (e.target.checked) setSelectedIndirects([...selectedIndirects, i.id]);
+                                                                    else setSelectedIndirects(selectedIndirects.filter(id => id !== i.id));
+                                                                }}
+                                                            />
                                                             <div className="cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 shrink-0">
                                                                 <GripVertical size={16} />
                                                             </div>
