@@ -1380,8 +1380,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                     <input
                                                         type="text"
                                                         value={editDesc}
-                                                        onChange={e => setEditDesc(e.target.value.toUpperCase())}
-                                                        className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm font-bold text-slate-900 dark:text-slate-100"
+                                                        onChange={e => setEditDesc(e.target.value)}
+                                                        className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm font-bold text-slate-900 dark:text-slate-100 uppercase"
                                                     />
                                                 </div>
                                                 <div className="md:col-span-1">
@@ -1560,37 +1560,109 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
                                         <div className="space-y-2">
                                             {materials.map((m, index) => (
-                                                <div key={m.id} className="bg-white dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center text-sm shadow-sm transition-all hover:border-green-400 group">
-                                                    <div className="flex items-center gap-3 grow">
-                                                        <input
-                                                            type="checkbox"
-                                                            className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-green-600 focus:ring-green-500 bg-white dark:bg-slate-900"
-                                                            checked={selectedMaterials.includes(m.id)}
-                                                            onChange={(e) => {
-                                                                if (e.target.checked) setSelectedMaterials([...selectedMaterials, m.id]);
-                                                                else setSelectedMaterials(selectedMaterials.filter(id => id !== m.id));
-                                                            }}
-                                                        />
-                                                        <div className="grow text-slate-900 dark:text-slate-100">
-                                                            <span className="whitespace-nowrap"><b className="dark:text-green-400 uppercase">{m.material_name}</b> | (R$ {m.unit_cost.toFixed(2)}) {m.quantity} {m.unit}</span>
+                                                editingId === m.id ? (
+                                                    <div key={m.id} className="bg-white dark:bg-slate-900/50 p-3 rounded-lg border border-green-400 flex justify-between items-center text-sm shadow-md transition-all">
+                                                        <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center mr-2">
+                                                            <div className="md:col-span-8">
+                                                                <input
+                                                                    type="text"
+                                                                    value={editDesc}
+                                                                    onChange={e => setEditDesc(e.target.value)}
+                                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-900 dark:text-slate-100 placeholder:text-slate-400 uppercase"
+                                                                    placeholder="DESCRIÇÃO DO MATERIAL"
+                                                                />
+                                                            </div>
+                                                            <div className="md:col-span-1">
+                                                                <input
+                                                                    type="text"
+                                                                    value={editUnit}
+                                                                    onChange={e => setEditUnit(e.target.value)}
+                                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-900 dark:text-slate-100 placeholder:text-slate-400 uppercase"
+                                                                    placeholder="UN"
+                                                                />
+                                                            </div>
+                                                            <div className="md:col-span-1">
+                                                                <input
+                                                                    type="number"
+                                                                    value={editQty}
+                                                                    onChange={e => setEditQty(parseFloat(e.target.value) || 0)}
+                                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-900 dark:text-slate-100"
+                                                                />
+                                                            </div>
+                                                            <div className="md:col-span-1">
+                                                                <input
+                                                                    type="number"
+                                                                    value={editPrice1}
+                                                                    onChange={e => setEditPrice1(parseFloat(e.target.value) || 0)}
+                                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-900 dark:text-slate-100"
+                                                                    placeholder="Custo Unit."
+                                                                />
+                                                            </div>
+                                                            <div className="md:col-span-1 flex gap-1">
+                                                                <button
+                                                                    onClick={() => {
+                                                                        const upMaterial = {
+                                                                            ...m,
+                                                                            material_name: editDesc.toUpperCase(),
+                                                                            quantity: editQty,
+                                                                            unit: editUnit.toUpperCase(),
+                                                                            unit_cost: editPrice1,
+                                                                            total_cost: editQty * editPrice1
+                                                                        };
+                                                                        const updated = materials.map(item => item.id === m.id ? upMaterial : item);
+                                                                        setMaterials(updated);
+                                                                        const allMaterial = db.load('serviflow_work_materials', []) as WorkMaterial[];
+                                                                        const finalMaterials = allMaterial.map(item => item.id === m.id ? upMaterial : item);
+                                                                        db.save('serviflow_work_materials', finalMaterials, [upMaterial]);
+                                                                        setEditingId(null);
+                                                                        notify("Material atualizado!");
+                                                                    }}
+                                                                    className="text-green-600 p-1 hover:bg-green-50 dark:hover:bg-green-900/30 rounded"
+                                                                >
+                                                                    <Check size={16} />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => setEditingId(null)}
+                                                                    className="text-red-600 p-1 hover:bg-red-50 dark:hover:bg-red-900/30 rounded"
+                                                                >
+                                                                    <X size={16} />
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-center gap-4 text-xs shrink-0 whitespace-nowrap">
-                                                        <span className="font-bold text-slate-900 dark:text-slate-100">R$ {m.total_cost.toFixed(2)}</span>
-                                                        <div className="flex gap-1 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                            <button onClick={() => {
-                                                                setEditingId(m.id);
-                                                                setEditDesc(m.material_name);
-                                                                setEditQty(m.quantity);
-                                                                setEditUnit(m.unit);
-                                                                setEditPrice1(m.unit_cost);
-                                                            }} className="p-1.5 text-slate-400 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-900/30 rounded transition-all"><Pencil size={14} /></button>
-                                                            <button onClick={() => handleDeleteMaterial(m.id)} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-all">
-                                                                <Trash2 size={14} />
-                                                            </button>
+                                                ) : (
+                                                    <div key={m.id} className="bg-white dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center text-sm shadow-sm transition-all hover:border-green-400 group">
+                                                        <div className="flex items-center gap-3 grow">
+                                                            <input
+                                                                type="checkbox"
+                                                                className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-green-600 focus:ring-green-500 bg-white dark:bg-slate-900"
+                                                                checked={selectedMaterials.includes(m.id)}
+                                                                onChange={(e) => {
+                                                                    if (e.target.checked) setSelectedMaterials([...selectedMaterials, m.id]);
+                                                                    else setSelectedMaterials(selectedMaterials.filter(id => id !== m.id));
+                                                                }}
+                                                            />
+                                                            <div className="grow text-slate-900 dark:text-slate-100">
+                                                                <span className="whitespace-nowrap"><b className="dark:text-green-400 uppercase">{m.material_name}</b> | (R$ {m.unit_cost.toFixed(2)}) {m.quantity} {m.unit}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-4 text-xs shrink-0 whitespace-nowrap">
+                                                            <span className="font-bold text-slate-900 dark:text-slate-100">R$ {m.total_cost.toFixed(2)}</span>
+                                                            <div className="flex gap-1 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                <button onClick={() => {
+                                                                    setEditingId(m.id);
+                                                                    setEditDesc(m.material_name);
+                                                                    setEditQty(m.quantity);
+                                                                    setEditUnit(m.unit);
+                                                                    setEditPrice1(m.unit_cost);
+                                                                }} className="p-1.5 text-slate-400 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-900/30 rounded transition-all"><Pencil size={14} /></button>
+                                                                <button onClick={() => handleDeleteMaterial(m.id)} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-all">
+                                                                    <Trash2 size={14} />
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
+                                                )
                                             ))}
                                             {materials.length > 0 && (
                                                 <div className="flex justify-end items-center p-4 bg-green-50/50 dark:bg-green-900/10 rounded-xl border border-green-100 dark:border-green-900/30 mt-4">
@@ -1668,37 +1740,110 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
                                         <div className="space-y-2">
                                             {labor.map((l, index) => (
-                                                <div key={l.id} className="bg-white dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center text-sm shadow-sm transition-all hover:border-green-400 group">
-                                                    <div className="flex items-center gap-3 grow">
-                                                        <input
-                                                            type="checkbox"
-                                                            className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-green-600 focus:ring-green-500 bg-white dark:bg-slate-900"
-                                                            checked={selectedLabor.includes(l.id)}
-                                                            onChange={(e) => {
-                                                                if (e.target.checked) setSelectedLabor([...selectedLabor, l.id]);
-                                                                else setSelectedLabor(selectedLabor.filter(id => id !== l.id));
-                                                            }}
-                                                        />
-                                                        <div className="grow text-slate-900 dark:text-slate-100">
-                                                            <span className="whitespace-nowrap"><b className="dark:text-amber-400 uppercase">{l.role}</b> | ({l.cost_type}) {l.quantity}{l.unit || 'un'}</span>
+                                                editingId === l.id ? (
+                                                    <div key={l.id} className="bg-white dark:bg-slate-900/50 p-3 rounded-lg border border-green-400 flex justify-between items-center text-sm shadow-md transition-all">
+                                                        <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center mr-2">
+                                                            <div className="md:col-span-8">
+                                                                <input
+                                                                    type="text"
+                                                                    value={editDesc}
+                                                                    onChange={e => setEditDesc(e.target.value)}
+                                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-900 dark:text-slate-100 placeholder:text-slate-400 uppercase"
+                                                                    placeholder="FUNÇÃO / CARGO"
+                                                                />
+                                                            </div>
+                                                            <div className="md:col-span-1">
+                                                                <input
+                                                                    type="text"
+                                                                    value={editUnit}
+                                                                    onChange={e => setEditUnit(e.target.value)}
+                                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-900 dark:text-slate-100 placeholder:text-slate-400 uppercase"
+                                                                    placeholder="UN"
+                                                                />
+                                                            </div>
+                                                            <div className="md:col-span-1">
+                                                                <input
+                                                                    type="number"
+                                                                    value={editQty}
+                                                                    onChange={e => setEditQty(parseFloat(e.target.value) || 0)}
+                                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-900 dark:text-slate-100"
+                                                                />
+                                                            </div>
+                                                            <div className="md:col-span-1">
+                                                                <input
+                                                                    type="number"
+                                                                    value={editPrice1}
+                                                                    onChange={e => setEditPrice1(parseFloat(e.target.value) || 0)}
+                                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-900 dark:text-slate-100"
+                                                                    placeholder="Custo Unit."
+                                                                />
+                                                            </div>
+                                                            <div className="md:col-span-1 flex gap-1">
+                                                                <button
+                                                                    onClick={() => {
+                                                                        const upLabor = {
+                                                                            ...l,
+                                                                            role: editDesc.toUpperCase(),
+                                                                            quantity: editQty,
+                                                                            unit: editUnit.toUpperCase(),
+                                                                            unit_cost: editPrice1,
+                                                                            total_cost: editQty * editPrice1
+                                                                        };
+                                                                        const updated = labor.map(item => item.id === l.id ? upLabor : item);
+                                                                        setLabor(updated);
+                                                                        const allLabor = db.load('serviflow_work_labor', []) as WorkLabor[];
+                                                                        const finalLabor = allLabor.map(item => item.id === l.id ? upLabor : item);
+                                                                        db.save('serviflow_work_labor', finalLabor, [upLabor]);
+                                                                        setEditingId(null);
+                                                                        notify("Mão de obra atualizada!");
+                                                                    }}
+                                                                    className="text-green-600 p-1 hover:bg-green-50 dark:hover:bg-green-900/30 rounded"
+                                                                >
+                                                                    <Check size={16} />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => setEditingId(null)}
+                                                                    className="text-red-600 p-1 hover:bg-red-50 dark:hover:bg-red-900/30 rounded"
+                                                                >
+                                                                    <X size={16} />
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-center gap-4 text-xs shrink-0 whitespace-nowrap">
-                                                        <span className="font-bold text-slate-900 dark:text-slate-100">R$ {l.total_cost.toFixed(2)}</span>
-                                                        <div className="flex gap-1 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                            <button onClick={() => {
-                                                                setEditingId(l.id);
-                                                                setEditDesc(l.role);
-                                                                setEditUnit(l.unit || 'un');
-                                                                setEditQty(l.quantity);
-                                                                setEditPrice1(l.unit_cost);
-                                                            }} className="p-1.5 text-slate-400 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-900/30 rounded transition-all"><Pencil size={14} /></button>
-                                                            <button onClick={() => handleDeleteLabor(l.id)} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-all">
-                                                                <Trash2 size={14} />
-                                                            </button>
+                                                ) : (
+                                                    <div key={l.id} className="bg-white dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center text-sm shadow-sm transition-all hover:border-green-400 group">
+                                                        <div className="flex items-center gap-3 grow">
+                                                            <input
+                                                                type="checkbox"
+                                                                className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-green-600 focus:ring-green-500 bg-white dark:bg-slate-900"
+                                                                checked={selectedLabor.includes(l.id)}
+                                                                onChange={(e) => {
+                                                                    if (e.target.checked) setSelectedLabor([...selectedLabor, l.id]);
+                                                                    else setSelectedLabor(selectedLabor.filter(id => id !== l.id));
+                                                                }}
+                                                            />
+                                                            <div className="grow text-slate-900 dark:text-slate-100">
+                                                                <span className="whitespace-nowrap"><b className="dark:text-amber-400 uppercase">{l.role}</b> | ({l.cost_type}) {l.quantity}{l.unit || 'un'}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-4 text-xs shrink-0 whitespace-nowrap">
+                                                            <span className="font-bold text-slate-900 dark:text-slate-100">R$ {l.total_cost.toFixed(2)}</span>
+                                                            <div className="flex gap-1 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                <button onClick={() => {
+                                                                    setEditingId(l.id);
+                                                                    setEditDesc(l.role);
+                                                                    setEditUnit(l.unit || 'un');
+                                                                    setEditQty(l.quantity);
+                                                                    setEditPrice1(l.unit_cost);
+                                                                    setEditPrice2(0);
+                                                                }} className="p-1.5 text-slate-400 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-900/30 rounded transition-all"><Pencil size={14} /></button>
+                                                                <button onClick={() => handleDeleteLabor(l.id)} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-all">
+                                                                    <Trash2 size={14} />
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
+                                                )
                                             ))}
                                             {labor.length > 0 && (
                                                 <div className="flex justify-end items-center p-4 bg-amber-50/50 dark:bg-amber-900/10 rounded-xl border border-amber-100 dark:border-amber-900/30 mt-4">
@@ -1776,30 +1921,102 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
                                         <div className="space-y-2">
                                             {indirects.map((i, index) => (
-                                                <div key={i.id} className="bg-white dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center text-sm shadow-sm transition-all hover:border-green-400 group">
-                                                    <div className="flex items-center gap-3 grow">
-                                                        <input
-                                                            type="checkbox"
-                                                            className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-green-600 focus:ring-green-500 bg-white dark:bg-slate-900"
-                                                            checked={selectedIndirects.includes(i.id)}
-                                                            onChange={(e) => {
-                                                                if (e.target.checked) setSelectedIndirects([...selectedIndirects, i.id]);
-                                                                else setSelectedIndirects(selectedIndirects.filter(id => id !== i.id));
-                                                            }}
-                                                        />
-                                                        <div className="grow text-slate-900 dark:text-slate-100">
-                                                            <span><b className="text-slate-400 dark:text-slate-500">[{i.category}]</b> <b>{i.description}</b></span>
+                                                editingId === i.id ? (
+                                                    <div key={i.id} className="bg-white dark:bg-slate-900/50 p-3 rounded-lg border border-green-400 flex justify-between items-center text-sm shadow-md transition-all">
+                                                        <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center mr-2">
+                                                            <div className="md:col-span-3">
+                                                                <select
+                                                                    value={editUnit}
+                                                                    onChange={e => setEditUnit(e.target.value)}
+                                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs text-slate-900 dark:text-slate-100"
+                                                                >
+                                                                    <option>Transporte</option>
+                                                                    <option>Alimentação</option>
+                                                                    <option>EPI</option>
+                                                                    <option>Equipamentos</option>
+                                                                    <option>Taxas</option>
+                                                                    <option>Outros</option>
+                                                                </select>
+                                                            </div>
+                                                            <div className="md:col-span-6">
+                                                                <input
+                                                                    type="text"
+                                                                    value={editDesc}
+                                                                    onChange={e => setEditDesc(e.target.value)}
+                                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-900 dark:text-slate-100 uppercase"
+                                                                    placeholder="DESCRIÇÃO"
+                                                                />
+                                                            </div>
+                                                            <div className="md:col-span-2">
+                                                                <input
+                                                                    type="number"
+                                                                    value={editPrice1}
+                                                                    onChange={e => setEditPrice1(parseFloat(e.target.value) || 0)}
+                                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-900 dark:text-slate-100"
+                                                                />
+                                                            </div>
+                                                            <div className="md:col-span-1 flex gap-1">
+                                                                <button
+                                                                    onClick={() => {
+                                                                        const upIndirect = {
+                                                                            ...i,
+                                                                            category: editUnit,
+                                                                            description: editDesc.toUpperCase(),
+                                                                            value: editPrice1
+                                                                        };
+                                                                        const updated = indirects.map(item => item.id === i.id ? upIndirect : item);
+                                                                        setIndirects(updated);
+                                                                        const allInd = db.load('serviflow_work_indirects', []) as WorkIndirect[];
+                                                                        const finalInd = allInd.map(item => item.id === i.id ? upIndirect : item);
+                                                                        db.save('serviflow_work_indirects', finalInd, [upIndirect]);
+                                                                        setEditingId(null);
+                                                                        notify("Custo indireto atualizado!");
+                                                                    }}
+                                                                    className="text-green-600 p-1 hover:bg-green-50 dark:hover:bg-green-900/30 rounded"
+                                                                >
+                                                                    <Check size={16} />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => setEditingId(null)}
+                                                                    className="text-red-600 p-1 hover:bg-red-50 dark:hover:bg-red-900/30 rounded"
+                                                                >
+                                                                    <X size={16} />
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-center gap-4 text-xs shrink-0 whitespace-nowrap">
-                                                        <span className="font-bold text-slate-900 dark:text-slate-100">R$ {i.value.toFixed(2)}</span>
-                                                        <div className="flex gap-1 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                            <button onClick={() => handleDeleteIndirect(i.id)} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-all">
-                                                                <Trash2 size={14} />
-                                                            </button>
+                                                ) : (
+                                                    <div key={i.id} className="bg-white dark:bg-slate-900/50 p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center text-sm shadow-sm transition-all hover:border-green-400 group">
+                                                        <div className="flex items-center gap-3 grow">
+                                                            <input
+                                                                type="checkbox"
+                                                                className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-green-600 focus:ring-green-500 bg-white dark:bg-slate-900"
+                                                                checked={selectedIndirects.includes(i.id)}
+                                                                onChange={(e) => {
+                                                                    if (e.target.checked) setSelectedIndirects([...selectedIndirects, i.id]);
+                                                                    else setSelectedIndirects(selectedIndirects.filter(id => id !== i.id));
+                                                                }}
+                                                            />
+                                                            <div className="grow text-slate-900 dark:text-slate-100">
+                                                                <span><b className="text-slate-400 dark:text-slate-500">[{i.category}]</b> <b>{i.description}</b></span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-4 text-xs shrink-0 whitespace-nowrap">
+                                                            <span className="font-bold text-slate-900 dark:text-slate-100">R$ {i.value.toFixed(2)}</span>
+                                                            <div className="flex gap-1 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                <button onClick={() => {
+                                                                    setEditingId(i.id);
+                                                                    setEditDesc(i.description);
+                                                                    setEditUnit(i.category);
+                                                                    setEditPrice1(i.value);
+                                                                }} className="p-1.5 text-slate-400 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-900/30 rounded transition-all"><Pencil size={14} /></button>
+                                                                <button onClick={() => handleDeleteIndirect(i.id)} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-all">
+                                                                    <Trash2 size={14} />
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
+                                                )
                                             ))}
                                             {indirects.length > 0 && (
                                                 <div className="flex justify-end items-center p-4 bg-slate-100/50 dark:bg-slate-800/30 rounded-xl border border-slate-200 dark:border-slate-700 mt-4">

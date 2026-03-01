@@ -1178,8 +1178,8 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                         <input
                                                             type="text"
                                                             value={editDesc}
-                                                            onChange={e => setEditDesc(e.target.value.toUpperCase())}
-                                                            className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm font-bold text-slate-900 dark:text-slate-100"
+                                                            onChange={e => setEditDesc(e.target.value)}
+                                                            className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm font-bold text-slate-900 dark:text-slate-100 uppercase"
                                                         />
                                                     </div>
                                                     <div className="md:col-span-1">
@@ -1221,8 +1221,8 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             onClick={() => {
                                                                 const updated = services.map(s => s.id === svc.id ? {
                                                                     ...s,
-                                                                    description: editDesc,
-                                                                    unit: editUnit,
+                                                                    description: editDesc.toUpperCase(),
+                                                                    unit: editUnit.toUpperCase(),
                                                                     quantity: editQty,
                                                                     unit_material_cost: editPrice1,
                                                                     unit_labor_cost: editPrice2,
@@ -1363,8 +1363,8 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             <input
                                                                 type="text"
                                                                 value={editDesc}
-                                                                onChange={e => setEditDesc(e.target.value.toUpperCase())}
-                                                                className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-900 dark:text-slate-100 placeholder:text-slate-400"
+                                                                onChange={e => setEditDesc(e.target.value)}
+                                                                className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-900 dark:text-slate-100 placeholder:text-slate-400 uppercase"
                                                                 placeholder="DESCRIÇÃO DO MATERIAL"
                                                             />
                                                         </div>
@@ -1372,8 +1372,8 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             <input
                                                                 type="text"
                                                                 value={editUnit}
-                                                                onChange={e => setEditUnit(e.target.value.toUpperCase())}
-                                                                className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-900 dark:text-slate-100 placeholder:text-slate-400"
+                                                                onChange={e => setEditUnit(e.target.value)}
+                                                                className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-900 dark:text-slate-100 placeholder:text-slate-400 uppercase"
                                                                 placeholder="UN"
                                                             />
                                                         </div>
@@ -1399,9 +1399,9 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                 onClick={() => {
                                                                     const updated = materials.map(item => item.id === m.id ? {
                                                                         ...item,
-                                                                        material_name: editDesc,
+                                                                        material_name: editDesc.toUpperCase(),
                                                                         quantity: editQty,
-                                                                        unit: editUnit,
+                                                                        unit: editUnit.toUpperCase(),
                                                                         unit_cost: editPrice1,
                                                                         total_cost: editQty * editPrice1
                                                                     } : item);
@@ -1543,8 +1543,8 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             <input
                                                                 type="text"
                                                                 value={editDesc}
-                                                                onChange={e => setEditDesc(e.target.value.toUpperCase())}
-                                                                className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-900 dark:text-slate-100"
+                                                                onChange={e => setEditDesc(e.target.value)}
+                                                                className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-900 dark:text-slate-100 uppercase"
                                                             />
                                                         </div>
                                                         <div className="md:col-span-2">
@@ -1591,7 +1591,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                 onClick={() => {
                                                                     const updated = labor.map(item => item.id === l.id ? {
                                                                         ...item,
-                                                                        role: editDesc,
+                                                                        role: editDesc.toUpperCase(),
                                                                         unit: editUnit,
                                                                         quantity: editQty,
                                                                         unit_cost: editPrice1,
@@ -1749,8 +1749,8 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             <input
                                                                 type="text"
                                                                 value={editDesc}
-                                                                onChange={e => setEditDesc(e.target.value.toUpperCase())}
-                                                                className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-900 dark:text-slate-100"
+                                                                onChange={e => setEditDesc(e.target.value)}
+                                                                className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-bold text-slate-900 dark:text-slate-100 uppercase"
                                                             />
                                                         </div>
                                                         <div className="md:col-span-2">
@@ -1767,7 +1767,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                     const updated = indirects.map(item => item.id === i.id ? {
                                                                         ...item,
                                                                         category: editUnit,
-                                                                        description: editDesc,
+                                                                        description: editDesc.toUpperCase(),
                                                                         value: editPrice1
                                                                     } : item);
                                                                     setIndirects(updated);
