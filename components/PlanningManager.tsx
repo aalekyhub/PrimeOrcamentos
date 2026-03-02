@@ -1256,8 +1256,8 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                             </p>
                                                         </div>
                                                     </div>
-                                                    <div className="text-right mr-4 shrink-0 whitespace-nowrap">
-                                                        <p className="text-sm font-bold text-slate-800 dark:text-slate-100">R$ {svc.total_cost.toFixed(2)}</p>
+                                                    <div className="w-32 text-right mr-4 shrink-0">
+                                                        <p className="text-sm font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap">R$ {svc.total_cost.toFixed(2)}</p>
                                                     </div>
                                                     <div className="flex gap-1 shrink-0">
                                                         <div className="flex items-center gap-1 mr-2">
@@ -1439,8 +1439,10 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                 <span className="break-words"><b className="dark:text-blue-400 uppercase">{m.material_name}</b> | (R$ {m.unit_cost.toFixed(2)}) {m.quantity} {m.unit}</span>
                                                             </div>
                                                         </div>
-                                                        <div className="flex items-center gap-4 text-xs shrink-0 w-32 justify-end">
-                                                            <span className="font-bold text-slate-900 dark:text-slate-100 whitespace-nowrap">R$ {m.total_cost.toFixed(2)}</span>
+                                                        <div className="flex items-center gap-4 text-xs shrink-0">
+                                                            <div className="w-32 text-right">
+                                                                <span className="font-bold text-slate-900 dark:text-slate-100 whitespace-nowrap">R$ {m.total_cost.toFixed(2)}</span>
+                                                            </div>
                                                             <div className="flex gap-1 mr-2">
                                                                 <button onClick={() => (window as any).moveItem(materials, setMaterials, index, 'up')} disabled={index === 0} className="text-slate-300 dark:text-slate-600 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronUp size={14} /></button>
                                                                 <button onClick={() => (window as any).moveItem(materials, setMaterials, index, 'down')} disabled={index === materials.length - 1} className="text-slate-300 dark:text-slate-600 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronDown size={14} /></button>
@@ -1631,8 +1633,10 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                 <span className="break-words"><b className="dark:text-amber-400">{l.role}</b> | ({l.cost_type}) {l.quantity}{l.unit || 'un'}</span>
                                                             </div>
                                                         </div>
-                                                        <div className="flex items-center gap-4 text-xs shrink-0 w-32 justify-end">
-                                                            <span className="font-bold text-slate-900 dark:text-slate-100 whitespace-nowrap">R$ {l.total_cost.toFixed(2)}</span>
+                                                        <div className="flex items-center gap-4 text-xs shrink-0">
+                                                            <div className="w-32 text-right">
+                                                                <span className="font-bold text-slate-900 dark:text-slate-100 whitespace-nowrap">R$ {l.total_cost.toFixed(2)}</span>
+                                                            </div>
                                                             <div className="flex gap-1 mr-2">
                                                                 <button onClick={() => (window as any).moveItem(labor, setLabor, index, 'up')} disabled={index === 0} className="text-slate-300 dark:text-slate-600 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronUp size={14} /></button>
                                                                 <button onClick={() => (window as any).moveItem(labor, setLabor, index, 'down')} disabled={index === labor.length - 1} className="text-slate-300 dark:text-slate-600 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronDown size={14} /></button>
@@ -1804,8 +1808,10 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                                                 <span className="break-words"><b className="text-slate-400 dark:text-slate-500">[{i.category}]</b> <b>{i.description}</b></span>
                                                             </div>
                                                         </div>
-                                                        <div className="flex items-center gap-4 text-xs shrink-0 w-32 justify-end">
-                                                            <span className="font-bold text-slate-900 dark:text-slate-100 whitespace-nowrap">R$ {i.value.toFixed(2)}</span>
+                                                        <div className="flex items-center gap-4 text-xs shrink-0">
+                                                            <div className="w-32 text-right">
+                                                                <span className="font-bold text-slate-900 dark:text-slate-100 whitespace-nowrap">R$ {i.value.toFixed(2)}</span>
+                                                            </div>
                                                             <div className="flex gap-1 mr-2">
                                                                 <button onClick={() => (window as any).moveItem(indirects, setIndirects, index, 'up')} disabled={index === 0} className="text-slate-300 dark:text-slate-600 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronUp size={14} /></button>
                                                                 <button onClick={() => (window as any).moveItem(indirects, setIndirects, index, 'down')} disabled={index === indirects.length - 1} className="text-slate-300 dark:text-slate-600 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronDown size={14} /></button>
