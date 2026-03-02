@@ -1642,12 +1642,12 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                     else setSelectedMaterials(selectedMaterials.filter(id => id !== m.id));
                                                                 }}
                                                             />
-                                                            <div className="grow text-slate-900 dark:text-slate-100">
-                                                                <span className="whitespace-nowrap"><b className="dark:text-green-400 uppercase">{m.material_name}</b> | (R$ {m.unit_cost.toFixed(2)}) {m.quantity} {m.unit}</span>
+                                                            <div className="grow text-slate-900 dark:text-slate-100 min-w-0">
+                                                                <span className="break-words"><b className="dark:text-green-400 uppercase">{m.material_name}</b> | (R$ {m.unit_cost.toFixed(2)}) {m.quantity} {m.unit}</span>
                                                             </div>
                                                         </div>
-                                                        <div className="flex items-center gap-4 text-xs shrink-0 whitespace-nowrap">
-                                                            <span className="font-bold text-slate-900 dark:text-slate-100">R$ {m.total_cost.toFixed(2)}</span>
+                                                        <div className="flex items-center gap-4 text-xs shrink-0 w-32 justify-end">
+                                                            <span className="font-bold text-slate-900 dark:text-slate-100 whitespace-nowrap">R$ {m.total_cost.toFixed(2)}</span>
                                                             <div className="flex gap-1 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                                 <button onClick={() => {
                                                                     setEditingId(m.id);
@@ -1822,12 +1822,12 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                     else setSelectedLabor(selectedLabor.filter(id => id !== l.id));
                                                                 }}
                                                             />
-                                                            <div className="grow text-slate-900 dark:text-slate-100">
-                                                                <span className="whitespace-nowrap"><b className="dark:text-amber-400 uppercase">{l.role}</b> | ({l.cost_type}) {l.quantity}{l.unit || 'un'}</span>
+                                                            <div className="grow text-slate-900 dark:text-slate-100 min-w-0">
+                                                                <span className="break-words"><b className="dark:text-amber-400 uppercase">{l.role}</b> | ({l.cost_type}) {l.quantity}{l.unit || 'un'}</span>
                                                             </div>
                                                         </div>
-                                                        <div className="flex items-center gap-4 text-xs shrink-0 whitespace-nowrap">
-                                                            <span className="font-bold text-slate-900 dark:text-slate-100">R$ {l.total_cost.toFixed(2)}</span>
+                                                        <div className="flex items-center gap-4 text-xs shrink-0 w-32 justify-end">
+                                                            <span className="font-bold text-slate-900 dark:text-slate-100 whitespace-nowrap">R$ {l.total_cost.toFixed(2)}</span>
                                                             <div className="flex gap-1 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                                 <button onClick={() => {
                                                                     setEditingId(l.id);
@@ -1997,12 +1997,12 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                                     else setSelectedIndirects(selectedIndirects.filter(id => id !== i.id));
                                                                 }}
                                                             />
-                                                            <div className="grow text-slate-900 dark:text-slate-100">
-                                                                <span><b className="text-slate-400 dark:text-slate-500">[{i.category}]</b> <b>{i.description}</b></span>
+                                                            <div className="grow text-slate-900 dark:text-slate-100 min-w-0">
+                                                                <span className="break-words"><b className="text-slate-400 dark:text-slate-500">[{i.category}]</b> <b>{i.description}</b></span>
                                                             </div>
                                                         </div>
-                                                        <div className="flex items-center gap-4 text-xs shrink-0 whitespace-nowrap">
-                                                            <span className="font-bold text-slate-900 dark:text-slate-100">R$ {i.value.toFixed(2)}</span>
+                                                        <div className="flex items-center gap-4 text-xs shrink-0 w-32 justify-end">
+                                                            <span className="font-bold text-slate-900 dark:text-slate-100 whitespace-nowrap">R$ {i.value.toFixed(2)}</span>
                                                             <div className="flex gap-1 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                                 <button onClick={() => {
                                                                     setEditingId(i.id);
