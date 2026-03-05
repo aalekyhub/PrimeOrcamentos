@@ -191,6 +191,61 @@ const DataCleanup: React.FC<Props> = ({ customers, setCustomers, services, setSe
                     </div>
                 </div>
             )}
+
+            <div className="pt-8 mt-8 border-t border-slate-200">
+                <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                    <RefreshCw className="w-4 h-4 text-blue-500" /> Sincronização Avançada
+                </h3>
+
+                <div className="bg-amber-50 border border-amber-100 rounded-3xl p-8 flex flex-col md:flex-row items-center gap-6">
+                    <div className="bg-white p-4 rounded-2xl shadow-sm border border-amber-200">
+                        <AlertTriangle className="w-8 h-8 text-amber-500" />
+                    </div>
+                    <div className="flex-1 text-center md:text-left">
+                        <h4 className="text-lg font-black text-slate-900 border-none">Resetar Cache Local</h4>
+                        <p className="text-slate-600 text-sm mt-1">
+                            Isso apagará apenas os dados salvos **neste dispositivo** e baixará tudo novamente da nuvem.
+                            Use se notar divergências entre dispositivos (como registros fantasmas).
+                        </p>
+                        <p className="text-[10px] text-amber-700 font-bold uppercase tracking-widest mt-2">
+                            Não afeta seus dados na nuvem ou em outros computadores.
+                        </p>
+                    </div>
+                    <button
+                        onClick={async () => {
+                            if (!confirm("Isso irá limpar o banco de dados local NESTE DISPOSITIVO e recarregar a página para baixar os dados da nuvem. Deseja continuar?")) return;
+
+                            try {
+                                // Clear all local storage keys
+                                const keys = Object.keys(localStorage);
+                                keys.forEach(key => {
+                                    if (key.startsWith('serviflow_')) {
+                                        localStorage.removeItem(key);
+                                    }
+                                });
+
+                                // Clear IndexedDB
+                                const indexedDB = window.indexedDB;
+                                if (indexedDB) {
+                                    const databases = await indexedDB.databases();
+                                    databases.forEach(dbInfo => {
+                                        if (dbInfo.name) indexedDB.deleteDatabase(dbInfo.name);
+                                    });
+                                }
+
+                                notify("Cache limpo. Recarregando...");
+                                setTimeout(() => window.location.reload(), 1500);
+                            } catch (e) {
+                                console.error("Erro ao resetar cache:", e);
+                                notify("Erro ao limpar cache local.", "error");
+                            }
+                        }}
+                        className="bg-amber-500 text-white px-6 py-3 rounded-2xl text-xs font-black flex items-center gap-2 hover:bg-amber-600 transition-all shadow-lg shadow-amber-900/20 whitespace-nowrap"
+                    >
+                        <RefreshCw className="w-4 h-4" /> Resetar e Re-Sincronizar
+                    </button>
+                </div>
+            </div>
         </div>
     );
 };

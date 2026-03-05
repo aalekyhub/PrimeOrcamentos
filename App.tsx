@@ -170,23 +170,44 @@ const AppContent: React.FC = () => {
           await db.saveLocal(STORAGE_KEYS.LOANS, cloudData.loans);
         }
 
-        // --- Planning & Execution Tables ---
+        // --- Planning & Execution Tables (Authoritative Sync) ---
+        // For project headers, the cloud is the source of truth for synced items.
+
         if (Array.isArray(cloudData.plans)) {
+          const incomingPlans = cloudData.plans as any[];
+          const cloudIds = new Set(incomingPlans.map(p => p.id));
           const localPlans = db.load('serviflow_plans', []) as any[];
-          const planMap = new Map(localPlans.map(p => [p.id, p]));
-          cloudData.plans.forEach((p: any) => {
-            planMap.set(p.id, p);
+
+          // Keep local plans only if:
+          // 1. They are in the cloud (synced)
+          // 2. They are NOT syncing yet (newly created local items that haven't hit the cloud)
+          const validLocal = localPlans.filter(p => cloudIds.has(p.id) || p.syncStatus === 'pending');
+
+          // Merge
+          const planMap = new Map();
+          validLocal.forEach(p => planMap.set(p.id, p));
+          incomingPlans.forEach(p => {
+            // Cloud data is always more recent or trusted if already synced
+            planMap.set(p.id, { ...p, syncStatus: 'synced' });
           });
+
           const mergedPlans = Array.from(planMap.values());
           await db.saveLocal('serviflow_plans', mergedPlans);
         }
 
         if (Array.isArray(cloudData.works)) {
+          const incomingWorks = cloudData.works as any[];
+          const cloudIds = new Set(incomingWorks.map(w => w.id));
           const localWorks = db.load('serviflow_works', []) as any[];
-          const workMap = new Map(localWorks.map(w => [w.id, w]));
-          cloudData.works.forEach((w: any) => {
-            workMap.set(w.id, w);
+
+          const validLocal = localWorks.filter(w => cloudIds.has(w.id) || w.syncStatus === 'pending');
+
+          const workMap = new Map();
+          validLocal.forEach(w => workMap.set(w.id, w));
+          incomingWorks.forEach(w => {
+            workMap.set(w.id, { ...w, syncStatus: 'synced' });
           });
+
           const mergedWorks = Array.from(workMap.values());
           await db.saveLocal('serviflow_works', mergedWorks);
         }
