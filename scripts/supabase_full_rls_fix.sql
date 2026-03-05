@@ -20,6 +20,7 @@ alter table if exists catalog enable row level security;
 alter table if exists orders enable row level security;
 alter table if exists transactions enable row level security;
 alter table if exists loans enable row level security;
+alter table if exists company enable row level security;
 
 -- 2. Criar políticas de "Acesso Total" para todas as tabelas
 do $$ 
@@ -29,7 +30,7 @@ declare
     'plans', 'works', 'plan_services', 'work_services', 
     'plan_materials', 'work_materials', 'plan_labor', 'work_labor', 
     'plan_indirects', 'work_indirects', 'plan_taxes', 'work_taxes',
-    'users', 'customers', 'catalog', 'orders', 'transactions', 'loans'
+    'users', 'customers', 'catalog', 'orders', 'transactions', 'loans', 'company'
   ];
 begin
   foreach t in array tables

@@ -563,11 +563,30 @@ const AppContent: React.FC = () => {
   );
 };
 
-const App: React.FC = () => (
-  <ToastProvider>
-    <AppContent />
-  </ToastProvider>
-);
+const App: React.FC = () => {
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    initPromise.then(() => setIsReady(true));
+  }, []);
+
+  if (!isReady) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
+        <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center mb-6 shadow-lg shadow-blue-500/20 animate-pulse">
+          <Database className="w-6 h-6 text-white" />
+        </div>
+        <div className="text-slate-500 font-medium text-sm animate-pulse">Iniciando Banco de Dados...</div>
+      </div>
+    );
+  }
+
+  return (
+    <ToastProvider>
+      <AppContent />
+    </ToastProvider>
+  );
+};
 
 export default App;
 
