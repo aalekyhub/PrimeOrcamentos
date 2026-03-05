@@ -208,22 +208,10 @@ const AppContent: React.FC = () => {
 
         if (Array.isArray(cloudData.plans)) {
           const localPlans = db.load('serviflow_plans', []) as any[];
-          const cloudIds = new Set(cloudData.plans.map((p: any) => p.id));
+          const planMap = new Map<string, any>(localPlans.map(p => [p.id, p]));
 
-          // Identify local plans to keep: 
-          // 1. In cloud 
-          // 2. Or new/unsynced locally (not yet synced to cloud)
-          // 3. AND NOT explicitly deleted on this device (tombstoned)
-          const planMap = new Map<string, any>();
-
-          // Add local unsynced plans
-          localPlans.forEach(p => {
-            if (p.syncStatus !== 'synced') planMap.set(p.id, p);
-          });
-
-          // Merge cloud plans
           cloudData.plans.forEach((p: any) => {
-            if (!(db as any).isDeleted(p.id)) {
+            if (!(db as any).isDeleted?.(p.id)) {
               planMap.set(p.id, { ...p, syncStatus: 'synced' });
             }
           });
@@ -232,28 +220,28 @@ const AppContent: React.FC = () => {
             new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
           );
           await db.saveLocal('serviflow_plans', mergedPlans);
+
+          if (mergedPlans.length > cloudData.plans.length) {
+            await db.save('serviflow_plans', mergedPlans);
+          }
         }
 
         if (Array.isArray(cloudData.works)) {
-          const localWorks = db.load('serviflow_works', []) as any[];
-          const cloudIds = new Set(cloudData.works.map((w: any) => w.id));
+          const localWorks = (db.load('serviflow_works', []) || []) as any[];
+          const workMap = new Map<string, any>(localWorks.map(w => [w.id, w]));
 
-          const workMap = new Map<string, any>();
-
-          // Keep local unsynced works
-          localWorks.forEach(w => {
-            if (w.syncStatus !== 'synced') workMap.set(w.id, w);
-          });
-
-          // Merge cloud works
           cloudData.works.forEach((w: any) => {
-            if (!(db as any).isDeleted(w.id)) {
+            if (!(db as any).isDeleted?.(w.id)) {
               workMap.set(w.id, { ...w, syncStatus: 'synced' });
             }
           });
 
           const mergedWorks = Array.from(workMap.values());
           await db.saveLocal('serviflow_works', mergedWorks);
+
+          if (mergedWorks.length > cloudData.works.length) {
+            await db.save('serviflow_works', mergedWorks);
+          }
         }
 
         // Sub-items for Plan/Work (Services, Materials, etc.)
@@ -265,19 +253,22 @@ const AppContent: React.FC = () => {
         const subTablePromises = subTables.map(async (tableName) => {
           if (Array.isArray(cloudData[tableName])) {
             const incomingItems = (cloudData[tableName] as any[]);
-            const localData = db.load(`serviflow_${tableName}`, []) as any[];
+            const localData = (db.load(`serviflow_${tableName}`, []) || []) as any[];
             const itemMap = new Map<string, any>(localData.map(item => [item.id, item]));
 
             incomingItems.forEach(item => {
-              // Ignore sub-items of deleted plans/works
               const parentId = item.plan_id || item.work_id;
-              if (!parentId || !(db as any).isDeleted(parentId)) {
+              if (!parentId || !(db as any).isDeleted?.(parentId)) {
                 itemMap.set(item.id, item);
               }
             });
 
             const merged = Array.from(itemMap.values());
             await db.saveLocal(`serviflow_${tableName}`, merged);
+
+            if (merged.length > incomingItems.length) {
+              await db.save(`serviflow_${tableName}`, merged);
+            }
           }
         });
 
