@@ -185,22 +185,18 @@ const AppContent: React.FC = () => {
 
         if (Array.isArray(cloudData.users)) {
           const localUsers = (db.load(STORAGE_KEYS.USERS, INITIAL_USERS) || INITIAL_USERS) as UserAccount[];
-          const localMap = new Map<string, UserAccount>((Array.isArray(localUsers) ? localUsers : INITIAL_USERS).map(u => [u.id, u]));
+          const key = (u: UserAccount) => (u.email || '').trim().toLowerCase();
 
-          // Adicionamos um log para saber quantos usuários estamos tratando
-          console.log(`[Sync] Usuários na nuvem: ${cloudData.users.length}, Locais: ${localUsers.length}`);
+          const map = new Map<string, UserAccount>();
+          localUsers.forEach(u => map.set(key(u), u));
+          cloudData.users.forEach(u => map.set(key(u), u));
 
-          cloudData.users.forEach((u: UserAccount) => {
-            localMap.set(u.id, u);
-          });
-          const merged = Array.from(localMap.values());
+          const merged = Array.from(map.values());
           setUsers(merged);
           await db.saveLocal(STORAGE_KEYS.USERS, merged);
 
-          // PUSH de usuários se o computador tiver mais que a nuvem
-          if (merged.length > (cloudData.users?.length || 0)) {
-            await db.save(STORAGE_KEYS.USERS, merged);
-          }
+          // Subir a verdade após o merge, unificando pelo e-mail
+          await db.save(STORAGE_KEYS.USERS, merged);
         }
 
         if (Array.isArray(cloudData.loans)) {
