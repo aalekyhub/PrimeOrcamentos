@@ -106,6 +106,10 @@ const AppContent: React.FC = () => {
       }
 
       if (cloudData) {
+        if (cloudData.errors && Object.keys(cloudData.errors).length > 0) {
+          const failedTables = Object.keys(cloudData.errors).join(', ');
+          notify(`Aviso: Algumas tabelas não sincronizaram: ${failedTables}.`, "warning");
+        }
         // --- Core Tables ---
         if (Array.isArray(cloudData.customers)) {
           const localCustomers = (db.load(STORAGE_KEYS.CUSTOMERS, []) || []) as Customer[];
@@ -189,8 +193,7 @@ const AppContent: React.FC = () => {
           await db.saveLocal(STORAGE_KEYS.USERS, merged);
 
           // PUSH de usuários se o computador tiver mais que a nuvem
-          if (merged.length > cloudData.users.length) {
-            console.log("[Sync] Forçando upload de novos usuários para a nuvem...");
+          if (merged.length > (cloudData.users?.length || 0)) {
             await db.save(STORAGE_KEYS.USERS, merged);
           }
         }
