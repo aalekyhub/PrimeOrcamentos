@@ -32,7 +32,10 @@ const Login: React.FC<Props> = ({ onLogin, users, company, onSync, isSyncing, is
       if (user) {
         onLogin(user);
       } else {
-        setError(`E-mail ou senha incorretos. (Base: ${dbUsers.length})`);
+        const isBaseSmall = dbUsers.length <= 1;
+        setError(isBaseSmall
+          ? "Usuário não encontrado. Clique em 'Nuvem Conectada' abaixo para baixar os acessos da sua conta."
+          : "E-mail ou senha incorretos. Verifique os dados e tente novamente.");
       }
       setLoading(false);
     }, 800);
