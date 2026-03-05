@@ -684,15 +684,15 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         return `
             <div style="width: 100%; background: white; font-family: sans-serif;">
                 <!-- HEADER SECTION -->
-                <div class="report-header" style="padding-bottom: 4mm; border-bottom: 2px solid #059669; margin-bottom: 4mm;">
+                <div class="report-header" style="padding-bottom: 25px !important; border-bottom: 3px solid #000; margin-bottom: 25px;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <div style="display: flex; gap: 4mm; align-items: center;">
+                        <div style="display: flex; gap: 20px; align-items: center;">
                             <div style="width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;">
                                 ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:28px; color:#059669;">PO</div>'}
                             </div>
                             <div>
                                 <h1 style="font-size:16px; font-weight:900; color:#0f172a; margin:0 0 1mm 0; text-transform:uppercase; letter-spacing:-0.5px;">${company.name}</h1>
-                                <p style="font-size:12px; font-weight:800; color:#0f172a; margin:0 0 1mm 0;">OBRA: ${currentWork.name}</p>
+                                <p style="font-size:14px; font-weight:800; color:#0f172a; margin:0 0 1mm 0;">OBRA: ${currentWork.name}</p>
                                 <p style="font-size:10px; font-weight:800; color:#059669; text-transform:uppercase; letter-spacing:1px; margin:0 0 1mm 0;">Executivo de Obra / Realizado</p>
                                 <p style="font-size:8px; color:#94a3b8; font-weight:700; text-transform:uppercase; letter-spacing:-0.3px; margin:0;">${company.cnpj || ''} | ${company.phone || ''}</p>
                             </div>
