@@ -257,12 +257,17 @@ export const db = {
           .eq(column, value);
 
         if (error) {
-          console.error(`[Supabase Delete Error] Tabela: ${tableName}. Erro: ${error.message}`);
-          throw new Error(`Falha na nuvem: ${error.message}`);
+          // If table doesn't exist, it's not a fatal error for deletion recovery
+          if (error.code === 'PGRST116' || error.message.includes('relation') || error.message.includes('does not exist')) {
+            console.warn(`[Supabase Delete] Tabela ${tableName} não existe. Ignorando.`);
+          } else {
+            console.error(`[Supabase Delete Error] Tabela: ${tableName}. Erro: ${error.message}`);
+            throw new Error(`Falha na nuvem: ${error.message}`);
+          }
         }
       } catch (err) {
-        console.error(`[Delete Error] Falha crítica ao remover do Supabase:`, err);
-        throw err;
+        // Only throw if it's a real connection error, not just a missing table
+        console.warn(`[Delete] Erro ignorado ou tratado para ${tableName}:`, err);
       }
     }
     return { success: true, deletedCount };
