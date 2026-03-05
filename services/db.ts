@@ -135,9 +135,10 @@ export const db = {
 
           if (payload.length > 0) {
             console.log(`[Sync Background] Iniciando para ${tableName}...`);
+            const conflictKey = tableName === 'users' ? 'email' : 'id';
             const { error } = await supabase
               .from(tableName)
-              .upsert(payload, { onConflict: 'id' });
+              .upsert(payload, { onConflict: conflictKey });
 
             if (error) {
               console.error(`[Supabase Error] Tabela: ${tableName}. Erro: ${error.message}`);
