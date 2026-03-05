@@ -297,7 +297,9 @@ const AppContent: React.FC = () => {
   };
 
   useEffect(() => {
-    if (db.isConnected()) handleManualSync();
+    initPromise.then(() => {
+      if (db.isConnected()) handleManualSync();
+    });
   }, []);
 
   useEffect(() => {

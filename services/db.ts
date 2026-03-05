@@ -17,6 +17,8 @@ let _dbPromise: Promise<IDBPDatabase> | null = null;
 let _cache: Record<string, any> = {};
 let _tombstones: Set<string> = new Set();
 
+const SMALL_KEYS = ['serviflow_session', 'serviflow_dark_mode', 'serviflow_company', 'serviflow_tombstones', 'serviflow_users'];
+
 // Helper to get the DB instance
 const getDB = () => {
   if (!_dbPromise) {
@@ -103,15 +105,21 @@ export const db = {
     // 1. Update Cache immediately for synchronous consistency
     _cache[key] = data;
 
-    // 2. Save to IndexedDB and LocalStorage (Mirroring for reliability)
+    // 2. Save to IndexedDB and LocalStorage (Selective Mirroring)
     try {
       const idb = await getDB();
       await idb.put(STORE_NAME, data, key);
-      localStorage.setItem(key, JSON.stringify(data));
+
+      // Only mirror small keys to LocalStorage to avoid QuotaExceededError
+      if (SMALL_KEYS.includes(key) || key.length < 50) {
+        try {
+          localStorage.setItem(key, JSON.stringify(data));
+        } catch (lsError) {
+          console.warn(`[LocalStorage Quota] Falha ao espelhar ${key}, mas salvo no IDB.`);
+        }
+      }
     } catch (e) {
-      console.error(`[Storage Error] Falha ao salvar ${key}:`, e);
-      // Fallback only to LocalStorage if IDB fails
-      localStorage.setItem(key, JSON.stringify(data));
+      console.error(`[Storage Error] Falha crítica ao salvar ${key}:`, e);
     }
 
     // 3. Sync to Supabase in the background if available and skipCloud is false
