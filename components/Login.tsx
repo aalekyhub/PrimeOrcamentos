@@ -131,7 +131,7 @@ const Login: React.FC<Props> = ({ onLogin, users, company, onSync, isSyncing, is
               </button>
             </div>
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center justify-center gap-2">
-              Segurança Prime &copy; 2024 • {users?.length || 0} Usuários • Ver: 1.2.1
+              Segurança Prime &copy; 2024 • {users?.length || 0} Usuários • Ver: 1.2.2
               <button
                 onClick={() => {
                   if (confirm('Forçar atualização do sistema?')) {

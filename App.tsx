@@ -255,8 +255,9 @@ const AppContent: React.FC = () => {
         window.dispatchEvent(new CustomEvent('db-sync-complete'));
       }
     } catch (e: any) {
-      console.error("[Sync Error]", e);
-      notify(`Erro ao sincronizar: ${e.message || "Erro de rede"}. Tente atualizar a página.`, "error");
+      console.error("[Sync Error Detail]", e);
+      const errorStr = e instanceof Error ? e.message : JSON.stringify(e);
+      notify(`ERRO TÉCNICO: ${errorStr || "Sem resposta da rede"}. Tente o botão 'Atualizar Código' no Login.`, "error");
     } finally {
       setIsSyncing(false);
     }
