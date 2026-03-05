@@ -154,6 +154,7 @@ export const db = {
       'works', 'work_services', 'work_materials', 'work_labor', 'work_indirects', 'work_taxes'
     ];
     const results: any = {};
+    const errors: any = {};
 
     try {
       // Parallelize fetching for significantly better performance
@@ -161,7 +162,7 @@ export const db = {
         const { data, error } = await supabase.from(table).select('*');
         if (error) {
           console.error(`Erro ao baixar ${table}:`, error.message);
-          return { table, error };
+          return { table, error: error.message };
         }
         return { table, data };
       });
@@ -170,17 +171,16 @@ export const db = {
 
       for (const response of responses) {
         if ('error' in response) {
-          // If any critical table fails, we might want to know, but let's keep going for others
-          // Unless it's a critical error we want to bubble up
+          errors[response.table] = response.error;
           continue;
         }
         results[response.table] = response.data;
       }
 
-      return results;
+      return { results, errors };
     } catch (err) {
       console.error("[Cloud Sync] Erro ao baixar dados:", err);
-      return null;
+      return { results: {}, errors: { global: (err as any).message } };
     }
   },
 
