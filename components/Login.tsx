@@ -130,8 +130,18 @@ const Login: React.FC<Props> = ({ onLogin, users, company, onSync, isSyncing, is
                 </span>
               </button>
             </div>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-              Segurança Prime &copy; 2024 • {users?.length || 0} Usuários
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center justify-center gap-2">
+              Segurança Prime &copy; 2024 • {users?.length || 0} Usuários • Ver: 1.2.1
+              <button
+                onClick={() => {
+                  if (confirm('Forçar atualização do sistema?')) {
+                    window.location.href = window.location.pathname + '?v=' + Date.now();
+                  }
+                }}
+                className="text-blue-500 underline ml-2 hover:text-blue-700"
+              >
+                (Atualizar Código)
+              </button>
             </p>
           </div>
         </div>
