@@ -343,7 +343,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
         const totalMaterials = totalMaterial;
 
         return `
-            <div style="width: 100%; background: white; font-family: sans-serif;">
+            <div style="width: 100%; background: white; font-family: sans-serif; padding: 10mm;">
                 <!-- HEADER SECTION -->
                 <div class="report-header" style="padding-bottom: 25px !important; border-bottom: 3px solid #000; margin-bottom: 25px;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
@@ -522,7 +522,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
         Promise.all(imagePromises).finally(() => {
             setTimeout(() => {
                 const opt = {
-                    margin: 10,
+                    margin: 0,
                     filename: `Planejamento_${currentPlan.name.replace(/\s+/g, '_')}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: {
