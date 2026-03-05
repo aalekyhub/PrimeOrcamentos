@@ -143,6 +143,67 @@ const DataCleanup: React.FC<Props> = ({ customers, setCustomers, services, setSe
                 ))}
             </div>
 
+            {/* Caçador de Dados Fantasmas */}
+            <div className="bg-amber-50 border border-amber-100 rounded-[2rem] p-8 shadow-sm">
+                <div className="flex items-start gap-4">
+                    <div className="p-3 bg-white rounded-2xl shadow-sm">
+                        <Trash2 className="w-6 h-6 text-amber-500" />
+                    </div>
+                    <div className="flex-1">
+                        <h3 className="text-lg font-black text-amber-900 tracking-tight">Caçador de Dados Fantasmas</h3>
+                        <p className="text-amber-700 text-xs mt-1 leading-relaxed">
+                            Se um projeto (como <b>PLAN-5131</b>) insiste em reaparecer mesmo após ser excluído, digite o ID abaixo para uma limpeza profunda na nuvem e no computador.
+                        </p>
+
+                        <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                            <input
+                                type="text"
+                                placeholder="Ex: PLAN-5131"
+                                id="ghost-id-input"
+                                className="flex-1 bg-white border border-amber-200 rounded-xl px-4 py-3 text-sm font-bold uppercase tracking-widest focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                            />
+                            <button
+                                onClick={async () => {
+                                    const input = document.getElementById('ghost-id-input') as HTMLInputElement;
+                                    const id = input?.value.trim().toUpperCase();
+
+                                    if (!id || !id.startsWith('PLAN-')) {
+                                        notify("Digite um ID válido (Ex: PLAN-1234)", "error");
+                                        return;
+                                    }
+
+                                    if (!confirm(`Deseja realizar uma limpeza profunda do projeto ${id}? Isso removerá o projeto e todos os seus itens da nuvem permanentemente.`)) return;
+
+                                    try {
+                                        notify(`Iniciando limpeza profunda de ${id}...`);
+
+                                        // Deletar em cascata manual (mesma lógica que o Unified)
+                                        const tables = [
+                                            'serviflow_plan_services', 'serviflow_plan_materials',
+                                            'serviflow_plan_labor', 'serviflow_plan_indirects',
+                                            'serviflow_plan_taxes', 'serviflow_plans'
+                                        ];
+
+                                        for (const table of tables) {
+                                            await (db as any).deleteByCondition(table, table === 'serviflow_plans' ? 'id' : 'plan_id', id);
+                                        }
+
+                                        notify(`Projeto ${id} e itens removidos com sucesso!`, "success");
+                                        input.value = '';
+                                        setTimeout(() => window.location.reload(), 1500);
+                                    } catch (e: any) {
+                                        notify("Erro na limpeza profunda: " + e.message, "error");
+                                    }
+                                }}
+                                className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-3 rounded-xl font-bold text-xs shadow-lg shadow-amber-200 transition-all flex items-center justify-center gap-2"
+                            >
+                                <Trash2 className="w-4 h-4" /> Limpeza Profunda
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {/* Diagnóstico de Emergência */}
             <div className="pt-12 mt-8 border-t border-slate-200">
                 <div className="flex items-center gap-2 mb-6">

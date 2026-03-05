@@ -258,11 +258,11 @@ export const db = {
 
         if (error) {
           console.error(`[Supabase Delete Error] Tabela: ${tableName}. Erro: ${error.message}`);
-          return { success: false, error };
+          throw new Error(`Falha na nuvem: ${error.message}`);
         }
       } catch (err) {
         console.error(`[Delete Error] Falha crítica ao remover do Supabase:`, err);
-        return { success: false, error: err };
+        throw err;
       }
     }
     return { success: true, deletedCount };

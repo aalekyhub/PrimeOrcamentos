@@ -8,6 +8,7 @@ import { db } from '../services/db';
 import { PlanningHeader, Customer } from '../types';
 import PlanningManager from './PlanningManager';
 import WorksManager from './WorksManager';
+import { useNotify } from './ToastProvider';
 
 interface Props {
     customers: Customer[];
@@ -18,6 +19,7 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, onGenerateBudget }) =
     const [view, setView] = useState<'list' | 'detail'>('list');
     const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
     const [activeModule, setActiveModule] = useState<'planning' | 'execution'>('planning');
+    const { notify } = useNotify();
 
     const [plans, setPlans] = useState<PlanningHeader[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -54,43 +56,46 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, onGenerateBudget }) =
         if (!confirm('Deseja excluir permanentemente este planejamento e todos os dados de execução vinculados?')) return;
 
         try {
-            // 1. Delete Planning Data
-            await (db as any).deleteByCondition('serviflow_plans', 'id', id);
-
-            const tables = [
-                'serviflow_plan_services',
-                'serviflow_plan_materials',
-                'serviflow_plan_labor',
-                'serviflow_plan_indirects'
-            ];
-
-            for (const table of tables) {
-                await (db as any).deleteByCondition(table, 'plan_id', id);
-            }
-
-            // 2. Delete Linked Work Data (Execution)
+            // 1. Identify linked Work Data
             const allWorks = db.load('serviflow_works', []) as any[];
             const linkedWork = allWorks.find(w => w.plan_id === id);
 
+            // 2. Delete ALL sub-items FIRST to avoid Foreign Key constraint failures
+            const planSubTables = [
+                'serviflow_plan_services',
+                'serviflow_plan_materials',
+                'serviflow_plan_labor',
+                'serviflow_plan_indirects',
+                'serviflow_plan_taxes'
+            ];
+
+            for (const table of planSubTables) {
+                await (db as any).deleteByCondition(table, 'plan_id', id);
+            }
+
             if (linkedWork) {
-                await (db as any).deleteByCondition('serviflow_works', 'id', linkedWork.id);
-                const workTables = [
+                const workSubTables = [
                     'serviflow_work_services',
                     'serviflow_work_materials',
                     'serviflow_work_labor',
                     'serviflow_work_indirects',
                     'serviflow_work_taxes'
                 ];
-                for (const table of workTables) {
+                for (const table of workSubTables) {
                     await (db as any).deleteByCondition(table, 'work_id', linkedWork.id);
                 }
+                // Delete Work parent
+                await (db as any).deleteByCondition('serviflow_works', 'id', linkedWork.id);
             }
 
+            // 3. Delete Planning Parent LAST
+            await (db as any).deleteByCondition('serviflow_plans', 'id', id);
+
             loadPlans();
-            alert('Projeto excluído com sucesso.');
-        } catch (error) {
+            notify("Projeto e todos os seus itens foram excluídos permanentemente.", "success");
+        } catch (error: any) {
             console.error(error);
-            alert('Erro ao excluir projeto.');
+            notify("Erro ao excluir projeto: " + (error.message || "Falha na conexão"), "error");
         }
     };
 
