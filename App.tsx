@@ -195,18 +195,23 @@ const AppContent: React.FC = () => {
         ];
 
         subTables.forEach(tableName => {
-          if (cloudData[tableName] && (cloudData[tableName] as any[]).length > 0) {
+          if (cloudData[tableName]) {
+            const incomingItems = (cloudData[tableName] as any[]);
             const localData = db.load(`serviflow_${tableName}`, []) as any[];
             const itemMap = new Map<string, any>(localData.map(item => [item.id, item]));
-            (cloudData[tableName] as any[]).forEach(item => {
+
+            incomingItems.forEach(item => {
               itemMap.set(item.id, item);
             });
+
             const merged = Array.from(itemMap.values());
             db.saveLocal(`serviflow_${tableName}`, merged);
           }
         });
 
         notify("Sincronização concluída (Dados mesclados)");
+        // Emit a global event so mounted components (like UnifiedWorksManager) can refresh
+        window.dispatchEvent(new CustomEvent('db-sync-complete'));
       } else {
         notify("Falha ao baixar dados da nuvem.", "error");
       }

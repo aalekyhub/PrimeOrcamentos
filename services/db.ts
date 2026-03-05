@@ -98,7 +98,9 @@ export const db = {
         const tableName = key.replace('serviflow_', '');
         try {
           // Optimization: If singleItem is provided, sync ONLY that item
-          const payload = singleItem ? [singleItem] : (Array.isArray(data) ? data : [data]);
+          const payload = singleItem
+            ? (Array.isArray(singleItem) ? singleItem : [singleItem])
+            : (Array.isArray(data) ? data : [data]);
 
           if (payload.length > 0) {
             console.log(`[Sync Background] Iniciando para ${tableName}...`);

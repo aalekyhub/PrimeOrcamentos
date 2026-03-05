@@ -25,6 +25,11 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, onGenerateBudget }) =
 
     useEffect(() => {
         loadPlans();
+
+        // Listen for cloud sync completion to refresh list
+        const handleSync = () => loadPlans();
+        window.addEventListener('db-sync-complete', handleSync);
+        return () => window.removeEventListener('db-sync-complete', handleSync);
     }, []);
 
     const loadPlans = () => {
