@@ -216,10 +216,10 @@ const DataCleanup: React.FC<Props> = ({ customers, setCustomers, services, setSe
                             if (!confirm("Isso irá limpar o banco de dados local NESTE DISPOSITIVO e recarregar a página para baixar os dados da nuvem. Deseja continuar?")) return;
 
                             try {
-                                // Clear all local storage keys
+                                // Clear all local storage keys EXCEPT session
                                 const keys = Object.keys(localStorage);
                                 keys.forEach(key => {
-                                    if (key.startsWith('serviflow_')) {
+                                    if (key.startsWith('serviflow_') && key !== 'serviflow_session') {
                                         localStorage.removeItem(key);
                                     }
                                 });
