@@ -108,25 +108,41 @@ const AppContent: React.FC = () => {
       if (cloudData) {
         // --- Core Tables ---
         if (Array.isArray(cloudData.customers)) {
+          const localCustomers = (db.load(STORAGE_KEYS.CUSTOMERS, []) || []) as Customer[];
           const customerMap = new Map();
+          localCustomers.forEach(c => {
+            const doc = (c.document || "").replace(/\D/g, '');
+            if (doc) customerMap.set(doc, c);
+            else customerMap.set(c.id, c);
+          });
           cloudData.customers.forEach((c: Customer) => {
-            const doc = c.document.replace(/\D/g, '');
-            customerMap.set(doc, c);
+            const doc = (c.document || "").replace(/\D/g, '');
+            if (doc) customerMap.set(doc, c);
+            else customerMap.set(c.id, c);
           });
           const deduplicatedCustomers = Array.from(customerMap.values()) as Customer[];
           setCustomers(deduplicatedCustomers);
-          await db.saveLocal('serviflow_customers', deduplicatedCustomers);
+          await db.saveLocal(STORAGE_KEYS.CUSTOMERS, deduplicatedCustomers);
+          // Auto-push if local/merged has more items than cloud
+          if (deduplicatedCustomers.length > cloudData.customers.length) {
+            db.save(STORAGE_KEYS.CUSTOMERS, deduplicatedCustomers);
+          }
         }
 
         if (Array.isArray(cloudData.catalog)) {
+          const localCatalog = (db.load(STORAGE_KEYS.CATALOG, []) || []) as CatalogService[];
           const serviceMap = new Map();
+          localCatalog.forEach(s => serviceMap.set(s.id || s.name.trim().toLowerCase(), s));
           cloudData.catalog.forEach((s: CatalogService) => {
-            const key = s.name.trim().toLowerCase();
+            const key = s.id || s.name.trim().toLowerCase();
             serviceMap.set(key, s);
           });
           const deduplicatedCatalog = Array.from(serviceMap.values()) as CatalogService[];
           setCatalog(deduplicatedCatalog);
-          await db.saveLocal('serviflow_catalog', deduplicatedCatalog);
+          await db.saveLocal(STORAGE_KEYS.CATALOG, deduplicatedCatalog);
+          if (deduplicatedCatalog.length > cloudData.catalog.length) {
+            db.save(STORAGE_KEYS.CATALOG, deduplicatedCatalog);
+          }
         }
 
         if (Array.isArray(cloudData.orders)) {
@@ -140,6 +156,9 @@ const AppContent: React.FC = () => {
           );
           setOrders(merged);
           await db.saveLocal(STORAGE_KEYS.ORDERS, merged);
+          if (merged.length > cloudData.orders.length) {
+            db.save(STORAGE_KEYS.ORDERS, merged);
+          }
         }
 
         if (Array.isArray(cloudData.transactions)) {
@@ -158,12 +177,22 @@ const AppContent: React.FC = () => {
         if (Array.isArray(cloudData.users)) {
           const localUsers = (db.load(STORAGE_KEYS.USERS, INITIAL_USERS) || INITIAL_USERS) as UserAccount[];
           const localMap = new Map<string, UserAccount>((Array.isArray(localUsers) ? localUsers : INITIAL_USERS).map(u => [u.id, u]));
+
+          // Adicionamos um log para saber quantos usuários estamos tratando
+          console.log(`[Sync] Usuários na nuvem: ${cloudData.users.length}, Locais: ${localUsers.length}`);
+
           cloudData.users.forEach((u: UserAccount) => {
             localMap.set(u.id, u);
           });
           const merged = Array.from(localMap.values());
           setUsers(merged);
           await db.saveLocal(STORAGE_KEYS.USERS, merged);
+
+          // PUSH de usuários se o computador tiver mais que a nuvem
+          if (merged.length > cloudData.users.length) {
+            console.log("[Sync] Forçando upload de novos usuários para a nuvem...");
+            await db.save(STORAGE_KEYS.USERS, merged);
+          }
         }
 
         if (Array.isArray(cloudData.loans)) {
