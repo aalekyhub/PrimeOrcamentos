@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { Trash2, Merge, AlertTriangle, CheckCircle, RefreshCw, Layers } from 'lucide-react';
+import { Trash2, Merge, AlertTriangle, CheckCircle, RefreshCw, Layers, Briefcase, Users, Wallet, FileText, Building2 } from 'lucide-react';
 import { Customer, CatalogService } from '../types';
 import { db } from '../services/db';
 import { cleanDocument, formatDocument } from '../services/validation';
@@ -66,20 +66,81 @@ const DataCleanup: React.FC<Props> = ({ customers, setCustomers, services, setSe
         notify(`Serviços mesclados. ${removeIds.length} registros duplicados removidos.`);
     };
 
+    const tableStats = useMemo(() => {
+        const categories = [
+            {
+                title: 'Planejamento',
+                color: 'blue',
+                tables: [
+                    { id: 'serviflow_plans', label: 'Projetos', icon: Layers },
+                    { id: 'serviflow_plan_services', label: 'Serviços', icon: Briefcase },
+                    { id: 'serviflow_plan_materials', label: 'Materiais', icon: Layers },
+                    { id: 'serviflow_plan_labor', label: 'Mão de Obra', icon: Users },
+                    { id: 'serviflow_plan_indirects', label: 'Custos Indiretos', icon: Wallet },
+                    { id: 'serviflow_plan_taxes', label: 'Impostos', icon: FileText },
+                ]
+            },
+            {
+                title: 'Execução (Obras)',
+                color: 'emerald',
+                tables: [
+                    { id: 'serviflow_works', label: 'Obras', icon: Building2 },
+                    { id: 'serviflow_work_services', label: 'Serviços', icon: Briefcase },
+                    { id: 'serviflow_work_materials', label: 'Materiais', icon: Layers },
+                    { id: 'serviflow_work_labor', label: 'Mão de Obra', icon: Users },
+                    { id: 'serviflow_work_indirects', label: 'Custos Indiretos', icon: Wallet },
+                    { id: 'serviflow_work_taxes', label: 'Impostos', icon: FileText },
+                ]
+            }
+        ];
+
+        return categories.map(cat => ({
+            ...cat,
+            tables: cat.tables.map(t => ({
+                ...t,
+                count: (db.load(t.id, []) as any[]).length
+            }))
+        }));
+    }, []);
+
     const hasDuplicates = duplicateCustomers.length > 0 || duplicateServices.length > 0;
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-500">
+        <div className="space-y-8 animate-in fade-in duration-500 pb-20">
             <div className="flex items-center justify-between">
                 <div>
                     <h2 className="text-2xl font-bold text-slate-900">Auditoria de Dados</h2>
-                    <p className="text-slate-500 text-sm">Identifique e resolva registros duplicados no sistema.</p>
+                    <p className="text-slate-500 text-sm">Resumo da saúde e integridade do seu banco de dados local.</p>
                 </div>
                 {!hasDuplicates && (
                     <div className="flex items-center gap-2 bg-emerald-50 text-emerald-600 px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-widest border border-emerald-100">
                         <CheckCircle className="w-4 h-4" /> Banco de dados íntegro
                     </div>
                 )}
+            </div>
+
+            {/* Sumário de Tabelas */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {tableStats.map((cat, idx) => (
+                    <div key={idx} className={`bg-white rounded-3xl p-6 border border-slate-200 shadow-sm`}>
+                        <h3 className={`text-xs font-black text-${cat.color}-600 uppercase tracking-[0.2em] mb-6 flex items-center gap-2`}>
+                            <Layers className="w-4 h-4" /> {cat.title}
+                        </h3>
+                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                            {cat.tables.map((t, tidx) => (
+                                <div key={tidx} className="bg-slate-50 rounded-2xl p-4 border border-slate-100 group transition-all hover:bg-white hover:shadow-md hover:border-blue-100">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <t.icon className="w-3.5 h-3.5 text-slate-400 group-hover:text-blue-500" />
+                                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-tighter truncate">{t.label}</span>
+                                    </div>
+                                    <div className="text-2xl font-black text-slate-800 tracking-tighter">
+                                        {t.count || 0}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                ))}
             </div>
 
             {duplicateCustomers.length > 0 && (
