@@ -49,10 +49,25 @@
       };
     })();
 
-    function resetSystem() {
-      if (confirm('Isso apagará todos os dados locais. Continuar?')) {
+    async function resetSystem() {
+      if (confirm('Isso limpará todo o cache técnico e forçará o download da versão nova. Seus dados na nuvem estão seguros. Continuar?')) {
         localStorage.clear();
-        window.location.reload();
+        sessionStorage.clear();
+        
+        // Limpa IndexedDB
+        if (window.indexedDB) {
+          const databases = await window.indexedDB.databases();
+          for (const dbInfo of databases) {
+            if (dbInfo.name) window.indexedDB.deleteDatabase(dbInfo.name);
+          }
+           // Força o nome específico que usamos
+           window.indexedDB.deleteDatabase('PrimeOrcamentosDB');
+        }
+
+        // Força recarregamento ignorando cache
+        const url = new URL(window.location.href);
+        url.searchParams.set('v', Date.now());
+        window.location.href = url.toString();
       }
     }
   </script>
