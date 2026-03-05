@@ -378,6 +378,11 @@ const AppContent: React.FC = () => {
             >
               <LogOut className="w-4 h-4" /> Sair
             </button>
+            <div className="px-5 py-2">
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center">
+                Versão 1.2.2
+              </p>
+            </div>
           </div>
         </div>
       </aside>
