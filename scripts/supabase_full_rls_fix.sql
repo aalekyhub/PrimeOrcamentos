@@ -14,6 +14,12 @@ alter table if exists plan_indirects enable row level security;
 alter table if exists work_indirects enable row level security;
 alter table if exists plan_taxes enable row level security;
 alter table if exists work_taxes enable row level security;
+alter table if exists users enable row level security;
+alter table if exists customers enable row level security;
+alter table if exists catalog enable row level security;
+alter table if exists orders enable row level security;
+alter table if exists transactions enable row level security;
+alter table if exists loans enable row level security;
 
 -- 2. Criar políticas de "Acesso Total" para todas as tabelas
 do $$ 
@@ -22,7 +28,8 @@ declare
   tables text[] := array[
     'plans', 'works', 'plan_services', 'work_services', 
     'plan_materials', 'work_materials', 'plan_labor', 'work_labor', 
-    'plan_indirects', 'work_indirects', 'plan_taxes', 'work_taxes'
+    'plan_indirects', 'work_indirects', 'plan_taxes', 'work_taxes',
+    'users', 'customers', 'catalog', 'orders', 'transactions', 'loans'
   ];
 begin
   foreach t in array tables
