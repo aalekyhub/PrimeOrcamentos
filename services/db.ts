@@ -50,15 +50,21 @@ const initCache = async () => {
   if (migratableKeys.length > 0) {
     console.log(`[Migration] Encontradas ${migratableKeys.length} chaves no LocalStorage. Migrando para IDB...`);
     for (const key of migratableKeys) {
-      if (!_cache[key]) {
+      const needsMigration = !_cache[key] || (Array.isArray(_cache[key]) && _cache[key].length === 0);
+
+      if (needsMigration) {
         const value = localStorage.getItem(key);
         if (value) {
           try {
             const parsed = JSON.parse(value);
-            await db.put(STORE_NAME, parsed, key);
-            _cache[key] = parsed;
+            // Only migrate if we actually found data in localStorage
+            if (parsed && (!Array.isArray(parsed) || parsed.length > 0)) {
+              await db.put(STORE_NAME, parsed, key);
+              _cache[key] = parsed;
+              console.log(`[Recovery] Dados recuperados do LocalStorage para: ${key}`);
+            }
           } catch (e) {
-            console.warn(`[Migration] Erro ao migrar chave ${key}`);
+            console.warn(`[Migration] Erro ao migrar/recuperar chave ${key}`);
           }
         }
       }

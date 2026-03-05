@@ -170,41 +170,28 @@ const AppContent: React.FC = () => {
           await db.saveLocal(STORAGE_KEYS.LOANS, cloudData.loans);
         }
 
-        // --- Planning & Execution Tables (Authoritative Sync) ---
-        // For project headers, the cloud is the source of truth for synced items.
+        // --- Planning & Execution Tables (Additive Sync) ---
+        // Merge cloud data into local state to ensure no data loss.
 
         if (Array.isArray(cloudData.plans)) {
-          const incomingPlans = cloudData.plans as any[];
-          const cloudIds = new Set(incomingPlans.map(p => p.id));
           const localPlans = db.load('serviflow_plans', []) as any[];
+          const planMap = new Map<string, any>(localPlans.map(p => [p.id, p]));
 
-          // Keep local plans only if:
-          // 1. They are in the cloud (synced)
-          // 2. They are NOT syncing yet (newly created local items that haven't hit the cloud)
-          const validLocal = localPlans.filter(p => cloudIds.has(p.id) || p.syncStatus === 'pending');
-
-          // Merge
-          const planMap = new Map();
-          validLocal.forEach(p => planMap.set(p.id, p));
-          incomingPlans.forEach(p => {
-            // Cloud data is always more recent or trusted if already synced
+          cloudData.plans.forEach((p: any) => {
             planMap.set(p.id, { ...p, syncStatus: 'synced' });
           });
 
-          const mergedPlans = Array.from(planMap.values());
+          const mergedPlans = Array.from(planMap.values()).sort((a, b) =>
+            new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+          );
           await db.saveLocal('serviflow_plans', mergedPlans);
         }
 
         if (Array.isArray(cloudData.works)) {
-          const incomingWorks = cloudData.works as any[];
-          const cloudIds = new Set(incomingWorks.map(w => w.id));
           const localWorks = db.load('serviflow_works', []) as any[];
+          const workMap = new Map<string, any>(localWorks.map(w => [w.id, w]));
 
-          const validLocal = localWorks.filter(w => cloudIds.has(w.id) || w.syncStatus === 'pending');
-
-          const workMap = new Map();
-          validLocal.forEach(w => workMap.set(w.id, w));
-          incomingWorks.forEach(w => {
+          cloudData.works.forEach((w: any) => {
             workMap.set(w.id, { ...w, syncStatus: 'synced' });
           });
 
