@@ -287,7 +287,7 @@ const AppContent: React.FC = () => {
     } catch (e: any) {
       console.error("[Sync Error Detail]", e);
       const errorStr = e instanceof Error ? e.message : JSON.stringify(e);
-      notify(`ERRO TÉCNICO: ${errorStr || "Sem resposta da rede"}. Tente o botão 'Atualizar Código' no Login.`, "error");
+      notify(`ERRO TÉCNICO: ${errorStr || "Sem resposta da rede"}.`, "error");
     } finally {
       setIsSyncing(false);
     }
