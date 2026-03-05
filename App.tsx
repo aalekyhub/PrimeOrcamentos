@@ -26,7 +26,8 @@ import Login from './components/Login';
 import DataCleanup from './components/DataCleanup';
 import { ToastProvider, useNotify } from './components/ToastProvider';
 import { ServiceOrder, Transaction, OrderStatus, Customer, CatalogService, CompanyProfile, UserAccount, Loan } from './types';
-import { db } from './services/db';
+import { db, initPromise } from './services/db';
+import { APP_VERSION } from './services/version';
 
 const STORAGE_KEYS = {
   CUSTOMERS: 'serviflow_customers',
@@ -380,7 +381,7 @@ const AppContent: React.FC = () => {
             </button>
             <div className="px-5 py-2">
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center">
-                Versão 1.2.2
+                Versão {APP_VERSION}
               </p>
             </div>
           </div>

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Zap, Lock, Mail, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { UserAccount, CompanyProfile } from '../types';
+import { APP_VERSION } from '../services/version';
 
 interface Props {
   onLogin: (user: UserAccount) => void;
@@ -131,7 +132,7 @@ const Login: React.FC<Props> = ({ onLogin, users, company, onSync, isSyncing, is
               </button>
             </div>
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center justify-center gap-2">
-              Segurança Prime &copy; 2024 • {users?.length || 0} Usuários • Ver: 1.2.2
+              Segurança Prime &copy; 2024 • {users?.length || 0} Usuários • Ver: {APP_VERSION}
             </p>
           </div>
         </div>
