@@ -804,7 +804,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
                 <!-- LABOR -->
                 ${labor.length > 0 ? `
-                <div style="margin-bottom: 30px; page-break-before: always; break-before: page;">
+                <div style="margin-bottom: 30px; page-break-before: always; break-before: page; padding-top: 15mm;">
                     <h3 style="font-size: 14px; font-weight: 800; color: #064e3b; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 2px solid #e2e8f0;">3. Mão de Obra</h3>
                     <table style="width: 100%; border-collapse: collapse;">
                         <thead>
