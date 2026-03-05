@@ -230,12 +230,17 @@ const AppContent: React.FC = () => {
           }
         }
 
-        // --- Planning & Execution Tables (Additive Sync) ---
-        // Merge cloud data into local state to ensure no data loss.
+        // --- Planning & Execution Tables (Server-Authoritative Sync) ---
+        // A nuvem é a fonte primária. O dispositivo deve se espelhar nela para evitar Fantasmas.
 
         if (Array.isArray(cloudData.plans)) {
-          const localPlans = db.load('serviflow_plans', []) as any[];
-          const planMap = new Map<string, any>(localPlans.map(p => [p.id, p]));
+          const localPlans = (db.load('serviflow_plans', []) || []) as any[];
+
+          // 1. Manter APENAS o que acabou de ser criado localmente e ainda não foi para a nuvem
+          const pendingUploads = localPlans.filter(p => p.syncStatus !== 'synced');
+
+          // 2. A base principal agora é estritamente o que veio da nuvem
+          const planMap = new Map<string, any>(pendingUploads.map(p => [p.id, p]));
 
           cloudData.plans.forEach((p: any) => {
             if (!(db as any).isDeleted?.(p.id)) {
@@ -243,21 +248,24 @@ const AppContent: React.FC = () => {
             }
           });
 
-          const mergedPlans = Array.from(planMap.values()).sort((a, b) =>
+          const syncedPlans = Array.from(planMap.values()).sort((a, b) =>
             new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
           );
-          await db.saveLocal('serviflow_plans', mergedPlans);
 
-          const cloudIds = new Set(cloudData.plans.map((p: any) => p.id));
-          const missingPlans = mergedPlans.filter(p => !cloudIds.has(p.id));
-          if (missingPlans.length > 0) {
-            await db.save('serviflow_plans', missingPlans);
+          // 3. Sobrescrever o banco local com a verdade absoluta (Server + Pendentes)
+          await db.saveLocal('serviflow_plans', syncedPlans);
+
+          // 4. Se tiver pendentes (itens novos locais), forçar push para nuvem
+          if (pendingUploads.length > 0) {
+            await db.save('serviflow_plans', pendingUploads);
           }
         }
 
         if (Array.isArray(cloudData.works)) {
           const localWorks = (db.load('serviflow_works', []) || []) as any[];
-          const workMap = new Map<string, any>(localWorks.map(w => [w.id, w]));
+          const pendingUploads = localWorks.filter(w => w.syncStatus !== 'synced');
+
+          const workMap = new Map<string, any>(pendingUploads.map(w => [w.id, w]));
 
           cloudData.works.forEach((w: any) => {
             if (!(db as any).isDeleted?.(w.id)) {
@@ -265,13 +273,11 @@ const AppContent: React.FC = () => {
             }
           });
 
-          const mergedWorks = Array.from(workMap.values());
-          await db.saveLocal('serviflow_works', mergedWorks);
+          const syncedWorks = Array.from(workMap.values());
+          await db.saveLocal('serviflow_works', syncedWorks);
 
-          const cloudIds = new Set(cloudData.works.map((w: any) => w.id));
-          const missingWorks = mergedWorks.filter(w => !cloudIds.has(w.id));
-          if (missingWorks.length > 0) {
-            await db.save('serviflow_works', missingWorks);
+          if (pendingUploads.length > 0) {
+            await db.save('serviflow_works', pendingUploads);
           }
         }
 
@@ -285,22 +291,23 @@ const AppContent: React.FC = () => {
           if (Array.isArray(cloudData[tableName])) {
             const incomingItems = (cloudData[tableName] as any[]);
             const localData = (db.load(`serviflow_${tableName}`, []) || []) as any[];
-            const itemMap = new Map<string, any>(localData.map(item => [item.id, item]));
+
+            // Só segura itens não sincronizados criados offline
+            const pendingUploads = localData.filter(i => i.syncStatus !== 'synced');
+            const itemMap = new Map<string, any>(pendingUploads.map(item => [item.id, item]));
 
             incomingItems.forEach(item => {
               const parentId = item.plan_id || item.work_id;
               if (!parentId || !(db as any).isDeleted?.(parentId)) {
-                itemMap.set(item.id, item);
+                itemMap.set(item.id, { ...item, syncStatus: 'synced' });
               }
             });
 
-            const merged = Array.from(itemMap.values());
-            await db.saveLocal(`serviflow_${tableName}`, merged);
+            const syncedItems = Array.from(itemMap.values());
+            await db.saveLocal(`serviflow_${tableName}`, syncedItems);
 
-            const cloudIds = new Set(incomingItems.map((i: any) => i.id));
-            const missingItems = merged.filter(i => !cloudIds.has(i.id));
-            if (missingItems.length > 0) {
-              await db.save(`serviflow_${tableName}`, missingItems);
+            if (pendingUploads.length > 0) {
+              await db.save(`serviflow_${tableName}`, pendingUploads);
             }
           }
         });
