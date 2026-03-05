@@ -108,7 +108,7 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
 
         const opt = {
             margin: 0,
-            filename: filename || "Relatorio_Obra.pdf",
+            filename: (filename || "RELATORIO OBRA").toUpperCase() + ".pdf",
             image: { type: "jpeg", quality: 0.98 },
             html2canvas: {
                 scale: 2,

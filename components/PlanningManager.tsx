@@ -523,7 +523,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
             setTimeout(() => {
                 const opt = {
                     margin: 0,
-                    filename: `Planejamento_${currentPlan.name.replace(/\s+/g, '_')}.pdf`,
+                    filename: `PLANEJAMENTO ${currentPlan.name}`.toUpperCase() + ".pdf",
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: {
                         scale: 2,
@@ -554,7 +554,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
         setPreviewContent({
             title: 'Planejamento Executivo de Obra',
             html: generateFullReportHtml(),
-            filename: `Planejamento_${currentPlan.name.replace(/\s+/g, '_')}.pdf`
+            filename: `PLANEJAMENTO ${currentPlan.name}`.toUpperCase() + ".pdf"
         });
         setShowPreview(true);
     };

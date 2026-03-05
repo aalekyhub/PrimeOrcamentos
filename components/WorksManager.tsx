@@ -842,7 +842,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         setPreviewContent({
             title: 'Lista de Materiais',
             html: generateMaterialsReportHtml(),
-            filename: `Material_Obra_${currentWork.name.replace(/\s+/g, '_')}.pdf`
+            filename: `MATERIAL OBRA ${currentWork.name}`.toUpperCase() + ".pdf"
         });
         setShowPreview(true);
     };
@@ -852,7 +852,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         setPreviewContent({
             title: 'Relatório Completo de Obra',
             html: generateFullReportHtml(),
-            filename: `Relatorio_Completo_${currentWork.name.replace(/\s+/g, '_')}.pdf`
+            filename: `RELATORIO COMPLETO ${currentWork.name}`.toUpperCase() + ".pdf"
         });
         setShowPreview(true);
     };
@@ -884,7 +884,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             setTimeout(() => {
                 const opt = {
                     margin: 0,
-                    filename: `Execucao_${currentWork.name.replace(/\s+/g, '_')}.pdf`,
+                    filename: `EXECUCAO ${currentWork.name}`.toUpperCase() + ".pdf",
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: {
                         scale: 2,
