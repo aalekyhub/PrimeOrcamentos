@@ -284,6 +284,16 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         setTaxes(allTaxes.filter(t => t.work_id === workId));
     };
 
+    // Listen for cloud sync completion to refresh detail views
+    useEffect(() => {
+        const handleSync = () => {
+            loadWorks();
+            if (activeWorkId) loadWorkDetails(activeWorkId);
+        };
+        window.addEventListener('db-sync-complete', handleSync);
+        return () => window.removeEventListener('db-sync-complete', handleSync);
+    }, [activeWorkId]);
+
     const handleCreateWork = () => {
         const newWork: WorkHeader = {
             id: db.generateId('OBRA'),

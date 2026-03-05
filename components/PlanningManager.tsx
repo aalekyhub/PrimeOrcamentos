@@ -112,6 +112,16 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
         setTaxes(allTaxes.filter(t => t.plan_id === planId));
     };
 
+    // Listen for cloud sync completion to refresh detail views
+    useEffect(() => {
+        const handleSync = () => {
+            loadPlans();
+            if (activePlanId) loadPlanDetails(activePlanId);
+        };
+        window.addEventListener('db-sync-complete', handleSync);
+        return () => window.removeEventListener('db-sync-complete', handleSync);
+    }, [activePlanId]);
+
     const handleCreatePlan = () => {
         const newPlan: PlanningHeader = {
             id: db.generateId('PLAN'),

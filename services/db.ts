@@ -68,8 +68,8 @@ const initCache = async () => {
   }
 };
 
-// Pre-initialize
-initCache().catch(console.error);
+// Pre-initialize and export the promise so we can await it if needed
+export const initPromise = initCache().catch(console.error);
 
 export const db = {
   isConnected: () => !!supabase,

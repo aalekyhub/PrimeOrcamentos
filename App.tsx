@@ -188,13 +188,13 @@ const AppContent: React.FC = () => {
           db.saveLocal('serviflow_works', mergedWorks);
         }
 
-        // Sub-items for Plan/Work (Services, Materials, etc.) - Run background IDB saves for these
+        // Sub-items for Plan/Work (Services, Materials, etc.)
         const subTables = [
           'plan_services', 'plan_materials', 'plan_labor', 'plan_indirects', 'plan_taxes',
           'work_services', 'work_materials', 'work_labor', 'work_indirects', 'work_taxes'
         ];
 
-        subTables.forEach(tableName => {
+        const subTablePromises = subTables.map(async (tableName) => {
           if (cloudData[tableName]) {
             const incomingItems = (cloudData[tableName] as any[]);
             const localData = db.load(`serviflow_${tableName}`, []) as any[];
@@ -205,9 +205,11 @@ const AppContent: React.FC = () => {
             });
 
             const merged = Array.from(itemMap.values());
-            db.saveLocal(`serviflow_${tableName}`, merged);
+            await db.saveLocal(`serviflow_${tableName}`, merged);
           }
         });
+
+        await Promise.all(subTablePromises);
 
         notify("Sincronização concluída (Dados mesclados)");
         // Emit a global event so mounted components (like UnifiedWorksManager) can refresh
