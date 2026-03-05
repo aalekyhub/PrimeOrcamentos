@@ -354,14 +354,14 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, onGenerateBudget }) =
                                             <div className="flex items-center justify-end gap-1">
                                                 <button
                                                     onClick={(e) => handleDuplicatePlan(plan.id, e)}
-                                                    className="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                                                    className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                                                     title="Duplicar"
                                                 >
                                                     <Copy size={16} />
                                                 </button>
                                                 <button
                                                     onClick={(e) => handleDeletePlan(plan.id, e)}
-                                                    className="p-2 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                                                    className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                                                     title="Excluir"
                                                 >
                                                     <Trash2 size={16} />
@@ -404,17 +404,17 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, onGenerateBudget }) =
                                         }`}>
                                         {plan.status}
                                     </span>
-                                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="flex gap-1">
                                         <button
                                             onClick={(e) => handleDuplicatePlan(plan.id, e)}
-                                            className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                                            className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
                                             title="Duplicar Projeto"
                                         >
                                             <Copy size={16} />
                                         </button>
                                         <button
                                             onClick={(e) => handleDeletePlan(plan.id, e)}
-                                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
                                             title="Excluir Projeto"
                                         >
                                             <Trash2 size={16} />
