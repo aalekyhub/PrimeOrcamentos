@@ -132,12 +132,6 @@ const Login: React.FC<Props> = ({ onLogin, users, company, onSync, isSyncing, is
             </div>
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center justify-center gap-2">
               Segurança Prime &copy; 2024 • {users?.length || 0} Usuários • Ver: 1.2.2
-              <button
-                onClick={() => (window as any).resetSystem?.()}
-                className="text-blue-500 underline ml-2 hover:text-blue-700"
-              >
-                (Atualizar Código)
-              </button>
             </p>
           </div>
         </div>
