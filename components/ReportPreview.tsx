@@ -215,7 +215,7 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                         height: auto !important;
                     }
 
-                    @page { margin: 10mm; size: A4; }
+                    @page { margin: 0; size: A4; }
 
                     /* Force visibility and clear parent interference */
                     #root, .no-print, [role="dialog"] > :not(#print-modal-portal), .backdrop-blur-sm:not(#print-modal-portal) {
@@ -347,7 +347,7 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                 <div className="flex-1 overflow-y-auto bg-slate-50 p-6 md:p-10 flex justify-center">
                     <div
                         id="report-preview-content"
-                        className="bg-white shadow-xl w-full max-w-[210mm] p-[10mm] overflow-x-hidden rounded-sm"
+                        className="bg-white shadow-xl w-full max-w-[210mm] p-0 overflow-x-hidden rounded-sm"
                         dangerouslySetInnerHTML={{ __html: htmlContent }}
                     />
                 </div>

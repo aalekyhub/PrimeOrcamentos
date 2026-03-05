@@ -343,7 +343,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
         const totalMaterials = totalMaterial;
 
         return `
-            <div style="width: 100%; background: white; font-family: sans-serif; padding: 10mm;">
+            <div style="width: 100%; background: white; font-family: sans-serif; padding: 15mm;">
                 <!-- HEADER SECTION -->
                 <div class="report-header" style="padding-bottom: 25px !important; border-bottom: 3px solid #000; margin-bottom: 25px;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
