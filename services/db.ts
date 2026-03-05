@@ -181,7 +181,7 @@ export const db = {
     if (!supabase) return null;
 
     const tables = [
-      'customers', 'catalog', 'orders', 'transactions', 'users', 'loans',
+      'customers', 'catalog', 'orders', 'transactions', 'users', 'loans', 'company',
       'plans', 'plan_services', 'plan_materials', 'plan_labor', 'plan_indirects', 'plan_taxes',
       'works', 'work_services', 'work_materials', 'work_labor', 'work_indirects', 'work_taxes'
     ];

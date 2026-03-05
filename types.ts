@@ -27,6 +27,7 @@ export interface UserAccount {
 }
 
 export interface CompanyProfile {
+  id: string;
   name: string;
   tagline: string;
   cnpj: string;

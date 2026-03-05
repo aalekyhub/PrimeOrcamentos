@@ -53,6 +53,7 @@ const INITIAL_USERS: UserAccount[] = [
 ];
 
 const INITIAL_COMPANY: CompanyProfile = {
+  id: 'CMP-001',
   name: 'PRIME SERVIÇOS E MANUTENÇÃO LTDA',
   tagline: 'SOLUÇÕES EM GESTÃO E MANUTENÇÃO PROFISSIONAL',
   cnpj: '12.345.678/0001-90',
@@ -176,6 +177,10 @@ const AppContent: React.FC = () => {
           );
           setTransactions(merged);
           await db.saveLocal(STORAGE_KEYS.TRANSACTIONS, merged);
+
+          if (merged.length > cloudData.transactions.length) {
+            await db.save(STORAGE_KEYS.TRANSACTIONS, merged);
+          }
         }
 
         if (Array.isArray(cloudData.users)) {
@@ -199,8 +204,30 @@ const AppContent: React.FC = () => {
         }
 
         if (Array.isArray(cloudData.loans)) {
-          setLoans(cloudData.loans as Loan[]);
-          await db.saveLocal(STORAGE_KEYS.LOANS, cloudData.loans);
+          const localLoans = (db.load(STORAGE_KEYS.LOANS, []) || []) as Loan[];
+          const localMap = new Map<string, Loan>(localLoans.map(l => [l.id, l]));
+          cloudData.loans.forEach((l: Loan) => {
+            localMap.set(l.id, l);
+          });
+          const merged = Array.from(localMap.values());
+          setLoans(merged);
+          await db.saveLocal(STORAGE_KEYS.LOANS, merged);
+
+          if (merged.length > cloudData.loans.length) {
+            await db.save(STORAGE_KEYS.LOANS, merged);
+          }
+        }
+
+        if (Array.isArray(cloudData.company) && cloudData.company.length > 0) {
+          const cloudCompany = cloudData.company[0];
+          setCompany(cloudCompany);
+          await db.saveLocal(STORAGE_KEYS.COMPANY, cloudCompany);
+        } else {
+          // Push company data if not in cloud
+          const localCompany = db.load(STORAGE_KEYS.COMPANY, INITIAL_COMPANY);
+          if (localCompany) {
+            await db.save(STORAGE_KEYS.COMPANY, localCompany);
+          }
         }
 
         // --- Planning & Execution Tables (Additive Sync) ---
