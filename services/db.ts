@@ -266,5 +266,33 @@ export const db = {
       }
     }
     return { success: true, deletedCount };
+  },
+
+  async forceUploadAll() {
+    if (!supabase) return { success: false, error: 'Sem conexão com Supabase' };
+    const keys = [
+      'serviflow_customers', 'serviflow_catalog', 'serviflow_orders', 'serviflow_transactions',
+      'serviflow_users', 'serviflow_loans', 'serviflow_plans', 'serviflow_plan_services',
+      'serviflow_plan_materials', 'serviflow_plan_labor', 'serviflow_plan_indirects', 'serviflow_plan_taxes',
+      'serviflow_works', 'serviflow_work_services', 'serviflow_work_materials', 'serviflow_work_labor',
+      'serviflow_work_indirects', 'serviflow_work_taxes'
+    ];
+    let totalUpdated = 0;
+    for (const key of keys) {
+      const data = _cache[key] || [];
+      if (Array.isArray(data) && data.length > 0) {
+        const tableName = key.replace('serviflow_', '');
+        const { error } = await supabase.from(tableName).upsert(data, { onConflict: 'id' });
+        if (!error) totalUpdated += data.length;
+      }
+    }
+    return { success: true, count: totalUpdated };
+  },
+
+  async clearAll() {
+    const idb = await getDB();
+    await idb.clear(STORE_NAME);
+    _cache = {};
+    return { success: true };
   }
 };

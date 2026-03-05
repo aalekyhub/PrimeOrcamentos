@@ -143,7 +143,87 @@ const DataCleanup: React.FC<Props> = ({ customers, setCustomers, services, setSe
                 ))}
             </div>
 
-            {/* End of diagnostics */}
+            {/* Diagnóstico de Emergência */}
+            <div className="pt-12 mt-8 border-t border-slate-200">
+                <div className="flex items-center gap-2 mb-6">
+                    <div className="p-2 bg-blue-50 rounded-lg">
+                        <RefreshCw className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div>
+                        <h3 className="text-lg font-black text-slate-900 tracking-tight">Sincronização de Emergência</h3>
+                        <p className="text-slate-500 text-sm">Use estas ferramentas apenas em caso de divergência entre dispositivos.</p>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Botão de Envio Forçado - SEGURO */}
+                    <div className="bg-white border border-slate-200 rounded-[2rem] p-8 shadow-sm hover:border-blue-200 transition-all">
+                        <div className="flex items-start gap-4">
+                            <div className="p-3 bg-blue-50 rounded-2xl">
+                                <RefreshCw className="w-6 h-6 text-blue-500" />
+                            </div>
+                            <div>
+                                <h4 className="font-black text-slate-900">Forçar Envio para Nuvem</h4>
+                                <p className="text-slate-500 text-xs mt-1 leading-relaxed">
+                                    Pega todos os dados **deste dispositivo** e envia para a conta online (Supabase).
+                                    **NÃO APAGA NADA.** É ideal para enviar dados do Celular para o Computador.
+                                </p>
+                                <button
+                                    onClick={async () => {
+                                        if (!confirm("Deseja forçar o envio de todos os dados locais para a nuvem? Isso garantirá que sua conta online tenha a versão mais recente deste dispositivo.")) return;
+
+                                        try {
+                                            notify("Iniciando upload forçado...");
+                                            const result = await db.forceUploadAll();
+                                            if (result.success) {
+                                                notify(`Upload concluído! ${result.count} registros sincronizados.`);
+                                            } else {
+                                                notify("Erro no upload: " + result.error, "error");
+                                            }
+                                        } catch (e) {
+                                            notify("Erro crítico ao sincronizar.", "error");
+                                        }
+                                    }}
+                                    className="mt-6 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-bold text-xs flex items-center gap-2 shadow-lg shadow-blue-100 transition-all"
+                                >
+                                    Enviar dados para Nuvem
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Botão de Recebimento - SEGURO (Apenas recarrega) */}
+                    <div className="bg-white border border-slate-200 rounded-[2rem] p-8 shadow-sm hover:border-emerald-200 transition-all">
+                        <div className="flex items-start gap-4">
+                            <div className="p-3 bg-emerald-50 rounded-2xl">
+                                <RefreshCw className="w-6 h-6 text-emerald-500" />
+                            </div>
+                            <div>
+                                <h4 className="font-black text-slate-900">Baixar dados da Nuvem</h4>
+                                <p className="text-slate-500 text-xs mt-1 leading-relaxed">
+                                    Força o sistema a buscar as atualizações mais recentes da sua conta online.
+                                    **NÃO APAGA SEUS DADOS LOCAIS.**
+                                </p>
+                                <button
+                                    onClick={async () => {
+                                        notify("Buscando atualizações...");
+                                        const result = await db.syncFromCloud();
+                                        if (result && !result.errors.global) {
+                                            notify("Sincronização concluída com sucesso!");
+                                            setTimeout(() => window.location.reload(), 1000);
+                                        } else {
+                                            notify("Erro ao baixar dados.", "error");
+                                        }
+                                    }}
+                                    className="mt-6 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-2xl font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-100 transition-all"
+                                >
+                                    Baixar da Nuvem
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };
