@@ -37,14 +37,18 @@ const Login: React.FC<Props> = ({ onLogin, users, company, onSync, isSyncing, is
         return uEmail === typedEmail && uPass === typedPass;
       });
 
+      const foundAccount = dbUsers.find(u => (u.email || "").trim().toLowerCase() === typedEmail);
+
       if (user) {
         onLogin(user);
       } else {
-        const isBaseSmall = dbUsers.length <= 1;
         const availableEmails = dbUsers.map(u => u.email).join(', ');
-        setError(isBaseSmall
-          ? "Usuário não encontrado. Clique em 'Nuvem Conectada' abaixo para baixar os acessos da sua conta."
-          : `E-mail ou senha incorretos. Contas na base: ${availableEmails}`);
+
+        if (!foundAccount) {
+          setError(`E-mail NÃO encontrado no celular. Contas disponíveis: ${availableEmails}`);
+        } else {
+          setError(`E-mail encontrado (${foundAccount.email}), mas a SENHA está incorreta.`);
+        }
       }
       setLoading(false);
     }, 800);
