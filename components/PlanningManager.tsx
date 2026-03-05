@@ -383,7 +383,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                 </div>
 
                 <!-- COLORFUL CARDS -->
-                <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+                <div style="display: flex; gap: 12px; margin-bottom: 25px;">
                     ${totalMaterials > 0 ? `
                     <div style="flex: 1; background: #ecfdf5; border-bottom: 2px solid #10b981; border-radius: 6px; padding: 12px; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
                         <span style="font-size: 8px; font-weight: 700; color: #059669; text-transform: uppercase;">Materiais</span>
@@ -402,7 +402,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                 </div>
 
                 <!-- TOTAL BOX -->
-                <div style="margin-bottom: 20px; background: #064e3b; color: white; padding: 12px 16px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="margin-bottom: 30px; background: #064e3b; color: white; padding: 12px 16px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
                     <p style="font-size: 9px; font-weight: 800; text-transform: uppercase; margin: 0; letter-spacing: 0.1em; color: #a7f3d0;">CUSTO TOTAL PREVISTO</p>
                     <p style="font-size: 18px; font-weight: 900; margin: 0; white-space: nowrap;">R$ ${totalGeneral.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 </div>
@@ -465,7 +465,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
 
                 <!-- LABOR -->
                 ${labor.length > 0 ? `
-                <div style="margin-bottom: 30px; page-break-inside: auto;">
+                <div style="margin-bottom: 30px; page-break-before: always; break-before: page;">
                     <h3 style="font-size: 14px; font-weight: 800; color: #1e3a8a; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 2px solid #e2e8f0;">3. Mão de Obra</h3>
                     <table style="width: 100%; border-collapse: collapse;">
                         <thead>
