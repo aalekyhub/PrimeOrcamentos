@@ -28,15 +28,23 @@ const Login: React.FC<Props> = ({ onLogin, users, company, onSync, isSyncing, is
     // Simulação de delay de rede
     setTimeout(() => {
       const dbUsers = users || [];
-      const user = dbUsers.find(u => u.email.trim().toLowerCase() === email.trim().toLowerCase() && u.password === password.trim());
+      const typedEmail = email.trim().toLowerCase();
+      const typedPass = password.trim();
+
+      const user = dbUsers.find(u => {
+        const uEmail = (u.email || "").trim().toLowerCase();
+        const uPass = String(u.password || "").trim();
+        return uEmail === typedEmail && uPass === typedPass;
+      });
 
       if (user) {
         onLogin(user);
       } else {
         const isBaseSmall = dbUsers.length <= 1;
+        const availableEmails = dbUsers.map(u => u.email).join(', ');
         setError(isBaseSmall
           ? "Usuário não encontrado. Clique em 'Nuvem Conectada' abaixo para baixar os acessos da sua conta."
-          : "E-mail ou senha incorretos. Verifique os dados e tente novamente.");
+          : `E-mail ou senha incorretos. Contas na base: ${availableEmails}`);
       }
       setLoading(false);
     }, 800);
