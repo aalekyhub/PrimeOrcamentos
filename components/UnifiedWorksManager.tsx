@@ -93,6 +93,9 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, onGenerateBudget }) =
 
             loadPlans();
             notify("Projeto e todos os seus itens foram excluídos permanentemente.", "success");
+
+            // Force reload to ensure all ghost fallbacks are cleared
+            setTimeout(() => window.location.reload(), 1000);
         } catch (error: any) {
             console.error(error);
             notify("Erro ao excluir projeto: " + (error.message || "Falha na conexão"), "error");

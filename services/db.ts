@@ -50,9 +50,10 @@ const initCache = async () => {
   if (migratableKeys.length > 0) {
     console.log(`[Migration] Encontradas ${migratableKeys.length} chaves no LocalStorage. Migrando para IDB...`);
     for (const key of migratableKeys) {
-      const needsMigration = !_cache[key] || (Array.isArray(_cache[key]) && _cache[key].length === 0);
+      // Migration should ONLY happen if the key is missing from IDB entirely
+      const isMissingInIDB = _cache[key] === undefined;
 
-      if (needsMigration) {
+      if (isMissingInIDB) {
         const value = localStorage.getItem(key);
         if (value) {
           try {
@@ -61,10 +62,12 @@ const initCache = async () => {
             if (parsed && (!Array.isArray(parsed) || parsed.length > 0)) {
               await db.put(STORE_NAME, parsed, key);
               _cache[key] = parsed;
-              console.log(`[Recovery] Dados recuperados do LocalStorage para: ${key}`);
+              console.log(`[Migration] Dados migrados do LocalStorage para: ${key}`);
+              // Safe to remove now that it's in IDB
+              // localStorage.removeItem(key); // Keeping for one more version as safety backup
             }
           } catch (e) {
-            console.warn(`[Migration] Erro ao migrar/recuperar chave ${key}`);
+            console.warn(`[Migration] Erro ao migrar chave ${key}`);
           }
         }
       }
@@ -89,12 +92,15 @@ export const db = {
     // 1. Update Cache immediately for synchronous consistency
     _cache[key] = data;
 
-    // 2. Save to IndexedDB (always full list for offline reliability)
+    // 2. Save to IndexedDB and LocalStorage (Mirroring for reliability)
     try {
       const idb = await getDB();
       await idb.put(STORE_NAME, data, key);
+      localStorage.setItem(key, JSON.stringify(data));
     } catch (e) {
-      console.error(`[IDB Error] Falha ao salvar ${key} no IndexedDB:`, e);
+      console.error(`[Storage Error] Falha ao salvar ${key}:`, e);
+      // Fallback only to LocalStorage if IDB fails
+      localStorage.setItem(key, JSON.stringify(data));
     }
 
     // 3. Sync to Supabase in the background if available and skipCloud is false
@@ -237,14 +243,20 @@ export const db = {
       deletedCount = initialLength - _cache[key].length;
     }
 
-    // 2. Remove from IndexedDB
+    // 2. Remove from IndexedDB and LocalStorage
     try {
       const idb = await getDB();
       if (Array.isArray(_cache[key])) {
         await idb.put(STORE_NAME, _cache[key], key);
+        localStorage.setItem(key, JSON.stringify(_cache[key]));
+      } else {
+        localStorage.removeItem(key);
       }
     } catch (e) {
-      console.error(`[IDB Delete Error] ${e}`);
+      console.error(`[Storage Delete Error] ${e}`);
+      if (Array.isArray(_cache[key])) {
+        localStorage.setItem(key, JSON.stringify(_cache[key]));
+      }
     }
 
     // 3. Remove from Supabase
