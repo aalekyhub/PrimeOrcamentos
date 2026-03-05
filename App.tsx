@@ -178,7 +178,10 @@ const AppContent: React.FC = () => {
           const planMap = new Map<string, any>(localPlans.map(p => [p.id, p]));
 
           cloudData.plans.forEach((p: any) => {
-            planMap.set(p.id, { ...p, syncStatus: 'synced' });
+            // Respect local deletions: only restore if NOT recently deleted on this device
+            if (!(db as any).isDeleted(p.id)) {
+              planMap.set(p.id, { ...p, syncStatus: 'synced' });
+            }
           });
 
           const mergedPlans = Array.from(planMap.values()).sort((a, b) =>
@@ -192,7 +195,9 @@ const AppContent: React.FC = () => {
           const workMap = new Map<string, any>(localWorks.map(w => [w.id, w]));
 
           cloudData.works.forEach((w: any) => {
-            workMap.set(w.id, { ...w, syncStatus: 'synced' });
+            if (!(db as any).isDeleted(w.id)) {
+              workMap.set(w.id, { ...w, syncStatus: 'synced' });
+            }
           });
 
           const mergedWorks = Array.from(workMap.values());
@@ -212,7 +217,11 @@ const AppContent: React.FC = () => {
             const itemMap = new Map<string, any>(localData.map(item => [item.id, item]));
 
             incomingItems.forEach(item => {
-              itemMap.set(item.id, item);
+              // Ignore sub-items of deleted plans/works
+              const parentId = item.plan_id || item.work_id;
+              if (!parentId || !(db as any).isDeleted(parentId)) {
+                itemMap.set(item.id, item);
+              }
             });
 
             const merged = Array.from(itemMap.values());

@@ -15,6 +15,7 @@ const STORE_NAME = 'keyvalue';
 
 let _dbPromise: Promise<IDBPDatabase> | null = null;
 let _cache: Record<string, any> = {};
+let _tombstones: Set<string> = new Set();
 
 // Helper to get the DB instance
 const getDB = () => {
@@ -42,6 +43,16 @@ const initCache = async () => {
   keys.forEach((key, index) => {
     _cache[key as string] = values[index];
   });
+
+  // Load tombstones (deleted IDs to prevent ghosting)
+  const savedTombstones = localStorage.getItem('serviflow_tombstones');
+  if (savedTombstones) {
+    try {
+      _tombstones = new Set(JSON.parse(savedTombstones));
+    } catch {
+      _tombstones = new Set();
+    }
+  }
 
   // Check for migration from LocalStorage (Legacy)
   const localStorageKeys = Object.keys(localStorage);
@@ -243,6 +254,12 @@ export const db = {
       deletedCount = initialLength - _cache[key].length;
     }
 
+    // Add to tombstones if it's a primary project/work ID being deleted
+    if ((key === 'serviflow_plans' || key === 'serviflow_works') && column === 'id') {
+      _tombstones.add(value);
+      localStorage.setItem('serviflow_tombstones', JSON.stringify(Array.from(_tombstones)));
+    }
+
     // 2. Remove from IndexedDB and LocalStorage
     try {
       const idb = await getDB();
@@ -304,6 +321,10 @@ export const db = {
       }
     }
     return { success: true, count: totalUpdated };
+  },
+
+  isDeleted(id: string) {
+    return _tombstones.has(id);
   },
 
   async clearAll() {
