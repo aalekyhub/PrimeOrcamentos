@@ -213,14 +213,23 @@ export const db = {
       _cache[key] = _cache[key].filter((item: any) => item.id !== id);
     }
 
-    // 2. Remove from IndexedDB
+    // 2. Remove from IndexedDB and LocalStorage
     try {
       const idb = await getDB();
       if (Array.isArray(_cache[key])) {
         await idb.put(STORE_NAME, _cache[key], key);
+        localStorage.setItem(key, JSON.stringify(_cache[key]));
+      } else {
+        localStorage.removeItem(key);
       }
     } catch (e) {
-      console.error(`[IDB Delete Error] ${e}`);
+      console.error(`[Storage Delete Error] ${e}`);
+    }
+
+    // Add to tombstones if it's a primary project/work ID being deleted
+    if (key === 'serviflow_plans' || key === 'serviflow_works') {
+      _tombstones.add(id);
+      localStorage.setItem('serviflow_tombstones', JSON.stringify(Array.from(_tombstones)));
     }
 
     // 3. Remove from Supabase
