@@ -352,10 +352,11 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                                 ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:28px; color:#2563eb;">PO</div>'}
                             </div>
                             <div>
-                                <h1 style="font-size:16px; font-weight:900; color:#0f172a; margin:0 0 1mm 0; text-transform:uppercase; letter-spacing:-0.5px;">${company.name}</h1>
-                                <p style="font-size:10px; font-weight:800; color:#2563eb; text-transform:uppercase; letter-spacing:1px; margin:0 0 1mm 0;">Planejamento Executivo de Obra</p>
-                                <p style="font-size:8px; color:#94a3b8; font-weight:700; text-transform:uppercase; letter-spacing:-0.3px; margin:0;">${company.cnpj || ''} | ${company.phone || ''}</p>
-                            </div>
+                            <h1 style="font-size:16px; font-weight:900; color:#0f172a; margin:0 0 1mm 0; text-transform:uppercase; letter-spacing:-0.5px;">${company.name}</h1>
+                            <p style="font-size:12px; font-weight:800; color:#0f172a; margin:0 0 1mm 0;">OBRA: ${currentPlan.name}</p>
+                            <p style="font-size:10px; font-weight:800; color:#2563eb; text-transform:uppercase; letter-spacing:1px; margin:0 0 1mm 0;">Planejamento Executivo de Obra</p>
+                            <p style="font-size:8px; color:#94a3b8; font-weight:700; text-transform:uppercase; letter-spacing:-0.3px; margin:0;">${company.cnpj || ''} | ${company.phone || ''}</p>
+                        </div>
                         </div>
                         <div style="text-align:right;">
                             <div style="background:#2563eb; color:white; padding:1.5mm 3mm; border-radius:1.5mm; font-size:9px; font-weight:900; text-transform:uppercase; letter-spacing:1px; margin-bottom:1.5mm; display:inline-block;">PLANEJAMENTO</div>
@@ -521,7 +522,7 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
         Promise.all(imagePromises).finally(() => {
             setTimeout(() => {
                 const opt = {
-                    margin: 0,
+                    margin: 5,
                     filename: `Planejamento_${currentPlan.name.replace(/\s+/g, '_')}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: {
@@ -611,7 +612,8 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {plans.map(plan => (
                             <div key={plan.id}
-                                className="bg-white dark:bg-slate-900/50 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 hover:border-blue-400 transition-all group relative">
+                                id="report-preview-content"
+                                className="bg-white shadow-xl w-full max-w-[210mm] p-[5mm] overflow-x-hidden rounded-sm border border-slate-200 dark:border-slate-800 hover:border-blue-400 transition-all group relative">
                                 <div className="flex justify-between items-start mb-2">
                                     <span className="font-bold text-lg text-slate-800 dark:text-slate-100">{plan.name}</span>
                                     <span className={`px-2 py-1 rounded text-xs font-bold ${plan.status === 'Concluído' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'} `}>

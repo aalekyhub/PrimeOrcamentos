@@ -692,6 +692,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                             </div>
                             <div>
                                 <h1 style="font-size:16px; font-weight:900; color:#0f172a; margin:0 0 1mm 0; text-transform:uppercase; letter-spacing:-0.5px;">${company.name}</h1>
+                                <p style="font-size:12px; font-weight:800; color:#0f172a; margin:0 0 1mm 0;">OBRA: ${currentWork.name}</p>
                                 <p style="font-size:10px; font-weight:800; color:#059669; text-transform:uppercase; letter-spacing:1px; margin:0 0 1mm 0;">Executivo de Obra / Realizado</p>
                                 <p style="font-size:8px; color:#94a3b8; font-weight:700; text-transform:uppercase; letter-spacing:-0.3px; margin:0;">${company.cnpj || ''} | ${company.phone || ''}</p>
                             </div>
@@ -882,7 +883,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         Promise.all(imagePromises).finally(() => {
             setTimeout(() => {
                 const opt = {
-                    margin: 0,
+                    margin: 10,
                     filename: `Execucao_${currentWork.name.replace(/\s+/g, '_')}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 },
                     html2canvas: {
