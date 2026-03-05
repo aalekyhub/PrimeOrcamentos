@@ -317,9 +317,11 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, onGenerateBudget }) =
                                         onClick={() => handleSelectPlan(plan.id)}
                                         className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
                                     >
-                                        <span className="text-sm font-black text-blue-600 tracking-tight">
-                                            {plan.id}
-                                        </span>
+                                        <td className="px-6 py-5 whitespace-nowrap">
+                                            <span className="text-sm font-black text-blue-600 tracking-tight">
+                                                {plan.id}
+                                            </span>
+                                        </td>
                                         <td className="px-6 py-5">
                                             <div className="max-w-[320px]">
                                                 <p className="font-black text-slate-800 text-sm truncate uppercase tracking-tight">
