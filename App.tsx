@@ -129,8 +129,8 @@ const AppContent: React.FC = () => {
         }
 
         if (Array.isArray(cloudData.orders)) {
-          const localOrders = db.load(STORAGE_KEYS.ORDERS, []) as ServiceOrder[];
-          const localMap = new Map<string, ServiceOrder>(localOrders.map(o => [o.id, o]));
+          const localOrders = (db.load(STORAGE_KEYS.ORDERS, []) || []) as ServiceOrder[];
+          const localMap = new Map<string, ServiceOrder>((Array.isArray(localOrders) ? localOrders : []).map(o => [o.id, o]));
           cloudData.orders.forEach((o: ServiceOrder) => {
             localMap.set(o.id, o);
           });
@@ -142,8 +142,8 @@ const AppContent: React.FC = () => {
         }
 
         if (Array.isArray(cloudData.transactions)) {
-          const localTransactions = db.load(STORAGE_KEYS.TRANSACTIONS, []) as Transaction[];
-          const localMap = new Map<string, Transaction>(localTransactions.map(t => [t.id, t]));
+          const localTransactions = (db.load(STORAGE_KEYS.TRANSACTIONS, []) || []) as Transaction[];
+          const localMap = new Map<string, Transaction>((Array.isArray(localTransactions) ? localTransactions : []).map(t => [t.id, t]));
           cloudData.transactions.forEach((t: Transaction) => {
             localMap.set(t.id, t);
           });
@@ -155,8 +155,8 @@ const AppContent: React.FC = () => {
         }
 
         if (Array.isArray(cloudData.users)) {
-          const localUsers = db.load(STORAGE_KEYS.USERS, INITIAL_USERS) as UserAccount[];
-          const localMap = new Map<string, UserAccount>(localUsers.map(u => [u.id, u]));
+          const localUsers = (db.load(STORAGE_KEYS.USERS, INITIAL_USERS) || INITIAL_USERS) as UserAccount[];
+          const localMap = new Map<string, UserAccount>((Array.isArray(localUsers) ? localUsers : INITIAL_USERS).map(u => [u.id, u]));
           cloudData.users.forEach((u: UserAccount) => {
             localMap.set(u.id, u);
           });
@@ -254,9 +254,9 @@ const AppContent: React.FC = () => {
         // Emit a global event so mounted components (like UnifiedWorksManager) can refresh
         window.dispatchEvent(new CustomEvent('db-sync-complete'));
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error("[Sync Error]", e);
-      notify("Erro de rede ao sincronizar. Verifique sua conexão.", "error");
+      notify(`Erro ao sincronizar: ${e.message || "Erro de rede"}. Tente atualizar a página.`, "error");
     } finally {
       setIsSyncing(false);
     }

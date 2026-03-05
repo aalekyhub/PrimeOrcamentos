@@ -162,7 +162,8 @@ export const db = {
     const saved = localStorage.getItem(key);
     if (!saved) return defaultValue;
     try {
-      return JSON.parse(saved);
+      const data = JSON.parse(saved);
+      return (data === null || data === undefined) ? defaultValue : data;
     } catch {
       return defaultValue;
     }
