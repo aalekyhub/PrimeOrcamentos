@@ -248,8 +248,10 @@ const AppContent: React.FC = () => {
           );
           await db.saveLocal('serviflow_plans', mergedPlans);
 
-          if (mergedPlans.length > cloudData.plans.length) {
-            await db.save('serviflow_plans', mergedPlans);
+          const cloudIds = new Set(cloudData.plans.map((p: any) => p.id));
+          const missingPlans = mergedPlans.filter(p => !cloudIds.has(p.id));
+          if (missingPlans.length > 0) {
+            await db.save('serviflow_plans', missingPlans);
           }
         }
 
@@ -266,8 +268,10 @@ const AppContent: React.FC = () => {
           const mergedWorks = Array.from(workMap.values());
           await db.saveLocal('serviflow_works', mergedWorks);
 
-          if (mergedWorks.length > cloudData.works.length) {
-            await db.save('serviflow_works', mergedWorks);
+          const cloudIds = new Set(cloudData.works.map((w: any) => w.id));
+          const missingWorks = mergedWorks.filter(w => !cloudIds.has(w.id));
+          if (missingWorks.length > 0) {
+            await db.save('serviflow_works', missingWorks);
           }
         }
 
@@ -293,8 +297,10 @@ const AppContent: React.FC = () => {
             const merged = Array.from(itemMap.values());
             await db.saveLocal(`serviflow_${tableName}`, merged);
 
-            if (merged.length > incomingItems.length) {
-              await db.save(`serviflow_${tableName}`, merged);
+            const cloudIds = new Set(incomingItems.map((i: any) => i.id));
+            const missingItems = merged.filter(i => !cloudIds.has(i.id));
+            if (missingItems.length > 0) {
+              await db.save(`serviflow_${tableName}`, missingItems);
             }
           }
         });
