@@ -175,10 +175,21 @@ const AppContent: React.FC = () => {
 
         if (Array.isArray(cloudData.plans)) {
           const localPlans = db.load('serviflow_plans', []) as any[];
-          const planMap = new Map<string, any>(localPlans.map(p => [p.id, p]));
+          const cloudIds = new Set(cloudData.plans.map((p: any) => p.id));
 
+          // Identify local plans to keep: 
+          // 1. In cloud 
+          // 2. Or new/unsynced locally (not yet synced to cloud)
+          // 3. AND NOT explicitly deleted on this device (tombstoned)
+          const planMap = new Map<string, any>();
+
+          // Add local unsynced plans
+          localPlans.forEach(p => {
+            if (p.syncStatus !== 'synced') planMap.set(p.id, p);
+          });
+
+          // Merge cloud plans
           cloudData.plans.forEach((p: any) => {
-            // Respect local deletions: only restore if NOT recently deleted on this device
             if (!(db as any).isDeleted(p.id)) {
               planMap.set(p.id, { ...p, syncStatus: 'synced' });
             }
@@ -192,8 +203,16 @@ const AppContent: React.FC = () => {
 
         if (Array.isArray(cloudData.works)) {
           const localWorks = db.load('serviflow_works', []) as any[];
-          const workMap = new Map<string, any>(localWorks.map(w => [w.id, w]));
+          const cloudIds = new Set(cloudData.works.map((w: any) => w.id));
 
+          const workMap = new Map<string, any>();
+
+          // Keep local unsynced works
+          localWorks.forEach(w => {
+            if (w.syncStatus !== 'synced') workMap.set(w.id, w);
+          });
+
+          // Merge cloud works
           cloudData.works.forEach((w: any) => {
             if (!(db as any).isDeleted(w.id)) {
               workMap.set(w.id, { ...w, syncStatus: 'synced' });
