@@ -372,7 +372,7 @@ const ServiceOrderList: React.FC<Props> = ({ orders, setOrders, setTransactions,
               {filteredOrders.map((order) => (
                 <tr key={order.id} className="hover:bg-slate-50/50 transition-colors group">
                   <td className="px-6 py-4">
-                    <span className="font-mono text-xs font-bold text-blue-600">{order.id}</span>
+                    <span className="font-mono text-xs font-bold text-blue-600 whitespace-nowrap">{order.id}</span>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
