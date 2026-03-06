@@ -187,8 +187,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
           <div class="a4-container">
             <!-- Header -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #e2e8f0;">
-              <div style="width: 120px;">
-                ${company.logo ? `<img src="${company.logo}" style="max-height: 70px; width: auto; object-fit: contain;" crossorigin="anonymous" />` : ''}
+              <div style="display: flex; align-items: center; justify-content: flex-start;">
+                ${company.logo ? `<img src="${company.logo}" style="height: ${company.logoSize || 70}px; max-width: 250px; object-fit: contain;" crossorigin="anonymous" />` : ''}
               </div>
               <div style="text-align: center; flex-grow: 1;">
                 <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 2px; text-transform: uppercase;">${company.name}</h1>

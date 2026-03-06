@@ -242,8 +242,8 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                <!-- Header -->
                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10mm; border-bottom: 3px solid #0f172a; padding-bottom: 8mm;">
                  <div style="display: flex; gap: 6mm; align-items: center;">
-                   <div style="width: 80px; height: 80px; display:flex; align-items:center; justify-content:center;">
-                     ${company.logo ? `<img src="${company.logo}" style="max-height:100%; max-width:100%; object-fit:contain;" />` : `<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>`}
+                   <div style="display:flex; align-items:center; justify-content:flex-start;">
+                     ${company.logo ? `<img src="${company.logo}" style="height: ${company.logoSize || 80}px; max-width: 250px; object-fit:contain;" />` : `<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>`}
                    </div>
                    <div>
                      <h1 style="font-size:18px; font-weight:900; color:#0f172a; margin:0 0 2mm 0; text-transform:uppercase; letter-spacing:-0.5px;">${company.name}</h1>
@@ -488,8 +488,8 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
       <div class="a4-container">
         <!-- Header -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 2px solid #e2e8f0;">
-          <div style="width: 120px;">
-            ${company.logo ? `<img src="${company.logo}" style="max-height: 70px; width: auto; object-fit: contain;" />` : ''}
+          <div style="display: flex; align-items: center; justify-content: flex-start;">
+            ${company.logo ? `<img src="${company.logo}" style="height: ${company.logoSize || 70}px; max-width: 250px; object-fit: contain;" />` : ''}
           </div>
           <div style="text-align: center; flex-grow: 1;">
             <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 2px; text-transform: uppercase;">${company.name}</h1>

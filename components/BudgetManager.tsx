@@ -240,8 +240,8 @@ const BudgetManager: React.FC<Props> = ({
       <div style="padding-bottom: 25px !important; border-bottom: 3px solid #000; margin-bottom: 25px;">
          <div style="display: flex; justify-content: space-between; align-items: center;">
              <div style="display: flex; gap: 24px; align-items: center;">
-                 <div style="width: 80px; display: flex; align-items: center; justify: flex-start;">
-                     ${company.logo ? `<img src="${company.logo}" style="max-height: 80px; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#1e3a8a;">PRIME</div>'}
+                 <div style="display: flex; align-items: center; justify-content: flex-start;">
+                     ${company.logo ? `<img src="${company.logo}" style="height: ${company.logoSize || 80}px; max-width: 250px; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#1e3a8a;">PRIME</div>'}
                  </div>
                  <div>
                      <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 0 0 2px 0; text-transform: uppercase;">${company.name}</h1>

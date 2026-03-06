@@ -348,8 +348,8 @@ const PlanningManager: React.FC<Props> = ({ customers, onGenerateBudget, embedde
                 <div class="report-header" style="padding-bottom: 25px !important; border-bottom: 3px solid #000; margin-bottom: 25px;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <div style="display: flex; gap: 20px; align-items: center;">
-                            <div style="width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;">
-                                ${company.logo ? `<img src="${company.logo}" style="max-height: 100%; max-width: 100%; object-fit: contain;">` : '<div style="font-weight:900; font-size:28px; color:#2563eb;">PO</div>'}
+                            <div style="display: flex; align-items: center; justify-content: center;">
+                                ${company.logo ? `<img src="${company.logo}" style="height: ${company.logoSize || 70}px; max-width: 250px; object-fit: contain;">` : '<div style="font-weight:900; font-size:28px; color:#2563eb;">PO</div>'}
                             </div>
                             <div>
                             <h1 style="font-size:16px; font-weight:900; color:#0f172a; margin:0 0 1mm 0; text-transform:uppercase; letter-spacing:-0.5px;">${company.name}</h1>
