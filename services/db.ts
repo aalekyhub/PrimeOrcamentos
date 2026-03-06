@@ -84,6 +84,59 @@ const persistKeyLocally = async (key: string, data: any) => {
   }
 };
 
+const registerRemoteDeletion = async (tableName: string, recordId: string) => {
+  if (!supabase) return;
+
+  try {
+    const { error } = await supabase
+      .from('deleted_records')
+      .insert({
+        table_name: tableName,
+        record_id: recordId
+      });
+
+    if (error) {
+      console.error(`[Deleted Records] Erro ao registrar exclusão de ${tableName}/${recordId}: ${error.message}`);
+    }
+  } catch (err) {
+    console.error(`[Deleted Records] Falha crítica ao registrar exclusão de ${tableName}/${recordId}:`, err);
+  }
+};
+
+const syncDeletedRecordsFromCloud = async () => {
+  if (!supabase) return;
+
+  try {
+    const { data, error } = await supabase
+      .from('deleted_records')
+      .select('table_name, record_id, deleted_at');
+
+    if (error) {
+      console.error(`[Deleted Records] Erro ao baixar exclusões: ${error.message}`);
+      return;
+    }
+
+    const deletedRows = data || [];
+
+    for (const row of deletedRows) {
+      const storageKey = getStorageKeyFromTable(row.table_name);
+      _tombstones.add(row.record_id);
+
+      if (Array.isArray(_cache[storageKey])) {
+        _cache[storageKey] = _cache[storageKey].filter((item: any) => item?.id !== row.record_id);
+      }
+    }
+
+    persistTombstones();
+
+    for (const key of Object.keys(_cache)) {
+      await persistKeyLocally(key, _cache[key]);
+    }
+  } catch (err) {
+    console.error('[Deleted Records] Falha crítica ao sincronizar exclusões:', err);
+  }
+};
+
 // Helper to get the DB instance
 const getDB = () => {
   if (!_dbPromise) {
@@ -106,12 +159,10 @@ const initCache = async () => {
     db.getAll(STORE_NAME)
   ]);
 
-  // Load everything into cache in one go
   keys.forEach((key, index) => {
     _cache[key as string] = values[index];
   });
 
-  // Load tombstones (deleted IDs to prevent ghosting)
   const savedTombstones = localStorage.getItem('serviflow_tombstones');
   if (savedTombstones) {
     try {
@@ -121,7 +172,6 @@ const initCache = async () => {
     }
   }
 
-  // Check for migration from LocalStorage (Legacy)
   const localStorageKeys = Object.keys(localStorage);
   const migratableKeys = localStorageKeys.filter(k => k.startsWith('serviflow_'));
 
@@ -148,13 +198,13 @@ const initCache = async () => {
     }
   }
 
-  // Apply tombstones after loading all data
   applyTombstonesToCache();
 
-  // Persist cleaned cache back to IndexedDB / LocalStorage
   for (const key of Object.keys(_cache)) {
     await persistKeyLocally(key, _cache[key]);
   }
+
+  await syncDeletedRecordsFromCloud();
 };
 
 // Pre-initialize and export the promise so we can await it if needed
@@ -169,19 +219,15 @@ export const db = {
   },
 
   async save(key: string, data: any, singleItem?: any, skipCloud: boolean = false) {
-    // 1. Prevent deleted items from being reintroduced locally
     const sanitizedData = filterDeletedItems(data);
     const sanitizedSingleItem = Array.isArray(singleItem)
       ? filterDeletedItems(singleItem)
       : (isItemDeleted(singleItem) ? null : singleItem);
 
-    // 2. Update Cache immediately for synchronous consistency
     _cache[key] = sanitizedData;
 
-    // 3. Save to IndexedDB and LocalStorage
     await persistKeyLocally(key, sanitizedData);
 
-    // 4. Sync to Supabase in the background if available and skipCloud is false
     if (supabase && !skipCloud) {
       (async () => {
         const tableName = key.replace('serviflow_', '');
@@ -218,7 +264,6 @@ export const db = {
     return { success: true };
   },
 
-  // Helper for local-only saves (useful during cloud sync to avoid feedback loops)
   async saveLocal(key: string, data: any) {
     return this.save(key, data, null, true);
   },
@@ -247,6 +292,8 @@ export const db = {
     const errors: any = {};
 
     try {
+      await syncDeletedRecordsFromCloud();
+
       const fetchPromises = CLOUD_TABLES.map(async (table) => {
         const { data, error } = await supabase.from(table).select('*');
         if (error) {
@@ -280,18 +327,17 @@ export const db = {
   },
 
   async remove(key: string, id: string) {
-    // 1. Mark tombstone first
+    const tableName = key.replace('serviflow_', '');
+
     if (TOMBSTONE_KEYS.has(key)) {
       _tombstones.add(id);
       persistTombstones();
     }
 
-    // 2. Remove from cache
     if (Array.isArray(_cache[key])) {
       _cache[key] = _cache[key].filter((item: any) => item.id !== id);
     }
 
-    // 3. Remove from IndexedDB and LocalStorage
     try {
       const idb = await getDB();
       if (Array.isArray(_cache[key])) {
@@ -305,9 +351,7 @@ export const db = {
       console.error(`[Storage Delete Error] ${e}`);
     }
 
-    // 4. Remove from Supabase
     if (supabase) {
-      const tableName = key.replace('serviflow_', '');
       try {
         const { error } = await supabase
           .from(tableName)
@@ -318,6 +362,11 @@ export const db = {
           console.error(`[Supabase Delete Error] Tabela: ${tableName}. Erro: ${error.message}`);
           return { success: false, error };
         }
+
+        if (TOMBSTONE_KEYS.has(key)) {
+          await registerRemoteDeletion(tableName, id);
+        }
+
         return { success: true };
       } catch (err) {
         console.error(`[Delete Error] Falha crítica ao remover do Supabase:`, err);
@@ -330,21 +379,19 @@ export const db = {
 
   async deleteByCondition(key: string, column: string, value: any) {
     let deletedCount = 0;
+    const tableName = key.replace('serviflow_', '');
 
-    // 1. Mark tombstone when deleting by id in protected collections
     if (TOMBSTONE_KEYS.has(key) && column === 'id') {
       _tombstones.add(value);
       persistTombstones();
     }
 
-    // 2. Remove from cache
     if (Array.isArray(_cache[key])) {
       const initialLength = _cache[key].length;
       _cache[key] = _cache[key].filter((item: any) => item[column] !== value);
       deletedCount = initialLength - _cache[key].length;
     }
 
-    // 3. Remove from IndexedDB and LocalStorage
     try {
       const idb = await getDB();
       if (Array.isArray(_cache[key])) {
@@ -361,9 +408,7 @@ export const db = {
       }
     }
 
-    // 4. Remove from Supabase
     if (supabase) {
-      const tableName = key.replace('serviflow_', '');
       try {
         const { error } = await supabase
           .from(tableName)
@@ -382,6 +427,10 @@ export const db = {
             throw new Error(`Falha na nuvem: ${error.message}`);
           }
         }
+
+        if (TOMBSTONE_KEYS.has(key) && column === 'id') {
+          await registerRemoteDeletion(tableName, value);
+        }
       } catch (err) {
         console.warn(`[Delete] Erro ignorado ou tratado para ${tableName}:`, err);
       }
@@ -392,6 +441,8 @@ export const db = {
 
   async forceUploadAll() {
     if (!supabase) return { success: false, error: 'Sem conexão com Supabase' };
+
+    await syncDeletedRecordsFromCloud();
 
     const keys = [
       'serviflow_customers', 'serviflow_catalog', 'serviflow_orders', 'serviflow_transactions',
@@ -421,6 +472,11 @@ export const db = {
 
   isDeleted(id: string) {
     return _tombstones.has(id);
+  },
+
+  async refreshDeletedRecords() {
+    await syncDeletedRecordsFromCloud();
+    return { success: true };
   },
 
   async clearAll() {
