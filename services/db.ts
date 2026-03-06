@@ -15,6 +15,7 @@ const STORE_NAME = 'keyvalue';
 let _dbPromise: Promise<IDBPDatabase> | null = null;
 let _cache: Record<string, any> = {};
 let _tombstones: Set<string> = new Set();
+let _realtimeChannel: any = null;
 
 const SMALL_KEYS = [
   'serviflow_session',
@@ -38,6 +39,8 @@ const CLOUD_TABLES = [
   'plans', 'plan_services', 'plan_materials', 'plan_labor', 'plan_indirects', 'plan_taxes',
   'works', 'work_services', 'work_materials', 'work_labor', 'work_indirects', 'work_taxes'
 ];
+
+const REALTIME_TABLES = ['orders', 'plans', 'works'];
 
 const getStorageKeyFromTable = (table: string) => `serviflow_${table}`;
 
@@ -137,6 +140,80 @@ const syncDeletedRecordsFromCloud = async () => {
   }
 };
 
+const persistArrayKey = async (key: string) => {
+  if (!Array.isArray(_cache[key])) return;
+  await persistKeyLocally(key, _cache[key]);
+};
+
+const upsertIntoCacheArray = async (key: string, row: any) => {
+  if (!row?.id) return;
+  if (_tombstones.has(row.id)) return;
+
+  const current = Array.isArray(_cache[key]) ? [..._cache[key]] : [];
+  const index = current.findIndex((item: any) => item?.id === row.id);
+
+  if (index >= 0) {
+    current[index] = row;
+  } else {
+    current.push(row);
+  }
+
+  _cache[key] = filterDeletedItems(current);
+  await persistArrayKey(key);
+};
+
+const removeFromCacheArray = async (key: string, id: string) => {
+  if (!Array.isArray(_cache[key])) {
+    _cache[key] = [];
+  } else {
+    _cache[key] = _cache[key].filter((item: any) => item?.id !== id);
+  }
+
+  await persistArrayKey(key);
+};
+
+const handleRemoteDeletion = async (tableName: string, recordId: string) => {
+  const storageKey = getStorageKeyFromTable(tableName);
+  _tombstones.add(recordId);
+  persistTombstones();
+  await removeFromCacheArray(storageKey, recordId);
+};
+
+const bindRealtimeForTable = (channel: any, tableName: string) => {
+  const storageKey = getStorageKeyFromTable(tableName);
+
+  channel
+    .on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: tableName },
+      async (payload: any) => {
+        const row = payload?.new;
+        if (!row?.id) return;
+        if (_tombstones.has(row.id)) return;
+        await upsertIntoCacheArray(storageKey, row);
+      }
+    )
+    .on(
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: tableName },
+      async (payload: any) => {
+        const row = payload?.new;
+        if (!row?.id) return;
+        if (_tombstones.has(row.id)) return;
+        await upsertIntoCacheArray(storageKey, row);
+      }
+    )
+    .on(
+      'postgres_changes',
+      { event: 'DELETE', schema: 'public', table: tableName },
+      async (payload: any) => {
+        const row = payload?.old;
+        if (!row?.id) return;
+        await handleRemoteDeletion(tableName, row.id);
+      }
+    );
+};
+
 // Helper to get the DB instance
 const getDB = () => {
   if (!_dbPromise) {
@@ -209,6 +286,59 @@ const initCache = async () => {
 
 // Pre-initialize and export the promise so we can await it if needed
 export const initPromise = initCache().catch(console.error);
+
+export const startRealtimeSync = async () => {
+  if (!supabase) return { success: false, error: 'Sem conexão com Supabase' };
+
+  try {
+    await syncDeletedRecordsFromCloud();
+
+    if (_realtimeChannel) {
+      await supabase.removeChannel(_realtimeChannel);
+      _realtimeChannel = null;
+    }
+
+    const channel = supabase.channel('primeorcamentos-realtime');
+
+    for (const tableName of REALTIME_TABLES) {
+      bindRealtimeForTable(channel, tableName);
+    }
+
+    channel.on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'deleted_records' },
+      async (payload: any) => {
+        const row = payload?.new;
+        if (!row?.table_name || !row?.record_id) return;
+        await handleRemoteDeletion(row.table_name, row.record_id);
+      }
+    );
+
+    _realtimeChannel = channel;
+
+    _realtimeChannel.subscribe((status: string) => {
+      console.log('[Realtime]', status);
+    });
+
+    return { success: true };
+  } catch (err) {
+    console.error('[Realtime] Falha ao iniciar sincronização em tempo real:', err);
+    return { success: false, error: err };
+  }
+};
+
+export const stopRealtimeSync = async () => {
+  if (!supabase || !_realtimeChannel) return { success: true };
+
+  try {
+    await supabase.removeChannel(_realtimeChannel);
+    _realtimeChannel = null;
+    return { success: true };
+  } catch (err) {
+    console.error('[Realtime] Falha ao encerrar canal:', err);
+    return { success: false, error: err };
+  }
+};
 
 export const db = {
   isConnected: () => !!supabase,
