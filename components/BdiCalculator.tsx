@@ -1,6 +1,5 @@
-
-import React, { useState, useEffect } from 'react';
-import { Calculator, Percent, Info, Save } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Calculator, Info, Save } from 'lucide-react';
 import { BdiConfig } from '../types';
 import { calculateBDI } from '../services/sinapiUtils';
 import { useNotify } from './ToastProvider';
@@ -10,33 +9,68 @@ interface Props {
     onSave: (config: BdiConfig) => void;
 }
 
+type BdiFormData = Omit<BdiConfig, 'id' | 'total'>;
+type NumericBdiFields = 'ac' | 's' | 'g' | 'r' | 'df' | 'l' | 'iss' | 'pis' | 'cofins' | 'cprb';
+
+const DEFAULT_BDI_CONFIG: BdiFormData = {
+    name: 'BDI Padronizado',
+    ac: 4.0,
+    s: 0.8,
+    g: 0.2,
+    r: 0.97,
+    df: 0.59,
+    l: 7.4,
+    iss: 5.0,
+    pis: 0.65,
+    cofins: 3.0,
+    cprb: 4.5,
+};
+
 const BdiCalculator: React.FC<Props> = ({ initialConfig, onSave }) => {
-    const [config, setConfig] = useState<Omit<BdiConfig, 'id' | 'total'>>(initialConfig || {
-        name: 'BDI Padrãonizado',
-        ac: 4.00,
-        s: 0.80,
-        g: 0.20,
-        r: 0.97,
-        df: 0.59,
-        l: 7.40,
-        iss: 5.00,
-        pis: 0.65,
-        cofins: 3.00,
-        cprb: 4.50
+    const [config, setConfig] = useState<BdiFormData>(() => {
+        if (initialConfig) {
+            const { id, total, ...rest } = initialConfig;
+            return rest;
+        }
+        return DEFAULT_BDI_CONFIG;
     });
 
-    const [totalBdi, setTotalBdi] = useState(0);
     const { notify } = useNotify();
 
     useEffect(() => {
-        setTotalBdi(calculateBDI(config));
+        if (initialConfig) {
+            const { id, total, ...rest } = initialConfig;
+            setConfig(rest);
+        }
+    }, [initialConfig]);
+
+    const totalBdi = useMemo(() => {
+        return calculateBDI(config);
     }, [config]);
 
-    const handleChange = (field: keyof typeof config, value: string | number) => {
+    const handleChange = (field: NumericBdiFields, value: string) => {
+        const parsed = value === '' ? 0 : parseFloat(value);
+
         setConfig(prev => ({
             ...prev,
-            [field]: typeof value === 'string' ? parseFloat(value) || 0 : value
+            [field]: Number.isFinite(parsed) ? parsed : 0,
         }));
+    };
+
+    const handleSave = () => {
+        if (!Number.isFinite(totalBdi)) {
+            notify('Os valores informados geraram um BDI inválido.');
+            return;
+        }
+
+        const payload: BdiConfig = {
+            ...config,
+            id: initialConfig?.id || crypto.randomUUID(),
+            total: totalBdi,
+        };
+
+        onSave(payload);
+        notify('Configuração de BDI calculada!');
     };
 
     return (
@@ -53,9 +87,10 @@ const BdiCalculator: React.FC<Props> = ({ initialConfig, onSave }) => {
 
             <div className="p-8 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Custos Indiretos */}
                     <div className="space-y-4">
-                        <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest border-b pb-2">Custos Indiretos & Riscos</h4>
+                        <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest border-b pb-2">
+                            Custos Indiretos & Riscos
+                        </h4>
 
                         <div className="space-y-3">
                             <BdiInput label="Adm. Central (AC)" value={config.ac} onChange={v => handleChange('ac', v)} />
@@ -67,9 +102,10 @@ const BdiCalculator: React.FC<Props> = ({ initialConfig, onSave }) => {
                         </div>
                     </div>
 
-                    {/* Tributos */}
                     <div className="space-y-4">
-                        <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest border-b pb-2">Tributos (I)</h4>
+                        <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest border-b pb-2">
+                            Tributos (I)
+                        </h4>
 
                         <div className="space-y-3">
                             <BdiInput label="ISS" value={config.iss} onChange={v => handleChange('iss', v)} />
@@ -82,7 +118,7 @@ const BdiCalculator: React.FC<Props> = ({ initialConfig, onSave }) => {
                             <div className="flex items-start gap-2">
                                 <Info className="w-4 h-4 text-slate-400 shrink-0" />
                                 <p className="text-[10px] text-slate-500 leading-tight">
-                                    O CPRB (Contribuição Previdenciária sobre a Receita Bruta) deve ser incluído apenas em casos de desoneração da folha.
+                                    O CPRB deve ser incluído apenas em casos de desoneração da folha.
                                 </p>
                             </div>
                         </div>
@@ -91,20 +127,22 @@ const BdiCalculator: React.FC<Props> = ({ initialConfig, onSave }) => {
 
                 <div className="pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-6">
                     <div className="text-center sm:text-left">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Resultado Final</p>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                            Resultado Final
+                        </p>
                         <div className="flex items-baseline gap-2">
-                            <span className="text-4xl font-black text-indigo-600 tracking-tighter">BDI = {totalBdi.toFixed(2)}%</span>
+                            <span className="text-4xl font-black text-indigo-600 tracking-tighter">
+                                BDI = {totalBdi.toFixed(2)}%
+                            </span>
                         </div>
                     </div>
 
                     <button
-                        onClick={() => {
-                            onSave({ ...config, id: initialConfig?.id || 'default', total: totalBdi } as BdiConfig);
-                            notify('Configuração de BDI calculada!');
-                        }}
+                        onClick={handleSave}
                         className="w-full sm:w-auto bg-indigo-600 text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-950/40 flex items-center justify-center gap-2"
                     >
-                        <Save className="w-4 h-4" /> Aplicar BDI
+                        <Save className="w-4 h-4" />
+                        Aplicar BDI
                     </button>
                 </div>
             </div>
@@ -124,6 +162,7 @@ const BdiInput: React.FC<InputProps> = ({ label, value, onChange }) => (
         <div className="relative w-24">
             <input
                 type="number"
+                min="0"
                 step="0.01"
                 className="w-full bg-slate-50 border border-slate-200 rounded-lg py-1.5 pl-3 pr-8 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none"
                 value={value}
