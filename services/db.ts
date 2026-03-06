@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 import { openDB, IDBPDatabase } from 'idb';
 
@@ -17,7 +16,73 @@ let _dbPromise: Promise<IDBPDatabase> | null = null;
 let _cache: Record<string, any> = {};
 let _tombstones: Set<string> = new Set();
 
-const SMALL_KEYS = ['serviflow_session', 'serviflow_dark_mode', 'serviflow_company', 'serviflow_tombstones', 'serviflow_users'];
+const SMALL_KEYS = [
+  'serviflow_session',
+  'serviflow_dark_mode',
+  'serviflow_company',
+  'serviflow_tombstones',
+  'serviflow_users'
+];
+
+const TOMBSTONE_KEYS = new Set([
+  'serviflow_orders',
+  'serviflow_plans',
+  'serviflow_works',
+  'serviflow_customers',
+  'serviflow_transactions',
+  'serviflow_loans'
+]);
+
+const CLOUD_TABLES = [
+  'customers', 'catalog', 'orders', 'transactions', 'users', 'loans', 'company',
+  'plans', 'plan_services', 'plan_materials', 'plan_labor', 'plan_indirects', 'plan_taxes',
+  'works', 'work_services', 'work_materials', 'work_labor', 'work_indirects', 'work_taxes'
+];
+
+const getStorageKeyFromTable = (table: string) => `serviflow_${table}`;
+
+const persistTombstones = () => {
+  try {
+    localStorage.setItem('serviflow_tombstones', JSON.stringify(Array.from(_tombstones)));
+  } catch (err) {
+    console.warn('[Tombstones] Falha ao salvar tombstones no localStorage.', err);
+  }
+};
+
+const isItemDeleted = (item: any) => {
+  if (!item || !item.id) return false;
+  return _tombstones.has(item.id);
+};
+
+const filterDeletedItems = (data: any) => {
+  if (!Array.isArray(data)) return data;
+  return data.filter((item: any) => !isItemDeleted(item));
+};
+
+const applyTombstonesToCache = () => {
+  Object.keys(_cache).forEach((key) => {
+    if (Array.isArray(_cache[key])) {
+      _cache[key] = _cache[key].filter((item: any) => !isItemDeleted(item));
+    }
+  });
+};
+
+const persistKeyLocally = async (key: string, data: any) => {
+  try {
+    const idb = await getDB();
+    await idb.put(STORE_NAME, data, key);
+
+    if (SMALL_KEYS.includes(key) || key.length < 50) {
+      try {
+        localStorage.setItem(key, JSON.stringify(data));
+      } catch (lsError) {
+        console.warn(`[LocalStorage Quota] Falha ao espelhar ${key}, mas salvo no IDB.`);
+      }
+    }
+  } catch (e) {
+    console.error(`[Storage Error] Falha crítica ao salvar ${key}:`, e);
+  }
+};
 
 // Helper to get the DB instance
 const getDB = () => {
@@ -63,7 +128,6 @@ const initCache = async () => {
   if (migratableKeys.length > 0) {
     console.log(`[Migration] Encontradas ${migratableKeys.length} chaves no LocalStorage. Migrando para IDB...`);
     for (const key of migratableKeys) {
-      // Migration should ONLY happen if the key is missing from IDB entirely
       const isMissingInIDB = _cache[key] === undefined;
 
       if (isMissingInIDB) {
@@ -71,22 +135,25 @@ const initCache = async () => {
         if (value) {
           try {
             const parsed = JSON.parse(value);
-            // Only migrate if we actually found data in localStorage
             if (parsed && (!Array.isArray(parsed) || parsed.length > 0)) {
-              await db.put(STORE_NAME, parsed, key);
               _cache[key] = parsed;
+              await db.put(STORE_NAME, parsed, key);
               console.log(`[Migration] Dados migrados do LocalStorage para: ${key}`);
-              // Safe to remove now that it's in IDB
-              // localStorage.removeItem(key); // Keeping for one more version as safety backup
             }
-          } catch (e) {
+          } catch {
             console.warn(`[Migration] Erro ao migrar chave ${key}`);
           }
         }
       }
-      // Opcional: localStorage.removeItem(key) após garantir migração segura.
-      // Por enquanto, manteremos no localStorage como backup até validação.
     }
+  }
+
+  // Apply tombstones after loading all data
+  applyTombstonesToCache();
+
+  // Persist cleaned cache back to IndexedDB / LocalStorage
+  for (const key of Object.keys(_cache)) {
+    await persistKeyLocally(key, _cache[key]);
   }
 };
 
@@ -102,36 +169,32 @@ export const db = {
   },
 
   async save(key: string, data: any, singleItem?: any, skipCloud: boolean = false) {
-    // 1. Update Cache immediately for synchronous consistency
-    _cache[key] = data;
+    // 1. Prevent deleted items from being reintroduced locally
+    const sanitizedData = filterDeletedItems(data);
+    const sanitizedSingleItem = Array.isArray(singleItem)
+      ? filterDeletedItems(singleItem)
+      : (isItemDeleted(singleItem) ? null : singleItem);
 
-    // 2. Save to IndexedDB and LocalStorage (Selective Mirroring)
-    try {
-      const idb = await getDB();
-      await idb.put(STORE_NAME, data, key);
+    // 2. Update Cache immediately for synchronous consistency
+    _cache[key] = sanitizedData;
 
-      // Only mirror small keys to LocalStorage to avoid QuotaExceededError
-      if (SMALL_KEYS.includes(key) || key.length < 50) {
-        try {
-          localStorage.setItem(key, JSON.stringify(data));
-        } catch (lsError) {
-          console.warn(`[LocalStorage Quota] Falha ao espelhar ${key}, mas salvo no IDB.`);
-        }
-      }
-    } catch (e) {
-      console.error(`[Storage Error] Falha crítica ao salvar ${key}:`, e);
-    }
+    // 3. Save to IndexedDB and LocalStorage
+    await persistKeyLocally(key, sanitizedData);
 
-    // 3. Sync to Supabase in the background if available and skipCloud is false
+    // 4. Sync to Supabase in the background if available and skipCloud is false
     if (supabase && !skipCloud) {
-      // Create an IIFE to handle the background sync without awaiting it
       (async () => {
         const tableName = key.replace('serviflow_', '');
         try {
-          // Optimization: If singleItem is provided, sync ONLY that item
-          const payload = singleItem
-            ? (Array.isArray(singleItem) ? singleItem : [singleItem])
-            : (Array.isArray(data) ? data : [data]);
+          const rawPayload = sanitizedSingleItem
+            ? (Array.isArray(sanitizedSingleItem) ? sanitizedSingleItem : [sanitizedSingleItem])
+            : (Array.isArray(sanitizedData) ? sanitizedData : [sanitizedData]);
+
+          const payload = rawPayload.filter((item: any) => {
+            if (!item) return false;
+            if (!item.id) return true;
+            return !_tombstones.has(item.id);
+          });
 
           if (payload.length > 0) {
             console.log(`[Sync Background] Iniciando para ${tableName}...`);
@@ -152,7 +215,6 @@ export const db = {
       })();
     }
 
-    // Return success immediately after local save
     return { success: true };
   },
 
@@ -162,17 +224,17 @@ export const db = {
   },
 
   load(key: string, defaultValue: any) {
-    // Sync reading from cache. 
-    // If cache not yet loaded, fallback to localStorage temporarily for fast first boot
     if (_cache[key] !== undefined) {
       return _cache[key];
     }
 
     const saved = localStorage.getItem(key);
     if (!saved) return defaultValue;
+
     try {
       const data = JSON.parse(saved);
-      return (data === null || data === undefined) ? defaultValue : data;
+      const sanitized = filterDeletedItems(data);
+      return (sanitized === null || sanitized === undefined) ? defaultValue : sanitized;
     } catch {
       return defaultValue;
     }
@@ -181,17 +243,11 @@ export const db = {
   async syncFromCloud() {
     if (!supabase) return null;
 
-    const tables = [
-      'customers', 'catalog', 'orders', 'transactions', 'users', 'loans', 'company',
-      'plans', 'plan_services', 'plan_materials', 'plan_labor', 'plan_indirects', 'plan_taxes',
-      'works', 'work_services', 'work_materials', 'work_labor', 'work_indirects', 'work_taxes'
-    ];
     const results: any = {};
     const errors: any = {};
 
     try {
-      // Parallelize fetching for significantly better performance
-      const fetchPromises = tables.map(async (table) => {
+      const fetchPromises = CLOUD_TABLES.map(async (table) => {
         const { data, error } = await supabase.from(table).select('*');
         if (error) {
           console.error(`Erro ao baixar ${table}:`, error.message);
@@ -207,42 +263,49 @@ export const db = {
           errors[response.table] = response.error;
           continue;
         }
-        results[response.table] = response.data;
+
+        const storageKey = getStorageKeyFromTable(response.table);
+        const sanitizedData = filterDeletedItems(response.data);
+        results[response.table] = sanitizedData;
+
+        _cache[storageKey] = sanitizedData;
+        await persistKeyLocally(storageKey, sanitizedData);
       }
 
       return { results, errors };
     } catch (err) {
-      console.error("[Cloud Sync] Erro ao baixar dados:", err);
+      console.error('[Cloud Sync] Erro ao baixar dados:', err);
       return { results: {}, errors: { global: (err as any).message } };
     }
   },
 
   async remove(key: string, id: string) {
-    // 1. Remove from cache if it's an array field
+    // 1. Mark tombstone first
+    if (TOMBSTONE_KEYS.has(key)) {
+      _tombstones.add(id);
+      persistTombstones();
+    }
+
+    // 2. Remove from cache
     if (Array.isArray(_cache[key])) {
       _cache[key] = _cache[key].filter((item: any) => item.id !== id);
     }
 
-    // 2. Remove from IndexedDB and LocalStorage
+    // 3. Remove from IndexedDB and LocalStorage
     try {
       const idb = await getDB();
       if (Array.isArray(_cache[key])) {
         await idb.put(STORE_NAME, _cache[key], key);
         localStorage.setItem(key, JSON.stringify(_cache[key]));
       } else {
+        await idb.delete(STORE_NAME, key);
         localStorage.removeItem(key);
       }
     } catch (e) {
       console.error(`[Storage Delete Error] ${e}`);
     }
 
-    // Add to tombstones if it's a primary project/work ID being deleted
-    if (key === 'serviflow_plans' || key === 'serviflow_works') {
-      _tombstones.add(id);
-      localStorage.setItem('serviflow_tombstones', JSON.stringify(Array.from(_tombstones)));
-    }
-
-    // 3. Remove from Supabase
+    // 4. Remove from Supabase
     if (supabase) {
       const tableName = key.replace('serviflow_', '');
       try {
@@ -261,31 +324,34 @@ export const db = {
         return { success: false, error: err };
       }
     }
+
     return { success: true };
   },
 
   async deleteByCondition(key: string, column: string, value: any) {
-    // 1. Remove from cache if it's an array field
     let deletedCount = 0;
+
+    // 1. Mark tombstone when deleting by id in protected collections
+    if (TOMBSTONE_KEYS.has(key) && column === 'id') {
+      _tombstones.add(value);
+      persistTombstones();
+    }
+
+    // 2. Remove from cache
     if (Array.isArray(_cache[key])) {
       const initialLength = _cache[key].length;
       _cache[key] = _cache[key].filter((item: any) => item[column] !== value);
       deletedCount = initialLength - _cache[key].length;
     }
 
-    // Add to tombstones if it's a primary project/work ID being deleted
-    if ((key === 'serviflow_plans' || key === 'serviflow_works') && column === 'id') {
-      _tombstones.add(value);
-      localStorage.setItem('serviflow_tombstones', JSON.stringify(Array.from(_tombstones)));
-    }
-
-    // 2. Remove from IndexedDB and LocalStorage
+    // 3. Remove from IndexedDB and LocalStorage
     try {
       const idb = await getDB();
       if (Array.isArray(_cache[key])) {
         await idb.put(STORE_NAME, _cache[key], key);
         localStorage.setItem(key, JSON.stringify(_cache[key]));
       } else {
+        await idb.delete(STORE_NAME, key);
         localStorage.removeItem(key);
       }
     } catch (e) {
@@ -295,7 +361,7 @@ export const db = {
       }
     }
 
-    // 3. Remove from Supabase
+    // 4. Remove from Supabase
     if (supabase) {
       const tableName = key.replace('serviflow_', '');
       try {
@@ -305,8 +371,11 @@ export const db = {
           .eq(column, value);
 
         if (error) {
-          // If table doesn't exist, it's not a fatal error for deletion recovery
-          if (error.code === 'PGRST116' || error.message.includes('relation') || error.message.includes('does not exist')) {
+          if (
+            error.code === 'PGRST116' ||
+            error.message.includes('relation') ||
+            error.message.includes('does not exist')
+          ) {
             console.warn(`[Supabase Delete] Tabela ${tableName} não existe. Ignorando.`);
           } else {
             console.error(`[Supabase Delete Error] Tabela: ${tableName}. Erro: ${error.message}`);
@@ -314,15 +383,16 @@ export const db = {
           }
         }
       } catch (err) {
-        // Only throw if it's a real connection error, not just a missing table
         console.warn(`[Delete] Erro ignorado ou tratado para ${tableName}:`, err);
       }
     }
+
     return { success: true, deletedCount };
   },
 
   async forceUploadAll() {
     if (!supabase) return { success: false, error: 'Sem conexão com Supabase' };
+
     const keys = [
       'serviflow_customers', 'serviflow_catalog', 'serviflow_orders', 'serviflow_transactions',
       'serviflow_users', 'serviflow_loans', 'serviflow_plans', 'serviflow_plan_services',
@@ -330,15 +400,22 @@ export const db = {
       'serviflow_works', 'serviflow_work_services', 'serviflow_work_materials', 'serviflow_work_labor',
       'serviflow_work_indirects', 'serviflow_work_taxes'
     ];
+
     let totalUpdated = 0;
+
     for (const key of keys) {
-      const data = _cache[key] || [];
+      const data = filterDeletedItems(_cache[key] || []);
       if (Array.isArray(data) && data.length > 0) {
         const tableName = key.replace('serviflow_', '');
-        const { error } = await supabase.from(tableName).upsert(data, { onConflict: 'id' });
-        if (!error) totalUpdated += data.length;
+        const payload = data.filter((item: any) => !isItemDeleted(item));
+        if (payload.length === 0) continue;
+
+        const conflictKey = tableName === 'users' ? 'email' : 'id';
+        const { error } = await supabase.from(tableName).upsert(payload, { onConflict: conflictKey });
+        if (!error) totalUpdated += payload.length;
       }
     }
+
     return { success: true, count: totalUpdated };
   },
 
@@ -350,6 +427,8 @@ export const db = {
     const idb = await getDB();
     await idb.clear(STORE_NAME);
     _cache = {};
+    _tombstones = new Set();
+    localStorage.removeItem('serviflow_tombstones');
     return { success: true };
   }
 };
