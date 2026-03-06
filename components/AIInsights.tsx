@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Sparkles, Loader2, ChevronRight } from 'lucide-react';
 import { ServiceOrder, Transaction } from '../types';
 import { getFinancialInsights } from '../PrimeOrcamentos/services/geminiService';
@@ -13,26 +12,85 @@ const AIInsights: React.FC<AIInsightsProps> = ({ orders, transactions }) => {
   const [insight, setInsight] = useState<string>('');
   const [loading, setLoading] = useState(false);
 
-  const fetchInsight = async () => {
-    setLoading(true);
-    const text = await getFinancialInsights(orders, transactions);
-    setInsight(text || '');
-    setLoading(false);
-  };
+  const fetchInsight = useCallback(async () => {
+    if (loading) return;
+
+    if (!orders.length && !transactions.length) {
+      setInsight('Ainda não há dados suficientes para gerar insights.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const text = await getFinancialInsights(orders, transactions);
+      setInsight(text || 'Nenhum insight disponível no momento.');
+    } catch (error) {
+      console.error('Erro ao buscar insight:', error);
+      setInsight('Não foi possível carregar os insights agora.');
+    } finally {
+      setLoading(false);
+    }
+  }, [orders, transactions, loading]);
 
   useEffect(() => {
-    fetchInsight();
-  }, []);
+    let isMounted = true;
+
+    const load = async () => {
+      if (!orders.length && !transactions.length) {
+        if (isMounted) {
+          setInsight('Ainda não há dados suficientes para gerar insights.');
+        }
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const text = await getFinancialInsights(orders, transactions);
+
+        if (isMounted) {
+          setInsight(text || 'Nenhum insight disponível no momento.');
+        }
+      } catch (error) {
+        if (isMounted) {
+          console.error('Erro ao buscar insight:', error);
+          setInsight('Não foi possível carregar os insights agora.');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    load();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [orders, transactions]);
 
   return (
     <div className="bg-gradient-to-br from-indigo-600 to-blue-700 p-6 rounded-2xl text-white shadow-xl shadow-blue-200">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Sparkles className="w-5 h-5" />
-          <h4 className="font-bold uppercase tracking-wider text-xs opacity-90">Inteligência Gemini</h4>
+          <h4 className="font-bold uppercase tracking-wider text-xs opacity-90">
+            Inteligência Gemini
+          </h4>
         </div>
-        <button onClick={fetchInsight} disabled={loading} className="p-1 hover:bg-white/20 rounded-lg">
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ChevronRight className="w-4 h-4" />}
+
+        <button
+          onClick={fetchInsight}
+          disabled={loading}
+          title="Atualizar insights"
+          aria-label="Atualizar insights"
+          className="p-1 hover:bg-white/20 rounded-lg disabled:opacity-50"
+        >
+          {loading ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <ChevronRight className="w-4 h-4" />
+          )}
         </button>
       </div>
 
@@ -43,12 +101,15 @@ const AIInsights: React.FC<AIInsightsProps> = ({ orders, transactions }) => {
         </div>
       ) : (
         <div className="text-sm leading-relaxed whitespace-pre-line opacity-95 italic">
-          "{insight || "Carregando insights..."}"
+          {insight || 'Carregando insights...'}
         </div>
       )}
 
       {!loading && (
-        <button className="mt-6 w-full py-2 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-semibold border border-white/10">
+        <button
+          disabled
+          className="mt-6 w-full py-2 bg-white/10 rounded-xl text-xs font-semibold border border-white/10 opacity-50 cursor-not-allowed"
+        >
           Ver Relatório Estratégico
         </button>
       )}
