@@ -10,10 +10,6 @@ import BudgetManager from './components/BudgetManager';
 
 // ... (existing imports)
 
-
-
-
-
 import ServiceOrderManager from './components/ServiceOrderManager';
 import WorkOrderManager from './components/WorkOrderManager';
 import FinancialControl from './components/FinancialControl';
@@ -26,7 +22,7 @@ import Login from './components/Login';
 import DataCleanup from './components/DataCleanup';
 import { ToastProvider, useNotify } from './components/ToastProvider';
 import { ServiceOrder, Transaction, OrderStatus, Customer, CatalogService, CompanyProfile, UserAccount, Loan } from './types';
-import { db, initPromise } from './services/db';
+import { db, initPromise, startRealtimeSync, stopRealtimeSync } from './services/db';
 import { APP_VERSION } from './services/version';
 
 const STORAGE_KEYS = {
@@ -111,6 +107,7 @@ const AppContent: React.FC = () => {
           const failedTables = Object.keys(cloudData.errors).join(', ');
           notify(`Aviso: Algumas tabelas não sincronizaram: ${failedTables}.`, "warning");
         }
+
         // --- Core Tables ---
         if (Array.isArray(cloudData.customers)) {
           const localCustomers = (db.load(STORAGE_KEYS.CUSTOMERS, []) || []) as Customer[];
@@ -128,7 +125,6 @@ const AppContent: React.FC = () => {
           const deduplicatedCustomers = Array.from(customerMap.values()) as Customer[];
           setCustomers(deduplicatedCustomers);
           await db.saveLocal(STORAGE_KEYS.CUSTOMERS, deduplicatedCustomers);
-          // Auto-push if local/merged has more items than cloud
           if (deduplicatedCustomers.length > cloudData.customers.length) {
             db.save(STORAGE_KEYS.CUSTOMERS, deduplicatedCustomers);
           }
@@ -195,7 +191,6 @@ const AppContent: React.FC = () => {
           setUsers(merged);
           await db.saveLocal(STORAGE_KEYS.USERS, merged);
 
-          // Subir a verdade após o merge, unificando pelo e-mail
           await db.save(STORAGE_KEYS.USERS, merged);
         }
 
@@ -219,7 +214,6 @@ const AppContent: React.FC = () => {
           setCompany(cloudCompany);
           await db.saveLocal(STORAGE_KEYS.COMPANY, cloudCompany);
         } else {
-          // Push company data if not in cloud
           const localCompany = db.load(STORAGE_KEYS.COMPANY, INITIAL_COMPANY);
           if (localCompany) {
             await db.save(STORAGE_KEYS.COMPANY, localCompany);
@@ -227,15 +221,10 @@ const AppContent: React.FC = () => {
         }
 
         // --- Planning & Execution Tables (Server-Authoritative Sync) ---
-        // A nuvem é a fonte primária. O dispositivo deve se espelhar nela para evitar Fantasmas.
-
         if (Array.isArray(cloudData.plans)) {
           const localPlans = (db.load('serviflow_plans', []) || []) as any[];
-
-          // 1. Manter APENAS o que acabou de ser criado localmente e ainda não foi para a nuvem
           const pendingUploads = localPlans.filter(p => p.syncStatus !== 'synced');
 
-          // 2. A base principal agora é estritamente o que veio da nuvem
           const planMap = new Map<string, any>(pendingUploads.map(p => [p.id, p]));
 
           cloudData.plans.forEach((p: any) => {
@@ -248,10 +237,8 @@ const AppContent: React.FC = () => {
             new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
           );
 
-          // 3. Sobrescrever o banco local com a verdade absoluta (Server + Pendentes)
           await db.saveLocal('serviflow_plans', syncedPlans);
 
-          // 4. Se tiver pendentes (itens novos locais), forçar push para nuvem
           if (pendingUploads.length > 0) {
             await db.save('serviflow_plans', pendingUploads);
           }
@@ -277,7 +264,6 @@ const AppContent: React.FC = () => {
           }
         }
 
-        // Sub-items for Plan/Work (Services, Materials, etc.)
         const subTables = [
           'plan_services', 'plan_materials', 'plan_labor', 'plan_indirects', 'plan_taxes',
           'work_services', 'work_materials', 'work_labor', 'work_indirects', 'work_taxes'
@@ -288,7 +274,6 @@ const AppContent: React.FC = () => {
             const incomingItems = (cloudData[tableName] as any[]);
             const localData = (db.load(`serviflow_${tableName}`, []) || []) as any[];
 
-            // Só segura itens não sincronizados criados offline
             const pendingUploads = localData.filter(i => i.syncStatus !== 'synced');
             const itemMap = new Map<string, any>(pendingUploads.map(item => [item.id, item]));
 
@@ -311,7 +296,6 @@ const AppContent: React.FC = () => {
         await Promise.all(subTablePromises);
 
         notify("Sincronização concluída");
-        // Emit a global event so mounted components (like UnifiedWorksManager) can refresh
         window.dispatchEvent(new CustomEvent('db-sync-complete'));
       }
     } catch (e: any) {
@@ -324,14 +308,29 @@ const AppContent: React.FC = () => {
   };
 
   useEffect(() => {
-    initPromise.then(() => {
-      if (db.isConnected()) handleManualSync();
-    });
+    let isMounted = true;
+
+    const boot = async () => {
+      await initPromise;
+
+      if (!db.isConnected()) return;
+
+      await handleManualSync();
+
+      if (!isMounted) return;
+
+      await startRealtimeSync();
+    };
+
+    boot();
+
+    return () => {
+      isMounted = false;
+      stopRealtimeSync();
+    };
   }, []);
 
   useEffect(() => {
-    // Only save UI/Session state locally. 
-    // Business data (orders, transactions, etc.) is saved by individual components.
     db.saveLocal('serviflow_dark_mode', darkMode);
     if (currentUser) db.saveLocal(STORAGE_KEYS.SESSION, currentUser);
   }, [darkMode, currentUser]);
@@ -498,7 +497,6 @@ const AppContent: React.FC = () => {
           </div>
         </header>
 
-        {/* Multi-Tab Bar */}
         <div className={`border-b px-4 md:px-10 flex items-center gap-2 overflow-x-auto no-scrollbar shrink-0 h-12 transition-colors ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
           {openTabs.map(tabId => {
             const item = navItems.find(n => n.id === tabId);
@@ -538,7 +536,6 @@ const AppContent: React.FC = () => {
 
         <div className={`flex-1 overflow-y-auto p-4 md:p-10 no-scrollbar relative transition-colors ${darkMode ? 'bg-slate-900' : 'bg-slate-50'}`}>
           <div className="max-w-[1400px] mx-auto h-full">
-            {/* Persistent Tab Container */}
             {navItems.map(item => {
               const isMounted = openTabs.includes(item.id);
               if (!isMounted) return null;
@@ -598,4 +595,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-
