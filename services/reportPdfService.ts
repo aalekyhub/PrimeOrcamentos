@@ -149,8 +149,7 @@ export const buildReportHtml = (
     }));
 
     const reportIndirects = indirects.map((i: any) => ({
-        category: i.category,
-        description: i.description,
+        name: i.name,
         value: toNumber(i.value)
     }));
 
@@ -388,7 +387,7 @@ export const buildReportHtml = (
                 .map((i) => `
                                 <tr style="border-bottom:1px solid #f1f5f9;">
                                     <td style="padding:10px 8px; font-size:11px; font-weight:600;">
-                                        ${escapeHtml(i.category)}${i.description ? ` - ${escapeHtml(i.description)}` : ''}
+                                        ${escapeHtml(i.name)}
                                     </td>
                                     <td style="padding:10px 8px; font-size:11px; text-align:right; font-weight:700;">R$ ${formatMoney(i.value)}</td>
                                 </tr>`)

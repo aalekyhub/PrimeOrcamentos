@@ -24,6 +24,7 @@ import {
     Customer,
     MainTab,
 } from './types';
+import { buildReportHtml, PLANNING_THEME } from '../../services/reportPdfService';
 
 interface PlanningCalculations {
     totalMaterial: number;
@@ -109,6 +110,7 @@ interface PlanningEditorProps {
     onShowPreview: (title: string, html: string, filename: string) => void;
 }
 
+// Helpers
 const toNumber = (value: unknown): number => {
     if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
     if (typeof value === 'string') {
@@ -122,33 +124,6 @@ const toNumber = (value: unknown): number => {
     return 0;
 };
 
-const formatMoney = (value: unknown): string => {
-    return toNumber(value).toLocaleString('pt-BR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-    });
-};
-
-const escapeHtml = (value: unknown): string => {
-    return String(value ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-};
-
-const formatDateBR = (value?: string | Date): string => {
-    try {
-        if (!value) return new Date().toLocaleDateString('pt-BR');
-        const date = value instanceof Date ? value : new Date(value);
-        if (Number.isNaN(date.getTime())) return new Date().toLocaleDateString('pt-BR');
-        return date.toLocaleDateString('pt-BR');
-    } catch {
-        return new Date().toLocaleDateString('pt-BR');
-    }
-};
-
 const buildSafeFileName = (value?: string): string => {
     const name = String(value || 'planejamento-obra')
         .replace(/\.pdf$/i, '')
@@ -158,26 +133,17 @@ const buildSafeFileName = (value?: string): string => {
     return `${name || 'planejamento-obra'}.pdf`;
 };
 
-const getPlanCode = (id?: string): string => {
-    const raw = String(id || '').trim();
-    if (!raw) return 'PLAN-0000';
-
-    const lastPart = raw.includes('-') ? raw.split('-').pop() : raw;
-    return `PLAN-${String(lastPart || '0000').toUpperCase()}`;
-};
-
 const calculateServiceTotal = (service: {
     quantity: unknown;
     unit_material_cost: unknown;
     unit_labor_cost: unknown;
     unit_indirect_cost?: unknown;
 }): number => {
-    const quantity = toNumber(service.quantity);
-    const material = toNumber(service.unit_material_cost);
-    const labor = toNumber(service.unit_labor_cost);
-    const indirect = toNumber(service.unit_indirect_cost);
-
-    return quantity * (material + labor + indirect);
+    const q = toNumber(service.quantity);
+    const m = toNumber(service.unit_material_cost);
+    const l = toNumber(service.unit_labor_cost);
+    const i = toNumber(service.unit_indirect_cost);
+    return q * (m + l + i);
 };
 
 const calculateMaterialTotal = (material: {
@@ -192,375 +158,6 @@ const calculateLaborTotal = (item: {
     unit_cost: unknown;
 }): number => {
     return toNumber(item.quantity) * toNumber(item.unit_cost);
-};
-
-const buildPlanningReportHtml = ({
-    currentPlan,
-    services,
-    materials,
-    labor,
-    indirects,
-    taxes,
-    customers,
-    calculations,
-    company,
-}: {
-    currentPlan: PlanningHeader;
-    services: PlannedService[];
-    materials: PlannedMaterial[];
-    labor: PlannedLabor[];
-    indirects: PlannedIndirect[];
-    taxes: PlanTax[];
-    customers: Customer[];
-    calculations: PlanningCalculations;
-    company: CompanyProfileLite;
-}): string => {
-    const customer = customers.find((c) => c.id === currentPlan.client_id);
-
-    const reportServices = services.map((s) => {
-        const quantity = toNumber(s.quantity);
-        const unitMaterial = toNumber(s.unit_material_cost);
-        const unitLabor = toNumber(s.unit_labor_cost);
-        const unitIndirect = toNumber((s as any).unit_indirect_cost);
-        const unitTotal = unitMaterial + unitLabor + unitIndirect;
-        const total = toNumber(s.total_cost) || calculateServiceTotal({
-            quantity,
-            unit_material_cost: unitMaterial,
-            unit_labor_cost: unitLabor,
-            unit_indirect_cost: unitIndirect,
-        });
-
-        return {
-            ...s,
-            quantity,
-            unitTotal,
-            total,
-        };
-    });
-
-    const reportMaterials = materials.map((m) => ({
-        ...m,
-        quantity: toNumber(m.quantity),
-        unitCost: toNumber(m.unit_cost),
-        total: toNumber(m.total_cost) || calculateMaterialTotal(m),
-    }));
-
-    const reportLabor = labor.map((l) => ({
-        ...l,
-        quantity: toNumber(l.quantity),
-        total: toNumber(l.total_cost) || calculateLaborTotal(l),
-    }));
-
-    const reportIndirects = indirects.map((i) => ({
-        ...i,
-        valueSafe: toNumber(i.value),
-    }));
-
-    const baseTaxValue = Math.max(0, toNumber(calculations.totalGeneral) - toNumber(calculations.totalTax));
-
-    const reportTaxes = taxes.map((t) => {
-        const rate = toNumber(t.rate);
-        const fixedValue = toNumber(t.value);
-        const calculatedValue = rate > 0 ? baseTaxValue * (rate / 100) : fixedValue;
-
-        return {
-            ...t,
-            rate,
-            calculatedValue,
-        };
-    });
-
-    return `
-        <div style="width:100%; background:#ffffff; font-family:Inter, Arial, sans-serif; color:#1e293b; padding:8mm;">
-            <div class="report-header" style="padding-bottom:18px; border-bottom:2px solid #0f172a; margin-bottom:18px;">
-                <table style="width:100%; border-collapse:collapse;">
-                    <tr>
-                        <td style="width:72%; vertical-align:top; padding:0;">
-                            <table style="width:100%; border-collapse:collapse;">
-                                <tr>
-                                    <td style="width:${company.logo ? '90px' : '0'}; vertical-align:middle; padding:0 14px 0 0;">
-                                        ${company.logo
-            ? `<img src="${company.logo}" style="max-height:${toNumber(company.logoSize) || 70}px; max-width:220px; object-fit:contain; display:block;">`
-            : ''
-        }
-                                    </td>
-                                    <td style="vertical-align:middle; padding:0;">
-                                        <h1 style="font-size:16px; font-weight:900; color:#0f172a; margin:0 0 3px 0; text-transform:uppercase;">
-                                            ${escapeHtml(company.name || 'PRIME SERVIÇOS E MANUTENÇÃO LTDA')}
-                                        </h1>
-                                        <p style="font-size:13px; font-weight:800; color:#0f172a; margin:0 0 3px 0;">
-                                            OBRA: ${escapeHtml(currentPlan.name || 'Não informado')}
-                                        </p>
-                                        <p style="font-size:10px; font-weight:800; color:#2563eb; text-transform:uppercase; letter-spacing:0.08em; margin:0 0 3px 0;">
-                                            Planejamento Executivo de Obra
-                                        </p>
-                                        <p style="font-size:8px; color:#64748b; font-weight:700; margin:0;">
-                                            ${escapeHtml(company.cnpj || '')}${company.cnpj && company.phone ? ' | ' : ''}${escapeHtml(company.phone || '')}
-                                        </p>
-                                    </td>
-                                </tr>
-                            </table>
-                        </td>
-                        <td style="width:28%; vertical-align:top; text-align:right; padding:0;">
-                            <div style="background:#2563eb; color:#ffffff; padding:6px 10px; border-radius:4px; font-size:9px; font-weight:900; text-transform:uppercase; letter-spacing:0.08em; display:inline-block; margin-bottom:8px;">
-                                PLANEJAMENTO
-                            </div>
-                            <p style="font-size:18px; font-weight:900; color:#0f172a; margin:0 0 4px 0;">
-                                ${escapeHtml(getPlanCode(currentPlan.id))}
-                            </p>
-                            <p style="font-size:9px; font-weight:700; color:#64748b; text-transform:uppercase; margin:0;">
-                                EMISSÃO: ${escapeHtml(formatDateBR())}
-                            </p>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-
-            <div style="background:#f8fafc; padding:14px; border-radius:6px; border:1px solid #e2e8f0; margin-bottom:18px;">
-                <table style="width:100%; border-collapse:collapse;">
-                    <tr>
-                        <td style="padding:0 12px 10px 0; vertical-align:top; width:33.33%;">
-                            <p style="margin:0 0 4px 0; font-size:8px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.06em;">Cliente</p>
-                            <p style="margin:0; font-size:12px; color:#0f172a; font-weight:700;">${escapeHtml(customer?.name || 'Não informado')}</p>
-                        </td>
-                        <td style="padding:0 12px 10px 0; vertical-align:top; width:33.33%;">
-                            <p style="margin:0 0 4px 0; font-size:8px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.06em;">Tipo de Obra</p>
-                            <p style="margin:0; font-size:12px; color:#0f172a; font-weight:700;">${escapeHtml((currentPlan as any).type || 'Não informado')}</p>
-                        </td>
-                        <td style="padding:0 0 10px 0; vertical-align:top; width:33.33%;">
-                            <p style="margin:0 0 4px 0; font-size:8px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.06em;">Status</p>
-                            <p style="margin:0; font-size:12px; color:#0f172a; font-weight:700;">${escapeHtml(currentPlan.status || 'Não informado')}</p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="3" style="padding:0; vertical-align:top;">
-                            <p style="margin:0 0 4px 0; font-size:8px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.06em;">Endereço Previsto</p>
-                            <p style="margin:0; font-size:12px; color:#0f172a; font-weight:700;">${escapeHtml((currentPlan as any).address || 'Não informado')}</p>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-
-            <table style="width:100%; border-collapse:separate; border-spacing:10px 0; margin:0 -10px 20px -10px;">
-                <tr>
-                    <td style="width:25%; background:#ecfdf5; border-bottom:2px solid #10b981; border-radius:6px; padding:12px;">
-                        <span style="font-size:8px; font-weight:700; color:#059669; text-transform:uppercase;">Materiais</span>
-                        <span style="font-size:16px; font-weight:800; color:#064e3b; display:block; margin-top:4px;">R$ ${formatMoney(calculations.totalMaterial)}</span>
-                    </td>
-                    <td style="width:25%; background:#fffbeb; border-bottom:2px solid #f59e0b; border-radius:6px; padding:12px;">
-                        <span style="font-size:8px; font-weight:700; color:#d97706; text-transform:uppercase;">Mão de Obra</span>
-                        <span style="font-size:16px; font-weight:800; color:#78350f; display:block; margin-top:4px;">R$ ${formatMoney(calculations.totalLabor)}</span>
-                    </td>
-                    <td style="width:25%; background:#f8fafc; border-bottom:2px solid #64748b; border-radius:6px; padding:12px;">
-                        <span style="font-size:8px; font-weight:700; color:#475569; text-transform:uppercase;">Custos Indiretos</span>
-                        <span style="font-size:16px; font-weight:800; color:#0f172a; display:block; margin-top:4px;">R$ ${formatMoney(calculations.totalIndirect)}</span>
-                    </td>
-                    <td style="width:25%; background:#eff6ff; border-bottom:2px solid #3b82f6; border-radius:6px; padding:12px;">
-                        <span style="font-size:8px; font-weight:700; color:#2563eb; text-transform:uppercase;">Impostos</span>
-                        <span style="font-size:16px; font-weight:800; color:#1e3a8a; display:block; margin-top:4px;">R$ ${formatMoney(calculations.totalTax)}</span>
-                    </td>
-                </tr>
-            </table>
-
-            <div style="margin-bottom:24px; background:#064e3b; color:#ffffff; padding:12px 16px; border-radius:6px;">
-                <table style="width:100%; border-collapse:collapse;">
-                    <tr>
-                        <td style="padding:0; vertical-align:middle;">
-                            <p style="font-size:9px; font-weight:800; text-transform:uppercase; margin:0; letter-spacing:0.08em; color:#a7f3d0;">
-                                Custo Total Previsto
-                            </p>
-                        </td>
-                        <td style="padding:0; vertical-align:middle; text-align:right;">
-                            <p style="font-size:18px; font-weight:900; margin:0;">
-                                R$ ${formatMoney(calculations.totalGeneral)}
-                            </p>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-
-            ${reportServices.length > 0
-            ? `
-                <div style="margin-bottom:26px;">
-                    <h3 style="font-size:14px; font-weight:800; color:#1e3a8a; text-transform:uppercase; margin:0 0 12px 0; padding-bottom:6px; border-bottom:2px solid #e2e8f0;">
-                        1. Serviços Planejados
-                    </h3>
-                    <table style="width:100%; border-collapse:collapse;">
-                        <thead>
-                            <tr style="border-bottom:2px solid #e2e8f0;">
-                                <th style="padding:10px 8px; text-align:left; font-size:10px; color:#64748b;">DESCRIÇÃO</th>
-                                <th style="padding:10px 8px; text-align:center; font-size:10px; color:#64748b; width:65px;">QTD</th>
-                                <th style="padding:10px 8px; text-align:center; font-size:10px; color:#64748b; width:50px;">UND</th>
-                                <th style="padding:10px 8px; text-align:right; font-size:10px; color:#64748b; width:90px;">VL. UNIT.</th>
-                                <th style="padding:10px 8px; text-align:right; font-size:10px; color:#64748b; width:105px;">VL. TOTAL</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${reportServices
-                .map(
-                    (s) => `
-                                <tr style="border-bottom:1px solid #f1f5f9;">
-                                    <td style="padding:10px 8px; font-size:11px; font-weight:600;">${escapeHtml((s as any).description)}</td>
-                                    <td style="padding:10px 8px; font-size:11px; text-align:center;">${escapeHtml(s.quantity)}</td>
-                                    <td style="padding:10px 8px; font-size:11px; text-align:center;">${escapeHtml((s as any).unit)}</td>
-                                    <td style="padding:10px 8px; font-size:11px; text-align:right;">R$ ${formatMoney(s.unitTotal)}</td>
-                                    <td style="padding:10px 8px; font-size:11px; text-align:right; font-weight:700;">R$ ${formatMoney(s.total)}</td>
-                                </tr>
-                            `
-                )
-                .join('')}
-                        </tbody>
-                    </table>
-                </div>`
-            : ''
-        }
-
-            ${reportMaterials.length > 0
-            ? `
-                <div style="margin-bottom:26px;">
-                    <h3 style="font-size:14px; font-weight:800; color:#1e3a8a; text-transform:uppercase; margin:0 0 12px 0; padding-bottom:6px; border-bottom:2px solid #e2e8f0;">
-                        2. Insumos e Materiais
-                    </h3>
-                    <table style="width:100%; border-collapse:collapse;">
-                        <thead>
-                            <tr style="border-bottom:2px solid #e2e8f0;">
-                                <th style="padding:10px 8px; text-align:left; font-size:10px; color:#64748b;">MATERIAL</th>
-                                <th style="padding:10px 8px; text-align:center; font-size:10px; color:#64748b; width:65px;">QTD</th>
-                                <th style="padding:10px 8px; text-align:center; font-size:10px; color:#64748b; width:50px;">UND</th>
-                                <th style="padding:10px 8px; text-align:right; font-size:10px; color:#64748b; width:90px;">VL. UNIT.</th>
-                                <th style="padding:10px 8px; text-align:right; font-size:10px; color:#64748b; width:105px;">VL. TOTAL</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${reportMaterials
-                .map(
-                    (m) => `
-                                <tr style="border-bottom:1px solid #f1f5f9;">
-                                    <td style="padding:10px 8px; font-size:11px; font-weight:600;">${escapeHtml((m as any).material_name)}</td>
-                                    <td style="padding:10px 8px; font-size:11px; text-align:center;">${escapeHtml(m.quantity)}</td>
-                                    <td style="padding:10px 8px; font-size:11px; text-align:center;">${escapeHtml((m as any).unit)}</td>
-                                    <td style="padding:10px 8px; font-size:11px; text-align:right;">R$ ${formatMoney(m.unitCost)}</td>
-                                    <td style="padding:10px 8px; font-size:11px; text-align:right; font-weight:700;">R$ ${formatMoney(m.total)}</td>
-                                </tr>
-                            `
-                )
-                .join('')}
-                        </tbody>
-                    </table>
-                </div>`
-            : ''
-        }
-
-            ${reportLabor.length > 0
-            ? `
-                <div style="margin-bottom:26px;">
-                    <h3 style="font-size:14px; font-weight:800; color:#1e3a8a; text-transform:uppercase; margin:0 0 12px 0; padding-bottom:6px; border-bottom:2px solid #e2e8f0;">
-                        3. Mão de Obra
-                    </h3>
-                    <table style="width:100%; border-collapse:collapse;">
-                        <thead>
-                            <tr style="border-bottom:2px solid #e2e8f0;">
-                                <th style="padding:10px 8px; text-align:left; font-size:10px; color:#64748b;">FUNÇÃO / TIPO</th>
-                                <th style="padding:10px 8px; text-align:center; font-size:10px; color:#64748b; width:65px;">QTD</th>
-                                <th style="padding:10px 8px; text-align:center; font-size:10px; color:#64748b; width:50px;">UND</th>
-                                <th style="padding:10px 8px; text-align:right; font-size:10px; color:#64748b; width:105px;">VL. TOTAL</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${reportLabor
-                .map(
-                    (l) => `
-                                <tr style="border-bottom:1px solid #f1f5f9;">
-                                    <td style="padding:10px 8px; font-size:11px; font-weight:600;">
-                                        ${escapeHtml((l as any).role)}${(l as any).cost_type ? ` | (${escapeHtml((l as any).cost_type)})` : ''}
-                                    </td>
-                                    <td style="padding:10px 8px; font-size:11px; text-align:center;">${escapeHtml(l.quantity)}</td>
-                                    <td style="padding:10px 8px; font-size:11px; text-align:center;">${escapeHtml((l as any).unit || 'un')}</td>
-                                    <td style="padding:10px 8px; font-size:11px; text-align:right; font-weight:700;">R$ ${formatMoney(l.total)}</td>
-                                </tr>
-                            `
-                )
-                .join('')}
-                        </tbody>
-                    </table>
-                </div>`
-            : ''
-        }
-
-            ${reportIndirects.length > 0
-            ? `
-                <div style="margin-bottom:26px;">
-                    <h3 style="font-size:14px; font-weight:800; color:#1e3a8a; text-transform:uppercase; margin:0 0 12px 0; padding-bottom:6px; border-bottom:2px solid #e2e8f0;">
-                        4. Custos Indiretos
-                    </h3>
-                    <table style="width:100%; border-collapse:collapse;">
-                        <thead>
-                            <tr style="border-bottom:2px solid #e2e8f0;">
-                                <th style="padding:10px 8px; text-align:left; font-size:10px; color:#64748b;">CATEGORIA / DESCRIÇÃO</th>
-                                <th style="padding:10px 8px; text-align:right; font-size:10px; color:#64748b; width:105px;">VALOR</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${reportIndirects
-                .map(
-                    (i) => `
-                                <tr style="border-bottom:1px solid #f1f5f9;">
-                                    <td style="padding:10px 8px; font-size:11px; font-weight:600;">
-                                        ${escapeHtml((i as any).category)}${(i as any).description ? ` - ${escapeHtml((i as any).description)}` : ''}
-                                    </td>
-                                    <td style="padding:10px 8px; font-size:11px; text-align:right; font-weight:700;">R$ ${formatMoney(i.valueSafe)}</td>
-                                </tr>
-                            `
-                )
-                .join('')}
-                        </tbody>
-                    </table>
-                </div>`
-            : ''
-        }
-
-            ${reportTaxes.length > 0
-            ? `
-                <div style="margin-bottom:26px;">
-                    <h3 style="font-size:14px; font-weight:800; color:#1e3a8a; text-transform:uppercase; margin:0 0 12px 0; padding-bottom:6px; border-bottom:2px solid #e2e8f0;">
-                        5. Resumo de Impostos
-                    </h3>
-                    <table style="width:100%; border-collapse:collapse;">
-                        <thead>
-                            <tr style="border-bottom:2px solid #e2e8f0;">
-                                <th style="padding:10px 8px; text-align:left; font-size:10px; color:#64748b;">IMPOSTO</th>
-                                <th style="padding:10px 8px; text-align:center; font-size:10px; color:#64748b; width:70px;">ALÍQUOTA</th>
-                                <th style="padding:10px 8px; text-align:right; font-size:10px; color:#64748b; width:120px;">VALOR PREVISTO</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${reportTaxes
-                .map(
-                    (t) => `
-                                <tr style="border-bottom:1px solid #f1f5f9;">
-                                    <td style="padding:10px 8px; font-size:11px; font-weight:600;">${escapeHtml((t as any).name)}</td>
-                                    <td style="padding:10px 8px; font-size:11px; text-align:center;">${t.rate > 0 ? `${t.rate.toFixed(2)}%` : '-'}</td>
-                                    <td style="padding:10px 8px; font-size:11px; text-align:right; font-weight:700;">R$ ${formatMoney(t.calculatedValue)}</td>
-                                </tr>
-                            `
-                )
-                .join('')}
-                        </tbody>
-                    </table>
-                </div>`
-            : ''
-        }
-
-            <div class="report-footer" style="padding-top:18px; border-top:1px solid #e2e8f0; margin-top:18px; text-align:center;">
-                <p style="margin:0; font-size:9px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.1em; font-weight:700;">
-                    Este documento é um levantamento preliminar de custos para fins de orçamento.
-                </p>
-                <p style="margin:10px 0 0 0; font-size:10px; color:#64748b; font-weight:800;">
-                    ${escapeHtml(String(company.name || '').toUpperCase())} - GESTÃO DE PLANEJAMENTO
-                </p>
-            </div>
-        </div>
-    `;
 };
 
 export const PlanningEditor: React.FC<PlanningEditorProps> = ({
@@ -686,15 +283,17 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
     };
 
     const handlePreviewReport = () => {
-        const html = buildPlanningReportHtml({
+        if (!currentPlan) return;
+
+        const html = buildReportHtml(
             currentPlan,
+            customers,
             services,
             materials,
             labor,
             indirects,
             taxes,
-            customers,
-            calculations: {
+            {
                 totalMaterial: toNumber(calculations.totalMaterial),
                 totalLabor: toNumber(calculations.totalLabor),
                 totalIndirect: toNumber(calculations.totalIndirect),
@@ -702,7 +301,8 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
                 totalGeneral: toNumber(calculations.totalGeneral),
             },
             company,
-        });
+            PLANNING_THEME
+        );
 
         onShowPreview(
             'Planejamento de Obra',
@@ -772,8 +372,8 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
                             type="button"
                             onClick={() => setActiveTab(tab.id as MainTab)}
                             className={`px-6 py-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id
-                                    ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-                                    : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                                ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                                : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                                 }`}
                         >
                             <tab.icon size={16} />
