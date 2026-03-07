@@ -596,7 +596,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                 </>
             )}
             renderEdit={(data, update) => (
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-5 gap-2">
                     <input
                         type="text"
                         value={data.material_name || ''}
@@ -663,7 +663,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                 </>
             )}
             renderEdit={(data, update) => (
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-6 gap-2">
                     <input
                         type="text"
                         value={data.role || ''}
@@ -700,6 +700,58 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         onChange={e => update('unit_cost', parseFloat(e.target.value) || 0)}
                         className="p-2 border rounded text-sm"
                         placeholder="Custo"
+                    />
+                </div>
+            )}
+        />
+    );
+
+    const renderIndirectRow = (item: WorkIndirect) => (
+        <EditableRow
+            key={item.id}
+            item={item}
+            isEditing={indirectEdit.editingId === item.id}
+            editData={indirectEdit.editData}
+            onStartEdit={() => indirectEdit.startEditing(item)}
+            onUpdateField={indirectEdit.updateField}
+            onSave={() => {
+                indirectManager.updateItem(item.id, indirectEdit.editData);
+                indirectEdit.stopEditing();
+            }}
+            onCancel={indirectEdit.stopEditing}
+            onDelete={() => indirectManager.deleteItem(item.id, 'Excluir custo indireto?')}
+            className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 hover:border-slate-400"
+            renderView={(i) => (
+                <>
+                    <div className="flex items-center gap-3 grow">
+                        <input
+                            type="checkbox"
+                            className="w-4 h-4 rounded border-slate-300 text-green-600"
+                            checked={indirectSelect.selectedIds.includes(i.id)}
+                            onChange={() => indirectSelect.toggleSelect(i.id)}
+                        />
+                        <div className="grow uppercase">
+                            <span className="font-bold text-slate-700 dark:text-slate-300">{i.name}</span>
+                        </div>
+                    </div>
+                    <span className="font-bold">R$ {i.value.toFixed(2)}</span>
+                </>
+            )}
+            renderEdit={(data, update) => (
+                <div className="grid grid-cols-6 gap-2">
+                    <input
+                        type="text"
+                        value={data.name || ''}
+                        onChange={e => update('name', e.target.value)}
+                        className="col-span-4 p-2 border rounded text-sm"
+                        placeholder="Descrição"
+                    />
+                    <input
+                        type="number"
+                        value={data.value || 0}
+                        onChange={e => update('value', parseFloat(e.target.value) || 0)}
+                        className="col-span-2 p-2 border rounded text-sm"
+                        placeholder="Valor"
                     />
                 </div>
             )}
@@ -841,8 +893,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             key={r.id}
                                             onClick={() => setResourceTab(r.id as any)}
                                             className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all uppercase tracking-wider ${resourceTab === r.id
-                                                    ? 'bg-green-600 text-white shadow-md'
-                                                    : 'bg-white border border-slate-200 text-slate-500 hover:bg-green-50'
+                                                ? 'bg-green-600 text-white shadow-md'
+                                                : 'bg-white border border-slate-200 text-slate-500 hover:bg-green-50'
                                                 }`}
                                         >
                                             {r.label}
@@ -851,10 +903,12 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 </div>
 
                                 {/* Add forms - simplified version */}
+                                {/* Materiais Form */}
                                 {resourceTab === 'material' && (
                                     <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
                                         <div className="grid grid-cols-12 gap-4 items-end">
                                             <div className="col-span-5">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Insumo/Material</label>
                                                 <input
                                                     type="text"
                                                     id="new_mat_name"
@@ -863,13 +917,16 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 />
                                             </div>
                                             <div className="col-span-2">
-                                                <input type="number" id="new_mat_qty" className="w-full p-2 border rounded text-sm h-9" placeholder="Qtd" />
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Qtd</label>
+                                                <input type="number" id="new_mat_qty" className="w-full p-2 border rounded text-sm h-9" placeholder="0" />
                                             </div>
                                             <div className="col-span-1">
-                                                <input type="text" id="new_mat_unit" className="w-full p-2 border rounded text-sm h-9" placeholder="Un" />
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Un</label>
+                                                <input type="text" id="new_mat_unit" className="w-full p-2 border rounded text-sm h-9" placeholder="un" />
                                             </div>
                                             <div className="col-span-2">
-                                                <input type="number" id="new_mat_cost" className="w-full p-2 border rounded text-sm h-9" placeholder="Custo" />
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Custo Unit.</label>
+                                                <input type="number" id="new_mat_cost" className="w-full p-2 border rounded text-sm h-9" placeholder="0.00" />
                                             </div>
                                             <div className="col-span-2">
                                                 <button
@@ -903,7 +960,114 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         </div>
                                     </div>
                                 )}
-                                {/* Similar forms for other tabs */}
+
+                                {/* Mão de Obra Form */}
+                                {resourceTab === 'mo' && (
+                                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                        <div className="grid grid-cols-12 gap-4 items-end">
+                                            <div className="col-span-4">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Função/Cargo</label>
+                                                <input type="text" id="new_mo_role" className="w-full p-2 border rounded text-sm h-9" placeholder="Ex: Pedreiro" />
+                                            </div>
+                                            <div className="col-span-2">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Tipo</label>
+                                                <select id="new_mo_type" className="w-full p-2 border rounded text-sm h-9">
+                                                    <option value="Diária">Diária</option>
+                                                    <option value="Hora">Hora</option>
+                                                    <option value="Empreitada">Empreitada</option>
+                                                </select>
+                                            </div>
+                                            <div className="col-span-2">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Qtd</label>
+                                                <input type="number" id="new_mo_qty" className="w-full p-2 border rounded text-sm h-9" placeholder="0" />
+                                            </div>
+                                            <div className="col-span-2">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Custo</label>
+                                                <input type="number" id="new_mo_cost" className="w-full p-2 border rounded text-sm h-9" placeholder="0.00" />
+                                            </div>
+                                            <div className="col-span-2">
+                                                <button
+                                                    onClick={() => {
+                                                        const role = (document.getElementById('new_mo_role') as HTMLInputElement).value;
+                                                        const type = (document.getElementById('new_mo_type') as HTMLSelectElement).value;
+                                                        const qty = parseFloat((document.getElementById('new_mo_qty') as HTMLInputElement).value) || 0;
+                                                        const cost = parseFloat((document.getElementById('new_mo_cost') as HTMLInputElement).value) || 0;
+                                                        if (!role) return notify("Função obrigatória", "error");
+                                                        laborManager.addItem({ role: role.toUpperCase(), cost_type: type as any, quantity: qty, unit_cost: cost, total_cost: qty * cost } as any);
+                                                        (document.getElementById('new_mo_role') as HTMLInputElement).value = '';
+                                                        (document.getElementById('new_mo_qty') as HTMLInputElement).value = '';
+                                                        (document.getElementById('new_mo_cost') as HTMLInputElement).value = '';
+                                                    }}
+                                                    className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700 font-bold text-xs h-9"
+                                                >
+                                                    ADICIONAR
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Indiretos Form */}
+                                {resourceTab === 'indireto' && (
+                                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                        <div className="grid grid-cols-12 gap-4 items-end">
+                                            <div className="col-span-8">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Descrição do Custo Indireto</label>
+                                                <input type="text" id="new_ind_name" className="w-full p-2 border rounded text-sm h-9" placeholder="Ex: Container" />
+                                            </div>
+                                            <div className="col-span-2">
+                                                <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Valor</label>
+                                                <input type="number" id="new_ind_value" className="w-full p-2 border rounded text-sm h-9" placeholder="0.00" />
+                                            </div>
+                                            <div className="col-span-2">
+                                                <button
+                                                    onClick={() => {
+                                                        const name = (document.getElementById('new_ind_name') as HTMLInputElement).value;
+                                                        const val = parseFloat((document.getElementById('new_ind_value') as HTMLInputElement).value) || 0;
+                                                        if (!name) return notify("Descrição obrigatória", "error");
+                                                        indirectManager.addItem({ name: name.toUpperCase(), value: val } as any);
+                                                        (document.getElementById('new_ind_name') as HTMLInputElement).value = '';
+                                                        (document.getElementById('new_ind_value') as HTMLInputElement).value = '';
+                                                    }}
+                                                    className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700 font-bold text-xs h-9"
+                                                >
+                                                    ADICIONAR
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Impostos Control */}
+                                {resourceTab === 'impostos' && (
+                                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Configuração de Impostos e BDI</span>
+                                            <button
+                                                onClick={() => {
+                                                    const defaults = [
+                                                        { name: 'BDI', rate: 25 },
+                                                        { name: 'ISS', rate: 5 },
+                                                        { name: 'PIS', rate: 0.65 },
+                                                        { name: 'COFINS', rate: 3 },
+                                                        { name: 'INSS', rate: 3.5 },
+                                                    ];
+                                                    const newTaxes = [...taxes];
+                                                    defaults.forEach(def => {
+                                                        const idx = newTaxes.findIndex(t => t.name === def.name);
+                                                        if (idx !== -1) newTaxes[idx] = { ...newTaxes[idx], rate: def.rate };
+                                                        else newTaxes.push({ id: db.generateId('TAX'), work_id: currentWork?.id, name: def.name, rate: def.rate, value: 0 });
+                                                    });
+                                                    setTaxes(newTaxes);
+                                                    notify('Impostos padrão carregados!', 'success');
+                                                }}
+                                                className="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded hover:bg-green-100"
+                                            >
+                                                Carregar Padrão
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
@@ -1119,7 +1283,61 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     </div>
                                 )}
 
-                                {/* Similar para indirects e taxes */}
+                                {resourceTab === 'indireto' && (
+                                    <div>
+                                        <h3 className="font-bold text-slate-800 text-lg mb-4">Custos Indiretos</h3>
+                                        {indirects.length > 0 && (
+                                            <SelectionBar
+                                                count={indirectSelect.selectedIds.length}
+                                                total={indirects.length}
+                                                onToggleAll={() => indirectSelect.toggleAll(indirects)}
+                                                onDeleteSelected={() => {
+                                                    indirectManager.deleteMultiple(indirectSelect.selectedIds, 'custo indireto');
+                                                    indirectSelect.clearSelection();
+                                                }}
+                                                onClearAll={() => indirectManager.clearAll('Excluir TODOS os custos indiretos?')}
+                                                itemName="custo indireto"
+                                            />
+                                        )}
+                                        <div className="space-y-2">
+                                            {indirects.map(renderIndirectRow)}
+                                            {indirects.length > 0 && (
+                                                <div className="flex justify-end p-4 bg-slate-50 rounded-xl border border-slate-100 mt-4">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-xs font-bold text-slate-500 uppercase">Total Indiretos</span>
+                                                        <span className="text-xl font-black text-slate-700">R$ {calculations.totalIndirect.toFixed(2)}</span>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {resourceTab === 'impostos' && (
+                                    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
+                                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                                            {['BDI', 'ISS', 'PIS', 'COFINS', 'INSS'].map(name => (
+                                                <div key={name} className="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">{name} (%)</label>
+                                                    <input
+                                                        type="number"
+                                                        step="0.01"
+                                                        className="w-full bg-white border border-slate-200 rounded p-1 text-sm font-bold outline-none focus:ring-2 focus:ring-green-100"
+                                                        value={taxes.find(t => t.name === name)?.rate || ''}
+                                                        onChange={(e) => {
+                                                            const val = parseFloat(e.target.value) || 0;
+                                                            const newTaxes = [...taxes];
+                                                            const idx = newTaxes.findIndex(t => t.name === name);
+                                                            if (idx !== -1) newTaxes[idx] = { ...newTaxes[idx], rate: val };
+                                                            else newTaxes.push({ id: db.generateId('TAX'), work_id: currentWork?.id, name, rate: val, value: 0 });
+                                                            setTaxes(newTaxes);
+                                                        }}
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
 
