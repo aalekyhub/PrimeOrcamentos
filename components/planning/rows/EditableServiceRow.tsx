@@ -1,38 +1,40 @@
 import React, { useState } from 'react';
-import { GripVertical, ChevronUp, ChevronDown, Pencil, Trash2, Check, X } from 'lucide-react';
-import { PlannedService } from '../../../types';
+import { GripVertical, Pencil, Trash2, Check, X, ChevronUp, ChevronDown } from 'lucide-react';
+import { PlannedService } from '../types';
 
-interface Props {
+interface EditableServiceRowProps {
     service: PlannedService;
     index: number;
-    totalItems: number;
     isDragged: boolean;
     onDragStart: (index: number) => void;
     onDragOver: (e: React.DragEvent, index: number) => void;
     onDragEnd: () => void;
     onMove: (index: number, direction: 'up' | 'down') => void;
-    onUpdate: (updated: PlannedService) => void;
     onDelete: (id: string) => void;
+    onUpdate: (updatedService: PlannedService) => void;
+    isFirst: boolean;
+    isLast: boolean;
 }
 
-export const EditableServiceRow: React.FC<Props> = ({
+export const EditableServiceRow: React.FC<EditableServiceRowProps> = ({
     service,
     index,
-    totalItems,
     isDragged,
     onDragStart,
     onDragOver,
     onDragEnd,
     onMove,
-    onUpdate,
     onDelete,
+    onUpdate,
+    isFirst,
+    isLast,
 }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editDesc, setEditDesc] = useState(service.description);
     const [editUnit, setEditUnit] = useState(service.unit);
     const [editQty, setEditQty] = useState(service.quantity);
-    const [editPrice1, setEditPrice1] = useState(service.unit_material_cost);
-    const [editPrice2, setEditPrice2] = useState(service.unit_labor_cost);
+    const [editMatCost, setEditMatCost] = useState(service.unit_material_cost);
+    const [editLabCost, setEditLabCost] = useState(service.unit_labor_cost);
 
     const handleSave = () => {
         onUpdate({
@@ -40,16 +42,34 @@ export const EditableServiceRow: React.FC<Props> = ({
             description: editDesc.toUpperCase(),
             unit: editUnit.toUpperCase(),
             quantity: editQty,
-            unit_material_cost: editPrice1,
-            unit_labor_cost: editPrice2,
-            total_cost: editQty * (editPrice1 + editPrice2),
+            unit_material_cost: editMatCost,
+            unit_labor_cost: editLabCost,
+            total_cost: editQty * (editMatCost + editLabCost),
         });
         setIsEditing(false);
     };
 
-    if (isEditing) {
-        return (
-            <div className="bg-white dark:bg-slate-900/50 p-4 rounded-xl border border-blue-300 dark:border-blue-500 shadow-sm flex items-center">
+    const handleCancel = () => {
+        setEditDesc(service.description);
+        setEditUnit(service.unit);
+        setEditQty(service.quantity);
+        setEditMatCost(service.unit_material_cost);
+        setEditLabCost(service.unit_labor_cost);
+        setIsEditing(false);
+    };
+
+    return (
+        <div
+            draggable={!isEditing}
+            onDragStart={() => onDragStart(index)}
+            onDragOver={(e) => onDragOver(e, index)}
+            onDragEnd={onDragEnd}
+            className={`bg-white dark:bg-slate-900/50 p-4 rounded-xl border transition-all flex justify-between items-center group hover:border-blue-300 dark:hover:border-blue-500 ${isDragged
+                    ? 'opacity-50 bg-blue-50 dark:bg-blue-900/20 border-blue-200 shadow-inner'
+                    : 'border-slate-200 dark:border-slate-800 shadow-sm'
+                }`}
+        >
+            {isEditing ? (
                 <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center">
                     <div className="md:col-span-4">
                         <input
@@ -57,6 +77,7 @@ export const EditableServiceRow: React.FC<Props> = ({
                             value={editDesc}
                             onChange={(e) => setEditDesc(e.target.value)}
                             className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm font-bold text-slate-900 dark:text-slate-100 uppercase"
+                            autoFocus
                         />
                     </div>
                     <div className="md:col-span-1">
@@ -78,8 +99,8 @@ export const EditableServiceRow: React.FC<Props> = ({
                     <div className="md:col-span-2">
                         <input
                             type="number"
-                            value={editPrice1}
-                            onChange={(e) => setEditPrice1(parseFloat(e.target.value) || 0)}
+                            value={editMatCost}
+                            onChange={(e) => setEditMatCost(parseFloat(e.target.value) || 0)}
                             className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm text-slate-900 dark:text-slate-100"
                             placeholder="Mat."
                         />
@@ -87,8 +108,8 @@ export const EditableServiceRow: React.FC<Props> = ({
                     <div className="md:col-span-2">
                         <input
                             type="number"
-                            value={editPrice2}
-                            onChange={(e) => setEditPrice2(parseFloat(e.target.value) || 0)}
+                            value={editLabCost}
+                            onChange={(e) => setEditLabCost(parseFloat(e.target.value) || 0)}
                             className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm text-slate-900 dark:text-slate-100"
                             placeholder="M.O."
                         />
@@ -101,57 +122,64 @@ export const EditableServiceRow: React.FC<Props> = ({
                             <Check size={18} />
                         </button>
                         <button
-                            onClick={() => setIsEditing(false)}
+                            onClick={handleCancel}
                             className="text-red-600 p-1 hover:bg-red-50 dark:hover:bg-red-900/30 rounded"
                         >
                             <X size={18} />
                         </button>
                     </div>
                 </div>
-            </div>
-        );
-    }
-
-    return (
-        <div
-            draggable
-            onDragStart={() => onDragStart(index)}
-            onDragOver={(e) => onDragOver(e, index)}
-            onDragEnd={onDragEnd}
-            className={`bg-white dark:bg-slate-900/50 p-4 rounded-xl border transition-all flex justify-between items-center group hover:border-blue-300 dark:hover:border-blue-500 ${isDragged ? 'opacity-50 bg-blue-50 dark:bg-blue-900/20 border-blue-200 shadow-inner' : 'border-slate-200 dark:border-slate-800 shadow-sm'}`}
-        >
-            <div className="flex items-center gap-3 grow">
-                <div className="cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 shrink-0">
-                    <GripVertical size={18} />
-                </div>
-                <div className="grow">
-                    <p className="font-bold text-slate-800 dark:text-slate-100">{service.description}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                        {service.quantity} {service.unit} x (Mat: {service.unit_material_cost.toFixed(2)} + MO: {service.unit_labor_cost.toFixed(2)})
-                    </p>
-                </div>
-            </div>
-            <div className="w-32 text-right mr-4 shrink-0">
-                <p className="text-sm font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap">R$ {service.total_cost.toFixed(2)}</p>
-            </div>
-            <div className="flex gap-1 shrink-0">
-                <div className="flex items-center gap-1 mr-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => onMove(index, 'up')} disabled={index === 0} className="text-slate-300 dark:text-slate-600 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronUp size={16} /></button>
-                    <button onClick={() => onMove(index, 'down')} disabled={index === totalItems - 1} className="text-slate-300 dark:text-slate-600 hover:text-blue-500 disabled:opacity-0 transition-colors"><ChevronDown size={16} /></button>
-                </div>
-                <button
-                    onClick={() => setIsEditing(true)}
-                    className="text-slate-300 dark:text-slate-600 hover:text-blue-500 p-2"
-                >
-                    <Pencil size={16} />
-                </button>
-                <button
-                    onClick={() => onDelete(service.id)}
-                    className="text-slate-300 dark:text-slate-600 hover:text-red-500 p-2"
-                >
-                    <Trash2 size={16} />
-                </button>
-            </div>
+            ) : (
+                <>
+                    <div className="flex items-center gap-3 grow">
+                        <div className="cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 shrink-0">
+                            <GripVertical size={18} />
+                        </div>
+                        <div className="grow">
+                            <p className="font-bold text-slate-800 dark:text-slate-100">{service.description}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                {service.quantity} {service.unit} x (Mat: {service.unit_material_cost.toFixed(2)} + MO:{' '}
+                                {service.unit_labor_cost.toFixed(2)})
+                            </p>
+                        </div>
+                    </div>
+                    <div className="w-32 text-right mr-4 shrink-0">
+                        <p className="text-sm font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap">
+                            R$ {service.total_cost.toFixed(2)}
+                        </p>
+                    </div>
+                    <div className="flex gap-1 shrink-0">
+                        <div className="flex items-center gap-1 mr-2">
+                            <button
+                                onClick={() => onMove(index, 'up')}
+                                disabled={isFirst}
+                                className="text-slate-300 dark:text-slate-600 hover:text-blue-500 disabled:opacity-0 transition-colors"
+                            >
+                                <ChevronUp size={16} />
+                            </button>
+                            <button
+                                onClick={() => onMove(index, 'down')}
+                                disabled={isLast}
+                                className="text-slate-300 dark:text-slate-600 hover:text-blue-500 disabled:opacity-0 transition-colors"
+                            >
+                                <ChevronDown size={16} />
+                            </button>
+                        </div>
+                        <button
+                            onClick={() => setIsEditing(true)}
+                            className="text-slate-300 dark:text-slate-600 hover:text-blue-500 p-2"
+                        >
+                            <Pencil size={16} />
+                        </button>
+                        <button
+                            onClick={() => onDelete(service.id)}
+                            className="text-slate-300 dark:text-slate-600 hover:text-red-500 p-2"
+                        >
+                            <Trash2 size={16} />
+                        </button>
+                    </div>
+                </>
+            )}
         </div>
     );
 };

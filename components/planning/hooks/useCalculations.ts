@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { PlannedService, PlannedMaterial, PlannedLabor, PlannedIndirect, PlanTax } from '../../../types';
+import { PlannedService, PlannedMaterial, PlannedLabor, PlannedIndirect, PlanTax } from '../types';
 
 export const useCalculations = (
     services: PlannedService[],

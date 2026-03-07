@@ -1,72 +1,71 @@
 import React from 'react';
-import { PlanningHeader, Customer } from '../../../types';
+import { PlanningHeader, Customer } from '../types';
 
-interface Props {
-    currentPlan: PlanningHeader;
+interface DataTabProps {
+    plan: PlanningHeader;
     customers: Customer[];
-    onUpdate: (plan: PlanningHeader) => void;
+    onUpdatePlan: (plan: PlanningHeader) => void;
 }
 
-export const DataTab: React.FC<Props> = ({ currentPlan, customers, onUpdate }) => {
+export const DataTab: React.FC<DataTabProps> = ({ plan, customers, onUpdatePlan }) => {
     return (
-        <div className="max-w-2xl mx-auto space-y-6">
-            <div className="grid grid-cols-2 gap-4">
+        <div className="max-w-4xl mx-auto bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Nome da Obra</label>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Nome do Projeto</label>
                     <input
                         type="text"
-                        value={currentPlan.name}
-                        onChange={(e) => onUpdate({ ...currentPlan, name: e.target.value.toUpperCase() })}
-                        className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-semibold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900"
+                        className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-blue-100"
+                        value={plan.name}
+                        onChange={(e) => onUpdatePlan({ ...plan, name: e.target.value })}
                     />
                 </div>
                 <div>
-                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Tipo</label>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Cliente</label>
                     <select
-                        value={currentPlan.type}
-                        onChange={(e) => onUpdate({ ...currentPlan, type: e.target.value })}
-                        className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-semibold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900"
+                        className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-blue-100"
+                        value={plan.client_id}
+                        onChange={(e) => onUpdatePlan({ ...plan, client_id: e.target.value, client_name: customers.find(c => c.id === e.target.value)?.name })}
                     >
-                        <option>Reforma</option>
-                        <option>Manutenção</option>
-                        <option>Construção</option>
-                        <option>Retrofit</option>
-                        <option>Instalação</option>
+                        <option value="">Selecione um cliente...</option>
+                        {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </select>
                 </div>
-            </div>
-            <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Cliente</label>
-                <select
-                    value={currentPlan.client_id}
-                    onChange={(e) => {
-                        const clientId = e.target.value;
-                        const customer = customers.find((c) => c.id === clientId);
-                        onUpdate({
-                            ...currentPlan,
-                            client_id: clientId,
-                            client_name: customer ? customer.name : '',
-                        });
-                    }}
-                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-semibold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900"
-                >
-                    <option value="">Selecione...</option>
-                    {customers.map((c) => (
-                        <option key={c.id} value={c.id}>
-                            {c.name}
-                        </option>
-                    ))}
-                </select>
-            </div>
-            <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Endereço</label>
-                <input
-                    type="text"
-                    value={currentPlan.address}
-                    onChange={(e) => onUpdate({ ...currentPlan, address: e.target.value })}
-                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg font-semibold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900"
-                    placeholder="Local da execução"
-                />
+                <div className="md:col-span-2">
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Endereço da Obra</label>
+                    <input
+                        type="text"
+                        className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-blue-100"
+                        value={plan.address}
+                        onChange={(e) => onUpdatePlan({ ...plan, address: e.target.value })}
+                    />
+                </div>
+                <div>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Tipo de Serviço</label>
+                    <select
+                        className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-blue-100"
+                        value={plan.type}
+                        onChange={(e) => onUpdatePlan({ ...plan, type: e.target.value })}
+                    >
+                        <option>Reforma</option>
+                        <option>Construção Nova</option>
+                        <option>Manutenção</option>
+                        <option>Outros</option>
+                    </select>
+                </div>
+                <div>
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Status</label>
+                    <select
+                        className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-blue-100"
+                        value={plan.status}
+                        onChange={(e) => onUpdatePlan({ ...plan, status: e.target.value as any })}
+                    >
+                        <option>Planejamento</option>
+                        <option>Em Andamento</option>
+                        <option>Concluído</option>
+                        <option>Cancelado</option>
+                    </select>
+                </div>
             </div>
         </div>
     );

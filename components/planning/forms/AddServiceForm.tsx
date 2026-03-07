@@ -1,106 +1,115 @@
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
-import { db } from '../../../services/db';
 import { useNotify } from '../../ToastProvider';
-import { PlannedService } from '../../../types';
 
-interface Props {
+interface AddServiceFormProps {
+    onAdd: (service: any) => void;
     planId: string;
-    onAdd: (service: PlannedService) => void;
 }
 
-export const AddServiceForm: React.FC<Props> = ({ planId, onAdd }) => {
+export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onAdd, planId }) => {
     const [desc, setDesc] = useState('');
-    const [unit, setUnit] = useState('un');
-    const [qty, setQty] = useState('');
-    const [price1, setPrice1] = useState('');
-    const [price2, setPrice2] = useState('');
+    const [unit, setUnit] = useState('');
+    const [qty, setQty] = useState(0);
+    const [matCost, setMatCost] = useState(0);
+    const [labCost, setLabCost] = useState(0);
     const { notify } = useNotify();
 
-    const handleAdd = () => {
-        if (!desc) return notify("Descrição obrigatória", "error");
-
-        const q = parseFloat(qty) || 0;
-        const p1 = parseFloat(price1) || 0;
-        const p2 = parseFloat(price2) || 0;
+    const handleSubmit = () => {
+        if (!desc) {
+            notify('Descrição obrigatória', 'error');
+            return;
+        }
 
         onAdd({
-            id: db.generateId('PSVC'),
-            plan_id: planId,
             description: desc.toUpperCase(),
-            unit: unit.toUpperCase() || 'UN',
-            quantity: q,
-            unit_material_cost: p1,
-            unit_labor_cost: p2,
-            total_cost: q * (p1 + p2),
+            unit,
+            quantity: qty,
+            unit_material_cost: matCost,
+            unit_labor_cost: labCost,
+            unit_indirect_cost: 0,
         });
 
+        // Reset form
         setDesc('');
-        setUnit('un');
-        setQty('');
-        setPrice1('');
-        setPrice2('');
+        setUnit('');
+        setQty(0);
+        setMatCost(0);
+        setLabCost(0);
     };
 
     return (
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 shadow-sm rounded-xl mb-6">
+        <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+            <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
+                Adicionar Serviço
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                 <div className="md:col-span-4">
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Descrição do Serviço</label>
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
+                        Descrição
+                    </label>
                     <input
                         type="text"
                         value={desc}
                         onChange={(e) => setDesc(e.target.value)}
-                        className="w-full p-2 border border-slate-200 dark:border-slate-800 dark:bg-slate-900 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none"
-                        placeholder="Ex: Pintura de Paredes"
+                        className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100"
+                        placeholder="Ex: Pintura de Parede"
                     />
                 </div>
                 <div className="md:col-span-1">
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">UN</label>
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
+                        Un
+                    </label>
                     <input
                         type="text"
                         value={unit}
                         onChange={(e) => setUnit(e.target.value)}
-                        className="w-full p-2 border border-slate-200 dark:border-slate-800 dark:bg-slate-900 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none"
-                        placeholder="un"
+                        className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100"
+                        placeholder="m²"
                     />
                 </div>
                 <div className="md:col-span-1">
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Qtd</label>
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
+                        Qtd
+                    </label>
                     <input
                         type="number"
                         value={qty}
-                        onChange={(e) => setQty(e.target.value)}
-                        className="w-full p-2 border border-slate-200 dark:border-slate-800 dark:bg-slate-900 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none"
+                        onChange={(e) => setQty(parseFloat(e.target.value) || 0)}
+                        className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100"
                         placeholder="0"
                     />
                 </div>
                 <div className="md:col-span-2">
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">Material (Un.)</label>
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
+                        Unit. Mat.
+                    </label>
                     <input
                         type="number"
-                        value={price1}
-                        onChange={(e) => setPrice1(e.target.value)}
-                        className="w-full p-2 border border-slate-200 dark:border-slate-800 dark:bg-slate-900 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none"
+                        value={matCost}
+                        onChange={(e) => setMatCost(parseFloat(e.target.value) || 0)}
+                        className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100"
                         placeholder="0.00"
                     />
                 </div>
                 <div className="md:col-span-2">
-                    <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">M.O. (Un.)</label>
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
+                        Unit. M.O.
+                    </label>
                     <input
                         type="number"
-                        value={price2}
-                        onChange={(e) => setPrice2(e.target.value)}
-                        className="w-full p-2 border border-slate-200 dark:border-slate-800 dark:bg-slate-900 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 outline-none"
+                        value={labCost}
+                        onChange={(e) => setLabCost(parseFloat(e.target.value) || 0)}
+                        className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100"
                         placeholder="0.00"
                     />
                 </div>
                 <div className="md:col-span-2">
                     <button
-                        onClick={handleAdd}
-                        className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-bold text-xs h-9 shadow-md shadow-blue-950/20 flex items-center justify-center gap-2 transition-all active:scale-95"
+                        onClick={handleSubmit}
+                        className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-bold text-xs h-9 flex items-center justify-center gap-1 shadow-md shadow-blue-950/20"
                     >
-                        <Plus size={16} /> ADICIONAR ITEM
+                        <Plus size={14} /> ADICIONAR
                     </button>
                 </div>
             </div>

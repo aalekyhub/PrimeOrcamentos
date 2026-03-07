@@ -1,16 +1,32 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Save, LayoutDashboard, FileText, Package, Percent, Building2, Truck, PieChart, HardHat } from 'lucide-react';
-import { PlanningHeader, PlannedService, PlannedMaterial, PlannedLabor, PlannedIndirect, PlanTax, Customer } from '../../types';
+import {
+    Building2,
+    Truck,
+    HardHat,
+    FileText,
+    Save,
+    ArrowRight,
+    PieChart,
+} from 'lucide-react';
+import { useNotify } from '../ToastProvider';
+import { db } from '../../services/db';
 import { DataTab } from './tabs/DataTab';
 import { ServicesTab } from './tabs/ServicesTab';
 import { ResourcesTab } from './tabs/ResourcesTab';
 import { SummaryTab } from './tabs/SummaryTab';
-import ReportPreview from '../ReportPreview';
-import { generatePlanningReport } from '../../services/planningPdfService';
-import { useNotify } from '../ToastProvider';
+import {
+    PlanningHeader,
+    PlannedService,
+    PlannedMaterial,
+    PlannedLabor,
+    PlannedIndirect,
+    PlanTax,
+    Customer,
+    MainTab,
+} from './types';
 
-interface Props {
-    currentPlan: PlanningHeader;
+interface PlanningEditorProps {
+    currentPlan: PlanningHeader | null;
     services: PlannedService[];
     materials: PlannedMaterial[];
     labor: PlannedLabor[];
@@ -18,31 +34,25 @@ interface Props {
     taxes: PlanTax[];
     customers: Customer[];
     calculations: any;
-    onBack: () => void;
-    onSave: () => void;
     onUpdatePlan: (plan: PlanningHeader) => void;
-    onSetServices: (items: PlannedService[]) => void;
-    onSetMaterials: (items: PlannedMaterial[]) => void;
-    onSetLabor: (items: PlannedLabor[]) => void;
-    onSetIndirects: (items: PlannedIndirect[]) => void;
-    onSetTaxes: (items: PlanTax[]) => void;
+    onUpdateServices: (services: PlannedService[]) => void;
+    onUpdateMaterials: (materials: PlannedMaterial[]) => void;
+    onUpdateLabor: (labor: PlannedLabor[]) => void;
+    onUpdateIndirects: (indirects: PlannedIndirect[]) => void;
+    onUpdateTaxes: (taxes: PlanTax[]) => void;
     onDeleteService: (id: string) => void;
     onDeleteMaterial: (id: string) => void;
     onDeleteLabor: (id: string) => void;
     onDeleteIndirect: (id: string) => void;
     onDeleteTax: (id: string) => void;
-    onGenerateBudget?: (
-        plan: PlanningHeader,
-        services: PlannedService[],
-        totalMaterial: number,
-        totalLabor: number,
-        totalIndirect: number,
-        bdiRate: number,
-        taxRate: number
-    ) => void;
+    onSave: () => void;
+    onGenerateBudget: () => void;
+    onBack: () => void;
+    embeddedMode: boolean;
+    onShowPreview: (title: string, html: string, filename: string) => void;
 }
 
-export const PlanningEditor: React.FC<Props> = ({
+export const PlanningEditor: React.FC<PlanningEditorProps> = ({
     currentPlan,
     services,
     materials,
@@ -51,192 +61,223 @@ export const PlanningEditor: React.FC<Props> = ({
     taxes,
     customers,
     calculations,
-    onBack,
-    onSave,
     onUpdatePlan,
-    onSetServices,
-    onSetMaterials,
-    onSetLabor,
-    onSetIndirects,
-    onSetTaxes,
+    onUpdateServices,
+    onUpdateMaterials,
+    onUpdateLabor,
+    onUpdateIndirects,
+    onUpdateTaxes,
     onDeleteService,
     onDeleteMaterial,
     onDeleteLabor,
     onDeleteIndirect,
     onDeleteTax,
+    onSave,
     onGenerateBudget,
+    onBack,
+    embeddedMode,
+    onShowPreview,
 }) => {
-    const [activeTab, setActiveTab] = useState<'dados' | 'servicos' | 'recursos' | 'resumo'>('dados');
-    const [showPreview, setShowPreview] = useState(false);
-    const [previewContent, setPreviewContent] = useState({ title: '', html: '', filename: '' });
+    const [activeTab, setActiveTab] = useState<MainTab>('dados');
     const { notify } = useNotify();
 
-    const handlePreviewFull = async () => {
-        const bdiTx = taxes.find((t) => t.name === 'BDI');
-        const bdiRate = bdiTx ? bdiTx.rate : 0;
-        const otherTaxes = taxes.filter((t) => t.name !== 'BDI');
-        const taxRate = otherTaxes.reduce((acc, t) => acc + (t.rate || 0), 0);
+    if (!currentPlan) return null;
 
-        const company = (window as any).company_data || {};
-        const customer = customers.find((c) => c.id === currentPlan.client_id);
-
-        try {
-            const html = await generatePlanningReport(
-                currentPlan,
-                services,
-                calculations.totalMaterial,
-                calculations.totalLabor,
-                calculations.totalIndirect,
-                bdiRate,
-                taxRate,
-                company,
-                customer
-            );
-
-            setPreviewContent({
-                title: `RELATÓRIO DE PLANEJAMENTO - ${currentPlan.name}`,
-                html: html,
-                filename: `planejamento_${currentPlan.name.toLowerCase().replace(/\s+/g, '_')}.pdf`,
-            });
-            setShowPreview(true);
-        } catch (error) {
-            notify('Erro ao gerar relatório', 'error');
-        }
+    const handleAddService = (serviceData: any) => {
+        const newService: PlannedService = {
+            id: db.generateId('SVC'),
+            plan_id: currentPlan.id,
+            ...serviceData,
+            total_cost: serviceData.quantity * (serviceData.unit_material_cost + serviceData.unit_labor_cost),
+        };
+        onUpdateServices([...services, newService]);
     };
 
-    const handleGenerateBudget = () => {
-        if (!onGenerateBudget) {
-            notify('Função não disponível neste modo', 'info');
-            return;
-        }
+    const handleAddMaterial = (materialData: any) => {
+        const newMaterial: PlannedMaterial = {
+            id: db.generateId('MAT'),
+            plan_id: currentPlan.id,
+            ...materialData,
+            total_cost: materialData.quantity * materialData.unit_cost,
+        };
+        onUpdateMaterials([...materials, newMaterial]);
+    };
 
-        const bdiTx = taxes.find((t) => t.name === 'BDI');
-        const bdiRate = bdiTx ? bdiTx.rate : 0;
-        const otherTaxes = taxes.filter((t) => t.name !== 'BDI');
-        const taxRate = otherTaxes.reduce((acc, t) => acc + (t.rate || 0), 0);
+    const handleAddLabor = (laborData: any) => {
+        const newLabor: PlannedLabor = {
+            id: db.generateId('LBR'),
+            plan_id: currentPlan.id,
+            ...laborData,
+            total_cost: laborData.quantity * laborData.unit_cost,
+        };
+        onUpdateLabor([...labor, newLabor]);
+    };
 
-        onGenerateBudget(
-            currentPlan,
-            services,
-            calculations.totalMaterial,
-            calculations.totalLabor,
-            calculations.totalIndirect,
-            bdiRate,
-            taxRate
-        );
+    const handleAddIndirect = (indirectData: any) => {
+        const newIndirect: PlannedIndirect = {
+            id: db.generateId('IND'),
+            plan_id: currentPlan.id,
+            ...indirectData,
+        };
+        onUpdateIndirects([...indirects, newIndirect]);
+    };
+
+    const handleAddTax = (taxData: any) => {
+        const newTax: PlanTax = {
+            id: db.generateId('TAX'),
+            plan_id: currentPlan.id,
+            ...taxData,
+        };
+        onUpdateTaxes([...taxes, newTax]);
+    };
+
+    const generateFullReportHtml = () => {
+        const company = db.load('serviflow_company', {
+            name: 'PRIME SERVIÇOS E MANUTENÇÃO LTDA',
+            cnpj: '12.345.678/0001-90',
+        });
+
+        return `
+      <div style="width: 100%; font-family: sans-serif; padding: 15mm; background: white;">
+        <div style="border-bottom: 2px solid #000; padding-bottom: 5mm; margin-bottom: 10mm; display: flex; justify-content: space-between;">
+          <div>
+            <h1 style="margin: 0; font-size: 16pt;">${company.name}</h1>
+            <p style="margin: 2mm 0; font-size: 10pt; color: #666;">PROJETO: ${currentPlan.name}</p>
+          </div>
+          <div style="text-align: right;">
+            <div style="background: #2563eb; color: white; padding: 2mm 4mm; border-radius: 2mm; font-weight: bold; font-size: 10pt;">PLANEJAMENTO</div>
+            <p style="margin: 2mm 0; font-size: 12pt; font-weight: bold;">#${currentPlan.id}</p>
+          </div>
+        </div>
+        
+        <div style="background: #f8fafc; padding: 5mm; border-radius: 2mm; margin-bottom: 10mm;">
+          <table style="width: 100%; font-size: 10pt;">
+            <tr>
+              <td style="color: #64748b; font-weight: bold; width: 20%;">CLIENTE:</td>
+              <td style="font-weight: bold;">${currentPlan.client_name || 'NÃO INFORMADO'}</td>
+            </tr>
+            <tr>
+              <td style="color: #64748b; font-weight: bold;">ENDEREÇO:</td>
+              <td style="font-weight: bold;">${currentPlan.address || 'NÃO INFORMADO'}</td>
+            </tr>
+          </table>
+        </div>
+
+        <h3 style="background: #e2e8f0; padding: 2mm; font-size: 11pt; border-radius: 1mm;">RESUMO FINANCEIRO</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 10mm;">
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 3mm 0;">MATERIAIS</td>
+            <td style="padding: 3mm 0; text-align: right; font-weight: bold;">R$ ${calculations.totalMaterial.toFixed(2)}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 3mm 0;">MÃO DE OBRA</td>
+            <td style="padding: 3mm 0; text-align: right; font-weight: bold;">R$ ${calculations.totalLabor.toFixed(2)}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 3mm 0;">INDIRETOS</td>
+            <td style="padding: 3mm 0; text-align: right; font-weight: bold;">R$ ${calculations.totalIndirect.toFixed(2)}</td>
+          </tr>
+          <tr>
+            <td style="padding: 5mm 0; font-weight: bold; font-size: 12pt;">CUSTO TOTAL PLANEJADO</td>
+            <td style="padding: 5mm 0; text-align: right; font-weight: bold; font-size: 14pt; color: #2563eb;">R$ ${calculations.totalGeneral.toFixed(2)}</td>
+          </tr>
+        </table>
+      </div>
+    `;
     };
 
     return (
-        <div className="p-8 h-full overflow-y-auto bg-slate-50 dark:bg-slate-950 scrollbar-hide">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl min-h-[80vh] flex flex-col border dark:border-slate-800 overflow-hidden">
-                {/* Fixed Editor Header & Tabs */}
-                <div className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
-                    {/* Editor Header */}
-                    <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-blue-50 dark:bg-blue-900/20">
-                        <div className="flex items-center gap-4">
-                            <button
-                                onClick={onBack}
-                                className="text-blue-400 hover:text-blue-600 p-1 transition-colors"
-                            >
-                                <ArrowLeft size={20} />
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl min-h-[80vh] flex flex-col border dark:border-slate-800 overflow-hidden">
+            <div className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
+                <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-blue-50 dark:bg-blue-900/20">
+                    <div className="flex items-center gap-4">
+                        {!embeddedMode && (
+                            <button onClick={onBack} className="text-blue-400 hover:text-blue-600 font-bold flex items-center gap-1">
+                                <ArrowRight className="rotate-180" size={18} /> Voltar
                             </button>
-                            <div>
-                                <h2 className="text-xl font-bold text-blue-900 dark:text-blue-100 flex items-center gap-2">
-                                    <LayoutDashboard className="text-blue-600 dark:text-blue-400" />
-                                    {currentPlan.name || 'Novo Planejamento'}
-                                </h2>
-                                <p className="text-xs text-blue-600 dark:text-blue-400 uppercase tracking-widest font-semibold">PLANEJAMENTO • PREVISTO</p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-3">
-                            <button
-                                onClick={onSave}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-blue-700 shadow-md shadow-blue-950/20 active:scale-95 transition-all"
-                            >
-                                <Save size={16} /> Salvar Alterações
-                            </button>
+                        )}
+                        <div>
+                            <h2 className="text-xl font-black text-blue-900 dark:text-blue-100 flex items-center gap-2 uppercase tracking-tight">
+                                <HardHat className="text-blue-600 dark:text-blue-400" />
+                                {currentPlan.name}
+                            </h2>
+                            <p className="text-[10px] text-blue-600 dark:text-blue-400 uppercase tracking-widest font-black">
+                                {currentPlan.type} • PLANEJAMENTO EXECUTIVO
+                            </p>
                         </div>
                     </div>
-
-                    {/* Tabs Nav */}
-                    <div className="flex px-6 bg-white dark:bg-slate-900 overflow-x-auto no-scrollbar border-b border-slate-100 dark:border-slate-800">
-                        {[
-                            { id: 'dados', label: 'Dados Gerais', icon: FileText },
-                            { id: 'servicos', label: 'Escope de Serviços', icon: Building2 },
-                            { id: 'recursos', label: 'Recursos e Insumos', icon: Truck },
-                            { id: 'resumo', label: 'Resumo e Orçamento', icon: PieChart },
-                        ].map((tab) => (
-                            <button
-                                key={tab.id}
-                                onClick={() => setActiveTab(tab.id as any)}
-                                className={`px-6 py-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id
-                                    ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-                                    : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                                    }`}
-                            >
-                                <tab.icon size={16} /> {tab.label}
-                            </button>
-                        ))}
-                    </div>
+                    <button
+                        onClick={onSave}
+                        className="px-6 py-3 bg-blue-600 text-white rounded-xl flex items-center gap-2 text-sm font-black hover:bg-blue-700 shadow-lg shadow-blue-900/20 active:scale-95 transition-all"
+                    >
+                        <Save size={18} /> SALVAR ALTERAÇÕES
+                    </button>
                 </div>
 
-                {/* Content Area */}
-                <div className="p-8 flex-1 bg-slate-50/50 dark:bg-slate-900/30 overflow-y-auto">
-                    {activeTab === 'dados' && (
-                        <DataTab currentPlan={currentPlan} customers={customers} onUpdate={onUpdatePlan} />
-                    )}
-                    {activeTab === 'servicos' && (
-                        <ServicesTab
-                            planId={currentPlan.id}
-                            services={services}
-                            onSetServices={onSetServices}
-                            onDeleteService={onDeleteService}
-                        />
-                    )}
-                    {activeTab === 'recursos' && (
-                        <ResourcesTab
-                            planId={currentPlan.id}
-                            materials={materials}
-                            labor={labor}
-                            indirects={indirects}
-                            taxes={taxes}
-                            totalMaterial={calculations.totalMaterial}
-                            totalLabor={calculations.totalLabor}
-                            totalIndirect={calculations.totalIndirect}
-                            totalDirect={calculations.totalDirect}
-                            totalGeneral={calculations.totalGeneral}
-                            onSetMaterials={onSetMaterials}
-                            onSetLabor={onSetLabor}
-                            onSetIndirects={onSetIndirects}
-                            onSetTaxes={onSetTaxes}
-                            onDeleteMaterial={onDeleteMaterial}
-                            onDeleteLabor={onDeleteLabor}
-                            onDeleteIndirect={onDeleteIndirect}
-                            onDeleteTax={onDeleteTax}
-                        />
-                    )}
-                    {activeTab === 'resumo' && (
-                        <SummaryTab
-                            totalMaterial={calculations.totalMaterial}
-                            totalLabor={calculations.totalLabor}
-                            totalIndirect={calculations.totalIndirect}
-                            totalTaxes={calculations.totalTaxes}
-                            totalGeneral={calculations.totalGeneral}
-                            onPreview={handlePreviewFull}
-                            onGenerateBudget={handleGenerateBudget}
-                            hasGenerateBudget={!!onGenerateBudget}
-                        />
-                    )}
+                <div className="flex px-6 bg-white dark:bg-slate-900 overflow-x-auto">
+                    {[
+                        { id: 'dados', label: 'DADOS GERAIS', icon: FileText },
+                        { id: 'servicos', label: 'SERVIÇOS', icon: Building2 },
+                        { id: 'recursos', label: 'RECURSOS', icon: Truck },
+                        { id: 'resumo', label: 'RESUMO', icon: PieChart },
+                    ].map((tab) => (
+                        <button
+                            key={tab.id}
+                            type="button"
+                            onClick={() => setActiveTab(tab.id as MainTab)}
+                            className={`px-8 py-5 text-[11px] font-black flex items-center gap-2 border-b-2 transition-all whitespace-nowrap tracking-wider ${activeTab === tab.id
+                                    ? 'border-blue-600 text-blue-600'
+                                    : 'border-transparent text-slate-400 hover:text-slate-600 hover:bg-slate-50'
+                                }`}
+                        >
+                            <tab.icon size={16} /> {tab.label}
+                        </button>
+                    ))}
                 </div>
+            </div>
 
-                <ReportPreview
-                    isOpen={showPreview}
-                    onClose={() => setShowPreview(false)}
-                    title={previewContent.title}
-                    htmlContent={previewContent.html}
-                    filename={previewContent.filename}
-                />
+            <div className="p-8 flex-1 bg-slate-50/50 dark:bg-slate-900/50 overflow-auto">
+                {activeTab === 'dados' && <DataTab plan={currentPlan} customers={customers} onUpdatePlan={onUpdatePlan} />}
+                {activeTab === 'servicos' && (
+                    <ServicesTab
+                        services={services}
+                        onAddService={handleAddService}
+                        onUpdateService={(up) => onUpdateServices(services.map(s => s.id === up.id ? up : s))}
+                        onDeleteService={onDeleteService}
+                        onReorderServices={onUpdateServices}
+                        planId={currentPlan.id}
+                    />
+                )}
+                {activeTab === 'recursos' && (
+                    <ResourcesTab
+                        planId={currentPlan.id}
+                        materials={materials}
+                        labor={labor}
+                        indirects={indirects}
+                        taxes={taxes}
+                        calculations={calculations}
+                        onAddMaterial={handleAddMaterial}
+                        onAddLabor={handleAddLabor}
+                        onAddIndirect={handleAddIndirect}
+                        onAddTax={handleAddTax}
+                        onUpdateMaterials={onUpdateMaterials}
+                        onUpdateLabor={onUpdateLabor}
+                        onUpdateIndirects={onUpdateIndirects}
+                        onUpdateTaxes={onUpdateTaxes}
+                        onDeleteMaterial={onDeleteMaterial}
+                        onDeleteLabor={onDeleteLabor}
+                        onDeleteIndirect={onDeleteIndirect}
+                        onDeleteTax={onDeleteTax}
+                    />
+                )}
+                {activeTab === 'resumo' && (
+                    <SummaryTab
+                        calculations={calculations}
+                        onGenerateBudget={onGenerateBudget}
+                        onPreviewReport={() => onShowPreview('Planejamento de Obra', generateFullReportHtml(), `${currentPlan.name}.pdf`)}
+                        hasGenerateBudget={!!onGenerateBudget}
+                    />
+                )}
             </div>
         </div>
     );

@@ -1,51 +1,57 @@
 import React from 'react';
-import { PlannedService } from '../../../types';
-import { AddServiceForm } from '../forms/AddServiceForm';
+import { PlannedService } from '../types';
 import { EditableServiceRow } from '../rows/EditableServiceRow';
+import { AddServiceForm } from '../forms/AddServiceForm';
 import { useDragAndDrop } from '../hooks/useDragAndDrop';
 
-interface Props {
-    planId: string;
+interface ServicesTabProps {
     services: PlannedService[];
-    onSetServices: (services: PlannedService[]) => void;
+    onAddService: (service: Omit<PlannedService, 'id' | 'plan_id' | 'total_cost'>) => void;
+    onUpdateService: (updatedService: PlannedService) => void;
     onDeleteService: (id: string) => void;
+    onReorderServices: (newServices: PlannedService[]) => void;
+    planId: string;
 }
 
-export const ServicesTab: React.FC<Props> = ({ planId, services, onSetServices, onDeleteService }) => {
-    const { draggedIndex, handleDragStart, handleDragOver, handleDragEnd, moveItem } = useDragAndDrop<PlannedService>();
+export const ServicesTab: React.FC<ServicesTabProps> = ({
+    services,
+    onAddService,
+    onUpdateService,
+    onDeleteService,
+    onReorderServices,
+    planId,
+}) => {
+    const { draggedIndex, handleDragStart, handleDragOver, handleDragEnd, moveItem } =
+        useDragAndDrop<PlannedService>();
 
-    const handleUpdateService = (updated: PlannedService) => {
-        onSetServices(services.map((s) => (s.id === updated.id ? updated : s)));
-    };
-
-    const handleAddService = (newService: PlannedService) => {
-        onSetServices([...services, newService]);
+    const handleMove = (index: number, direction: 'up' | 'down') => {
+        moveItem(services, onReorderServices, index, direction);
     };
 
     return (
         <div className="max-w-4xl mx-auto">
-            <AddServiceForm planId={planId} onAdd={handleAddService} />
+            <AddServiceForm onAdd={onAddService} planId={planId} />
 
-            <div className="space-y-2">
-                {services.map((svc, index) => (
+            <div className="space-y-2 mt-6">
+                {services.map((service, index) => (
                     <EditableServiceRow
-                        key={svc.id}
-                        service={svc}
+                        key={service.id}
+                        service={service}
                         index={index}
-                        totalItems={services.length}
                         isDragged={draggedIndex === index}
                         onDragStart={handleDragStart}
-                        onDragOver={(e, idx) => handleDragOver(e, idx, services, onSetServices)}
+                        onDragOver={(e, i) => handleDragOver(e, i, services, onReorderServices)}
                         onDragEnd={handleDragEnd}
-                        onMove={(idx, dir) => moveItem(services, onSetServices, idx, dir)}
-                        onUpdate={handleUpdateService}
+                        onMove={handleMove}
                         onDelete={onDeleteService}
+                        onUpdate={onUpdateService}
+                        isFirst={index === 0}
+                        isLast={index === services.length - 1}
                     />
                 ))}
+
                 {services.length === 0 && (
-                    <div className="text-center py-10 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
-                        <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Nenhum serviço planejado ainda.</p>
-                    </div>
+                    <div className="text-center py-10 text-slate-400">Nenhum serviço planejado ainda.</div>
                 )}
             </div>
         </div>
