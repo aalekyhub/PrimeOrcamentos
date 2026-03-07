@@ -11,286 +11,289 @@ interface Props {
     filename: string;
 }
 
-const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, filename }) => {
-    const optimizePageBreaks = React.useCallback(() => {
-        const content = document.getElementById('report-preview-content');
-        if (!content) return;
-
-        // Reset existing wrappers
-        const wrappers = content.querySelectorAll('.keep-together');
-        wrappers.forEach(w => {
-            const parent = w.parentNode;
-            if (parent) {
-                while (w.firstChild) parent.insertBefore(w.firstChild, w);
-                parent.removeChild(w);
-            }
-        });
-
-        const allNodes: Element[] = [];
-        Array.from(content.children).forEach(block => {
-            if (block.classList.contains('ql-editor-print')) {
-                allNodes.push(...Array.from(block.children) as Element[]);
-            } else if (block.tagName === 'DIV' && (block as HTMLElement).style.display !== 'none') {
-                // If it's a flattened section, add it directly or its relevant children
-                allNodes.push(block);
-            } else {
-                allNodes.push(block);
-            }
-        });
-
-        for (let i = 0; i < allNodes.length - 1; i++) {
-            const el = allNodes[i];
-            let isTitle = false;
-
-            if (el.matches('h1, h2, h3, h4, h5, h6')) isTitle = true;
-            else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
-                const text = el.textContent?.trim() || '';
-                const isNumbered = /^\d+(\.\d+)*[\.\s\)]/.test(text);
-                const style = window.getComputedStyle(el);
-                const isBold = el.querySelector('strong, b') || parseInt(style.fontWeight) > 600 || el.tagName === 'STRONG';
-                const isShort = text.length < 150;
-                if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 4)) {
-                    isTitle = true;
-                }
-            }
-
-            if (isTitle) {
-                const nodesToWrap = [el];
-                let j = i + 1;
-                while (j < allNodes.length && nodesToWrap.length < 3) {
-                    const next = allNodes[j];
-                    if (next.matches('h1, h2, h3, h4, h5, h6')) break;
-                    nodesToWrap.push(next);
-                    j++;
-                }
-
-                if (nodesToWrap.length > 1) {
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'keep-together';
-                    wrapper.style.breakInside = 'avoid';
-                    wrapper.style.pageBreakInside = 'avoid';
-                    wrapper.style.display = 'block';
-                    el.parentNode?.insertBefore(wrapper, el);
-                    nodesToWrap.forEach(node => wrapper.appendChild(node));
-                    i = j - 1;
-                }
-            }
-        }
-    }, []);
-
-    React.useEffect(() => {
-        if (isOpen) {
-            const timer = setTimeout(() => {
-                optimizePageBreaks();
-            }, 500);
-            return () => clearTimeout(timer);
-        }
-    }, [isOpen, htmlContent, optimizePageBreaks]);
+const ReportPreview: React.FC<Props> = ({
+    isOpen,
+    onClose,
+    title,
+    htmlContent,
+    filename
+}) => {
+    const previewRef = React.useRef<HTMLDivElement | null>(null);
 
     if (!isOpen) return null;
 
+    const safeFileName = (name?: string) => {
+        const base = (name || 'RELATORIO')
+            .replace(/\.pdf$/i, '')
+            .replace(/[\\/:*?"<>|]+/g, '')
+            .trim();
+
+        return `${base || 'RELATORIO'}.pdf`;
+    };
+
+    const buildPdfContainer = () => {
+        const tempWrapper = document.createElement('div');
+        tempWrapper.id = 'pdf-export-container';
+
+        tempWrapper.style.position = 'fixed';
+        tempWrapper.style.left = '-100000px';
+        tempWrapper.style.top = '0';
+        tempWrapper.style.width = '210mm';
+        tempWrapper.style.background = '#ffffff';
+        tempWrapper.style.zIndex = '-1';
+        tempWrapper.style.opacity = '1';
+        tempWrapper.style.pointerEvents = 'none';
+        tempWrapper.style.boxSizing = 'border-box';
+
+        tempWrapper.innerHTML = `
+            <style>
+                #pdf-export-container,
+                #pdf-export-container * {
+                    box-sizing: border-box;
+                }
+
+                #pdf-export-container .pdf-page-content {
+                    width: 100%;
+                    background: #ffffff;
+                    color: #1e293b;
+                    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+                    line-height: 1.45;
+                    font-size: 12px;
+                    padding: 8mm;
+                    overflow: visible;
+                    word-break: break-word;
+                }
+
+                #pdf-export-container h1,
+                #pdf-export-container h2,
+                #pdf-export-container h3,
+                #pdf-export-container h4,
+                #pdf-export-container h5,
+                #pdf-export-container h6 {
+                    break-after: avoid-page;
+                    page-break-after: avoid;
+                    break-inside: avoid;
+                    page-break-inside: avoid;
+                    margin-top: 0;
+                }
+
+                #pdf-export-container p,
+                #pdf-export-container li,
+                #pdf-export-container blockquote {
+                    orphans: 3;
+                    widows: 3;
+                }
+
+                #pdf-export-container table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    page-break-inside: auto;
+                    break-inside: auto;
+                }
+
+                #pdf-export-container thead {
+                    display: table-header-group;
+                }
+
+                #pdf-export-container tfoot {
+                    display: table-footer-group;
+                }
+
+                #pdf-export-container tr,
+                #pdf-export-container td,
+                #pdf-export-container th {
+                    page-break-inside: avoid;
+                    break-inside: avoid;
+                }
+
+                #pdf-export-container th {
+                    background: #f8fafc;
+                    color: #64748b;
+                    font-size: 10px;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.04em;
+                    text-align: left;
+                    padding: 10px 8px;
+                    border-bottom: 2px solid #e2e8f0;
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+
+                #pdf-export-container td {
+                    padding: 10px 8px;
+                    font-size: 11px;
+                    border-bottom: 1px solid #f1f5f9;
+                    vertical-align: top;
+                }
+
+                #pdf-export-container img {
+                    max-width: 100%;
+                    height: auto;
+                    display: block;
+                    page-break-inside: avoid;
+                    break-inside: avoid;
+                }
+
+                #pdf-export-container .report-header,
+                #pdf-export-container .report-footer,
+                #pdf-export-container .keep-together,
+                #pdf-export-container .signature-block,
+                #pdf-export-container .section,
+                #pdf-export-container .card,
+                #pdf-export-container .box {
+                    page-break-inside: avoid;
+                    break-inside: avoid;
+                }
+
+                #pdf-export-container .page-break {
+                    page-break-before: always;
+                    break-before: page;
+                }
+            </style>
+            <div class="pdf-page-content">
+                ${htmlContent}
+            </div>
+        `;
+
+        document.body.appendChild(tempWrapper);
+        return tempWrapper;
+    };
+
+    const waitForImages = async (container: HTMLElement) => {
+        const images = Array.from(container.querySelectorAll('img'));
+
+        if (images.length === 0) return;
+
+        await Promise.all(
+            images.map((img) => {
+                return new Promise<void>((resolve) => {
+                    if (img.complete) {
+                        resolve();
+                        return;
+                    }
+
+                    const done = () => resolve();
+
+                    img.addEventListener('load', done, { once: true });
+                    img.addEventListener('error', done, { once: true });
+
+                    setTimeout(() => resolve(), 4000);
+                });
+            })
+        );
+    };
+
     const handlePrint = async () => {
-        const el = document.getElementById("report-preview-content");
-        if (!el) return;
-
-        // 1) Salva estilos atuais
-        // 1) Salva estilos atuais
-        const prev = {
-            height: el.style.height,
-            overflow: el.style.overflow,
-            maxHeight: el.style.maxHeight
-        };
-
-        // 2) Remove qualquer limitação/scroll do preview para captura total
-        el.style.height = "auto";
-        el.style.maxHeight = "none";
-        el.style.overflow = "visible";
-
-        const opt = {
-            margin: 0,
-            filename: (filename || "RELATORIO OBRA").toUpperCase() + ".pdf",
-            image: { type: "jpeg", quality: 0.98 },
-            html2canvas: {
-                scale: 2,
-                useCORS: true,
-                backgroundColor: "#ffffff",
-                windowWidth: el.scrollWidth,
-                windowHeight: el.scrollHeight,
-                scrollY: 0,
-                scrollX: 0,
-            },
-            jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-            pagebreak: { mode: "css" },
-        };
+        let tempContainer: HTMLElement | null = null;
 
         try {
+            tempContainer = buildPdfContainer();
+
+            await waitForImages(tempContainer);
+
+            const element = tempContainer.querySelector('.pdf-page-content') as HTMLElement | null;
+            if (!element) throw new Error('Conteúdo do PDF não encontrado.');
+
             const originalTitle = document.title;
-            if (filename) document.title = filename.replace('.pdf', '');
+            document.title = safeFileName(filename).replace(/\.pdf$/i, '');
+
+            const opt = {
+                margin: [0, 0, 0, 0],
+                filename: safeFileName(filename),
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    backgroundColor: '#ffffff',
+                    scrollX: 0,
+                    scrollY: 0
+                },
+                jsPDF: {
+                    unit: 'mm',
+                    format: 'a4',
+                    orientation: 'portrait'
+                },
+                pagebreak: {
+                    mode: ['css', 'legacy']
+                }
+            };
 
             // @ts-ignore
-            await html2pdf().set(opt).from(el).save();
+            await html2pdf().set(opt).from(element).save();
 
-            if (filename) setTimeout(() => { document.title = originalTitle; }, 1000);
-        } catch (err) {
-            console.error("Erro ao gerar PDF:", err);
-            // Fallback para o print padrão se o html2pdf falhar
+            setTimeout(() => {
+                document.title = originalTitle;
+            }, 300);
+        } catch (error) {
+            console.error('Erro ao gerar PDF:', error);
             window.print();
         } finally {
-            // 3) Restaura estilos originais
-            el.style.height = prev.height;
-            el.style.maxHeight = prev.maxHeight;
-            el.style.overflow = prev.overflow;
+            if (tempContainer && tempContainer.parentNode) {
+                tempContainer.parentNode.removeChild(tempContainer);
+            }
         }
     };
 
     const modalContent = (
-        <div id="print-modal-portal" className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div
+            id="print-modal-portal"
+            className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+        >
             <style>{`
                 @media print {
-                    #root, .no-print, #print-modal-portal header, #print-modal-portal .no-print {
-                        display: none !important;
-                    }
-
-                    body {
+                    body * {
                         visibility: hidden !important;
-                        background: white !important;
                     }
 
-                    html, body {
-                        height: auto !important;
-                        overflow: visible !important;
-                        margin: 0 !important;
-                        padding: 0 !important;
-                        position: static !important;
-                    }
-
-                    #print-modal-portal {
-                        position: absolute !important;
-                        top: 0 !important;
-                        left: 0 !important;
-                        width: 100% !important;
-                        background: white !important;
-                        visibility: visible !important;
-                        display: block !important;
-                        padding: 0 !important;
-                        z-index: auto !important;
-                    }
-
-                    #report-preview-wrapper {
-                        position: relative !important;
-                        width: 100% !important;
-                        max-width: none !important;
-                        height: auto !important;
-                        margin: 0 !important;
-                        display: block !important;
-                        box-shadow: none !important;
-                        border: none !important;
-                        visibility: visible !important;
-                    }
-
-                    #report-preview-wrapper > div {
-                        height: auto !important;
-                        overflow: visible !important;
-                        padding: 0 !important;
-                        display: block !important;
+                    #report-preview-content,
+                    #report-preview-content * {
                         visibility: visible !important;
                     }
 
                     #report-preview-content {
-                        visibility: visible !important;
-                        display: block !important;
+                        position: absolute !important;
+                        top: 0 !important;
+                        left: 0 !important;
                         width: 100% !important;
-                        height: auto !important;
                         margin: 0 !important;
                         padding: 0 !important;
-                        border: none !important;
+                        background: white !important;
                         box-shadow: none !important;
+                        border: none !important;
                         overflow: visible !important;
                     }
 
-                    /* Flattened structure optimization */
-                    #report-preview-content > * {
-                        display: block !important;
-                        width: 100% !important;
-                        height: auto !important;
-                    }
-
-                    @page { margin: 0; size: A4; }
-
-                    /* Force visibility and clear parent interference */
-                    #root, .no-print, [role="dialog"] > :not(#print-modal-portal), .backdrop-blur-sm:not(#print-modal-portal) {
+                    .no-print {
                         display: none !important;
                     }
 
-                    body {
-                        visibility: hidden !important;
-                        background: white !important;
+                    html, body {
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        background: #fff !important;
+                        height: auto !important;
+                        overflow: visible !important;
                         -webkit-print-color-adjust: exact !important;
                         print-color-adjust: exact !important;
                     }
 
-                    #print-modal-portal {
-                        visibility: visible !important;
-                        display: block !important;
-                        position: absolute !important;
-                        top: 0 !important;
-                        left: 0 !important;
-                        width: 100% !important;
-                        height: auto !important;
-                        background: white !important;
-                        padding: 0 !important;
-                        margin: 0 !important;
-                    }
-
-                    #report-preview-wrapper {
-                        display: block !important;
-                        width: 100% !important;
-                        height: auto !important;
-                        margin: 0 !important;
-                        padding: 0 !important;
-                        box-shadow: none !important;
-                        border: none !important;
-                        overflow: visible !important;
-                    }
-
-                    #report-preview-content {
-                        visibility: visible !important;
-                        display: block !important;
-                        width: 100% !important;
-                        height: auto !important;
-                        margin: 0 !important;
-                        padding: 0 !important; /* Managed by @page margin */
-                        overflow: visible !important;
-                        background: white !important;
-                    }
-
-                    .report-header, .report-footer {
-                        break-inside: avoid !important;
-                        page-break-inside: avoid !important;
-                    }
-
-                    tr { page-break-inside: avoid !important; }
-                    thead { display: table-header-group !important; }
-
-                    /* Prevent blank pages */
-                    * { box-sizing: border-box !important; }
-                    
-                    #report-preview-content > div:last-child {
-                        margin-bottom: 0 !important;
-                        padding-bottom: 0 !important;
+                    @page {
+                        size: A4;
+                        margin: 8mm;
                     }
                 }
 
-                /* UI Styles (Aesthetics) */
                 #report-preview-content {
                     font-family: 'Inter', system-ui, -apple-system, sans-serif;
                     color: #1e293b;
                     line-height: 1.5;
                 }
 
-                #report-preview-content table { 
-                    border-collapse: collapse; 
-                    width: 100%; 
+                #report-preview-content table {
+                    border-collapse: collapse;
+                    width: 100%;
                     margin-bottom: 24px;
                 }
 
@@ -302,30 +305,54 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                     text-transform: uppercase;
                     letter-spacing: 0.05em;
                     text-align: left;
-                    padding: 12px 0;
+                    padding: 12px 8px;
                     border-bottom: 2px solid #e2e8f0;
                     -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
                 }
 
                 #report-preview-content td {
-                    padding: 12px 0;
+                    padding: 12px 8px;
                     font-size: 11px;
                     border-bottom: 1px solid #f1f5f9;
+                    vertical-align: top;
                 }
 
-                .keep-together {
+                #report-preview-content img {
+                    max-width: 100%;
+                    height: auto;
                     display: block;
-                    width: 100%;
+                }
+
+                #report-preview-content .report-header,
+                #report-preview-content .report-footer,
+                #report-preview-content .keep-together,
+                #report-preview-content .signature-block,
+                #report-preview-content .section,
+                #report-preview-content .card,
+                #report-preview-content .box {
+                    break-inside: avoid;
+                    page-break-inside: avoid;
+                }
+
+                #report-preview-content .page-break {
+                    page-break-before: always;
+                    break-before: page;
                 }
             `}</style>
 
-            <div id="report-preview-wrapper" className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
-                {/* Header */}
+            <div
+                id="report-preview-wrapper"
+                className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 duration-300"
+            >
                 <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10 no-print">
                     <div>
                         <h3 className="text-xl font-bold text-slate-800">{title}</h3>
-                        <p className="text-sm text-slate-500">Visualize as informações antes de gerar o PDF</p>
+                        <p className="text-sm text-slate-500">
+                            Visualize as informações antes de gerar o PDF
+                        </p>
                     </div>
+
                     <div className="flex items-center gap-3">
                         <button
                             onClick={handlePrint}
@@ -334,6 +361,7 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                             <Printer size={18} />
                             IMPRIMIR
                         </button>
+
                         <button
                             onClick={onClose}
                             className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all active:scale-90"
@@ -343,16 +371,15 @@ const ReportPreview: React.FC<Props> = ({ isOpen, onClose, title, htmlContent, f
                     </div>
                 </div>
 
-                {/* Content Area */}
                 <div className="flex-1 overflow-y-auto bg-slate-50 p-6 md:p-10 flex justify-center">
                     <div
+                        ref={previewRef}
                         id="report-preview-content"
-                        className="bg-white shadow-xl w-full max-w-[210mm] p-0 overflow-x-hidden rounded-sm"
+                        className="bg-white shadow-xl w-full max-w-[210mm] rounded-sm overflow-x-hidden"
                         dangerouslySetInnerHTML={{ __html: htmlContent }}
                     />
                 </div>
 
-                {/* Footer Controls */}
                 <div className="px-6 py-4 border-t border-slate-100 bg-white flex justify-end z-10 no-print">
                     <button
                         onClick={onClose}
