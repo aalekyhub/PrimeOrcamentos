@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Save, LayoutDashboard, FileText, Package, Percent } from 'lucide-react';
+import { ArrowLeft, Save, LayoutDashboard, FileText, Package, Percent, Building2, Truck, PieChart, HardHat } from 'lucide-react';
 import { PlanningHeader, PlannedService, PlannedMaterial, PlannedLabor, PlannedIndirect, PlanTax, Customer } from '../../types';
 import { DataTab } from './tabs/DataTab';
 import { ServicesTab } from './tabs/ServicesTab';
@@ -127,121 +127,117 @@ export const PlanningEditor: React.FC<Props> = ({
     };
 
     return (
-        <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-950 overflow-hidden">
-            {/* Header */}
-            <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0 shadow-sm z-10">
-                <div className="flex items-center gap-4">
-                    <button
-                        onClick={onBack}
-                        className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-500"
-                    >
-                        <ArrowLeft size={20} />
-                    </button>
-                    <div>
-                        <h2 className="text-xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                            <span className="bg-blue-600 text-white p-1.5 rounded-lg">
-                                <LayoutDashboard size={18} />
-                            </span>
-                            {currentPlan.name || 'Novo Planejamento'}
-                        </h2>
-                        <div className="flex items-center gap-3 mt-1">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{currentPlan.id}</span>
-                            <span className="px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded text-[10px] font-black uppercase tracking-wider">
-                                Planejamento
-                            </span>
+        <div className="p-8 h-full overflow-y-auto bg-slate-50 dark:bg-slate-950 scrollbar-hide">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl min-h-[80vh] flex flex-col border dark:border-slate-800 overflow-hidden">
+                {/* Fixed Editor Header & Tabs */}
+                <div className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
+                    {/* Editor Header */}
+                    <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-blue-50 dark:bg-blue-900/20">
+                        <div className="flex items-center gap-4">
+                            <button
+                                onClick={onBack}
+                                className="text-blue-400 hover:text-blue-600 p-1 transition-colors"
+                            >
+                                <ArrowLeft size={20} />
+                            </button>
+                            <div>
+                                <h2 className="text-xl font-bold text-blue-900 dark:text-blue-100 flex items-center gap-2">
+                                    <LayoutDashboard className="text-blue-600 dark:text-blue-400" />
+                                    {currentPlan.name || 'Novo Planejamento'}
+                                </h2>
+                                <p className="text-xs text-blue-600 dark:text-blue-400 uppercase tracking-widest font-semibold">PLANEJAMENTO • PREVISTO</p>
+                            </div>
                         </div>
+
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={onSave}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-blue-700 shadow-md shadow-blue-950/20 active:scale-95 transition-all"
+                            >
+                                <Save size={16} /> Salvar Alterações
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Tabs Nav */}
+                    <div className="flex px-6 bg-white dark:bg-slate-900 overflow-x-auto no-scrollbar border-b border-slate-100 dark:border-slate-800">
+                        {[
+                            { id: 'dados', label: 'Dados Gerais', icon: FileText },
+                            { id: 'servicos', label: 'Escope de Serviços', icon: Building2 },
+                            { id: 'recursos', label: 'Recursos e Insumos', icon: Truck },
+                            { id: 'resumo', label: 'Resumo e Orçamento', icon: PieChart },
+                        ].map((tab) => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id as any)}
+                                className={`px-6 py-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id
+                                    ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                                    : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                                    }`}
+                            >
+                                <tab.icon size={16} /> {tab.label}
+                            </button>
+                        ))}
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                    <button
-                        onClick={onSave}
-                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-blue-900/20 active:scale-95 transition-all"
-                    >
-                        <Save size={18} /> SALVAR ALTERAÇÕES
-                    </button>
+                {/* Content Area */}
+                <div className="p-8 flex-1 bg-slate-50/50 dark:bg-slate-900/30 overflow-y-auto">
+                    {activeTab === 'dados' && (
+                        <DataTab currentPlan={currentPlan} customers={customers} onUpdate={onUpdatePlan} />
+                    )}
+                    {activeTab === 'servicos' && (
+                        <ServicesTab
+                            planId={currentPlan.id}
+                            services={services}
+                            onSetServices={onSetServices}
+                            onDeleteService={onDeleteService}
+                        />
+                    )}
+                    {activeTab === 'recursos' && (
+                        <ResourcesTab
+                            planId={currentPlan.id}
+                            materials={materials}
+                            labor={labor}
+                            indirects={indirects}
+                            taxes={taxes}
+                            totalMaterial={calculations.totalMaterial}
+                            totalLabor={calculations.totalLabor}
+                            totalIndirect={calculations.totalIndirect}
+                            totalDirect={calculations.totalDirect}
+                            totalGeneral={calculations.totalGeneral}
+                            onSetMaterials={onSetMaterials}
+                            onSetLabor={onSetLabor}
+                            onSetIndirects={onSetIndirects}
+                            onSetTaxes={onSetTaxes}
+                            onDeleteMaterial={onDeleteMaterial}
+                            onDeleteLabor={onDeleteLabor}
+                            onDeleteIndirect={onDeleteIndirect}
+                            onDeleteTax={onDeleteTax}
+                        />
+                    )}
+                    {activeTab === 'resumo' && (
+                        <SummaryTab
+                            totalMaterial={calculations.totalMaterial}
+                            totalLabor={calculations.totalLabor}
+                            totalIndirect={calculations.totalIndirect}
+                            totalTaxes={calculations.totalTaxes}
+                            totalGeneral={calculations.totalGeneral}
+                            onPreview={handlePreviewFull}
+                            onGenerateBudget={handleGenerateBudget}
+                            hasGenerateBudget={!!onGenerateBudget}
+                        />
+                    )}
                 </div>
-            </div>
 
-            {/* Tabs Nav */}
-            <div className="bg-white dark:bg-slate-900 px-6 shadow-sm shrink-0 overflow-x-auto scrollbar-hide">
-                <div className="flex gap-8">
-                    {[
-                        { id: 'dados', label: 'Dados Gerais', icon: FileText },
-                        { id: 'servicos', label: 'Escope de Serviços', icon: LayoutDashboard },
-                        { id: 'recursos', label: 'Recursos e Insumos', icon: Package },
-                        { id: 'resumo', label: 'Resumo e Orçamento', icon: Percent },
-                    ].map((tab) => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id as any)}
-                            className={`flex items-center gap-2 py-4 border-b-2 font-bold text-sm transition-all whitespace-nowrap ${activeTab === tab.id
-                                    ? 'border-blue-600 text-blue-600'
-                                    : 'border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
-                                }`}
-                        >
-                            <tab.icon size={16} /> {tab.label}
-                        </button>
-                    ))}
-                </div>
+                <ReportPreview
+                    isOpen={showPreview}
+                    onClose={() => setShowPreview(false)}
+                    title={previewContent.title}
+                    htmlContent={previewContent.html}
+                    filename={previewContent.filename}
+                />
             </div>
-
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6 scroll-smooth">
-                {activeTab === 'dados' && (
-                    <DataTab currentPlan={currentPlan} customers={customers} onUpdate={onUpdatePlan} />
-                )}
-                {activeTab === 'servicos' && (
-                    <ServicesTab
-                        planId={currentPlan.id}
-                        services={services}
-                        onSetServices={onSetServices}
-                        onDeleteService={onDeleteService}
-                    />
-                )}
-                {activeTab === 'recursos' && (
-                    <ResourcesTab
-                        planId={currentPlan.id}
-                        materials={materials}
-                        labor={labor}
-                        indirects={indirects}
-                        taxes={taxes}
-                        totalMaterial={calculations.totalMaterial}
-                        totalLabor={calculations.totalLabor}
-                        totalIndirect={calculations.totalIndirect}
-                        totalDirect={calculations.totalDirect}
-                        totalGeneral={calculations.totalGeneral}
-                        onSetMaterials={onSetMaterials}
-                        onSetLabor={onSetLabor}
-                        onSetIndirects={onSetIndirects}
-                        onSetTaxes={onSetTaxes}
-                        onDeleteMaterial={onDeleteMaterial}
-                        onDeleteLabor={onDeleteLabor}
-                        onDeleteIndirect={onDeleteIndirect}
-                        onDeleteTax={onDeleteTax}
-                    />
-                )}
-                {activeTab === 'resumo' && (
-                    <SummaryTab
-                        totalMaterial={calculations.totalMaterial}
-                        totalLabor={calculations.totalLabor}
-                        totalIndirect={calculations.totalIndirect}
-                        totalTaxes={calculations.totalTaxes}
-                        totalGeneral={calculations.totalGeneral}
-                        onPreview={handlePreviewFull}
-                        onGenerateBudget={handleGenerateBudget}
-                        hasGenerateBudget={!!onGenerateBudget}
-                    />
-                )}
-            </div>
-
-            <ReportPreview
-                isOpen={showPreview}
-                onClose={() => setShowPreview(false)}
-                title={previewContent.title}
-                htmlContent={previewContent.html}
-                filename={previewContent.filename}
-            />
         </div>
     );
 };

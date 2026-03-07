@@ -114,8 +114,8 @@ export const ResourcesTab: React.FC<Props> = ({
                         key={t.id}
                         onClick={() => setResourceTab(t.id as any)}
                         className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all ${resourceTab === t.id
-                                ? 'bg-blue-600 text-white shadow-md shadow-blue-900/20'
-                                : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                            ? 'bg-blue-600 text-white shadow-md shadow-blue-900/20'
+                            : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'
                             }`}
                     >
                         <t.icon size={16} /> <span className="hidden sm:inline">{t.label}</span>
@@ -188,6 +188,11 @@ export const ResourcesTab: React.FC<Props> = ({
                                 </div>
                             </div>
                         )}
+                        {materials.length === 0 && (
+                            <div className="text-center py-10 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Nenhum material planejado ainda.</p>
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -252,6 +257,11 @@ export const ResourcesTab: React.FC<Props> = ({
                                 </div>
                             </div>
                         )}
+                        {labor.length === 0 && (
+                            <div className="text-center py-10 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Nenhuma mão de obra planejada ainda.</p>
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -314,6 +324,11 @@ export const ResourcesTab: React.FC<Props> = ({
                                     <span className="text-[10px] font-bold text-slate-500/60 dark:text-slate-400/60 uppercase tracking-[0.2em]">Total Indiretos</span>
                                     <span className="text-xl font-black text-slate-700 dark:text-slate-200">R$ {totalIndirect.toFixed(2)}</span>
                                 </div>
+                            </div>
+                        )}
+                        {indirects.length === 0 && (
+                            <div className="text-center py-10 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Nenhum custo indireto planejado ainda.</p>
                             </div>
                         )}
                     </div>
