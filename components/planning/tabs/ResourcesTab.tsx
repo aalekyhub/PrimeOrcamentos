@@ -90,24 +90,27 @@ export const ResourcesTab: React.FC<ResourcesTabProps> = ({
 
     return (
         <div className="max-w-4xl mx-auto space-y-6">
-            <div className="flex bg-white dark:bg-slate-900 p-1 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
-                {[
-                    { id: 'material', label: 'Materiais', icon: Package },
-                    { id: 'mo', label: 'Mão de Obra', icon: Users },
-                    { id: 'indireto', label: 'Indiretos', icon: Archive },
-                    { id: 'impostos', label: 'Impostos/BDI', icon: Percent },
-                ].map((t) => (
-                    <button
-                        key={t.id}
-                        onClick={() => setActiveResTab(t.id as ResourceTab)}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all ${activeResTab === t.id
-                                ? 'bg-blue-600 text-white shadow-md'
-                                : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'
-                            }`}
-                    >
-                        <t.icon size={16} /> <span className="hidden sm:inline">{t.label}</span>
-                    </button>
-                ))}
+            <div className="px-6 pb-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+                <div className="flex gap-1.5 my-3 justify-center">
+                    {[
+                        { id: 'material', label: 'Materiais' },
+                        { id: 'mo', label: 'Mão de Obra' },
+                        { id: 'indireto', label: 'Indiretos' },
+                        { id: 'impostos', label: 'Impostos' },
+                    ].map((r) => (
+                        <button
+                            key={r.id}
+                            type="button"
+                            onClick={() => setActiveResTab(r.id as ResourceTab)}
+                            className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all uppercase tracking-wider ${activeResTab === r.id
+                                ? 'bg-blue-600 dark:bg-blue-600 text-white shadow-md'
+                                : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-blue-900/30'
+                                }`}
+                        >
+                            {r.label}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             <div className="min-h-[300px]">
