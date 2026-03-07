@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { db } from '../services/db';
 import { PlanningHeader, Customer } from '../types';
-import PlanningManager from './PlanningManager';
+import PlanningManager from './planning/PlanningManager';
 import WorksManager from './WorksManager';
 import { useNotify } from './ToastProvider';
 
