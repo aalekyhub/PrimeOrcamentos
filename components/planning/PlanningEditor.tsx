@@ -225,7 +225,7 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
 
                 <div className="flex px-6 bg-white dark:bg-slate-900 overflow-x-auto no-scrollbar">
                     {[
-                        { id: 'dados', label: 'Dados do Projeto', icon: FileText },
+                        { id: 'dados', label: 'Dados da Obra', icon: FileText },
                         { id: 'servicos', label: 'Serviços', icon: Building2 },
                         { id: 'recursos', label: 'Gastos Detalhados', icon: Truck },
                         { id: 'resumo', label: 'Resumo de Custo', icon: PieChart },

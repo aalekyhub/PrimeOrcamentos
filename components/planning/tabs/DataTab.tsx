@@ -12,7 +12,7 @@ export const DataTab: React.FC<DataTabProps> = ({ plan, customers, onUpdatePlan 
         <div className="max-w-2xl mx-auto space-y-8 animate-in slide-in-from-bottom-4">
             <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-1.5">
-                    <label className="block text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Nome Identificador do Projeto</label>
+                    <label className="block text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Nome Identificador da Obra</label>
                     <input
                         type="text"
                         value={plan.name}
@@ -21,7 +21,7 @@ export const DataTab: React.FC<DataTabProps> = ({ plan, customers, onUpdatePlan 
                     />
                 </div>
                 <div className="space-y-1.5">
-                    <label className="block text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Status de Planejamento</label>
+                    <label className="block text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Status de Execução</label>
                     <select
                         value={plan.status}
                         onChange={(e) => onUpdatePlan({ ...plan, status: e.target.value as any })}

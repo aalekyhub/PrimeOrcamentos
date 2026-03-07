@@ -116,31 +116,21 @@ export const ResourcesTab: React.FC<ResourcesTabProps> = ({
             <div className="min-h-[300px]">
                 {activeResTab === 'material' && (
                     <div className="space-y-4">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-tighter text-lg">Insumos e Materiais</h3>
+                        </div>
                         <AddMaterialForm planId={planId} onAdd={onAddMaterial} />
                         {materials.length > 0 && (
-                            <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-2 rounded-lg border border-slate-200 dark:border-slate-700">
-                                <div className="flex items-center gap-2">
+                            <div className="flex items-center justify-between bg-white dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800 mb-4 shadow-sm">
+                                <div className="flex items-center gap-3">
                                     <input
                                         type="checkbox"
-                                        className="w-4 h-4 rounded border-slate-300"
+                                        className="w-4 h-4 rounded-md border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-blue-600 focus:ring-blue-500 cursor-pointer"
                                         checked={selectedMaterials.length === materials.length && materials.length > 0}
                                         onChange={(e) => setSelectedMaterials(e.target.checked ? materials.map(m => m.id) : [])}
                                     />
-                                    <span className="text-xs font-semibold text-slate-600">{selectedMaterials.length} selecionado(s)</span>
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{selectedMaterials.length} SELECIONADO(S)</span>
                                 </div>
-                                {selectedMaterials.length > 0 && (
-                                    <button
-                                        onClick={() => {
-                                            if (confirm(`Excluir ${selectedMaterials.length} materiais?`)) {
-                                                onUpdateMaterials(materials.filter(m => !selectedMaterials.includes(m.id)));
-                                                setSelectedMaterials([]);
-                                            }
-                                        }}
-                                        className="flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 rounded text-[10px] font-bold border border-red-100"
-                                    >
-                                        <Trash2 size={12} /> Excluir Selecionados
-                                    </button>
-                                )}
                             </div>
                         )}
                         <div className="space-y-2">
@@ -163,8 +153,13 @@ export const ResourcesTab: React.FC<ResourcesTabProps> = ({
                                 />
                             ))}
                         </div>
+                        {materials.length === 0 && (
+                            <div className="text-center py-10 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Nenhum material lançado ainda.</p>
+                            </div>
+                        )}
                         {materials.length > 0 && (
-                            <div className="flex justify-end p-4 bg-blue-50/50 rounded-xl border border-blue-100">
+                            <div className="flex justify-end p-4 bg-blue-50/50 rounded-xl border border-blue-100 mt-4">
                                 <div className="flex items-center gap-2">
                                     <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Total Materiais</span>
                                     <span className="text-xl font-black text-blue-700">R$ {calculations.totalMaterial.toFixed(2)}</span>
@@ -176,8 +171,11 @@ export const ResourcesTab: React.FC<ResourcesTabProps> = ({
 
                 {activeResTab === 'mo' && (
                     <div className="space-y-4">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-tighter text-lg">Mão de Obra</h3>
+                        </div>
                         <AddLaborForm planId={planId} onAdd={onAddLabor} />
-                        <div className="space-y-2">
+                        <div className="space-y-2 mt-4">
                             {labor.map((l, index) => (
                                 <EditableLaborRow
                                     key={l.id}
@@ -196,9 +194,14 @@ export const ResourcesTab: React.FC<ResourcesTabProps> = ({
                                     isLast={index === labor.length - 1}
                                 />
                             ))}
+                            {labor.length === 0 && (
+                                <div className="text-center py-10 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                                    <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Nenhuma mão de obra lançada.</p>
+                                </div>
+                            )}
                         </div>
                         {labor.length > 0 && (
-                            <div className="flex justify-end p-4 bg-amber-50/50 rounded-xl border border-amber-100">
+                            <div className="flex justify-end p-4 bg-amber-50/50 rounded-xl border border-amber-100 mt-4">
                                 <div className="flex items-center gap-2">
                                     <span className="text-[10px] font-bold text-amber-600 uppercase tracking-widest">Total Mão de Obra</span>
                                     <span className="text-xl font-black text-amber-700">R$ {calculations.totalLabor.toFixed(2)}</span>
@@ -210,8 +213,11 @@ export const ResourcesTab: React.FC<ResourcesTabProps> = ({
 
                 {activeResTab === 'indireto' && (
                     <div className="space-y-4">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-tighter text-lg">Custos Indiretos</h3>
+                        </div>
                         <AddIndirectForm planId={planId} onAdd={onAddIndirect} />
-                        <div className="space-y-2">
+                        <div className="space-y-2 mt-4">
                             {indirects.map((i, index) => (
                                 <EditableIndirectRow
                                     key={i.id}
@@ -230,9 +236,14 @@ export const ResourcesTab: React.FC<ResourcesTabProps> = ({
                                     isLast={index === indirects.length - 1}
                                 />
                             ))}
+                            {indirects.length === 0 && (
+                                <div className="text-center py-10 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800">
+                                    <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Nenhum custo indireto lançado.</p>
+                                </div>
+                            )}
                         </div>
                         {indirects.length > 0 && (
-                            <div className="flex justify-end p-4 bg-slate-100/50 rounded-xl border border-slate-200">
+                            <div className="flex justify-end p-4 bg-slate-100/50 rounded-xl border border-slate-200 mt-4">
                                 <div className="flex items-center gap-2">
                                     <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Total Indiretos</span>
                                     <span className="text-xl font-black text-slate-700">R$ {calculations.totalIndirect.toFixed(2)}</span>

@@ -14,13 +14,13 @@ export const PlanningList: React.FC<PlanningListProps> = ({ plans, onCreatePlan,
             <div className="flex justify-between items-center">
                 <div>
                     <h1 className="text-3xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-3">
-                        <Building2 className="text-blue-600" size={36} /> Planejamento de Obras
+                        <HardHat className="text-blue-600" size={36} /> Planejamento de Obras
                     </h1>
-                    <p className="text-slate-500 font-medium">Crie e gerencie o levantamento de custos para seus orçamentos.</p>
+                    <p className="text-slate-500 font-medium tracking-tight">Crie e gerencie o levantamento de custos detalhados para seus novos projetos.</p>
                 </div>
                 <button
                     onClick={onCreatePlan}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg flex items-center gap-2 transition-all transform hover:scale-105"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-blue-200/50 flex items-center gap-2 transition-all transform hover:scale-105 active:scale-95"
                 >
                     <Plus size={20} /> Novo Planejamento
                 </button>

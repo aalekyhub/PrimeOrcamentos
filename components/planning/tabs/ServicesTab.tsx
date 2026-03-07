@@ -51,7 +51,9 @@ export const ServicesTab: React.FC<ServicesTabProps> = ({
                 ))}
 
                 {services.length === 0 && (
-                    <div className="text-center py-10 text-slate-400">Nenhum serviço planejado ainda.</div>
+                    <div className="text-center py-10 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 animate-in fade-in duration-500">
+                        <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Nenhum serviço lançado.</p>
+                    </div>
                 )}
             </div>
         </div>
