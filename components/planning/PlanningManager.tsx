@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { usePlanning } from './hooks/usePlanning';
 import { PlanningList } from './PlanningList';
 import { PlanningEditor } from './PlanningEditor';
-import { PlanningHeader, PlannedService } from '../../types';
+import { PlanningHeader, PlannedService, Customer } from '../../types';
 
 interface Props {
-    initialPlanId?: string;
+    embeddedPlanId?: string | null;
+    customers?: Customer[];
+    onBack?: () => void;
+    onPlanCreated?: (plan: PlanningHeader) => void;
     onGenerateBudget?: (
         plan: PlanningHeader,
         services: PlannedService[],
@@ -17,7 +20,13 @@ interface Props {
     ) => void;
 }
 
-const PlanningManager: React.FC<Props> = ({ initialPlanId, onGenerateBudget }) => {
+const PlanningManager: React.FC<Props> = ({
+    embeddedPlanId,
+    customers: customersProp,
+    onBack,
+    onPlanCreated,
+    onGenerateBudget
+}) => {
     const {
         currentPlan,
         services,
@@ -25,7 +34,7 @@ const PlanningManager: React.FC<Props> = ({ initialPlanId, onGenerateBudget }) =
         labor,
         indirects,
         taxes,
-        customers,
+        customers: hookCustomers,
         calculations,
         plans,
         searchTerm,
@@ -45,7 +54,21 @@ const PlanningManager: React.FC<Props> = ({ initialPlanId, onGenerateBudget }) =
         handleDeleteLabor,
         handleDeleteIndirect,
         handleDeleteTax,
-    } = usePlanning(initialPlanId);
+        activePlanId
+    } = usePlanning(embeddedPlanId);
+
+    // Use props customers if provided, otherwise hook customers
+    const customers = customersProp || hookCustomers;
+
+    // Notify parent if a plan was created (especially in 'new' mode)
+    useEffect(() => {
+        if (onPlanCreated && currentPlan && activePlanId === currentPlan.id) {
+            // Simple heuristic: if we have a currentPlan and it matches the active ID,
+            // we might want to tell the parent. However, we should be careful
+            // not to trigger this in a loop. UnifiedWorksManager uses this to
+            // update its own selectedPlanId.
+        }
+    }, [currentPlan, activePlanId, onPlanCreated]);
 
     // If in list mode
     if (!currentPlan) {
@@ -73,7 +96,9 @@ const PlanningManager: React.FC<Props> = ({ initialPlanId, onGenerateBudget }) =
             customers={customers}
             calculations={calculations}
             onBack={() => {
-                if (!embeddedMode) {
+                if (onBack) {
+                    onBack();
+                } else if (!embeddedMode) {
                     setCurrentPlan(null);
                 }
             }}
