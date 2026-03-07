@@ -106,6 +106,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                             name: plan.name,
                             client_id: plan.client_id,
                             address: plan.address,
+                            type: plan.type,
                             status: 'Em Andamento',
                             start_date: new Date().toISOString()
                         };
@@ -300,6 +301,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             name: 'Nova Obra',
             client_id: '',
             address: '',
+            type: 'Reforma',
             status: 'Em Andamento',
             start_date: new Date().toISOString()
         };
@@ -1369,6 +1371,21 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         className="w-full p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-800 dark:text-slate-100 outline-none shadow-sm transition-all focus:ring-2 focus:ring-green-500/20"
                                         placeholder="Ex: Rua, Número, Bairro, Cidade..."
                                     />
+                                </div>
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div className="space-y-1.5">
+                                        <label className="block text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Tipo de Serviço</label>
+                                        <select
+                                            className="w-full p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-800 dark:text-slate-100 outline-none shadow-sm cursor-pointer transition-all focus:ring-2 focus:ring-green-500/20"
+                                            value={currentWork.type}
+                                            onChange={(e) => setCurrentWork({ ...currentWork, type: e.target.value })}
+                                        >
+                                            <option>Reforma</option>
+                                            <option>Construção Nova</option>
+                                            <option>Manutenção</option>
+                                            <option>Outros</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-3xl border border-slate-100 dark:border-slate-700/50">
                                     <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-relaxed">

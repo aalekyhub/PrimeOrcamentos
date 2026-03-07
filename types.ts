@@ -282,6 +282,7 @@ export interface WorkHeader {
   order_id?: string;
 
   address: string;
+  type: string;
   status: 'Em Andamento' | 'Concluída' | 'Pausada';
   start_date: string;
   end_date?: string;
