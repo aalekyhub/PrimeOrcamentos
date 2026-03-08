@@ -17,6 +17,7 @@ import { usePrintOS } from '../hooks/usePrintOS';
 import { compressImage } from '../services/imageUtils';
 import ReportPreview from './ReportPreview';
 import { getContractHtml } from '../services/contractPdfService';
+import { buildOsHtml } from '../services/osPdfService';
 // DocumentPreview, ContractDocument are replaced by the unified system
 
 interface Props {
@@ -417,7 +418,15 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             {previewOS && (
                 <ReportPreview
                     title={`OS de Obra - ${previewOS.id}`}
-                    htmlContent={getOSHtml(previewOS)}
+                    htmlContent={buildOsHtml(
+                        previewOS,
+                        customers.find(c => c.id === previewOS.customerId) || {
+                            name: previewOS.customerName,
+                            address: 'Não informado',
+                            document: 'N/A'
+                        },
+                        company
+                    )}
                     filename={`OS-${previewOS.id}`}
                     onClose={() => setPreviewOS(null)}
                 />
