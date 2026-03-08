@@ -11,9 +11,10 @@ import { useNotify } from './ToastProvider';
 import CustomerManager from './CustomerManager';
 import ServiceCatalog from './ServiceCatalog';
 import { db } from '../services/db';
-import { compressImage } from '../services/imageUtils';
 import { buildMaintenanceOsHtml } from '../services/osPdfService';
-import { printContractRawHTML } from '../services/contractPdfService';
+import { compressImage } from '../services/imageUtils';
+import { DocumentPreview } from './documents/DocumentPreview';
+import { ContractDocument } from './documents/ContractDocument';
 
 interface Props {
   orders: ServiceOrder[];
@@ -30,6 +31,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
   const [showForm, setShowForm] = useState(false);
   const [showFullClientForm, setShowFullClientForm] = useState(false);
   const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
+  const [previewContract, setPreviewContract] = useState<ServiceOrder | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const { notify } = useNotify();
 
@@ -150,14 +152,8 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
   };
 
   // NEXT_Contract
-  const handlePrintContract = (order: ServiceOrder) => {
-    const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, document: 'N/A', address: 'Endereço não informado', city: '', state: '', cep: '' };
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-
-    const html = printContractRawHTML(order, customer, company);
-    printWindow.document.write(html);
-    printWindow.document.close();
+  const handlePreviewContract = (order: ServiceOrder) => {
+    setPreviewContract(order);
   };
 
   // NEXT_InitCanvas
@@ -241,7 +237,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                 <td className="px-8 py-5 text-sm font-black uppercase text-slate-900 dark:text-white">{order.customerName}</td>
                 <td className="px-8 py-5 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase">{order.equipmentBrand || 'N/A'} {order.equipmentModel}</td>
                 <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => handlePrintContract(order)} className="p-2 text-slate-400 dark:text-slate-600 hover:text-slate-900 dark:hover:text-white transition-colors" title="Gerar Contrato"><ScrollText className="w-4 h-4" /></button>
+                  <button onClick={() => handlePreviewContract(order)} className="p-2 text-slate-400 dark:text-slate-600 hover:text-slate-900 dark:hover:text-white transition-colors" title="Gerar Contrato"><ScrollText className="w-4 h-4" /></button>
                   <button onClick={() => handlePrintOS(order)} className="p-2 text-slate-400 dark:text-slate-600 hover:text-slate-900 dark:hover:text-white transition-colors"><Printer className="w-4 h-4" /></button>
                   <button onClick={() => {
                     setEditingOrderId(order.id);
@@ -454,6 +450,31 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {previewContract && (
+        <div className="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-5xl h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95">
+            <DocumentPreview
+              filename={`Contrato-${previewContract.id}`}
+              onClose={() => setPreviewContract(null)}
+            >
+              <ContractDocument
+                order={previewContract}
+                company={company}
+                customer={customers.find(c => c.id === previewContract.customerId) || {
+                  name: previewContract.customerName,
+                  document: 'N/A',
+                  address: 'Endereço não informado',
+                  city: '',
+                  state: '',
+                  cep: '',
+                  number: ''
+                }}
+              />
+            </DocumentPreview>
           </div>
         </div>
       )}
