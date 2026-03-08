@@ -1,6 +1,6 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
-import { X, Printer } from 'lucide-react';
+import { X, Printer, ZoomIn, ZoomOut, Maximize } from 'lucide-react';
 import html2pdf from 'html2pdf.js';
 
 interface Props {
@@ -18,6 +18,7 @@ const ReportPreview: React.FC<Props> = ({
     htmlContent,
     filename
 }) => {
+    const [zoom, setZoom] = React.useState(100);
     const previewRef = React.useRef<HTMLDivElement | null>(null);
 
     if (!isOpen) return null;
@@ -285,31 +286,48 @@ const ReportPreview: React.FC<Props> = ({
                     }
                 }
 
-                #report-preview-content {
-                    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-                    color: #1e293b;
-                    line-height: 1.5;
-                    background: #ffffff;
-                    min-height: 297mm; /* Min height of A4 */
-                    padding: 0 !important; /* Remove individual padding to use page-like padding */
+                #report-preview-viewport {
+                    flex: 1;
+                    overflow: auto;
+                    background: #e2e8f0;
+                    padding: 40px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
                 }
 
-                /* Simulated Page Breaks in Preview */
-                #report-preview-content .pdf-page-content > div {
+                #report-preview-content {
+                    transform-origin: top center;
+                    transition: transform 0.2s ease-in-out;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    width: fit-content;
+                }
+
+                /* Simulated Page Blocks */
+                .pdf-page-content {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 30px;
+                }
+
+                /* Cada div direta dentro de pdf-page-content vira uma folha A4 */
+                .pdf-page-content > div {
                     background: white;
                     width: 210mm;
                     min-height: 297mm;
-                    margin: 0 auto 20px auto;
-                    padding: 8mm !important;
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                    padding: 15mm !important;
+                    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
                     position: relative;
+                    box-sizing: border-box;
                 }
 
-                /* Ensure tables handle breaks well in preview */
                 #report-preview-content table {
                     border-collapse: collapse;
                     width: 100%;
-                    margin-bottom: 24px;
+                    margin-bottom: 20px;
                 }
 
                 #report-preview-content th {
@@ -318,16 +336,13 @@ const ReportPreview: React.FC<Props> = ({
                     font-size: 10px;
                     font-weight: 700;
                     text-transform: uppercase;
-                    letter-spacing: 0.05em;
-                    text-align: left;
-                    padding: 12px 8px;
+                    padding: 10px 8px;
                     border-bottom: 2px solid #e2e8f0;
-                    -webkit-print-color-adjust: exact;
-                    print-color-adjust: exact;
+                    text-align: left;
                 }
 
                 #report-preview-content td {
-                    padding: 12px 8px;
+                    padding: 10px 8px;
                     font-size: 11px;
                     border-bottom: 1px solid #f1f5f9;
                     vertical-align: top;
@@ -337,26 +352,6 @@ const ReportPreview: React.FC<Props> = ({
                     max-width: 100%;
                     height: auto;
                     display: block;
-                }
-
-                #report-preview-content .report-header,
-                #report-preview-content .report-footer,
-                #report-preview-content .keep-together,
-                #report-preview-content .signature-block,
-                #report-preview-content .section,
-                #report-preview-content .card,
-                #report-preview-content .box {
-                    break-inside: avoid;
-                    page-break-inside: avoid;
-                }
-
-                #report-preview-content .page-break {
-                    page-break-before: always;
-                    break-before: page;
-                    height: 0;
-                    margin: 0;
-                    border: none;
-                    visibility: hidden;
                 }
             `}</style>
 
@@ -368,33 +363,64 @@ const ReportPreview: React.FC<Props> = ({
                     <div>
                         <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{title}</h3>
                         <p className="text-sm text-slate-500 dark:text-slate-400">
-                            Visualize as páginas A4 antes de gerar o PDF
+                            Ambiente de Visualização Profissional
                         </p>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={handlePrint}
-                            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all font-bold shadow-md hover:shadow-lg active:scale-95"
-                        >
-                            <Printer size={18} />
-                            EXPORTAR PDF
-                        </button>
+                    <div className="flex items-center gap-6">
+                        {/* Zoom Toolbar */}
+                        <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-1 gap-1">
+                            <button
+                                onClick={() => setZoom(Math.max(30, zoom - 10))}
+                                className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded transition-colors text-slate-600 dark:text-slate-300"
+                                title="Afastar"
+                            >
+                                <ZoomOut size={18} />
+                            </button>
+                            <span className="text-xs font-bold text-slate-500 w-12 text-center">
+                                {zoom}%
+                            </span>
+                            <button
+                                onClick={() => setZoom(Math.min(200, zoom + 10))}
+                                className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded transition-colors text-slate-600 dark:text-slate-300"
+                                title="Aproximar"
+                            >
+                                <ZoomIn size={18} />
+                            </button>
+                            <div className="w-px h-4 bg-slate-300 dark:bg-slate-600 mx-1" />
+                            <button
+                                onClick={() => setZoom(100)}
+                                className="p-1.5 hover:bg-white dark:hover:bg-slate-700 rounded transition-colors text-slate-600 dark:text-slate-300"
+                                title="Resetar Zoom"
+                            >
+                                <Maximize size={18} />
+                            </button>
+                        </div>
 
-                        <button
-                            onClick={onClose}
-                            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all active:scale-90"
-                        >
-                            <X size={24} />
-                        </button>
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={handlePrint}
+                                className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all font-bold shadow-md hover:shadow-lg active:scale-95"
+                            >
+                                <Printer size={18} />
+                                EXPORTAR PDF
+                            </button>
+
+                            <button
+                                onClick={onClose}
+                                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all active:scale-90"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto bg-slate-200 dark:bg-slate-950 p-6 md:p-10 flex flex-col items-center">
+                <div id="report-preview-viewport">
                     <div
                         ref={previewRef}
                         id="report-preview-content"
-                        className="w-full flex flex-col items-center"
+                        style={{ transform: `scale(${zoom / 100})` }}
                         dangerouslySetInnerHTML={{ __html: htmlContent }}
                     />
                 </div>
