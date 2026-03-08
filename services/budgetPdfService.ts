@@ -146,7 +146,7 @@ export const buildBudgetItemsTableHtml = (budget: ServiceOrder, company: Company
 
   return `
       <!-- Items Table -->
-      <div style="margin-top: 20px; margin-bottom: 20px; page-break-before: always; break-before: page;">
+      <div class="financial-section-start" style="margin-top: 20px; margin-bottom: 20px;">
           <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; padding-bottom: 6px; margin-bottom: 4px;">DETALHAMENTO FINANCEIRO</div>
           <table style="width: 100%; border-collapse: collapse;">
             <thead>
@@ -183,7 +183,6 @@ export const buildBudgetTotalsHtml = (budget: ServiceOrder) => {
   return `
     <!-- Total Bar -->
     <div style="margin-top: 20px; margin-bottom: 30px; break-inside: avoid;">
-          <!-- Resumo Superior: Subtotal, BDI e Impostos -->
           <div style="display: flex; justify-content: flex-end; margin-bottom: 8px; gap: 40px; padding-right: 12px;">
               <div style="text-align: right;">
                  <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 2px; line-height: 1.2;">SUBTOTAL</span>
@@ -199,7 +198,6 @@ export const buildBudgetTotalsHtml = (budget: ServiceOrder) => {
               </div>
           </div>
 
-          <!-- Barra de Total Final -->
           <div style="background: #0f172a; border-radius: 12px; padding: 10px 30px; display: flex; justify-content: space-between; align-items: center; color: white;">
               <span style="font-size: 14px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase;">INVESTIMENTO TOTAL:</span>
               <span style="font-size: 38px; font-weight: 900; letter-spacing: -0.05em; white-space: nowrap;">R$ ${formatMoney(finalT)}</span>
@@ -234,7 +232,6 @@ export const getBudgetBodyHtml = (budget: ServiceOrder, company: CompanyProfile,
   `;
 };
 
-// removido o table/thead/tfoot que estava reservando espaço fantasma nas páginas seguintes do PDF
 export const generateBudgetReportHtml = (
   budget: ServiceOrder,
   company: CompanyProfile,
@@ -253,79 +250,120 @@ export const generateBudgetReportHtml = (
 
 export const runOptimizePageBreaks = (container: HTMLElement) => {
   const root = container.querySelector('.print-description-content');
-  if (!root) return;
+  if (root) {
+    const content = root.querySelector('div:last-child');
+    if (content) {
+      const allNodes: Element[] = [];
 
-  const content = root.querySelector('div:last-child');
-  if (!content) return;
+      Array.from(content.children).forEach(block => {
+        if (block.classList.contains('ql-editor-print')) {
+          allNodes.push(...Array.from(block.children));
+        } else {
+          allNodes.push(block);
+        }
+      });
 
-  const allNodes: Element[] = [];
+      for (let i = 0; i < allNodes.length - 1; i++) {
+        const el = allNodes[i] as HTMLElement;
+        let isTitle = false;
 
-  Array.from(content.children).forEach(block => {
-    if (block.classList.contains('ql-editor-print')) {
-      allNodes.push(...Array.from(block.children));
-    } else {
-      allNodes.push(block);
-    }
-  });
+        if (el.matches('h1, h2, h3, h4, h5, h6')) {
+          isTitle = true;
+        } else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
+          const text = el.innerText.trim();
+          const isNumbered = /^\\d+(\\.\\d+)*[\\.\\s\\)]/.test(text);
+          const isBold =
+            el.querySelector('strong, b') ||
+            (el.style && (parseInt(el.style.fontWeight) >= 600 || el.style.fontWeight === 'bold')) ||
+            el.classList.contains('font-bold') ||
+            el.tagName === 'STRONG';
+          const isShort = text.length < 150;
 
-  for (let i = 0; i < allNodes.length - 1; i++) {
-    const el = allNodes[i] as HTMLElement;
-    let isTitle = false;
+          if (
+            (isNumbered && isBold && isShort) ||
+            (isBold && isShort && text === text.toUpperCase() && text.length > 3)
+          ) {
+            isTitle = true;
+          }
+        }
 
-    if (el.matches('h1, h2, h3, h4, h5, h6')) {
-      isTitle = true;
-    } else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
-      const text = el.innerText.trim();
-      const isNumbered = /^\\d+(\\.\\d+)*[\\.\\s\\)]/.test(text);
-      const isBold =
-        el.querySelector('strong, b') ||
-        (el.style && (parseInt(el.style.fontWeight) >= 600 || el.style.fontWeight === 'bold')) ||
-        el.classList.contains('font-bold') ||
-        el.tagName === 'STRONG';
-      const isShort = text.length < 150;
+        if (isTitle) {
+          const nodesToWrap = [el];
+          let j = i + 1;
 
-      if (
-        (isNumbered && isBold && isShort) ||
-        (isBold && isShort && text === text.toUpperCase() && text.length > 3)
-      ) {
-        isTitle = true;
-      }
-    }
+          while (j < allNodes.length && nodesToWrap.length < 2) {
+            const next = allNodes[j] as HTMLElement;
+            const nextText = next.innerText.trim();
+            const nextIsTitle =
+              next.matches('h1, h2, h3, h4, h5, h6') ||
+              (/^\\d+(\\.\\d+)*[\\.\\s\\)]/.test(nextText) &&
+                (next.querySelector('strong, b') ||
+                  nextText === nextText.toUpperCase() ||
+                  (next.style && next.style.fontWeight === 'bold')));
 
-    if (isTitle) {
-      const nodesToWrap = [el];
-      let j = i + 1;
+            if (nextIsTitle) break;
 
-      while (j < allNodes.length && nodesToWrap.length < 2) {
-        const next = allNodes[j] as HTMLElement;
-        const nextText = next.innerText.trim();
-        const nextIsTitle =
-          next.matches('h1, h2, h3, h4, h5, h6') ||
-          (/^\\d+(\\.\\d+)*[\\.\\s\\)]/.test(nextText) &&
-            (next.querySelector('strong, b') ||
-              nextText === nextText.toUpperCase() ||
-              (next.style && next.style.fontWeight === 'bold')));
+            nodesToWrap.push(next);
+            j++;
+          }
 
-        if (nextIsTitle) break;
+          if (nodesToWrap.length > 1) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'keep-together';
+            wrapper.style.breakInside = 'avoid';
+            wrapper.style.pageBreakInside = 'avoid';
+            wrapper.style.display = 'block';
+            wrapper.style.width = '100%';
 
-        nodesToWrap.push(next);
-        j++;
-      }
-
-      if (nodesToWrap.length > 1) {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'keep-together';
-        wrapper.style.breakInside = 'avoid';
-        wrapper.style.pageBreakInside = 'avoid';
-        wrapper.style.display = 'block';
-        wrapper.style.width = '100%';
-
-        el.parentNode?.insertBefore(wrapper, el);
-        nodesToWrap.forEach(node => wrapper.appendChild(node));
-        i = j - 1;
+            el.parentNode?.insertBefore(wrapper, el);
+            nodesToWrap.forEach(node => wrapper.appendChild(node));
+            i = j - 1;
+          }
+        }
       }
     }
   }
+
+  // ===== REGRA ESPECÍFICA DO DETALHAMENTO FINANCEIRO =====
+  // Só força nova página se o bloco ainda estiver "na mesma página visual"
+  // do conteúdo anterior. Se ele já começou naturalmente numa nova página,
+  // não adiciona quebra.
+  const financialSection = container.querySelector('.financial-section-start') as HTMLElement | null;
+  if (!financialSection) return;
+
+  // limpa qualquer quebra antiga antes de recalcular
+  financialSection.style.pageBreakBefore = '';
+  financialSection.style.breakBefore = '';
+  financialSection.style.marginTop = '20px';
+
+  const pageRoot = container.querySelector('.pdf-page-content > div') as HTMLElement | null;
+  if (!pageRoot) return;
+
+  const pageRect = pageRoot.getBoundingClientRect();
+  const sectionRect = financialSection.getBoundingClientRect();
+
+  // altura útil aproximada de uma página A4 em px no preview
+  // considerando que no preview cada página visual usa 297mm
+  const pxPerMm = pageRect.width / 210;
+  const pageHeightPx = 297 * pxPerMm;
+
+  // posição do topo do bloco dentro do documento
+  const topInsideDocument = sectionRect.top - pageRect.top;
+
+  // resto da divisão = posição dentro da página atual
+  const topInsideCurrentPage = ((topInsideDocument % pageHeightPx) + pageHeightPx) % pageHeightPx;
+
+  // tolerância para considerar "já está no topo"
+  const TOP_TOLERANCE = 24;
+
+  // se já está praticamente no topo de uma nova página, não força quebra
+  if (topInsideCurrentPage <= TOP_TOLERANCE) {
+    return;
+  }
+
+  // se não está no topo, empurra para a próxima página
+  financialSection.style.pageBreakBefore = 'always';
+  financialSection.style.breakBefore = 'page';
 };
 
 // Legacy methods removed. Integration is now via ReportPreview component.
