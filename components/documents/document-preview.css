@@ -48,8 +48,18 @@
   color: #374151;
   font-weight: bold;
 }
-.zoom-btn:hover { background: #e5e7eb; }
-.zoom-label { font-size: 13px; font-weight: 600; min-width: 48px; text-align: center; color: #4b5563; }
+
+.zoom-btn:hover {
+  background: #e5e7eb;
+}
+
+.zoom-label {
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 48px;
+  text-align: center;
+  color: #4b5563;
+}
 
 .preview-stage {
   display: flex;
@@ -91,6 +101,47 @@
 .page-break {
   page-break-before: always;
   break-before: page;
+}
+
+.pdf-muted-label {
+  margin: 0 0 4px 0;
+  font-size: 8px;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.pdf-value-text {
+  margin: 0;
+  font-size: 12px;
+  color: #0f172a;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.pdf-th {
+  padding: 9px 8px;
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 800;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.pdf-td {
+  padding: 9px 8px;
+  font-size: 11px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: top;
+  line-height: 1.35;
+}
+
+.right {
+  text-align: right;
+}
+
+.center {
+  text-align: center;
 }
 
 /* Print specific styles (fallback if someone uses native print) */

@@ -24,22 +24,14 @@ import {
     Customer,
     MainTab,
 } from './types';
-import { buildPlanningReportHtml, PLANNING_THEME } from '../../services/planningPdfService';
 
 interface PlanningCalculations {
     totalMaterial: number;
     totalLabor: number;
     totalIndirect: number;
-    totalTax: number;
+    totalTaxes?: number;
+    totalTax?: number;
     totalGeneral: number;
-}
-
-interface CompanyProfileLite {
-    name: string;
-    cnpj?: string;
-    phone?: string;
-    logo?: string;
-    logoSize?: number;
 }
 
 interface NewServiceInput {
@@ -107,7 +99,7 @@ interface PlanningEditorProps {
     onGenerateBudget: () => void;
     onBack: () => void;
     embeddedMode: boolean;
-    onShowPreview: (title: string, html: string, filename: string) => void;
+    onShowPreview: () => void;
 }
 
 // Helpers
@@ -189,22 +181,6 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
     const [activeTab, setActiveTab] = useState<MainTab>('dados');
     const { notify } = useNotify();
 
-    const company = useMemo<CompanyProfileLite>(() => {
-        const loaded = db.load('serviflow_company', {
-            name: 'PRIME SERVIÇOS E MANUTENÇÃO LTDA',
-            cnpj: '12.345.678/0001-90',
-            logoSize: 70,
-        });
-
-        return {
-            name: loaded?.name || 'PRIME SERVIÇOS E MANUTENÇÃO LTDA',
-            cnpj: loaded?.cnpj || '',
-            phone: loaded?.phone || '',
-            logo: loaded?.logo || '',
-            logoSize: toNumber(loaded?.logoSize) || 70,
-        };
-    }, []);
-
     if (!currentPlan) return null;
 
     const handleAddService = (serviceData: NewServiceInput) => {
@@ -280,35 +256,6 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
         } as PlanTax;
 
         onUpdateTaxes([...taxes, newTax]);
-    };
-
-    const handlePreviewReport = () => {
-        if (!currentPlan) return;
-
-        const html = buildPlanningReportHtml(
-            currentPlan,
-            customers,
-            services,
-            materials,
-            labor,
-            indirects,
-            taxes,
-            {
-                totalMaterial: toNumber(calculations.totalMaterial),
-                totalLabor: toNumber(calculations.totalLabor),
-                totalIndirect: toNumber(calculations.totalIndirect),
-                totalTax: toNumber(calculations.totalTax),
-                totalGeneral: toNumber(calculations.totalGeneral),
-            },
-            company,
-            PLANNING_THEME
-        );
-
-        onShowPreview(
-            'Planejamento de Obra',
-            html,
-            buildSafeFileName(currentPlan.name || 'planejamento-obra')
-        );
     };
 
     return (
@@ -441,7 +388,7 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
                     <SummaryTab
                         calculations={calculations}
                         onGenerateBudget={onGenerateBudget}
-                        onPreviewReport={handlePreviewReport}
+                        onPreviewReport={onShowPreview}
                         hasGenerateBudget={!!onGenerateBudget}
                     />
                 )}

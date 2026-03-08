@@ -4,7 +4,11 @@ import { useCalculations } from './hooks/useCalculations';
 import { PlanningList } from './PlanningList';
 import { PlanningEditor } from './PlanningEditor';
 import { Customer } from './types';
-import ReportPreview from '../ReportPreview';
+import { db } from '../../services/db';
+import { toNumber } from '../../services/formatUtils';
+import { DocumentPreview } from '../documents/DocumentPreview';
+import { PlanningDocument } from '../documents/PlanningDocument';
+import { PLANNING_THEME } from '../../services/planningPdfService';
 
 interface Props {
     customers: Customer[];
@@ -30,7 +34,21 @@ const PlanningManager: React.FC<Props> = ({
     onPlanCreated,
 }) => {
     const [showPreview, setShowPreview] = useState(false);
-    const [previewContent, setPreviewContent] = useState({ title: '', html: '', filename: '' });
+
+    const company = React.useMemo(() => {
+        const loaded = db.load('serviflow_company', {
+            name: 'PRIME SERVIÇOS E MANUTENÇÃO LTDA',
+            cnpj: '12.345.678/0001-90',
+            logoSize: 70,
+        });
+        return {
+            name: loaded?.name || 'PRIME SERVIÇOS E MANUTENÇÃO LTDA',
+            cnpj: loaded?.cnpj || '',
+            phone: loaded?.phone || '',
+            logo: loaded?.logo || '',
+            logoSize: toNumber(loaded?.logoSize) || 70,
+        };
+    }, []);
 
     const planning = usePlanning(customers, embeddedPlanId);
 
@@ -115,20 +133,39 @@ const PlanningManager: React.FC<Props> = ({
                         if (onBack) onBack();
                     }}
                     embeddedMode={!!embeddedPlanId}
-                    onShowPreview={(title, html, filename) => {
-                        setPreviewContent({ title, html, filename });
-                        setShowPreview(true);
-                    }}
+                    onShowPreview={() => setShowPreview(true)}
                 />
             )}
 
-            <ReportPreview
-                isOpen={showPreview}
-                onClose={() => setShowPreview(false)}
-                title={previewContent.title}
-                htmlContent={previewContent.html}
-                filename={previewContent.filename}
-            />
+            {showPreview && planning.currentPlan && (
+                <div className="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="w-full max-w-5xl h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95">
+                        <DocumentPreview
+                            filename={`Planejamento-${planning.currentPlan.id}`}
+                            onClose={() => setShowPreview(false)}
+                        >
+                            <PlanningDocument
+                                header={planning.currentPlan}
+                                customers={customers}
+                                services={planning.services}
+                                materials={planning.materials}
+                                labor={planning.labor}
+                                indirects={planning.indirects}
+                                taxes={planning.taxes}
+                                calculations={{
+                                    totalMaterial: calculations.totalMaterial,
+                                    totalLabor: calculations.totalLabor,
+                                    totalIndirect: calculations.totalIndirect,
+                                    totalTax: calculations.totalTaxes,
+                                    totalGeneral: calculations.totalGeneral
+                                }}
+                                company={company}
+                                theme={PLANNING_THEME}
+                            />
+                        </DocumentPreview>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
