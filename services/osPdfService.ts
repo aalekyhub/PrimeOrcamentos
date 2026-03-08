@@ -2,29 +2,29 @@ import { ServiceOrder, CompanyProfile } from '../types';
 import { financeUtils } from './financeUtils';
 
 export const buildOsHtml = (order: ServiceOrder, customer: any, company: CompanyProfile) => {
-    const formatDate = (dateStr: string) => {
-        try {
-            const d = new Date(dateStr);
-            return isNaN(d.getTime()) ? new Date().toLocaleDateString('pt-BR') : d.toLocaleDateString('pt-BR');
-        } catch {
-            return new Date().toLocaleDateString('pt-BR');
-        }
-    };
+  const formatDate = (dateStr: string) => {
+    try {
+      const d = new Date(dateStr);
+      return isNaN(d.getTime()) ? new Date().toLocaleDateString('pt-BR') : d.toLocaleDateString('pt-BR');
+    } catch {
+      return new Date().toLocaleDateString('pt-BR');
+    }
+  };
 
-    const { subtotal, bdiValue, taxValue, finalTotal } = financeUtils.getDetailedFinancials(order);
-    const itemFontBase = company.itemsFontSize || 12;
+  const { subtotal, bdiValue, taxValue, finalTotal } = financeUtils.getDetailedFinancials(order);
+  const itemFontBase = company.itemsFontSize || 12;
 
-    const itemsHtml = order.items.map((item) => {
-        return `
+  const itemsHtml = order.items.map((item) => {
+    return `
         <tr style="border-bottom: 1px solid #e2e8f0;">
             <td style="padding: 6px 0; font-size: 10px; font-weight: 600; color: #1e293b; text-transform: uppercase; vertical-align: top;">${item.description}</td>
             <td style="padding: 6px 0; text-align: center; font-size: 10px; font-weight: 600; color: #475569; vertical-align: top;">${item.quantity} ${item.unit || ''}</td>
             <td style="padding: 6px 0; text-align: right; font-size: 10px; color: #475569; vertical-align: top;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
             <td style="padding: 6px 0; text-align: right; font-size: 10px; font-weight: 700; color: #0f172a; vertical-align: top;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
         </tr>`;
-    }).join('');
+  }).join('');
 
-    return `
+  return `
       <!DOCTYPE html>
       <html>
       <head>
@@ -151,15 +151,15 @@ export const buildOsHtml = (order: ServiceOrder, customer: any, company: Company
                         <div class="section-title">DESCRIÇÃO TÉCNICA</div>
                         <div class="space-y-6">
                             ${order.descriptionBlocks.map(block => {
-        if (block.type === 'text') {
-            return `<div class="text-slate-800 leading-relaxed text-justify font-medium ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px;">${block.content}</div>`;
-        } else if (block.type === 'image') {
-            return `<div class="avoid-break" style="margin: 20px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; object-fit: contain; display: block;"></div>`;
-        } else if (block.type === 'page-break') {
-            return `<div style="page-break-after: always; break-after: page; height: 0; margin: 0; padding: 0;"></div>`;
-        }
-        return '';
-    }).join('')}
+    if (block.type === 'text') {
+      return `<div class="text-slate-800 leading-relaxed text-justify font-medium ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px;">${block.content}</div>`;
+    } else if (block.type === 'image') {
+      return `<div class="avoid-break" style="margin: 20px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; object-fit: contain; display: block;"></div>`;
+    } else if (block.type === 'page-break') {
+      return `<div style="page-break-after: always; break-after: page; height: 0; margin: 0; padding: 0;"></div>`;
+    }
+    return '';
+  }).join('')}
                         </div>
                     </div>` : ''}
 
@@ -307,22 +307,22 @@ export const buildOsHtml = (order: ServiceOrder, customer: any, company: Company
 };
 
 export const buildMaintenanceOsHtml = (order: ServiceOrder, customer: any, company: CompanyProfile) => {
-    const formatDate = (dateStr: string) => {
-        try {
-            const d = new Date(dateStr);
-            return isNaN(d.getTime()) ? new Date().toLocaleDateString('pt-BR') : d.toLocaleDateString('pt-BR');
-        } catch {
-            return new Date().toLocaleDateString('pt-BR');
-        }
-    };
+  const formatDate = (dateStr: string) => {
+    try {
+      const d = new Date(dateStr);
+      return isNaN(d.getTime()) ? new Date().toLocaleDateString('pt-BR') : d.toLocaleDateString('pt-BR');
+    } catch {
+      return new Date().toLocaleDateString('pt-BR');
+    }
+  };
 
-    const subTotal = order.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0);
-    const bdiValue = order.bdiRate ? subTotal * (order.bdiRate / 100) : 0;
-    const subTotalWithBDI = subTotal + bdiValue;
-    const taxValue = order.taxRate ? subTotalWithBDI * (order.taxRate / 100) : 0;
-    const finalTotal = subTotalWithBDI + taxValue; // Calculate proactively, though order.totalAmount might be used if trusted
+  const subTotal = order.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0);
+  const bdiValue = order.bdiRate ? subTotal * (order.bdiRate / 100) : 0;
+  const subTotalWithBDI = subTotal + bdiValue;
+  const taxValue = order.taxRate ? subTotalWithBDI * (order.taxRate / 100) : 0;
+  const finalTotal = subTotalWithBDI + taxValue; // Calculate proactively, though order.totalAmount might be used if trusted
 
-    const itemsHtml = order.items.map((item: any) => `
+  const itemsHtml = order.items.map((item: any) => `
       <tr style="border-bottom: 1px solid #f1f5f9;">
         <td style="padding: 12px 0; font-weight: 600; text-transform: uppercase; font-size: 10px; color: #0f172a;">${item.description}</td>
         <td style="padding: 12px 0; text-align: center; color: #94a3b8; font-size: 9px; font-weight: 600; text-transform: uppercase;">${item.unit || 'UN'}</td>
@@ -331,7 +331,7 @@ export const buildMaintenanceOsHtml = (order: ServiceOrder, customer: any, compa
         <td style="padding: 12px 0; text-align: right; font-weight: 600; font-size: 11px; color: #0f172a; white-space: nowrap;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
       </tr>`).join('');
 
-    return `
+  return `
       <!DOCTYPE html>
       <html>
       <head>
@@ -376,7 +376,7 @@ export const buildMaintenanceOsHtml = (order: ServiceOrder, customer: any, compa
                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10mm; border-bottom: 3px solid #0f172a; padding-bottom: 8mm;">
                  <div style="display: flex; gap: 6mm; align-items: center;">
                    <div style="display:flex; align-items:center; justify-content:flex-start;">
-                     ${company.logo ?\`<img src="\${company.logo}" style="height: \${company.logoSize || 80}px; max-width: 250px; object-fit:contain;" />\` : \`<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>\`}
+                     ${company.logo ? `<img src="${company.logo}" style="height: ${company.logoSize || 80}px; max-width: 250px; object-fit:contain;" />` : `<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>`}
                    </div>
                    <div>
                      <h1 style="font-size:18px; font-weight:900; color:#0f172a; margin:0 0 2mm 0; text-transform:uppercase; letter-spacing:-0.5px;">${company.name}</h1>
