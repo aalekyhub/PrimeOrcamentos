@@ -62,31 +62,7 @@ export const EXECUTION_THEME: ReportTheme = {
     }
 };
 
-// Helpers duplicados do original para manter o serviço independente
-const toNumber = (val: any): number => {
-    if (typeof val === 'number') return val;
-    return parseFloat(val) || 0;
-};
-
-const formatMoney = (val: any): string => {
-    const num = toNumber(val);
-    return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-};
-
-const escapeHtml = (unsafe: any): string => {
-    if (unsafe === null || unsafe === undefined) return '';
-    return String(unsafe)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-};
-
-const formatDateBR = (dateStr?: string): string => {
-    const date = dateStr ? new Date(dateStr) : new Date();
-    return date.toLocaleDateString('pt-BR');
-};
+import { escapeHtml, toNumber, formatMoney, formatQty, formatDateBR } from './formatUtils';
 
 export const buildExecutionReportHtml = (
     header: PlanningHeader | WorkHeader,
@@ -293,7 +269,7 @@ export const buildExecutionReportHtml = (
                 .map((s) => `
                                 <tr style="border-bottom:1px solid #f1f5f9;">
                                     <td style="padding:10px 8px; font-size:11px; font-weight:600;">${escapeHtml(s.description)}</td>
-                                    <td style="padding:10px 8px; font-size:11px; text-align:center;">${escapeHtml(s.quantity)}</td>
+                                    <td style="padding:10px 8px; font-size:11px; text-align:center;">${formatQty(s.quantity)}</td>
                                     <td style="padding:10px 8px; font-size:11px; text-align:center;">${escapeHtml(s.unit)}</td>
                                     <td style="padding:10px 8px; font-size:11px; text-align:right;">R$ ${formatMoney(s.unitTotal)}</td>
                                     <td style="padding:10px 8px; font-size:11px; text-align:right; font-weight:700;">R$ ${formatMoney(s.total)}</td>
@@ -326,7 +302,7 @@ export const buildExecutionReportHtml = (
                 .map((m) => `
                                 <tr style="border-bottom:1px solid #f1f5f9;">
                                     <td style="padding:10px 8px; font-size:11px; font-weight:600;">${escapeHtml(m.name)}</td>
-                                    <td style="padding:10px 8px; font-size:11px; text-align:center;">${escapeHtml(m.quantity)}</td>
+                                    <td style="padding:10px 8px; font-size:11px; text-align:center;">${formatQty(m.quantity)}</td>
                                     <td style="padding:10px 8px; font-size:11px; text-align:center;">${escapeHtml(m.unit)}</td>
                                     <td style="padding:10px 8px; font-size:11px; text-align:right;">R$ ${formatMoney(m.unitCost)}</td>
                                     <td style="padding:10px 8px; font-size:11px; text-align:right; font-weight:700;">R$ ${formatMoney(m.total)}</td>
@@ -360,7 +336,7 @@ export const buildExecutionReportHtml = (
                                     <td style="padding:10px 8px; font-size:11px; font-weight:600;">
                                         ${escapeHtml(l.role)}${l.type ? ` | (${escapeHtml(l.type)})` : ''}
                                     </td>
-                                    <td style="padding:10px 8px; font-size:11px; text-align:center;">${escapeHtml(l.quantity)}</td>
+                                    <td style="padding:10px 8px; font-size:11px; text-align:center;">${formatQty(l.quantity)}</td>
                                     <td style="padding:10px 8px; font-size:11px; text-align:center;">${escapeHtml(l.unit)}</td>
                                     <td style="padding:10px 8px; font-size:11px; text-align:right; font-weight:700;">R$ ${formatMoney(l.total)}</td>
                                 </tr>`)
