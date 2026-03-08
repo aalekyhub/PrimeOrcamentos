@@ -45,7 +45,7 @@ const SinapiSearch: React.FC<Props> = ({ onSelect }) => {
         setIsSearching(true);
         try {
             if (activeType === 'INSUMO') {
-                const res = await sinapiDb.searchInsumos(query, filters);
+                const res = await sinapiDb.searchComposicoes(query, filters); // Will need to figure out actual method, let's view sinapiDb.ts first
                 setResults(res);
             } else {
                 const res = await sinapiDb.searchComposicoes(query, filters);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Sparkles, Loader2, ChevronRight } from 'lucide-react';
 import { ServiceOrder, Transaction } from '../types';
-import { getFinancialInsights } from '../PrimeOrcamentos/services/geminiService';
+import { getFinancialInsights } from '../services/geminiService';
 
 interface AIInsightsProps {
   orders: ServiceOrder[];
