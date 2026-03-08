@@ -15,6 +15,8 @@ import { financeUtils } from '../services/financeUtils';
 import InfoCard from './ui/InfoCard';
 import RichTextEditor from './ui/RichTextEditor';
 import { downloadContractPdf, printContractRawHTML } from '../services/contractPdfService';
+import { usePrintOS } from '../hooks/usePrintOS';
+import { compressImage } from '../services/imageUtils';
 
 interface Props {
     orders: ServiceOrder[];
