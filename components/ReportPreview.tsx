@@ -148,54 +148,42 @@ const ReportPreview: React.FC<Props> = ({
             className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
         >
             <style>{`
+                /* Global Print Adjustments */
                 @media print {
                     body * {
                         visibility: hidden !important;
                     }
 
-                    #report-preview-content,
-                    #report-preview-content * {
+                    #report-preview-viewport,
+                    #report-preview-viewport * {
                         visibility: visible !important;
                     }
 
-                    #report-preview-content {
+                    #report-preview-viewport {
                         position: absolute !important;
                         top: 0 !important;
                         left: 0 !important;
                         width: 100% !important;
-                        margin: 0 !important;
                         padding: 0 !important;
+                        margin: 0 !important;
                         background: white !important;
-                        box-shadow: none !important;
-                        border: none !important;
-                        overflow: visible !important;
                     }
 
                     .no-print {
                         display: none !important;
                     }
 
-                    html, body {
-                        margin: 0 !important;
-                        padding: 0 !important;
-                        background: #fff !important;
-                        height: auto !important;
-                        overflow: visible !important;
-                        -webkit-print-color-adjust: exact !important;
-                        print-color-adjust: exact !important;
-                    }
-
                     @page {
                         size: A4;
-                        margin: 8mm;
+                        margin: 0;
                     }
                 }
 
                 #report-preview-viewport {
                     flex: 1;
                     overflow: auto;
-                    background: #e2e8f0;
-                    padding: 40px;
+                    background: #cbd5e1;
+                    padding: 60px 40px;
                     display: flex;
                     flex-direction: column;
                     align-items: center;
@@ -210,59 +198,72 @@ const ReportPreview: React.FC<Props> = ({
                     width: fit-content;
                 }
 
-                /* Simulated Page Blocks */
+                /* Standard A4 Page Blocks in Preview */
                 .pdf-page-content {
                     display: flex;
                     flex-direction: column;
                     align-items: center;
                     gap: 30px;
+                    width: 100%;
                 }
 
-                /* Cada div direta dentro de pdf-page-content vira uma folha A4 */
+                /* Each direct div child of pdf-page-content is treated as an A4 page */
                 .pdf-page-content > div {
-                    background: white;
-                    width: 210mm;
-                    min-height: 297mm;
+                    background: white !important;
+                    width: 210mm !important;
+                    min-height: 297mm !important;
                     padding: 15mm !important;
-                    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
                     position: relative;
                     box-sizing: border-box;
+                    color: #1e293b;
+                    font-family: 'Inter', sans-serif;
                 }
 
+                @media print {
+                    .pdf-page-content {
+                        gap: 0 !important;
+                    }
+                    .pdf-page-content > div {
+                        box-shadow: none !important;
+                        padding: 15mm !important;
+                        page-break-after: always !important;
+                        break-after: always !important;
+                    }
+                }
+
+                /* Utility styles used across services */
+                .avoid-break { break-inside: avoid !important; page-break-inside: avoid !important; }
+                .report-header { width: 100%; margin-bottom: 20px; }
+                .report-footer { width: 100%; margin-top: 20px; }
+                
                 #report-preview-content table {
                     border-collapse: collapse;
                     width: 100%;
-                    margin-bottom: 20px;
                 }
-
-                #report-preview-content th {
-                    background: #f8fafc;
-                    color: #64748b !important;
-                    font-size: 10px;
-                    font-weight: 700;
-                    text-transform: uppercase;
-                    padding: 10px 8px;
-                    border-bottom: 2px solid #e2e8f0;
-                    text-align: left;
-                }
-
-                #report-preview-content td {
-                    padding: 10px 8px;
-                    font-size: 11px;
-                    border-bottom: 1px solid #f1f5f9;
-                    vertical-align: top;
-                }
-
+                
                 #report-preview-content img {
                     max-width: 100%;
                     height: auto;
-                    display: block;
+                }
+
+                /* Scrollbar style */
+                #report-preview-viewport::-webkit-scrollbar {
+                    width: 10px;
+                }
+                #report-preview-viewport::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                #report-preview-viewport::-webkit-scrollbar-thumb {
+                    background: #94a3b8;
+                    border-radius: 10px;
+                    border: 2px solid #cbd5e1;
                 }
             `}</style>
 
             <div
                 id="report-preview-wrapper"
-                className="bg-slate-200 dark:bg-slate-950 rounded-2xl shadow-2xl w-full max-w-6xl h-[90vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 duration-300"
+                className="bg-slate-200 dark:bg-slate-950 rounded-2xl shadow-2xl w-full max-w-6xl h-[95vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 duration-500"
             >
                 <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 sticky top-0 z-10 no-print">
                     <div>
@@ -339,7 +340,7 @@ const ReportPreview: React.FC<Props> = ({
                     </button>
                 </div>
             </div>
-        </div>
+        </div >
     );
 
     return createPortal(modalContent, document.body);

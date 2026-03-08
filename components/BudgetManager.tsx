@@ -20,8 +20,9 @@ import { db } from '../services/db';
 import BudgetList from './budget/BudgetList';
 import BudgetDescriptionEditor from './budget/BudgetDescriptionEditor';
 import BudgetSummarySidebar from './budget/BudgetSummarySidebar';
-import { DocumentPreview } from './documents/DocumentPreview';
-import { BudgetDocument } from './documents/BudgetDocument';
+import ReportPreview from './ReportPreview';
+import { generateBudgetReportHtml } from '../services/budgetPdfService';
+// DocumentPreview and BudgetDocument are replaced by the unified system
 
 interface Props {
   orders: ServiceOrder[];
@@ -750,20 +751,15 @@ const BudgetManager: React.FC<Props> = ({
       )}
 
       {previewBudget && (
-        <div className="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-5xl h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95">
-            <DocumentPreview
-              filename={`Orcamento-${previewBudget.id}`}
-              onClose={() => setPreviewBudget(null)}
-            >
-              <BudgetDocument
-                budget={previewBudget}
-                company={company}
-                customerDoc={customers.find(c => c.id === previewBudget.customerId)?.document}
-              />
-            </DocumentPreview>
-          </div>
-        </div>
+        <ReportPreview
+          title={`Orçamento - ${previewBudget.id}`}
+          htmlContent={generateBudgetReportHtml(
+            previewBudget,
+            company,
+            customers.find(c => c.id === previewBudget.customerId)?.document
+          )}
+          onClose={() => setPreviewBudget(null)}
+        />
       )}
     </div>
   );

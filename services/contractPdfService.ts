@@ -1,21 +1,8 @@
-import html2pdf from 'html2pdf.js';
+// No longer using html2pdf here
 import { ServiceOrder, CompanyProfile } from '../types';
 import { escapeHtml, toNumber, formatMoney } from './formatUtils';
 
-export const getContractStyles = () => `
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { 
-            background: white; 
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-        }
-        p, h1, h2, h3, h4, h5, h6 { margin: 0; }
-        ul { list-style-type: none; padding-left: 0; margin: 3mm 0 0 0; }
-        li { margin-bottom: 4px; }
-        .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
-    </style>
-`;
+// Styles are now handled by the unified ReportPreview component.
 
 export const getContractHtml = (order: ServiceOrder, customer: any, company: CompanyProfile) => {
     // Determine the contract value
@@ -196,80 +183,4 @@ export const getContractHtml = (order: ServiceOrder, customer: any, company: Com
   `;
 };
 
-export const downloadContractPdf = async (order: ServiceOrder, customer: any, company: CompanyProfile, notify?: (msg: string, type?: string) => void) => {
-    const contentHtml = getContractHtml(order, customer, company);
-
-    const safeDescription = (order.description || "Proposta").replace(/[\\/:"*?<>|]/g, "_").trim();
-
-    const opt = {
-        margin: [15, 0, 15, 0] as [number, number, number, number],
-        filename: `Contrato - ${order.id.replace("OS-", "OS")} - ${safeDescription}.pdf`,
-        image: { type: "jpeg" as const, quality: 0.98 },
-        html2canvas: {
-            scale: 2,
-            useCORS: true,
-            allowTaint: false,
-            backgroundColor: "#ffffff",
-            logging: false,
-            letterRendering: true,
-            windowWidth: 1200,
-        },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" as const },
-        pagebreak: { mode: ["css", "legacy"] }
-    };
-
-    const tempDiv = document.createElement("div");
-    tempDiv.innerHTML = contentHtml;
-    const style = document.createElement("style");
-    style.textContent = `
-        ${getContractStyles()}
-        .a4-container { width: 210mm !important; }
-    `;
-    tempDiv.appendChild(style);
-    document.body.appendChild(tempDiv);
-
-    try {
-        if (notify) notify("Gerando PDF do Contrato...", "success");
-        await new Promise(resolve => setTimeout(resolve, 500));
-        await (html2pdf()
-            .set(opt)
-            .from(tempDiv)
-            .toPdf()
-            .get('pdf')
-            .then((pdf: any) => {
-                const totalPages = pdf.internal.getNumberOfPages();
-                for (let i = 1; i <= totalPages; i++) {
-                    pdf.setPage(i);
-                    pdf.setFontSize(10);
-                    pdf.setTextColor(148, 163, 184);
-                    pdf.text(
-                        `Pág. ${i} / ${totalPages}`,
-                        pdf.internal.pageSize.getWidth() - 15,
-                        pdf.internal.pageSize.getHeight() - 10,
-                        { align: "right" }
-                    );
-                }
-            }) as any)
-            .save();
-        if (notify) notify("PDF do Contrato gerado com sucesso!", "success");
-    } catch (error) {
-        console.error("Erro ao gerar PDF:", error);
-        if (notify) notify("Erro ao gerar PDF do Contrato. Tente novamente.", "error");
-    } finally {
-        document.body.removeChild(tempDiv);
-    }
-};
-
-export const printContractRawHTML = (order: ServiceOrder, customer: any, company: CompanyProfile) => {
-    return `
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Contrato - ${order.id.replace('OS-', 'OS')} - ${escapeHtml(order.description || 'Proposta')}</title>
-        ${getContractStyles()}
-    </head>
-    <body onload="setTimeout(() => { window.print(); window.close(); }, 800);">
-        ${getContractHtml(order, customer, company).replace('crossorigin="anonymous"', '')}
-    </body>
-</html>`;
-};
+// Legacy methods removed. Integration is now via ReportPreview component.

@@ -1,5 +1,4 @@
-﻿// @ts-ignore
-import html2pdf from 'html2pdf.js';
+﻿// html2pdf is no longer used
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
     Plus, Search, X, Trash2, Pencil, Printer, Save, FileDown,
@@ -16,8 +15,9 @@ import InfoCard from './ui/InfoCard';
 import RichTextEditor from './ui/RichTextEditor';
 import { usePrintOS } from '../hooks/usePrintOS';
 import { compressImage } from '../services/imageUtils';
-import { DocumentPreview } from './documents/DocumentPreview';
-import { ContractDocument } from './documents/ContractDocument';
+import ReportPreview from './ReportPreview';
+import { getContractHtml } from '../services/contractPdfService';
+// DocumentPreview, ContractDocument are replaced by the unified system
 
 interface Props {
     orders: ServiceOrder[];
@@ -37,9 +37,10 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     const [showFullClientForm, setShowFullClientForm] = useState(false);
     const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
     const [previewContract, setPreviewContract] = useState<ServiceOrder | null>(null);
+    const [previewOS, setPreviewOS] = useState<ServiceOrder | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     const { notify } = useNotify();
-    const { handlePrintOS } = usePrintOS(customers, company);
+    const { getOSHtml } = usePrintOS(customers, company);
 
     const [selectedCustomerId, setSelectedCustomerId] = useState('');
     const [osTitle, setOsTitle] = useState('Execução de Obra');
@@ -183,6 +184,10 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
         setPreviewContract(order);
     };
 
+    const handlePreviewOS = (order: ServiceOrder) => {
+        setPreviewOS(order);
+    };
+
 
     useEffect(() => { /* Signature Removed */ }, [showForm]);
 
@@ -228,7 +233,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                 <td className="px-8 py-5 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase">{order.description || 'N/A'} - {order.serviceDescription || ''}</td>
                                 <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button onClick={() => handlePreviewContract(order)} className="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" title="Gerar Contrato"><ScrollText className="w-4 h-4" /></button>
-                                    <button onClick={() => handlePrintOS(order)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Imprimir OS"><Printer className="w-4 h-4" /></button>
+                                    <button onClick={() => handlePreviewOS(order)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Imprimir OS"><Printer className="w-4 h-4" /></button>
                                     <button onClick={() => {
                                         setEditingOrderId(order.id);
                                         setSelectedCustomerId(order.customerId);
@@ -390,28 +395,31 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             )}
 
             {previewContract && (
-                <div className="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div className="w-full max-w-5xl h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95">
-                        <DocumentPreview
-                            filename={`Contrato-${previewContract.id}`}
-                            onClose={() => setPreviewContract(null)}
-                        >
-                            <ContractDocument
-                                order={previewContract}
-                                company={company}
-                                customer={customers.find(c => c.id === previewContract.customerId) || {
-                                    name: previewContract.customerName,
-                                    document: 'N/A',
-                                    address: 'Endereço não informado',
-                                    city: '',
-                                    state: '',
-                                    cep: '',
-                                    number: ''
-                                }}
-                            />
-                        </DocumentPreview>
-                    </div>
-                </div>
+                <ReportPreview
+                    title={`Contrato - ${previewContract.id}`}
+                    htmlContent={getContractHtml(
+                        previewContract,
+                        customers.find(c => c.id === previewContract.customerId) || {
+                            name: previewContract.customerName,
+                            document: 'N/A',
+                            address: 'Endereço não informado',
+                            city: '',
+                            state: '',
+                            cep: '',
+                            number: ''
+                        },
+                        company
+                    )}
+                    onClose={() => setPreviewContract(null)}
+                />
+            )}
+
+            {previewOS && (
+                <ReportPreview
+                    title={`OS de Obra - ${previewOS.id}`}
+                    htmlContent={getOSHtml(previewOS)}
+                    onClose={() => setPreviewOS(null)}
+                />
             )}
         </div>
     );

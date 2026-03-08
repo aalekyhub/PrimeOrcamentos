@@ -6,9 +6,9 @@ import { PlanningEditor } from './PlanningEditor';
 import { Customer } from './types';
 import { db } from '../../services/db';
 import { toNumber } from '../../services/formatUtils';
-import { DocumentPreview } from '../documents/DocumentPreview';
-import { PlanningDocument } from '../documents/PlanningDocument';
-import { PLANNING_THEME } from '../../services/planningPdfService';
+import ReportPreview from '../ReportPreview';
+import { buildPlanningReportHtml, PLANNING_THEME } from '../../services/planningPdfService';
+// DocumentPreview and PlanningDocument are replaced by the unified system
 
 interface Props {
     customers: Customer[];
@@ -138,33 +138,28 @@ const PlanningManager: React.FC<Props> = ({
             )}
 
             {showPreview && planning.currentPlan && (
-                <div className="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div className="w-full max-w-5xl h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95">
-                        <DocumentPreview
-                            filename={`Planejamento-${planning.currentPlan.id}`}
-                            onClose={() => setShowPreview(false)}
-                        >
-                            <PlanningDocument
-                                header={planning.currentPlan}
-                                customers={customers}
-                                services={planning.services}
-                                materials={planning.materials}
-                                labor={planning.labor}
-                                indirects={planning.indirects}
-                                taxes={planning.taxes}
-                                calculations={{
-                                    totalMaterial: calculations.totalMaterial,
-                                    totalLabor: calculations.totalLabor,
-                                    totalIndirect: calculations.totalIndirect,
-                                    totalTax: calculations.totalTaxes,
-                                    totalGeneral: calculations.totalGeneral
-                                }}
-                                company={company}
-                                theme={PLANNING_THEME}
-                            />
-                        </DocumentPreview>
-                    </div>
-                </div>
+                <ReportPreview
+                    title={`Planejamento - ${planning.currentPlan.id}`}
+                    htmlContent={buildPlanningReportHtml(
+                        planning.currentPlan,
+                        customers,
+                        planning.services,
+                        planning.materials,
+                        planning.labor,
+                        planning.indirects,
+                        planning.taxes,
+                        {
+                            totalMaterial: calculations.totalMaterial,
+                            totalLabor: calculations.totalLabor,
+                            totalIndirect: calculations.totalIndirect,
+                            totalTax: calculations.totalTaxes,
+                            totalGeneral: calculations.totalGeneral
+                        },
+                        company,
+                        PLANNING_THEME
+                    )}
+                    onClose={() => setShowPreview(false)}
+                />
             )}
         </div>
     );

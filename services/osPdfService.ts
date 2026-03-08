@@ -25,39 +25,6 @@ export const buildOsHtml = (order: ServiceOrder, customer: any, company: Company
   }).join('');
 
   return `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>OS - ${order.id.replace('OS-', '')} - ${order.description || 'Obra'}</title>
-         <script src="https://cdn.tailwindcss.com"></script>
-         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
-        <style>
-           * { box-sizing: border-box; }
-           body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
-           @page { size: A4; margin: 0 !important; }
-           .pdf-page-content { width: 100%; margin: 0; background: white; padding: 0 !important; }
-           .a4-container { width: 100%; padding: 0 15mm !important; }
-           .avoid-break { break-inside: avoid; page-break-inside: avoid; }
-           .info-box { background: #f8fafc; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; }
-           .info-label { font-size: 9px; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; display: block; }
-           .info-value { font-size: 11px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.3; }
-           .info-sub { font-size: 10px; color: #64748b; font-weight: 600; }
-           .section-title { font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 6px; border-bottom: 2px solid #e2e8f0; margin-bottom: 12px; }
-           @media screen { 
-             body { background: #f1f5f9; padding: 40px 0; } 
-             .pdf-page-content { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; } 
-           }
-           @media print { 
-             body { background: white !important; margin: 0 !important; } 
-             .pdf-page-content { box-shadow: none !important; border: none !important; width: 100% !important; } 
-           }
-           .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
-           .ql-editor-print ul { list-style-type: disc !important; padding-left: 30px !important; margin: 12px 0 !important; display: block !important; }
-           .ql-editor-print ol { list-style-type: decimal !important; padding-left: 30px !important; margin: 12px 0 !important; display: block !important; }
-           .ql-editor-print li { display: list-item !important; margin-bottom: 4px !important; list-style-position: outside !important; }
-        </style>
-      </head>
-      <body>
         <div class="pdf-page-content">
           <div class="a4-container">
             <div class="report-header" style="padding: 10mm 0 8mm 0; border-bottom: 3px solid #0f172a; margin-bottom: 8mm;">
@@ -180,68 +147,8 @@ export const buildOsHtml = (order: ServiceOrder, customer: any, company: Company
             </tr>
           </tfoot>
         </table>
-        <script>
-           function optimizePageBreaks() {
-             const root = document.querySelector('.print-description-content .space-y-6');
-             if (!root) return;
-
-             const allNodes = [];
-             Array.from(root.children).forEach(block => {
-               if (block.classList.contains('ql-editor-print')) {
-                  allNodes.push(...Array.from(block.children));
-               } else {
-                  allNodes.push(block);
-               }
-             });
-
-             for (let i = 0; i < allNodes.length - 1; i++) {
-               const el = allNodes[i];
-               let isTitle = false;
-               
-               if (el.matches('h1, h2, h3, h4, h5, h6')) {
-                 isTitle = true;
-               } else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
-                  const text = el.innerText.trim();
-                  const isNumbered = /^\\d+(\\.\\d+)*[\\.\\s\\)]/.test(text);
-                  const isBold = el.querySelector('strong, b') || 
-                                (el.style && (parseInt(el.style.fontWeight) >= 600 || el.style.fontWeight === 'bold')) || 
-                                el.tagName === 'STRONG';
-                  const isShort = text.length < 150;
-                  if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 3)) {
-                    isTitle = true;
-                  }
-               }
-
-               if (isTitle) {
-                 const nodesToWrap = [el];
-                 let j = i + 1;
-                 while (j < allNodes.length && nodesToWrap.length < 3) {
-                   const next = allNodes[j];
-                   const nextText = next.innerText.trim();
-                   const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') || 
-                                        (/^\\d+(\\.\\d+)*[\\.\\s\\)]/.test(nextText) && (next.querySelector('strong, b') || nextText === nextText.toUpperCase()));
-                   if (nextIsTitle) break;
-                   nodesToWrap.push(next);
-                   j++;
-                 }
-
-                 if (nodesToWrap.length > 1) {
-                   const wrapper = document.createElement('div');
-                   wrapper.className = 'keep-together';
-                   el.parentNode.insertBefore(wrapper, el);
-                   nodesToWrap.forEach(node => wrapper.appendChild(node));
-                   i = j - 1;
-                 }
-               }
-             }
-           }
-           window.onload = function() { 
-             optimizePageBreaks();
-              setTimeout(() => { window.print(); window.close(); }, 2000); 
-           }
-        </script>
-      </body>
-      </html>`;
+        </div>
+      </div>`;
 };
 
 export const buildMaintenanceOsHtml = (order: ServiceOrder, customer: any, company: CompanyProfile) => {
@@ -270,38 +177,6 @@ export const buildMaintenanceOsHtml = (order: ServiceOrder, customer: any, compa
       </tr>`).join('');
 
   return `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Ordem de Serviço - ${order.id}</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
-        <style>
-           * { box-sizing: border-box; }
-           body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; }
-           @page { size: A4; margin: 0 !important; }
-           .pdf-page-content { width: 100%; margin: 0; background: white; padding: 0 !important; }
-           .a4-container { width: 100%; padding: 0 15mm !important; }
-           .avoid-break { break-inside: avoid; page-break-inside: avoid; }
-           .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
-           
-           .info-box { background: #eff6ff; border-radius: 12px; padding: 20px; border: 1px solid #dbeafe; }
-           .info-label { font-size: 9px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; display: block; }
-           .info-value { font-size: 11px; font-weight: 700; color: #0f172a; text-transform: uppercase; line-height: 1.4; }
-           .info-sub { font-size: 10px; color: #64748b; font-weight: 500; }
-           .section-title { font-size: 9px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; margin-bottom: 16px; }
-           
-           @media screen { 
-             body { background: #f1f5f9; padding: 40px 0; } 
-             .pdf-page-content { width: 210mm; margin: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 8px; } 
-           }
-           @media print { 
-             body { background: white !important; margin: 0 !important; } 
-             .pdf-page-content { box-shadow: none !important; border: none !important; width: 100% !important; } 
-           }
-        </style>
-      </head>
-      <body>
         <div class="pdf-page-content">
           <div class="a4-container">
             <div class="report-header" style="padding: 10mm 0 8mm 0; border-bottom: 3px solid #0f172a; margin-bottom: 10mm;">
@@ -439,66 +314,6 @@ export const buildMaintenanceOsHtml = (order: ServiceOrder, customer: any, compa
           </td></tr></tbody>
         </table>
       </div>
-        <script>
-           function optimizePageBreaks() {
-             const root = document.querySelector('.print-description-content .space-y-6');
-             if (!root) return;
-
-             const allNodes = [];
-             Array.from(root.children).forEach(block => {
-               if (block.classList.contains('ql-editor-print')) {
-                  allNodes.push(...Array.from(block.children));
-               } else {
-                  allNodes.push(block);
-               }
-             });
-
-             for (let i = 0; i < allNodes.length - 1; i++) {
-               const el = allNodes[i];
-               let isTitle = false;
-               
-               if (el.matches('h1, h2, h3, h4, h5, h6')) {
-                 isTitle = true;
-               } else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
-                 const text = el.innerText.trim();
-                 const isNumbered = /^\\d+(\\.\\d+)*[\\.\\s\\)]/.test(text);
-                 const isBold = el.querySelector('strong, b') || 
-                               (el.style && (parseInt(el.style.fontWeight) >= 600 || el.style.fontWeight === 'bold')) || 
-                               el.tagName === 'STRONG';
-                 const isShort = text.length < 150;
-                 if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 3)) {
-                   isTitle = true;
-                 }
-               }
-
-               if (isTitle) {
-                 const nodesToWrap = [el];
-                 let j = i + 1;
-                 while (j < allNodes.length && nodesToWrap.length < 3) {
-                   const next = allNodes[j];
-                   const nextText = next.innerText.trim();
-                   const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') || 
-                                      (/^\\d+(\\.\\d+)*[\\.\\s\\)]/.test(nextText) && (next.querySelector('strong, b') || nextText === nextText.toUpperCase()));
-                   if (nextIsTitle) break;
-                   nodesToWrap.push(next);
-                   j++;
-                 }
-
-                 if (nodesToWrap.length > 1) {
-                   const wrapper = document.createElement('div');
-                   wrapper.className = 'keep-together';
-                   el.parentNode.insertBefore(wrapper, el);
-                   nodesToWrap.forEach(node => wrapper.appendChild(node));
-                   i = j - 1;
-                 }
-               }
-             }
-           }
-           window.onload = function() { 
-             optimizePageBreaks();
-             setTimeout(() => { window.print(); window.close(); }, 2000); 
-           }
-        </script>
-      </body>
-      </html>`;
+        </div>
+      </div>`;
 };

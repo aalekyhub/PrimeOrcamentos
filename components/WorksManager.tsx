@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import html2pdf from 'html2pdf.js';
+// html2pdf is no longer used
 import {
     Building2, Truck, HardHat, FileText,
     Plus, Trash2, Save, ArrowRight, Calculator,
