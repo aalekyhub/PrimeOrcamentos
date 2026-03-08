@@ -1,7 +1,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { X, Printer, ZoomIn, ZoomOut, Maximize } from 'lucide-react';
-import html2pdf from 'html2pdf.js';
+// No longer using html2pdf.js for better fidelity
 
 interface Props {
     isOpen: boolean;
@@ -32,208 +32,113 @@ const ReportPreview: React.FC<Props> = ({
         return `${base || 'RELATORIO'}.pdf`;
     };
 
-    const buildPdfContainer = () => {
-        const tempWrapper = document.createElement('div');
-        tempWrapper.id = 'pdf-export-container';
-
-        tempWrapper.style.position = 'fixed';
-        tempWrapper.style.left = '-100000px';
-        tempWrapper.style.top = '0';
-        tempWrapper.style.width = '210mm';
-        tempWrapper.style.background = '#ffffff';
-        tempWrapper.style.zIndex = '-1';
-        tempWrapper.style.opacity = '1';
-        tempWrapper.style.pointerEvents = 'none';
-        tempWrapper.style.boxSizing = 'border-box';
-
-        tempWrapper.innerHTML = `
-            <style>
-                #pdf-export-container,
-                #pdf-export-container * {
-                    box-sizing: border-box;
-                }
-
-                #pdf-export-container .pdf-page-content {
-                    width: 100%;
-                    background: #ffffff;
-                    color: #1e293b;
-                    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-                    line-height: 1.45;
-                    font-size: 12px;
-                    padding: 8mm;
-                    overflow: visible;
-                    word-break: break-word;
-                }
-
-                #pdf-export-container h1,
-                #pdf-export-container h2,
-                #pdf-export-container h3,
-                #pdf-export-container h4,
-                #pdf-export-container h5,
-                #pdf-export-container h6 {
-                    break-after: avoid-page;
-                    page-break-after: avoid;
-                    break-inside: avoid;
-                    page-break-inside: avoid;
-                    margin-top: 0;
-                }
-
-                #pdf-export-container p,
-                #pdf-export-container li,
-                #pdf-export-container blockquote {
-                    orphans: 3;
-                    widows: 3;
-                }
-
-                #pdf-export-container table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    page-break-inside: auto;
-                    break-inside: auto;
-                }
-
-                #pdf-export-container thead {
-                    display: table-header-group;
-                }
-
-                #pdf-export-container tfoot {
-                    display: table-footer-group;
-                }
-
-                #pdf-export-container tr,
-                #pdf-export-container td,
-                #pdf-export-container th {
-                    page-break-inside: avoid;
-                    break-inside: avoid;
-                }
-
-                #pdf-export-container th {
-                    background: #f8fafc;
-                    color: #64748b;
-                    font-size: 10px;
-                    font-weight: 700;
-                    text-transform: uppercase;
-                    letter-spacing: 0.04em;
-                    text-align: left;
-                    padding: 10px 8px;
-                    border-bottom: 2px solid #e2e8f0;
-                    -webkit-print-color-adjust: exact;
-                    print-color-adjust: exact;
-                }
-
-                #pdf-export-container td {
-                    padding: 10px 8px;
-                    font-size: 11px;
-                    border-bottom: 1px solid #f1f5f9;
-                    vertical-align: top;
-                }
-
-                #pdf-export-container img {
-                    max-width: 100%;
-                    height: auto;
-                    display: block;
-                    page-break-inside: avoid;
-                    break-inside: avoid;
-                }
-
-                #pdf-export-container .report-header,
-                #pdf-export-container .report-footer,
-                #pdf-export-container .keep-together,
-                #pdf-export-container .signature-block,
-                #pdf-export-container .section,
-                #pdf-export-container .card,
-                #pdf-export-container .box {
-                    page-break-inside: avoid;
-                    break-inside: avoid;
-                }
-
-                #pdf-export-container .page-break {
-                    page-break-before: always;
-                    break-before: page;
-                }
-            </style>
-            <div class="pdf-page-content">
-                ${htmlContent}
-            </div>
-        `;
-
-        document.body.appendChild(tempWrapper);
-        return tempWrapper;
-    };
-
-    const waitForImages = async (container: HTMLElement) => {
-        const images = Array.from(container.querySelectorAll('img'));
-
-        if (images.length === 0) return;
-
-        await Promise.all(
-            images.map((img) => {
-                return new Promise<void>((resolve) => {
-                    if (img.complete) {
-                        resolve();
-                        return;
-                    }
-
-                    const done = () => resolve();
-
-                    img.addEventListener('load', done, { once: true });
-                    img.addEventListener('error', done, { once: true });
-
-                    setTimeout(() => resolve(), 4000);
-                });
-            })
-        );
-    };
+    // Iframe printing method is self-contained
 
     const handlePrint = async () => {
-        let tempContainer: HTMLElement | null = null;
-
         try {
-            tempContainer = buildPdfContainer();
-
-            await waitForImages(tempContainer);
-
-            const element = tempContainer.querySelector('.pdf-page-content') as HTMLElement | null;
-            if (!element) throw new Error('Conteúdo do PDF não encontrado.');
-
             const originalTitle = document.title;
-            document.title = safeFileName(filename).replace(/\.pdf$/i, '');
+            const tempTitle = safeFileName(filename).replace(/\.pdf$/i, '');
+            document.title = tempTitle;
 
-            const opt = {
-                margin: [0, 0, 0, 0],
-                filename: safeFileName(filename),
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: {
-                    scale: 2,
-                    useCORS: true,
-                    logging: false,
-                    backgroundColor: '#ffffff',
-                    scrollX: 0,
-                    scrollY: 0
-                },
-                jsPDF: {
-                    unit: 'mm',
-                    format: 'a4',
-                    orientation: 'portrait'
-                },
-                pagebreak: {
-                    mode: ['css', 'legacy']
-                }
-            };
+            // Create a hidden iframe
+            const iframe = document.createElement('iframe');
+            iframe.style.position = 'fixed';
+            iframe.style.right = '0';
+            iframe.style.bottom = '0';
+            iframe.style.width = '0';
+            iframe.style.height = '0';
+            iframe.style.border = '0';
+            document.body.appendChild(iframe);
 
-            // @ts-ignore
-            await html2pdf().set(opt).from(element).save();
+            const iframeDoc = iframe.contentWindow?.document;
+            if (!iframeDoc) throw new Error('Could not create print iframe');
 
+            // Build the full HTML for the iframe
+            // We use the same styles used for PDF generation in the services
+            iframeDoc.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>${tempTitle}</title>
+                    <script src="https://cdn.tailwindcss.com"></script>
+                    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
+                    <style>
+                        @page {
+                            size: A4;
+                            margin: 0;
+                        }
+                        body {
+                            margin: 0;
+                            padding: 0;
+                            background: white;
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                        }
+                        * {
+                            box-sizing: border-box;
+                        }
+                        /* Ensure the content fits A4 perfectly */
+                        .pdf-page-content {
+                            width: 210mm;
+                            margin: 0 auto;
+                            background: white;
+                        }
+                        /* Support for the structural divs from services */
+                        .pdf-page-content > div {
+                            padding: 15mm !important;
+                            min-height: 297mm;
+                            page-break-after: always;
+                            break-after: always;
+                        }
+                        /* Avoid empty page at the end if the last div has page-break-after */
+                        .pdf-page-content > div:last-child {
+                            page-break-after: auto;
+                            break-after: auto;
+                        }
+                        
+                        /* Standard Table Styles for all Documents */
+                        table {
+                            width: 100% !important;
+                            border-collapse: collapse !important;
+                        }
+                        td, th {
+                            word-break: break-word;
+                        }
+                        .avoid-break {
+                            break-inside: avoid !important;
+                            page-break-inside: avoid !important;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="pdf-page-content">
+                        ${htmlContent}
+                    </div>
+                    <script>
+                        // Wait for images and Tailwind to finish
+                        window.onload = () => {
+                            setTimeout(() => {
+                                window.print();
+                                setTimeout(() => {
+                                    window.parent.document.title = "${originalTitle}";
+                                }, 100);
+                            }, 500);
+                        };
+                    </script>
+                </body>
+                </html>
+            `);
+            iframeDoc.close();
+
+            // Cleanup after printing (or if user cancels)
+            // We give it some time to ensure the print dialog is handled
             setTimeout(() => {
-                document.title = originalTitle;
-            }, 300);
+                document.body.removeChild(iframe);
+            }, 2000);
+
         } catch (error) {
             console.error('Erro ao gerar PDF:', error);
             window.print();
-        } finally {
-            if (tempContainer && tempContainer.parentNode) {
-                tempContainer.parentNode.removeChild(tempContainer);
-            }
         }
     };
 
