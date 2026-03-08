@@ -1,5 +1,6 @@
 import html2pdf from 'html2pdf.js';
 import { ServiceOrder, ServiceItem, CompanyProfile, DescriptionBlock } from '../types';
+import { escapeHtml, toNumber, roundMoney, formatMoney } from './formatUtils';
 
 // Helper to format dates
 const formatDate = (dateStr?: string) => {
@@ -25,9 +26,9 @@ export const buildBudgetHeaderHtml = (budget: ServiceOrder, company: CompanyProf
                    ${company.logo ? `<img src="${company.logo}" style="height: ${company.logoSize || 80}px; max-width: 250px; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#1e3a8a;">PRIME</div>'}
                </div>
                <div>
-                   <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 0 0 2px 0; text-transform: uppercase;">${company.name}</h1>
+                   <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 0 0 2px 0; text-transform: uppercase;">${escapeHtml(company.name)}</h1>
                    <p style="margin: 0; font-size: 11px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.02em;">SOLUÇÕES em Gestão Profissional</p>
-                    <p style="margin: 4px 0 0 0; font-size: 10px; color: #64748b; font-weight: 500;">${company.cnpj || ''} | ${company.phone || ''}</p>
+                    <p style="margin: 4px 0 0 0; font-size: 10px; color: #64748b; font-weight: 500;">${escapeHtml(company.cnpj || '')} | ${escapeHtml(company.phone || '')}</p>
                </div>
            </div>
            <div style="text-align: right;">
@@ -65,12 +66,12 @@ export const buildBudgetClientBoxHtml = (budget: ServiceOrder, customerDoc?: str
     <div style="display: flex; gap: 24px; margin-bottom: 40px;">
         <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
             <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">CLIENTE / DESTINATÁRIO</span>
-            <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${budget.customerName || 'Não Informado'}</div>
-            <div style="font-size: 11px; color: #64748b; font-weight: 600; margin-top: 4px;">${customerDoc || 'CPF/CNPJ não informado'}</div>
+            <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${escapeHtml(budget.customerName || 'Não Informado')}</div>
+            <div style="font-size: 11px; color: #64748b; font-weight: 600; margin-top: 4px;">${escapeHtml(customerDoc || 'CPF/CNPJ não informado')}</div>
         </div>
         <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
             <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">REFERÊNCIA DO ORÇAMENTO</span>
-            <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${budget.description || 'PROPOSTA COMERCIAL'}</div>
+            <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${escapeHtml(budget.description || 'PROPOSTA COMERCIAL')}</div>
         </div>
     </div>`;
 };
@@ -80,7 +81,7 @@ export const buildBudgetDescriptionBlocksHtml = (budget: ServiceOrder, company: 
     <!-- Description Blocks -->
     <div style="margin-bottom: 32px;">
           <h2 style="margin: 0 0 8px 0; font-size: 11px; font-weight: 800; color: #334155; text-transform: uppercase; letter-spacing: 0.02em;">PROPOSTA COMERCIAL</h2>
-          <p style="margin: 0; font-size: 20px; font-weight: 800; color: #2563eb; text-transform: uppercase; line-height: 1.3;">${budget.description}</p>
+          <p style="margin: 0; font-size: 20px; font-weight: 800; color: #2563eb; text-transform: uppercase; line-height: 1.3;">${escapeHtml(budget.description)}</p>
     </div>`;
 
   if (budget.descriptionBlocks && budget.descriptionBlocks.length > 0) {
@@ -90,9 +91,11 @@ export const buildBudgetDescriptionBlocksHtml = (budget: ServiceOrder, company: 
         <div style="display: block;">
           ${budget.descriptionBlocks.map((block: DescriptionBlock) => {
       if (block.type === 'text') {
-        return `<div class="ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px; color: #334155; line-height: 1.6; text-align: justify; margin-bottom: 24px;">${block.content}</div>`;
+        // Assume text block from rich editor comes sanitized via Quill or is intentional rich text.
+        // We inject as-is to preserve HTML formatting from Quill.
+        return `<div class="ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px; color: #334155; line-height: 1.6; text-align: justify; margin-bottom: 24px;">${block.content || ''}</div>`;
       } else if (block.type === 'image') {
-        return `<div style="margin: 24px 0; break-inside: avoid; page-break-inside: avoid; display: block; text-align: center;"><img src="${block.content}" style="width: auto; max-width: 100%; border-radius: 8px; display: block; margin: 0 auto; object-fit: contain; max-height: 250mm;"></div>`;
+        return `<div style="margin: 24px 0; break-inside: avoid; page-break-inside: avoid; display: block; text-align: center;"><img src="${escapeHtml(block.content)}" style="width: auto; max-width: 100%; border-radius: 8px; display: block; margin: 0 auto; object-fit: contain; max-height: 250mm;"></div>`;
       } else if (block.type === 'page-break') {
         return `<div style="page-break-after: always; break-after: page; height: 0;"></div>`;
       }
@@ -107,16 +110,16 @@ export const buildBudgetDescriptionBlocksHtml = (budget: ServiceOrder, company: 
 export const buildBudgetItemsTableHtml = (budget: ServiceOrder, company: CompanyProfile) => {
   const itemFBase = company.itemsFontSize || 12;
   const itemsH = budget.items.map((item: ServiceItem) => `
-    <tr style="border-bottom: 1px solid #e2e8f0;">
-      <td style="padding: 8px 0; font-weight: 600; text-transform: uppercase; font-size: ${itemFBase}px; color: #334155; width: 55%; vertical-align: top;">${item.description}</td>
-      <td style="padding: 8px 0; text-align: center; font-weight: 600; color: #475569; font-size: ${itemFBase}px; width: 10%; vertical-align: top;">${item.quantity} ${item.unit || ''}</td>
-      <td style="padding: 8px 0; text-align: right; color: #475569; font-size: ${itemFBase}px; width: 17.5%; vertical-align: top; white-space: nowrap;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-      <td style="padding: 8px 0; text-align: right; font-weight: 700; font-size: ${itemFBase}px; color: #0f172a; width: 17.5%; vertical-align: top; white-space: nowrap;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+    <tr style="border-bottom: 1px solid #e2e8f0; break-inside: avoid; page-break-inside: avoid;">
+      <td style="padding: 8px 0; font-weight: 600; text-transform: uppercase; font-size: ${itemFBase}px; color: #334155; width: 55%; vertical-align: top;">${escapeHtml(item.description)}</td>
+      <td style="padding: 8px 0; text-align: center; font-weight: 600; color: #475569; font-size: ${itemFBase}px; width: 10%; vertical-align: top;">${toNumber(item.quantity)} ${escapeHtml(item.unit || '')}</td>
+      <td style="padding: 8px 0; text-align: right; color: #475569; font-size: ${itemFBase}px; width: 17.5%; vertical-align: top; white-space: nowrap;">R$ ${formatMoney(item.unitPrice)}</td>
+      <td style="padding: 8px 0; text-align: right; font-weight: 700; font-size: ${itemFBase}px; color: #0f172a; width: 17.5%; vertical-align: top; white-space: nowrap;">R$ ${formatMoney(toNumber(item.unitPrice) * toNumber(item.quantity))}</td>
     </tr>`).join('');
 
   return `
       <!-- Items Table -->
-      <div style="page-break-before: always; break-before: page; margin-top: 20px; margin-bottom: 20px;">
+      <div style="margin-top: 20px; margin-bottom: 20px;">
           <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; padding-bottom: 6px; margin-bottom: 4px;">DETALHAMENTO FINANCEIRO</div>
           <table style="width: 100%; border-collapse: collapse;">
             <thead>
@@ -133,15 +136,22 @@ export const buildBudgetItemsTableHtml = (budget: ServiceOrder, company: Company
 };
 
 export const buildBudgetTotalsHtml = (budget: ServiceOrder) => {
-  const subT = budget.items.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0);
-  const bdiR = budget.bdiRate || 0;
-  const taxR = budget.taxRate || 0;
+  const subT = roundMoney(
+    budget.items.reduce((acc, item) => {
+      const up = toNumber(item.unitPrice);
+      const qty = toNumber(item.quantity);
+      return acc + (up * qty);
+    }, 0)
+  );
 
-  const bdiV = subT * (bdiR / 100);
-  const subTWithBDI = subT + bdiV;
-  const taxFactorBody = Math.max(0.01, 1 - (taxR / 100));
-  const finalT = subTWithBDI / taxFactorBody;
-  const taxV = finalT - subTWithBDI;
+  const bdiR = Math.max(0, toNumber(budget.bdiRate));
+  const taxR = Math.min(99.99, Math.max(0, toNumber(budget.taxRate)));
+
+  const bdiV = roundMoney(subT * (bdiR / 100));
+  const subTWithBDI = roundMoney(subT + bdiV);
+  const taxFactorBody = Math.max(0.0001, 1 - (taxR / 100));
+  const finalT = roundMoney(subTWithBDI / taxFactorBody);
+  const taxV = roundMoney(finalT - subTWithBDI);
 
   return `
     <!-- Total Bar -->
@@ -150,22 +160,22 @@ export const buildBudgetTotalsHtml = (budget: ServiceOrder) => {
           <div style="display: flex; justify-content: flex-end; margin-bottom: 8px; gap: 40px; padding-right: 12px;">
               <div style="text-align: right;">
                  <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 2px; line-height: 1.2;">SUBTOTAL</span>
-                 <span style="font-size: 11px; font-weight: 700; color: #334155; display: block; white-space: nowrap;">R$ ${subT.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                 <span style="font-size: 11px; font-weight: 700; color: #334155; display: block; white-space: nowrap;">R$ ${formatMoney(subT)}</span>
               </div>
               <div style="text-align: right;">
                  <span style="font-size: 8px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">BDI (${bdiR}%)</span>
-                 <span style="font-size: 11px; font-weight: 700; color: #10b981; display: block; white-space: nowrap;">+ R$ ${bdiV.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                 <span style="font-size: 11px; font-weight: 700; color: #10b981; display: block; white-space: nowrap;">+ R$ ${formatMoney(bdiV)}</span>
               </div>
               <div style="text-align: right;">
                  <span style="font-size: 8px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">IMPOSTOS (${taxR}%)</span>
-                 <span style="font-size: 11px; font-weight: 700; color: #3b82f6; display: block; white-space: nowrap;">+ R$ ${taxV.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                 <span style="font-size: 11px; font-weight: 700; color: #3b82f6; display: block; white-space: nowrap;">+ R$ ${formatMoney(taxV)}</span>
               </div>
           </div>
 
           <!-- Barra de Total Final -->
           <div style="background: #0f172a; border-radius: 12px; padding: 10px 30px; display: flex; justify-content: space-between; align-items: center; color: white;">
               <span style="font-size: 14px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase;">INVESTIMENTO TOTAL:</span>
-              <span style="font-size: 38px; font-weight: 900; letter-spacing: -0.05em; white-space: nowrap;">R$ ${finalT.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              <span style="font-size: 38px; font-weight: 900; letter-spacing: -0.05em; white-space: nowrap;">R$ ${formatMoney(finalT)}</span>
           </div>
     </div>`;
 };
@@ -177,11 +187,11 @@ export const buildBudgetTermsHtml = (budget: ServiceOrder) => {
         <div style="display: flex; gap: 24px;">
             <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
                 <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">FORMA DE PAGAMENTO</span>
-                <p style="margin: 0; font-size: 12px; font-weight: 600; color: #334155; line-height: 1.5;">${budget.paymentTerms || 'A combinar'}</p>
+                <p style="margin: 0; font-size: 12px; font-weight: 600; color: #334155; line-height: 1.5;">${escapeHtml(budget.paymentTerms || 'A combinar')}</p>
             </div>
             <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
                 <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">PRAZO DE ENTREGA / EXECUÇÃO</span>
-                <p style="margin: 0; font-size: 12px; font-weight: 600; color: #334155; line-height: 1.5;">${budget.deliveryTime || 'A combinar'}</p>
+                <p style="margin: 0; font-size: 12px; font-weight: 600; color: #334155; line-height: 1.5;">${escapeHtml(budget.deliveryTime || 'A combinar')}</p>
             </div>
         </div>
     </div>`;
@@ -286,7 +296,6 @@ export const printBudget = (budget: ServiceOrder, company: CompanyProfile, custo
     <html>
     <head>
       <title>Orçamento - ${budget.id}</title>
-       <script src="https://cdn.tailwindcss.com"></script>
        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
       <style>
          * { box-sizing: border-box; }
@@ -469,11 +478,11 @@ export const downloadBudgetPdf = async (budget: ServiceOrder, company: CompanyPr
     const filename = `${budget.id} - ${safeDescription}.pdf`;
 
     const options = {
-      margin: [10, 0, 15, 0] as [number, number, number, number],
+      margin: [15, 0, 15, 0] as [number, number, number, number],
       filename,
       image: { type: "jpeg" as const, quality: 0.98 },
       html2canvas: {
-        scale: 4,
+        scale: 2,
         useCORS: true,
         allowTaint: false,
         backgroundColor: "#ffffff",
