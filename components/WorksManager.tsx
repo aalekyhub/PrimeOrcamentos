@@ -45,7 +45,12 @@ const useWorkCalculations = (
         return fromLabor + fromSvcs;
     }, [labor, services]);
 
-    const totalIndirect = useMemo(() => indirects.reduce((acc, i) => acc + i.value, 0), [indirects]);
+    const totalIndirect = useMemo(() => {
+        const fromIndirects = indirects.reduce((acc, i) => acc + i.value, 0);
+        const fromSvcs = services.reduce((acc, s) => acc + (s.unit_indirect_cost * s.quantity), 0);
+        return fromIndirects + fromSvcs;
+    }, [indirects, services]);
+
     const totalDirect = useMemo(() => totalMaterial + totalLabor + totalIndirect, [totalMaterial, totalLabor, totalIndirect]);
 
     const bdiTax = useMemo(() => taxes.find(t => t.name === 'BDI'), [taxes]);
@@ -68,9 +73,10 @@ const useWorkCalculations = (
         return (desiredLiquid + sumFixed) / taxFactor;
     }, [desiredLiquid, otherTaxes, taxFactor]);
 
-    const totalTaxes = useMemo(() => totalGeneral - totalDirect, [totalGeneral, totalDirect]);
+    // totalTaxes represents the sum of BDI and all taxes (it's the difference between total final and direct costs)
+    const totalCharges = useMemo(() => totalGeneral - totalDirect, [totalGeneral, totalDirect]);
 
-    return { totalMaterial, totalLabor, totalIndirect, totalDirect, totalGeneral, totalTaxes };
+    return { totalMaterial, totalLabor, totalIndirect, totalDirect, totalGeneral, totalTaxes: totalCharges };
 };
 
 // Hook genérico para operações CRUD
@@ -90,7 +96,7 @@ const useItemManager = <T extends { id: string; work_id?: string }>(
         } as T;
         setItems(prev => [...prev, item]);
         return item;
-    }, [currentWorkId, setItems]);
+    }, [currentWorkId, setItems, storageKey]);
 
     const updateItem = useCallback((id: string, updates: Partial<T>) => {
         setItems(prev => prev.map(item =>
@@ -100,54 +106,33 @@ const useItemManager = <T extends { id: string; work_id?: string }>(
 
     const deleteItem = useCallback(async (id: string, confirmMessage: string) => {
         if (!confirm(confirmMessage)) return false;
-
         setItems(prev => prev.filter(item => item.id !== id));
         await db.remove(storageKey, id);
-
-        if (currentWorkId) {
-            const allItems = db.load(storageKey, []) as T[];
-            const otherItems = allItems.filter(item => item.work_id !== currentWorkId);
-            await db.save(storageKey, [...otherItems, ...items.filter(i => i.id !== id)]);
-        }
-
-        notify(`${storageKey} excluído`, 'success');
+        notify("Item removido com sucesso", 'success');
         return true;
-    }, [storageKey, items, currentWorkId, setItems, notify]);
+    }, [storageKey, setItems, notify]);
 
     const deleteMultiple = useCallback(async (ids: string[], itemName: string) => {
         if (!confirm(`Excluir ${ids.length} ${itemName}(s) selecionado(s)?`)) return false;
-
         setItems(prev => prev.filter(item => !ids.includes(item.id)));
-
         for (const id of ids) {
             await db.remove(storageKey, id);
         }
-
-        if (currentWorkId) {
-            const allItems = db.load(storageKey, []) as T[];
-            const otherItems = allItems.filter(item => item.work_id !== currentWorkId);
-            await db.save(storageKey, [...otherItems, ...items.filter(i => !ids.includes(i.id))]);
-        }
-
-        notify(`${ids.length} ${itemName}(s) excluído(s)`, 'success');
+        notify(`${ids.length} ${itemName}(s) removidos`, 'success');
         return true;
-    }, [storageKey, items, currentWorkId, setItems, notify]);
+    }, [storageKey, setItems, notify]);
 
     const clearAll = useCallback(async (confirmMessage: string) => {
         if (!confirm(confirmMessage)) return false;
-
-        const ids = items.map(i => i.id);
         setItems([]);
-
-        for (const id of ids) {
-            await db.remove(storageKey, id);
-        }
-
-        notify('Lista limpa!', 'success');
+        const all = db.load(storageKey, []);
+        const others = all.filter((i: any) => i.work_id !== currentWorkId);
+        await db.save(storageKey, others);
+        notify("Todos os itens removidos", 'success');
         return true;
-    }, [storageKey, items, setItems, notify]);
+    }, [storageKey, currentWorkId, setItems, notify]);
 
-    return { addItem, updateItem, deleteItem, deleteMultiple, clearAll };
+    return useMemo(() => ({ addItem, updateItem, deleteItem, deleteMultiple, clearAll }), [addItem, updateItem, deleteItem, deleteMultiple, clearAll]);
 };
 
 // Hook para gerenciar estado de edição
@@ -314,11 +299,16 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
     const [labor, setLabor] = useState<WorkLabor[]>([]);
     const [indirects, setIndirects] = useState<WorkIndirect[]>([]);
     const [taxes, setTaxes] = useState<WorkTax[]>([]);
-    const [company, setCompany] = useState<any>({});
+    const [company, setCompany] = useState<Partial<CompanyProfile>>({});
     const [activeTab, setActiveTab] = useState<'dados' | 'servicos' | 'recursos' | 'resumo'>('dados');
     const [resourceTab, setResourceTab] = useState<'material' | 'mo' | 'indireto' | 'impostos'>('material');
     const [showPreview, setShowPreview] = useState(false);
     const [previewContent, setPreviewContent] = useState({ title: '', html: '', filename: '' });
+
+    // States for "Add Item" forms (Point 3)
+    const [newMaterial, setNewMaterial] = useState({ name: '', qty: '', unit: 'un', cost: '' });
+    const [newLabor, setNewLabor] = useState({ role: '', type: 'Diária', qty: '', cost: '' });
+    const [newIndirect, setNewIndirect] = useState({ name: '', value: '' });
 
     const { notify } = useNotify();
     const creationAttemptedRef = useRef<{ [key: string]: boolean }>({});
@@ -340,43 +330,21 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
     const serviceManager = useItemManager('serviflow_work_services', services, setServices, currentWork?.id);
     const taxManager = useItemManager('serviflow_work_taxes', taxes, setTaxes, currentWork?.id);
 
-    // Effects
-    useEffect(() => {
-        loadWorks();
-        const storedCompany = db.load('serviflow_company', {});
-        setCompany(storedCompany);
-    }, []);
-
-    useEffect(() => {
-        if (embeddedPlanId && works.length >= 0) {
-            handleEmbeddedPlan(embeddedPlanId);
-        }
-    }, [embeddedPlanId, works]);
-
-    useEffect(() => {
-        const handleSync = () => {
-            loadWorks();
-            if (activeWorkId) loadWorkDetails(activeWorkId);
-        };
-        window.addEventListener('db-sync-complete', handleSync);
-        return () => window.removeEventListener('db-sync-complete', handleSync);
-    }, [activeWorkId]);
-
     // Funções principais
-    const loadWorks = async () => {
+    const loadWorks = useCallback(async () => {
         const localWorks = db.load('serviflow_works', []) as WorkHeader[];
         setWorks(localWorks);
-    };
+    }, []);
 
-    const loadWorkDetails = (workId: string) => {
+    const loadWorkDetails = useCallback((workId: string) => {
         setServices(db.load('serviflow_work_services', []).filter((s: WorkService) => s.work_id === workId));
         setMaterials(db.load('serviflow_work_materials', []).filter((m: WorkMaterial) => m.work_id === workId));
         setLabor(db.load('serviflow_work_labor', []).filter((l: WorkLabor) => l.work_id === workId));
         setIndirects(db.load('serviflow_work_indirects', []).filter((i: WorkIndirect) => i.work_id === workId));
         setTaxes(db.load('serviflow_work_taxes', []).filter((t: WorkTax) => t.work_id === workId));
-    };
+    }, []);
 
-    const handleEmbeddedPlan = async (planId: string) => {
+    const handleEmbeddedPlan = useCallback(async (planId: string) => {
         let work = works.find(w => w.plan_id === planId);
 
         if (!work && !creationAttemptedRef.current[planId]) {
@@ -398,7 +366,29 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             setCurrentWork(work);
             loadWorkDetails(work.id);
         }
-    };
+    }, [activeWorkId, loadWorkDetails, works]);
+
+    // Effects
+    useEffect(() => {
+        loadWorks();
+        const storedCompany = db.load('serviflow_company', {});
+        setCompany(storedCompany);
+    }, [loadWorks]);
+
+    useEffect(() => {
+        if (embeddedPlanId && works.length > 0) {
+            handleEmbeddedPlan(embeddedPlanId);
+        }
+    }, [embeddedPlanId, works, handleEmbeddedPlan]);
+
+    useEffect(() => {
+        const handleSync = () => {
+            loadWorks();
+            if (activeWorkId) loadWorkDetails(activeWorkId);
+        };
+        window.addEventListener('db-sync-complete', handleSync);
+        return () => window.removeEventListener('db-sync-complete', handleSync);
+    }, [activeWorkId, loadWorkDetails, loadWorks]);
 
     const createWorkFromPlan = async (plan: any) => {
         const newWorkId = db.generateId('OBRA');
@@ -451,8 +441,70 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             importedCount += newServices.length;
         }
 
-        // Similar para materials, labor, indirects, taxes...
-        // (código omitido por brevidade - mesmo padrão)
+        const importCategory = async (planKey: string, workKey: string, planFilter: (i: any) => boolean, mapFn: (i: any) => any) => {
+            const planItems = db.load(planKey, []).filter(planFilter);
+            const existingItems = db.load(workKey, []).filter((i: any) => i.work_id === workId);
+            const existingNames = new Set(existingItems.map((i: any) => i.material_name || i.role || i.name));
+
+            const newItems = planItems
+                .filter(i => !existingNames.has(i.material_name || i.role || i.name))
+                .map(mapFn);
+
+            if (newItems.length > 0) {
+                await db.save(workKey, [...existingItems, ...newItems], newItems);
+                importedCount += newItems.length;
+            }
+        };
+
+        // Materials
+        await importCategory('serviflow_plan_materials', 'serviflow_work_materials', (m) => m.plan_id === planId, (m) => ({
+            id: db.generateId('WMAT'),
+            work_id: workId,
+            material_name: m.material_name,
+            unit: m.unit,
+            quantity: m.quantity || 0,
+            unit_cost: m.unit_cost || 0,
+            total_cost: m.total_cost || 0
+        }));
+
+        // Labor
+        await importCategory('serviflow_plan_labor', 'serviflow_work_labor', (l) => l.plan_id === planId, (l) => ({
+            id: db.generateId('WMO'),
+            work_id: workId,
+            role: l.role,
+            cost_type: l.cost_type,
+            unit: l.unit,
+            quantity: l.quantity || 0,
+            unit_cost: l.unit_cost || 0,
+            total_cost: l.total_cost || 0
+        }));
+
+        // Indirects
+        await importCategory('serviflow_plan_indirects', 'serviflow_work_indirects', (i) => i.plan_id === planId, (i) => ({
+            id: db.generateId('WIND'),
+            work_id: workId,
+            name: i.name,
+            value: i.value || 0
+        }));
+
+        // Taxes
+        const planTaxes = db.load('serviflow_plan_taxes', []).filter((t: any) => t.plan_id === planId);
+        const existingTaxes = db.load('serviflow_work_taxes', []).filter((t: any) => t.work_id === workId);
+        const existingTaxNames = new Set(existingTaxes.map((t: any) => t.name));
+        const newTaxes = planTaxes
+            .filter((t: any) => !existingTaxNames.has(t.name))
+            .map((t: any) => ({
+                id: db.generateId('WTAX'),
+                work_id: workId,
+                name: t.name,
+                rate: t.rate || 0,
+                value: t.value || 0
+            }));
+
+        if (newTaxes.length > 0) {
+            await db.save('serviflow_work_taxes', [...existingTaxes, ...newTaxes], newTaxes);
+            importedCount += newTaxes.length;
+        }
 
         if (importedCount > 0) {
             notify(`${importedCount} novos itens sincronizados!`, "success");
@@ -464,40 +516,47 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         if (!currentWork) return;
         setLoading(true);
 
-        const updatedWork = {
-            ...currentWork,
-            total_real_cost: calculations.totalGeneral,
-            total_material_cost: calculations.totalMaterial
-        };
+        try {
+            const updatedWork = {
+                ...currentWork,
+                total_real_cost: calculations.totalGeneral,
+                total_material_cost: calculations.totalMaterial
+            };
 
-        const currentLocalWorks = db.load('serviflow_works', []) as WorkHeader[];
-        const updatedWorks = currentLocalWorks.map(w => w.id === currentWork.id ? updatedWork : w);
+            const currentLocalWorks = db.load('serviflow_works', []) as WorkHeader[];
+            const updatedWorks = currentLocalWorks.map(w => w.id === currentWork.id ? updatedWork : w);
 
-        if (!currentLocalWorks.find(w => w.id === currentWork.id)) {
-            updatedWorks.unshift(updatedWork);
+            if (!currentLocalWorks.find(w => w.id === currentWork.id)) {
+                updatedWorks.unshift(updatedWork);
+            }
+
+            await db.save('serviflow_works', updatedWorks, updatedWork);
+
+            // Save all items categories
+            const saveItems = async (key: string, items: any[]) => {
+                const all = db.load(key, []);
+                const others = all.filter((i: any) => i.work_id !== currentWork.id);
+                // Ensure correct work_id assignment before saving
+                const currentItems = items.map(i => ({ ...i, work_id: currentWork.id }));
+                await db.save(key, [...others, ...currentItems], currentItems);
+            };
+
+            await Promise.all([
+                saveItems('serviflow_work_services', services),
+                saveItems('serviflow_work_materials', materials),
+                saveItems('serviflow_work_labor', labor),
+                saveItems('serviflow_work_indirects', indirects),
+                saveItems('serviflow_work_taxes', taxes)
+            ]);
+
+            setWorks(updatedWorks);
+            notify("Obra atualizada com sucesso!", "success");
+        } catch (error) {
+            console.error("Erro ao salvar obra:", error);
+            notify("Erro ao salvar dados.", "error");
+        } finally {
+            setLoading(false);
         }
-
-        await db.save('serviflow_works', updatedWorks, updatedWork);
-
-        // Save all items
-        const saveItems = async (key: string, items: any[]) => {
-            const all = db.load(key, []);
-            const others = all.filter((i: any) => i.work_id !== currentWork.id);
-            const current = items.map(i => ({ ...i, work_id: currentWork.id }));
-            await db.save(key, [...others, ...current], current);
-        };
-
-        await Promise.all([
-            saveItems('serviflow_work_services', services),
-            saveItems('serviflow_work_materials', materials),
-            saveItems('serviflow_work_labor', labor),
-            saveItems('serviflow_work_indirects', indirects),
-            saveItems('serviflow_work_taxes', taxes)
-        ]);
-
-        setWorks(updatedWorks);
-        notify("Obra atualizada com sucesso!", "success");
-        setLoading(false);
     };
 
     const handleDuplicateWork = async (id: string) => {
@@ -505,7 +564,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
         try {
             setLoading(true);
-            const sourceWork = works.find(w => w.id === id);
+            const localWorks = db.load('serviflow_works', []) as WorkHeader[];
+            const sourceWork = localWorks.find(w => w.id === id);
             if (!sourceWork) return;
 
             const newWorkId = db.generateId('OBRA');
@@ -516,11 +576,12 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                 start_date: new Date().toISOString()
             };
 
-            // Duplicate all items
-            const duplicateItems = async (key: string, items: any[]) => {
-                const newItems = items.map(i => ({
+            // Duplicate all items by loading directly from DB for the specific work
+            const duplicateItems = async (key: string, suffix: string) => {
+                const sourceItems = db.load(key, []).filter((i: any) => i.work_id === id);
+                const newItems = sourceItems.map((i: any) => ({
                     ...i,
-                    id: db.generateId(key.split('_').pop()?.toUpperCase() || 'ITEM'),
+                    id: db.generateId(suffix),
                     work_id: newWorkId
                 }));
                 const all = db.load(key, []);
@@ -528,16 +589,19 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             };
 
             await Promise.all([
-                duplicateItems('serviflow_work_services', services),
-                duplicateItems('serviflow_work_materials', materials),
-                duplicateItems('serviflow_work_labor', labor),
-                duplicateItems('serviflow_work_indirects', indirects),
-                duplicateItems('serviflow_work_taxes', taxes)
+                duplicateItems('serviflow_work_services', 'WSVC'),
+                duplicateItems('serviflow_work_materials', 'WMAT'),
+                duplicateItems('serviflow_work_labor', 'WMO'),
+                duplicateItems('serviflow_work_indirects', 'WIND'),
+                duplicateItems('serviflow_work_taxes', 'WTAX')
             ]);
 
-            setWorks(prev => [newWork, ...prev]);
+            const updatedWorks = [newWork, ...localWorks];
+            await db.save('serviflow_works', updatedWorks, newWork);
+            setWorks(updatedWorks);
             notify("Obra duplicada com sucesso!", "success");
         } catch (error) {
+            console.error(error);
             notify("Erro ao duplicar obra.", "error");
         } finally {
             setLoading(false);
@@ -575,7 +639,12 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             onStartEdit={() => materialEdit.startEditing(material)}
             onUpdateField={materialEdit.updateField}
             onSave={() => {
-                materialManager.updateItem(material.id, materialEdit.editData);
+                const qty = Number(materialEdit.editData.quantity || 0);
+                const unitCost = Number(materialEdit.editData.unit_cost || 0);
+                materialManager.updateItem(material.id, {
+                    ...materialEdit.editData,
+                    total_cost: qty * unitCost
+                });
                 materialEdit.stopEditing();
             }}
             onCancel={materialEdit.stopEditing}
@@ -660,7 +729,12 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             onStartEdit={() => laborEdit.startEditing(item)}
             onUpdateField={laborEdit.updateField}
             onSave={() => {
-                laborManager.updateItem(item.id, laborEdit.editData);
+                const qty = Number(laborEdit.editData.quantity || 0);
+                const unitCost = Number(laborEdit.editData.unit_cost || 0);
+                laborManager.updateItem(item.id, {
+                    ...laborEdit.editData,
+                    total_cost: qty * unitCost
+                });
                 laborEdit.stopEditing();
             }}
             onCancel={laborEdit.stopEditing}
@@ -996,46 +1070,60 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Insumo/Material</label>
                                                 <input
                                                     type="text"
-                                                    id="new_mat_name"
+                                                    value={newMaterial.name}
+                                                    onChange={e => setNewMaterial({ ...newMaterial, name: e.target.value })}
                                                     className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100"
                                                     placeholder="Material"
                                                 />
                                             </div>
                                             <div className="md:col-span-2">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Qtd</label>
-                                                <input type="number" id="new_mat_qty" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100" placeholder="0" />
+                                                <input
+                                                    type="number"
+                                                    value={newMaterial.qty}
+                                                    onChange={e => setNewMaterial({ ...newMaterial, qty: e.target.value })}
+                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100"
+                                                    placeholder="0"
+                                                />
                                             </div>
                                             <div className="md:col-span-1">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Un</label>
-                                                <input type="text" id="new_mat_unit" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100" placeholder="un" />
+                                                <input
+                                                    type="text"
+                                                    value={newMaterial.unit}
+                                                    onChange={e => setNewMaterial({ ...newMaterial, unit: e.target.value })}
+                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100"
+                                                    placeholder="un"
+                                                />
                                             </div>
                                             <div className="md:col-span-2">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Custo Unit.</label>
-                                                <input type="number" id="new_mat_cost" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100" placeholder="0.00" />
+                                                <input
+                                                    type="number"
+                                                    value={newMaterial.cost}
+                                                    onChange={e => setNewMaterial({ ...newMaterial, cost: e.target.value })}
+                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100"
+                                                    placeholder="0.00"
+                                                />
                                             </div>
                                             <div className="md:col-span-2">
                                                 <button
                                                     onClick={() => {
-                                                        const name = (document.getElementById('new_mat_name') as HTMLInputElement).value;
-                                                        const qty = parseFloat((document.getElementById('new_mat_qty') as HTMLInputElement).value) || 0;
-                                                        const unit = (document.getElementById('new_mat_unit') as HTMLInputElement).value || 'un';
-                                                        const cost = parseFloat((document.getElementById('new_mat_cost') as HTMLInputElement).value) || 0;
+                                                        const { name, qty, unit, cost } = newMaterial;
+                                                        const nQty = parseFloat(qty) || 0;
+                                                        const nCost = parseFloat(cost) || 0;
 
                                                         if (!name) return notify("Nome obrigatório", "error");
 
                                                         materialManager.addItem({
                                                             material_name: name.toUpperCase(),
                                                             unit,
-                                                            quantity: qty,
-                                                            unit_cost: cost,
-                                                            total_cost: qty * cost
+                                                            quantity: nQty,
+                                                            unit_cost: nCost,
+                                                            total_cost: nQty * nCost
                                                         } as any);
 
-                                                        // Reset
-                                                        (document.getElementById('new_mat_name') as HTMLInputElement).value = '';
-                                                        (document.getElementById('new_mat_qty') as HTMLInputElement).value = '';
-                                                        (document.getElementById('new_mat_unit') as HTMLInputElement).value = '';
-                                                        (document.getElementById('new_mat_cost') as HTMLInputElement).value = '';
+                                                        setNewMaterial({ name: '', qty: '', unit: 'un', cost: '' });
                                                     }}
                                                     className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700 font-bold text-xs h-9 flex items-center justify-center gap-1 shadow-md shadow-green-950/20"
                                                 >
@@ -1055,11 +1143,21 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                             <div className="md:col-span-4">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Função/Cargo</label>
-                                                <input type="text" id="new_mo_role" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100" placeholder="Ex: Pedreiro" />
+                                                <input
+                                                    type="text"
+                                                    value={newLabor.role}
+                                                    onChange={e => setNewLabor({ ...newLabor, role: e.target.value })}
+                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100"
+                                                    placeholder="Ex: Pedreiro"
+                                                />
                                             </div>
                                             <div className="md:col-span-2">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Tipo</label>
-                                                <select id="new_mo_type" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100">
+                                                <select
+                                                    value={newLabor.type}
+                                                    onChange={e => setNewLabor({ ...newLabor, type: e.target.value })}
+                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100"
+                                                >
                                                     <option value="Diária">Diária</option>
                                                     <option value="Hora">Hora</option>
                                                     <option value="Empreitada">Empreitada</option>
@@ -1067,24 +1165,33 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             </div>
                                             <div className="md:col-span-2">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Qtd</label>
-                                                <input type="number" id="new_mo_qty" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100" placeholder="0" />
+                                                <input
+                                                    type="number"
+                                                    value={newLabor.qty}
+                                                    onChange={e => setNewLabor({ ...newLabor, qty: e.target.value })}
+                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100"
+                                                    placeholder="0"
+                                                />
                                             </div>
                                             <div className="md:col-span-2">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Custo</label>
-                                                <input type="number" id="new_mo_cost" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100" placeholder="0.00" />
+                                                <input
+                                                    type="number"
+                                                    value={newLabor.cost}
+                                                    onChange={e => setNewLabor({ ...newLabor, cost: e.target.value })}
+                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100"
+                                                    placeholder="0.00"
+                                                />
                                             </div>
                                             <div className="md:col-span-2">
                                                 <button
                                                     onClick={() => {
-                                                        const role = (document.getElementById('new_mo_role') as HTMLInputElement).value;
-                                                        const type = (document.getElementById('new_mo_type') as HTMLSelectElement).value;
-                                                        const qty = parseFloat((document.getElementById('new_mo_qty') as HTMLInputElement).value) || 0;
-                                                        const cost = parseFloat((document.getElementById('new_mo_cost') as HTMLInputElement).value) || 0;
+                                                        const { role, type, qty, cost } = newLabor;
+                                                        const nQty = parseFloat(qty) || 0;
+                                                        const nCost = parseFloat(cost) || 0;
                                                         if (!role) return notify("Função obrigatória", "error");
-                                                        laborManager.addItem({ role: role.toUpperCase(), cost_type: type as any, quantity: qty, unit_cost: cost, total_cost: qty * cost } as any);
-                                                        (document.getElementById('new_mo_role') as HTMLInputElement).value = '';
-                                                        (document.getElementById('new_mo_qty') as HTMLInputElement).value = '';
-                                                        (document.getElementById('new_mo_cost') as HTMLInputElement).value = '';
+                                                        laborManager.addItem({ role: role.toUpperCase(), cost_type: type as any, quantity: nQty, unit_cost: nCost, total_cost: nQty * nCost } as any);
+                                                        setNewLabor({ role: '', type: 'Diária', qty: '', cost: '' });
                                                     }}
                                                     className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700 font-bold text-xs h-9 flex items-center justify-center gap-1 shadow-md shadow-green-950/20"
                                                 >
@@ -1104,21 +1211,32 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                                             <div className="md:col-span-8">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Descrição</label>
-                                                <input type="text" id="new_ind_name" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100" placeholder="Ex: Container" />
+                                                <input
+                                                    type="text"
+                                                    value={newIndirect.name}
+                                                    onChange={e => setNewIndirect({ ...newIndirect, name: e.target.value })}
+                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100"
+                                                    placeholder="Ex: Container"
+                                                />
                                             </div>
                                             <div className="md:col-span-2">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Valor</label>
-                                                <input type="number" id="new_ind_value" className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100" placeholder="0.00" />
+                                                <input
+                                                    type="number"
+                                                    value={newIndirect.value}
+                                                    onChange={e => setNewIndirect({ ...newIndirect, value: e.target.value })}
+                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100"
+                                                    placeholder="0.00"
+                                                />
                                             </div>
                                             <div className="md:col-span-2">
                                                 <button
                                                     onClick={() => {
-                                                        const name = (document.getElementById('new_ind_name') as HTMLInputElement).value;
-                                                        const val = parseFloat((document.getElementById('new_ind_value') as HTMLInputElement).value) || 0;
+                                                        const { name, value } = newIndirect;
+                                                        const nVal = parseFloat(value) || 0;
                                                         if (!name) return notify("Descrição obrigatória", "error");
-                                                        indirectManager.addItem({ name: name.toUpperCase(), value: val } as any);
-                                                        (document.getElementById('new_ind_name') as HTMLInputElement).value = '';
-                                                        (document.getElementById('new_ind_value') as HTMLInputElement).value = '';
+                                                        indirectManager.addItem({ name: name.toUpperCase(), value: nVal } as any);
+                                                        setNewIndirect({ name: '', value: '' });
                                                     }}
                                                     className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700 font-bold text-xs h-9 flex items-center justify-center gap-1 shadow-md shadow-green-950/20"
                                                 >
@@ -1475,23 +1593,40 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         {activeTab === 'resumo' && (
                             <div className="max-w-4xl mx-auto space-y-8 pb-12 animate-in slide-in-from-bottom-4">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-                                    {[
-                                        { label: 'Materiais', value: calculations.totalMaterial, icon: Truck, color: 'emerald', desc: 'Insumos e Materiais' },
-                                        { label: 'Mão de Obra', value: calculations.totalLabor, icon: HardHat, color: 'amber', desc: 'Equipes e Diárias' },
-                                        { label: 'Indiretos', value: calculations.totalIndirect, icon: Archive, color: 'slate', desc: 'Custos Adicionais' },
-                                        { label: 'Impostos', value: calculations.totalTaxes, icon: Percent, color: 'green', desc: 'Taxas e BDI' },
-                                    ].map((item) => (
-                                        <div key={item.label} className={`bg-${item.color}-50 dark:bg-${item.color}-900/20 p-6 rounded-2xl border border-${item.color}-200 dark:border-${item.color}-800 shadow-sm transition-all hover:shadow-md`}>
-                                            <div className="flex justify-between items-start mb-2">
-                                                <span className={`text-[10px] font-bold text-${item.color}-600 dark:text-${item.color}-400 uppercase tracking-widest`}>{item.label}</span>
-                                                <div className={`bg-${item.color}-100 dark:bg-${item.color}-900/40 p-1.5 rounded-lg`}>
-                                                    <item.icon size={16} className={`text-${item.color}-600 dark:text-${item.color}-400`} />
+                                    {(() => {
+                                        const cardStyles: Record<string, any> = {
+                                            emerald: 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/40',
+                                            amber: 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/40',
+                                            slate: 'bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800',
+                                            green: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/40',
+                                        };
+
+                                        return [
+                                            { label: 'Materiais', value: calculations.totalMaterial, icon: Truck, color: 'emerald', desc: 'Insumos e Materiais' },
+                                            { label: 'Mão de Obra', value: calculations.totalLabor, icon: HardHat, color: 'amber', desc: 'Equipes e Diárias' },
+                                            { label: 'Indiretos', value: calculations.totalIndirect, icon: Archive, color: 'slate', desc: 'Custos Adicionais' },
+                                            { label: 'Impostos', value: calculations.totalTaxes, icon: Percent, color: 'green', desc: 'Taxas e BDI' },
+                                        ].map((item) => {
+                                            const styles = cardStyles[item.color].split(' ');
+                                            const bgColor = styles[0] + ' ' + styles[1];
+                                            const borderColor = styles[2] + ' ' + styles[3];
+                                            const textColor = styles[4] + ' ' + styles[5];
+                                            const iconBg = styles[6] + ' ' + styles[7];
+
+                                            return (
+                                                <div key={item.label} className={`${bgColor} p-6 rounded-2xl border ${borderColor} shadow-sm transition-all hover:shadow-md hover:-translate-y-1 duration-300`}>
+                                                    <div className="flex justify-between items-start mb-2">
+                                                        <span className={`text-[10px] font-bold ${textColor} uppercase tracking-widest`}>{item.label}</span>
+                                                        <div className={`${iconBg} p-1.5 rounded-lg`}>
+                                                            <item.icon size={16} className={textColor} />
+                                                        </div>
+                                                    </div>
+                                                    <span className="text-2xl font-black text-slate-800 dark:text-slate-100 whitespace-nowrap">R$ {item.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                                    <p className={`text-[9px] ${textColor} opacity-60 mt-1 font-bold uppercase`}>{item.desc}</p>
                                                 </div>
-                                            </div>
-                                            <span className="text-2xl font-black text-slate-800 dark:text-slate-100 whitespace-nowrap">R$ {item.value.toFixed(2)}</span>
-                                            <p className={`text-[9px] text-${item.color}-600/60 dark:text-${item.color}-400/60 mt-1 font-bold uppercase`}>{item.desc}</p>
-                                        </div>
-                                    ))}
+                                            );
+                                        });
+                                    })()}
                                 </div>
 
                                 <div className="flex justify-end gap-3">
@@ -1505,14 +1640,18 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             });
                                             setShowPreview(true);
                                         }}
-                                        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 px-6 py-4 rounded-2xl flex items-center gap-4 hover:bg-slate-50 transition-all shadow-md group border-b-4 border-b-green-600 active:border-b-0 active:translate-y-1"
+                                        className="relative overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 px-8 py-5 rounded-3xl flex items-center gap-6 hover:bg-slate-50 transition-all shadow-xl group hover:shadow-green-500/10 active:translate-y-1"
                                     >
-                                        <div className="bg-green-100 dark:bg-green-900/40 p-2 rounded-xl group-hover:scale-110 transition-transform">
-                                            <Eye size={24} className="text-green-600 dark:text-green-400" />
+                                        <div className="absolute top-0 left-0 w-1 h-full bg-green-600 group-hover:w-2 transition-all"></div>
+                                        <div className="bg-green-100 dark:bg-green-900/40 p-3 rounded-2xl group-hover:scale-110 transition-transform duration-500">
+                                            <Eye size={28} className="text-green-600 dark:text-green-400" />
                                         </div>
                                         <div className="text-left">
-                                            <span className="block text-slate-800 dark:text-slate-100 font-bold">Relatório Executivo</span>
-                                            <span className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Visualizar PDF</span>
+                                            <span className="block text-slate-800 dark:text-slate-100 font-black text-lg tracking-tight">Relatório Executivo</span>
+                                            <span className="text-[10px] text-slate-400 uppercase tracking-widest font-bold flex items-center gap-1.5">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                                                Gerar PDF de Execução
+                                            </span>
                                         </div>
                                     </button>
                                 </div>
