@@ -241,7 +241,7 @@ const ReportPreview: React.FC<Props> = ({
 
                     @page {
                         size: A4;
-                        margin: 15mm 15mm 15mm 15mm;
+                        margin: 15mm 15mm 15mm 15mm; 'controle de margem 
 
                         @bottom-center {
                             content: "Página " counter(page) " de " counter(pages);
