@@ -1,5 +1,6 @@
 import html2pdf from 'html2pdf.js';
 import { ServiceOrder, CompanyProfile } from '../types';
+import { escapeHtml, toNumber, formatMoney } from './formatUtils';
 
 export const getContractStyles = () => `
     <style>
@@ -40,9 +41,9 @@ export const getContractHtml = (order: ServiceOrder, customer: any, company: Com
             ${company.logo ? `<img src="${company.logo}" style="height: ${company.logoSize || 70}px; max-width: 250px; object-fit: contain;" crossorigin="anonymous" />` : ''}
           </div>
           <div style="text-align: center; flex-grow: 1;">
-            <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 2px; text-transform: uppercase;">${company.name}</h1>
+            <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 2px; text-transform: uppercase;">${escapeHtml(company.name)}</h1>
             <p style="font-size: 11px; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">CONTRATO DE PRESTAÇÃO DE SERVIÇOS</p>
-            <p style="font-size: 9px; color: #64748b; font-weight: 600;">${company.cnpj || ""} | ${company.phone || ""}</p>
+            <p style="font-size: 9px; color: #64748b; font-weight: 600;">${escapeHtml(company.cnpj || "")} | ${escapeHtml(company.phone || "")}</p>
           </div>
           <div style="text-align: right; width: 120px;">
             <h2 style="font-size: 24px; font-weight: 900; color: #2563eb; margin: 0; letter-spacing: -1px;">${order.id.replace('OS-', 'OS')}</h2>
@@ -54,15 +55,15 @@ export const getContractHtml = (order: ServiceOrder, customer: any, company: Com
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin-bottom: 15px;">
           <div style="background:#f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #dbeafe;">
             <h4 style="font-size:10px; font-weight:900; color:#3b82f6; text-transform:uppercase; letter-spacing:1px; margin:0 0 2mm 0;">CONTRATADA</h4>
-            <p style="font-size:14px; font-weight:900; color:#0f172a; text-transform:uppercase; margin:0;">${company.name}</p>
-            <p style="font-size:11px; font-weight:600; color:#64748b; margin:1mm 0 0 0;">${company.address || ""}</p>
-            <p style="font-size:11px; font-weight:600; color:#64748b; margin:0;">${company.email || ""}</p>
+            <p style="font-size:14px; font-weight:900; color:#0f172a; text-transform:uppercase; margin:0;">${escapeHtml(company.name)}</p>
+            <p style="font-size:11px; font-weight:600; color:#64748b; margin:1mm 0 0 0;">${escapeHtml(company.address || "")}</p>
+            <p style="font-size:11px; font-weight:600; color:#64748b; margin:0;">${escapeHtml(company.email || "")}</p>
           </div>
           <div style="background:#f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #dbeafe;">
             <h4 style="font-size:10px; font-weight:900; color:#3b82f6; text-transform:uppercase; letter-spacing:1px; margin:0 0 2mm 0;">CONTRATANTE</h4>
-            <p style="font-size:14px; font-weight:900; color:#0f172a; text-transform:uppercase; margin:0;">${customer.name}</p>
-            <p style="font-size:11px; font-weight:600; color:#64748b; margin:1mm 0 0 0;">${(customer.document || "").replace(/\D/g, "").length <= 11 ? "CPF" : "CNPJ"}: ${customer.document || "N/A"}</p>
-            <p style="font-size:11px; font-weight:600; color:#64748b; margin:0;">${customer.address || ""}, ${customer.number || ""} - ${customer.city || ""}</p>
+            <p style="font-size:14px; font-weight:900; color:#0f172a; text-transform:uppercase; margin:0;">${escapeHtml(customer.name)}</p>
+            <p style="font-size:11px; font-weight:600; color:#64748b; margin:1mm 0 0 0;">${(customer.document || "").replace(/\D/g, "").length <= 11 ? "CPF" : "CNPJ"}: ${escapeHtml(customer.document || "N/A")}</p>
+            <p style="font-size:11px; font-weight:600; color:#64748b; margin:0;">${escapeHtml(customer.address || "")}, ${escapeHtml(customer.number || "")} - ${escapeHtml(customer.city || "")}</p>
           </div>
         </div>
 
@@ -80,8 +81,8 @@ export const getContractHtml = (order: ServiceOrder, customer: any, company: Com
             1.1. O presente contrato tem por objeto a execução de reforma na unidade situada no endereço do CONTRATANTE, compreendendo os serviços descritos em memorial descritivo e/ou proposta comercial anexa, que passa a integrar este instrumento para todos os fins legais.
           </p>
           <div style="background:#f8fafc; padding: 15px; border-radius: 8px; border-left: 5px solid #2563eb; margin: 15px 0;">
-            <p style="font-size:14px; font-weight:800; color:#1e3a8a; text-transform:uppercase; letter-spacing:0.5px; margin:0;">${order.description || ""}</p>
-            ${order.osType === 'EQUIPMENT' && order.items && order.items.length > 0 ? `<p style="font-size:12px; color:#1e3a8a; margin-top:4px;">${order.items.map((i: any) => `${i.quantity}x ${i.description}`).join(', ')}</p>` : ''}
+            <p style="font-size:14px; font-weight:800; color:#1e3a8a; text-transform:uppercase; letter-spacing:0.5px; margin:0;">${escapeHtml(order.description || "")}</p>
+            ${order.osType === 'EQUIPMENT' && order.items && order.items.length > 0 ? `<p style="font-size:12px; color:#1e3a8a; margin-top:4px;">${order.items.map((i: any) => `${toNumber(i.quantity)}x ${escapeHtml(i.description)}`).join(', ')}</p>` : ''}
           </div>
           <p style="font-size:13px; color:#475569; line-height:1.6; text-align:justify; margin:10px 0 0 0;">1.2. A contratação se dá sob regime de empreitada global, com fornecimento de materiais e mão de obra, assumindo a CONTRATADA integral responsabilidade técnica, administrativa e operacional pela execução da obra.</p>
           <p style="font-size:13px; color:#475569; line-height:1.6; text-align:justify; margin:10px 0 0 0;">1.3. Não se caracteriza, em hipótese alguma, cessão ou locação de mão de obra.</p>
@@ -96,8 +97,8 @@ export const getContractHtml = (order: ServiceOrder, customer: any, company: Com
 
         <div style="margin-bottom: 3.5mm; page-break-inside: avoid; break-inside: avoid-page;">
             <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 3mm 0; padding-top: 2mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">CLÁUSULA 3ª – DO PREÇO E FORMA DE PAGAMENTO</h4>
-            <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0 0 2mm 0;">3.1. Pelos serviços objeto deste contrato, o CONTRATANTE pagará à CONTRATADA o valor global de <b style="color:#0f172a; white-space: nowrap;">R$ ${contractValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b>.</p>
-            <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:2mm 0 2mm 0;">3.2. O pagamento será realizado da seguinte forma: <b>${order.paymentTerms || 'Conforme combinado'}</b>.</p>
+            <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0 0 2mm 0;">3.1. Pelos serviços objeto deste contrato, o CONTRATANTE pagará à CONTRATADA o valor global de <b style="color:#0f172a; white-space: nowrap;">R$ ${formatMoney(contractValue)}</b>.</p>
+            <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:2mm 0 2mm 0;">3.2. O pagamento será realizado da seguinte forma: <b>${escapeHtml(order.paymentTerms || 'Conforme combinado')}</b>.</p>
             <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:2mm 0 0 0;">3.3. O valor contratado corresponde a preço fechado por obra certa, não estando vinculado a horas trabalhadas ou número de funcionários.</p>
         </div>
 
@@ -129,7 +130,7 @@ export const getContractHtml = (order: ServiceOrder, customer: any, company: Com
 
         <div style="margin-bottom: 3.5mm; page-break-inside: avoid; break-inside: avoid-page;">
             <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 3mm 0; padding-top: 2mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">CLÁUSULA 7ª – DO PRAZO</h4>
-            <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0 0 2mm 0;">7.1. O prazo estimado para execução da obra é de <b>${order.deliveryTime || '15 dias úteis'}</b>, contados do início efetivo dos serviços.</p>
+            <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0 0 2mm 0;">7.1. O prazo estimado para execução da obra é de <b>${escapeHtml(order.deliveryTime || '15 dias úteis')}</b>, contados do início efetivo dos serviços.</p>
             <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:2mm 0 0 0;">7.2. O prazo poderá ser prorrogado em caso de: serviços adicionais, atraso de pagamento, impedimento de acesso, ou caso fortuito/força maior.</p>
         </div>
 
@@ -157,23 +158,23 @@ export const getContractHtml = (order: ServiceOrder, customer: any, company: Com
 
         <div style="margin-bottom: 3.5mm; page-break-inside: avoid; break-inside: avoid-page;">
             <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 3mm 0; padding-top: 2mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">CLÁUSULA 12ª – DO FORO</h4>
-            <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0;">12.1. Fica eleito o foro da Comarca de <b>${customer.city || 'Brasília'} - ${customer.state || 'DF'}</b> para dirimir quaisquer controvérsias oriundas deste contrato.</p>
+            <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0;">12.1. Fica eleito o foro da Comarca de <b>${escapeHtml(customer.city || 'Brasília')} - ${escapeHtml(customer.state || 'DF')}</b> para dirimir quaisquer controvérsias oriundas deste contrato.</p>
         </div>
 
         <div style="margin-top: 10mm; font-size: 14px; color: #475569; line-height: 1.6;">
             <p>E por estarem justas e contratadas, assinam as partes o presente instrumento em duas vias de igual teor.</p>
-            <p style="margin-top: 5mm;">${customer.city || 'Brasília'}/${customer.state || 'DF'}, ${new Date().getDate()} de ${new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(new Date())} de ${new Date().getFullYear()}.</p>
+            <p style="margin-top: 5mm;">${escapeHtml(customer.city || 'Brasília')}/${escapeHtml(customer.state || 'DF')}, ${new Date().getDate()} de ${new Intl.DateTimeFormat('pt-BR', { month: 'long' }).format(new Date())} de ${new Date().getFullYear()}.</p>
         </div>
 
         <div style="margin: 30mm 0 20mm 0; page-break-inside: avoid;">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16mm; padding: 0 10mm;">
                 <div style="text-align:center; border-top: 1px solid #cbd5e1; padding-top: 3mm;">
                     <p style="font-size:9px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:1px; margin:0 0 1mm 0;">CONTRATADA</p>
-                    <p style="font-size:14px; font-weight:700; text-transform:uppercase; color:#0f172a; margin:0;">${company.name}</p>
+                    <p style="font-size:14px; font-weight:700; text-transform:uppercase; color:#0f172a; margin:0;">${escapeHtml(company.name)}</p>
                 </div>
                 <div style="text-align:center; border-top: 1px solid #cbd5e1; padding-top: 3mm;">
                     <p style="font-size:9px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:1px; margin:0 0 1mm 0;">CONTRATANTE</p>
-                    <p style="font-size:14px; font-weight:700; text-transform:uppercase; color:#0f172a; margin:0;">${customer.name}</p>
+                    <p style="font-size:14px; font-weight:700; text-transform:uppercase; color:#0f172a; margin:0;">${escapeHtml(customer.name)}</p>
                 </div>
             </div>
         </div>
@@ -185,12 +186,14 @@ export const getContractHtml = (order: ServiceOrder, customer: any, company: Com
 export const downloadContractPdf = async (order: ServiceOrder, customer: any, company: CompanyProfile, notify?: (msg: string, type?: string) => void) => {
     const contentHtml = getContractHtml(order, customer, company);
 
+    const safeDescription = (order.description || "Proposta").replace(/[\\/:"*?<>|]/g, "_").trim();
+
     const opt = {
-        margin: [10, 0, 15, 0] as [number, number, number, number],
-        filename: `Contrato - ${order.id.replace("OS-", "OS")} - ${order.description || "Proposta"}.pdf`,
+        margin: [15, 0, 15, 0] as [number, number, number, number],
+        filename: `Contrato - ${order.id.replace("OS-", "OS")} - ${safeDescription}.pdf`,
         image: { type: "jpeg" as const, quality: 0.98 },
         html2canvas: {
-            scale: 4,
+            scale: 2,
             useCORS: true,
             allowTaint: false,
             backgroundColor: "#ffffff",
@@ -249,7 +252,7 @@ export const printContractRawHTML = (order: ServiceOrder, customer: any, company
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Contrato - ${order.id.replace('OS-', 'OS')} - ${order.description || 'Proposta'}</title>
+        <title>Contrato - ${order.id.replace('OS-', 'OS')} - ${escapeHtml(order.description || 'Proposta')}</title>
         ${getContractStyles()}
     </head>
     <body onload="setTimeout(() => { window.print(); window.close(); }, 800);">
