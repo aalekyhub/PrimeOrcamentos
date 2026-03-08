@@ -14,14 +14,13 @@ interface BudgetSummarySidebarProps {
     setDeliveryTime: (val: string) => void;
     onShowPayment: () => void;
     onPrint: () => void;
-    onDownload: () => void;
     onSave: () => void;
 }
 
 const BudgetSummarySidebar: React.FC<BudgetSummarySidebarProps> = ({
     bdiRate, setBdiRate, taxRate, setTaxRate, subtotal, totalAmount,
     paymentTerms, setPaymentTerms, deliveryTime, setDeliveryTime,
-    onShowPayment, onPrint, onDownload, onSave
+    onShowPayment, onPrint, onSave
 }) => {
     const bdiNum = Number(bdiRate) || 0;
     const taxNum = Number(taxRate) || 0;
@@ -80,12 +79,9 @@ const BudgetSummarySidebar: React.FC<BudgetSummarySidebarProps> = ({
             </div>
 
             <div className="mt-auto space-y-3 relative z-10">
-                <div className="grid grid-cols-2 gap-2">
-                    <button onClick={onPrint} className="bg-slate-800 hover:bg-slate-700 text-white p-4 rounded-xl font-black uppercase text-[8px] flex flex-col items-center gap-1 transition-all border border-slate-700 group">
-                        <Printer className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" /> IMPRIMIR
-                    </button>
-                    <button onClick={onDownload} className="bg-slate-800 hover:bg-slate-700 text-white p-4 rounded-xl font-black uppercase text-[8px] flex flex-col items-center gap-1 transition-all border border-slate-700 group">
-                        <FileDown className="w-4 h-4 text-rose-400 group-hover:scale-110 transition-transform" /> BAIXAR PDF
+                <div className="grid grid-cols-1 gap-2">
+                    <button onClick={onPrint} className="bg-slate-800 hover:bg-slate-700 text-white p-4 rounded-xl font-black uppercase text-[8px] flex flex-row items-center justify-center gap-2 transition-all border border-slate-700 group w-full">
+                        <Printer className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" /> IMPRIMIR ORÇAMENTO
                     </button>
                     <button onClick={onSave} className="col-span-2 bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[11px] shadow-md shadow-blue-950/20 transition-all flex items-center justify-center gap-2">
                         <Save className="w-5 h-5" /> REGISTRAR

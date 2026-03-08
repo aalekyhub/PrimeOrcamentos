@@ -664,7 +664,6 @@ const BudgetManager: React.FC<Props> = ({
                 setDeliveryTime={setDeliveryTime}
                 onShowPayment={() => setShowPaymentModal(true)}
                 onPrint={handlePreviewDraft}
-                onDownload={handlePreviewDraft}
                 onSave={handleSave}
               />
             </div>

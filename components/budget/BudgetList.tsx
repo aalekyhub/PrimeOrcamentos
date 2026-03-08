@@ -9,7 +9,6 @@ interface BudgetListProps {
     onDuplicate: (budget: ServiceOrder) => void;
     onEdit: (budget: ServiceOrder) => void;
     onPrint: (budget: ServiceOrder) => void;
-    onDownloadPdf: (budget: ServiceOrder) => void;
     onDelete: (budget: ServiceOrder) => void;
 }
 
@@ -20,7 +19,6 @@ const BudgetList: React.FC<BudgetListProps> = ({
     onDuplicate,
     onEdit,
     onPrint,
-    onDownloadPdf,
     onDelete
 }) => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -96,9 +94,6 @@ const BudgetList: React.FC<BudgetListProps> = ({
                                     </button>
                                     <button onClick={() => onPrint(budget)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Imprimir">
                                         <Printer className="w-4 h-4" />
-                                    </button>
-                                    <button onClick={() => onDownloadPdf(budget)} className="p-2 text-slate-400 hover:text-rose-600 transition-colors" title="Baixar PDF">
-                                        <FileDown className="w-4 h-4" />
                                     </button>
                                     <button onClick={() => onDelete(budget)} className="p-2 text-rose-300 hover:text-rose-600 transition-colors" title="Excluir">
                                         <Trash2 className="w-4 h-4" />
