@@ -40,7 +40,7 @@ export const PLANNING_THEME: ReportTheme = {
     reportTitle: 'Planejamento Executivo de Obra',
     terminologies: {
         totalLabel: 'Custo Total Previsto',
-        servicesSection: '1. Serviços Planejados',
+        servicesSection: 'Serviços Planejados',
         totalUnitLabel: 'VL. UNIT.',
         totalRowLabel: 'VL. TOTAL'
     }
@@ -56,7 +56,7 @@ export const EXECUTION_THEME: ReportTheme = {
     reportTitle: 'Relatório de Execução de Obra',
     terminologies: {
         totalLabel: 'Custo Total Realizado',
-        servicesSection: '1. Serviços Executados',
+        servicesSection: 'Serviços Executados',
         totalUnitLabel: 'VL. UNIT.',
         totalRowLabel: 'VL. REALIZADO'
     }
@@ -160,6 +160,8 @@ export const buildReportHtml = (
         const calculatedValue = rate > 0 ? baseTaxValue * (rate / 100) : val;
         return { name: t.name, rate, calculatedValue };
     });
+
+    let sectionCounter = 1;
 
     return `
         <div style="width:100%; background:#ffffff; font-family:Inter, Arial, sans-serif; color:#1e293b; padding:8mm;">
@@ -274,7 +276,7 @@ export const buildReportHtml = (
             ? `
                 <div style="margin-bottom:26px;">
                     <h3 style="font-size:14px; font-weight:800; color:${theme.secondaryColor}; text-transform:uppercase; margin:0 0 12px 0; padding-bottom:6px; border-bottom:2px solid #e2e8f0;">
-                        ${theme.terminologies.servicesSection}
+                        ${sectionCounter++}. ${theme.terminologies.servicesSection}
                     </h3>
                     <table style="width:100%; border-collapse:collapse;">
                         <thead>
@@ -307,7 +309,7 @@ export const buildReportHtml = (
             ? `
                 <div style="margin-bottom:26px;">
                     <h3 style="font-size:14px; font-weight:800; color:${theme.secondaryColor}; text-transform:uppercase; margin:0 0 12px 0; padding-bottom:6px; border-bottom:2px solid #e2e8f0;">
-                        2. Insumos e Materiais
+                        ${sectionCounter++}. Insumos e Materiais
                     </h3>
                     <table style="width:100%; border-collapse:collapse;">
                         <thead>
@@ -340,7 +342,7 @@ export const buildReportHtml = (
             ? `
                 <div style="margin-bottom:26px;">
                     <h3 style="font-size:14px; font-weight:800; color:${theme.secondaryColor}; text-transform:uppercase; margin:0 0 12px 0; padding-bottom:6px; border-bottom:2px solid #e2e8f0;">
-                        3. Mão de Obra
+                        ${sectionCounter++}. Mão de Obra
                     </h3>
                     <table style="width:100%; border-collapse:collapse;">
                         <thead>
@@ -373,7 +375,7 @@ export const buildReportHtml = (
             ? `
                 <div style="margin-bottom:26px;">
                     <h3 style="font-size:14px; font-weight:800; color:${theme.secondaryColor}; text-transform:uppercase; margin:0 0 12px 0; padding-bottom:6px; border-bottom:2px solid #e2e8f0;">
-                        4. Custos Indiretos
+                        ${sectionCounter++}. Custos Indiretos
                     </h3>
                     <table style="width:100%; border-collapse:collapse;">
                         <thead>
@@ -402,7 +404,7 @@ export const buildReportHtml = (
             ? `
                 <div style="margin-bottom:26px;">
                     <h3 style="font-size:14px; font-weight:800; color:${theme.secondaryColor}; text-transform:uppercase; margin:0 0 12px 0; padding-bottom:6px; border-bottom:2px solid #e2e8f0;">
-                        5. Resumo de Impostos
+                        ${sectionCounter++}. Resumo de Impostos
                     </h3>
                     <table style="width:100%; border-collapse:collapse;">
                         <thead>
