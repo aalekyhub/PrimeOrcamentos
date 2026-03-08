@@ -410,6 +410,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         },
                         company
                     )}
+                    filename={`Contrato-${previewContract.id}`}
                     onClose={() => setPreviewContract(null)}
                 />
             )}
@@ -418,6 +419,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                 <ReportPreview
                     title={`OS de Obra - ${previewOS.id}`}
                     htmlContent={getOSHtml(previewOS)}
+                    filename={`OS-${previewOS.id}`}
                     onClose={() => setPreviewOS(null)}
                 />
             )}

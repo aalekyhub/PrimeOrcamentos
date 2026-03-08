@@ -1538,13 +1538,14 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                 </div>
             )}
 
-            <ReportPreview
-                isOpen={showPreview}
-                onClose={() => setShowPreview(false)}
-                title={previewContent.title}
-                htmlContent={previewContent.html}
-                filename={previewContent.filename}
-            />
+            {showPreview && (
+                <ReportPreview
+                    onClose={() => setShowPreview(false)}
+                    title={previewContent.title}
+                    htmlContent={previewContent.html}
+                    filename={previewContent.filename}
+                />
+            )}
         </div>
     );
 

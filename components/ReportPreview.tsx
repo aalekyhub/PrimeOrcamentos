@@ -4,24 +4,20 @@ import { X, Printer, ZoomIn, ZoomOut, Maximize } from 'lucide-react';
 // No longer using html2pdf.js for better fidelity
 
 interface Props {
-    isOpen: boolean;
     onClose: () => void;
     title: string;
     htmlContent: string;
-    filename: string;
+    filename?: string;
 }
 
 const ReportPreview: React.FC<Props> = ({
-    isOpen,
     onClose,
     title,
     htmlContent,
-    filename
+    filename = 'RELATORIO'
 }) => {
     const [zoom, setZoom] = React.useState(100);
     const previewRef = React.useRef<HTMLDivElement | null>(null);
-
-    if (!isOpen) return null;
 
     const safeFileName = (name?: string) => {
         const base = (name || 'RELATORIO')
@@ -115,15 +111,25 @@ const ReportPreview: React.FC<Props> = ({
                         ${htmlContent}
                     </div>
                     <script>
-                        // Wait for images and Tailwind to finish
-                        window.onload = () => {
+                        function startPrint() {
+                            window.print();
+                            // Restore title after print dialog closes
                             setTimeout(() => {
-                                window.print();
-                                setTimeout(() => {
-                                    window.parent.document.title = "${originalTitle}";
-                                }, 100);
-                            }, 500);
-                        };
+                                try {
+                                    window.parent.document.title = "${originalTitle.replace(/"/g, '\\"')}";
+                                } catch(e) {}
+                            }, 100);
+                        }
+                        
+                        // Wait for images and Tailwind
+                        window.addEventListener('load', () => {
+                            setTimeout(startPrint, 500);
+                        });
+                        
+                        // Fallback if load event already fired
+                        if (document.readyState === 'complete') {
+                            setTimeout(startPrint, 500);
+                        }
                     </script>
                 </body>
                 </html>

@@ -158,6 +158,7 @@ const PlanningManager: React.FC<Props> = ({
                         company,
                         PLANNING_THEME
                     )}
+                    filename={`Planejamento-${planning.currentPlan.id}`}
                     onClose={() => setShowPreview(false)}
                 />
             )}

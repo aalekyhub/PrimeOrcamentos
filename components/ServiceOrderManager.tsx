@@ -452,6 +452,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
             },
             company
           )}
+          filename={`Contrato-${previewContract.id}`}
           onClose={() => setPreviewContract(null)}
         />
       )}
@@ -468,6 +469,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
             },
             company
           )}
+          filename={`OS-${previewOS.id}`}
           onClose={() => setPreviewOS(null)}
         />
       )}

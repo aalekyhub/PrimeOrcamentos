@@ -758,6 +758,7 @@ const BudgetManager: React.FC<Props> = ({
             company,
             customers.find(c => c.id === previewBudget.customerId)?.document
           )}
+          filename={`Orcamento-${previewBudget.id}`}
           onClose={() => setPreviewBudget(null)}
         />
       )}
