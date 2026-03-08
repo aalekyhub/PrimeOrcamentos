@@ -24,7 +24,7 @@ import {
     Customer,
     MainTab,
 } from './types';
-import { buildReportHtml, PLANNING_THEME } from '../../services/reportPdfService';
+import { buildPlanningReportHtml, PLANNING_THEME } from '../../services/planningPdfService';
 
 interface PlanningCalculations {
     totalMaterial: number;
@@ -285,7 +285,7 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
     const handlePreviewReport = () => {
         if (!currentPlan) return;
 
-        const html = buildReportHtml(
+        const html = buildPlanningReportHtml(
             currentPlan,
             customers,
             services,

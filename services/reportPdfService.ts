@@ -88,7 +88,7 @@ const formatDateBR = (dateStr?: string): string => {
     return date.toLocaleDateString('pt-BR');
 };
 
-export const buildReportHtml = (
+export const buildExecutionReportHtml = (
     header: PlanningHeader | WorkHeader,
     customers: Customer[],
     services: (PlannedService | WorkService)[],

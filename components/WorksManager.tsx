@@ -16,7 +16,7 @@ import {
     PlannedLabor, PlannedIndirect, WorkTax, PlanTax,
     CompanyProfile
 } from '../types';
-import { buildReportHtml, EXECUTION_THEME } from '../services/reportPdfService';
+import { buildExecutionReportHtml, EXECUTION_THEME } from '../services/reportPdfService';
 
 interface Props {
     customers: Customer[];
@@ -1551,7 +1551,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
     // Funções de geração de relatórios
     function generateMaterialsReportHtml(): string {
         if (!currentWork || materials.length === 0) return '';
-        return buildReportHtml(
+        return buildExecutionReportHtml(
             currentWork,
             customers,
             [],
@@ -1573,7 +1573,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
     function generateFullReportHtml(): string {
         if (!currentWork) return '';
-        return buildReportHtml(
+        return buildExecutionReportHtml(
             currentWork,
             customers,
             services,
