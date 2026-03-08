@@ -10,7 +10,8 @@ import {
   Database,
   ChevronUp,
   ChevronDown,
-  GripVertical
+  GripVertical,
+  ScrollText
 } from 'lucide-react';
 import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock } from '../types';
 import { useNotify } from './ToastProvider';
@@ -22,6 +23,7 @@ import BudgetDescriptionEditor from './budget/BudgetDescriptionEditor';
 import BudgetSummarySidebar from './budget/BudgetSummarySidebar';
 import ReportPreview from './ReportPreview';
 import { generateBudgetReportHtml } from '../services/budgetPdfService';
+import { getContractHtml } from '../services/contractPdfService';
 // DocumentPreview and BudgetDocument are replaced by the unified system
 
 interface Props {
@@ -64,6 +66,7 @@ const BudgetManager: React.FC<Props> = ({
   const [editingBudgetId, setEditingBudgetId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [previewBudget, setPreviewBudget] = useState<ServiceOrder | null>(null);
+  const [previewContract, setPreviewContract] = useState<ServiceOrder | null>(null);
   const { notify } = useNotify();
 
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
@@ -454,6 +457,10 @@ const BudgetManager: React.FC<Props> = ({
     setShowForm(true);
   }, [resetForm]);
 
+  const handleGenerateContract = (budget: ServiceOrder) => {
+    setPreviewContract(budget);
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {!showForm && (
@@ -466,8 +473,29 @@ const BudgetManager: React.FC<Props> = ({
           onDuplicate={(budget) => loadBudgetToForm(budget, true)}
           onEdit={(budget) => loadBudgetToForm(budget)}
           onPrint={handlePreviewBudget}
-          onDownloadPdf={handlePreviewBudget}
+          onGenerateContract={handleGenerateContract}
           onDelete={handleDeleteBudget}
+        />
+      )}
+
+      {previewContract && (
+        <ReportPreview
+          title={`Contrato - ${previewContract.id}`}
+          htmlContent={getContractHtml(
+            previewContract,
+            customers.find(c => c.id === previewContract.customerId) || {
+              name: previewContract.customerName,
+              document: 'N/A',
+              address: 'Endereço não informado',
+              city: '',
+              state: '',
+              cep: '',
+              number: ''
+            },
+            company
+          )}
+          filename={`Contrato-${previewContract.id}`}
+          onClose={() => setPreviewContract(null)}
         />
       )}
 

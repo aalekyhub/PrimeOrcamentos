@@ -233,7 +233,6 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                 <td className="px-8 py-5 text-sm font-black uppercase text-slate-900 dark:text-white">{order.customerName}</td>
                 <td className="px-8 py-5 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase">{order.equipmentBrand || 'N/A'} {order.equipmentModel}</td>
                 <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => handlePreviewContract(order)} className="p-2 text-slate-400 dark:text-slate-600 hover:text-slate-900 dark:hover:text-white transition-colors" title="Gerar Contrato"><ScrollText className="w-4 h-4" /></button>
                   <button onClick={() => handlePreviewOS(order)} className="p-2 text-slate-400 dark:text-slate-600 hover:text-slate-900 dark:hover:text-white transition-colors" title="Visualizar/Imprimir OS"><Printer className="w-4 h-4" /></button>
                   <button onClick={() => {
                     setEditingOrderId(order.id);

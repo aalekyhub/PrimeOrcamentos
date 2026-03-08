@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Search, CheckCircle, Copy, Pencil, Printer, FileDown, Trash2 } from 'lucide-react';
+import { Plus, Search, CheckCircle, Copy, Pencil, Printer, FileDown, Trash2, ScrollText } from 'lucide-react';
 import { ServiceOrder, OrderStatus } from '../../types';
 
 interface BudgetListProps {
@@ -9,6 +9,7 @@ interface BudgetListProps {
     onDuplicate: (budget: ServiceOrder) => void;
     onEdit: (budget: ServiceOrder) => void;
     onPrint: (budget: ServiceOrder) => void;
+    onGenerateContract: (budget: ServiceOrder) => void;
     onDelete: (budget: ServiceOrder) => void;
 }
 
@@ -19,6 +20,7 @@ const BudgetList: React.FC<BudgetListProps> = ({
     onDuplicate,
     onEdit,
     onPrint,
+    onGenerateContract,
     onDelete
 }) => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -94,6 +96,9 @@ const BudgetList: React.FC<BudgetListProps> = ({
                                     </button>
                                     <button onClick={() => onPrint(budget)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Imprimir">
                                         <Printer className="w-4 h-4" />
+                                    </button>
+                                    <button onClick={() => onGenerateContract(budget)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Gerar Contrato">
+                                        <ScrollText className="w-4 h-4" />
                                     </button>
                                     <button onClick={() => onDelete(budget)} className="p-2 text-rose-300 hover:text-rose-600 transition-colors" title="Excluir">
                                         <Trash2 className="w-4 h-4" />

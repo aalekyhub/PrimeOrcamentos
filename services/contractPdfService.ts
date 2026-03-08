@@ -40,7 +40,7 @@ export const getContractHtml = (order: ServiceOrder, customer: any, company: Com
                     </td>
                     <td style="width:28%; vertical-align:top; text-align:right; padding:0;">
                         <h2 style="font-size: 24px; font-weight: 900; color: #2563eb; margin: 0; letter-spacing: -1px; line-height: 1.1;">
-                            ${order.id.replace('OS-', 'OS')}
+                            ${order.id.replace('OS-', 'CONTRATO-')}
                         </h2>
                         <p style="font-size: 10px; font-weight: 800; color: #334155; text-transform: uppercase; margin-top: 6px;">
                             EMISSÃO: ${new Date().toLocaleDateString("pt-BR")}
