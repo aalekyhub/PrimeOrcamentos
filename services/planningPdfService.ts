@@ -128,11 +128,19 @@ export const buildPlanningReportHtml = (
         value: toNumber(i.value)
     }));
 
-    const reportTaxes = taxes.map((t: any) => ({
-        name: t.name || '',
-        rate: toNumber(t.rate),
-        calculatedValue: toNumber(t.value)
-    }));
+    const baseTaxValue = Math.max(0, toNumber(calculations.totalGeneral) - toNumber(calculations.totalTax));
+    const reportTaxes = taxes.map((t: any) => {
+        const rate = toNumber(t.rate);
+        const val = toNumber(t.value);
+        // BDI is usually based on direct cost (totalGeneral - totalTax), while other taxes are based on totalGeneral.
+        // However, to keep it simple and consistent with the "perfect" execution report:
+        const calculatedValue = rate > 0 ? baseTaxValue * (rate / 100) : val;
+        return {
+            name: t.name || '',
+            rate,
+            calculatedValue
+        };
+    });
 
     let sectionCounter = 1;
 
