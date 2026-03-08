@@ -11,10 +11,11 @@ import { useNotify } from './ToastProvider';
 import CustomerManager from './CustomerManager';
 import ServiceCatalog from './ServiceCatalog';
 import { db } from '../services/db';
+import ReportPreview from './ReportPreview';
 import { buildMaintenanceOsHtml } from '../services/osPdfService';
 import { compressImage } from '../services/imageUtils';
-import { DocumentPreview } from './documents/DocumentPreview';
-import { ContractDocument } from './documents/ContractDocument';
+import { getContractHtml } from '../services/contractPdfService';
+// DocumentPreview and ContractDocument are replaced by the unified system
 
 interface Props {
   orders: ServiceOrder[];
@@ -32,6 +33,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
   const [showFullClientForm, setShowFullClientForm] = useState(false);
   const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
   const [previewContract, setPreviewContract] = useState<ServiceOrder | null>(null);
+  const [previewOS, setPreviewOS] = useState<ServiceOrder | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const { notify } = useNotify();
 
@@ -140,15 +142,9 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
       else { notify("Salvo localmente. Erro ao sincronizar (veja o console)", "warning"); setEditingOrderId(null); setShowForm(false); }
     } finally { setIsSaving(false); }
   };
-  // NEXT_PrintOS
-  const handlePrintOS = (order: ServiceOrder, mode: 'print' | 'pdf' = 'print') => {
-    const customer = customers.find(c => c.id === order.customerId) || { name: order.customerName, address: 'Não informado', document: 'N/A' };
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-
-    const html = buildMaintenanceOsHtml(order, customer, company);
-    printWindow.document.write(html);
-    printWindow.document.close();
+  // Unified OS Preview
+  const handlePreviewOS = (order: ServiceOrder) => {
+    setPreviewOS(order);
   };
 
   // NEXT_Contract
@@ -238,7 +234,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                 <td className="px-8 py-5 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase">{order.equipmentBrand || 'N/A'} {order.equipmentModel}</td>
                 <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button onClick={() => handlePreviewContract(order)} className="p-2 text-slate-400 dark:text-slate-600 hover:text-slate-900 dark:hover:text-white transition-colors" title="Gerar Contrato"><ScrollText className="w-4 h-4" /></button>
-                  <button onClick={() => handlePrintOS(order)} className="p-2 text-slate-400 dark:text-slate-600 hover:text-slate-900 dark:hover:text-white transition-colors"><Printer className="w-4 h-4" /></button>
+                  <button onClick={() => handlePreviewOS(order)} className="p-2 text-slate-400 dark:text-slate-600 hover:text-slate-900 dark:hover:text-white transition-colors" title="Visualizar/Imprimir OS"><Printer className="w-4 h-4" /></button>
                   <button onClick={() => {
                     setEditingOrderId(order.id);
                     // ... other setters ...
@@ -413,7 +409,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
 
                 <div className="space-y-3 mt-auto">
                   <div className="grid grid-cols-2 gap-3">
-                    <button onClick={() => handlePrintOS({
+                    <button onClick={() => handlePreviewOS({
                       id: editingOrderId || 'PREVIEW',
                       customerId: selectedCustomerId,
                       customerName: customers.find(c => c.id === selectedCustomerId)?.name || 'N/A',
@@ -426,23 +422,9 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                       status: OrderStatus.IN_PROGRESS,
                       items, totalAmount, signature: canvasRef.current?.toDataURL(), descriptionBlocks, paymentTerms, deliveryTime,
                       createdAt: new Date().toISOString(),
-                      dueDate: deliveryDate || new Date().toISOString()
-                    })} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-600 p-4 rounded-2xl font-black uppercase text-[10px] flex items-center justify-center gap-2 transition-all"><Printer className="w-4 h-4" /> Imprimir</button>
-                    <button onClick={() => handlePrintOS({
-                      id: editingOrderId || 'PREVIEW',
-                      customerId: selectedCustomerId,
-                      customerName: customers.find(c => c.id === selectedCustomerId)?.name || 'N/A',
-                      customerEmail: '',
-                      description: osTitle,
-                      serviceDescription: diagnosis,
-                      equipmentBrand: brand,
-                      equipmentModel: model,
-                      equipmentSerialNumber: serial,
-                      status: OrderStatus.IN_PROGRESS,
-                      items, totalAmount, signature: canvasRef.current?.toDataURL(), descriptionBlocks, paymentTerms, deliveryTime,
-                      createdAt: new Date().toISOString(),
-                      dueDate: deliveryDate || new Date().toISOString()
-                    }, 'pdf')} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-600 p-4 rounded-2xl font-black uppercase text-[10px] flex items-center justify-center gap-2 transition-all"><FileText className="w-4 h-4" /> PDF</button>
+                      dueDate: deliveryDate || new Date().toISOString(),
+                      osType: 'EQUIPMENT'
+                    })} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-600 p-4 rounded-2xl font-black uppercase text-[10px] flex items-center justify-center gap-2 transition-all col-span-2"><Printer className="w-4 h-4" /> Visualizar Documento</button>
                   </div>
                   <button onClick={handleSaveOS} disabled={isSaving} className={`w-full ${isSaving ? 'bg-slate-800' : 'bg-slate-900 dark:bg-blue-600 hover:bg-slate-800 dark:hover:bg-blue-500'} text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-slate-200 dark:shadow-none hover:shadow-2xl transition-all flex items-center justify-center gap-3`}>
                     <Save className={`w-4 h-4 ${isSaving ? 'animate-pulse' : ''}`} /> {isSaving ? 'Processando...' : 'Salvar Ordem de Serviço'}
@@ -455,28 +437,39 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
       )}
 
       {previewContract && (
-        <div className="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-5xl h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95">
-            <DocumentPreview
-              filename={`Contrato-${previewContract.id}`}
-              onClose={() => setPreviewContract(null)}
-            >
-              <ContractDocument
-                order={previewContract}
-                company={company}
-                customer={customers.find(c => c.id === previewContract.customerId) || {
-                  name: previewContract.customerName,
-                  document: 'N/A',
-                  address: 'Endereço não informado',
-                  city: '',
-                  state: '',
-                  cep: '',
-                  number: ''
-                }}
-              />
-            </DocumentPreview>
-          </div>
-        </div>
+        <ReportPreview
+          title={`Contrato - ${previewContract.id}`}
+          htmlContent={getContractHtml(
+            previewContract,
+            customers.find(c => c.id === previewContract.customerId) || {
+              name: previewContract.customerName,
+              document: 'N/A',
+              address: 'Endereço não informado',
+              city: '',
+              state: '',
+              cep: '',
+              number: ''
+            },
+            company
+          )}
+          onClose={() => setPreviewContract(null)}
+        />
+      )}
+
+      {previewOS && (
+        <ReportPreview
+          title={`Ordem de Serviço - ${previewOS.id}`}
+          htmlContent={buildMaintenanceOsHtml(
+            previewOS,
+            customers.find(c => c.id === previewOS.customerId) || {
+              name: previewOS.customerName,
+              address: 'Não informado',
+              document: 'N/A'
+            },
+            company
+          )}
+          onClose={() => setPreviewOS(null)}
+        />
       )}
     </div>
   );
