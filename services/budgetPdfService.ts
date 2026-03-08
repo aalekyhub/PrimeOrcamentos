@@ -79,7 +79,7 @@ export const buildBudgetFooterHtml = (company: CompanyProfile) => {
                  "Este documento constitui uma proposta comercial formal. Ao assinar abaixo, o cliente declara estar ciente e de pleno acordo com os valores, prazos e especificações técnicas descritas. Esta aceitação autoriza o início imediato dos trabalhos sob as condições estabelecidas. A contratada reserva-se o direito de renegociar valores caso a aprovação ocorra após o prazo de validade de ${vDays} dias. Eventuais alterações de escopo solicitadas após o aceite estarão sujeitas a nova análise de custos."
              </p>
         </div>
-        <div style="margin-top: 72px;">
+        <div style="margin-top: 70px;">
             <div style="border-bottom: 2px solid #cbd5e1; width: 400px; max-width: 100%;"></div>
             <p style="margin: 12px 0 0 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; line-height: 1.4; padding-bottom: 2px;">ASSINATURA DO CLIENTE / ACEITE</p>
         </div>
