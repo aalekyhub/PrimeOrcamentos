@@ -28,123 +28,21 @@ const ReportPreview: React.FC<Props> = ({
         return `${base || 'RELATORIO'}.pdf`;
     };
 
-    // Iframe printing method is self-contained
-
-    const handlePrint = async () => {
+    const handlePrint = () => {
         try {
             const originalTitle = document.title;
             const tempTitle = safeFileName(filename).replace(/\.pdf$/i, '');
             document.title = tempTitle;
 
-            // Create a hidden iframe
-            const iframe = document.createElement('iframe');
-            iframe.style.position = 'fixed';
-            iframe.style.right = '0';
-            iframe.style.bottom = '0';
-            iframe.style.width = '0';
-            iframe.style.height = '0';
-            iframe.style.border = '0';
-            document.body.appendChild(iframe);
-
-            const iframeDoc = iframe.contentWindow?.document;
-            if (!iframeDoc) throw new Error('Could not create print iframe');
-
-            // Build the full HTML for the iframe
-            // We use the same styles used for PDF generation in the services
-            iframeDoc.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>${tempTitle}</title>
-                    <script src="https://cdn.tailwindcss.com"></script>
-                    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
-                    <style>
-                        @page {
-                            size: A4;
-                            margin: 0;
-                        }
-                        body {
-                            margin: 0;
-                            padding: 0;
-                            background: white;
-                            -webkit-print-color-adjust: exact !important;
-                            print-color-adjust: exact !important;
-                        }
-                        * {
-                            box-sizing: border-box;
-                        }
-                        /* Ensure the content fits A4 perfectly */
-                        .pdf-page-content {
-                            width: 210mm;
-                            margin: 0 auto;
-                            background: white;
-                        }
-                        /* Support for the structural divs from services */
-                        .pdf-page-content > div {
-                            padding: 15mm !important;
-                            min-height: 297mm;
-                            page-break-after: always;
-                            break-after: always;
-                        }
-                        /* Avoid empty page at the end if the last div has page-break-after */
-                        .pdf-page-content > div:last-child {
-                            page-break-after: auto;
-                            break-after: auto;
-                        }
-                        
-                        /* Standard Table Styles for all Documents */
-                        table {
-                            width: 100% !important;
-                            border-collapse: collapse !important;
-                        }
-                        td, th {
-                            word-break: break-word;
-                        }
-                        .avoid-break {
-                            break-inside: avoid !important;
-                            page-break-inside: avoid !important;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="pdf-page-content">
-                        ${htmlContent}
-                    </div>
-                    <script>
-                        function startPrint() {
-                            window.print();
-                            // Restore title after print dialog closes
-                            setTimeout(() => {
-                                try {
-                                    window.parent.document.title = "${originalTitle.replace(/"/g, '\\"')}";
-                                } catch(e) {}
-                            }, 100);
-                        }
-                        
-                        // Wait for images and Tailwind
-                        window.addEventListener('load', () => {
-                            setTimeout(startPrint, 500);
-                        });
-                        
-                        // Fallback if load event already fired
-                        if (document.readyState === 'complete') {
-                            setTimeout(startPrint, 500);
-                        }
-                    </script>
-                </body>
-                </html>
-            `);
-            iframeDoc.close();
-
-            // Cleanup after printing (or if user cancels)
-            // We give it some time to ensure the print dialog is handled
-            setTimeout(() => {
-                document.body.removeChild(iframe);
-            }, 2000);
-
-        } catch (error) {
-            console.error('Erro ao gerar PDF:', error);
+            // Simple native print
             window.print();
+
+            // Restore title
+            setTimeout(() => {
+                document.title = originalTitle;
+            }, 500);
+        } catch (error) {
+            console.error('Erro ao acionar impressão:', error);
         }
     };
 
@@ -156,27 +54,75 @@ const ReportPreview: React.FC<Props> = ({
             <style>{`
                 /* Global Print Adjustments */
                 @media print {
-                    body * {
-                        visibility: hidden !important;
+                    /* Hide EVERYTHING except the preview content */
+                    body > *:not(#print-modal-portal) {
+                        display: none !important;
                     }
-
-                    #report-preview-viewport,
-                    #report-preview-viewport * {
-                        visibility: visible !important;
-                    }
-
-                    #report-preview-viewport {
-                        position: absolute !important;
-                        top: 0 !important;
-                        left: 0 !important;
-                        width: 100% !important;
+                    
+                    #print-modal-portal {
+                        position: static !important;
                         padding: 0 !important;
-                        margin: 0 !important;
+                        background: white !important;
+                        display: block !important;
+                        overflow: visible !important;
+                    }
+
+                    #report-preview-wrapper {
+                        box-shadow: none !important;
+                        border: none !important;
+                        border-radius: 0 !important;
+                        height: auto !important;
+                        width: auto !important;
+                        max-width: none !important;
+                        display: block !important;
                         background: white !important;
                     }
 
-                    .no-print {
+                    /* Hide UI elements */
+                    .no-print, 
+                    .sticky,
+                    #report-preview-wrapper > div:first-child,
+                    #report-preview-wrapper > div:last-child {
                         display: none !important;
+                    }
+
+                    #report-preview-viewport {
+                        background: white !important;
+                        padding: 0 !important;
+                        margin: 0 !important;
+                        display: block !important;
+                        width: 100% !important;
+                        height: auto !important;
+                        overflow: visible !important;
+                    }
+
+                    #report-preview-content {
+                        transform: none !important; /* RESET ZOOM FOR PRINT */
+                        display: block !important;
+                        width: 100% !important;
+                    }
+
+                    .pdf-page-content {
+                        gap: 0 !important;
+                        display: block !important;
+                    }
+
+                    .pdf-page-content > div {
+                        box-shadow: none !important;
+                        margin: 0 !important;
+                        padding: 15mm !important;
+                        width: 100% !important;
+                        min-height: 297mm !important;
+                        page-break-after: always !important;
+                        break-after: always !important;
+                        display: block !important;
+                        box-sizing: border-box !important;
+                    }
+
+                    /* Prevent blank pages */
+                    .pdf-page-content > div:last-child {
+                        page-break-after: auto !important;
+                        break-after: auto !important;
                     }
 
                     @page {
