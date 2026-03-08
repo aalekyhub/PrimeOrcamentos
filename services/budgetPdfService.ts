@@ -16,7 +16,13 @@ const formatDate = (dateStr?: string) => {
 export const buildBudgetHeaderHtml = (budget: ServiceOrder, company: CompanyProfile) => {
   const eDate = formatDate(budget.createdAt);
   const vDays = company.defaultProposalValidity || 15;
-  const vDate = budget.dueDate ? formatDate(budget.dueDate) : formatDate(new Date(new Date(budget.createdAt || Date.now()).getTime() + vDays * 24 * 60 * 60 * 1000).toISOString());
+  const vDate = budget.dueDate
+    ? formatDate(budget.dueDate)
+    : formatDate(
+      new Date(
+        new Date(budget.createdAt || Date.now()).getTime() + vDays * 24 * 60 * 60 * 1000
+      ).toISOString()
+    );
 
   return `
     <div class="report-header" style="padding-bottom:18px; border-bottom:2px solid #000; margin-bottom:18px;">
@@ -111,8 +117,6 @@ export const buildBudgetDescriptionBlocksHtml = (budget: ServiceOrder, company: 
         <div style="display: block;">
           ${budget.descriptionBlocks.map((block: DescriptionBlock) => {
       if (block.type === 'text') {
-        // Assume text block from rich editor comes sanitized via Quill or is intentional rich text.
-        // We inject as-is to preserve HTML formatting from Quill.
         return `<div class="ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px; color: #334155; line-height: 1.6; text-align: justify; margin-bottom: 24px;">${block.content || ''}</div>`;
       } else if (block.type === 'image') {
         return `<div style="margin: 24px 0; break-inside: avoid; page-break-inside: avoid; display: block; text-align: center;"><img src="${escapeHtml(block.content)}" style="width: auto; max-width: 100%; border-radius: 8px; display: block; margin: 0 auto; object-fit: contain; max-height: 250mm;"></div>`;
@@ -124,22 +128,25 @@ export const buildBudgetDescriptionBlocksHtml = (budget: ServiceOrder, company: 
         </div>
       </div>`;
   }
+
   return html;
 };
 
 export const buildBudgetItemsTableHtml = (budget: ServiceOrder, company: CompanyProfile) => {
   const itemFBase = company.itemsFontSize || 12;
+
   const itemsH = budget.items.map((item: ServiceItem) => `
     <tr style="border-bottom: 1px solid #e2e8f0; break-inside: avoid; page-break-inside: avoid;">
       <td style="padding: 8px 0; font-weight: 600; text-transform: uppercase; font-size: ${itemFBase}px; color: #334155; width: 55%; vertical-align: top;">${escapeHtml(item.description)}</td>
       <td style="padding: 8px 0; text-align: center; font-weight: 600; color: #475569; font-size: ${itemFBase}px; width: 10%; vertical-align: top;">${toNumber(item.quantity)} ${escapeHtml(item.unit || '')}</td>
       <td style="padding: 8px 0; text-align: right; color: #475569; font-size: ${itemFBase}px; width: 17.5%; vertical-align: top; white-space: nowrap;">R$ ${formatMoney(item.unitPrice)}</td>
       <td style="padding: 8px 0; text-align: right; font-weight: 700; font-size: ${itemFBase}px; color: #0f172a; width: 17.5%; vertical-align: top; white-space: nowrap;">R$ ${formatMoney(toNumber(item.unitPrice) * toNumber(item.quantity))}</td>
-    </tr>`).join('');
+    </tr>
+  `).join('');
 
   return `
       <!-- Items Table -->
-      <div style="margin-top: 20px; margin-bottom: 20px;">
+      <div style="margin-top: 20px; margin-bottom: 20px; page-break-before: always; break-before: page;">
           <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; padding-bottom: 6px; margin-bottom: 4px;">DETALHAMENTO FINANCEIRO</div>
           <table style="width: 100%; border-collapse: collapse;">
             <thead>
@@ -227,9 +234,12 @@ export const getBudgetBodyHtml = (budget: ServiceOrder, company: CompanyProfile,
   `;
 };
 
-// CORREÇÃO AQUI:
 // removido o table/thead/tfoot que estava reservando espaço fantasma nas páginas seguintes do PDF
-export const generateBudgetReportHtml = (budget: ServiceOrder, company: CompanyProfile, customerDoc?: string) => {
+export const generateBudgetReportHtml = (
+  budget: ServiceOrder,
+  company: CompanyProfile,
+  customerDoc?: string
+) => {
   return `
     <div class="pdf-page-content">
       <div style="width:100%; background:#ffffff; font-family:Inter, Arial, sans-serif; color:#1e293b; padding:0;">
@@ -244,10 +254,12 @@ export const generateBudgetReportHtml = (budget: ServiceOrder, company: CompanyP
 export const runOptimizePageBreaks = (container: HTMLElement) => {
   const root = container.querySelector('.print-description-content');
   if (!root) return;
+
   const content = root.querySelector('div:last-child');
   if (!content) return;
 
   const allNodes: Element[] = [];
+
   Array.from(content.children).forEach(block => {
     if (block.classList.contains('ql-editor-print')) {
       allNodes.push(...Array.from(block.children));
@@ -265,13 +277,17 @@ export const runOptimizePageBreaks = (container: HTMLElement) => {
     } else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'STRONG') {
       const text = el.innerText.trim();
       const isNumbered = /^\\d+(\\.\\d+)*[\\.\\s\\)]/.test(text);
-      const isBold = el.querySelector('strong, b') ||
+      const isBold =
+        el.querySelector('strong, b') ||
         (el.style && (parseInt(el.style.fontWeight) >= 600 || el.style.fontWeight === 'bold')) ||
         el.classList.contains('font-bold') ||
         el.tagName === 'STRONG';
       const isShort = text.length < 150;
 
-      if ((isNumbered && isBold && isShort) || (isBold && isShort && text === text.toUpperCase() && text.length > 3)) {
+      if (
+        (isNumbered && isBold && isShort) ||
+        (isBold && isShort && text === text.toUpperCase() && text.length > 3)
+      ) {
         isTitle = true;
       }
     }
@@ -279,13 +295,19 @@ export const runOptimizePageBreaks = (container: HTMLElement) => {
     if (isTitle) {
       const nodesToWrap = [el];
       let j = i + 1;
+
       while (j < allNodes.length && nodesToWrap.length < 2) {
         const next = allNodes[j] as HTMLElement;
         const nextText = next.innerText.trim();
-        const nextIsTitle = next.matches('h1, h2, h3, h4, h5, h6') ||
-          (/^\\d+(\\.\\d+)*[\\.\\s\\)]/.test(nextText) && (next.querySelector('strong, b') || nextText === nextText.toUpperCase() || (next.style && next.style.fontWeight === 'bold')));
+        const nextIsTitle =
+          next.matches('h1, h2, h3, h4, h5, h6') ||
+          (/^\\d+(\\.\\d+)*[\\.\\s\\)]/.test(nextText) &&
+            (next.querySelector('strong, b') ||
+              nextText === nextText.toUpperCase() ||
+              (next.style && next.style.fontWeight === 'bold')));
 
         if (nextIsTitle) break;
+
         nodesToWrap.push(next);
         j++;
       }
@@ -297,6 +319,7 @@ export const runOptimizePageBreaks = (container: HTMLElement) => {
         wrapper.style.pageBreakInside = 'avoid';
         wrapper.style.display = 'block';
         wrapper.style.width = '100%';
+
         el.parentNode?.insertBefore(wrapper, el);
         nodesToWrap.forEach(node => wrapper.appendChild(node));
         i = j - 1;
