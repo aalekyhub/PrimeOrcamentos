@@ -233,32 +233,32 @@ const ReportPreview: React.FC<Props> = ({
                     }
 
                     /* 
-                       RESTAURA O ESPAÇAMENTO VERTICAL NO PDF (CORREÇÃO DE MARGENS GRUDADAS)
-                       Força o distanciamento entre parágrafos e títulos que o Tailwind/Browser reseeta no Print.
+                       ESTILOS DE CONTEÚDO (TELA E PDF)
+                       Garante que o espaçamento seja idêntico na visualização e no arquivo final.
                     */
                     .pdf-page-content p, 
                     .pdf-page-content .ql-editor-print p {
-                        margin-bottom: 12pt !important;
+                        margin-bottom: 8pt !important;
                         line-height: 1.6 !important;
                     }
 
                     .pdf-page-content h1, .pdf-page-content h2, .pdf-page-content h3,
                     .pdf-page-content h4, .pdf-page-content h5, .pdf-page-content h6 {
-                        margin-top: 18pt !important;
-                        margin-bottom: 8pt !important;
+                        margin-top: 14pt !important;
+                        margin-bottom: 6pt !important;
                         line-height: 1.2 !important;
                     }
 
                     .pdf-page-content ul, .pdf-page-content ol {
-                        margin-bottom: 12pt !important;
+                        margin-bottom: 8pt !important;
                         padding-left: 20pt !important;
                     }
 
                     .pdf-page-content li {
-                        margin-bottom: 4pt !important;
+                        margin-bottom: 3pt !important;
                     }
 
-                    /* Garante que o primeiro elemento da página não tenha margem superior extra */
+                    /* Garante que o primeiro elemento de cada página não tenha margem superior extra */
                     .pdf-page-content > div > *:first-child {
                         margin-top: 0 !important;
                     }
