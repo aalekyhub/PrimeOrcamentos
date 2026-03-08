@@ -5,17 +5,17 @@ import { escapeHtml, formatDateBR as formatDate } from './formatUtils';
 // Modular Header for OS
 export const buildOsHeaderHtml = (order: ServiceOrder, company: CompanyProfile, title: string) => {
     return `
-    <div class="report-header" style="padding: 10mm 0 8mm 0; border-bottom: 3px solid #0f172a; margin-bottom: 8mm;">
+    <div class="report-header" style="padding: 10mm 0 8mm 0; border-bottom: 4px solid #0f172a; margin-bottom: 10mm;">
         <table style="width:100%; border-collapse:collapse; table-layout: fixed;">
             <tr>
                 <td style="width:72%; vertical-align:top; padding:0;">
                     <table style="width:100%; border-collapse:collapse;">
                         <tr>
-                            <td style="width:90px; vertical-align:middle; padding:0 14px 0 0;">
-                                ${company.logo ? `<img src="${company.logo}" style="max-height: 80px; max-width: 250px; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#2563eb;">PO</div>'}
+                            <td style="width:105px; vertical-align:middle; padding:0 18px 0 0;">
+                                ${company.logo ? `<img src="${company.logo}" style="max-height: 85px; max-width: 250px; object-fit: contain;">` : '<div style="font-weight:900; font-size:36px; color:#2563eb;">PO</div>'}
                             </td>
                             <td style="vertical-align:middle; padding:0;">
-                                <h1 style="font-size:18px; font-weight:900; color:#0f172a; margin:0 0 2mm 0; text-transform:uppercase; letter-spacing:-0.5px;">${escapeHtml(company.name)}</h1>
+                                <h1 style="font-size:20px; font-weight:900; color:#0f172a; margin:0 0 1mm 0; text-transform:uppercase; letter-spacing:-0.8px;">${escapeHtml(company.name)}</h1>
                                 <p style="font-size:11px; font-weight:800; color:#2563eb; text-transform:uppercase; letter-spacing:1px; margin:0 0 2mm 0;">${title}</p>
                                 <p style="font-size:9px; color:#94a3b8; font-weight:700; text-transform:uppercase; letter-spacing:-0.3px; margin:0;">${escapeHtml(company.cnpj || '')} | ${escapeHtml(company.phone || '')}</p>
                             </td>
@@ -23,9 +23,9 @@ export const buildOsHeaderHtml = (order: ServiceOrder, company: CompanyProfile, 
                     </table>
                 </td>
                 <td style="width:28%; vertical-align:top; text-align:right; padding:0;">
-                    <div style="background:#2563eb; color:white; padding:2mm 4mm; border-radius:2mm; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:1px; margin-bottom:3mm; display:inline-block;">ORDEM DE SERVIÇO</div>
-                    <p style="font-size:24px; font-weight:900; color:#0f172a; letter-spacing:-1px; margin:0 0 1mm 0; white-space:nowrap; line-height: 1;">${order.id}</p>
-                    <p style="font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:1px; text-align:right; margin:6px 0 0 0;">ABERTURA: ${formatDate(order.createdAt || '')}</p>
+                    <div style="background:#2563eb; color:white; padding:3mm 5mm; border-radius:3mm; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:4mm; display:inline-block; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);">ORDEM DE SERVIÇO</div>
+                    <p style="font-size:26px; font-weight:900; color:#0f172a; letter-spacing:-1.2px; margin:0 0 1mm 0; white-space:nowrap; line-height: 1;">${order.id}</p>
+                    <p style="font-size:10px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:1px; text-align:right; margin:8px 0 0 0;">ABERTURA: ${formatDate(order.createdAt || '')}</p>
                 </td>
             </tr>
         </table>
@@ -34,17 +34,26 @@ export const buildOsHeaderHtml = (order: ServiceOrder, company: CompanyProfile, 
 
 // Modular Boxes for Customer and Details
 export const buildOsClientBoxHtml = (order: ServiceOrder, customer: any) => {
+    const accentStyle = 'border-left: 4px solid #2563eb;';
+    const cardStyle = 'flex: 1; background: #f8fafc; border-radius: 8px; padding: 22px; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02);';
+
     return `
     <div style="display: flex; gap: 24px; margin-bottom: 32px;">
-        <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0;">
-            <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">CLIENTE / SOLICITANTE</span>
-            <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${escapeHtml(customer.name)}</div>
-            <div style="font-size: 11px; color: #64748b; font-weight: 600; margin-top: 4px;">${escapeHtml(customer.document || 'Documento não inf.')}</div>
+        <div style="${cardStyle} ${accentStyle}">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                <div style="width: 16px; height: 16px; background: #2563eb; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-size: 8px; font-weight: 900;">C</div>
+                <span style="font-size: 10px; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.1em;">CLIENTE / SOLICITANTE</span>
+            </div>
+            <div style="font-size: 14px; font-weight: 900; color: #0f172a; text-transform: uppercase; line-height: 1.2; margin-bottom: 6px;">${escapeHtml(customer.name)}</div>
+            <div style="font-size: 11px; color: #64748b; font-weight: 700; background: #f1f5f9; padding: 4px 8px; border-radius: 4px; display: inline-block;">${escapeHtml(customer.document || 'CPF/CNPJ NÃO INF.')}</div>
         </div>
-        <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0;">
-            <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">REFERÊNCIA / LOCAL</span>
-            <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${escapeHtml(order.description || 'OBRA / REFORMA')}</div>
-            <div style="font-size: 11px; color: #64748b; font-weight: 600; margin-top: 4px;">PREVISÃO: ${order.deliveryTime || (order.dueDate ? formatDate(order.dueDate) : 'A combinar')}</div>
+        <div style="${cardStyle} border-left: 4px solid #0f172a;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                <div style="width: 16px; height: 16px; background: #0f172a; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-size: 8px; font-weight: 900;">R</div>
+                <span style="font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em;">REFERÊNCIA / LOCAL</span>
+            </div>
+            <div style="font-size: 14px; font-weight: 900; color: #0f172a; text-transform: uppercase; line-height: 1.2; margin-bottom: 6px;">${escapeHtml(order.description || 'OBRA / REFORMA')}</div>
+            <div style="font-size: 11px; color: #2563eb; font-weight: 800; text-transform: uppercase;">PREVISÃO: ${escapeHtml(order.deliveryTime || (order.dueDate ? formatDate(order.dueDate) : 'A COMBINAR'))}</div>
         </div>
     </div>`;
 };
@@ -53,10 +62,13 @@ export const buildOsClientBoxHtml = (order: ServiceOrder, customer: any) => {
 export const buildOsEquipmentBoxHtml = (order: ServiceOrder) => {
     return `
     <div style="display: flex; gap: 24px; margin-bottom: 32px;">
-        <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0;">
-            <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">DADOS DO EQUIPAMENTO</span>
-            <div style="font-size: 13px; font-weight: 800; color: #0f172a; text-transform: uppercase; line-height: 1.4;">${escapeHtml(order.equipmentBrand || '')} ${escapeHtml(order.equipmentModel || 'Não especificado')}</div>
-            <div style="font-size: 11px; color: #64748b; font-weight: 600; margin-top: 4px;">SÉRIE: ${escapeHtml(order.equipmentSerialNumber || 'N/A')}</div>
+        <div style="flex: 1; background: #f8fafc; border-radius: 8px; padding: 22px; border: 1px solid #e2e8f0; border-left: 4px solid #2563eb;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                <div style="width: 16px; height: 16px; background: #2563eb; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-size: 8px; font-weight: 900;">E</div>
+                <span style="font-size: 10px; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.1em;">DADOS DO EQUIPAMENTO</span>
+            </div>
+            <div style="font-size: 15px; font-weight: 900; color: #0f172a; text-transform: uppercase; line-height: 1.2; margin-bottom: 6px;">${escapeHtml(order.equipmentBrand || '')} ${escapeHtml(order.equipmentModel || 'EQUIPAMENTO')}</div>
+            <div style="font-size: 11px; color: #64748b; font-weight: 700; background: #f1f5f9; padding: 4px 8px; border-radius: 4px; display: inline-block;">SÉRIE: ${escapeHtml(order.equipmentSerialNumber || 'N/A')}</div>
         </div>
     </div>`;
 };
@@ -116,26 +128,29 @@ export const buildOsTotalsHtml = (order: ServiceOrder) => {
     const { subtotal, bdiValue, taxValue, finalTotal } = financeUtils.getDetailedFinancials(order);
 
     return `
-    <div class="avoid-break mb-8">
-        <div style="display: flex; justify-content: flex-end; margin-bottom: 8px; gap: 40px; padding: 0 12px;">
+    <div class="avoid-break mb-10">
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 12px; gap: 40px; padding: 0 24px;">
             <div style="text-align: right;">
-                <p style="font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px;">Subtotal</p>
-                <p style="font-size: 10px; font-weight: 800; color: #0f172a; margin: 0;">R$ ${subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.05em;">Subtotal</p>
+                <p style="font-size: 11px; font-weight: 800; color: #334155; margin: 0;">R$ ${subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             </div>
             ${order.bdiRate ? `
             <div style="text-align: right;">
-                <p style="font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px;">BDI (${order.bdiRate}%)</p>
-                <p style="font-size: 10px; font-weight: 800; color: #059669; margin: 0;">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p style="font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.05em;">BDI (${order.bdiRate}%)</p>
+                <p style="font-size: 11px; font-weight: 800; color: #059669; margin: 0;">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             </div>` : ''}
             ${order.taxRate ? `
             <div style="text-align: right;">
-                <p style="font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px;">Impostos (${order.taxRate}%)</p>
-                <p style="font-size: 10px; font-weight: 800; color: #2563eb; margin: 0;">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p style="font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.05em;">Impostos (${order.taxRate}%)</p>
+                <p style="font-size: 11px; font-weight: 800; color: #2563eb; margin: 0;">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             </div>` : ''}
         </div>
-        <div style="background: #0f172a; border-radius: 12px; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; color: white;">
-            <span style="font-size: 14px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase;">INVESTIMENTO TOTAL:</span>
-            <span style="font-size: 32px; font-weight: 900; letter-spacing: -0.05em; white-space: nowrap;">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+        <div style="background: #0f172a; border-radius: 12px; padding: 14px 40px; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 4px; height: 24px; background: #2563eb; border-radius: 2px;"></div>
+                <span style="font-size: 14px; font-weight: 900; letter-spacing: 0.1em; text-transform: uppercase;">INVESTIMENTO TOTAL DA ORDEM:</span>
+            </div>
+            <span style="font-size: 36px; font-weight: 900; letter-spacing: -0.05em; white-space: nowrap;">R$ ${finalTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
         </div>
     </div>`;
 };
