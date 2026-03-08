@@ -15,10 +15,9 @@ const ReportPreview: React.FC<Props> = ({
     htmlContent,
     filename = 'RELATORIO'
 }) => {
-    const [zoom, setZoom] = React.useState(100); // Estado que controla o nível de zoom da visualização em tela
+    const [zoom, setZoom] = React.useState(100);
     const previewRef = React.useRef<HTMLDivElement | null>(null);
 
-    /* Limpa e formata o nome do arquivo para garantir que seja um nome de PDF válido */
     const safeFileName = (name?: string) => {
         const base = (name || 'RELATORIO')
             .replace(/\.pdf$/i, '')
@@ -28,7 +27,6 @@ const ReportPreview: React.FC<Props> = ({
         return `${base || 'RELATORIO'}.pdf`;
     };
 
-    /* Aciona a caixa de diálogo de impressão nativa do navegador */
     const handlePrint = () => {
         try {
             const originalTitle = document.title;
@@ -53,8 +51,6 @@ const ReportPreview: React.FC<Props> = ({
             <style>{`
                 /* =========================
                    VISUALIZAÇÃO EM TELA (PREVIEW)
-                   Estilos que controlam como o documento
-                   aparece dentro do modal no navegador.
                 ========================== */
 
                 #report-preview-viewport {
@@ -84,8 +80,6 @@ const ReportPreview: React.FC<Props> = ({
                     width: 100%;
                 }
 
-                /* Cada div direta dentro de .pdf-page-content é tratada
-                   como uma página A4 individual no preview. */
                 .pdf-page-content > div {
                     background: white !important;
                     width: 210mm !important;
@@ -143,10 +137,38 @@ const ReportPreview: React.FC<Props> = ({
                     border: 2px solid #cbd5e1;
                 }
 
+                /* Tipografia do preview para ficar próxima do editor */
+                .pdf-page-content p,
+                .pdf-page-content .ql-editor-print p {
+                    margin-top: 0 !important;
+                    margin-bottom: 8px !important;
+                    line-height: 1.45 !important;
+                }
+
+                .pdf-page-content h1, .pdf-page-content h2, .pdf-page-content h3,
+                .pdf-page-content h4, .pdf-page-content h5, .pdf-page-content h6 {
+                    margin-top: 12px !important;
+                    margin-bottom: 6px !important;
+                    line-height: 1.2 !important;
+                }
+
+                .pdf-page-content ul, .pdf-page-content ol {
+                    margin-top: 0 !important;
+                    margin-bottom: 8px !important;
+                    padding-left: 18px !important;
+                }
+
+                .pdf-page-content li {
+                    margin-bottom: 2px !important;
+                    line-height: 1.4 !important;
+                }
+
+                .pdf-page-content > div > *:first-child {
+                    margin-top: 0 !important;
+                }
+
                 /* =========================
                    ESTILOS DE IMPRESSÃO (PDF)
-                   Estilos aplicados apenas quando o 
-                   usuário clica em 'Exportar PDF' ou Imprimir.
                 ========================== */
                 @media print {
                     html, body {
@@ -156,7 +178,6 @@ const ReportPreview: React.FC<Props> = ({
                         overflow: visible !important;
                     }
 
-                    /* Esconde todos os elementos do site original para focar apenas no conteúdo do modal */
                     body > *:not(#print-modal-portal) {
                         display: none !important;
                     }
@@ -184,7 +205,6 @@ const ReportPreview: React.FC<Props> = ({
                         overflow: visible !important;
                     }
 
-                    /* Esconde barras de ferramentas, botões e cabeçalhos do modal que não devem sair no papel */
                     .no-print,
                     .sticky,
                     #report-preview-wrapper > div:first-child,
@@ -216,11 +236,10 @@ const ReportPreview: React.FC<Props> = ({
                         width: 100% !important;
                     }
 
-                    /* Remove sombras e paddings das divs internas para alinhar perfeitamente com a margem da página real */
                     .pdf-page-content > div {
                         box-shadow: none !important;
                         margin: 0 !important;
-                        padding: 0 !important; /* importante para não conflitar com @page */
+                        padding: 0 !important;
                         width: 100% !important;
                         min-height: auto !important;
                         max-width: none !important;
@@ -232,33 +251,31 @@ const ReportPreview: React.FC<Props> = ({
                         overflow: visible !important;
                     }
 
-                    /* 
-                       RESTAURA O ESPAÇAMENTO VERTICAL NO PDF (CORREÇÃO DE MARGENS GRUDADAS)
-                       Força o distanciamento entre parágrafos e títulos que o Tailwind/Browser reseeta no Print.
-                    */
-                    .pdf-page-content p, 
+                    .pdf-page-content p,
                     .pdf-page-content .ql-editor-print p {
-                        margin-bottom: 12pt !important;
-                        line-height: 1.6 !important;
+                        margin-top: 0 !important;
+                        margin-bottom: 8px !important;
+                        line-height: 1.45 !important;
                     }
 
                     .pdf-page-content h1, .pdf-page-content h2, .pdf-page-content h3,
                     .pdf-page-content h4, .pdf-page-content h5, .pdf-page-content h6 {
-                        margin-top: 18pt !important;
-                        margin-bottom: 8pt !important;
+                        margin-top: 12px !important;
+                        margin-bottom: 6px !important;
                         line-height: 1.2 !important;
                     }
 
                     .pdf-page-content ul, .pdf-page-content ol {
-                        margin-bottom: 12pt !important;
-                        padding-left: 20pt !important;
+                        margin-top: 0 !important;
+                        margin-bottom: 8px !important;
+                        padding-left: 18px !important;
                     }
 
                     .pdf-page-content li {
-                        margin-bottom: 4pt !important;
+                        margin-bottom: 2px !important;
+                        line-height: 1.4 !important;
                     }
 
-                    /* Garante que o primeiro elemento da página não tenha margem superior extra */
                     .pdf-page-content > div > *:first-child {
                         margin-top: 0 !important;
                     }
@@ -268,24 +285,20 @@ const ReportPreview: React.FC<Props> = ({
                         break-after: auto !important;
                     }
 
-                    /* Se o conteúdo interno vier dentro de uma camada extra, mantém legível */
                     .pdf-page-content > div > * {
                         box-sizing: border-box !important;
                     }
 
-                    /* Força o ajuste de cores em impressoras (evita que o fundo saia em branco) */
                     * {
                         -webkit-print-color-adjust: exact !important;
                         print-color-adjust: exact !important;
                         color-adjust: exact !important;
                     }
 
-                    /* Configurações da página física (tamanho e margens) */
                     @page {
                         size: A4;
-                        margin: 15mm 15mm 15mm 15mm; /* Margens: Superior, Direita, Inferior, Esquerda */
+                        margin: 15mm 15mm 15mm 15mm;
 
-                        /* Cabeçalho/Rodapé nativo do navegador (opcional) */
                         @bottom-center {
                             content: "Página " counter(page) " de " counter(pages);
                             font-size: 10px;
@@ -366,10 +379,6 @@ const ReportPreview: React.FC<Props> = ({
                 </div>
 
                 <div id="report-preview-viewport">
-                    {/* 
-                        A renderização física do HTML acontece aqui. 
-                        O scale(zoom) aplica o zoom visual sem afetar o layout real do documento. 
-                    */}
                     <div
                         ref={previewRef}
                         id="report-preview-content"
