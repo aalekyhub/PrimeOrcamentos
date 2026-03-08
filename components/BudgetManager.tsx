@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { printBudget, downloadBudgetPdf } from '../services/budgetPdfService';
 import {
   Plus,
   Search,
@@ -21,6 +20,8 @@ import { db } from '../services/db';
 import BudgetList from './budget/BudgetList';
 import BudgetDescriptionEditor from './budget/BudgetDescriptionEditor';
 import BudgetSummarySidebar from './budget/BudgetSummarySidebar';
+import { DocumentPreview } from './documents/DocumentPreview';
+import { BudgetDocument } from './documents/BudgetDocument';
 
 interface Props {
   orders: ServiceOrder[];
@@ -61,6 +62,7 @@ const BudgetManager: React.FC<Props> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [editingBudgetId, setEditingBudgetId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [previewBudget, setPreviewBudget] = useState<ServiceOrder | null>(null);
   const { notify } = useNotify();
 
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
@@ -319,15 +321,9 @@ const BudgetManager: React.FC<Props> = ({
     });
   }, []);
 
-  const handlePrint = useCallback((budget: ServiceOrder) => {
-    const cust = customers.find(c => c.id === budget.customerId);
-    printBudget(budget, company, cust?.document);
-  }, [customers, company]);
-
-  const handleGeneratePDF = useCallback((budget: ServiceOrder) => {
-    const cust = customers.find(c => c.id === budget.customerId);
-    downloadBudgetPdf(budget, company, cust?.document, notify);
-  }, [customers, company, notify]);
+  const handlePreviewBudget = useCallback((budget: ServiceOrder) => {
+    setPreviewBudget(budget);
+  }, []);
 
   const handleSave = useCallback(async () => {
     if (isSaving) return;
@@ -385,23 +381,14 @@ const BudgetManager: React.FC<Props> = ({
     notify
   ]);
 
-  const handleDraftPrint = useCallback(() => {
+  const handlePreviewDraft = useCallback(() => {
     const budget = buildBudgetFromForm();
     if (!budget) {
-      notify('Selecione um cliente para imprimir o rascunho.', 'error');
+      notify('Preencha os dados (cliente e itens) para visualizar o rascunho.', 'error');
       return;
     }
-    handlePrint(budget);
-  }, [buildBudgetFromForm, notify, handlePrint]);
-
-  const handleDraftDownload = useCallback(() => {
-    const budget = buildBudgetFromForm();
-    if (!budget) {
-      notify('Selecione um cliente para gerar o PDF do rascunho.', 'error');
-      return;
-    }
-    handleGeneratePDF(budget);
-  }, [buildBudgetFromForm, notify, handleGeneratePDF]);
+    setPreviewBudget(budget);
+  }, [buildBudgetFromForm, notify]);
 
   const loadBudgetToForm = useCallback((budget: ServiceOrder, isClone = false) => {
     setShowImportModal(false);
@@ -477,8 +464,8 @@ const BudgetManager: React.FC<Props> = ({
           onApprove={handleApproveBudget}
           onDuplicate={(budget) => loadBudgetToForm(budget, true)}
           onEdit={(budget) => loadBudgetToForm(budget)}
-          onPrint={handlePrint}
-          onDownloadPdf={handleGeneratePDF}
+          onPrint={handlePreviewBudget}
+          onDownloadPdf={handlePreviewBudget}
           onDelete={handleDeleteBudget}
         />
       )}
@@ -675,8 +662,8 @@ const BudgetManager: React.FC<Props> = ({
                 deliveryTime={deliveryTime}
                 setDeliveryTime={setDeliveryTime}
                 onShowPayment={() => setShowPaymentModal(true)}
-                onPrint={handleDraftPrint}
-                onDownload={handleDraftDownload}
+                onPrint={handlePreviewDraft}
+                onDownload={handlePreviewDraft}
                 onSave={handleSave}
               />
             </div>
@@ -758,6 +745,23 @@ const BudgetManager: React.FC<Props> = ({
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {previewBudget && (
+        <div className="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-5xl h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95">
+            <DocumentPreview
+              filename={`Orcamento-${previewBudget.id}`}
+              onClose={() => setPreviewBudget(null)}
+            >
+              <BudgetDocument
+                budget={previewBudget}
+                company={company}
+                customerDoc={customers.find(c => c.id === previewBudget.customerId)?.document}
+              />
+            </DocumentPreview>
           </div>
         </div>
       )}

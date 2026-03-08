@@ -1,0 +1,115 @@
+.preview-wrapper {
+  width: 100%;
+  height: 100%;
+  background: #e5e7eb;
+  border-radius: 8px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-toolbar {
+  padding: 12px 16px;
+  background: #ffffff;
+  border-bottom: 1px solid #d1d5db;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.preview-toolbar-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f3f4f6;
+  padding: 4px;
+  border-radius: 6px;
+}
+
+.zoom-btn {
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #374151;
+  font-weight: bold;
+}
+.zoom-btn:hover { background: #e5e7eb; }
+.zoom-label { font-size: 13px; font-weight: 600; min-width: 48px; text-align: center; color: #4b5563; }
+
+.preview-stage {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+  flex: 1;
+}
+
+.pdf-page {
+  width: 210mm;
+  min-height: 297mm;
+  background: #ffffff;
+  color: #111827;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.15);
+  padding: 15mm 15mm 15mm 15mm;
+  box-sizing: border-box;
+  font-family: 'Inter', Arial, Helvetica, sans-serif;
+  line-height: 1.4;
+  position: relative;
+}
+
+.pdf-header {
+  margin-bottom: 25px;
+}
+
+.pdf-section {
+  margin-bottom: 8mm;
+}
+
+.pdf-footer {
+  margin-top: 32px;
+}
+
+.avoid-break {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.page-break {
+  page-break-before: always;
+  break-before: page;
+}
+
+/* Print specific styles (fallback if someone uses native print) */
+@media print {
+  .preview-toolbar {
+    display: none !important;
+  }
+
+  .preview-wrapper,
+  .preview-stage {
+    background: white !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .pdf-page {
+    box-shadow: none !important;
+    margin: 0 !important;
+    width: 100% !important;
+    padding: 0 !important;
+  }
+}
