@@ -19,24 +19,44 @@ export const buildBudgetHeaderHtml = (budget: ServiceOrder, company: CompanyProf
   const vDate = budget.dueDate ? formatDate(budget.dueDate) : formatDate(new Date(new Date(budget.createdAt || Date.now()).getTime() + vDays * 24 * 60 * 60 * 1000).toISOString());
 
   return `
-    <div style="padding-bottom: 25px !important; border-bottom: 3px solid #000; margin-bottom: 25px;">
-       <div style="display: flex; justify-content: space-between; align-items: center;">
-           <div style="display: flex; gap: 24px; align-items: center;">
-               <div style="display: flex; align-items: center; justify-content: flex-start;">
-                   ${company.logo ? `<img src="${company.logo}" style="height: ${company.logoSize || 80}px; max-width: 250px; object-fit: contain;">` : '<div style="font-weight:900; font-size:32px; color:#1e3a8a;">PRIME</div>'}
-               </div>
-               <div>
-                   <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 0 0 2px 0; text-transform: uppercase;">${escapeHtml(company.name)}</h1>
-                   <p style="margin: 0; font-size: 11px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.02em;">SOLUÇÕES em Gestão Profissional</p>
-                    <p style="margin: 4px 0 0 0; font-size: 10px; color: #64748b; font-weight: 500;">${escapeHtml(company.cnpj || '')} | ${escapeHtml(company.phone || '')}</p>
-               </div>
-           </div>
-           <div style="text-align: right;">
-               <p style="margin: 0; font-size: 24px; font-weight: 800; color: #2563eb;">${budget.id}</p>
-               <p style="margin: 4px 0 0 0; font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase;">EMISSÃO: ${eDate}</p>
-               <p style="margin: 2px 0 0 0; font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase;">VALIDADE: ${vDate}</p>
-           </div>
-       </div>
+    <div class="report-header" style="padding-bottom:18px; border-bottom:2px solid #000; margin-bottom:18px;">
+        <table style="width:100%; border-collapse:collapse; table-layout: fixed;">
+            <tr>
+                <td style="width:72%; vertical-align:top; padding:0;">
+                    <table style="width:100%; border-collapse:collapse;">
+                        <tr>
+                            ${company.logo ? `
+                            <td style="width:100px; vertical-align:middle; padding:0 14px 0 0;">
+                                <img src="${company.logo}" style="height: ${company.logoSize || 80}px; max-width: 250px; object-fit: contain;">
+                            </td>
+                            ` : ''}
+                            <td style="vertical-align:middle; padding:0;">
+                                <h1 style="font-size: 18px; font-weight: 900; color: #0f172a; line-height: 1.2; margin: 0 0 3px 0; text-transform: uppercase;">
+                                    ${escapeHtml(company.name)}
+                                </h1>
+                                <p style="margin: 0; font-size: 11px; font-weight: 800; color: #2563eb; text-transform: uppercase; letter-spacing: 0.04em;">
+                                    SOLUÇÕES em Gestão Profissional
+                                </p>
+                                <p style="margin: 4px 0 0 0; font-size: 9px; color: #64748b; font-weight: 700;">
+                                    ${escapeHtml(company.cnpj || '')}${company.cnpj && company.phone ? ' | ' : ''}${escapeHtml(company.phone || '')}
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td style="width:28%; vertical-align:top; text-align:right; padding:0;">
+                    <p style="margin: 0; font-size: 24px; font-weight: 900; color: #2563eb; line-height: 1.1;">
+                        ${budget.id}
+                    </p>
+                    <p style="margin: 6px 0 0 0; font-size: 10px; font-weight: 800; color: #334155; text-transform: uppercase;">
+                        EMISSÃO: ${eDate}
+                    </p>
+                    <p style="margin: 2px 0 0 0; font-size: 10px; font-weight: 800; color: #334155; text-transform: uppercase;">
+                        VALIDADE: ${vDate}
+                    </p>
+                </td>
+            </tr>
+        </table>
     </div>`;
 };
 
@@ -211,12 +231,12 @@ export const getBudgetBodyHtml = (budget: ServiceOrder, company: CompanyProfile,
 // removido o table/thead/tfoot que estava reservando espaço fantasma nas páginas seguintes do PDF
 export const generateBudgetReportHtml = (budget: ServiceOrder, company: CompanyProfile, customerDoc?: string) => {
   return `
-    <div class="a4-container">
-      <div style="margin-bottom: 25px;">
+    <div class="pdf-page-content">
+      <div style="width:100%; background:#ffffff; font-family:Inter, Arial, sans-serif; color:#1e293b; padding:0;">
         ${buildBudgetHeaderHtml(budget, company)}
+        ${getBudgetBodyHtml(budget, company, customerDoc)}
+        ${buildBudgetFooterHtml(company)}
       </div>
-      ${getBudgetBodyHtml(budget, company, customerDoc)}
-      ${buildBudgetFooterHtml(company)}
     </div>
   `;
 };

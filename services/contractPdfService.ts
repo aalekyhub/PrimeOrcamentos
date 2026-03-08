@@ -9,20 +9,11 @@ export const getContractStyles = () => `
         body { 
             background: white; 
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-            -webkit-print-color-adjust: exact; 
-            print-color-adjust: exact;
         }
-        .a4-container { width: 100%; max-width: 210mm; margin: 0 auto; padding: 0 15mm !important; background: white; }
         p, h1, h2, h3, h4, h5, h6 { margin: 0; }
         ul { list-style-type: none; padding-left: 0; margin: 3mm 0 0 0; }
         li { margin-bottom: 4px; }
         .keep-together { break-inside: avoid !important; page-break-inside: avoid !important; display: block !important; width: 100% !important; }
-        
-        @media print {
-            @page { size: A4; margin: 10mm 0 15mm 0; }
-            body { background: white !important; margin: 0 !important; padding: 0 !important; }
-            .a4-container { width: 210mm !important; margin: 0 auto !important; padding: 0 15mm !important; }
-        }
     </style>
 `;
 
@@ -33,22 +24,44 @@ export const getContractHtml = (order: ServiceOrder, customer: any, company: Com
         : order.totalAmount;
 
     return `
-    <div id="contract-content" style="background:#fff; padding: 0; margin: 0;">
-      <div class="a4-container">
+    <div class="pdf-page-content">
+      <div style="width:100%; background:#ffffff; font-family:Inter, Arial, sans-serif; color:#1e293b; padding:0;">
         <!-- Header -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #e2e8f0;">
-          <div style="display: flex; align-items: center; justify-content: flex-start;">
-            ${company.logo ? `<img src="${company.logo}" style="height: ${company.logoSize || 70}px; max-width: 250px; object-fit: contain;" crossorigin="anonymous" />` : ''}
-          </div>
-          <div style="text-align: center; flex-grow: 1;">
-            <h1 style="font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 2px; text-transform: uppercase;">${escapeHtml(company.name)}</h1>
-            <p style="font-size: 11px; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">CONTRATO DE PRESTAÇÃO DE SERVIÇOS</p>
-            <p style="font-size: 9px; color: #64748b; font-weight: 600;">${escapeHtml(company.cnpj || "")} | ${escapeHtml(company.phone || "")}</p>
-          </div>
-          <div style="text-align: right; width: 120px;">
-            <h2 style="font-size: 24px; font-weight: 900; color: #2563eb; margin: 0; letter-spacing: -1px;">${order.id.replace('OS-', 'OS')}</h2>
-            <p style="font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase; margin-top: 2px;">EMISSÃO: ${new Date().toLocaleDateString("pt-BR")}</p>
-          </div>
+        <div class="report-header" style="padding-bottom:18px; border-bottom:2px solid #e2e8f0; margin-bottom:18px;">
+            <table style="width:100%; border-collapse:collapse; table-layout: fixed;">
+                <tr>
+                    <td style="width:72%; vertical-align:top; padding:0;">
+                        <table style="width:100%; border-collapse:collapse;">
+                            <tr>
+                                ${company.logo ? `
+                                <td style="width:90px; vertical-align:middle; padding:0 14px 0 0;">
+                                    <img src="${company.logo}" style="height: ${company.logoSize || 70}px; max-width: 250px; object-fit: contain;" crossorigin="anonymous">
+                                </td>
+                                ` : ''}
+                                <td style="vertical-align:middle; padding:0;">
+                                    <h1 style="font-size: 18px; font-weight: 900; color: #0f172a; line-height: 1.2; margin: 0 0 3px 0; text-transform: uppercase;">
+                                        ${escapeHtml(company.name)}
+                                    </h1>
+                                    <p style="font-size: 11px; font-weight: 800; color: #2563eb; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px;">
+                                        CONTRATO DE PRESTAÇÃO DE SERVIÇOS
+                                    </p>
+                                    <p style="font-size: 9px; color: #64748b; font-weight: 700;">
+                                        ${escapeHtml(company.cnpj || "")}${company.cnpj && company.phone ? ' | ' : ''}${escapeHtml(company.phone || "")}
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td style="width:28%; vertical-align:top; text-align:right; padding:0;">
+                        <h2 style="font-size: 24px; font-weight: 900; color: #2563eb; margin: 0; letter-spacing: -1px; line-height: 1.1;">
+                            ${order.id.replace('OS-', 'OS')}
+                        </h2>
+                        <p style="font-size: 10px; font-weight: 800; color: #334155; text-transform: uppercase; margin-top: 6px;">
+                            EMISSÃO: ${new Date().toLocaleDateString("pt-BR")}
+                        </p>
+                    </td>
+                </tr>
+            </table>
         </div>
 
         <!-- Info Boxes -->

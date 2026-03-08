@@ -289,8 +289,23 @@ const ReportPreview: React.FC<Props> = ({
                     font-family: 'Inter', system-ui, -apple-system, sans-serif;
                     color: #1e293b;
                     line-height: 1.5;
+                    background: #ffffff;
+                    min-height: 297mm; /* Min height of A4 */
+                    padding: 0 !important; /* Remove individual padding to use page-like padding */
                 }
 
+                /* Simulated Page Breaks in Preview */
+                #report-preview-content .pdf-page-content > div {
+                    background: white;
+                    width: 210mm;
+                    min-height: 297mm;
+                    margin: 0 auto 20px auto;
+                    padding: 8mm !important;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                    position: relative;
+                }
+
+                /* Ensure tables handle breaks well in preview */
                 #report-preview-content table {
                     border-collapse: collapse;
                     width: 100%;
@@ -338,18 +353,22 @@ const ReportPreview: React.FC<Props> = ({
                 #report-preview-content .page-break {
                     page-break-before: always;
                     break-before: page;
+                    height: 0;
+                    margin: 0;
+                    border: none;
+                    visibility: hidden;
                 }
             `}</style>
 
             <div
                 id="report-preview-wrapper"
-                className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 duration-300"
+                className="bg-slate-200 dark:bg-slate-950 rounded-2xl shadow-2xl w-full max-w-6xl h-[90vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 duration-300"
             >
-                <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10 no-print">
+                <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900 sticky top-0 z-10 no-print">
                     <div>
-                        <h3 className="text-xl font-bold text-slate-800">{title}</h3>
-                        <p className="text-sm text-slate-500">
-                            Visualize as informações antes de gerar o PDF
+                        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100">{title}</h3>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                            Visualize as páginas A4 antes de gerar o PDF
                         </p>
                     </div>
 
@@ -359,31 +378,31 @@ const ReportPreview: React.FC<Props> = ({
                             className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all font-bold shadow-md hover:shadow-lg active:scale-95"
                         >
                             <Printer size={18} />
-                            IMPRIMIR
+                            EXPORTAR PDF
                         </button>
 
                         <button
                             onClick={onClose}
-                            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all active:scale-90"
+                            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all active:scale-90"
                         >
                             <X size={24} />
                         </button>
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto bg-slate-50 p-6 md:p-10 flex justify-center">
+                <div className="flex-1 overflow-y-auto bg-slate-200 dark:bg-slate-950 p-6 md:p-10 flex flex-col items-center">
                     <div
                         ref={previewRef}
                         id="report-preview-content"
-                        className="bg-white shadow-xl w-full max-w-[210mm] rounded-sm overflow-x-hidden"
+                        className="w-full flex flex-col items-center"
                         dangerouslySetInnerHTML={{ __html: htmlContent }}
                     />
                 </div>
 
-                <div className="px-6 py-4 border-t border-slate-100 bg-white flex justify-end z-10 no-print">
+                <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-end z-10 no-print">
                     <button
                         onClick={onClose}
-                        className="px-6 py-2 text-slate-600 font-bold hover:bg-slate-100 rounded-lg transition-all"
+                        className="px-6 py-2 text-slate-600 dark:text-slate-400 font-bold hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all"
                     >
                         FECHAR
                     </button>
