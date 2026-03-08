@@ -69,8 +69,8 @@ export const buildBudgetHeaderHtml = (budget: ServiceOrder, company: CompanyProf
 export const buildBudgetFooterHtml = (company: CompanyProfile) => {
   const vDays = company.defaultProposalValidity || 15;
   return `
-    <div style="margin-top: 24px;">
-        <div style="border: 1px solid #e2e8f0; background: #f8fafc; border-radius: 12px; padding: 24px; break-inside: avoid; page-break-inside: avoid;">
+    <div style="margin-top: 32px; break-inside: avoid;">
+        <div style="border: 1px solid #e2e8f0; background: #f8fafc; border-radius: 12px; padding: 24px;">
              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
                  <div style="background: #2563eb; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; font-weight: bold;">?</div>
                  <span style="font-size: 11px; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em;">TERMO DE ACEITE E AUTORIZAÇÃO PROFISSIONAL</span>
@@ -79,7 +79,7 @@ export const buildBudgetFooterHtml = (company: CompanyProfile) => {
                  "Este documento constitui uma proposta comercial formal. Ao assinar abaixo, o cliente declara estar ciente e de pleno acordo com os valores, prazos e especificações técnicas descritas. Esta aceitação autoriza o início imediato dos trabalhos sob as condições estabelecidas. A contratada reserva-se o direito de renegociar valores caso a aprovação ocorra após o prazo de validade de ${vDays} dias. Eventuais alterações de escopo solicitadas após o aceite estarão sujeitas a nova análise de custos."
              </p>
         </div>
-        <div style="margin-top: 42px;">
+        <div style="margin-top: 100px; break-inside: avoid;">
             <div style="border-bottom: 2px solid #cbd5e1; width: 400px; max-width: 100%;"></div>
             <p style="margin: 12px 0 0 0; font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; line-height: 1.4; padding-bottom: 2px;">ASSINATURA DO CLIENTE / ACEITE</p>
         </div>
