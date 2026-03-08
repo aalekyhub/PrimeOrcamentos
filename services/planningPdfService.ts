@@ -27,7 +27,7 @@ export interface ReportTheme {
         servicesSection: string;
         totalUnitLabel: string;
         totalRowLabel: string;
-    }
+    };
 }
 
 export const PLANNING_THEME: ReportTheme = {
@@ -68,7 +68,6 @@ const toNumber = (val: any): number => {
 
     const raw = String(val).trim();
 
-    // Detecta formato brasileiro com vírgula decimal
     if (raw.includes(',')) {
         const normalizedBR = raw.replace(/\./g, '').replace(',', '.');
         const num = Number(normalizedBR);
@@ -107,9 +106,7 @@ const escapeHtml = (unsafe: any): string => {
 };
 
 const formatDateBR = (dateStr?: string): string => {
-    if (!dateStr) {
-        return new Date().toLocaleDateString('pt-BR');
-    }
+    if (!dateStr) return new Date().toLocaleDateString('pt-BR');
 
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
         const [y, m, d] = dateStr.split('-');
@@ -145,7 +142,7 @@ export const buildPlanningReportHtml = (
     },
     theme: ReportTheme
 ): string => {
-    const customer = customers.find((c) => c.id === header.client_id);
+    const customer = customers.find((c) => c.id === (header as any).client_id);
 
     const reportServices = services.map((s: any) => {
         const qty = toNumber(s.quantity);
@@ -192,6 +189,10 @@ export const buildPlanningReportHtml = (
     }));
 
     let sectionCounter = 1;
+
+    const logoHtml = company.logo
+        ? `<img src="${company.logo}" style="max-height:${toNumber(company.logoSize) || 70}px; max-width:220px; height:auto; width:auto; object-fit:contain; display:block;" />`
+        : '';
 
     return `
         <div style="width:100%; background:#ffffff; font-family:Arial, Helvetica, sans-serif; color:#1e293b; box-sizing:border-box;">
@@ -279,17 +280,14 @@ export const buildPlanningReportHtml = (
                             <table style="width:100%; border-collapse:collapse;">
                                 <tr>
                                     <td style="width:${company.logo ? '90px' : '0'}; vertical-align:middle; padding:0 12px 0 0;">
-                                        ${company.logo
-            ? `<img src="${company.logo}" style="max-height:${toNumber(company.logoSize) || 70}px; max-width:220px; height:auto; width:auto; object-fit:contain; display:block;">`
-            : ''
-        }
+                                        ${logoHtml}
                                     </td>
                                     <td style="vertical-align:middle; padding:0;">
                                         <h1 style="font-size:16px; font-weight:900; color:#0f172a; margin:0 0 3px 0; text-transform:uppercase; line-height:1.2;">
                                             ${escapeHtml(company.name || 'Empresa não informada')}
                                         </h1>
                                         <p style="font-size:13px; font-weight:800; color:#0f172a; margin:0 0 3px 0; line-height:1.3;">
-                                            OBRA: ${escapeHtml(header.name || 'Não informado')}
+                                            OBRA: ${escapeHtml((header as any).name || 'Não informado')}
                                         </p>
                                         <p style="font-size:10px; font-weight:800; color:${theme.primaryColor}; text-transform:uppercase; letter-spacing:0.08em; margin:0 0 3px 0;">
                                             ${escapeHtml(theme.reportTitle)}
@@ -307,7 +305,7 @@ export const buildPlanningReportHtml = (
                                 ${escapeHtml(theme.moduleName)}
                             </div>
                             <p style="font-size:18px; font-weight:900; color:#0f172a; margin:0 0 4px 0; line-height:1.2;">
-                                ${escapeHtml((header as any).id || 'SEM CÓDIGO')}
+                                ${escapeHtml(String((header as any).id || 'SEM CÓDIGO'))}
                             </p>
                             <p style="font-size:9px; font-weight:700; color:#64748b; text-transform:uppercase; margin:0;">
                                 EMISSÃO: ${escapeHtml(formatDateBR())}
@@ -330,7 +328,7 @@ export const buildPlanningReportHtml = (
                         </td>
                         <td style="padding:0 0 10px 0; vertical-align:top; width:33.33%;">
                             <p class="muted-label">Status</p>
-                            <p class="value-text">${escapeHtml(header.status || 'Não informado')}</p>
+                            <p class="value-text">${escapeHtml((header as any).status || 'Não informado')}</p>
                         </td>
                     </tr>
                     <tr>
@@ -380,8 +378,7 @@ export const buildPlanningReportHtml = (
                 </table>
             </div>
 
-            ${reportServices.length > 0
-            ? `
+            ${reportServices.length > 0 ? `
                 <div class="pdf-section">
                     <h3 style="font-size:14px; font-weight:800; color:${theme.secondaryColor}; text-transform:uppercase; margin:0 0 10px 0; padding-bottom:6px; border-bottom:2px solid #e2e8f0;">
                         ${sectionCounter++}. ${escapeHtml(theme.terminologies.servicesSection)}
@@ -409,12 +406,10 @@ export const buildPlanningReportHtml = (
                             `).join('')}
                         </tbody>
                     </table>
-                </div>`
-            : ''
-        }
+                </div>
+            ` : ''}
 
-            ${reportMaterials.length > 0
-            ? `
+            ${reportMaterials.length > 0 ? `
                 <div class="pdf-section">
                     <h3 style="font-size:14px; font-weight:800; color:${theme.secondaryColor}; text-transform:uppercase; margin:0 0 10px 0; padding-bottom:6px; border-bottom:2px solid #e2e8f0;">
                         ${sectionCounter++}. Insumos e Materiais
@@ -442,12 +437,10 @@ export const buildPlanningReportHtml = (
                             `).join('')}
                         </tbody>
                     </table>
-                </div>`
-            : ''
-        }
+                </div>
+            ` : ''}
 
-            ${reportLabor.length > 0
-            ? `
+            ${reportLabor.length > 0 ? `
                 <div class="pdf-section">
                     <h3 style="font-size:14px; font-weight:800; color:${theme.secondaryColor}; text-transform:uppercase; margin:0 0 10px 0; padding-bottom:6px; border-bottom:2px solid #e2e8f0;">
                         ${sectionCounter++}. Mão de Obra
@@ -475,12 +468,10 @@ export const buildPlanningReportHtml = (
                             `).join('')}
                         </tbody>
                     </table>
-                </div>`
-            : ''
-        }
+                </div>
+            ` : ''}
 
-            ${reportIndirects.length > 0
-            ? `
+            ${reportIndirects.length > 0 ? `
                 <div class="pdf-section">
                     <h3 style="font-size:14px; font-weight:800; color:${theme.secondaryColor}; text-transform:uppercase; margin:0 0 10px 0; padding-bottom:6px; border-bottom:2px solid #e2e8f0;">
                         ${sectionCounter++}. Custos Indiretos
@@ -502,12 +493,10 @@ export const buildPlanningReportHtml = (
                             `).join('')}
                         </tbody>
                     </table>
-                </div>`
-            : ''
-        }
+                </div>
+            ` : ''}
 
-            ${reportTaxes.length > 0
-            ? `
+            ${reportTaxes.length > 0 ? `
                 <div class="pdf-section">
                     <h3 style="font-size:14px; font-weight:800; color:${theme.secondaryColor}; text-transform:uppercase; margin:0 0 10px 0; padding-bottom:6px; border-bottom:2px solid #e2e8f0;">
                         ${sectionCounter++}. Resumo de Impostos
@@ -531,9 +520,8 @@ export const buildPlanningReportHtml = (
                             `).join('')}
                         </tbody>
                     </table>
-                </div>`
-            : ''
-        }
+                </div>
+            ` : ''}
 
             <div class="report-footer" style="padding-top:12px; border-top:1px solid #e2e8f0; margin-top:12px; text-align:center; page-break-inside:avoid;">
                 <p style="margin:0; font-size:9px; color:#94a3b8; text-transform:uppercase; letter-spacing:0.1em; font-weight:700;">
