@@ -413,22 +413,22 @@ export const buildMaintenanceOsHtml = (order: ServiceOrder, customer: any, compa
                    </div>
                </div>
 
-               ${order.descriptionBlocks && order.descriptionBlocks.length > 0 ?\`
+               ${order.descriptionBlocks && order.descriptionBlocks.length > 0 ? `
                <div class="mb-10 print-description-content">
                    <div class="section-title">DESCRIÇÃO TÉCNICA E ESCOPO</div>
                    <div class="space-y-6">
-                       \${order.descriptionBlocks.map((block: any) => {
-      if (block.type === 'text') {
-        return \`<div class="text-slate-700 leading-relaxed text-justify ql-editor-print" style="font-size: \${company.descriptionFontSize || 14}px;">\${block.content}</div>\`;
-      } else if (block.type === 'image') {
-        return \`<div class="avoid-break" style="margin: 20px 0;"><img src="\${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; border: 1px solid #e2e8f0; display: block; object-fit: contain;"></div>\`;
-      } else if (block.type === 'page-break') {
-        return \`<div style="page-break-after: always; break-after: page; height: 0; margin: 0; padding: 0;"></div>\`;
-      }
-      return '';
-    }).join('')}
+                       ${order.descriptionBlocks.map((block: any) => {
+    if (block.type === 'text') {
+      return `<div class="text-slate-700 leading-relaxed text-justify ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px;">${block.content}</div>`;
+    } else if (block.type === 'image') {
+      return `<div class="avoid-break" style="margin: 20px 0;"><img src="${block.content}" style="width: 100%; max-height: 230mm; border-radius: 12px; border: 1px solid #e2e8f0; display: block; object-fit: contain;"></div>`;
+    } else if (block.type === 'page-break') {
+      return `<div style="page-break-after: always; break-after: page; height: 0; margin: 0; padding: 0;"></div>`;
+    }
+    return '';
+  }).join('')}
                    </div>
-               </div>\` : ''}
+               </div>` : ''}
 
                <!-- Items Table -->
                <div class="mb-8">
@@ -455,16 +455,16 @@ export const buildMaintenanceOsHtml = (order: ServiceOrder, customer: any, compa
                            <span class="text-[8px] font-medium text-slate-400 uppercase block">Subtotal</span>
                            <span class="text-[10px] font-bold text-slate-600 block" style="white-space: nowrap;">R$ ${subTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>
-                        ${order.bdiRate ?\`
+                        ${order.bdiRate ? `
                         <div class="text-right">
-                           <span class="text-[8px] font-medium text-slate-400 uppercase block">BDI (\${order.bdiRate}%)</span>
-                           <span class="text-[10px] font-bold text-emerald-600 block" style="white-space: nowrap;">+ R$ \${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                        </div>\` : ''}
-                        ${order.taxRate ?\`
+                           <span class="text-[8px] font-medium text-slate-400 uppercase block">BDI (${order.bdiRate}%)</span>
+                           <span class="text-[10px] font-bold text-emerald-600 block" style="white-space: nowrap;">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        </div>` : ''}
+                        ${order.taxRate ? `
                         <div class="text-right">
-                           <span class="text-[8px] font-medium text-slate-400 uppercase block">Impostos (\${order.taxRate}%)</span>
-                           <span class="text-[10px] font-bold text-blue-600 block" style="white-space: nowrap;">+ R$ \${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                        </div>\` : ''}
+                           <span class="text-[8px] font-medium text-slate-400 uppercase block">Impostos (${order.taxRate}%)</span>
+                           <span class="text-[10px] font-bold text-blue-600 block" style="white-space: nowrap;">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        </div>` : ''}
                    </div>
                    <div class="bg-slate-900 text-white p-6 rounded-xl flex justify-between items-center shadow-xl">
                        <span class="text-[12px] font-bold uppercase tracking-widest">Valor Total:</span>
@@ -490,7 +490,7 @@ export const buildMaintenanceOsHtml = (order: ServiceOrder, customer: any, compa
                            <p class="text-[10px] font-bold uppercase text-slate-900">${company.name}</p>
                        </div>
                        <div class="text-center relative">
-                           ${order.signature ?\`<img src="\${order.signature}" style="max-height: 50px; position: absolute; top: -45px; left: 50%; transform: translateX(-50%);">\` : ''}
+                           ${order.signature ? `<img src="${order.signature}" style="max-height: 50px; position: absolute; top: -45px; left: 50%; transform: translateX(-50%);">` : ''}
                            <div style="border-top: 1px solid #cbd5e1; margin-bottom: 8px;"></div>
                            <p class="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1">Assinatura do Cliente</p>
                            <p class="text-[10px] font-bold uppercase text-slate-900">${order.customerName}</p>
@@ -562,5 +562,5 @@ export const buildMaintenanceOsHtml = (order: ServiceOrder, customer: any, compa
            }
         </script>
       </body>
-      </html>\`;
+      </html>`;
 };
