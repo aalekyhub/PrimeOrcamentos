@@ -1,4 +1,5 @@
 import React from 'react';
+import { Trash2, Archive } from 'lucide-react';
 import { PlannedService } from '../types';
 import { EditableServiceRow } from '../rows/EditableServiceRow';
 import { AddServiceForm } from '../forms/AddServiceForm';
@@ -21,6 +22,7 @@ export const ServicesTab: React.FC<ServicesTabProps> = ({
     onReorderServices,
     planId,
 }) => {
+    const [selectedServices, setSelectedServices] = React.useState<string[]>([]);
     const { draggedIndex, handleDragStart, handleDragOver, handleDragEnd, moveItem } =
         useDragAndDrop<PlannedService>();
 
@@ -28,17 +30,67 @@ export const ServicesTab: React.FC<ServicesTabProps> = ({
         moveItem(services, onReorderServices, index, direction);
     };
 
+    const handleDeleteSelected = () => {
+        if (selectedServices.length === 0) return;
+        if (confirm(`Excluir ${selectedServices.length} serviço(s) selecionado(s)?`)) {
+            selectedServices.forEach(id => onDeleteService(id));
+            setSelectedServices([]);
+        }
+    };
+
+    const handleClearAll = () => {
+        if (services.length === 0) return;
+        if (confirm('Excluir TODOS os serviços deste planejamento?')) {
+            services.forEach(s => onDeleteService(s.id));
+            setSelectedServices([]);
+        }
+    };
+
     return (
         <div className="max-w-4xl mx-auto">
             <AddServiceForm onAdd={onAddService} planId={planId} />
 
-            <div className="space-y-2 mt-6">
+            {services.length > 0 && (
+                <div className="flex items-center justify-between bg-white dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800 mt-6 mb-4 shadow-sm">
+                    <div className="flex items-center gap-3">
+                        <input
+                            type="checkbox"
+                            className="w-4 h-4 rounded-md border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                            checked={selectedServices.length === services.length && services.length > 0}
+                            onChange={(e) => setSelectedServices(e.target.checked ? services.map(s => s.id) : [])}
+                        />
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                            {selectedServices.length} SELECIONADO(S)
+                        </span>
+                    </div>
+                    <div className="flex gap-2">
+                        {selectedServices.length > 0 && (
+                            <button
+                                onClick={handleDeleteSelected}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-[10px] font-bold hover:bg-red-100 transition-all border border-red-100 dark:border-red-800"
+                            >
+                                <Trash2 size={12} /> Excluir Selecionados
+                            </button>
+                        )}
+                        <button
+                            onClick={handleClearAll}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[10px] font-bold hover:bg-slate-200 transition-all border border-slate-200 dark:border-slate-700"
+                        >
+                            <Archive size={12} /> Limpar Lista
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            <div className="space-y-2 mt-4">
                 {services.map((service, index) => (
                     <EditableServiceRow
                         key={service.id}
                         service={service}
                         index={index}
                         isDragged={draggedIndex === index}
+                        isSelected={selectedServices.includes(service.id)}
+                        onSelect={(id, sel) => setSelectedServices(prev => sel ? [...prev, id] : prev.filter(i => i !== id))}
                         onDragStart={handleDragStart}
                         onDragOver={(e, i) => handleDragOver(e, i, services, onReorderServices)}
                         onDragEnd={handleDragEnd}

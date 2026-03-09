@@ -14,6 +14,8 @@ interface EditableServiceRowProps {
     onUpdate: (updatedService: PlannedService) => void;
     isFirst: boolean;
     isLast: boolean;
+    isSelected: boolean;
+    onSelect: (id: string, selected: boolean) => void;
 }
 
 export const EditableServiceRow: React.FC<EditableServiceRowProps> = ({
@@ -28,6 +30,8 @@ export const EditableServiceRow: React.FC<EditableServiceRowProps> = ({
     onUpdate,
     isFirst,
     isLast,
+    isSelected,
+    onSelect,
 }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editDesc, setEditDesc] = useState(service.description);
@@ -65,8 +69,8 @@ export const EditableServiceRow: React.FC<EditableServiceRowProps> = ({
             onDragOver={(e) => onDragOver(e, index)}
             onDragEnd={onDragEnd}
             className={`bg-white dark:bg-slate-900/50 p-4 rounded-xl border transition-all flex justify-between items-center group hover:border-blue-300 dark:hover:border-blue-500 ${isDragged
-                    ? 'opacity-50 bg-blue-50 dark:bg-blue-900/20 border-blue-200 shadow-inner'
-                    : 'border-slate-200 dark:border-slate-800 shadow-sm'
+                ? 'opacity-50 bg-blue-50 dark:bg-blue-900/20 border-blue-200 shadow-inner'
+                : 'border-slate-200 dark:border-slate-800 shadow-sm'
                 }`}
         >
             {isEditing ? (
@@ -132,6 +136,12 @@ export const EditableServiceRow: React.FC<EditableServiceRowProps> = ({
             ) : (
                 <>
                     <div className="flex items-center gap-3 grow">
+                        <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={(e) => onSelect(service.id, e.target.checked)}
+                            className="w-4 h-4 rounded border-slate-300 text-blue-600"
+                        />
                         <div className="cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 shrink-0">
                             <GripVertical size={18} />
                         </div>

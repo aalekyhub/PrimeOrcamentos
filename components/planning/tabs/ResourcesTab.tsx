@@ -131,6 +131,32 @@ export const ResourcesTab: React.FC<ResourcesTabProps> = ({
                                     />
                                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{selectedMaterials.length} SELECIONADO(S)</span>
                                 </div>
+                                <div className="flex gap-2">
+                                    {selectedMaterials.length > 0 && (
+                                        <button
+                                            onClick={() => {
+                                                if (confirm(`Excluir ${selectedMaterials.length} material(is) selecionado(s)?`)) {
+                                                    selectedMaterials.forEach(id => onDeleteMaterial(id));
+                                                    setSelectedMaterials([]);
+                                                }
+                                            }}
+                                            className="flex items-center gap-1 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-[10px] font-bold hover:bg-red-100 transition-all border border-red-100 dark:border-red-800"
+                                        >
+                                            <Trash2 size={12} /> Excluir Selecionados
+                                        </button>
+                                    )}
+                                    <button
+                                        onClick={() => {
+                                            if (confirm('Excluir TODOS os materiais deste planejamento?')) {
+                                                materials.forEach(m => onDeleteMaterial(m.id));
+                                                setSelectedMaterials([]);
+                                            }
+                                        }}
+                                        className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[10px] font-bold hover:bg-slate-200 transition-all border border-slate-200 dark:border-slate-700"
+                                    >
+                                        <Archive size={12} /> Limpar Lista
+                                    </button>
+                                </div>
                             </div>
                         )}
                         <div className="space-y-2">
@@ -175,7 +201,46 @@ export const ResourcesTab: React.FC<ResourcesTabProps> = ({
                             <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-tighter text-lg">Mão de Obra</h3>
                         </div>
                         <AddLaborForm planId={planId} onAdd={onAddLabor} />
-                        <div className="space-y-2 mt-4">
+                        {labor.length > 0 && (
+                            <div className="flex items-center justify-between bg-white dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800 mt-4 mb-4 shadow-sm">
+                                <div className="flex items-center gap-3">
+                                    <input
+                                        type="checkbox"
+                                        className="w-4 h-4 rounded-md border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                        checked={selectedLabor.length === labor.length && labor.length > 0}
+                                        onChange={(e) => setSelectedLabor(e.target.checked ? labor.map(l => l.id) : [])}
+                                    />
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{selectedLabor.length} SELECIONADO(S)</span>
+                                </div>
+                                <div className="flex gap-2">
+                                    {selectedLabor.length > 0 && (
+                                        <button
+                                            onClick={() => {
+                                                if (confirm(`Excluir ${selectedLabor.length} item(ns) de mão de obra selecionado(s)?`)) {
+                                                    selectedLabor.forEach(id => onDeleteLabor(id));
+                                                    setSelectedLabor([]);
+                                                }
+                                            }}
+                                            className="flex items-center gap-1 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-[10px] font-bold hover:bg-red-100 transition-all border border-red-100 dark:border-red-800"
+                                        >
+                                            <Trash2 size={12} /> Excluir Selecionados
+                                        </button>
+                                    )}
+                                    <button
+                                        onClick={() => {
+                                            if (confirm('Excluir TODA a mão de obra deste planejamento?')) {
+                                                labor.forEach(l => onDeleteLabor(l.id));
+                                                setSelectedLabor([]);
+                                            }
+                                        }}
+                                        className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[10px] font-bold hover:bg-slate-200 transition-all border border-slate-200 dark:border-slate-700"
+                                    >
+                                        <Archive size={12} /> Limpar Lista
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                        <div className="space-y-2">
                             {labor.map((l, index) => (
                                 <EditableLaborRow
                                     key={l.id}
@@ -217,7 +282,46 @@ export const ResourcesTab: React.FC<ResourcesTabProps> = ({
                             <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-tighter text-lg">Custos Indiretos</h3>
                         </div>
                         <AddIndirectForm planId={planId} onAdd={onAddIndirect} />
-                        <div className="space-y-2 mt-4">
+                        {indirects.length > 0 && (
+                            <div className="flex items-center justify-between bg-white dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800 mt-4 mb-4 shadow-sm">
+                                <div className="flex items-center gap-3">
+                                    <input
+                                        type="checkbox"
+                                        className="w-4 h-4 rounded-md border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                                        checked={selectedIndirects.length === indirects.length && indirects.length > 0}
+                                        onChange={(e) => setSelectedIndirects(e.target.checked ? indirects.map(i => i.id) : [])}
+                                    />
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{selectedIndirects.length} SELECIONADO(S)</span>
+                                </div>
+                                <div className="flex gap-2">
+                                    {selectedIndirects.length > 0 && (
+                                        <button
+                                            onClick={() => {
+                                                if (confirm(`Excluir ${selectedIndirects.length} custo(s) indireto(s) selecionado(s)?`)) {
+                                                    selectedIndirects.forEach(id => onDeleteIndirect(id));
+                                                    setSelectedIndirects([]);
+                                                }
+                                            }}
+                                            className="flex items-center gap-1 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-[10px] font-bold hover:bg-red-100 transition-all border border-red-100 dark:border-red-800"
+                                        >
+                                            <Trash2 size={12} /> Excluir Selecionados
+                                        </button>
+                                    )}
+                                    <button
+                                        onClick={() => {
+                                            if (confirm('Excluir TODOS os custos indiretos deste planejamento?')) {
+                                                indirects.forEach(i => onDeleteIndirect(i.id));
+                                                setSelectedIndirects([]);
+                                            }
+                                        }}
+                                        className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[10px] font-bold hover:bg-slate-200 transition-all border border-slate-200 dark:border-slate-700"
+                                    >
+                                        <Archive size={12} /> Limpar Lista
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                        <div className="space-y-2">
                             {indirects.map((i, index) => (
                                 <EditableIndirectRow
                                     key={i.id}
