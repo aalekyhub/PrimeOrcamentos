@@ -777,13 +777,13 @@ const BudgetManager: React.FC<Props> = ({
 
       {previewBudget && (
         <ReportPreview
-          title={`${previewBudget.id} - ORÇAMENTO - ${previewBudget.description}`}
+          title={`${previewBudget.id} - ${previewBudget.description}`}
           htmlContent={generateBudgetReportHtml(
             previewBudget,
             company,
             customers.find(c => c.id === previewBudget.customerId)?.document
           )}
-          filename={`${previewBudget.id} - ORÇAMENTO - ${previewBudget.description}`}
+          filename={`${previewBudget.id} - ${previewBudget.description}`}
           onClose={() => setPreviewBudget(null)}
         />
       )}
