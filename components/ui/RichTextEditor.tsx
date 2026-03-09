@@ -24,7 +24,7 @@ interface RichTextEditorProps {
 }
 
 const CustomToolbar: React.FC<{ id: string; onAddText?: () => void; onAddImage?: () => void }> = ({ id, onAddText, onAddImage }) => (
-  <div id={id} className="ql-toolbar-custom sticky top-0 z-[100] flex flex-wrap items-center gap-2 p-2 pr-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 backdrop-blur-sm bg-white/95 dark:bg-slate-900/95">
+  <div id={id} className="ql-toolbar-custom sticky top-0 z-[50] flex flex-wrap items-center gap-2 p-2 pr-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
     <div className="flex flex-wrap items-center gap-1">
       <span className="ql-formats">
         <select className="ql-font" defaultValue="inter">
@@ -282,8 +282,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeh
           margin-bottom: 4px;
         }
         .rich-text-editor .ql-container {
-          max-height: 600px;
-          overflow-y: auto;
+          min-height: 120px;
         }
         .ql-editor h1, .ql-editor h2, .ql-editor h3, .ql-editor h4 {
           font-weight: 800 !important;
@@ -312,7 +311,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeh
           position: sticky;
           top: 0;
           z-index: 50;
-          background: white;
+          background: white !important;
+        }
+        .dark .rich-text-editor .ql-toolbar-custom {
+          background: #0f172a !important;
         }
       `}</style>
       <CustomToolbar id={toolbarId} onAddText={onAddText} onAddImage={onAddImage} />
