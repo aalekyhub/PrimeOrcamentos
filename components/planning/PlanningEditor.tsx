@@ -23,7 +23,12 @@ import {
     PlanTax,
     Customer,
     MainTab,
+    ResourceTab,
 } from './types';
+import { AddServiceForm } from './forms/AddServiceForm';
+import { AddMaterialForm } from './forms/AddMaterialForm';
+import { AddLaborForm } from './forms/AddLaborForm';
+import { AddIndirectForm } from './forms/AddIndirectForm';
 
 interface PlanningCalculations {
     totalMaterial: number;
@@ -187,6 +192,7 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
     onShowPreview,
 }) => {
     const [activeTab, setActiveTab] = useState<MainTab>('dados');
+    const [resourceTab, setResourceTab] = useState<ResourceTab>('material');
     const { notify } = useNotify();
 
     if (!currentPlan) return null;
@@ -267,8 +273,8 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
     };
 
     return (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl min-h-[80vh] flex flex-col border dark:border-slate-800 overflow-hidden">
-            <div className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl h-[calc(100vh-140px)] flex flex-col border dark:border-slate-800 overflow-hidden">
+            <div className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm shrink-0">
                 <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-blue-50 dark:bg-blue-900/20">
                     <div className="flex items-center gap-4">
                         {!embeddedMode && (
@@ -336,6 +342,63 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
                         </button>
                     ))}
                 </div>
+
+                {/* Sticky Add Forms based on Tab */}
+                <div className="bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800 px-6 py-4">
+                    <div className="max-w-4xl mx-auto">
+                        {activeTab === 'servicos' && (
+                            <AddServiceForm onAdd={handleAddService} planId={currentPlan.id} />
+                        )}
+                        {activeTab === 'recursos' && (
+                            <>
+                                <div className="flex gap-1.5 mb-4 justify-center">
+                                    {[
+                                        { id: 'material', label: 'Materiais' },
+                                        { id: 'mo', label: 'Mão de Obra' },
+                                        { id: 'indireto', label: 'Indiretos' },
+                                        { id: 'impostos', label: 'Impostos' },
+                                    ].map((r) => (
+                                        <button
+                                            key={r.id}
+                                            type="button"
+                                            onClick={() => setResourceTab(r.id as ResourceTab)}
+                                            className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all uppercase tracking-wider ${resourceTab === r.id
+                                                ? 'bg-blue-600 text-white shadow-md'
+                                                : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-blue-50'
+                                                }`}
+                                        >
+                                            {r.label}
+                                        </button>
+                                    ))}
+                                </div>
+                                {resourceTab === 'material' && (
+                                    <AddMaterialForm planId={currentPlan.id} onAdd={handleAddMaterial} />
+                                )}
+                                {resourceTab === 'mo' && (
+                                    <AddLaborForm planId={currentPlan.id} onAdd={handleAddLabor} />
+                                )}
+                                {resourceTab === 'indireto' && (
+                                    <AddIndirectForm planId={currentPlan.id} onAdd={handleAddIndirect} />
+                                )}
+                                {resourceTab === 'impostos' && (
+                                    <div className="flex justify-center">
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Defina as alíquotas abaixo</p>
+                                    </div>
+                                )}
+                            </>
+                        )}
+                        {activeTab === 'resumo' && (
+                            <div className="flex justify-center">
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Resumo Geral Financeiro</p>
+                            </div>
+                        )}
+                        {activeTab === 'dados' && (
+                            <div className="flex justify-center">
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Edite os dados básicos da obra</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
 
             <div className="p-8 flex-1 bg-slate-50/50 dark:bg-slate-900/50 overflow-auto">
@@ -378,6 +441,8 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
                         indirects={indirects}
                         taxes={taxes}
                         calculations={calculations}
+                        activeResTab={resourceTab}
+                        setActiveResTab={setResourceTab}
                         onAddMaterial={handleAddMaterial}
                         onAddLabor={handleAddLabor}
                         onAddIndirect={handleAddIndirect}

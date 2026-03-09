@@ -60,9 +60,7 @@ export const ServicesTab: React.FC<ServicesTabProps> = ({
     };
 
     return (
-        <div className="max-w-4xl mx-auto">
-            <AddServiceForm onAdd={onAddService} planId={planId} />
-
+        <div className="w-full">
             {services.length > 0 && (
                 <div className="flex items-center justify-between bg-white dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800 mt-6 mb-4 shadow-sm">
                     <div className="flex items-center gap-3">

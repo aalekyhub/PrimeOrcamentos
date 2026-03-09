@@ -33,6 +33,8 @@ interface ResourcesTabProps {
     onDeleteMultipleMaterials?: (ids: string[]) => void;
     onDeleteMultipleLabor?: (ids: string[]) => void;
     onDeleteMultipleIndirects?: (ids: string[]) => void;
+    activeResTab: ResourceTab;
+    setActiveResTab: (tab: ResourceTab) => void;
 }
 
 export const ResourcesTab: React.FC<ResourcesTabProps> = ({
@@ -56,8 +58,9 @@ export const ResourcesTab: React.FC<ResourcesTabProps> = ({
     onDeleteMultipleMaterials,
     onDeleteMultipleLabor,
     onDeleteMultipleIndirects,
+    activeResTab,
+    setActiveResTab,
 }) => {
-    const [activeResTab, setActiveResTab] = useState<ResourceTab>('material');
     const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
     const [selectedLabor, setSelectedLabor] = useState<string[]>([]);
     const [selectedIndirects, setSelectedIndirects] = useState<string[]>([]);
@@ -95,29 +98,7 @@ export const ResourcesTab: React.FC<ResourcesTabProps> = ({
     };
 
     return (
-        <div className="max-w-4xl mx-auto space-y-6">
-            <div className="px-6 pb-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
-                <div className="flex gap-1.5 my-3 justify-center">
-                    {[
-                        { id: 'material', label: 'Materiais' },
-                        { id: 'mo', label: 'Mão de Obra' },
-                        { id: 'indireto', label: 'Indiretos' },
-                        { id: 'impostos', label: 'Impostos' },
-                    ].map((r) => (
-                        <button
-                            key={r.id}
-                            type="button"
-                            onClick={() => setActiveResTab(r.id as ResourceTab)}
-                            className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all uppercase tracking-wider ${activeResTab === r.id
-                                ? 'bg-blue-600 dark:bg-blue-600 text-white shadow-md'
-                                : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-blue-900/30'
-                                }`}
-                        >
-                            {r.label}
-                        </button>
-                    ))}
-                </div>
-            </div>
+        <div className="w-full space-y-6">
 
             <div className="min-h-[300px]">
                 {activeResTab === 'material' && (
@@ -125,7 +106,6 @@ export const ResourcesTab: React.FC<ResourcesTabProps> = ({
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-tighter text-lg">Insumos e Materiais</h3>
                         </div>
-                        <AddMaterialForm planId={planId} onAdd={onAddMaterial} />
                         {materials.length > 0 && (
                             <div className="flex items-center justify-between bg-white dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800 mb-4 shadow-sm">
                                 <div className="flex items-center gap-3">
@@ -216,7 +196,6 @@ export const ResourcesTab: React.FC<ResourcesTabProps> = ({
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-tighter text-lg">Mão de Obra</h3>
                         </div>
-                        <AddLaborForm planId={planId} onAdd={onAddLabor} />
                         {labor.length > 0 && (
                             <div className="flex items-center justify-between bg-white dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800 mt-4 mb-4 shadow-sm">
                                 <div className="flex items-center gap-3">
@@ -307,7 +286,6 @@ export const ResourcesTab: React.FC<ResourcesTabProps> = ({
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-tighter text-lg">Custos Indiretos</h3>
                         </div>
-                        <AddIndirectForm planId={planId} onAdd={onAddIndirect} />
                         {indirects.length > 0 && (
                             <div className="flex items-center justify-between bg-white dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800 mt-4 mb-4 shadow-sm">
                                 <div className="flex items-center gap-3">
