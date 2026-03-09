@@ -160,11 +160,11 @@ export const buildExecutionReportHtml = (
                                         </td>
                                         ` : ''}
                                         <td style="vertical-align:middle; padding:0;">
-                                            <h1 style="font-size:16px; font-weight:900; color:#0f172a; margin:0 0- 3px 0; text-transform:uppercase; line-height: 1.2;">
+                                            <h1 style="font-size:16px; font-weight:900; color:#0f172a; margin:0 0 3px 0; text-transform:uppercase; line-height: 1.2;">
                                                 ${escapeHtml(company.name || 'Empresa não informada')}
                                             </h1>
                                             <p style="font-size:13px; font-weight:800; color:#0f172a; margin:0 0 3px 0; line-height: 1.2;">
-                                                OBRA: ${escapeHtml(header.name || 'Não informado')}
+                                                NOME IDENTIFICADOR DA OBRA: ${escapeHtml(header.name || 'Não informado')}
                                             </p>
                                             <p style="font-size:10px; font-weight:800; color:${theme.primaryColor}; text-transform:uppercase; letter-spacing:0.08em; margin:0 0 3px 0;">
                                                 ${theme.reportTitle}
