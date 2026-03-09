@@ -250,7 +250,7 @@ export const buildPlanningReportHtml = (
                     <table style="width:100%; border-collapse:collapse;">
                         <tr>
                             <td style="padding:0; vertical-align:middle;">
-                                <p style="font-size:9px; font-weight:800; text-transform:uppercase; margin:0; letter-spacing:0.08em; color:${theme.accentColor}77;">
+                                <p style="font-size:9px; font-weight:800; text-transform:uppercase; margin:0; letter-spacing:0.08em; color:#ffffff;">
                                     ${theme.terminologies.totalLabel}
                                 </p>
                             </td>
