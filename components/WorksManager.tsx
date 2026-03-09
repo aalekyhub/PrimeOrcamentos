@@ -1473,9 +1473,9 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         // Preview materials report
                                                         const html = generateMaterialsReportHtml();
                                                         setPreviewContent({
-                                                            title: 'Lista de Materiais',
+                                                            title: `Lista de Materiais - ${currentWork?.name} - ${currentWork?.id}`,
                                                             html,
-                                                            filename: `MATERIAL ${currentWork?.name}.pdf`
+                                                            filename: `Materiais - ${currentWork?.name} - ${currentWork?.id}`
                                                         });
                                                         setShowPreview(true);
                                                     }}
@@ -1670,9 +1670,9 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         onClick={() => {
                                             const html = generateFullReportHtml();
                                             setPreviewContent({
-                                                title: 'Relatório Completo',
+                                                title: `Relatório de Execução - ${currentWork?.name} - ${currentWork?.id}`,
                                                 html,
-                                                filename: `RELATORIO ${currentWork?.name}.pdf`
+                                                filename: `Execução - ${currentWork?.name} - ${currentWork?.id}`
                                             });
                                             setShowPreview(true);
                                         }}

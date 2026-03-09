@@ -478,7 +478,7 @@ const BudgetManager: React.FC<Props> = ({
 
       {previewContract && (
         <ReportPreview
-          title={`Contrato - ${previewContract.id}`}
+          title={`Contrato - ${previewContract.description} - ${previewContract.id}`}
           htmlContent={getContractHtml(
             previewContract,
             customers.find(c => c.id === previewContract.customerId) || {
@@ -492,7 +492,7 @@ const BudgetManager: React.FC<Props> = ({
             },
             company
           )}
-          filename={`Contrato-${previewContract.id}`}
+          filename={`Contrato - ${previewContract.description} - ${previewContract.id}`}
           onClose={() => setPreviewContract(null)}
         />
       )}
@@ -777,13 +777,13 @@ const BudgetManager: React.FC<Props> = ({
 
       {previewBudget && (
         <ReportPreview
-          title={`Orçamento - ${previewBudget.id}`}
+          title={`Orçamento - ${previewBudget.description} - ${previewBudget.id}`}
           htmlContent={generateBudgetReportHtml(
             previewBudget,
             company,
             customers.find(c => c.id === previewBudget.customerId)?.document
           )}
-          filename={`Orcamento-${previewBudget.id}`}
+          filename={`Orçamento - ${previewBudget.description} - ${previewBudget.id}`}
           onClose={() => setPreviewBudget(null)}
         />
       )}
