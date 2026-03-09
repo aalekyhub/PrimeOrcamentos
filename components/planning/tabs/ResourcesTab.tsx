@@ -383,25 +383,34 @@ export const ResourcesTab: React.FC<ResourcesTabProps> = ({
                             </button>
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                            {['BDI', 'ISS', 'PIS', 'COFINS', 'INSS'].map(name => (
-                                <div key={name} className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
-                                    <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">{name} (%)</label>
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded p-1 text-sm font-bold outline-none"
-                                        value={taxes.find(t => t.name === name)?.rate || ''}
-                                        onChange={(e) => {
-                                            const val = parseFloat(e.target.value) || 0;
-                                            const newTaxes = [...taxes];
-                                            const idx = newTaxes.findIndex(t => t.name === name);
-                                            if (idx !== -1) newTaxes[idx] = { ...newTaxes[idx], rate: val };
-                                            else newTaxes.push({ id: db.generateId('TAX'), plan_id: planId, name, rate: val, value: 0 });
-                                            onUpdateTaxes(newTaxes);
-                                        }}
-                                    />
-                                </div>
-                            ))}
+                            {['BDI', 'ISS', 'PIS', 'COFINS', 'INSS'].map(name => {
+                                const taxValue = name === 'BDI'
+                                    ? calculations.bdiValue
+                                    : calculations.individualTaxValues.find((t: any) => t.name === name)?.value || 0;
+
+                                return (
+                                    <div key={name} className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
+                                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">{name} (%)</label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded p-1 text-sm font-bold outline-none mb-1"
+                                            value={taxes.find(t => t.name === name)?.rate || ''}
+                                            onChange={(e) => {
+                                                const val = parseFloat(e.target.value) || 0;
+                                                const newTaxes = [...taxes];
+                                                const idx = newTaxes.findIndex(t => t.name === name);
+                                                if (idx !== -1) newTaxes[idx] = { ...newTaxes[idx], rate: val };
+                                                else newTaxes.push({ id: db.generateId('TAX'), plan_id: planId, name, rate: val, value: 0 });
+                                                onUpdateTaxes(newTaxes);
+                                            }}
+                                        />
+                                        <div className="text-[10px] font-black text-blue-600 dark:text-blue-400 text-right">
+                                            R$ {taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
                 )}

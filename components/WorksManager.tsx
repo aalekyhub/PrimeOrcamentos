@@ -73,10 +73,27 @@ const useWorkCalculations = (
         return (desiredLiquid + sumFixed) / taxFactor;
     }, [desiredLiquid, otherTaxes, taxFactor]);
 
+    // Calcular valores individuais dos impostos
+    const individualTaxValues = useMemo(() => {
+        return otherTaxes.map(t => ({
+            name: t.name,
+            value: t.rate > 0 ? (totalGeneral * (t.rate / 100)) : t.value
+        }));
+    }, [otherTaxes, totalGeneral]);
+
     // totalTaxes represents the sum of BDI and all taxes (it's the difference between total final and direct costs)
     const totalCharges = useMemo(() => totalGeneral - totalDirect, [totalGeneral, totalDirect]);
 
-    return { totalMaterial, totalLabor, totalIndirect, totalDirect, totalGeneral, totalTaxes: totalCharges };
+    return {
+        totalMaterial,
+        totalLabor,
+        totalIndirect,
+        totalDirect,
+        totalGeneral,
+        totalTaxes: totalCharges,
+        bdiValue,
+        individualTaxValues
+    };
 };
 
 // Hook genérico para operações CRUD
@@ -1572,28 +1589,37 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         </div>
 
                                         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                                            {['BDI', 'ISS', 'PIS', 'COFINS', 'INSS'].map(name => (
-                                                <div key={name} className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-700/50 hover:border-green-200 dark:hover:border-green-900/50 transition-colors">
-                                                    <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">{name} (%)</label>
-                                                    <div className="relative">
-                                                        <input
-                                                            type="number"
-                                                            step="0.01"
-                                                            className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-sm font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-green-500/20 dark:focus:ring-green-500/10 transition-all pl-3 pr-8"
-                                                            value={taxes.find(t => t.name === name)?.rate || ''}
-                                                            onChange={(e) => {
-                                                                const val = parseFloat(e.target.value) || 0;
-                                                                const newTaxes = [...taxes];
-                                                                const idx = newTaxes.findIndex(t => t.name === name);
-                                                                if (idx !== -1) newTaxes[idx] = { ...newTaxes[idx], rate: val };
-                                                                else newTaxes.push({ id: db.generateId('TAX'), work_id: currentWork?.id, name, rate: val, value: 0 });
-                                                                setTaxes(newTaxes);
-                                                            }}
-                                                        />
-                                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 text-sm font-bold">%</span>
+                                            {['BDI', 'ISS', 'PIS', 'COFINS', 'INSS'].map(name => {
+                                                const taxValue = name === 'BDI'
+                                                    ? calculations.bdiValue
+                                                    : calculations.individualTaxValues.find(t => t.name === name)?.value || 0;
+
+                                                return (
+                                                    <div key={name} className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-700/50 hover:border-green-200 dark:hover:border-green-900/50 transition-colors">
+                                                        <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">{name} (%)</label>
+                                                        <div className="relative mb-2">
+                                                            <input
+                                                                type="number"
+                                                                step="0.01"
+                                                                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-sm font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-green-500/20 dark:focus:ring-green-500/10 transition-all pl-3 pr-8"
+                                                                value={taxes.find(t => t.name === name)?.rate || ''}
+                                                                onChange={(e) => {
+                                                                    const val = parseFloat(e.target.value) || 0;
+                                                                    const newTaxes = [...taxes];
+                                                                    const idx = newTaxes.findIndex(t => t.name === name);
+                                                                    if (idx !== -1) newTaxes[idx] = { ...newTaxes[idx], rate: val };
+                                                                    else newTaxes.push({ id: db.generateId('TAX'), work_id: currentWork?.id, name, rate: val, value: 0 });
+                                                                    setTaxes(newTaxes);
+                                                                }}
+                                                            />
+                                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 text-sm font-bold">%</span>
+                                                        </div>
+                                                        <div className="text-[10px] font-black text-green-600 dark:text-green-400 text-right">
+                                                            R$ {taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
                                     </div>
                                 )}

@@ -61,6 +61,14 @@ export const useCalculations = (
 
     const totalTaxes = useMemo(() => totalGeneral - totalDirect, [totalGeneral, totalDirect]);
 
+    // Calcular valores individuais dos impostos
+    const individualTaxValues = useMemo(() => {
+        return otherTaxes.map(t => ({
+            name: t.name,
+            value: t.rate > 0 ? (totalGeneral * (t.rate / 100)) : (t.value || 0)
+        }));
+    }, [otherTaxes, totalGeneral]);
+
     return {
         totalServices,
         totalMaterial,
@@ -72,5 +80,6 @@ export const useCalculations = (
         taxFactor,
         totalGeneral,
         totalTaxes,
+        individualTaxValues,
     };
 };
