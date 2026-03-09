@@ -2,10 +2,21 @@
 import React from 'react';
 import ReactQuill, { Quill } from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import './RichTextEditor.css';
 import { Type, Image as ImageIcon } from 'lucide-react';
+
+// Helper to escape HTML special characters
+const escapeHtml = (str: string) =>
+  str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 
 // Whitelist fonts
 const Font = Quill.import('formats/font');
+// ... (rest of the whitelists)
 Font.whitelist = ['inter', 'arial', 'roboto', 'serif', 'monospace', 'montserrat', 'opensans', 'lato', 'poppins', 'oswald', 'playfair', 'nunito'];
 Quill.register(Font, true);
 
@@ -111,15 +122,20 @@ const CustomToolbar: React.FC<{ id: string; onAddText?: () => void; onAddImage?:
 );
 
 const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeholder, onAddText, onAddImage, id = "toolbar-default" }) => {
-  const toolbarId = `toolbar-${id}`;
+  const toolbarId = React.useMemo(() => `toolbar-${id}-${Math.random().toString(36).substr(2, 9)}`, [id]);
 
   const processedValue = React.useMemo(() => {
     if (!value) return '';
-    if (/<[a-z][\s\S]*>/i.test(value)) return value;
-    if (value.includes('\n')) {
-      return value.split('\n').map(line => `<p>${line}</p>`).join('');
-    }
-    return value;
+
+    // Check if it's likely HTML
+    const isHtml = /<[a-z][\s\S]*>/i.test(value);
+    if (isHtml) return value;
+
+    // If plain text, wrap in paragraphs and escape content
+    return value
+      .split('\n')
+      .map(line => `<p>${line ? escapeHtml(line) : '<br/>'}</p>`)
+      .join('');
   }, [value]);
 
   const modules = React.useMemo(() => ({
@@ -128,197 +144,17 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeh
     },
   }), [toolbarId]);
 
-  const formats = [
+  const formats = React.useMemo(() => [
     'font', 'size',
     'header',
     'bold', 'italic', 'underline', 'strike',
     'color', 'background',
     'list', 'bullet', 'check', 'indent',
     'align'
-  ];
+  ], []);
 
   return (
     <div className="rich-text-editor bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm">
-      <style>{`
-        .rich-text-editor .ql-toolbar-custom {
-          border: none !important;
-          background: #f8fafc !important;
-        }
-        .dark .rich-text-editor .ql-toolbar-custom {
-          background: #0f172a !important;
-          border-bottom: 1px solid #1e293b !important;
-        }
-        .rich-text-editor .ql-font {
-          width: 90px !important;
-          font-family: inherit !important;
-        }
-        .rich-text-editor .ql-size {
-          width: 70px !important;
-        }
-        .ql-snow.ql-toolbar .ql-formats {
-          margin-right: 8px !important;
-        }
-        
-        /* Dark mode icons and pickers */
-        .dark .ql-snow.ql-toolbar button, 
-        .dark .ql-snow .ql-toolbar button {
-          color: #94a3b8 !important;
-        }
-        .dark .ql-snow.ql-toolbar button:hover, 
-        .dark .ql-snow .ql-toolbar button:hover,
-        .dark .ql-snow.ql-toolbar button.ql-active,
-        .dark .ql-snow .ql-toolbar button.ql-active {
-          color: #3b82f6 !important;
-        }
-        .dark .ql-snow.ql-toolbar button .ql-stroke,
-        .dark .ql-snow .ql-toolbar button .ql-stroke {
-          stroke: #94a3b8 !important;
-        }
-        .dark .ql-snow.ql-toolbar button:hover .ql-stroke, 
-        .dark .ql-snow .ql-toolbar button:hover .ql-stroke,
-        .dark .ql-snow.ql-toolbar button.ql-active .ql-stroke,
-        .dark .ql-snow .ql-toolbar button.ql-active .ql-stroke {
-          stroke: #3b82f6 !important;
-        }
-        .dark .ql-snow.ql-toolbar .ql-picker {
-          color: #94a3b8 !important;
-        }
-        .dark .ql-snow.ql-toolbar .ql-picker-label .ql-stroke {
-          stroke: #94a3b8 !important;
-        }
-        .dark .ql-snow.ql-toolbar .ql-picker-options {
-          background-color: #0f172a !important;
-          border-color: #1e293b !important;
-          color: #f1f5f9 !important;
-        }
-
-        .ql-snow .ql-picker.ql-font .ql-picker-label::before,
-        .ql-snow .ql-picker.ql-font .ql-picker-item::before {
-          content: 'Inter';
-        }
-        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='inter']::before,
-        .ql-snow .ql-picker.ql-font .ql-picker-item::before { font-family: 'Inter'; content: 'Inter'; }
-        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='arial']::before,
-        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='arial']::before { font-family: Arial; content: 'Arial'; }
-        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='roboto']::before,
-        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='roboto']::before { font-family: Roboto; content: 'Roboto'; }
-        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='serif']::before,
-        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='serif']::before { font-family: serif; content: 'Serif'; }
-        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='monospace']::before,
-        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='monospace']::before { font-family: monospace; content: 'Monospace'; }
-        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='montserrat']::before,
-        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='montserrat']::before { font-family: 'Montserrat'; content: 'Montserrat'; }
-        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='opensans']::before,
-        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='opensans']::before { font-family: 'Open Sans'; content: 'Open Sans'; }
-        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='lato']::before,
-        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='lato']::before { font-family: 'Lato'; content: 'Lato'; }
-        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='poppins']::before,
-        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='poppins']::before { font-family: 'Poppins'; content: 'Poppins'; }
-        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='oswald']::before,
-        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='oswald']::before { font-family: 'Oswald'; content: 'Oswald'; }
-        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='playfair']::before,
-        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='playfair']::before { font-family: 'Playfair Display'; content: 'Playfair'; }
-        .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='nunito']::before,
-        .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='nunito']::before { font-family: 'Nunito'; content: 'Nunito'; }
-
-        /* Sizes */
-        .ql-snow .ql-picker.ql-size .ql-picker-label::before,
-        .ql-snow .ql-picker.ql-size .ql-picker-item::before { content: '14px'; }
-        .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='10px']::before,
-        .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='10px']::before { content: '10px'; }
-        .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='12px']::before,
-        .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='12px']::before { content: '12px'; }
-        .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='14px']::before,
-        .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='14px']::before { content: '14px'; }
-        .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='16px']::before,
-        .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='16px']::before { content: '16px'; }
-        .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='18px']::before,
-        .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='18px']::before { content: '18px'; }
-        .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='20px']::before,
-        .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='20px']::before { content: '20px'; }
-        .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='24px']::before,
-        .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='24px']::before { content: '24px'; }
-        .ql-snow .ql-picker.ql-size .ql-picker-label[data-value='32px']::before,
-        .ql-snow .ql-picker.ql-size .ql-picker-item[data-value='32px']::before { content: '32px'; }
-
-        /* Font Classes for Rendering */
-        .ql-font-inter { font-family: 'Inter', sans-serif !important; }
-        .ql-font-arial { font-family: Arial, sans-serif !important; }
-        .ql-font-roboto { font-family: 'Roboto', sans-serif !important; }
-        .ql-font-serif { font-family: serif !important; }
-        .ql-font-monospace { font-family: monospace !important; }
-        .ql-font-montserrat { font-family: 'Montserrat', sans-serif !important; }
-        .ql-font-opensans { font-family: 'Open Sans', sans-serif !important; }
-        .ql-font-lato { font-family: 'Lato', sans-serif !important; }
-        .ql-font-poppins { font-family: 'Poppins', sans-serif !important; }
-        .ql-font-oswald { font-family: 'Oswald', sans-serif !important; }
-        .ql-font-playfair { font-family: 'Playfair Display', serif !important; }
-        .ql-font-nunito { font-family: 'Nunito', sans-serif !important; }
-
-        /* Size Classes for Rendering */
-        .ql-size-10px { font-size: 10px !important; }
-        .ql-size-12px { font-size: 12px !important; }
-        .ql-size-14px { font-size: 14px !important; }
-        .ql-size-16px { font-size: 16px !important; }
-        .ql-size-18px { font-size: 18px !important; }
-        .ql-size-20px { font-size: 20px !important; }
-        .ql-size-24px { font-size: 24px !important; }
-        .ql-size-32px { font-size: 32px !important; }
-
-        .ql-container.ql-snow {
-          border: none !important;
-          min-height: 120px;
-          font-family: inherit;
-        }
-        .ql-editor {
-          font-family: 'Inter', sans-serif;
-          font-size: 14px;
-          line-height: 1.15 !important;
-        }
-        .ql-editor p {
-          margin-bottom: 10px !important;
-        }
-        .ql-editor ol, .ql-editor ul {
-          padding-left: 1.25em !important;
-        }
-        .ql-editor li {
-          padding-left: 0.25em !important;
-          margin-bottom: 4px;
-        }
-        .rich-text-editor .ql-container {
-          max-height: 600px;
-          overflow-y: auto;
-        }
-        .ql-editor h1, .ql-editor h2, .ql-editor h3, .ql-editor h4 {
-          font-weight: 800 !important;
-          color: #0f172a !important;
-          margin-top: 15px !important;
-          margin-bottom: 5px !important;
-        }
-        .ql-editor h1 { font-size: 24px !important; }
-        .ql-editor h2 { font-size: 20px !important; }
-        .ql-editor h3 { font-size: 18px !important; }
-        .ql-editor h4 { font-size: 14px !important; }
-        /* Checklist Icon Fix */
-        .ql-snow .ql-toolbar button.ql-list[value="check"]::before {
-          content: '☐';
-          font-family: Arial, sans-serif;
-          font-weight: bold;
-          font-size: 16px;
-          display: block;
-          margin-top: -2px;
-        }
-        .ql-snow .ql-toolbar button.ql-list[value="check"].ql-active::before {
-          content: '☑';
-          color: #2563eb;
-        }
-        .rich-text-editor .ql-toolbar-custom {
-          position: sticky;
-          top: 0;
-          z-index: 50;
-          background: white;
-        }
-      `}</style>
       <CustomToolbar id={toolbarId} onAddText={onAddText} onAddImage={onAddImage} />
       <ReactQuill
         theme="snow"
