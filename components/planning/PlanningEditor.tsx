@@ -95,6 +95,10 @@ interface PlanningEditorProps {
     onDeleteLabor: (id: string) => void;
     onDeleteIndirect: (id: string) => void;
     onDeleteTax: (id: string) => void;
+    onDeleteMultipleServices?: (ids: string[]) => void;
+    onDeleteMultipleMaterials?: (ids: string[]) => void;
+    onDeleteMultipleLabor?: (ids: string[]) => void;
+    onDeleteMultipleIndirects?: (ids: string[]) => void;
     onSave: () => void;
     onGenerateBudget: () => void;
     onBack: () => void;
@@ -172,6 +176,10 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
     onDeleteLabor,
     onDeleteIndirect,
     onDeleteTax,
+    onDeleteMultipleServices,
+    onDeleteMultipleMaterials,
+    onDeleteMultipleLabor,
+    onDeleteMultipleIndirects,
     onSave,
     onGenerateBudget,
     onBack,
@@ -356,6 +364,7 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
                             )
                         }
                         onDeleteService={onDeleteService}
+                        onDeleteMultipleServices={onDeleteMultipleServices}
                         onReorderServices={onUpdateServices}
                         planId={currentPlan.id}
                     />
@@ -380,6 +389,9 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
                         onDeleteMaterial={onDeleteMaterial}
                         onDeleteLabor={onDeleteLabor}
                         onDeleteIndirect={onDeleteIndirect}
+                        onDeleteMultipleMaterials={onDeleteMultipleMaterials}
+                        onDeleteMultipleLabor={onDeleteMultipleLabor}
+                        onDeleteMultipleIndirects={onDeleteMultipleIndirects}
                         onDeleteTax={onDeleteTax}
                     />
                 )}

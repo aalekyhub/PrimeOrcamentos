@@ -126,6 +126,18 @@ const PlanningManager: React.FC<Props> = ({
                     onDeleteTax={(id) =>
                         planning.deleteItem('serviflow_plan_taxes', id, planning.taxes, planning.setTaxes, 'imposto')
                     }
+                    onDeleteMultipleServices={(ids) =>
+                        planning.deleteMultipleItems('serviflow_plan_services', ids, planning.services, planning.setServices, () => { }, 'serviço')
+                    }
+                    onDeleteMultipleMaterials={(ids) =>
+                        planning.deleteMultipleItems('serviflow_plan_materials', ids, planning.materials, planning.setMaterials, () => { }, 'material')
+                    }
+                    onDeleteMultipleLabor={(ids) =>
+                        planning.deleteMultipleItems('serviflow_plan_labor', ids, planning.labor, planning.setLabor, () => { }, 'mão de obra')
+                    }
+                    onDeleteMultipleIndirects={(ids) =>
+                        planning.deleteMultipleItems('serviflow_plan_indirects', ids, planning.indirects, planning.setIndirects, () => { }, 'custo indireto')
+                    }
                     onSave={handleSave}
                     onGenerateBudget={handleGenerateBudget}
                     onBack={() => {

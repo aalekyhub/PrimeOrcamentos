@@ -30,6 +30,9 @@ interface ResourcesTabProps {
     onDeleteLabor: (id: string) => void;
     onDeleteIndirect: (id: string) => void;
     onDeleteTax: (id: string) => void;
+    onDeleteMultipleMaterials?: (ids: string[]) => void;
+    onDeleteMultipleLabor?: (ids: string[]) => void;
+    onDeleteMultipleIndirects?: (ids: string[]) => void;
 }
 
 export const ResourcesTab: React.FC<ResourcesTabProps> = ({
@@ -50,6 +53,9 @@ export const ResourcesTab: React.FC<ResourcesTabProps> = ({
     onDeleteLabor,
     onDeleteIndirect,
     onDeleteTax,
+    onDeleteMultipleMaterials,
+    onDeleteMultipleLabor,
+    onDeleteMultipleIndirects,
 }) => {
     const [activeResTab, setActiveResTab] = useState<ResourceTab>('material');
     const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
@@ -135,9 +141,14 @@ export const ResourcesTab: React.FC<ResourcesTabProps> = ({
                                     {selectedMaterials.length > 0 && (
                                         <button
                                             onClick={() => {
-                                                if (confirm(`Excluir ${selectedMaterials.length} material(is) selecionado(s)?`)) {
-                                                    selectedMaterials.forEach(id => onDeleteMaterial(id));
+                                                if (onDeleteMultipleMaterials) {
+                                                    onDeleteMultipleMaterials(selectedMaterials);
                                                     setSelectedMaterials([]);
+                                                } else {
+                                                    if (confirm(`Excluir ${selectedMaterials.length} material(is) selecionado(s)?`)) {
+                                                        selectedMaterials.forEach(id => onDeleteMaterial(id));
+                                                        setSelectedMaterials([]);
+                                                    }
                                                 }
                                             }}
                                             className="flex items-center gap-1 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-[10px] font-bold hover:bg-red-100 transition-all border border-red-100 dark:border-red-800"
@@ -147,9 +158,14 @@ export const ResourcesTab: React.FC<ResourcesTabProps> = ({
                                     )}
                                     <button
                                         onClick={() => {
-                                            if (confirm('Excluir TODOS os materiais deste planejamento?')) {
-                                                materials.forEach(m => onDeleteMaterial(m.id));
+                                            if (onDeleteMultipleMaterials) {
+                                                onDeleteMultipleMaterials(materials.map(m => m.id));
                                                 setSelectedMaterials([]);
+                                            } else {
+                                                if (confirm('Excluir TODOS os materiais deste planejamento?')) {
+                                                    materials.forEach(m => onDeleteMaterial(m.id));
+                                                    setSelectedMaterials([]);
+                                                }
                                             }
                                         }}
                                         className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[10px] font-bold hover:bg-slate-200 transition-all border border-slate-200 dark:border-slate-700"
@@ -216,9 +232,14 @@ export const ResourcesTab: React.FC<ResourcesTabProps> = ({
                                     {selectedLabor.length > 0 && (
                                         <button
                                             onClick={() => {
-                                                if (confirm(`Excluir ${selectedLabor.length} item(ns) de mão de obra selecionado(s)?`)) {
-                                                    selectedLabor.forEach(id => onDeleteLabor(id));
+                                                if (onDeleteMultipleLabor) {
+                                                    onDeleteMultipleLabor(selectedLabor);
                                                     setSelectedLabor([]);
+                                                } else {
+                                                    if (confirm(`Excluir ${selectedLabor.length} item(ns) de mão de obra selecionado(s)?`)) {
+                                                        selectedLabor.forEach(id => onDeleteLabor(id));
+                                                        setSelectedLabor([]);
+                                                    }
                                                 }
                                             }}
                                             className="flex items-center gap-1 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-[10px] font-bold hover:bg-red-100 transition-all border border-red-100 dark:border-red-800"
@@ -228,9 +249,14 @@ export const ResourcesTab: React.FC<ResourcesTabProps> = ({
                                     )}
                                     <button
                                         onClick={() => {
-                                            if (confirm('Excluir TODA a mão de obra deste planejamento?')) {
-                                                labor.forEach(l => onDeleteLabor(l.id));
+                                            if (onDeleteMultipleLabor) {
+                                                onDeleteMultipleLabor(labor.map(l => l.id));
                                                 setSelectedLabor([]);
+                                            } else {
+                                                if (confirm('Excluir TODA a mão de obra deste planejamento?')) {
+                                                    labor.forEach(l => onDeleteLabor(l.id));
+                                                    setSelectedLabor([]);
+                                                }
                                             }
                                         }}
                                         className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[10px] font-bold hover:bg-slate-200 transition-all border border-slate-200 dark:border-slate-700"
@@ -297,9 +323,14 @@ export const ResourcesTab: React.FC<ResourcesTabProps> = ({
                                     {selectedIndirects.length > 0 && (
                                         <button
                                             onClick={() => {
-                                                if (confirm(`Excluir ${selectedIndirects.length} custo(s) indireto(s) selecionado(s)?`)) {
-                                                    selectedIndirects.forEach(id => onDeleteIndirect(id));
+                                                if (onDeleteMultipleIndirects) {
+                                                    onDeleteMultipleIndirects(selectedIndirects);
                                                     setSelectedIndirects([]);
+                                                } else {
+                                                    if (confirm(`Excluir ${selectedIndirects.length} custo(s) indireto(s) selecionado(s)?`)) {
+                                                        selectedIndirects.forEach(id => onDeleteIndirect(id));
+                                                        setSelectedIndirects([]);
+                                                    }
                                                 }
                                             }}
                                             className="flex items-center gap-1 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-[10px] font-bold hover:bg-red-100 transition-all border border-red-100 dark:border-red-800"
@@ -309,9 +340,14 @@ export const ResourcesTab: React.FC<ResourcesTabProps> = ({
                                     )}
                                     <button
                                         onClick={() => {
-                                            if (confirm('Excluir TODOS os custos indiretos deste planejamento?')) {
-                                                indirects.forEach(i => onDeleteIndirect(i.id));
+                                            if (onDeleteMultipleIndirects) {
+                                                onDeleteMultipleIndirects(indirects.map(i => i.id));
                                                 setSelectedIndirects([]);
+                                            } else {
+                                                if (confirm('Excluir TODOS os custos indiretos deste planejamento?')) {
+                                                    indirects.forEach(i => onDeleteIndirect(i.id));
+                                                    setSelectedIndirects([]);
+                                                }
                                             }
                                         }}
                                         className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[10px] font-bold hover:bg-slate-200 transition-all border border-slate-200 dark:border-slate-700"

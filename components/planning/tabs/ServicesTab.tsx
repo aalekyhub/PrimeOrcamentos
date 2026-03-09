@@ -10,6 +10,7 @@ interface ServicesTabProps {
     onAddService: (service: Omit<PlannedService, 'id' | 'plan_id' | 'total_cost'>) => void;
     onUpdateService: (updatedService: PlannedService) => void;
     onDeleteService: (id: string) => void;
+    onDeleteMultipleServices?: (ids: string[]) => void;
     onReorderServices: (newServices: PlannedService[]) => void;
     planId: string;
 }
@@ -19,6 +20,7 @@ export const ServicesTab: React.FC<ServicesTabProps> = ({
     onAddService,
     onUpdateService,
     onDeleteService,
+    onDeleteMultipleServices,
     onReorderServices,
     planId,
 }) => {
@@ -32,17 +34,28 @@ export const ServicesTab: React.FC<ServicesTabProps> = ({
 
     const handleDeleteSelected = () => {
         if (selectedServices.length === 0) return;
-        if (confirm(`Excluir ${selectedServices.length} serviço(s) selecionado(s)?`)) {
-            selectedServices.forEach(id => onDeleteService(id));
+        if (onDeleteMultipleServices) {
+            onDeleteMultipleServices(selectedServices);
             setSelectedServices([]);
+        } else {
+            // Fallback if prop not provided (though it should be)
+            if (confirm(`Excluir ${selectedServices.length} serviço(s) selecionado(s)?`)) {
+                selectedServices.forEach(id => onDeleteService(id));
+                setSelectedServices([]);
+            }
         }
     };
 
     const handleClearAll = () => {
         if (services.length === 0) return;
-        if (confirm('Excluir TODOS os serviços deste planejamento?')) {
-            services.forEach(s => onDeleteService(s.id));
+        if (onDeleteMultipleServices) {
+            onDeleteMultipleServices(services.map(s => s.id));
             setSelectedServices([]);
+        } else {
+            if (confirm('Excluir TODOS os serviços deste planejamento?')) {
+                services.forEach(s => onDeleteService(s.id));
+                setSelectedServices([]);
+            }
         }
     };
 
