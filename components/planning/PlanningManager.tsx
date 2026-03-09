@@ -151,7 +151,7 @@ const PlanningManager: React.FC<Props> = ({
 
             {showPreview && planning.currentPlan && (
                 <ReportPreview
-                    title={`PLANEJAMENTO - ${planning.currentPlan.name} - ${planning.currentPlan.id}`}
+                    title={`${planning.currentPlan.id} - ${planning.currentPlan.name}`}
                     htmlContent={buildPlanningReportHtml(
                         planning.currentPlan,
                         customers,
@@ -170,7 +170,7 @@ const PlanningManager: React.FC<Props> = ({
                         company,
                         PLANNING_THEME
                     )}
-                    filename={`PLANEJAMENTO - ${planning.currentPlan.name} - ${planning.currentPlan.id}`}
+                    filename={`${planning.currentPlan.id} - ${planning.currentPlan.name}`}
                     onClose={() => setShowPreview(false)}
                 />
             )}
