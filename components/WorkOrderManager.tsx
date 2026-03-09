@@ -397,7 +397,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
             {previewContract && (
                 <ReportPreview
-                    title={`${previewContract.id} - CONTRATO - ${previewContract.description}`}
+                    title={`CONTRATO - ${previewContract.id} - ${previewContract.description}`}
                     htmlContent={getContractHtml(
                         previewContract,
                         customers.find(c => c.id === previewContract.customerId) || {
@@ -411,7 +411,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         },
                         company
                     )}
-                    filename={`${previewContract.id} - CONTRATO - ${previewContract.description}`}
+                    filename={`CONTRATO - ${previewContract.id} - ${previewContract.description}`}
                     onClose={() => setPreviewContract(null)}
                 />
             )}
