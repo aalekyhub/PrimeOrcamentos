@@ -138,12 +138,12 @@ const ReportPreview: React.FC<Props> = ({
                 }
 
                 /* Tipografia do preview para ficar próxima do editor */
-                .pdf-page-content p,
-                .pdf-page-content .ql-editor-print p {
-                    margin-top: 0 !important;
-                    margin-bottom: 8px !important;
-                    line-height: 1.45 !important;
-                }
+                    .pdf-page-content p,
+                    .pdf-page-content .ql-editor-print p {
+                        margin-top: 0 !important;
+                        margin-bottom: 8px !important;
+                        line-height: 2.0 !important;
+                    }
 
                 .pdf-page-content h1, .pdf-page-content h2, .pdf-page-content h3,
                 .pdf-page-content h4, .pdf-page-content h5, .pdf-page-content h6 {
