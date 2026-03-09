@@ -250,7 +250,7 @@ export const buildExecutionReportHtml = (
 
                 ${reportServices.length > 0
             ? `
-                    <div style="margin-bottom:26px; page-break-inside: avoid; break-inside: avoid;">
+                    <div style="margin-bottom:26px;">
                         <h3 style="font-size:14px; font-weight:800; color:${theme.secondaryColor}; text-transform:uppercase; margin:0 0 12px 0; padding-bottom:6px; border-bottom:2px solid #e2e8f0;">
                             ${sectionCounter++}. ${theme.terminologies.servicesSection}
                         </h3>
@@ -283,7 +283,7 @@ export const buildExecutionReportHtml = (
 
                 ${reportMaterials.length > 0
             ? `
-                    <div style="margin-bottom:26px; page-break-inside: avoid; break-inside: avoid;">
+                    <div style="margin-bottom:26px;">
                         <h3 style="font-size:14px; font-weight:800; color:${theme.secondaryColor}; text-transform:uppercase; margin:0 0 12px 0; padding-bottom:6px; border-bottom:2px solid #e2e8f0;">
                             ${sectionCounter++}. Insumos e Materiais
                         </h3>
@@ -316,7 +316,7 @@ export const buildExecutionReportHtml = (
 
                 ${reportLabor.length > 0
             ? `
-                    <div style="margin-bottom:26px; page-break-inside: avoid; break-inside: avoid;">
+                    <div style="margin-bottom:26px;">
                         <h3 style="font-size:14px; font-weight:800; color:${theme.secondaryColor}; text-transform:uppercase; margin:0 0 12px 0; padding-bottom:6px; border-bottom:2px solid #e2e8f0;">
                             ${sectionCounter++}. Mão de Obra
                         </h3>
@@ -349,7 +349,7 @@ export const buildExecutionReportHtml = (
 
                 ${reportIndirects.length > 0
             ? `
-                    <div style="margin-bottom:26px; page-break-inside: avoid; break-inside: avoid;">
+                    <div style="margin-bottom:26px;">
                         <h3 style="font-size:14px; font-weight:800; color:${theme.secondaryColor}; text-transform:uppercase; margin:0 0 12px 0; padding-bottom:6px; border-bottom:2px solid #e2e8f0;">
                             ${sectionCounter++}. Custos Indiretos
                         </h3>
@@ -376,7 +376,7 @@ export const buildExecutionReportHtml = (
 
                 ${reportTaxes.length > 0
             ? `
-                    <div style="margin-bottom:26px; page-break-inside: avoid; break-inside: avoid;">
+                    <div style="margin-bottom:26px;">
                         <h3 style="font-size:14px; font-weight:800; color:${theme.secondaryColor}; text-transform:uppercase; margin:0 0 12px 0; padding-bottom:6px; border-bottom:2px solid #e2e8f0;">
                             ${sectionCounter++}. Resumo de Impostos
                         </h3>
