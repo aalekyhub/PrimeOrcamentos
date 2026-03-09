@@ -397,7 +397,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
             {previewContract && (
                 <ReportPreview
-                    title={`Contrato - ${previewContract.description} - ${previewContract.id}`}
+                    title={`CONTRATO - ${previewContract.description} - ${previewContract.id}`}
                     htmlContent={getContractHtml(
                         previewContract,
                         customers.find(c => c.id === previewContract.customerId) || {
@@ -411,14 +411,14 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         },
                         company
                     )}
-                    filename={`Contrato - ${previewContract.description} - ${previewContract.id}`}
+                    filename={`CONTRATO - ${previewContract.description} - ${previewContract.id}`}
                     onClose={() => setPreviewContract(null)}
                 />
             )}
 
             {previewOS && (
                 <ReportPreview
-                    title={`OS de Obra - ${previewOS.description} - ${previewOS.id}`}
+                    title={`OS DE OBRA - ${previewOS.description} - ${previewOS.id}`}
                     htmlContent={buildOsHtml(
                         previewOS,
                         customers.find(c => c.id === previewOS.customerId) || {
@@ -428,7 +428,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                         },
                         company
                     )}
-                    filename={`OS de Obra - ${previewOS.description} - ${previewOS.id}`}
+                    filename={`OS DE OBRA - ${previewOS.description} - ${previewOS.id}`}
                     onClose={() => setPreviewOS(null)}
                 />
             )}

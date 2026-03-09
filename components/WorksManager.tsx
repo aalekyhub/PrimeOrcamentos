@@ -1473,9 +1473,9 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                         // Preview materials report
                                                         const html = generateMaterialsReportHtml();
                                                         setPreviewContent({
-                                                            title: `Lista de Materiais - ${currentWork?.name} - ${currentWork?.id}`,
+                                                            title: `LISTA DE MATERIAIS - ${currentWork?.name} - ${currentWork?.id}`,
                                                             html,
-                                                            filename: `Materiais - ${currentWork?.name} - ${currentWork?.id}`
+                                                            filename: `MATERIAIS - ${currentWork?.name} - ${currentWork?.id}`
                                                         });
                                                         setShowPreview(true);
                                                     }}
@@ -1670,9 +1670,9 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         onClick={() => {
                                             const html = generateFullReportHtml();
                                             setPreviewContent({
-                                                title: `Relatório de Execução - ${currentWork?.name} - ${currentWork?.id}`,
+                                                title: `RELATÓRIO DE EXECUÇÃO - ${currentWork?.name} - ${currentWork?.id}`,
                                                 html,
-                                                filename: `Execução - ${currentWork?.name} - ${currentWork?.id}`
+                                                filename: `EXECUÇÃO - ${currentWork?.name} - ${currentWork?.id}`
                                             });
                                             setShowPreview(true);
                                         }}
