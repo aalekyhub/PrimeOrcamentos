@@ -155,10 +155,10 @@ const ReportPreview: React.FC<Props> = ({
                 .pdf-page-content ul, .pdf-page-content ol {
                     margin-top: 0 !important;
                     margin-bottom: 8px !important;
-                    padding-left: 18px !important;
+                    padding-left: 1.25em !important;
                 }
-
                 .pdf-page-content li {
+                    padding-left: 0.25em !important;
                     margin-bottom: 2px !important;
                     line-height: 1.4 !important;
                 }
@@ -268,10 +268,10 @@ const ReportPreview: React.FC<Props> = ({
                     .pdf-page-content ul, .pdf-page-content ol {
                         margin-top: 0 !important;
                         margin-bottom: 8px !important;
-                        padding-left: 18px !important;
+                        padding-left: 1.25em !important;
                     }
-
                     .pdf-page-content li {
+                        padding-left: 0.25em !important;
                         margin-bottom: 2px !important;
                         line-height: 1.4 !important;
                     }

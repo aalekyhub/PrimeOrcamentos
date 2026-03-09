@@ -278,7 +278,11 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeh
         .ql-editor p {
           margin-bottom: 10px !important;
         }
+        .ql-editor ol, .ql-editor ul {
+          padding-left: 1.25em !important;
+        }
         .ql-editor li {
+          padding-left: 0.25em !important;
           margin-bottom: 4px;
         }
         .rich-text-editor .ql-container {
