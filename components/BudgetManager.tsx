@@ -362,12 +362,10 @@ const BudgetManager: React.FC<Props> = ({
       const result = await db.save('serviflow_orders', newList, data);
       if (result?.success) {
         notify('Orçamento salvo e sincronizado!');
-        setShowForm(false);
       } else if ((result as any)?.error === 'quota_exceeded') {
         notify('ERRO DE ARMAZENAMENTO: limite excedido.', 'error');
       } else {
         notify(`Salvo localmente. Erro de sync: ${((result as any)?.error)?.message || JSON.stringify((result as any)?.error)}`, 'warning');
-        setShowForm(false);
       }
     } finally {
       setIsSaving(false);
