@@ -115,13 +115,19 @@ export const buildPlanningReportHtml = (
         total: toNumber(m.total_cost) || (toNumber(m.quantity) * toNumber(m.unit_cost))
     }));
 
-    const reportLabor = labor.map((l: any) => ({
-        role: l.role || '',
-        type: l.cost_type || '',
-        quantity: toNumber(l.quantity),
-        unit: l.unit || 'un',
-        total: toNumber(l.total_cost) || (toNumber(l.quantity) * toNumber(l.unit_cost))
-    }));
+    const reportLabor = labor.map((l: any) => {
+        const qty = toNumber(l.quantity);
+        const unitCost = toNumber(l.unit_cost);
+        const total = toNumber(l.total_cost) || (qty * unitCost);
+        return {
+            role: l.role || '',
+            type: l.cost_type || '',
+            quantity: qty,
+            unit: l.unit || 'un',
+            unitCost,
+            total
+        };
+    });
 
     const reportIndirects = indirects.map((i: any) => ({
         name: i.name || '',
@@ -264,7 +270,7 @@ export const buildPlanningReportHtml = (
                             ${sectionCounter++}. ${theme.terminologies.servicesSection}
                         </h3>
                         <table style="width:100%; border-collapse:collapse;">
-                            <thead>
+                            <tbody>
                                 <tr style="border-bottom:2px solid #e2e8f0;">
                                     <th style="padding:10px 8px; text-align:left; font-size:10px; color:#64748b;">DESCRIÇÃO</th>
                                     <th style="padding:10px 8px; text-align:center; font-size:10px; color:#64748b; width:65px;">QTD</th>
@@ -272,8 +278,6 @@ export const buildPlanningReportHtml = (
                                     <th style="padding:10px 8px; text-align:right; font-size:10px; color:#64748b; width:90px;">${theme.terminologies.totalUnitLabel}</th>
                                     <th style="padding:10px 8px; text-align:right; font-size:10px; color:#64748b; width:105px;">${theme.terminologies.totalRowLabel}</th>
                                 </tr>
-                            </thead>
-                            <tbody>
                                 ${reportServices
                 .map((s) => `
                                     <tr style="border-bottom:1px solid #f1f5f9; page-break-inside: avoid; break-inside: avoid;">
@@ -297,7 +301,7 @@ export const buildPlanningReportHtml = (
                             ${sectionCounter++}. Insumos e Materiais
                         </h3>
                         <table style="width:100%; border-collapse:collapse;">
-                            <thead>
+                            <tbody>
                                 <tr style="border-bottom:2px solid #e2e8f0;">
                                     <th style="padding:10px 8px; text-align:left; font-size:10px; color:#64748b;">MATERIAL</th>
                                     <th style="padding:10px 8px; text-align:center; font-size:10px; color:#64748b; width:65px;">QTD</th>
@@ -305,8 +309,6 @@ export const buildPlanningReportHtml = (
                                     <th style="padding:10px 8px; text-align:right; font-size:10px; color:#64748b; width:90px;">VL. UNIT.</th>
                                     <th style="padding:10px 8px; text-align:right; font-size:10px; color:#64748b; width:105px;">VL. TOTAL</th>
                                 </tr>
-                            </thead>
-                            <tbody>
                                 ${reportMaterials
                 .map((m) => `
                                     <tr style="border-bottom:1px solid #f1f5f9; page-break-inside: avoid; break-inside: avoid;">
@@ -330,15 +332,14 @@ export const buildPlanningReportHtml = (
                             ${sectionCounter++}. Mão de Obra
                         </h3>
                         <table style="width:100%; border-collapse:collapse;">
-                            <thead>
+                            <tbody>
                                 <tr style="border-bottom:2px solid #e2e8f0;">
                                     <th style="padding:10px 8px; text-align:left; font-size:10px; color:#64748b;">FUNÇÃO / TIPO</th>
                                     <th style="padding:10px 8px; text-align:center; font-size:10px; color:#64748b; width:65px;">QTD</th>
                                     <th style="padding:10px 8px; text-align:center; font-size:10px; color:#64748b; width:50px;">UND</th>
+                                    <th style="padding:10px 8px; text-align:right; font-size:10px; color:#64748b; width:90px;">VL. UNIT.</th>
                                     <th style="padding:10px 8px; text-align:right; font-size:10px; color:#64748b; width:105px;">VL. TOTAL</th>
                                 </tr>
-                            </thead>
-                            <tbody>
                                 ${reportLabor
                 .map((l) => `
                                     <tr style="border-bottom:1px solid #f1f5f9; page-break-inside: avoid; break-inside: avoid;">
@@ -347,6 +348,7 @@ export const buildPlanningReportHtml = (
                                         </td>
                                         <td style="padding:10px 8px; font-size:11px; text-align:center;">${formatQty(l.quantity)}</td>
                                         <td style="padding:10px 8px; font-size:11px; text-align:center;">${escapeHtml(l.unit)}</td>
+                                        <td style="padding:10px 8px; font-size:11px; text-align:right;">R$ ${formatMoney(l.unitCost)}</td>
                                         <td style="padding:10px 8px; font-size:11px; text-align:right; font-weight:700;">R$ ${formatMoney(l.total)}</td>
                                     </tr>`)
                 .join('')}
@@ -363,13 +365,11 @@ export const buildPlanningReportHtml = (
                             ${sectionCounter++}. Custos Indiretos
                         </h3>
                         <table style="width:100%; border-collapse:collapse;">
-                            <thead>
+                            <tbody>
                                 <tr style="border-bottom:2px solid #e2e8f0;">
                                     <th style="padding:10px 8px; text-align:left; font-size:10px; color:#64748b;">CATEGORIA / DESCRIÇÃO</th>
                                     <th style="padding:10px 8px; text-align:right; font-size:10px; color:#64748b; width:105px;">VALOR</th>
                                 </tr>
-                            </thead>
-                            <tbody>
                                 ${reportIndirects
                 .map((i) => `
                                     <tr style="border-bottom:1px solid #f1f5f9; page-break-inside: avoid; break-inside: avoid;">
@@ -390,14 +390,12 @@ export const buildPlanningReportHtml = (
                             ${sectionCounter++}. Resumo de Impostos
                         </h3>
                         <table style="width:100%; border-collapse:collapse;">
-                            <thead>
+                            <tbody>
                                 <tr style="border-bottom:2px solid #e2e8f0;">
                                     <th style="padding:10px 8px; text-align:left; font-size:10px; color:#64748b;">IMPOSTO</th>
                                     <th style="padding:10px 8px; text-align:center; font-size:10px; color:#64748b; width:70px;">ALÍQUOTA</th>
                                     <th style="padding:10px 8px; text-align:right; font-size:10px; color:#64748b; width:120px;">VALOR</th>
                                 </tr>
-                            </thead>
-                            <tbody>
                                 ${reportTaxes
                 .map((t) => `
                                     <tr style="border-bottom:1px solid #f1f5f9; page-break-inside: avoid; break-inside: avoid;">
