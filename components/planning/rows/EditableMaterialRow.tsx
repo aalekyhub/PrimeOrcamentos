@@ -58,10 +58,10 @@ export const EditableMaterialRow: React.FC<EditableMaterialRowProps> = ({
             onDragOver={(e) => onDragOver(e, index)}
             onDragEnd={onDragEnd}
             className={`bg-white dark:bg-slate-900/50 p-3 rounded-lg border flex justify-between items-center text-sm transition-all ${isDragged
-                    ? 'opacity-50 bg-blue-50 dark:bg-blue-900/20 border-blue-200'
-                    : isSelected
-                        ? 'border-blue-300 bg-blue-50/30'
-                        : 'border-slate-200 dark:border-slate-800 shadow-sm'
+                ? 'opacity-50 bg-blue-50 dark:bg-blue-900/20 border-blue-200'
+                : isSelected
+                    ? 'border-blue-300 bg-blue-50/30'
+                    : 'border-slate-200 dark:border-slate-800 shadow-sm'
                 }`}
         >
             {isEditing ? (
@@ -74,19 +74,19 @@ export const EditableMaterialRow: React.FC<EditableMaterialRowProps> = ({
                             className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 rounded text-xs font-bold uppercase"
                         />
                     </div>
-                    <div className="md:col-span-1">
-                        <input
-                            type="text"
-                            value={editUnit}
-                            onChange={(e) => setEditUnit(e.target.value)}
-                            className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 rounded text-xs"
-                        />
-                    </div>
                     <div className="md:col-span-2">
                         <input
                             type="number"
                             value={editQty}
                             onChange={(e) => setEditQty(parseFloat(e.target.value) || 0)}
+                            className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 rounded text-xs"
+                        />
+                    </div>
+                    <div className="md:col-span-1">
+                        <input
+                            type="text"
+                            value={editUnit}
+                            onChange={(e) => setEditUnit(e.target.value)}
                             className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 rounded text-xs"
                         />
                     </div>

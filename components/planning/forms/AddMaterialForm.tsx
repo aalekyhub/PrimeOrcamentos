@@ -49,16 +49,6 @@ export const AddMaterialForm: React.FC<AddMaterialFormProps> = ({ onAdd, planId 
                         placeholder="Ex: Cimento CP-II"
                     />
                 </div>
-                <div className="md:col-span-1">
-                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Un</label>
-                    <input
-                        type="text"
-                        value={unit}
-                        onChange={(e) => setUnit(e.target.value)}
-                        className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100"
-                        placeholder="un"
-                    />
-                </div>
                 <div className="md:col-span-2">
                     <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Qtd</label>
                     <input
@@ -67,6 +57,16 @@ export const AddMaterialForm: React.FC<AddMaterialFormProps> = ({ onAdd, planId 
                         onChange={(e) => setQty(parseFloat(e.target.value) || 0)}
                         className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100"
                         placeholder="0"
+                    />
+                </div>
+                <div className="md:col-span-1">
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Un</label>
+                    <input
+                        type="text"
+                        value={unit}
+                        onChange={(e) => setUnit(e.target.value)}
+                        className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100"
+                        placeholder="un"
                     />
                 </div>
                 <div className="md:col-span-2">

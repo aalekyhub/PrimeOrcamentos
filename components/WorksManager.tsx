@@ -307,7 +307,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
     // States for "Add Item" forms (Point 3)
     const [newMaterial, setNewMaterial] = useState({ name: '', qty: '', unit: 'un', cost: '' });
-    const [newLabor, setNewLabor] = useState({ role: '', type: 'Diária', qty: '', cost: '' });
+    const [newLabor, setNewLabor] = useState({ role: '', type: 'Diária', qty: '', unit: 'un', cost: '' });
     const [newIndirect, setNewIndirect] = useState({ name: '', value: '' });
 
     const { notify } = useNotify();
@@ -1173,7 +1173,17 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                     placeholder="0"
                                                 />
                                             </div>
-                                            <div className="md:col-span-2">
+                                            <div className="md:col-span-1">
+                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Un</label>
+                                                <input
+                                                    type="text"
+                                                    value={newLabor.unit || ''}
+                                                    onChange={e => setNewLabor({ ...newLabor, unit: e.target.value })}
+                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100"
+                                                    placeholder="un"
+                                                />
+                                            </div>
+                                            <div className="md:col-span-1">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Custo</label>
                                                 <input
                                                     type="number"
@@ -1186,12 +1196,12 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             <div className="md:col-span-2">
                                                 <button
                                                     onClick={() => {
-                                                        const { role, type, qty, cost } = newLabor;
+                                                        const { role, type, qty, cost, unit } = newLabor;
                                                         const nQty = parseFloat(qty) || 0;
                                                         const nCost = parseFloat(cost) || 0;
                                                         if (!role) return notify("Função obrigatória", "error");
-                                                        laborManager.addItem({ role: role.toUpperCase(), cost_type: type as any, quantity: nQty, unit_cost: nCost, total_cost: nQty * nCost } as any);
-                                                        setNewLabor({ role: '', type: 'Diária', qty: '', cost: '' });
+                                                        laborManager.addItem({ role: role.toUpperCase(), cost_type: type as any, quantity: nQty, unit: unit || 'un', unit_cost: nCost, total_cost: nQty * nCost } as any);
+                                                        setNewLabor({ role: '', type: 'Diária', qty: '', cost: '', unit: 'un' });
                                                     }}
                                                     className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700 font-bold text-xs h-9 flex items-center justify-center gap-1 shadow-md shadow-green-950/20"
                                                 >

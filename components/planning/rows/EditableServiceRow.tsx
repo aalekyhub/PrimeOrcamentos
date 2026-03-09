@@ -84,19 +84,19 @@ export const EditableServiceRow: React.FC<EditableServiceRowProps> = ({
                             autoFocus
                         />
                     </div>
-                    <div className="md:col-span-1">
-                        <input
-                            type="text"
-                            value={editUnit}
-                            onChange={(e) => setEditUnit(e.target.value)}
-                            className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm text-slate-900 dark:text-slate-100"
-                        />
-                    </div>
                     <div className="md:col-span-2">
                         <input
                             type="number"
                             value={editQty}
                             onChange={(e) => setEditQty(parseFloat(e.target.value) || 0)}
+                            className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm text-slate-900 dark:text-slate-100"
+                        />
+                    </div>
+                    <div className="md:col-span-1">
+                        <input
+                            type="text"
+                            value={editUnit}
+                            onChange={(e) => setEditUnit(e.target.value)}
                             className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm text-slate-900 dark:text-slate-100"
                         />
                     </div>
