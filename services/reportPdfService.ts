@@ -164,7 +164,7 @@ export const buildExecutionReportHtml = (
                                                 ${escapeHtml(company.name || 'Empresa não informada')}
                                             </h1>
                                             <p style="font-size:13px; font-weight:800; color:#0f172a; margin:0 0 3px 0; line-height: 1.2;">
-                                                NOME IDENTIFICADOR DA OBRA: ${escapeHtml(header.name || 'Não informado')}
+                                                OBRA: ${escapeHtml(header.name || 'Não informado')}
                                             </p>
                                             <p style="font-size:10px; font-weight:800; color:${theme.primaryColor}; text-transform:uppercase; letter-spacing:0.08em; margin:0 0 3px 0;">
                                                 ${theme.reportTitle}
