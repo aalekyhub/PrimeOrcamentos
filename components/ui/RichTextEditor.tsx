@@ -273,10 +273,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeh
         .ql-editor {
           font-family: 'Inter', sans-serif;
           font-size: 14px;
-          line-height: 1.5 !important;
+          line-height: 1.15 !important;
         }
         .ql-editor p {
-          margin-bottom: 6px !important;
+          margin-bottom: 10px !important;
         }
         .ql-editor li {
           margin-bottom: 4px;
@@ -288,8 +288,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeh
         .ql-editor h1, .ql-editor h2, .ql-editor h3, .ql-editor h4 {
           font-weight: 800 !important;
           color: #0f172a !important;
-          margin-top: 12px !important;
-          margin-bottom: 8px !important;
+          margin-top: 15px !important;
+          margin-bottom: 5px !important;
         }
         .ql-editor h1 { font-size: 24px !important; }
         .ql-editor h2 { font-size: 20px !important; }

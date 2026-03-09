@@ -141,14 +141,14 @@ const ReportPreview: React.FC<Props> = ({
                     .pdf-page-content p,
                     .pdf-page-content .ql-editor-print p {
                         margin-top: 0 !important;
-                        margin-bottom: 8px !important;
-                        line-height: 2.0 !important;
+                        margin-bottom: 10px !important;
+                        line-height: 1.15 !important;
                     }
 
                 .pdf-page-content h1, .pdf-page-content h2, .pdf-page-content h3,
                 .pdf-page-content h4, .pdf-page-content h5, .pdf-page-content h6 {
-                    margin-top: 12px !important;
-                    margin-bottom: 6px !important;
+                    margin-top: 15px !important;
+                    margin-bottom: 5px !important;
                     line-height: 1.2 !important;
                 }
 
@@ -254,14 +254,14 @@ const ReportPreview: React.FC<Props> = ({
                     .pdf-page-content p,
                     .pdf-page-content .ql-editor-print p {
                         margin-top: 0 !important;
-                        margin-bottom: 8px !important;
-                        line-height: 1.45 !important;
+                        margin-bottom: 10px !important;
+                        line-height: 1.15 !important;
                     }
 
                     .pdf-page-content h1, .pdf-page-content h2, .pdf-page-content h3,
                     .pdf-page-content h4, .pdf-page-content h5, .pdf-page-content h6 {
-                        margin-top: 12px !important;
-                        margin-bottom: 6px !important;
+                        margin-top: 15px !important;
+                        margin-bottom: 5px !important;
                         line-height: 1.2 !important;
                     }
 
