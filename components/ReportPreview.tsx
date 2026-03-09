@@ -152,7 +152,14 @@ const ReportPreview: React.FC<Props> = ({
                     line-height: 1.2 !important;
                 }
 
-                .pdf-page-content ul, .pdf-page-content ol {
+                .pdf-page-content ul {
+                    list-style-type: disc !important;
+                    margin-top: 0 !important;
+                    margin-bottom: 8px !important;
+                    padding-left: 1.25em !important;
+                }
+                .pdf-page-content ol {
+                    list-style-type: decimal !important;
                     margin-top: 0 !important;
                     margin-bottom: 8px !important;
                     padding-left: 1.25em !important;
@@ -265,7 +272,14 @@ const ReportPreview: React.FC<Props> = ({
                         line-height: 1.2 !important;
                     }
 
-                    .pdf-page-content ul, .pdf-page-content ol {
+                    .pdf-page-content ul {
+                        list-style-type: disc !important;
+                        margin-top: 0 !important;
+                        margin-bottom: 8px !important;
+                        padding-left: 1.25em !important;
+                    }
+                    .pdf-page-content ol {
+                        list-style-type: decimal !important;
                         margin-top: 0 !important;
                         margin-bottom: 8px !important;
                         padding-left: 1.25em !important;
