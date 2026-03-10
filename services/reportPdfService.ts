@@ -219,23 +219,31 @@ export const buildExecutionReportHtml = (
                     </table>
                 </div>
 
-                <table style="width:100%; border-collapse:separate; border-spacing:10px 0; margin:0 -10px 20px -10px;">
+                <table style="width:100%; border-collapse:collapse; table-layout:fixed; margin:0 0 20px 0;">
                     <tr>
-                        <td style="width:25%; background:#ecfdf5; border-bottom:2px solid #10b981; border-radius:6px; padding:12px;">
-                            <span style="font-size:8px; font-weight:700; color:#059669; text-transform:uppercase;">Materiais</span>
-                            <span style="font-size:16px; font-weight:800; color:#064e3b; display:block; margin-top:4px;">R$ ${formatMoney(calculations.totalMaterial)}</span>
+                        <td style="width:25%; padding-right:5px; vertical-align:top;">
+                            <div style="background:#ecfdf5; border-bottom:2px solid #10b981; border-radius:6px; padding:12px; height:100%;">
+                                <span style="font-size:8px; font-weight:700; color:#059669; text-transform:uppercase;">Materiais</span>
+                                <span style="font-size:16px; font-weight:800; color:#064e3b; display:block; margin-top:4px;">R$ ${formatMoney(calculations.totalMaterial)}</span>
+                            </div>
                         </td>
-                        <td style="width:25%; background:#fffbeb; border-bottom:2px solid #f59e0b; border-radius:6px; padding:12px;">
-                            <span style="font-size:8px; font-weight:700; color:#d97706; text-transform:uppercase;">Mão de Obra</span>
-                            <span style="font-size:16px; font-weight:800; color:#78350f; display:block; margin-top:4px;">R$ ${formatMoney(calculations.totalLabor)}</span>
+                        <td style="width:25%; padding:0 5px; vertical-align:top;">
+                            <div style="background:#fffbeb; border-bottom:2px solid #f59e0b; border-radius:6px; padding:12px; height:100%;">
+                                <span style="font-size:8px; font-weight:700; color:#d97706; text-transform:uppercase;">Mão de Obra</span>
+                                <span style="font-size:16px; font-weight:800; color:#78350f; display:block; margin-top:4px;">R$ ${formatMoney(calculations.totalLabor)}</span>
+                            </div>
                         </td>
-                        <td style="width:25%; background:#f8fafc; border-bottom:2px solid #64748b; border-radius:6px; padding:12px;">
-                            <span style="font-size:8px; font-weight:700; color:#475569; text-transform:uppercase;">Custos Indiretos</span>
-                            <span style="font-size:16px; font-weight:800; color:#0f172a; display:block; margin-top:4px;">R$ ${formatMoney(calculations.totalIndirect)}</span>
+                        <td style="width:25%; padding:0 5px; vertical-align:top;">
+                            <div style="background:#f8fafc; border-bottom:2px solid #64748b; border-radius:6px; padding:12px; height:100%;">
+                                <span style="font-size:8px; font-weight:700; color:#475569; text-transform:uppercase;">Custos Indiretos</span>
+                                <span style="font-size:16px; font-weight:800; color:#0f172a; display:block; margin-top:4px;">R$ ${formatMoney(calculations.totalIndirect)}</span>
+                            </div>
                         </td>
-                        <td style="width:25%; background:${theme.lightBg}; border-bottom:2px solid ${theme.primaryColor}; border-radius:6px; padding:12px;">
-                            <span style="font-size:8px; font-weight:700; color:${theme.primaryColor}; text-transform:uppercase;">Impostos</span>
-                            <span style="font-size:16px; font-weight:800; color:${theme.secondaryColor}; display:block; margin-top:4px;">R$ ${formatMoney(calculations.totalTax)}</span>
+                        <td style="width:25%; padding-left:5px; vertical-align:top;">
+                            <div style="background:${theme.lightBg}; border-bottom:2px solid ${theme.primaryColor}; border-radius:6px; padding:12px; height:100%;">
+                                <span style="font-size:8px; font-weight:700; color:${theme.primaryColor}; text-transform:uppercase;">Impostos</span>
+                                <span style="font-size:16px; font-weight:800; color:${theme.secondaryColor}; display:block; margin-top:4px;">R$ ${formatMoney(calculations.totalTax)}</span>
+                            </div>
                         </td>
                     </tr>
                 </table>
