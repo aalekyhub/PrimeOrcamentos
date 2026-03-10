@@ -1,19 +1,11 @@
-import React, { useMemo, useRef } from 'react';
+
+import React from 'react';
 import ReactQuill, { Quill } from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import './RichTextEditor.css';
-import {
-  Type,
-  Image as ImageIcon,
-  Link as LinkIcon,
-  RotateCcw,
-  RotateCw,
-  Eraser,
-} from 'lucide-react';
+import { Type, Image as ImageIcon } from 'lucide-react';
 
-// =========================
-// HELPERS
-// =========================
+// Helper to escape HTML special characters
 const escapeHtml = (str: string) =>
   str
     .replace(/&/g, '&amp;')
@@ -22,77 +14,17 @@ const escapeHtml = (str: string) =>
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 
-const isLikelyHtml = (value: string) => /<\/?[a-z][\s\S]*>/i.test(value);
-
-// =========================
-// CONFIG
-// =========================
-const FONT_OPTIONS = [
-  { value: 'inter', label: 'Inter' },
-  { value: 'arial', label: 'Arial' },
-  { value: 'roboto', label: 'Roboto' },
-  { value: 'serif', label: 'Serif' },
-  { value: 'monospace', label: 'Monospace' },
-  { value: 'montserrat', label: 'Montserrat' },
-  { value: 'opensans', label: 'Open Sans' },
-  { value: 'lato', label: 'Lato' },
-  { value: 'poppins', label: 'Poppins' },
-  { value: 'oswald', label: 'Oswald' },
-  { value: 'playfair', label: 'Playfair' },
-  { value: 'nunito', label: 'Nunito' },
-] as const;
-
-const SIZE_OPTIONS = [
-  '10px',
-  '12px',
-  '14px',
-  '16px',
-  '18px',
-  '20px',
-  '24px',
-  '32px',
-] as const;
-
-const HEADER_OPTIONS = [
-  { value: '1', label: 'Título 1' },
-  { value: '2', label: 'Título 2' },
-  { value: '3', label: 'Título 3' },
-  { value: '4', label: 'Título 4' },
-  { value: '', label: 'Normal' },
-] as const;
-
-// =========================
-// QUILL REGISTRATION
-// =========================
+// Whitelist fonts
 const Font = Quill.import('formats/font');
-Font.whitelist = FONT_OPTIONS.map((item) => item.value);
+// ... (rest of the whitelists)
+Font.whitelist = ['inter', 'arial', 'roboto', 'serif', 'monospace', 'montserrat', 'opensans', 'lato', 'poppins', 'oswald', 'playfair', 'nunito'];
 Quill.register(Font, true);
 
+// Whitelist sizes
 const Size = Quill.import('formats/size');
-Size.whitelist = [...SIZE_OPTIONS];
+Size.whitelist = ['10px', '12px', '14px', '16px', '18px', '20px', '24px', '32px'];
 Quill.register(Size, true);
 
-// =========================
-// QUILL ICONS
-// =========================
-const icons = Quill.import('ui/icons');
-icons.undo = `
-  <svg viewBox="0 0 18 18">
-    <polygon class="ql-fill ql-stroke" points="6 10 4 12 2 10 6 10"></polygon>
-    <path class="ql-stroke" d="M4,11 L4,5.5 C4,4.12 5.12,3 6.5,3 L11,3 C13.21,3 15,4.79 15,7 C15,9.21 13.21,11 11,11 L5,11"></path>
-  </svg>
-`;
-
-icons.redo = `
-  <svg viewBox="0 0 18 18">
-    <polygon class="ql-fill ql-stroke" points="12 10 14 12 16 10 12 10"></polygon>
-    <path class="ql-stroke" d="M14,11 L14,5.5 C14,4.12 12.88,3 11.5,3 L7,3 C4.79,3 3,4.79 3,7 C3,9.21 4.79,11 7,11 L13,11"></path>
-  </svg>
-`;
-
-// =========================
-// TYPES
-// =========================
 interface RichTextEditorProps {
   value: string;
   onChange: (content: string) => void;
@@ -100,219 +32,138 @@ interface RichTextEditorProps {
   onAddText?: () => void;
   onAddImage?: () => void;
   id?: string;
-  documentMode?: boolean;
-  minHeight?: number;
 }
 
-interface CustomToolbarProps {
-  id: string;
-  onAddText?: () => void;
-  onAddImage?: () => void;
-}
+const CustomToolbar: React.FC<{ id: string; onAddText?: () => void; onAddImage?: () => void }> = ({ id, onAddText, onAddImage }) => (
+  <div id={id} className="ql-toolbar-custom sticky top-0 z-[100] flex flex-wrap items-center gap-2 p-2 pr-12 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 backdrop-blur-sm bg-white/95 dark:bg-slate-900/95">
+    <div className="flex flex-wrap items-center gap-1">
+      <span className="ql-formats">
+        <select className="ql-font" defaultValue="inter">
+          <option value="inter">Inter</option>
+          <option value="arial">Arial</option>
+          <option value="roboto">Roboto</option>
+          <option value="serif">Serif</option>
+          <option value="monospace">Monospace</option>
+          <option value="montserrat">Montserrat</option>
+          <option value="opensans">Open Sans</option>
+          <option value="lato">Lato</option>
+          <option value="poppins">Poppins</option>
+          <option value="oswald">Oswald</option>
+          <option value="playfair">Playfair</option>
+          <option value="nunito">Nunito</option>
+        </select>
+        <select className="ql-size" defaultValue="14px">
+          <option value="10px">10px</option>
+          <option value="12px">12px</option>
+          <option value="14px">14px</option>
+          <option value="16px">16px</option>
+          <option value="18px">18px</option>
+          <option value="20px">20px</option>
+          <option value="24px">24px</option>
+          <option value="32px">32px</option>
+        </select>
+      </span>
+      <span className="ql-formats">
+        <select className="ql-header" defaultValue="">
+          <option value="1">Título 1</option>
+          <option value="2">Título 2</option>
+          <option value="3">Título 3</option>
+          <option value="4">Título 4</option>
+          <option value="">Normal</option>
+        </select>
+      </span>
+      <span className="ql-formats">
+        <button className="ql-bold" />
+        <button className="ql-italic" />
+        <button className="ql-underline" />
+        <button className="ql-strike" />
+      </span>
+      <span className="ql-formats">
+        <select className="ql-color" />
+        <select className="ql-background" />
+      </span>
+      <span className="ql-formats">
+        <button className="ql-list" value="ordered" />
+        <button className="ql-list" value="bullet" />
+        <button className="ql-list" value="check" />
+        <button className="ql-indent" value="-1" />
+        <button className="ql-indent" value="+1" />
+      </span>
+      <span className="ql-formats">
+        <select className="ql-align" />
+      </span>
+    </div>
 
-// =========================
-// TOOLBAR
-// =========================
-const CustomToolbar: React.FC<CustomToolbarProps> = ({ id, onAddText, onAddImage }) => {
-  return (
-    <div
-      id={id}
-      className="ql-toolbar-custom rte-toolbar sticky top-0 z-[60] border-b border-slate-200 dark:border-slate-800"
-    >
-      <div className="rte-toolbar-row">
-        <span className="ql-formats">
-          <select className="ql-font" defaultValue="inter">
-            {FONT_OPTIONS.map((font) => (
-              <option key={font.value} value={font.value}>
-                {font.label}
-              </option>
-            ))}
-          </select>
-
-          <select className="ql-size" defaultValue="14px">
-            {SIZE_OPTIONS.map((size) => (
-              <option key={size} value={size}>
-                {size}
-              </option>
-            ))}
-          </select>
-
-          <select className="ql-header" defaultValue="">
-            {HEADER_OPTIONS.map((header) => (
-              <option key={`${header.value}-${header.label}`} value={header.value}>
-                {header.label}
-              </option>
-            ))}
-          </select>
-        </span>
-
-        <span className="ql-formats">
-          <button className="ql-bold" type="button" title="Negrito" />
-          <button className="ql-italic" type="button" title="Itálico" />
-          <button className="ql-underline" type="button" title="Sublinhado" />
-          <button className="ql-strike" type="button" title="Riscado" />
-        </span>
-
-        <span className="ql-formats">
-          <select className="ql-color" />
-          <select className="ql-background" />
-        </span>
-
-        <span className="ql-formats">
-          <button className="ql-list" value="ordered" type="button" title="Lista numerada" />
-          <button className="ql-list" value="bullet" type="button" title="Lista com marcadores" />
-          <button className="ql-indent" value="-1" type="button" title="Diminuir recuo" />
-          <button className="ql-indent" value="+1" type="button" title="Aumentar recuo" />
-        </span>
-
-        <span className="ql-formats">
-          <select className="ql-align" />
-        </span>
-
-        <span className="ql-formats">
-          <button className="ql-link" type="button" title="Inserir link">
-            <LinkIcon className="rte-inline-icon" />
+    {(onAddText || onAddImage) && (
+      <div className="flex items-center gap-4 px-4 border-l border-slate-200 dark:border-slate-800 flex-shrink-0">
+        {onAddText && (
+          <button
+            type="button"
+            onClick={onAddText}
+            className="!w-auto !h-auto flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg text-[10px] font-black uppercase hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-all active:scale-95 shadow-sm border border-blue-100 dark:border-blue-900/30 whitespace-nowrap"
+            title="Adicionar Bloco de Texto"
+          >
+            <Type className="w-3.5 h-3.5" /> + TEXTO
           </button>
-
-          <button className="ql-clean" type="button" title="Limpar formatação">
-            <Eraser className="rte-inline-icon" />
+        )}
+        {onAddImage && (
+          <button
+            type="button"
+            onClick={onAddImage}
+            className="!w-auto !h-auto flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-lg text-[10px] font-black uppercase hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-all active:scale-95 shadow-sm border border-emerald-100 dark:border-emerald-900/30 whitespace-nowrap"
+            title="Adicionar Bloco de Imagem"
+          >
+            <ImageIcon className="w-3.5 h-3.5" /> + IMAGEM
           </button>
-        </span>
-
-        <span className="ql-formats">
-          <button className="ql-undo" type="button" title="Desfazer">
-            <RotateCcw className="rte-inline-icon" />
-          </button>
-
-          <button className="ql-redo" type="button" title="Refazer">
-            <RotateCw className="rte-inline-icon" />
-          </button>
-        </span>
-
-        {(onAddText || onAddImage) && (
-          <div className="rte-extra-actions">
-            {onAddText && (
-              <button
-                type="button"
-                onClick={onAddText}
-                className="rte-action-btn rte-action-btn-text"
-                title="Adicionar bloco de texto"
-              >
-                <Type className="w-4 h-4" />
-                <span>Texto</span>
-              </button>
-            )}
-
-            {onAddImage && (
-              <button
-                type="button"
-                onClick={onAddImage}
-                className="rte-action-btn rte-action-btn-image"
-                title="Adicionar bloco de imagem"
-              >
-                <ImageIcon className="w-4 h-4" />
-                <span>Imagem</span>
-              </button>
-            )}
-          </div>
         )}
       </div>
-    </div>
-  );
-};
+    )}
+  </div>
+);
 
-// =========================
-// COMPONENT
-// =========================
-const RichTextEditor: React.FC<RichTextEditorProps> = ({
-  value,
-  onChange,
-  placeholder = 'Digite aqui...',
-  onAddText,
-  onAddImage,
-  id = 'default',
-  documentMode = true,
-  minHeight = 1123,
-}) => {
-  const toolbarIdRef = useRef(`toolbar-${id}-${Math.random().toString(36).slice(2, 10)}`);
-  const toolbarId = toolbarIdRef.current;
+const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeholder, onAddText, onAddImage, id = "toolbar-default" }) => {
+  const toolbarId = React.useMemo(() => `toolbar-${id}-${Math.random().toString(36).substr(2, 9)}`, [id]);
 
-  const processedValue = useMemo(() => {
-    if (!value?.trim()) return '';
+  const processedValue = React.useMemo(() => {
+    if (!value) return '';
 
-    if (isLikelyHtml(value)) return value;
+    // Check if it's likely HTML
+    const isHtml = /<[a-z][\s\S]*>/i.test(value);
+    if (isHtml) return value;
 
+    // If plain text, wrap in paragraphs and escape content
     return value
       .split('\n')
-      .map((line) => `<p>${line ? escapeHtml(line) : '<br/></p>'}`.replace('</p></p>', '</p>'))
+      .map(line => `<p>${line ? escapeHtml(line) : '<br/>'}</p>`)
       .join('');
   }, [value]);
 
-  const modules = useMemo(() => {
-    return {
-      toolbar: {
-        container: `#${toolbarId}`,
-        handlers: {
-          undo: function (this: any) {
-            this.quill?.history?.undo();
-          },
-          redo: function (this: any) {
-            this.quill?.history?.redo();
-          },
-        },
-      },
-      history: {
-        delay: 500,
-        maxStack: 100,
-        userOnly: true,
-      },
-      clipboard: {
-        matchVisual: false,
-      },
-    };
-  }, [toolbarId]);
+  const modules = React.useMemo(() => ({
+    toolbar: {
+      container: `#${toolbarId}`,
+    },
+  }), [toolbarId]);
 
-  const formats = useMemo(
-    () => [
-      'font',
-      'size',
-      'header',
-      'bold',
-      'italic',
-      'underline',
-      'strike',
-      'color',
-      'background',
-      'list',
-      'indent',
-      'align',
-      'link',
-    ],
-    []
-  );
-
-  const handleChange = (content: string) => {
-    const normalized = content === '<p><br></p>' ? '' : content;
-    onChange(normalized);
-  };
+  const formats = React.useMemo(() => [
+    'font', 'size',
+    'header',
+    'bold', 'italic', 'underline', 'strike',
+    'color', 'background',
+    'list', 'bullet', 'check', 'indent',
+    'align'
+  ], []);
 
   return (
-    <div
-      className={`rich-text-editor ${documentMode ? 'rte-document-mode' : 'rte-compact-mode'}`}
-      style={{ ['--rte-page-min-height' as string]: `${minHeight}px` }}
-    >
+    <div className="rich-text-editor bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm">
       <CustomToolbar id={toolbarId} onAddText={onAddText} onAddImage={onAddImage} />
-
-      <div className="rte-editor-shell">
-        <ReactQuill
-          theme="snow"
-          value={processedValue}
-          onChange={handleChange}
-          modules={modules}
-          formats={formats}
-          placeholder={placeholder}
-        />
-      </div>
+      <ReactQuill
+        theme="snow"
+        value={processedValue}
+        onChange={onChange}
+        modules={modules}
+        formats={formats}
+        placeholder={placeholder}
+      />
     </div>
   );
 };
