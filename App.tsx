@@ -19,7 +19,6 @@ import CompanySettings from './components/CompanySettings';
 import BudgetSearch from './components/BudgetSearch';
 import UserManager from './components/UserManager';
 import Login from './components/Login';
-import DataCleanup from './components/DataCleanup';
 import { ToastProvider, useNotify } from './components/ToastProvider';
 import { ServiceOrder, Transaction, OrderStatus, Customer, CatalogService, CompanyProfile, UserAccount, Loan } from './types';
 import { db, initPromise, startRealtimeSync, stopRealtimeSync } from './services/db';
@@ -389,7 +388,6 @@ const AppContent: React.FC = () => {
     { id: 'works', label: 'O.S. Obra', icon: HardHat },
     { id: 'financials', label: 'Financeiro', icon: Wallet },
     { id: 'search', label: 'Consultar', icon: Search },
-    { id: 'audit', label: 'Auditoria', icon: Database },
     { id: 'users', label: 'Usuários', icon: Lock },
     { id: 'settings', label: 'Empresa', icon: Settings },
   ].filter(item => currentUser.role === 'admin' || currentUser.permissions?.includes(item.id));
@@ -557,7 +555,6 @@ const AppContent: React.FC = () => {
                   {item.id === 'search' && <BudgetSearch orders={orders} setOrders={setOrders} customers={customers} company={company} catalogServices={catalog} setCatalogServices={setCatalog} isLoading={isSyncing} />}
                   {item.id === 'financials' && <FinancialControl transactions={transactions} setTransactions={setTransactions} loans={loans} setLoans={setLoans} currentUser={currentUser} />}
                   {item.id === 'users' && <UserManager users={users} setUsers={setUsers} />}
-                  {item.id === 'audit' && <DataCleanup customers={customers} setCustomers={setCustomers} services={catalog} setServices={setCatalog} />}
                   {item.id === 'settings' && <CompanySettings company={company} setCompany={setCompany} />}
                 </div>
               );
