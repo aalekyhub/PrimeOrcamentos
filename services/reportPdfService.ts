@@ -197,15 +197,15 @@ export const buildExecutionReportHtml = (
                             </td>
                         </tr>
                         <tr>
-                            <td style="padding:10px 12px 10px 0; vertical-align:top; width:33.33%;">
+                            <td style="padding:10px 12px 10px 0; vertical-align:top; width:50%;">
                                 <p style="margin:0 0 4px 0; font-size:8px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.06em;">Cliente</p>
                                 <p style="margin:0; font-size:11px; color:#0f172a; font-weight:700;">${escapeHtml(customer?.name || 'Não informado')}</p>
                             </td>
-                            <td style="padding:10px 12px 10px 0; vertical-align:top; width:33.33%;">
+                            <td style="padding:10px 12px 10px 0; vertical-align:top; width:25%;">
                                 <p style="margin:0 0 4px 0; font-size:8px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.06em;">Tipo de Obra</p>
                                 <p style="margin:0; font-size:11px; color:#0f172a; font-weight:700;">${escapeHtml((header as any).type || 'Não informado')}</p>
                             </td>
-                            <td style="padding:10px 0 10px 0; vertical-align:top; width:33.33%;">
+                            <td style="padding:10px 0 10px 0; vertical-align:top; width:25%;">
                                 <p style="margin:0 0 4px 0; font-size:8px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.06em;">Status</p>
                                 <p style="margin:0; font-size:11px; color:#0f172a; font-weight:700;">${escapeHtml(header.status || 'Não informado')}</p>
                             </td>
