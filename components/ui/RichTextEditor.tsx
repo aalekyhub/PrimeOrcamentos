@@ -1,6 +1,5 @@
 import React, { useMemo, useRef } from 'react';
 import ReactQuill, { Quill } from 'react-quill';
-import type QuillType from 'quill';
 import 'react-quill/dist/quill.snow.css';
 import './RichTextEditor.css';
 import {
@@ -43,7 +42,16 @@ const FONT_OPTIONS = [
   { value: 'nunito', label: 'Nunito' },
 ] as const;
 
-const SIZE_OPTIONS = ['10px', '12px', '14px', '16px', '18px', '20px', '24px', '32px'] as const;
+const SIZE_OPTIONS = [
+  '10px',
+  '12px',
+  '14px',
+  '16px',
+  '18px',
+  '20px',
+  '24px',
+  '32px',
+] as const;
 
 const HEADER_OPTIONS = [
   { value: '1', label: 'Título 1' },
@@ -65,6 +73,24 @@ Size.whitelist = [...SIZE_OPTIONS];
 Quill.register(Size, true);
 
 // =========================
+// QUILL ICONS
+// =========================
+const icons = Quill.import('ui/icons');
+icons.undo = `
+  <svg viewBox="0 0 18 18">
+    <polygon class="ql-fill ql-stroke" points="6 10 4 12 2 10 6 10"></polygon>
+    <path class="ql-stroke" d="M4,11 L4,5.5 C4,4.12 5.12,3 6.5,3 L11,3 C13.21,3 15,4.79 15,7 C15,9.21 13.21,11 11,11 L5,11"></path>
+  </svg>
+`;
+
+icons.redo = `
+  <svg viewBox="0 0 18 18">
+    <polygon class="ql-fill ql-stroke" points="12 10 14 12 16 10 12 10"></polygon>
+    <path class="ql-stroke" d="M14,11 L14,5.5 C14,4.12 12.88,3 11.5,3 L7,3 C4.79,3 3,4.79 3,7 C3,9.21 4.79,11 7,11 L13,11"></path>
+  </svg>
+`;
+
+// =========================
 // TYPES
 // =========================
 interface RichTextEditorProps {
@@ -83,24 +109,6 @@ interface CustomToolbarProps {
   onAddText?: () => void;
   onAddImage?: () => void;
 }
-
-// =========================
-// CUSTOM ICONS FOR QUILL
-// =========================
-const icons = Quill.import('ui/icons');
-icons.undo = `
-  <svg viewBox="0 0 18 18">
-    <polygon class="ql-fill ql-stroke" points="6 10 4 12 2 10 6 10"></polygon>
-    <path class="ql-stroke" d="M4,11 L4,5.5 C4,4.12 5.12,3 6.5,3 L11,3 C13.21,3 15,4.79 15,7 C15,9.21 13.21,11 11,11 L5,11"></path>
-  </svg>
-`;
-
-icons.redo = `
-  <svg viewBox="0 0 18 18">
-    <polygon class="ql-fill ql-stroke" points="12 10 14 12 16 10 12 10"></polygon>
-    <path class="ql-stroke" d="M14,11 L14,5.5 C14,4.12 12.88,3 11.5,3 L7,3 C4.79,3 3,4.79 3,7 C3,9.21 4.79,11 7,11 L13,11"></path>
-  </svg>
-`;
 
 // =========================
 // TOOLBAR
@@ -131,7 +139,7 @@ const CustomToolbar: React.FC<CustomToolbarProps> = ({ id, onAddText, onAddImage
 
           <select className="ql-header" defaultValue="">
             {HEADER_OPTIONS.map((header) => (
-              <option key={header.label} value={header.value}>
+              <option key={`${header.value}-${header.label}`} value={header.value}>
                 {header.label}
               </option>
             ))}
@@ -165,6 +173,7 @@ const CustomToolbar: React.FC<CustomToolbarProps> = ({ id, onAddText, onAddImage
           <button className="ql-link" type="button" title="Inserir link">
             <LinkIcon className="rte-inline-icon" />
           </button>
+
           <button className="ql-clean" type="button" title="Limpar formatação">
             <Eraser className="rte-inline-icon" />
           </button>
@@ -174,6 +183,7 @@ const CustomToolbar: React.FC<CustomToolbarProps> = ({ id, onAddText, onAddImage
           <button className="ql-undo" type="button" title="Desfazer">
             <RotateCcw className="rte-inline-icon" />
           </button>
+
           <button className="ql-redo" type="button" title="Refazer">
             <RotateCw className="rte-inline-icon" />
           </button>
@@ -224,7 +234,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   documentMode = true,
   minHeight = 1123,
 }) => {
-  const quillRef = useRef<ReactQuill | null>(null);
   const toolbarIdRef = useRef(`toolbar-${id}-${Math.random().toString(36).slice(2, 10)}`);
   const toolbarId = toolbarIdRef.current;
 
@@ -235,7 +244,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
     return value
       .split('\n')
-      .map((line) => `<p>${line ? escapeHtml(line) : '<br/>'}</p>`)
+      .map((line) => `<p>${line ? escapeHtml(line) : '<br/></p>'}`.replace('</p></p>', '</p>'))
       .join('');
   }, [value]);
 
@@ -244,11 +253,11 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       toolbar: {
         container: `#${toolbarId}`,
         handlers: {
-          undo: function (this: { quill: QuillType }) {
-            this.quill.history.undo();
+          undo: function (this: any) {
+            this.quill?.history?.undo();
           },
-          redo: function (this: { quill: QuillType }) {
-            this.quill.history.redo();
+          redo: function (this: any) {
+            this.quill?.history?.redo();
           },
         },
       },
@@ -290,13 +299,12 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   return (
     <div
       className={`rich-text-editor ${documentMode ? 'rte-document-mode' : 'rte-compact-mode'}`}
-      style={{ ['--rte-page-min-height' as any]: `${minHeight}px` }}
+      style={{ ['--rte-page-min-height' as string]: `${minHeight}px` }}
     >
       <CustomToolbar id={toolbarId} onAddText={onAddText} onAddImage={onAddImage} />
 
       <div className="rte-editor-shell">
         <ReactQuill
-          ref={quillRef}
           theme="snow"
           value={processedValue}
           onChange={handleChange}
