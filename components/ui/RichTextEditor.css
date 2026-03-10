@@ -1,68 +1,329 @@
-/* RichTextEditor custom styles */
+/* =========================================================
+   BASE WRAPPER
+========================================================= */
+.rich-text-editor {
+    --rte-bg: #eef2f7;
+    --rte-toolbar-bg: rgba(255, 255, 255, 0.96);
+    --rte-border: #dbe3ee;
+    --rte-page-bg: #ffffff;
+    --rte-page-shadow: 0 10px 35px rgba(15, 23, 42, 0.08);
+    --rte-text: #0f172a;
+    --rte-muted: #64748b;
+    --rte-primary: #2563eb;
+    --rte-primary-soft: #dbeafe;
+    --rte-page-width: 816px;
+    --rte-page-padding-y: 72px;
+    --rte-page-padding-x: 64px;
+    --rte-page-min-height: 1123px;
 
+    background: var(--rte-bg);
+    border: 1px solid var(--rte-border);
+    border-radius: 18px;
+    overflow: hidden;
+}
+
+.dark .rich-text-editor {
+    --rte-bg: #0b1220;
+    --rte-toolbar-bg: rgba(15, 23, 42, 0.96);
+    --rte-border: #1e293b;
+    --rte-page-bg: #0f172a;
+    --rte-page-shadow: 0 12px 32px rgba(2, 6, 23, 0.55);
+    --rte-text: #e2e8f0;
+    --rte-muted: #94a3b8;
+    --rte-primary: #60a5fa;
+    --rte-primary-soft: rgba(37, 99, 235, 0.18);
+}
+
+/* =========================================================
+   TOOLBAR
+========================================================= */
 .rich-text-editor .ql-toolbar-custom {
-    border: none !important;
-    background: #f8fafc !important;
+    background: var(--rte-toolbar-bg);
+    backdrop-filter: blur(10px);
 }
 
-.dark .rich-text-editor .ql-toolbar-custom {
-    background: #0f172a !important;
-    border-bottom: 1px solid #1e293b !important;
-}
-
-.rich-text-editor .ql-font {
-    width: 90px !important;
-    font-family: inherit !important;
-}
-
-.rich-text-editor .ql-size {
-    width: 70px !important;
+.rte-toolbar-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
 }
 
 .ql-snow.ql-toolbar .ql-formats {
-    margin-right: 8px !important;
+    margin-right: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding-right: 10px;
+    margin-right: 10px;
+    border-right: 1px solid var(--rte-border);
 }
 
-/* Dark mode icons and pickers */
-.dark .ql-snow.ql-toolbar button,
-.dark .ql-snow .ql-toolbar button {
-    color: #94a3b8 !important;
+.ql-snow.ql-toolbar .ql-formats:last-of-type {
+    border-right: none;
+    margin-right: 0;
+    padding-right: 0;
 }
 
-.dark .ql-snow.ql-toolbar button:hover,
-.dark .ql-snow .ql-toolbar button:hover,
-.dark .ql-snow.ql-toolbar button.ql-active,
-.dark .ql-snow .ql-toolbar button.ql-active {
-    color: #3b82f6 !important;
+.rich-text-editor .ql-font {
+    width: 110px !important;
+    font-family: inherit;
 }
 
-.dark .ql-snow.ql-toolbar button .ql-stroke,
-.dark .ql-snow .ql-toolbar button .ql-stroke {
-    stroke: #94a3b8 !important;
+.rich-text-editor .ql-size {
+    width: 78px !important;
+    font-family: inherit;
 }
 
-.dark .ql-snow.ql-toolbar button:hover .ql-stroke,
-.dark .ql-snow .ql-toolbar button:hover .ql-stroke,
-.dark .ql-snow.ql-toolbar button.ql-active .ql-stroke,
-.dark .ql-snow .ql-toolbar button.ql-active .ql-stroke {
-    stroke: #3b82f6 !important;
+.rich-text-editor .ql-header {
+    width: 110px !important;
+    font-family: inherit;
 }
 
-.dark .ql-snow.ql-toolbar .ql-picker {
-    color: #94a3b8 !important;
+.ql-snow.ql-toolbar button,
+.ql-snow .ql-toolbar button {
+    width: 30px;
+    height: 30px;
+    color: var(--rte-muted);
 }
 
-.dark .ql-snow.ql-toolbar .ql-picker-label .ql-stroke {
-    stroke: #94a3b8 !important;
+.ql-snow.ql-toolbar button:hover,
+.ql-snow .ql-toolbar button:hover,
+.ql-snow.ql-toolbar button.ql-active,
+.ql-snow .ql-toolbar button.ql-active {
+    color: var(--rte-primary);
 }
 
-.dark .ql-snow.ql-toolbar .ql-picker-options {
-    background-color: #0f172a !important;
-    border-color: #1e293b !important;
-    color: #f1f5f9 !important;
+.ql-snow.ql-toolbar button .ql-stroke,
+.ql-snow .ql-toolbar button .ql-stroke {
+    stroke: var(--rte-muted);
 }
 
-/* Font Pickers - Correct Selectors */
+.ql-snow.ql-toolbar button:hover .ql-stroke,
+.ql-snow .ql-toolbar button:hover .ql-stroke,
+.ql-snow.ql-toolbar button.ql-active .ql-stroke,
+.ql-snow .ql-toolbar button.ql-active .ql-stroke {
+    stroke: var(--rte-primary);
+}
+
+.ql-snow.ql-toolbar .ql-picker {
+    color: var(--rte-muted);
+}
+
+.ql-snow.ql-toolbar .ql-picker-label:hover,
+.ql-snow.ql-toolbar .ql-picker-label.ql-active {
+    color: var(--rte-primary);
+}
+
+.ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke,
+.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke {
+    stroke: var(--rte-primary);
+}
+
+.ql-snow.ql-toolbar .ql-picker-options {
+    background: var(--rte-toolbar-bg);
+    border: 1px solid var(--rte-border);
+    border-radius: 10px;
+    padding: 6px;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
+}
+
+/* =========================================================
+   EXTRA ACTIONS
+========================================================= */
+.rte-extra-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    flex-wrap: wrap;
+}
+
+.rte-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid transparent;
+    transition: 0.2s ease;
+    white-space: nowrap;
+}
+
+.rte-action-btn:hover {
+    transform: translateY(-1px);
+}
+
+.rte-action-btn-text {
+    background: #eff6ff;
+    color: #2563eb;
+    border-color: #bfdbfe;
+}
+
+.rte-action-btn-text:hover {
+    background: #dbeafe;
+}
+
+.rte-action-btn-image {
+    background: #ecfdf5;
+    color: #059669;
+    border-color: #a7f3d0;
+}
+
+.rte-action-btn-image:hover {
+    background: #d1fae5;
+}
+
+.dark .rte-action-btn-text {
+    background: rgba(37, 99, 235, 0.14);
+    color: #93c5fd;
+    border-color: rgba(37, 99, 235, 0.3);
+}
+
+.dark .rte-action-btn-image {
+    background: rgba(5, 150, 105, 0.14);
+    color: #6ee7b7;
+    border-color: rgba(5, 150, 105, 0.3);
+}
+
+.rte-inline-icon {
+    width: 15px;
+    height: 15px;
+    pointer-events: none;
+}
+
+/* =========================================================
+   EDITOR SHELL / DOCUMENT AREA
+========================================================= */
+.rte-editor-shell {
+    padding: 24px 18px 34px;
+    background: var(--rte-bg);
+}
+
+.rich-text-editor .ql-container.ql-snow {
+    border: none;
+    background: transparent;
+}
+
+.rich-text-editor .ql-editor {
+    box-sizing: border-box;
+    color: var(--rte-text);
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    tab-size: 4;
+    outline: none;
+}
+
+/* Document mode = folha central */
+.rte-document-mode .ql-editor {
+    width: min(var(--rte-page-width), 100%);
+    min-height: var(--rte-page-min-height);
+    margin: 0 auto;
+    padding: var(--rte-page-padding-y) var(--rte-page-padding-x);
+    background: var(--rte-page-bg);
+    border: 1px solid var(--rte-border);
+    border-radius: 10px;
+    box-shadow: var(--rte-page-shadow);
+}
+
+/* Compact mode opcional */
+.rte-compact-mode .ql-editor {
+    min-height: 220px;
+    padding: 20px 22px;
+    background: var(--rte-page-bg);
+    border-radius: 0 0 14px 14px;
+}
+
+/* =========================================================
+   TYPOGRAPHY
+========================================================= */
+.ql-editor p {
+    margin-bottom: 12px;
+}
+
+.ql-editor p:last-child {
+    margin-bottom: 0;
+}
+
+.ql-editor h1,
+.ql-editor h2,
+.ql-editor h3,
+.ql-editor h4 {
+    color: var(--rte-text);
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.ql-editor h1 {
+    font-size: 28px;
+    margin: 24px 0 14px;
+}
+
+.ql-editor h2 {
+    font-size: 22px;
+    margin: 22px 0 12px;
+}
+
+.ql-editor h3 {
+    font-size: 18px;
+    margin: 18px 0 10px;
+}
+
+.ql-editor h4 {
+    font-size: 16px;
+    margin: 16px 0 8px;
+}
+
+.ql-editor ul,
+.ql-editor ol {
+    padding-left: 1.5em;
+    margin-bottom: 12px;
+}
+
+.ql-editor li {
+    margin-bottom: 6px;
+}
+
+.ql-editor blockquote {
+    border-left: 4px solid #cbd5e1;
+    margin: 16px 0;
+    padding: 8px 0 8px 16px;
+    color: var(--rte-muted);
+    background: rgba(148, 163, 184, 0.08);
+    border-radius: 0 8px 8px 0;
+}
+
+.ql-editor a {
+    color: var(--rte-primary);
+    text-decoration: underline;
+}
+
+.ql-editor.ql-blank::before {
+    color: #94a3b8;
+    font-style: normal;
+    left: auto;
+    right: auto;
+}
+
+/* =========================================================
+   DARK MODE TUNING
+========================================================= */
+.dark .ql-editor.ql-blank::before {
+    color: #64748b;
+}
+
+.dark .ql-editor blockquote {
+    border-left-color: #334155;
+    background: rgba(148, 163, 184, 0.08);
+}
+
+/* =========================================================
+   FONT PICKER LABELS
+========================================================= */
 .ql-snow .ql-picker.ql-font .ql-picker-label::before,
 .ql-snow .ql-picker.ql-font .ql-picker-item::before {
     content: 'Inter';
@@ -70,77 +331,79 @@
 
 .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='inter']::before,
 .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='inter']::before {
-    font-family: 'Inter';
     content: 'Inter';
+    font-family: 'Inter', sans-serif;
 }
 
 .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='arial']::before,
 .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='arial']::before {
-    font-family: Arial;
     content: 'Arial';
+    font-family: Arial, sans-serif;
 }
 
 .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='roboto']::before,
 .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='roboto']::before {
-    font-family: Roboto;
     content: 'Roboto';
+    font-family: 'Roboto', sans-serif;
 }
 
 .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='serif']::before,
 .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='serif']::before {
-    font-family: serif;
     content: 'Serif';
+    font-family: serif;
 }
 
 .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='monospace']::before,
 .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='monospace']::before {
-    font-family: monospace;
     content: 'Monospace';
+    font-family: monospace;
 }
 
 .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='montserrat']::before,
 .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='montserrat']::before {
-    font-family: 'Montserrat';
     content: 'Montserrat';
+    font-family: 'Montserrat', sans-serif;
 }
 
 .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='opensans']::before,
 .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='opensans']::before {
-    font-family: 'Open Sans';
     content: 'Open Sans';
+    font-family: 'Open Sans', sans-serif;
 }
 
 .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='lato']::before,
 .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='lato']::before {
-    font-family: 'Lato';
     content: 'Lato';
+    font-family: 'Lato', sans-serif;
 }
 
 .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='poppins']::before,
 .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='poppins']::before {
-    font-family: 'Poppins';
     content: 'Poppins';
+    font-family: 'Poppins', sans-serif;
 }
 
 .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='oswald']::before,
 .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='oswald']::before {
-    font-family: 'Oswald';
     content: 'Oswald';
+    font-family: 'Oswald', sans-serif;
 }
 
 .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='playfair']::before,
 .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='playfair']::before {
-    font-family: 'Playfair Display';
     content: 'Playfair';
+    font-family: 'Playfair Display', serif;
 }
 
 .ql-snow .ql-picker.ql-font .ql-picker-label[data-value='nunito']::before,
 .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='nunito']::before {
-    font-family: 'Nunito';
     content: 'Nunito';
+    font-family: 'Nunito', sans-serif;
 }
 
-/* Sizes Pickers */
+/* =========================================================
+   SIZE PICKER LABELS
+========================================================= */
 .ql-snow .ql-picker.ql-size .ql-picker-label::before,
 .ql-snow .ql-picker.ql-size .ql-picker-item::before {
     content: '14px';
@@ -186,165 +449,117 @@
     content: '32px';
 }
 
-/* Font Classes for Rendering */
+/* =========================================================
+   RENDERED FONT CLASSES
+========================================================= */
 .ql-font-inter {
-    font-family: 'Inter', sans-serif !important;
+    font-family: 'Inter', sans-serif;
 }
 
 .ql-font-arial {
-    font-family: Arial, sans-serif !important;
+    font-family: Arial, sans-serif;
 }
 
 .ql-font-roboto {
-    font-family: 'Roboto', sans-serif !important;
+    font-family: 'Roboto', sans-serif;
 }
 
 .ql-font-serif {
-    font-family: serif !important;
+    font-family: serif;
 }
 
 .ql-font-monospace {
-    font-family: monospace !important;
+    font-family: monospace;
 }
 
 .ql-font-montserrat {
-    font-family: 'Montserrat', sans-serif !important;
+    font-family: 'Montserrat', sans-serif;
 }
 
 .ql-font-opensans {
-    font-family: 'Open Sans', sans-serif !important;
+    font-family: 'Open Sans', sans-serif;
 }
 
 .ql-font-lato {
-    font-family: 'Lato', sans-serif !important;
+    font-family: 'Lato', sans-serif;
 }
 
 .ql-font-poppins {
-    font-family: 'Poppins', sans-serif !important;
+    font-family: 'Poppins', sans-serif;
 }
 
 .ql-font-oswald {
-    font-family: 'Oswald', sans-serif !important;
+    font-family: 'Oswald', sans-serif;
 }
 
 .ql-font-playfair {
-    font-family: 'Playfair Display', serif !important;
+    font-family: 'Playfair Display', serif;
 }
 
 .ql-font-nunito {
-    font-family: 'Nunito', sans-serif !important;
+    font-family: 'Nunito', sans-serif;
 }
 
-/* Size Classes for Rendering */
+/* =========================================================
+   RENDERED SIZE CLASSES
+========================================================= */
 .ql-size-10px {
-    font-size: 10px !important;
+    font-size: 10px;
 }
 
 .ql-size-12px {
-    font-size: 12px !important;
+    font-size: 12px;
 }
 
 .ql-size-14px {
-    font-size: 14px !important;
+    font-size: 14px;
 }
 
 .ql-size-16px {
-    font-size: 16px !important;
+    font-size: 16px;
 }
 
 .ql-size-18px {
-    font-size: 18px !important;
+    font-size: 18px;
 }
 
 .ql-size-20px {
-    font-size: 20px !important;
+    font-size: 20px;
 }
 
 .ql-size-24px {
-    font-size: 24px !important;
+    font-size: 24px;
 }
 
 .ql-size-32px {
-    font-size: 32px !important;
+    font-size: 32px;
 }
 
-.ql-container.ql-snow {
-    border: none !important;
-    min-height: 120px;
-    font-family: inherit;
-}
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+@media (max-width: 900px) {
+    .rich-text-editor {
+        --rte-page-padding-y: 36px;
+        --rte-page-padding-x: 22px;
+    }
 
-.ql-editor {
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    line-height: 1.15 !important;
-    min-height: 120px;
-}
+    .rte-editor-shell {
+        padding: 14px 10px 18px;
+    }
 
-.ql-editor p {
-    margin-bottom: 10px !important;
-}
+    .rte-toolbar-row {
+        gap: 6px;
+    }
 
-/* Omitted: .ql-editor ol, .ql-editor ul { Usar padding padrão do Quill } */
+    .ql-snow.ql-toolbar .ql-formats {
+        padding-right: 6px;
+        margin-right: 6px;
+    }
 
-.ql-editor li {
-    margin-bottom: 4px;
-}
-
-.rich-text-editor .ql-container {
-    border: none !important;
-}
-
-/* Scroll no Editor e não no Container */
-.rich-text-editor .ql-editor {
-    max-height: 600px;
-    overflow-y: auto;
-}
-
-.ql-editor h1,
-.ql-editor h2,
-.ql-editor h3,
-.ql-editor h4 {
-    font-weight: 800 !important;
-    color: #0f172a !important;
-    margin-top: 15px !important;
-    margin-bottom: 5px !important;
-}
-
-.ql-editor h1 {
-    font-size: 24px !important;
-}
-
-.ql-editor h2 {
-    font-size: 20px !important;
-}
-
-.ql-editor h3 {
-    font-size: 18px !important;
-}
-
-.ql-editor h4 {
-    font-size: 14px !important;
-}
-
-/* Checklist Icon Fix */
-.ql-snow .ql-toolbar button.ql-list[value="check"]::before {
-    content: '☐';
-    font-family: Arial, sans-serif;
-    font-weight: bold;
-    font-size: 16px;
-    display: block;
-    margin-top: -2px;
-}
-
-.ql-snow .ql-toolbar button.ql-list[value="check"].ql-active::before {
-    content: '☑';
-    color: #2563eb;
-}
-
-.rich-text-editor .ql-toolbar-custom {
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    background: white;
+    .rte-extra-actions {
+        width: 100%;
+        margin-left: 0;
+        padding-top: 6px;
+    }
 }
