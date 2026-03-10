@@ -52,18 +52,6 @@ export const AddLaborForm: React.FC<AddLaborFormProps> = ({ onAdd, planId }) => 
                         placeholder="Ex: Pedreiro"
                     />
                 </div>
-                <div className="md:col-span-2">
-                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Tipo</label>
-                    <select
-                        value={type}
-                        onChange={(e) => setType(e.target.value as any)}
-                        className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 outline-none text-slate-700 dark:text-slate-100 transition-all focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 shadow-sm"
-                    >
-                        <option value="Diária">Diária</option>
-                        <option value="Hora">Hora</option>
-                        <option value="Empreitada">Empreitada</option>
-                    </select>
-                </div>
                 <div className="md:col-span-1">
                     <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Qtd</label>
                     <input
@@ -85,7 +73,7 @@ export const AddLaborForm: React.FC<AddLaborFormProps> = ({ onAdd, planId }) => 
                     />
                 </div>
                 <div className="md:col-span-2">
-                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Custo Unit.</label>
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Valor Unit.</label>
                     <input
                         type="number"
                         value={cost}

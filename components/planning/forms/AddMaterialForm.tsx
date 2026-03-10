@@ -70,7 +70,7 @@ export const AddMaterialForm: React.FC<AddMaterialFormProps> = ({ onAdd, planId 
                     />
                 </div>
                 <div className="md:col-span-2">
-                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Custo Unit.</label>
+                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Valor Unit.</label>
                     <input
                         type="number"
                         value={cost}

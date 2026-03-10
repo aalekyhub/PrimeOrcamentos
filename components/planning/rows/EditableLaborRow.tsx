@@ -122,7 +122,7 @@ export const EditableLaborRow: React.FC<EditableLaborRowProps> = ({
                         <div className="grow">
                             <p className="font-bold text-slate-800 dark:text-slate-100">{labor.role}</p>
                             <p className="text-[10px] text-slate-500">
-                                {labor.cost_type} | {labor.quantity} {labor.unit} x R$ {labor.unit_cost.toFixed(2)}
+                                {labor.quantity} {labor.unit} x R$ {labor.unit_cost.toFixed(2)}
                             </p>
                         </div>
                     </div>

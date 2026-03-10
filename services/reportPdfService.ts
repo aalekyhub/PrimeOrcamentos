@@ -325,7 +325,7 @@ export const buildExecutionReportHtml = (
                         <table style="width:100%; border-collapse:collapse;">
                             <tbody>
                                 <tr style="border-bottom:2px solid #e2e8f0;">
-                                    <th style="padding:10px 8px; text-align:left; font-size:10px; color:#64748b;">FUNÇÃO / TIPO</th>
+                                    <th style="padding:10px 8px; text-align:left; font-size:10px; color:#64748b;">FUNÇÃO</th>
                                     <th style="padding:10px 8px; text-align:center; font-size:10px; color:#64748b; width:65px;">QTD</th>
                                     <th style="padding:10px 8px; text-align:center; font-size:10px; color:#64748b; width:50px;">UND</th>
                                     <th style="padding:10px 8px; text-align:right; font-size:10px; color:#64748b; width:90px;">VL. UNIT.</th>
@@ -335,7 +335,7 @@ export const buildExecutionReportHtml = (
                 .map((l) => `
                                     <tr style="border-bottom:1px solid #f1f5f9; page-break-inside: avoid; break-inside: avoid;">
                                         <td style="padding:10px 8px; font-size:11px; font-weight:600;">
-                                            ${escapeHtml(l.role)}${l.type ? ` | (${escapeHtml(l.type)})` : ''}
+                                            ${escapeHtml(l.role)}
                                         </td>
                                         <td style="padding:10px 8px; font-size:11px; text-align:center;">${formatQty(l.quantity)}</td>
                                         <td style="padding:10px 8px; font-size:11px; text-align:center;">${escapeHtml(l.unit)}</td>
