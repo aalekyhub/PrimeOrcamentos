@@ -73,7 +73,7 @@ const BudgetList: React.FC<BudgetListProps> = ({
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                         {budgets.map(budget => (
                             <tr key={budget.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 group transition-all">
-                                <td className="px-8 py-5 text-xs font-mono font-black text-blue-600">
+                                <td className="px-8 py-5 text-xs font-mono font-black text-blue-600 whitespace-nowrap">
                                     <div className="flex items-center gap-2">
                                         {budget.id}
                                         {budget.status === OrderStatus.APPROVED && <CheckCircle className="w-3 h-3 text-emerald-500" />}
