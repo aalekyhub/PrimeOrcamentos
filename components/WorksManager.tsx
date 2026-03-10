@@ -723,13 +723,13 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         />
                     </div>
                     <div className="md:col-span-1">
-                        <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Custo</label>
+                        <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Valor Unit.</label>
                         <input
                             type="number"
                             value={data.unit_cost || 0}
                             onChange={e => update('unit_cost', parseFloat(e.target.value) || 0)}
                             className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900/50 outline-none"
-                            placeholder="Custo"
+                            placeholder="0.00"
                         />
                     </div>
                 </div>
@@ -772,7 +772,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         <div className="grow flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
                             <span className="font-bold text-slate-800 dark:text-slate-100 uppercase text-sm hidden sm:block">{l.role}</span>
                             <div className="flex gap-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                                <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">({l.cost_type}) {l.quantity} {l.unit || 'un'}</span>
+                                <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">{l.quantity} {l.unit || 'un'}</span>
                                 <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">R$ {l.unit_cost.toFixed(2)}</span>
                             </div>
                         </div>
@@ -793,16 +793,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         />
                     </div>
                     <div className="md:col-span-1">
-                        <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Tipo</label>
-                        <select
-                            value={data.cost_type || 'Diária'}
-                            onChange={e => update('cost_type', e.target.value as any)}
-                            className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-amber-100 dark:focus:ring-amber-900/50 outline-none"
-                        >
-                            <option value="Diária">Diária</option>
-                            <option value="Hora">Hora</option>
-                            <option value="Empreitada">Empreitada</option>
-                        </select>
+                        {/* Tipo removido */}
                     </div>
                     <div className="md:col-span-1">
                         <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Qtd</label>
@@ -825,13 +816,13 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         />
                     </div>
                     <div className="md:col-span-1">
-                        <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Custo</label>
+                        <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Valor Unit.</label>
                         <input
                             type="number"
                             value={data.unit_cost || 0}
                             onChange={e => update('unit_cost', parseFloat(e.target.value) || 0)}
                             className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-amber-100 dark:focus:ring-amber-900/50 outline-none"
-                            placeholder="Custo"
+                            placeholder="0.00"
                         />
                     </div>
                 </div>
@@ -1114,7 +1105,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 />
                                             </div>
                                             <div className="md:col-span-2">
-                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Custo Unit.</label>
+                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Valor Unit.</label>
                                                 <input
                                                     type="number"
                                                     value={newMaterial.cost}
@@ -1169,16 +1160,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 />
                                             </div>
                                             <div className="md:col-span-2">
-                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Tipo</label>
-                                                <select
-                                                    value={newLabor.type}
-                                                    onChange={e => setNewLabor({ ...newLabor, type: e.target.value })}
-                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100"
-                                                >
-                                                    <option value="Diária">Diária</option>
-                                                    <option value="Hora">Hora</option>
-                                                    <option value="Empreitada">Empreitada</option>
-                                                </select>
+                                                {/* Tipo oculto */}
                                             </div>
                                             <div className="md:col-span-2">
                                                 <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Qtd</label>
@@ -1201,7 +1183,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 />
                                             </div>
                                             <div className="md:col-span-1">
-                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Custo</label>
+                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Valor Unit.</label>
                                                 <input
                                                     type="number"
                                                     value={newLabor.cost}
