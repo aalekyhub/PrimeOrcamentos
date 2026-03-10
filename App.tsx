@@ -86,6 +86,7 @@ const AppContent: React.FC = () => {
 
     setIsSyncing(true);
     try {
+      console.log("[Sync] Iniciando sincronização manual...");
       const syncResponse = await db.syncFromCloud();
 
       if (!syncResponse) {
@@ -98,209 +99,70 @@ const AppContent: React.FC = () => {
       if (Object.keys(cloudErrors).length > 0) {
         console.warn("[Sync Partial Failure]", cloudErrors);
         const failedTables = Object.keys(cloudErrors).join(', ');
-        notify(`Atenção: Falha ao baixar tabelas: ${failedTables}. Verifique as permissões no Supabase.`, "warning");
+        notify(`Atenção: Falha ao baixar tabelas: ${failedTables}.`, "warning");
       }
 
       if (cloudData) {
-        if (cloudData.errors && Object.keys(cloudData.errors).length > 0) {
-          const failedTables = Object.keys(cloudData.errors).join(', ');
-          notify(`Aviso: Algumas tabelas não sincronizaram: ${failedTables}.`, "warning");
-        }
-
         // --- Core Tables ---
         if (Array.isArray(cloudData.customers)) {
-          const localCustomers = (db.load(STORAGE_KEYS.CUSTOMERS, []) || []) as Customer[];
-          const customerMap = new Map();
-          localCustomers.forEach(c => {
-            const doc = (c.document || "").replace(/\D/g, '');
-            if (doc) customerMap.set(doc, c);
-            else customerMap.set(c.id, c);
-          });
-          cloudData.customers.forEach((c: Customer) => {
-            const doc = (c.document || "").replace(/\D/g, '');
-            if (doc) customerMap.set(doc, c);
-            else customerMap.set(c.id, c);
-          });
-          const deduplicatedCustomers = Array.from(customerMap.values()) as Customer[];
-          setCustomers(deduplicatedCustomers);
-          await db.saveLocal(STORAGE_KEYS.CUSTOMERS, deduplicatedCustomers);
-          if (deduplicatedCustomers.length > cloudData.customers.length) {
-            db.save(STORAGE_KEYS.CUSTOMERS, deduplicatedCustomers);
-          }
+          setCustomers(cloudData.customers);
+          await db.saveLocal(STORAGE_KEYS.CUSTOMERS, cloudData.customers);
         }
 
         if (Array.isArray(cloudData.catalog)) {
-          const localCatalog = (db.load(STORAGE_KEYS.CATALOG, []) || []) as CatalogService[];
-          const serviceMap = new Map();
-          localCatalog.forEach(s => serviceMap.set(s.id || s.name.trim().toLowerCase(), s));
-          cloudData.catalog.forEach((s: CatalogService) => {
-            const key = s.id || s.name.trim().toLowerCase();
-            serviceMap.set(key, s);
-          });
-          const deduplicatedCatalog = Array.from(serviceMap.values()) as CatalogService[];
-          setCatalog(deduplicatedCatalog);
-          await db.saveLocal(STORAGE_KEYS.CATALOG, deduplicatedCatalog);
-          if (deduplicatedCatalog.length > cloudData.catalog.length) {
-            db.save(STORAGE_KEYS.CATALOG, deduplicatedCatalog);
-          }
+          setCatalog(cloudData.catalog);
+          await db.saveLocal(STORAGE_KEYS.CATALOG, cloudData.catalog);
         }
 
         if (Array.isArray(cloudData.orders)) {
-          const localOrders = (db.load(STORAGE_KEYS.ORDERS, []) || []) as ServiceOrder[];
-          const localMap = new Map<string, ServiceOrder>((Array.isArray(localOrders) ? localOrders : []).map(o => [o.id, o]));
-          cloudData.orders.forEach((o: ServiceOrder) => {
-            localMap.set(o.id, o);
-          });
-          const merged = Array.from(localMap.values()).sort((a, b) =>
+          const sorted = [...cloudData.orders].sort((a, b) =>
             new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
           );
-          setOrders(merged);
-          await db.saveLocal(STORAGE_KEYS.ORDERS, merged);
-          if (merged.length > cloudData.orders.length) {
-            db.save(STORAGE_KEYS.ORDERS, merged);
-          }
+          setOrders(sorted);
+          await db.saveLocal(STORAGE_KEYS.ORDERS, sorted);
         }
 
         if (Array.isArray(cloudData.transactions)) {
-          const localTransactions = (db.load(STORAGE_KEYS.TRANSACTIONS, []) || []) as Transaction[];
-          const localMap = new Map<string, Transaction>((Array.isArray(localTransactions) ? localTransactions : []).map(t => [t.id, t]));
-          cloudData.transactions.forEach((t: Transaction) => {
-            localMap.set(t.id, t);
-          });
-          const merged = Array.from(localMap.values()).sort((a, b) =>
+          const sorted = [...cloudData.transactions].sort((a, b) =>
             new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()
           );
-          setTransactions(merged);
-          await db.saveLocal(STORAGE_KEYS.TRANSACTIONS, merged);
-
-          if (merged.length > cloudData.transactions.length) {
-            await db.save(STORAGE_KEYS.TRANSACTIONS, merged);
-          }
+          setTransactions(sorted);
+          await db.saveLocal(STORAGE_KEYS.TRANSACTIONS, sorted);
         }
 
         if (Array.isArray(cloudData.users)) {
-          const localUsers = (db.load(STORAGE_KEYS.USERS, INITIAL_USERS) || INITIAL_USERS) as UserAccount[];
-          const key = (u: UserAccount) => (u.email || '').trim().toLowerCase();
-
-          const map = new Map<string, UserAccount>();
-          localUsers.forEach(u => map.set(key(u), u));
-          cloudData.users.forEach(u => map.set(key(u), u));
-
-          const merged = Array.from(map.values());
-          setUsers(merged);
-          await db.saveLocal(STORAGE_KEYS.USERS, merged);
-
-          await db.save(STORAGE_KEYS.USERS, merged);
+          setUsers(cloudData.users);
+          await db.saveLocal(STORAGE_KEYS.USERS, cloudData.users);
         }
 
         if (Array.isArray(cloudData.loans)) {
-          const localLoans = (db.load(STORAGE_KEYS.LOANS, []) || []) as Loan[];
-          const localMap = new Map<string, Loan>(localLoans.map(l => [l.id, l]));
-          cloudData.loans.forEach((l: Loan) => {
-            localMap.set(l.id, l);
-          });
-          const merged = Array.from(localMap.values());
-          setLoans(merged);
-          await db.saveLocal(STORAGE_KEYS.LOANS, merged);
-
-          if (merged.length > cloudData.loans.length) {
-            await db.save(STORAGE_KEYS.LOANS, merged);
-          }
+          setLoans(cloudData.loans);
+          await db.saveLocal(STORAGE_KEYS.LOANS, cloudData.loans);
         }
 
         if (Array.isArray(cloudData.company) && cloudData.company.length > 0) {
-          const cloudCompany = cloudData.company[0];
-          setCompany(cloudCompany);
-          await db.saveLocal(STORAGE_KEYS.COMPANY, cloudCompany);
-        } else {
-          const localCompany = db.load(STORAGE_KEYS.COMPANY, INITIAL_COMPANY);
-          if (localCompany) {
-            await db.save(STORAGE_KEYS.COMPANY, localCompany);
-          }
+          setCompany(cloudData.company[0]);
+          await db.saveLocal(STORAGE_KEYS.COMPANY, cloudData.company[0]);
         }
 
-        // --- Planning & Execution Tables (Server-Authoritative Sync) ---
-        if (Array.isArray(cloudData.plans)) {
-          const localPlans = (db.load('serviflow_plans', []) || []) as any[];
-          const pendingUploads = localPlans.filter(p => p.syncStatus !== 'synced');
-
-          const planMap = new Map<string, any>(pendingUploads.map(p => [p.id, p]));
-
-          cloudData.plans.forEach((p: any) => {
-            if (!(db as any).isDeleted?.(p.id)) {
-              planMap.set(p.id, { ...p, syncStatus: 'synced' });
-            }
-          });
-
-          const syncedPlans = Array.from(planMap.values()).sort((a, b) =>
-            new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
-          );
-
-          await db.saveLocal('serviflow_plans', syncedPlans);
-
-          if (pendingUploads.length > 0) {
-            await db.save('serviflow_plans', pendingUploads);
-          }
-        }
-
-        if (Array.isArray(cloudData.works)) {
-          const localWorks = (db.load('serviflow_works', []) || []) as any[];
-          const pendingUploads = localWorks.filter(w => w.syncStatus !== 'synced');
-
-          const workMap = new Map<string, any>(pendingUploads.map(w => [w.id, w]));
-
-          cloudData.works.forEach((w: any) => {
-            if (!(db as any).isDeleted?.(w.id)) {
-              workMap.set(w.id, { ...w, syncStatus: 'synced' });
-            }
-          });
-
-          const syncedWorks = Array.from(workMap.values());
-          await db.saveLocal('serviflow_works', syncedWorks);
-
-          if (pendingUploads.length > 0) {
-            await db.save('serviflow_works', pendingUploads);
-          }
-        }
-
+        // --- Planning & Execution Tables ---
         const subTables = [
-          'plan_services', 'plan_materials', 'plan_labor', 'plan_indirects', 'plan_taxes',
-          'work_services', 'work_materials', 'work_labor', 'work_indirects', 'work_taxes'
+          'plans', 'plan_services', 'plan_materials', 'plan_labor', 'plan_indirects', 'plan_taxes',
+          'works', 'work_services', 'work_materials', 'work_labor', 'work_indirects', 'work_taxes'
         ];
 
-        const subTablePromises = subTables.map(async (tableName) => {
+        for (const tableName of subTables) {
           if (Array.isArray(cloudData[tableName])) {
-            const incomingItems = (cloudData[tableName] as any[]);
-            const localData = (db.load(`serviflow_${tableName}`, []) || []) as any[];
-
-            const pendingUploads = localData.filter(i => i.syncStatus !== 'synced');
-            const itemMap = new Map<string, any>(pendingUploads.map(item => [item.id, item]));
-
-            incomingItems.forEach(item => {
-              const parentId = item.plan_id || item.work_id;
-              if (!parentId || !(db as any).isDeleted?.(parentId)) {
-                itemMap.set(item.id, { ...item, syncStatus: 'synced' });
-              }
-            });
-
-            const syncedItems = Array.from(itemMap.values());
-            await db.saveLocal(`serviflow_${tableName}`, syncedItems);
-
-            if (pendingUploads.length > 0) {
-              await db.save(`serviflow_${tableName}`, pendingUploads);
-            }
+            await db.saveLocal(`serviflow_${tableName}`, cloudData[tableName]);
           }
-        });
+        }
 
-        await Promise.all(subTablePromises);
-
-        notify("Sincronização concluída");
+        notify("Sincronização concluída com sucesso!");
         window.dispatchEvent(new CustomEvent('db-sync-complete'));
       }
     } catch (e: any) {
       console.error("[Sync Error Detail]", e);
-      const errorStr = e instanceof Error ? e.message : JSON.stringify(e);
-      notify(`ERRO TÉCNICO: ${errorStr || "Sem resposta da rede"}.`, "error");
+      notify(`Erro de sincronização: ${e.message || "Erro desconhecido"}.`, "error");
     } finally {
       setIsSyncing(false);
     }

@@ -1006,11 +1006,33 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     <button
                                         type="button"
                                         onClick={() => importPlanItems(currentWork.plan_id!, currentWork.id)}
-                                        className="px-4 py-2 bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400 rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-green-200 transition-all border border-green-200 dark:border-green-800"
+                                        className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-slate-200 transition-all border border-slate-200 dark:border-slate-700"
+                                        title="Importar itens novos do planejamento"
                                     >
-                                        <ArrowRight className="rotate-180" size={16} /> Sincronizar
+                                        <ArrowRight className="rotate-180" size={16} /> Importar Plan.
                                     </button>
                                 )}
+                                <button
+                                    type="button"
+                                    onClick={async () => {
+                                        notify('Sincronizando com a nuvem...', 'info');
+                                        try {
+                                            await db.forceUploadAll();
+                                            const syncRes = await db.syncFromCloud();
+                                            if (syncRes && !Object.keys(syncRes.errors || {}).length) {
+                                                notify('Sincronização concluída com sucesso!', 'success');
+                                                window.dispatchEvent(new CustomEvent('db-sync-complete'));
+                                            } else {
+                                                notify('Sincronização concluída com avisos.', 'warning');
+                                            }
+                                        } catch (err) {
+                                            notify('Erro ao sincronizar dados.', 'error');
+                                        }
+                                    }}
+                                    className="px-4 py-2 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-blue-200 transition-all border border-blue-200 dark:border-blue-800"
+                                >
+                                    <ArrowRight className="rotate-180" size={16} /> Sincronizar Nuvem
+                                </button>
                                 <button
                                     type="button"
                                     onClick={handleSave}

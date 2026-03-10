@@ -301,8 +301,20 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
                     <div className="flex gap-2">
                         <button
                             type="button"
-                            onClick={() => {
-                                notify('Sincronização com a nuvem disponível conforme configuração do sistema.', 'info');
+                            onClick={async () => {
+                                notify('Sincronizando com a nuvem...', 'info');
+                                try {
+                                    const uploadRes = await db.forceUploadAll();
+                                    const syncRes = await db.syncFromCloud();
+                                    if (syncRes && !Object.keys(syncRes.errors || {}).length) {
+                                        notify('Sincronização concluída com sucesso!', 'success');
+                                        window.dispatchEvent(new CustomEvent('db-sync-complete'));
+                                    } else {
+                                        notify('Sincronização concluída com alguns avisos.', 'warning');
+                                    }
+                                } catch (err) {
+                                    notify('Erro ao sincronizar dados.', 'error');
+                                }
                             }}
                             className="px-4 py-2 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-blue-200 transition-all border border-blue-200 dark:border-blue-800"
                         >

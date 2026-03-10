@@ -40,7 +40,11 @@ const CLOUD_TABLES = [
   'works', 'work_services', 'work_materials', 'work_labor', 'work_indirects', 'work_taxes'
 ];
 
-const REALTIME_TABLES = ['orders', 'plans', 'works'];
+const REALTIME_TABLES = [
+  'orders', 'plans', 'works',
+  'plan_services', 'plan_materials', 'plan_labor', 'plan_indirects', 'plan_taxes',
+  'work_services', 'work_materials', 'work_labor', 'work_indirects', 'work_taxes'
+];
 
 const getStorageKeyFromTable = (table: string) => `serviflow_${table}`;
 
@@ -359,36 +363,35 @@ export const db = {
     await persistKeyLocally(key, sanitizedData);
 
     if (supabase && !skipCloud) {
-      (async () => {
-        const tableName = key.replace('serviflow_', '');
-        try {
-          const rawPayload = sanitizedSingleItem
-            ? (Array.isArray(sanitizedSingleItem) ? sanitizedSingleItem : [sanitizedSingleItem])
-            : (Array.isArray(sanitizedData) ? sanitizedData : [sanitizedData]);
+      const tableName = key.replace('serviflow_', '');
+      try {
+        const rawPayload = sanitizedSingleItem
+          ? (Array.isArray(sanitizedSingleItem) ? sanitizedSingleItem : [sanitizedSingleItem])
+          : (Array.isArray(sanitizedData) ? sanitizedData : [sanitizedData]);
 
-          const payload = rawPayload.filter((item: any) => {
-            if (!item) return false;
-            if (!item.id) return true;
-            return !_tombstones.has(item.id);
-          });
+        const payload = rawPayload.filter((item: any) => {
+          if (!item) return false;
+          if (!item.id) return true;
+          return !_tombstones.has(item.id);
+        });
 
-          if (payload.length > 0) {
-            console.log(`[Sync Background] Iniciando para ${tableName}...`);
-            const conflictKey = tableName === 'users' ? 'email' : 'id';
-            const { error } = await supabase
-              .from(tableName)
-              .upsert(payload, { onConflict: conflictKey });
+        if (payload.length > 0) {
+          console.log(`[Sync Cloud] Salvando ${payload.length} itens em ${tableName}...`);
+          const conflictKey = tableName === 'users' ? 'email' : 'id';
+          const { error } = await supabase
+            .from(tableName)
+            .upsert(payload, { onConflict: conflictKey });
 
-            if (error) {
-              console.error(`[Supabase Error] Tabela: ${tableName}. Erro: ${error.message}`);
-            } else {
-              console.log(`[Sync Background] ${tableName} atualizado com sucesso.`);
-            }
+          if (error) {
+            console.error(`[Supabase Error] Tabela: ${tableName}. Erro: ${error.message}`);
+            return { success: false, error: error.message };
           }
-        } catch (err) {
-          console.error(`[Sync Error Background] Falha crítica no Supabase para ${tableName}:`, err);
+          console.log(`[Sync Cloud] ${tableName} atualizado com sucesso.`);
         }
-      })();
+      } catch (err) {
+        console.error(`[Sync Error] Falha crítica no Supabase para ${tableName}:`, err);
+        return { success: false, error: (err as any).message };
+      }
     }
 
     return { success: true };
@@ -572,32 +575,38 @@ export const db = {
   async forceUploadAll() {
     if (!supabase) return { success: false, error: 'Sem conexão com Supabase' };
 
-    await syncDeletedRecordsFromCloud();
-
     const keys = [
-      'serviflow_customers', 'serviflow_catalog', 'serviflow_orders', 'serviflow_transactions',
-      'serviflow_users', 'serviflow_loans', 'serviflow_plans', 'serviflow_plan_services',
-      'serviflow_plan_materials', 'serviflow_plan_labor', 'serviflow_plan_indirects', 'serviflow_plan_taxes',
-      'serviflow_works', 'serviflow_work_services', 'serviflow_work_materials', 'serviflow_work_labor',
-      'serviflow_work_indirects', 'serviflow_work_taxes'
+      'serviflow_customers', 'serviflow_catalog', 'serviflow_orders',
+      'serviflow_transactions', 'serviflow_loans', 'serviflow_users',
+      'serviflow_company', 'serviflow_plans', 'serviflow_works',
+      'serviflow_plan_services', 'serviflow_plan_materials', 'serviflow_plan_labor', 'serviflow_plan_indirects', 'serviflow_plan_taxes',
+      'serviflow_work_services', 'serviflow_work_materials', 'serviflow_work_labor', 'serviflow_work_indirects', 'serviflow_work_taxes'
     ];
-
-    let totalUpdated = 0;
+    let totalItems = 0;
+    const errors: string[] = [];
 
     for (const key of keys) {
-      const data = filterDeletedItems(_cache[key] || []);
+      const data = this.load(key, []);
       if (Array.isArray(data) && data.length > 0) {
-        const tableName = key.replace('serviflow_', '');
-        const payload = data.filter((item: any) => !isItemDeleted(item));
-        if (payload.length === 0) continue;
-
-        const conflictKey = tableName === 'users' ? 'email' : 'id';
-        const { error } = await supabase.from(tableName).upsert(payload, { onConflict: conflictKey });
-        if (!error) totalUpdated += payload.length;
+        console.log(`[Force Upload] Enviando ${data.length} itens de ${key}...`);
+        const res = await this.save(key, data);
+        if (res.success) {
+          totalItems += data.length;
+        } else {
+          errors.push(`${key}: ${res.error}`);
+        }
+      } else if (!Array.isArray(data) && data && Object.keys(data).length > 0) {
+        // Itens únicos como company
+        const res = await this.save(key, data);
+        if (res.success) totalItems++;
       }
     }
 
-    return { success: true, count: totalUpdated };
+    if (errors.length > 0) {
+      console.error("[Force Upload] Erros parciais:", errors);
+    }
+
+    return { success: errors.length === 0, totalItems, errors };
   },
 
   isDeleted(id: string) {
