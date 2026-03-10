@@ -578,11 +578,10 @@ const App: React.FC = () => {
 
   if (!isReady) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 transition-colors duration-300">
         <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center mb-6 shadow-lg shadow-blue-500/20 animate-pulse">
           <Database className="w-6 h-6 text-white" />
         </div>
-        <div className="text-slate-500 font-medium text-sm animate-pulse">Iniciando Banco de Dados...</div>
       </div>
     );
   }
