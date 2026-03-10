@@ -172,10 +172,7 @@ export const buildPlanningReportHtml = (
                                             <h1 style="font-size:16px; font-weight:900; color:#0f172a; margin:0 0 3px 0; text-transform:uppercase; line-height: 1.2;">
                                                 ${escapeHtml(company.name || 'Empresa não informada')}
                                             </h1>
-                                            <p style="font-size:13px; font-weight:800; color:#0f172a; margin:0 0 3px 0; line-height: 1.2;">
-                                                OBRA: ${escapeHtml((header as any).name || 'Não informado')}
-                                            </p>
-                                            <p style="font-size:10px; font-weight:800; color:${theme.primaryColor}; text-transform:uppercase; letter-spacing:0.08em; margin:0 0 3px 0;">
+                                            <p style="font-size:11px; font-weight:800; color:${theme.primaryColor}; text-transform:uppercase; letter-spacing:0.08em; margin:0 0 3px 0;">
                                                 ${theme.reportTitle}
                                             </p>
                                             <p style="font-size:8px; color:#64748b; font-weight:700; margin:0; line-height: 1.2;">
@@ -203,17 +200,23 @@ export const buildPlanningReportHtml = (
                 <div style="background:#f8fafc; padding:14px; border-radius:6px; border:1px solid #e2e8f0; margin-bottom:18px;">
                     <table style="width:100%; border-collapse:collapse;">
                         <tr>
-                            <td style="padding:0 12px 10px 0; vertical-align:top; width:33.33%;">
+                            <td colspan="3" style="padding:0 0 12px 0; vertical-align:top; border-bottom:1px solid #e2e8f0; margin-bottom:12px;">
+                                <p style="margin:0 0 4px 0; font-size:8px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.06em;">Nome da Obra</p>
+                                <p style="margin:0; font-size:14px; color:#0f172a; font-weight:900; text-transform:uppercase;">${escapeHtml((header as any).name || 'Não informado')}</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding:10px 12px 10px 0; vertical-align:top; width:33.33%;">
                                 <p style="margin:0 0 4px 0; font-size:8px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.06em;">Cliente</p>
-                                <p style="margin:0; font-size:12px; color:#0f172a; font-weight:700;">${escapeHtml(customer?.name || 'Não informado')}</p>
+                                <p style="margin:0; font-size:11px; color:#0f172a; font-weight:700;">${escapeHtml(customer?.name || 'Não informado')}</p>
                             </td>
-                            <td style="padding:0 12px 10px 0; vertical-align:top; width:33.33%;">
+                            <td style="padding:10px 12px 10px 0; vertical-align:top; width:33.33%;">
                                 <p style="margin:0 0 4px 0; font-size:8px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.06em;">Tipo de Obra</p>
-                                <p style="margin:0; font-size:12px; color:#0f172a; font-weight:700;">${escapeHtml((header as any).type || 'Não informado')}</p>
+                                <p style="margin:0; font-size:11px; color:#0f172a; font-weight:700;">${escapeHtml((header as any).type || 'Não informado')}</p>
                             </td>
-                            <td style="padding:0 0 10px 0; vertical-align:top; width:33.33%;">
+                            <td style="padding:10px 0 10px 0; vertical-align:top; width:33.33%;">
                                 <p style="margin:0 0 4px 0; font-size:8px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.06em;">Status</p>
-                                <p style="margin:0; font-size:12px; color:#0f172a; font-weight:700;">${escapeHtml((header as any).status || 'Não informado')}</p>
+                                <p style="margin:0; font-size:11px; color:#0f172a; font-weight:700;">${escapeHtml((header as any).status || 'Não informado')}</p>
                             </td>
                         </tr>
                         <tr>
