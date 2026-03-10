@@ -421,6 +421,20 @@ export const buildExecutionReportHtml = (
                     </p>
                 </div>
             </div>
+
+            ${(header as any).annex_image ? `
+            <div style="page-break-before: always; padding: 40px 0; font-family: Inter, Arial, sans-serif;">
+                <h3 style="font-size: 14px; font-weight: 800; color: ${theme.secondaryColor}; text-transform: uppercase; margin: 0 0 20px 0; padding-bottom: 6px; border-bottom: 2px solid #e2e8f0; text-align: center;">
+                    ANEXO FOTOGRÁFICO
+                </h3>
+                <div style="text-align: center; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; min-height: 400px; display: flex; align-items: center; justify-content: center;">
+                    <img src="${(header as any).annex_image}" style="max-width: 100%; max-height: 800px; object-fit: contain; border-radius: 4px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);" />
+                </div>
+                <p style="margin-top: 15px; font-size: 10px; color: #64748b; text-align: center; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
+                    Referente ao Projeto/Obra: ${escapeHtml(header.name || '')}
+                </p>
+            </div>
+            ` : ''}
         </div>
     `;
 };

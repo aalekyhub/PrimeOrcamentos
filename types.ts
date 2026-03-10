@@ -212,6 +212,7 @@ export interface PlanningHeader {
   total_labor_cost?: number;
   total_indirect_cost?: number;
   total_real_cost?: number;
+  annex_image?: string; // Base64
 }
 
 // --- NEW MODULE: Works Management (Realized) ---
@@ -288,6 +289,7 @@ export interface WorkHeader {
   total_labor_cost?: number;
   total_indirect_cost?: number;
   total_real_cost?: number;
+  annex_image?: string; // Base64
 }
 
 export interface WorkTax {
