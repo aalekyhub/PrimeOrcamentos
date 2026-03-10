@@ -228,68 +228,48 @@ export const buildPlanningReportHtml = (
                     </table>
                 </div>
 
-                <div style="margin-bottom: 20px;">
-                    <table style="width:100%; border-collapse:collapse; table-layout:fixed;">
+                <table style="width:100%; border-collapse:collapse; table-layout:fixed; margin:0 0 20px 0;">
+                    <tr>
+                        <td style="width:25%; padding-right:5px; vertical-align:top;">
+                            <div style="background:#ecfdf5; border-bottom:2px solid #10b981; border-radius:6px; padding:12px; height:100%;">
+                                <span style="font-size:8px; font-weight:700; color:#059669; text-transform:uppercase;">Materiais</span>
+                                <span style="font-size:16px; font-weight:800; color:#064e3b; display:block; margin-top:4px;">R$ ${formatMoney(calculations.totalMaterial)}</span>
+                            </div>
+                        </td>
+                        <td style="width:25%; padding:0 5px; vertical-align:top;">
+                            <div style="background:#fffbeb; border-bottom:2px solid #f59e0b; border-radius:6px; padding:12px; height:100%;">
+                                <span style="font-size:8px; font-weight:700; color:#d97706; text-transform:uppercase;">Mão de Obra</span>
+                                <span style="font-size:16px; font-weight:800; color:#78350f; display:block; margin-top:4px;">R$ ${formatMoney(calculations.totalLabor)}</span>
+                            </div>
+                        </td>
+                        <td style="width:25%; padding:0 5px; vertical-align:top;">
+                            <div style="background:#f8fafc; border-bottom:2px solid #64748b; border-radius:6px; padding:12px; height:100%;">
+                                <span style="font-size:8px; font-weight:700; color:#475569; text-transform:uppercase;">Custos Indiretos</span>
+                                <span style="font-size:16px; font-weight:800; color:#0f172a; display:block; margin-top:4px;">R$ ${formatMoney(calculations.totalIndirect)}</span>
+                            </div>
+                        </td>
+                        <td style="width:25%; padding-left:5px; vertical-align:top;">
+                            <div style="background:${theme.lightBg}; border-bottom:2px solid ${theme.primaryColor}; border-radius:6px; padding:12px; height:100%;">
+                                <span style="font-size:8px; font-weight:700; color:${theme.primaryColor}; text-transform:uppercase;">Impostos</span>
+                                <span style="font-size:16px; font-weight:800; color:${theme.secondaryColor}; display:block; margin-top:4px;">R$ ${formatMoney(calculations.totalTax)}</span>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+                <div style="margin-bottom:24px; background:${theme.secondaryColor}; color:#ffffff; padding:12px 16px; border-radius:6px;">
+                    <table style="width:100%; border-collapse:collapse;">
                         <tr>
-                            <td style="width:${header.annex_image ? '65%' : '100%'}; vertical-align:top; padding-right:${header.annex_image ? '10px' : '0'};">
-                                <table style="width:100%; border-collapse:collapse; table-layout:fixed; margin-bottom:12px;">
-                                    <tr>
-                                        <td style="width:50%; padding-right:5px; padding-bottom:10px;">
-                                            <div style="background:#ecfdf5; border-bottom:2px solid #10b981; border-radius:6px; padding:10px;">
-                                                <span style="font-size:7px; font-weight:700; color:#059669; text-transform:uppercase;">Materiais</span>
-                                                <span style="font-size:13px; font-weight:800; color:#064e3b; display:block; margin-top:2px;">R$ ${formatMoney(calculations.totalMaterial)}</span>
-                                            </div>
-                                        </td>
-                                        <td style="width:50%; padding-left:5px; padding-bottom:10px;">
-                                            <div style="background:#fffbeb; border-bottom:2px solid #f59e0b; border-radius:6px; padding:10px;">
-                                                <span style="font-size:7px; font-weight:700; color:#d97706; text-transform:uppercase;">Mão de Obra</span>
-                                                <span style="font-size:13px; font-weight:800; color:#78350f; display:block; margin-top:2px;">R$ ${formatMoney(calculations.totalLabor)}</span>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td style="width:50%; padding-right:5px;">
-                                            <div style="background:#f8fafc; border-bottom:2px solid #64748b; border-radius:6px; padding:10px;">
-                                                <span style="font-size:7px; font-weight:700; color:#475569; text-transform:uppercase;">Custos Indiretos</span>
-                                                <span style="font-size:13px; font-weight:800; color:#0f172a; display:block; margin-top:2px;">R$ ${formatMoney(calculations.totalIndirect)}</span>
-                                            </div>
-                                        </td>
-                                        <td style="width:50%; padding-left:5px;">
-                                            <div style="background:${theme.lightBg}; border-bottom:2px solid ${theme.primaryColor}; border-radius:6px; padding:10px;">
-                                                <span style="font-size:7px; font-weight:700; color:${theme.primaryColor}; text-transform:uppercase;">Impostos</span>
-                                                <span style="font-size:13px; font-weight:800; color:${theme.secondaryColor}; display:block; margin-top:2px;">R$ ${formatMoney(calculations.totalTax)}</span>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </table>
-                                
-                                <div style="background:${theme.secondaryColor}; color:#ffffff; padding:10px 14px; border-radius:6px;">
-                                    <table style="width:100%; border-collapse:collapse;">
-                                        <tr>
-                                            <td style="padding:0; vertical-align:middle;">
-                                                <p style="font-size:8px; font-weight:800; text-transform:uppercase; margin:0; letter-spacing:0.08em; color:#ffffff;">
-                                                    ${theme.terminologies.totalLabel}
-                                                </p>
-                                            </td>
-                                            <td style="padding:0; vertical-align:middle; text-align:right;">
-                                                <p style="font-size:16px; font-weight:900; margin:0;">
-                                                    R$ ${formatMoney(calculations.totalGeneral)}
-                                                </p>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
+                            <td style="padding:0; vertical-align:middle;">
+                                <p style="font-size:9px; font-weight:800; text-transform:uppercase; margin:0; letter-spacing:0.08em; color:#ffffff;">
+                                    ${theme.terminologies.totalLabel}
+                                </p>
                             </td>
-                            ${header.annex_image ? `
-                            <td style="width:35%; vertical-align:top;">
-                                <div style="background:#f1f5f9; border-radius:6px; border:1px solid #e2e8f0; padding:6px; height: 145px; display: flex; flex-direction: column;">
-                                    <span style="font-size:7px; font-weight:800; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:4px; text-align:center;">ANEXO FOTOGRÁFICO</span>
-                                    <div style="flex-grow: 1; display:flex; align-items:center; justify-content:center; overflow:hidden; background:white; border-radius:4px;">
-                                        <img src="${header.annex_image}" style="max-width:100%; max-height:120px; object-fit:contain;" />
-                                    </div>
-                                </div>
+                            <td style="padding:0; vertical-align:middle; text-align:right;">
+                                <p style="font-size:18px; font-weight:900; margin:0;">
+                                    R$ ${formatMoney(calculations.totalGeneral)}
+                                </p>
                             </td>
-                            ` : ''}
                         </tr>
                     </table>
                 </div>
@@ -450,6 +430,19 @@ export const buildPlanningReportHtml = (
                     </p>
                 </div>
             </div>
+            ${header.annex_image ? `
+            <div style="page-break-before: always; padding: 40px 0; font-family: Inter, Arial, sans-serif;">
+                <h3 style="font-size: 14px; font-weight: 800; color: ${theme.secondaryColor}; text-transform: uppercase; margin: 0 0 20px 0; padding-bottom: 6px; border-bottom: 2px solid #e2e8f0; text-align: center;">
+                    ANEXO FOTOGRÁFICO
+                </h3>
+                <div style="text-align: center; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; min-height: 400px; display: flex; align-items: center; justify-content: center;">
+                    <img src="${header.annex_image}" style="max-width: 100%; max-height: 800px; object-fit: contain; border-radius: 4px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);" />
+                </div>
+                <p style="margin-top: 15px; font-size: 10px; color: #64748b; text-align: center; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
+                    Referente ao Projeto/Obra: ${escapeHtml(header.name || '')}
+                </p>
+            </div>
+            ` : ''}
         </div>
     `;
 };
