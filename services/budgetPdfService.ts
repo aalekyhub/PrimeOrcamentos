@@ -43,9 +43,14 @@ export const buildBudgetHeaderHtml = (budget: ServiceOrder, company: CompanyProf
                                 <p style="margin: 0; font-size: 11px; font-weight: 800; color: #2563eb; text-transform: uppercase; letter-spacing: 0.04em;">
                                     SOLUÇÕES em Gestão Profissional
                                 </p>
-                                <p style="margin: 4px 0 0 0; font-size: 9px; color: #64748b; font-weight: 700;">
+                                <p style="margin: 4px 0 0 0; font-size: 9px; color: #64748b; font-weight: 700; line-height: 1.2;">
                                     ${escapeHtml(company.cnpj || '')}${company.cnpj && company.phone ? ' | ' : ''}${escapeHtml(company.phone || '')}
                                 </p>
+                                ${company.address ? `
+                                <p style="margin: 1px 0 0 0; font-size: 8.5px; color: #94a3b8; font-weight: 600; text-transform: uppercase;">
+                                    ${escapeHtml(company.address)}
+                                </p>
+                                ` : ''}
                             </td>
                         </tr>
                     </table>

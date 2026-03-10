@@ -5,11 +5,11 @@ import { escapeHtml, toNumber, formatMoney } from './formatUtils';
 // Styles are now handled by the unified ReportPreview component.
 
 export const getContractHtml = (order: ServiceOrder, customer: any, company: CompanyProfile) => {
-    const contractValue = order.contractPrice && order.contractPrice > 0
-        ? order.contractPrice
-        : order.totalAmount;
+  const contractValue = order.contractPrice && order.contractPrice > 0
+    ? order.contractPrice
+    : order.totalAmount;
 
-    return `
+  return `
     <div class="pdf-page-content">
       <div style="width:100%; background:#ffffff; font-family:Inter, Arial, sans-serif; color:#1e293b; padding:0;">
         <!-- Header -->
@@ -31,9 +31,14 @@ export const getContractHtml = (order: ServiceOrder, customer: any, company: Com
                                     <p style="font-size: 11px; font-weight: 800; color: #2563eb; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px;">
                                         CONTRATO DE PRESTAÇÃO DE SERVIÇOS
                                     </p>
-                                    <p style="font-size: 9px; color: #64748b; font-weight: 700;">
+                                    <p style="font-size: 9px; color: #64748b; font-weight: 700; line-height: 1.2;">
                                         ${escapeHtml(company.cnpj || "")}${company.cnpj && company.phone ? ' | ' : ''}${escapeHtml(company.phone || "")}
                                     </p>
+                                    ${company.address ? `
+                                    <p style="margin: 1px 0 0 0; font-size: 8.5px; color: #94a3b8; font-weight: 600; text-transform: uppercase;">
+                                        ${escapeHtml(company.address)}
+                                    </p>
+                                    ` : ''}
                                 </td>
                             </tr>
                         </table>
