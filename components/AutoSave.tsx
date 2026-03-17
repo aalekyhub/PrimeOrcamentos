@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Check, RefreshCw, AlertCircle } from 'lucide-react';
+import { useGlobalAutoSave } from './AutoSaveContext';
 
 interface AutoSaveProps<T> {
   data: T;
@@ -14,6 +15,7 @@ export const AutoSave = <T,>({
 }: AutoSaveProps<T>) => {
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [error, setError] = useState<string | null>(null);
+  const { setGlobalStatus } = useGlobalAutoSave();
 
   const firstRender = useRef(true);
   const isMounted = useRef(true);
@@ -50,6 +52,7 @@ export const AutoSave = <T,>({
     }
 
     setStatus('idle');
+    setGlobalStatus('idle');
     setError(null);
 
     const currentVersion = ++saveVersion.current;
@@ -58,6 +61,7 @@ export const AutoSave = <T,>({
       if (!isMounted.current) return;
 
       setStatus('saving');
+      setGlobalStatus('saving');
       setError(null);
 
       try {
@@ -67,16 +71,19 @@ export const AutoSave = <T,>({
         if (!isMounted.current || currentVersion !== saveVersion.current) return;
 
         setStatus('saved');
+        setGlobalStatus('saved');
 
         resetStatusTimer.current = setTimeout(() => {
           if (!isMounted.current || currentVersion !== saveVersion.current) return;
           setStatus('idle');
+          setGlobalStatus('idle');
         }, 3000);
       } catch (err: any) {
         if (!isMounted.current || currentVersion !== saveVersion.current) return;
 
         console.error('AutoSave Error:', err);
         setStatus('error');
+        setGlobalStatus('error', err?.message || 'Erro ao sincronizar');
         setError(err?.message || 'Erro ao sincronizar');
       }
     }, delay);

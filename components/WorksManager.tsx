@@ -9,6 +9,7 @@ import {
 import { useNotify } from './ToastProvider';
 import { db } from '../services/db';
 import ReportPreview from './ReportPreview';
+import { AutoSave } from './AutoSave';
 import {
     WorkHeader, WorkService, WorkMaterial,
     WorkLabor, WorkIndirect, Customer,
@@ -1028,14 +1029,20 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 >
                                     <ArrowRight className="rotate-180" size={16} /> Sincronizar Nuvem
                                 </button>
-                                <button
-                                    type="button"
-                                    onClick={handleSave}
-                                    disabled={loading}
-                                    className="whitespace-nowrap px-4 py-2 bg-green-600 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-green-700 shadow-md shadow-green-900/20 disabled:opacity-50"
-                                >
-                                    <Save size={16} /> {loading ? 'Salvando...' : 'Salvar'}
-                                </button>
+                                <div className="flex items-center gap-2">
+                                    <AutoSave 
+                                        data={currentWork} 
+                                        onSave={handleSave} 
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={handleSave}
+                                        disabled={loading}
+                                        className="whitespace-nowrap px-4 py-2 bg-green-600 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-green-700 shadow-md shadow-green-900/20 disabled:opacity-50"
+                                    >
+                                        <Save size={16} /> {loading ? 'Salvando...' : 'Salvar'}
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -1051,13 +1058,13 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     key={tab.id}
                                     type="button"
                                     onClick={() => setActiveTab(tab.id as any)}
-                                    className={`px-6 py-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id ? 'border-green-600 text-green-600 dark:text-green-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                                        }`}
+                                    className={`px-6 py-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id ? 'border-green-600 text-green-600 dark:text-green-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
                                 >
                                     <tab.icon size={16} /> {tab.label}
                                 </button>
                             ))}
                         </div>
+                    </div>
 
                         {/* Resource Sub-tabs */}
                         {activeTab === 'recursos' && (
@@ -1073,10 +1080,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             key={r.id}
                                             type="button"
                                             onClick={() => setResourceTab(r.id as any)}
-                                            className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all uppercase tracking-wider ${resourceTab === r.id
-                                                ? 'bg-green-600 dark:bg-green-600 text-white shadow-md'
-                                                : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-green-50 dark:hover:bg-green-900/30'
-                                                }`}
+                                            className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all uppercase tracking-wider ${resourceTab === r.id ? 'bg-green-600 dark:bg-green-600 text-white shadow-md' : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-green-50 dark:hover:bg-green-900/30'}`}
                                         >
                                             {r.label}
                                         </button>
@@ -1305,7 +1309,6 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                 )}
                             </div>
                         )}
-                    </div>
 
                     {/* Content Area */}
                     <div className="p-8 flex-1 bg-slate-50/50 dark:bg-slate-900/50 overflow-auto">
