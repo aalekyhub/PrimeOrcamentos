@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-// html2pdf is no longer used
 import {
     Building2, Truck, HardHat, FileText,
     Plus, Trash2, Save, ArrowRight, Calculator,
-    PieChart, Calendar, Pencil, Check, X, Percent, Eye, Archive,
-    ChevronUp, ChevronDown, GripVertical, AlertCircle, Copy
+    PieChart, Calendar, Pencil, Check, X, Percent, Eye, Archive, Copy
 } from 'lucide-react';
 import { useNotify } from './ToastProvider';
 import { db } from '../services/db';
@@ -13,9 +11,7 @@ import { AutoSave } from './AutoSave';
 import {
     WorkHeader, WorkService, WorkMaterial,
     WorkLabor, WorkIndirect, Customer,
-    PlannedService, PlannedMaterial,
-    PlannedLabor, PlannedIndirect, WorkTax, PlanTax,
-    CompanyProfile
+    PlannedService, WorkTax, CompanyProfile
 } from '../types';
 import { buildExecutionReportHtml, EXECUTION_THEME } from '../services/reportPdfService';
 
@@ -52,7 +48,10 @@ const useWorkCalculations = (
         return fromIndirects + fromSvcs;
     }, [indirects, services]);
 
-    const totalDirect = useMemo(() => totalMaterial + totalLabor + totalIndirect, [totalMaterial, totalLabor, totalIndirect]);
+    const totalDirect = useMemo(
+        () => totalMaterial + totalLabor + totalIndirect,
+        [totalMaterial, totalLabor, totalIndirect]
+    );
 
     const bdiTax = useMemo(() => taxes.find(t => t.name === 'BDI'), [taxes]);
     const otherTaxes = useMemo(() => taxes.filter(t => t.name !== 'BDI'), [taxes]);
@@ -74,7 +73,6 @@ const useWorkCalculations = (
         return (desiredLiquid + sumFixed) / taxFactor;
     }, [desiredLiquid, otherTaxes, taxFactor]);
 
-    // Calcular valores individuais dos impostos
     const individualTaxValues = useMemo(() => {
         return otherTaxes.map(t => ({
             name: t.name,
@@ -82,7 +80,6 @@ const useWorkCalculations = (
         }));
     }, [otherTaxes, totalGeneral]);
 
-    // totalTaxes represents the sum of BDI and all taxes (it's the difference between total final and direct costs)
     const totalCharges = useMemo(() => totalGeneral - totalDirect, [totalGeneral, totalDirect]);
 
     return {
@@ -97,10 +94,8 @@ const useWorkCalculations = (
     };
 };
 
-// Hook genérico para operações CRUD
 const useItemManager = <T extends { id: string; work_id?: string }>(
     storageKey: string,
-    items: T[],
     setItems: React.Dispatch<React.SetStateAction<T[]>>,
     currentWorkId?: string
 ) => {
@@ -112,30 +107,27 @@ const useItemManager = <T extends { id: string; work_id?: string }>(
             id: db.generateId(storageKey.split('_').pop()?.toUpperCase() || 'ITEM'),
             work_id: currentWorkId
         } as T;
+
         setItems(prev => [...prev, item]);
         return item;
     }, [currentWorkId, setItems, storageKey]);
 
     const updateItem = useCallback((id: string, updates: Partial<T>) => {
-        setItems(prev => prev.map(item =>
-            item.id === id ? { ...item, ...updates } : item
-        ));
+        setItems(prev => prev.map(item => item.id === id ? { ...item, ...updates } : item));
     }, [setItems]);
 
     const deleteItem = useCallback(async (id: string, confirmMessage: string) => {
         if (!confirm(confirmMessage)) return false;
         setItems(prev => prev.filter(item => item.id !== id));
         await db.remove(storageKey, id);
-        notify("Item removido com sucesso", 'success');
+        notify('Item removido com sucesso', 'success');
         return true;
     }, [storageKey, setItems, notify]);
 
     const deleteMultiple = useCallback(async (ids: string[], itemName: string) => {
         if (!confirm(`Excluir ${ids.length} ${itemName}(s) selecionado(s)?`)) return false;
         setItems(prev => prev.filter(item => !ids.includes(item.id)));
-        for (const id of ids) {
-            await db.remove(storageKey, id);
-        }
+        await Promise.all(ids.map(id => db.remove(storageKey, id)));
         notify(`${ids.length} ${itemName}(s) removidos`, 'success');
         return true;
     }, [storageKey, setItems, notify]);
@@ -146,14 +138,19 @@ const useItemManager = <T extends { id: string; work_id?: string }>(
         const all = db.load(storageKey, []);
         const others = all.filter((i: any) => i.work_id !== currentWorkId);
         await db.save(storageKey, others);
-        notify("Todos os itens removidos", 'success');
+        notify('Todos os itens removidos', 'success');
         return true;
     }, [storageKey, currentWorkId, setItems, notify]);
 
-    return useMemo(() => ({ addItem, updateItem, deleteItem, deleteMultiple, clearAll }), [addItem, updateItem, deleteItem, deleteMultiple, clearAll]);
+    return useMemo(() => ({
+        addItem,
+        updateItem,
+        deleteItem,
+        deleteMultiple,
+        clearAll
+    }), [addItem, updateItem, deleteItem, deleteMultiple, clearAll]);
 };
 
-// Hook para gerenciar estado de edição
 const useEditState = <T extends { id: string }>() => {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editData, setEditData] = useState<Partial<T>>({});
@@ -175,25 +172,20 @@ const useEditState = <T extends { id: string }>() => {
     return { editingId, editData, startEditing, updateField, stopEditing };
 };
 
-// Hook para seleção múltipla
 const useMultiSelect = <T extends { id: string }>() => {
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
     const toggleSelect = useCallback((id: string) => {
-        setSelectedIds(prev =>
-            prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
-        );
+        setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
     }, []);
 
     const toggleAll = useCallback((items: T[]) => {
-        setSelectedIds(prev =>
-            prev.length === items.length ? [] : items.map(i => i.id)
-        );
+        setSelectedIds(prev => prev.length === items.length ? [] : items.map(i => i.id));
     }, []);
 
     const clearSelection = useCallback(() => setSelectedIds([]), []);
 
-    return { selectedIds, toggleSelect, toggleAll, clearSelection, setSelectedIds };
+    return { selectedIds, toggleSelect, toggleAll, clearSelection };
 };
 
 // ==================== COMPONENTES REUTILIZÁVEIS ====================
@@ -210,7 +202,6 @@ interface EditableRowProps<T> {
     renderView: (item: T) => React.ReactNode;
     renderEdit: (editData: Partial<T>, onUpdateField: any) => React.ReactNode;
     className?: string;
-    key?: React.Key;
 }
 
 function EditableRow<T extends { id: string }>({
@@ -224,7 +215,7 @@ function EditableRow<T extends { id: string }>({
     onDelete,
     renderView,
     renderEdit,
-    className = ""
+    className = ''
 }: EditableRowProps<T>) {
     return (
         <div className={`p-3 rounded-lg border transition-all group ${className}`}>
@@ -271,8 +262,7 @@ const SelectionBar: React.FC<SelectionBarProps> = ({
     total,
     onToggleAll,
     onDeleteSelected,
-    onClearAll,
-    itemName
+    onClearAll
 }) => (
     <div className="flex items-center justify-between bg-white dark:bg-slate-900/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800 mb-4 shadow-sm">
         <div className="flex items-center gap-3">
@@ -307,7 +297,7 @@ const SelectionBar: React.FC<SelectionBarProps> = ({
 
 // ==================== COMPONENTE PRINCIPAL ====================
 
-const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) => {
+const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId }) => {
     const [works, setWorks] = useState<WorkHeader[]>([]);
     const [activeWorkId, setActiveWorkId] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
@@ -323,16 +313,16 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
     const [showPreview, setShowPreview] = useState(false);
     const [previewContent, setPreviewContent] = useState({ title: '', html: '', filename: '' });
 
-    // States for "Add Item" forms (Point 3)
     const [newMaterial, setNewMaterial] = useState({ name: '', qty: '', unit: 'un', cost: '' });
     const [newLabor, setNewLabor] = useState({ role: '', type: 'Diária', qty: '', unit: 'un', cost: '' });
     const [newIndirect, setNewIndirect] = useState({ name: '', value: '' });
 
     const { notify } = useNotify();
-    const creationAttemptedRef = useRef<{ [key: string]: boolean }>({});
+    const creationAttemptedRef = useRef<Record<string, boolean>>({});
+    const savingRef = useRef(false);
 
-    // Hooks personalizados
     const calculations = useWorkCalculations(services, materials, labor, indirects, taxes);
+
     const serviceEdit = useEditState<WorkService>();
     const materialEdit = useEditState<WorkMaterial>();
     const laborEdit = useEditState<WorkLabor>();
@@ -342,16 +332,22 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
     const laborSelect = useMultiSelect<WorkLabor>();
     const indirectSelect = useMultiSelect<WorkIndirect>();
 
-    const materialManager = useItemManager('serviflow_work_materials', materials, setMaterials, currentWork?.id);
-    const laborManager = useItemManager('serviflow_work_labor', labor, setLabor, currentWork?.id);
-    const indirectManager = useItemManager('serviflow_work_indirects', indirects, setIndirects, currentWork?.id);
-    const serviceManager = useItemManager('serviflow_work_services', services, setServices, currentWork?.id);
-    const taxManager = useItemManager('serviflow_work_taxes', taxes, setTaxes, currentWork?.id);
+    const materialManager = useItemManager<WorkMaterial>('serviflow_work_materials', setMaterials, currentWork?.id);
+    const laborManager = useItemManager<WorkLabor>('serviflow_work_labor', setLabor, currentWork?.id);
+    const indirectManager = useItemManager<WorkIndirect>('serviflow_work_indirects', setIndirects, currentWork?.id);
+    const serviceManager = useItemManager<WorkService>('serviflow_work_services', setServices, currentWork?.id);
 
-    // Funções principais
     const loadWorks = useCallback(async () => {
         const localWorks = db.load('serviflow_works', []) as WorkHeader[];
         setWorks(localWorks);
+    }, []);
+
+    const clearCurrentLists = useCallback(() => {
+        setServices([]);
+        setMaterials([]);
+        setLabor([]);
+        setIndirects([]);
+        setTaxes([]);
     }, []);
 
     const loadWorkDetails = useCallback((workId: string) => {
@@ -362,11 +358,155 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         setTaxes(db.load('serviflow_work_taxes', []).filter((t: WorkTax) => t.work_id === workId));
     }, []);
 
+    const importPlanItems = useCallback(async (planId: string, workId: string) => {
+        let importedCount = 0;
+
+        const planServices = db.load('serviflow_plan_services', []).filter((s: PlannedService) => s.plan_id === planId);
+        const existingServices = db.load('serviflow_work_services', []).filter((s: WorkService) => s.work_id === workId);
+        const existingIds = new Set(existingServices.map(s => s.plan_service_id));
+
+        const newServices = planServices
+            .filter(s => !existingIds.has(s.id))
+            .map(s => ({
+                id: db.generateId('WSVC'),
+                work_id: workId,
+                plan_service_id: s.id,
+                description: s.description,
+                unit: s.unit,
+                quantity: s.quantity || 0,
+                unit_labor_cost: s.unit_labor_cost || 0,
+                unit_material_cost: s.unit_material_cost || 0,
+                unit_indirect_cost: s.unit_indirect_cost || 0,
+                total_cost: (s.quantity || 0) * (
+                    (s.unit_labor_cost || 0) +
+                    (s.unit_material_cost || 0) +
+                    (s.unit_indirect_cost || 0)
+                ),
+                status: 'Pendente' as const
+            }));
+
+        if (newServices.length > 0) {
+            await db.save('serviflow_work_services', [...existingServices, ...newServices], newServices);
+            importedCount += newServices.length;
+        }
+
+        const importCategory = async (
+            planKey: string,
+            workKey: string,
+            planFilter: (i: any) => boolean,
+            mapFn: (i: any) => any
+        ) => {
+            const planItems = db.load(planKey, []).filter(planFilter);
+            const existingItems = db.load(workKey, []).filter((i: any) => i.work_id === workId);
+            const existingNames = new Set(existingItems.map((i: any) => i.material_name || i.role || i.name));
+
+            const newItems = planItems
+                .filter(i => !existingNames.has(i.material_name || i.role || i.name))
+                .map(mapFn);
+
+            if (newItems.length > 0) {
+                await db.save(workKey, [...existingItems, ...newItems], newItems);
+                importedCount += newItems.length;
+            }
+        };
+
+        await importCategory(
+            'serviflow_plan_materials',
+            'serviflow_work_materials',
+            (m) => m.plan_id === planId,
+            (m) => ({
+                id: db.generateId('WMAT'),
+                work_id: workId,
+                material_name: m.material_name,
+                unit: m.unit,
+                quantity: m.quantity || 0,
+                unit_cost: m.unit_cost || 0,
+                total_cost: m.total_cost || 0
+            })
+        );
+
+        await importCategory(
+            'serviflow_plan_labor',
+            'serviflow_work_labor',
+            (l) => l.plan_id === planId,
+            (l) => ({
+                id: db.generateId('WMO'),
+                work_id: workId,
+                role: l.role,
+                cost_type: l.cost_type,
+                unit: l.unit,
+                quantity: l.quantity || 0,
+                unit_cost: l.unit_cost || 0,
+                total_cost: l.total_cost || 0
+            })
+        );
+
+        await importCategory(
+            'serviflow_plan_indirects',
+            'serviflow_work_indirects',
+            (i) => i.plan_id === planId,
+            (i) => ({
+                id: db.generateId('WIND'),
+                work_id: workId,
+                name: i.name,
+                value: i.value || 0
+            })
+        );
+
+        const planTaxes = db.load('serviflow_plan_taxes', []).filter((t: any) => t.plan_id === planId);
+        const existingTaxes = db.load('serviflow_work_taxes', []).filter((t: any) => t.work_id === workId);
+        const existingTaxNames = new Set(existingTaxes.map((t: any) => t.name));
+
+        const newTaxes = planTaxes
+            .filter((t: any) => !existingTaxNames.has(t.name))
+            .map((t: any) => ({
+                id: db.generateId('WTAX'),
+                work_id: workId,
+                name: t.name,
+                rate: t.rate || 0,
+                value: t.value || 0
+            }));
+
+        if (newTaxes.length > 0) {
+            await db.save('serviflow_work_taxes', [...existingTaxes, ...newTaxes], newTaxes);
+            importedCount += newTaxes.length;
+        }
+
+        if (importedCount > 0) {
+            notify(`${importedCount} novos itens sincronizados!`, 'success');
+            loadWorkDetails(workId);
+        }
+    }, [loadWorkDetails, notify]);
+
+    const createWorkFromPlan = useCallback(async (plan: any) => {
+        const newWorkId = db.generateId('OBRA');
+
+        const work: WorkHeader = {
+            id: newWorkId,
+            plan_id: plan.id,
+            name: plan.name,
+            client_id: plan.client_id,
+            address: plan.address,
+            type: plan.type,
+            status: 'Em Andamento',
+            start_date: new Date().toISOString()
+        };
+
+        const newWorks = [...db.load('serviflow_works', []), work];
+        await db.save('serviflow_works', newWorks, work);
+        setWorks(newWorks);
+
+        await importPlanItems(plan.id, newWorkId);
+
+        return work;
+    }, [importPlanItems]);
+
     const handleEmbeddedPlan = useCallback(async (planId: string) => {
         let work = works.find(w => w.plan_id === planId);
 
         if (!work && !creationAttemptedRef.current[planId]) {
             creationAttemptedRef.current[planId] = true;
+
             const localWorks = db.load('serviflow_works', []) as WorkHeader[];
             work = localWorks.find(w => w.plan_id === planId);
 
@@ -384,9 +524,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             setCurrentWork(work);
             loadWorkDetails(work.id);
         }
-    }, [activeWorkId, loadWorkDetails, works]);
+    }, [activeWorkId, createWorkFromPlan, loadWorkDetails, works]);
 
-    // Effects
     useEffect(() => {
         loadWorks();
         const storedCompany = db.load('serviflow_company', {});
@@ -404,157 +543,36 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             loadWorks();
             if (activeWorkId) loadWorkDetails(activeWorkId);
         };
+
         window.addEventListener('db-sync-complete', handleSync);
         return () => window.removeEventListener('db-sync-complete', handleSync);
     }, [activeWorkId, loadWorkDetails, loadWorks]);
 
-    const createWorkFromPlan = async (plan: any) => {
-        const newWorkId = db.generateId('OBRA');
-        const work: WorkHeader = {
-            id: newWorkId,
-            plan_id: plan.id,
-            name: plan.name,
-            client_id: plan.client_id,
-            address: plan.address,
-            type: plan.type,
-            status: 'Em Andamento',
-            start_date: new Date().toISOString()
-        };
+    const persistWork = useCallback(async (showToast = false) => {
+        if (!currentWork || savingRef.current) return;
 
-        await importPlanItems(plan.id, newWorkId);
-
-        const newWorks = [...db.load('serviflow_works', []), work];
-        db.save('serviflow_works', newWorks, work);
-        setWorks(newWorks);
-
-        return work;
-    };
-
-    const importPlanItems = async (planId: string, workId: string) => {
-        let importedCount = 0;
-
-        // Services
-        const planServices = db.load('serviflow_plan_services', []).filter((s: PlannedService) => s.plan_id === planId);
-        const existingServices = db.load('serviflow_work_services', []).filter((s: WorkService) => s.work_id === workId);
-        const existingIds = new Set(existingServices.map(s => s.plan_service_id));
-
-        const newServices = planServices
-            .filter(s => !existingIds.has(s.id))
-            .map(s => ({
-                id: db.generateId('WSVC'),
-                work_id: workId,
-                plan_service_id: s.id,
-                description: s.description,
-                unit: s.unit,
-                quantity: s.quantity || 0,
-                unit_labor_cost: s.unit_labor_cost || 0,
-                unit_material_cost: s.unit_material_cost || 0,
-                unit_indirect_cost: s.unit_indirect_cost || 0,
-                total_cost: s.total_cost || 0,
-                status: 'Pendente' as const
-            }));
-
-        if (newServices.length > 0) {
-            await db.save('serviflow_work_services', [...existingServices, ...newServices], newServices);
-            importedCount += newServices.length;
-        }
-
-        const importCategory = async (planKey: string, workKey: string, planFilter: (i: any) => boolean, mapFn: (i: any) => any) => {
-            const planItems = db.load(planKey, []).filter(planFilter);
-            const existingItems = db.load(workKey, []).filter((i: any) => i.work_id === workId);
-            const existingNames = new Set(existingItems.map((i: any) => i.material_name || i.role || i.name));
-
-            const newItems = planItems
-                .filter(i => !existingNames.has(i.material_name || i.role || i.name))
-                .map(mapFn);
-
-            if (newItems.length > 0) {
-                await db.save(workKey, [...existingItems, ...newItems], newItems);
-                importedCount += newItems.length;
-            }
-        };
-
-        // Materials
-        await importCategory('serviflow_plan_materials', 'serviflow_work_materials', (m) => m.plan_id === planId, (m) => ({
-            id: db.generateId('WMAT'),
-            work_id: workId,
-            material_name: m.material_name,
-            unit: m.unit,
-            quantity: m.quantity || 0,
-            unit_cost: m.unit_cost || 0,
-            total_cost: m.total_cost || 0
-        }));
-
-        // Labor
-        await importCategory('serviflow_plan_labor', 'serviflow_work_labor', (l) => l.plan_id === planId, (l) => ({
-            id: db.generateId('WMO'),
-            work_id: workId,
-            role: l.role,
-            cost_type: l.cost_type,
-            unit: l.unit,
-            quantity: l.quantity || 0,
-            unit_cost: l.unit_cost || 0,
-            total_cost: l.total_cost || 0
-        }));
-
-        // Indirects
-        await importCategory('serviflow_plan_indirects', 'serviflow_work_indirects', (i) => i.plan_id === planId, (i) => ({
-            id: db.generateId('WIND'),
-            work_id: workId,
-            name: i.name,
-            value: i.value || 0
-        }));
-
-        // Taxes
-        const planTaxes = db.load('serviflow_plan_taxes', []).filter((t: any) => t.plan_id === planId);
-        const existingTaxes = db.load('serviflow_work_taxes', []).filter((t: any) => t.work_id === workId);
-        const existingTaxNames = new Set(existingTaxes.map((t: any) => t.name));
-        const newTaxes = planTaxes
-            .filter((t: any) => !existingTaxNames.has(t.name))
-            .map((t: any) => ({
-                id: db.generateId('WTAX'),
-                work_id: workId,
-                name: t.name,
-                rate: t.rate || 0,
-                value: t.value || 0
-            }));
-
-        if (newTaxes.length > 0) {
-            await db.save('serviflow_work_taxes', [...existingTaxes, ...newTaxes], newTaxes);
-            importedCount += newTaxes.length;
-        }
-
-        if (importedCount > 0) {
-            notify(`${importedCount} novos itens sincronizados!`, "success");
-            loadWorkDetails(workId);
-        }
-    };
-
-    const handleSave = async () => {
-        if (!currentWork) return;
+        savingRef.current = true;
         setLoading(true);
 
         try {
-            const updatedWork = {
+            const updatedWork: WorkHeader = {
                 ...currentWork,
                 total_real_cost: calculations.totalGeneral,
                 total_material_cost: calculations.totalMaterial
             };
 
             const currentLocalWorks = db.load('serviflow_works', []) as WorkHeader[];
-            const updatedWorks = currentLocalWorks.map(w => w.id === currentWork.id ? updatedWork : w);
+            const exists = currentLocalWorks.some(w => w.id === currentWork.id);
 
-            if (!currentLocalWorks.find(w => w.id === currentWork.id)) {
-                updatedWorks.unshift(updatedWork);
-            }
+            const updatedWorks = exists
+                ? currentLocalWorks.map(w => w.id === currentWork.id ? updatedWork : w)
+                : [updatedWork, ...currentLocalWorks];
 
             await db.save('serviflow_works', updatedWorks, updatedWork);
 
-            // Save all items categories
             const saveItems = async (key: string, items: any[]) => {
                 const all = db.load(key, []);
                 const others = all.filter((i: any) => i.work_id !== currentWork.id);
-                // Ensure correct work_id assignment before saving
                 const currentItems = items.map(i => ({ ...i, work_id: currentWork.id }));
                 await db.save(key, [...others, ...currentItems], currentItems);
             };
@@ -568,20 +586,75 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             ]);
 
             setWorks(updatedWorks);
-            notify("Obra atualizada com sucesso!", "success");
+
+            if (showToast) {
+                notify('Obra atualizada com sucesso!', 'success');
+            }
         } catch (error) {
-            console.error("Erro ao salvar obra:", error);
-            notify("Erro ao salvar dados.", "error");
+            console.error('Erro ao salvar obra:', error);
+            if (showToast) {
+                notify('Erro ao salvar dados.', 'error');
+            }
+            throw error;
         } finally {
+            savingRef.current = false;
             setLoading(false);
         }
-    };
+    }, [
+        currentWork,
+        services,
+        materials,
+        labor,
+        indirects,
+        taxes,
+        calculations.totalGeneral,
+        calculations.totalMaterial,
+        notify
+    ]);
 
-    const handleDuplicateWork = async (id: string) => {
+    const handleManualSave = useCallback(async () => {
+        await persistWork(true);
+    }, [persistWork]);
+
+    const handleAutoSave = useCallback(async (_payload: any) => {
+        await persistWork(false);
+    }, [persistWork]);
+
+    const autoSavePayload = useMemo(() => ({
+        currentWork,
+        services,
+        materials,
+        labor,
+        indirects,
+        taxes
+    }), [currentWork, services, materials, labor, indirects, taxes]);
+
+    const handleCreateNewWork = useCallback(async () => {
+        const newWork: WorkHeader = {
+            id: db.generateId('OBRA'),
+            name: 'Nova Obra',
+            client_id: '',
+            address: '',
+            type: 'Reforma',
+            status: 'Em Andamento',
+            start_date: new Date().toISOString()
+        };
+
+        const updatedWorks = [newWork, ...(db.load('serviflow_works', []) as WorkHeader[])];
+        await db.save('serviflow_works', updatedWorks, newWork);
+
+        setWorks(updatedWorks);
+        setActiveWorkId(newWork.id);
+        setCurrentWork(newWork);
+        clearCurrentLists();
+    }, [clearCurrentLists]);
+
+    const handleDuplicateWork = useCallback(async (id: string) => {
         if (!confirm('Deseja criar uma cópia desta obra?')) return;
 
         try {
             setLoading(true);
+
             const localWorks = db.load('serviflow_works', []) as WorkHeader[];
             const sourceWork = localWorks.find(w => w.id === id);
             if (!sourceWork) return;
@@ -594,7 +667,6 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                 start_date: new Date().toISOString()
             };
 
-            // Duplicate all items by loading directly from DB for the specific work
             const duplicateItems = async (key: string, suffix: string) => {
                 const sourceItems = db.load(key, []).filter((i: any) => i.work_id === id);
                 const newItems = sourceItems.map((i: any) => ({
@@ -617,20 +689,21 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             const updatedWorks = [newWork, ...localWorks];
             await db.save('serviflow_works', updatedWorks, newWork);
             setWorks(updatedWorks);
-            notify("Obra duplicada com sucesso!", "success");
+            notify('Obra duplicada com sucesso!', 'success');
         } catch (error) {
             console.error(error);
-            notify("Erro ao duplicar obra.", "error");
+            notify('Erro ao duplicar obra.', 'error');
         } finally {
             setLoading(false);
         }
-    };
+    }, [notify]);
 
-    const handleDeleteWork = async (id: string) => {
+    const handleDeleteWork = useCallback(async (id: string) => {
         if (!confirm('Excluir PERMANENTEMENTE esta obra e todos os seus dados?')) return;
 
         try {
             setLoading(true);
+
             await (db as any).deleteByCondition('serviflow_works', 'id', id);
             await (db as any).deleteByCondition('serviflow_work_services', 'work_id', id);
             await (db as any).deleteByCondition('serviflow_work_materials', 'work_id', id);
@@ -639,15 +712,67 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             await (db as any).deleteByCondition('serviflow_work_taxes', 'work_id', id);
 
             setWorks(prev => prev.filter(w => w.id !== id));
-            notify("Obra excluída com sucesso.", "success");
+
+            if (activeWorkId === id) {
+                setActiveWorkId(null);
+                setCurrentWork(null);
+                clearCurrentLists();
+            }
+
+            notify('Obra excluída com sucesso.', 'success');
         } catch (error) {
-            notify("Erro ao excluir obra.", "error");
+            notify('Erro ao excluir obra.', 'error');
         } finally {
             setLoading(false);
         }
-    };
+    }, [activeWorkId, clearCurrentLists, notify]);
 
-    // Render helpers
+    const generateMaterialsReportHtml = useCallback((): string => {
+        if (!currentWork || materials.length === 0) return '';
+
+        return buildExecutionReportHtml(
+            currentWork,
+            customers,
+            [],
+            materials,
+            [],
+            [],
+            [],
+            {
+                totalMaterial: calculations.totalMaterial,
+                totalLabor: 0,
+                totalIndirect: 0,
+                totalTax: 0,
+                totalGeneral: calculations.totalMaterial
+            },
+            company,
+            EXECUTION_THEME
+        );
+    }, [currentWork, materials, customers, calculations.totalMaterial, company]);
+
+    const generateFullReportHtml = useCallback((): string => {
+        if (!currentWork) return '';
+
+        return buildExecutionReportHtml(
+            currentWork,
+            customers,
+            services,
+            materials,
+            labor,
+            indirects,
+            taxes,
+            {
+                totalMaterial: calculations.totalMaterial,
+                totalLabor: calculations.totalLabor,
+                totalIndirect: calculations.totalIndirect,
+                totalTax: calculations.totalTaxes,
+                totalGeneral: calculations.totalGeneral
+            },
+            company,
+            EXECUTION_THEME
+        );
+    }, [currentWork, customers, services, materials, labor, indirects, taxes, calculations, company]);
+
     const renderMaterialRow = (material: WorkMaterial) => (
         <EditableRow
             key={material.id}
@@ -659,10 +784,12 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             onSave={() => {
                 const qty = Number(materialEdit.editData.quantity || 0);
                 const unitCost = Number(materialEdit.editData.unit_cost || 0);
+
                 materialManager.updateItem(material.id, {
                     ...materialEdit.editData,
                     total_cost: qty * unitCost
                 });
+
                 materialEdit.stopEditing();
             }}
             onCancel={materialEdit.stopEditing}
@@ -696,9 +823,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         <input
                             type="text"
                             value={data.material_name || ''}
-                            onChange={e => update('material_name', e.target.value)}
-                            className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900/50 outline-none"
-                            placeholder="Material"
+                            onChange={e => update('material_name', e.target.value as any)}
+                            className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100"
                         />
                     </div>
                     <div className="md:col-span-1">
@@ -706,9 +832,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         <input
                             type="number"
                             value={data.quantity || 0}
-                            onChange={e => update('quantity', parseFloat(e.target.value) || 0)}
-                            className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900/50 outline-none"
-                            placeholder="Qtd"
+                            onChange={e => update('quantity', (parseFloat(e.target.value) || 0) as any)}
+                            className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100"
                         />
                     </div>
                     <div className="md:col-span-1">
@@ -716,9 +841,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         <input
                             type="text"
                             value={data.unit || ''}
-                            onChange={e => update('unit', e.target.value)}
-                            className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900/50 outline-none"
-                            placeholder="Un"
+                            onChange={e => update('unit', e.target.value as any)}
+                            className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100"
                         />
                     </div>
                     <div className="md:col-span-1">
@@ -726,9 +850,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         <input
                             type="number"
                             value={data.unit_cost || 0}
-                            onChange={e => update('unit_cost', parseFloat(e.target.value) || 0)}
-                            className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900/50 outline-none"
-                            placeholder="0.00"
+                            onChange={e => update('unit_cost', (parseFloat(e.target.value) || 0) as any)}
+                            className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100"
                         />
                     </div>
                 </div>
@@ -747,10 +870,12 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             onSave={() => {
                 const qty = Number(laborEdit.editData.quantity || 0);
                 const unitCost = Number(laborEdit.editData.unit_cost || 0);
+
                 laborManager.updateItem(item.id, {
                     ...laborEdit.editData,
                     total_cost: qty * unitCost
                 });
+
                 laborEdit.stopEditing();
             }}
             onCancel={laborEdit.stopEditing}
@@ -778,48 +903,41 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                 </>
             )}
             renderEdit={(data, update) => (
-                <div className="grid grid-cols-1 md:grid-cols-6 gap-2 w-full">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-2 w-full">
                     <div className="md:col-span-2">
                         <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Função</label>
                         <input
                             type="text"
                             value={data.role || ''}
-                            onChange={e => update('role', e.target.value)}
-                            className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-amber-100 dark:focus:ring-amber-900/50 outline-none"
-                            placeholder="Função"
+                            onChange={e => update('role', e.target.value as any)}
+                            className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100"
                         />
                     </div>
-                    <div className="md:col-span-1">
-                        {/* Tipo removido */}
-                    </div>
-                    <div className="md:col-span-1">
+                    <div>
                         <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Qtd</label>
                         <input
                             type="number"
                             value={data.quantity || 0}
-                            onChange={e => update('quantity', parseFloat(e.target.value) || 0)}
-                            className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-amber-100 dark:focus:ring-amber-900/50 outline-none"
-                            placeholder="Qtd"
+                            onChange={e => update('quantity', (parseFloat(e.target.value) || 0) as any)}
+                            className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100"
                         />
                     </div>
-                    <div className="md:col-span-1">
+                    <div>
                         <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Un</label>
                         <input
                             type="text"
                             value={data.unit || ''}
-                            onChange={e => update('unit', e.target.value)}
-                            className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-amber-100 dark:focus:ring-amber-900/50 outline-none"
-                            placeholder="Un"
+                            onChange={e => update('unit', e.target.value as any)}
+                            className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100"
                         />
                     </div>
-                    <div className="md:col-span-1">
+                    <div>
                         <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Valor Unit.</label>
                         <input
                             type="number"
                             value={data.unit_cost || 0}
-                            onChange={e => update('unit_cost', parseFloat(e.target.value) || 0)}
-                            className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-amber-100 dark:focus:ring-amber-900/50 outline-none"
-                            placeholder="0.00"
+                            onChange={e => update('unit_cost', (parseFloat(e.target.value) || 0) as any)}
+                            className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100"
                         />
                     </div>
                 </div>
@@ -867,9 +985,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         <input
                             type="text"
                             value={data.name || ''}
-                            onChange={e => update('name', e.target.value)}
-                            className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 outline-none"
-                            placeholder="Descrição"
+                            onChange={e => update('name', e.target.value as any)}
+                            className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100"
                         />
                     </div>
                     <div className="md:col-span-2">
@@ -877,9 +994,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         <input
                             type="number"
                             value={data.value || 0}
-                            onChange={e => update('value', parseFloat(e.target.value) || 0)}
-                            className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-slate-100 dark:focus:ring-slate-800 outline-none"
-                            placeholder="Valor"
+                            onChange={e => update('value', (parseFloat(e.target.value) || 0) as any)}
+                            className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100"
                         />
                     </div>
                 </div>
@@ -887,37 +1003,26 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
         />
     );
 
-    // Renderização principal
     if (embeddedPlanId && !currentWork) {
         return <div className="p-10 text-center text-slate-500">Preparando ambiente de execução...</div>;
     }
 
     return (
         <div className="w-full max-w-6xl mx-auto p-6">
-            {(!activeWorkId && !embeddedPlanId) ? (
+            {!activeWorkId && !embeddedPlanId ? (
                 <div className="space-y-8">
                     <div className="flex justify-between items-center">
                         <div>
                             <h1 className="text-3xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-3">
                                 <HardHat className="text-green-600" size={36} /> Gestão de Obras
                             </h1>
-                            <p className="text-slate-500 font-medium tracking-tight">Gerencie a execução detalhada para seus projetos em andamento.</p>
+                            <p className="text-slate-500 font-medium tracking-tight">
+                                Gerencie a execução detalhada para seus projetos em andamento.
+                            </p>
                         </div>
+
                         <button
-                            onClick={() => {
-                                const newWork: WorkHeader = {
-                                    id: db.generateId('OBRA'),
-                                    name: 'Nova Obra',
-                                    client_id: '',
-                                    address: '',
-                                    type: 'Reforma',
-                                    status: 'Em Andamento',
-                                    start_date: new Date().toISOString()
-                                };
-                                setWorks(prev => [newWork, ...prev]);
-                                setActiveWorkId(newWork.id);
-                                setCurrentWork(newWork);
-                            }}
+                            onClick={handleCreateNewWork}
                             className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-green-200/50 flex items-center gap-2 transition-all transform hover:scale-105 active:scale-95"
                         >
                             <Plus size={20} /> Nova Obra
@@ -928,16 +1033,29 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         {works.map(work => (
                             <div
                                 key={work.id}
-                                onClick={() => { setActiveWorkId(work.id); setCurrentWork(work); loadWorkDetails(work.id); }}
+                                onClick={() => {
+                                    setActiveWorkId(work.id);
+                                    setCurrentWork(work);
+                                    loadWorkDetails(work.id);
+                                }}
                                 className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 hover:shadow-md transition-all cursor-pointer group relative overflow-hidden"
                             >
-                                <div className="absolute top-0 left-0 w-1.5 h-full bg-green-500 group-hover:bg-green-600 transition-colors"></div>
+                                <div className="absolute top-0 left-0 w-1.5 h-full bg-green-500 group-hover:bg-green-600 transition-colors" />
+
                                 <div className="flex justify-between items-start mb-4 pl-2">
                                     <div className="flex-1 min-w-0 pr-2">
-                                        <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg group-hover:text-green-700 transition-colors truncate uppercase">{work.name}</h3>
-                                        <p className="text-sm text-slate-500 font-medium truncate">{customers.find(c => c.id === work.client_id)?.name || 'Cliente não informado'}</p>
+                                        <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg group-hover:text-green-700 transition-colors truncate uppercase">
+                                            {work.name}
+                                        </h3>
+                                        <p className="text-sm text-slate-500 font-medium truncate">
+                                            {customers.find(c => c.id === work.client_id)?.name || 'Cliente não informado'}
+                                        </p>
                                     </div>
-                                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${work.status === 'Concluída' ? 'bg-emerald-100 text-emerald-700' : 'bg-green-100 text-green-700'}`}>
+
+                                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${work.status === 'Concluída'
+                                            ? 'bg-emerald-100 text-emerald-700'
+                                            : 'bg-green-100 text-green-700'
+                                        }`}>
                                         {work.status}
                                     </span>
                                 </div>
@@ -955,19 +1073,36 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
                                 <div className="pl-2 border-t border-slate-100 dark:border-slate-800 pt-4 flex justify-between items-center">
                                     <div className="flex gap-2">
-                                        <button onClick={(e) => { e.stopPropagation(); handleDuplicateWork(work.id); }} className="text-slate-400 hover:text-green-500 transition-colors" title="Duplicar">
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDuplicateWork(work.id);
+                                            }}
+                                            className="text-slate-400 hover:text-green-500 transition-colors"
+                                            title="Duplicar"
+                                        >
                                             <Copy size={16} />
                                         </button>
-                                        <button onClick={(e) => { e.stopPropagation(); handleDeleteWork(work.id); }} className="text-slate-400 hover:text-red-500 transition-colors" title="Excluir">
+
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDeleteWork(work.id);
+                                            }}
+                                            className="text-slate-400 hover:text-red-500 transition-colors"
+                                            title="Excluir"
+                                        >
                                             <Trash2 size={16} />
                                         </button>
                                     </div>
+
                                     <div className="flex items-center text-green-600 font-black text-xs group-hover:translate-x-1 transition-transform">
                                         EDITAR EXECUÇÃO <ArrowRight size={16} className="ml-1" />
                                     </div>
                                 </div>
                             </div>
                         ))}
+
                         {works.length === 0 && (
                             <div className="col-span-full py-20 text-center text-slate-400 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl">
                                 <Building2 size={48} className="mx-auto mb-4 opacity-10" />
@@ -978,15 +1113,23 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                 </div>
             ) : (
                 <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl h-[calc(100vh-140px)] flex flex-col border dark:border-slate-800 overflow-hidden">
-                    {/* Header */}
                     <div className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
                         <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-green-50 dark:bg-green-900/20">
                             <div className="flex items-center gap-4">
                                 {!embeddedPlanId && (
-                                    <button onClick={() => setActiveWorkId(null)} className="text-green-400 hover:text-green-600 p-1" type="button">
+                                    <button
+                                        onClick={() => {
+                                            setActiveWorkId(null);
+                                            setCurrentWork(null);
+                                            clearCurrentLists();
+                                        }}
+                                        className="text-green-400 hover:text-green-600 p-1"
+                                        type="button"
+                                    >
                                         <ArrowRight className="rotate-180" size={20} />
                                     </button>
                                 )}
+
                                 <div>
                                     <h2 className="text-xl font-bold text-green-900 dark:text-green-100 flex items-center gap-2">
                                         <HardHat className="text-green-600 dark:text-green-400" />
@@ -997,46 +1140,28 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     </p>
                                 </div>
                             </div>
+
                             <div className="flex gap-2">
                                 {currentWork?.plan_id && (
                                     <button
                                         type="button"
                                         onClick={() => importPlanItems(currentWork.plan_id!, currentWork.id)}
                                         className="whitespace-nowrap px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-slate-200 transition-all border border-slate-200 dark:border-slate-700"
-                                        title="Importar itens novos do planejamento"
                                     >
                                         <ArrowRight className="rotate-180" size={16} /> Importar Plan.
                                     </button>
                                 )}
-                                <button
-                                    type="button"
-                                    onClick={async () => {
-                                        notify('Sincronizando com a nuvem...', 'info');
-                                        try {
-                                            await db.forceUploadAll();
-                                            const syncRes = await db.syncFromCloud();
-                                            if (syncRes && !Object.keys(syncRes.errors || {}).length) {
-                                                notify('Sincronização concluída com sucesso!', 'success');
-                                                window.dispatchEvent(new CustomEvent('db-sync-complete'));
-                                            } else {
-                                                notify('Sincronização concluída com avisos.', 'warning');
-                                            }
-                                        } catch (err) {
-                                            notify('Erro ao sincronizar dados.', 'error');
-                                        }
-                                    }}
-                                    className="whitespace-nowrap px-4 py-2 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-blue-200 transition-all border border-blue-200 dark:border-blue-800"
-                                >
-                                    <ArrowRight className="rotate-180" size={16} /> Sincronizar Nuvem
-                                </button>
+
                                 <div className="flex items-center gap-2">
-                                    <AutoSave 
-                                        data={currentWork} 
-                                        onSave={handleSave} 
+                                    <AutoSave
+                                        id={`work-${currentWork?.id || 'new'}`}
+                                        data={autoSavePayload}
+                                        onSave={handleAutoSave}
                                     />
+
                                     <button
                                         type="button"
-                                        onClick={handleSave}
+                                        onClick={handleManualSave}
                                         disabled={loading}
                                         className="whitespace-nowrap px-4 py-2 bg-green-600 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-green-700 shadow-md shadow-green-900/20 disabled:opacity-50"
                                     >
@@ -1046,7 +1171,6 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                             </div>
                         </div>
 
-                        {/* Tabs */}
                         <div className="flex px-6 bg-white dark:bg-slate-900 overflow-x-auto no-scrollbar">
                             {[
                                 { id: 'dados', label: 'Dados da Obra', icon: FileText },
@@ -1058,7 +1182,10 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     key={tab.id}
                                     type="button"
                                     onClick={() => setActiveTab(tab.id as any)}
-                                    className={`px-6 py-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id ? 'border-green-600 text-green-600 dark:text-green-400' : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                                    className={`px-6 py-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id
+                                            ? 'border-green-600 text-green-600 dark:text-green-400'
+                                            : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                                        }`}
                                 >
                                     <tab.icon size={16} /> {tab.label}
                                 </button>
@@ -1066,270 +1193,30 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         </div>
                     </div>
 
-                        {/* Resource Sub-tabs */}
-                        {activeTab === 'recursos' && (
-                            <div className="px-6 pb-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
-                                <div className="flex gap-1.5 my-3 justify-center">
-                                    {[
-                                        { id: 'material', label: 'Materiais' },
-                                        { id: 'mo', label: 'Mão de Obra' },
-                                        { id: 'indireto', label: 'Indiretos' },
-                                        { id: 'impostos', label: 'Impostos' }
-                                    ].map(r => (
-                                        <button
-                                            key={r.id}
-                                            type="button"
-                                            onClick={() => setResourceTab(r.id as any)}
-                                            className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all uppercase tracking-wider ${resourceTab === r.id ? 'bg-green-600 dark:bg-green-600 text-white shadow-md' : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-green-50 dark:hover:bg-green-900/30'}`}
-                                        >
-                                            {r.label}
-                                        </button>
-                                    ))}
-                                </div>
-
-                                {/* Add forms - styled to match Planning */}
-                                {/* Materiais Form */}
-                                {resourceTab === 'material' && (
-                                    <div className="p-6 border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl shadow-sm mb-6">
-                                        <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
-                                            Adicionar Insumo/Material
-                                        </h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                                            <div className="md:col-span-5">
-                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Insumo/Material</label>
-                                                <input
-                                                    type="text"
-                                                    value={newMaterial.name}
-                                                    onChange={e => setNewMaterial({ ...newMaterial, name: e.target.value })}
-                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100"
-                                                    placeholder="Material"
-                                                />
-                                            </div>
-                                            <div className="md:col-span-2">
-                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Qtd</label>
-                                                <input
-                                                    type="number"
-                                                    value={newMaterial.qty}
-                                                    onChange={e => setNewMaterial({ ...newMaterial, qty: e.target.value })}
-                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100"
-                                                    placeholder="0"
-                                                />
-                                            </div>
-                                            <div className="md:col-span-1">
-                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Un</label>
-                                                <input
-                                                    type="text"
-                                                    value={newMaterial.unit}
-                                                    onChange={e => setNewMaterial({ ...newMaterial, unit: e.target.value })}
-                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100"
-                                                    placeholder="un"
-                                                />
-                                            </div>
-                                            <div className="md:col-span-2">
-                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Valor Unit.</label>
-                                                <input
-                                                    type="number"
-                                                    value={newMaterial.cost}
-                                                    onChange={e => setNewMaterial({ ...newMaterial, cost: e.target.value })}
-                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100"
-                                                    placeholder="0.00"
-                                                />
-                                            </div>
-                                            <div className="md:col-span-2">
-                                                <button
-                                                    onClick={() => {
-                                                        const { name, qty, unit, cost } = newMaterial;
-                                                        const nQty = parseFloat(qty) || 0;
-                                                        const nCost = parseFloat(cost) || 0;
-
-                                                        if (!name) return notify("Nome obrigatório", "error");
-
-                                                        materialManager.addItem({
-                                                            material_name: name.toUpperCase(),
-                                                            unit,
-                                                            quantity: nQty,
-                                                            unit_cost: nCost,
-                                                            total_cost: nQty * nCost
-                                                        } as any);
-
-                                                        setNewMaterial({ name: '', qty: '', unit: 'un', cost: '' });
-                                                    }}
-                                                    className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700 font-bold text-xs h-9 flex items-center justify-center gap-1 shadow-md shadow-green-950/20"
-                                                >
-                                                    <Plus size={14} /> ADICIONAR
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Mão de Obra Form */}
-                                {resourceTab === 'mo' && (
-                                    <div className="p-6 border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl shadow-sm mb-6">
-                                        <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
-                                            Adicionar Mão de Obra
-                                        </h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                                            <div className="md:col-span-4">
-                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Função/Cargo</label>
-                                                <input
-                                                    type="text"
-                                                    value={newLabor.role}
-                                                    onChange={e => setNewLabor({ ...newLabor, role: e.target.value })}
-                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100"
-                                                    placeholder="Ex: Pedreiro"
-                                                />
-                                            </div>
-                                            <div className="md:col-span-2">
-                                                {/* Tipo oculto */}
-                                            </div>
-                                            <div className="md:col-span-2">
-                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Qtd</label>
-                                                <input
-                                                    type="number"
-                                                    value={newLabor.qty}
-                                                    onChange={e => setNewLabor({ ...newLabor, qty: e.target.value })}
-                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100"
-                                                    placeholder="0"
-                                                />
-                                            </div>
-                                            <div className="md:col-span-1">
-                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Un</label>
-                                                <input
-                                                    type="text"
-                                                    value={newLabor.unit || ''}
-                                                    onChange={e => setNewLabor({ ...newLabor, unit: e.target.value })}
-                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100"
-                                                    placeholder="un"
-                                                />
-                                            </div>
-                                            <div className="md:col-span-1">
-                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Valor Unit.</label>
-                                                <input
-                                                    type="number"
-                                                    value={newLabor.cost}
-                                                    onChange={e => setNewLabor({ ...newLabor, cost: e.target.value })}
-                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100"
-                                                    placeholder="0.00"
-                                                />
-                                            </div>
-                                            <div className="md:col-span-2">
-                                                <button
-                                                    onClick={() => {
-                                                        const { role, type, qty, cost, unit } = newLabor;
-                                                        const nQty = parseFloat(qty) || 0;
-                                                        const nCost = parseFloat(cost) || 0;
-                                                        if (!role) return notify("Função obrigatória", "error");
-                                                        laborManager.addItem({ role: role.toUpperCase(), cost_type: type as any, quantity: nQty, unit: unit || 'un', unit_cost: nCost, total_cost: nQty * nCost } as any);
-                                                        setNewLabor({ role: '', type: 'Diária', qty: '', cost: '', unit: 'un' });
-                                                    }}
-                                                    className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700 font-bold text-xs h-9 flex items-center justify-center gap-1 shadow-md shadow-green-950/20"
-                                                >
-                                                    <Plus size={14} /> ADICIONAR
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Indiretos Form */}
-                                {resourceTab === 'indireto' && (
-                                    <div className="p-6 border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-xl shadow-sm mb-6">
-                                        <h3 className="font-bold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
-                                            Adicionar Custo Indireto
-                                        </h3>
-                                        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                                            <div className="md:col-span-8">
-                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Descrição</label>
-                                                <input
-                                                    type="text"
-                                                    value={newIndirect.name}
-                                                    onChange={e => setNewIndirect({ ...newIndirect, name: e.target.value })}
-                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100"
-                                                    placeholder="Ex: Container"
-                                                />
-                                            </div>
-                                            <div className="md:col-span-2">
-                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Valor</label>
-                                                <input
-                                                    type="number"
-                                                    value={newIndirect.value}
-                                                    onChange={e => setNewIndirect({ ...newIndirect, value: e.target.value })}
-                                                    className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-slate-900 dark:text-slate-100"
-                                                    placeholder="0.00"
-                                                />
-                                            </div>
-                                            <div className="md:col-span-2">
-                                                <button
-                                                    onClick={() => {
-                                                        const { name, value } = newIndirect;
-                                                        const nVal = parseFloat(value) || 0;
-                                                        if (!name) return notify("Descrição obrigatória", "error");
-                                                        indirectManager.addItem({ name: name.toUpperCase(), value: nVal } as any);
-                                                        setNewIndirect({ name: '', value: '' });
-                                                    }}
-                                                    className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700 font-bold text-xs h-9 flex items-center justify-center gap-1 shadow-md shadow-green-950/20"
-                                                >
-                                                    <Plus size={14} /> ADICIONAR
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Impostos Control */}
-                                {resourceTab === 'impostos' && (
-                                    <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Impostos e BDI</span>
-                                            <button
-                                                onClick={() => {
-                                                    const defaults = [
-                                                        { name: 'BDI', rate: 25 },
-                                                        { name: 'ISS', rate: 5 },
-                                                        { name: 'PIS', rate: 0.65 },
-                                                        { name: 'COFINS', rate: 3 },
-                                                        { name: 'INSS', rate: 3.5 },
-                                                    ];
-                                                    const newTaxes = [...taxes];
-                                                    defaults.forEach(def => {
-                                                        const idx = newTaxes.findIndex(t => t.name === def.name);
-                                                        if (idx !== -1) newTaxes[idx] = { ...newTaxes[idx], rate: def.rate };
-                                                        else newTaxes.push({ id: db.generateId('TAX'), work_id: currentWork?.id, name: def.name, rate: def.rate, value: 0 });
-                                                    });
-                                                    setTaxes(newTaxes);
-                                                    notify('Impostos padrão carregados!', 'success');
-                                                }}
-                                                className="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded hover:bg-green-100"
-                                            >
-                                                Carregar Padrão
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                    {/* Content Area */}
                     <div className="p-8 flex-1 bg-slate-50/50 dark:bg-slate-900/50 overflow-auto">
                         {activeTab === 'dados' && currentWork && (
-                            <div className="max-w-2xl mx-auto space-y-8 animate-in slide-in-from-bottom-4">
+                            <div className="max-w-2xl mx-auto space-y-8">
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="space-y-1.5">
-                                        <label className="block text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Nome da Obra</label>
+                                        <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">
+                                            Nome da Obra
+                                        </label>
                                         <input
                                             type="text"
                                             value={currentWork.name}
                                             onChange={e => setCurrentWork({ ...currentWork, name: e.target.value.toUpperCase() })}
-                                            className="w-full p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-green-500/20 dark:focus:ring-green-500/10 outline-none shadow-sm transition-all"
+                                            className="w-full p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-800 dark:text-slate-100"
                                         />
                                     </div>
+
                                     <div className="space-y-1.5">
-                                        <label className="block text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Status</label>
+                                        <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">
+                                            Status
+                                        </label>
                                         <select
                                             value={currentWork.status}
                                             onChange={e => setCurrentWork({ ...currentWork, status: e.target.value as any })}
-                                            className="w-full p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-800 dark:text-slate-100 outline-none shadow-sm cursor-pointer appearance-none transition-all focus:ring-2 focus:ring-green-500/20"
+                                            className="w-full p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-800 dark:text-slate-100"
                                         >
                                             <option value="Em Andamento">Em Andamento</option>
                                             <option value="Pausada">Pausada</option>
@@ -1337,81 +1224,36 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         </select>
                                     </div>
                                 </div>
+
                                 <div className="space-y-1.5">
-                                    <label className="block text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Cliente</label>
+                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">
+                                        Cliente
+                                    </label>
                                     <select
                                         value={currentWork.client_id}
                                         onChange={e => {
                                             const customer = customers.find(c => c.id === e.target.value);
                                             setCurrentWork({ ...currentWork, client_id: e.target.value, client_name: customer?.name });
                                         }}
-                                        className="w-full p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-800 dark:text-slate-100 outline-none shadow-sm cursor-pointer transition-all focus:ring-2 focus:ring-green-500/20"
+                                        className="w-full p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-800 dark:text-slate-100"
                                     >
                                         <option value="">Selecione...</option>
-                                        {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                        {customers.map(c => (
+                                            <option key={c.id} value={c.id}>{c.name}</option>
+                                        ))}
                                     </select>
                                 </div>
+
                                 <div className="space-y-1.5">
-                                    <label className="block text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Endereço da Obra</label>
+                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">
+                                        Endereço da Obra
+                                    </label>
                                     <input
                                         type="text"
                                         value={currentWork.address}
                                         onChange={e => setCurrentWork({ ...currentWork, address: e.target.value })}
-                                        className="w-full p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-800 dark:text-slate-100 outline-none shadow-sm transition-all focus:ring-2 focus:ring-green-500/20"
+                                        className="w-full p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-800 dark:text-slate-100"
                                     />
-                                </div>
-
-                                <div className="space-y-3 p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-sm">
-                                    <div className="flex justify-between items-center">
-                                        <div>
-                                            <label className="block text-[10px] font-black text-slate-700 dark:text-slate-200 uppercase tracking-widest">Imagem de Anexo (Opcional)</label>
-                                            <p className="text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase mt-0.5">Aparecerá no final do relatório PDF em uma nova página</p>
-                                        </div>
-                                        {currentWork.annex_image && (
-                                            <button
-                                                onClick={() => setCurrentWork({ ...currentWork, annex_image: undefined })}
-                                                className="text-[9px] font-black text-red-500 hover:text-red-600 uppercase tracking-widest"
-                                            >
-                                                Remover
-                                            </button>
-                                        )}
-                                    </div>
-
-                                    {!currentWork.annex_image ? (
-                                        <div className="relative group">
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={(e) => {
-                                                    const file = e.target.files?.[0];
-                                                    if (file) {
-                                                        const reader = new FileReader();
-                                                        reader.onloadend = () => {
-                                                            setCurrentWork({ ...currentWork, annex_image: reader.result as string });
-                                                        };
-                                                        reader.readAsDataURL(file);
-                                                    }
-                                                }}
-                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                            />
-                                            <div className="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl p-8 flex flex-col items-center justify-center gap-2 group-hover:border-green-400 dark:group-hover:border-green-500 transition-all bg-slate-50/50 dark:bg-slate-900/50">
-                                                <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center text-green-600 dark:text-green-400">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /><circle cx="9" cy="9" r="2" /><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></svg>
-                                                </div>
-                                                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest text-center">Clique para selecionar imagem <br /> ou arraste o arquivo aqui</span>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-inner bg-slate-100 dark:bg-slate-900 max-h-[250px] flex justify-center items-center">
-                                            <img src={currentWork.annex_image} className="max-w-full max-h-[250px] object-contain" alt="Anexo" />
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="p-6 bg-green-50/50 dark:bg-slate-800/50 rounded-3xl border border-green-100 dark:border-slate-700/50">
-                                    <p className="text-[10px] font-bold text-green-600 dark:text-slate-500 uppercase tracking-widest leading-relaxed">
-                                        Nota: Os dados preenchidos aqui são utilizados nos cabeçalhos de todos os relatórios e documentos gerados para esta obra.
-                                    </p>
                                 </div>
                             </div>
                         )}
@@ -1427,7 +1269,16 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         onStartEdit={() => serviceEdit.startEditing(service)}
                                         onUpdateField={serviceEdit.updateField}
                                         onSave={() => {
-                                            serviceManager.updateItem(service.id, serviceEdit.editData);
+                                            const qty = Number(serviceEdit.editData.quantity ?? service.quantity ?? 0);
+                                            const unitMaterial = Number(serviceEdit.editData.unit_material_cost ?? service.unit_material_cost ?? 0);
+                                            const unitLabor = Number(serviceEdit.editData.unit_labor_cost ?? service.unit_labor_cost ?? 0);
+                                            const unitIndirect = Number(serviceEdit.editData.unit_indirect_cost ?? service.unit_indirect_cost ?? 0);
+
+                                            serviceManager.updateItem(service.id, {
+                                                ...serviceEdit.editData,
+                                                total_cost: qty * (unitMaterial + unitLabor + unitIndirect)
+                                            });
+
                                             serviceEdit.stopEditing();
                                         }}
                                         onCancel={serviceEdit.stopEditing}
@@ -1438,7 +1289,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 <div className="grow">
                                                     <p className="font-bold text-slate-800 dark:text-slate-100 uppercase text-sm">{s.description}</p>
                                                     <p className="text-[10px] text-slate-500 uppercase">
-                                                        {s.quantity} {s.unit} - Mat: R$ {s.unit_material_cost.toFixed(2)} | MO: R$ {s.unit_labor_cost.toFixed(2)}
+                                                        {s.quantity} {s.unit} - Mat: R$ {s.unit_material_cost.toFixed(2)} | MO: R$ {s.unit_labor_cost.toFixed(2)} | Ind: R$ {s.unit_indirect_cost.toFixed(2)}
                                                     </p>
                                                 </div>
                                                 <div className="w-24 text-right mr-4 font-black text-slate-700 dark:text-slate-200">
@@ -1447,66 +1298,65 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             </>
                                         )}
                                         renderEdit={(data, update) => (
-                                            <div className="grid grid-cols-1 md:grid-cols-6 gap-2 w-full">
+                                            <div className="grid grid-cols-1 md:grid-cols-7 gap-2 w-full">
                                                 <div className="md:col-span-2">
                                                     <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Descrição</label>
                                                     <input
                                                         type="text"
                                                         value={data.description || ''}
-                                                        onChange={e => update('description', e.target.value)}
-                                                        className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900/50 outline-none"
-                                                        placeholder="Descrição"
+                                                        onChange={e => update('description', e.target.value as any)}
+                                                        className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100"
                                                     />
                                                 </div>
-                                                <div className="md:col-span-1">
+                                                <div>
                                                     <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Un</label>
                                                     <input
                                                         type="text"
                                                         value={data.unit || ''}
-                                                        onChange={e => update('unit', e.target.value)}
-                                                        className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900/50 outline-none"
-                                                        placeholder="Un"
+                                                        onChange={e => update('unit', e.target.value as any)}
+                                                        className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100"
                                                     />
                                                 </div>
-                                                <div className="md:col-span-1">
+                                                <div>
                                                     <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Qtd</label>
                                                     <input
                                                         type="number"
                                                         value={data.quantity ?? 0}
-                                                        onChange={e => update('quantity', parseFloat(e.target.value) || 0)}
-                                                        className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900/50 outline-none"
-                                                        placeholder="Qtd"
+                                                        onChange={e => update('quantity', (parseFloat(e.target.value) || 0) as any)}
+                                                        className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100"
                                                     />
                                                 </div>
-                                                <div className="md:col-span-1">
+                                                <div>
                                                     <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Mat</label>
                                                     <input
                                                         type="number"
                                                         value={data.unit_material_cost ?? 0}
-                                                        onChange={e => update('unit_material_cost', parseFloat(e.target.value) || 0)}
-                                                        className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900/50 outline-none"
-                                                        placeholder="Mat"
+                                                        onChange={e => update('unit_material_cost', (parseFloat(e.target.value) || 0) as any)}
+                                                        className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100"
                                                     />
                                                 </div>
-                                                <div className="md:col-span-1">
+                                                <div>
                                                     <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">MO</label>
                                                     <input
                                                         type="number"
                                                         value={data.unit_labor_cost ?? 0}
-                                                        onChange={e => update('unit_labor_cost', parseFloat(e.target.value) || 0)}
-                                                        className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900/50 outline-none"
-                                                        placeholder="MO"
+                                                        onChange={e => update('unit_labor_cost', (parseFloat(e.target.value) || 0) as any)}
+                                                        className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Ind</label>
+                                                    <input
+                                                        type="number"
+                                                        value={data.unit_indirect_cost ?? 0}
+                                                        onChange={e => update('unit_indirect_cost', (parseFloat(e.target.value) || 0) as any)}
+                                                        className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100"
                                                     />
                                                 </div>
                                             </div>
                                         )}
                                     />
                                 ))}
-                                {services.length === 0 && (
-                                    <div className="text-center py-10 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 animate-in fade-in duration-500">
-                                        <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Nenhum serviço lançado.</p>
-                                    </div>
-                                )}
                             </div>
                         )}
 
@@ -1519,7 +1369,6 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             {materials.length > 0 && (
                                                 <button
                                                     onClick={() => {
-                                                        // Preview materials report
                                                         const html = generateMaterialsReportHtml();
                                                         setPreviewContent({
                                                             title: `${currentWork?.id} - MATERIAIS - ${currentWork?.name}`,
@@ -1540,8 +1389,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 count={materialSelect.selectedIds.length}
                                                 total={materials.length}
                                                 onToggleAll={() => materialSelect.toggleAll(materials)}
-                                                onDeleteSelected={() => {
-                                                    materialManager.deleteMultiple(materialSelect.selectedIds, 'material');
+                                                onDeleteSelected={async () => {
+                                                    await materialManager.deleteMultiple(materialSelect.selectedIds, 'material');
                                                     materialSelect.clearSelection();
                                                 }}
                                                 onClearAll={() => materialManager.clearAll('Excluir TODOS os materiais?')}
@@ -1551,14 +1400,6 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
 
                                         <div className="space-y-2">
                                             {materials.map(renderMaterialRow)}
-                                            {materials.length > 0 && (
-                                                <div className="flex justify-end p-4 bg-green-50/50 dark:bg-green-900/10 rounded-xl border border-green-100 dark:border-green-900/30 mt-4">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-[10px] font-bold text-green-600 dark:text-green-400 uppercase tracking-widest">Total Materiais</span>
-                                                        <span className="text-xl font-black text-green-700 dark:text-green-300">R$ {calculations.totalMaterial.toFixed(2)}</span>
-                                                    </div>
-                                                </div>
-                                            )}
                                         </div>
                                     </div>
                                 )}
@@ -1571,24 +1412,17 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 count={laborSelect.selectedIds.length}
                                                 total={labor.length}
                                                 onToggleAll={() => laborSelect.toggleAll(labor)}
-                                                onDeleteSelected={() => {
-                                                    laborManager.deleteMultiple(laborSelect.selectedIds, 'mão de obra');
+                                                onDeleteSelected={async () => {
+                                                    await laborManager.deleteMultiple(laborSelect.selectedIds, 'mão de obra');
                                                     laborSelect.clearSelection();
                                                 }}
                                                 onClearAll={() => laborManager.clearAll('Excluir TODA a mão de obra?')}
                                                 itemName="mão de obra"
                                             />
                                         )}
+
                                         <div className="space-y-2">
                                             {labor.map(renderLaborRow)}
-                                            {labor.length > 0 && (
-                                                <div className="flex justify-end p-4 bg-amber-50/50 dark:bg-amber-900/10 rounded-xl border border-amber-100 dark:border-amber-900/30 mt-4">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest">Total Mão de Obra</span>
-                                                        <span className="text-xl font-black text-amber-700 dark:text-amber-300">R$ {calculations.totalLabor.toFixed(2)}</span>
-                                                    </div>
-                                                </div>
-                                            )}
                                         </div>
                                     </div>
                                 )}
@@ -1601,42 +1435,23 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                 count={indirectSelect.selectedIds.length}
                                                 total={indirects.length}
                                                 onToggleAll={() => indirectSelect.toggleAll(indirects)}
-                                                onDeleteSelected={() => {
-                                                    indirectManager.deleteMultiple(indirectSelect.selectedIds, 'custo indireto');
+                                                onDeleteSelected={async () => {
+                                                    await indirectManager.deleteMultiple(indirectSelect.selectedIds, 'custo indireto');
                                                     indirectSelect.clearSelection();
                                                 }}
                                                 onClearAll={() => indirectManager.clearAll('Excluir TODOS os custos indiretos?')}
                                                 itemName="custo indireto"
                                             />
                                         )}
+
                                         <div className="space-y-2">
                                             {indirects.map(renderIndirectRow)}
-                                            {indirects.length > 0 && (
-                                                <div className="flex justify-end p-4 bg-slate-50/50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-800 mt-4">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Total Indiretos</span>
-                                                        <span className="text-xl font-black text-slate-700 dark:text-slate-300">R$ {calculations.totalIndirect.toFixed(2)}</span>
-                                                    </div>
-                                                </div>
-                                            )}
                                         </div>
                                     </div>
                                 )}
 
                                 {resourceTab === 'impostos' && (
                                     <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
-                                        <div className="flex items-center gap-3 mb-6">
-                                            <div className="w-8 h-8 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
-                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
-                                                </svg>
-                                            </div>
-                                            <div>
-                                                <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg">Impostos e Taxas</h3>
-                                                <p className="text-slate-500 dark:text-slate-400 text-sm">Configure as alíquotas aplicáveis ao orçamento</p>
-                                            </div>
-                                        </div>
-
                                         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                                             {['BDI', 'ISS', 'PIS', 'COFINS', 'INSS'].map(name => {
                                                 const taxValue = name === 'BDI'
@@ -1644,27 +1459,45 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                                     : calculations.individualTaxValues.find(t => t.name === name)?.value || 0;
 
                                                 return (
-                                                    <div key={name} className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-700/50 hover:border-green-200 dark:hover:border-green-900/50 transition-colors">
-                                                        <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">{name} (%)</label>
+                                                    <div key={name} className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                                                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                                                            {name} (%)
+                                                        </label>
+
                                                         <div className="relative mb-2">
                                                             <input
                                                                 type="number"
                                                                 step="0.01"
-                                                                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-sm font-bold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-green-500/20 dark:focus:ring-green-500/10 transition-all pl-3 pr-8"
+                                                                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-sm font-bold text-slate-700 dark:text-slate-200 pr-8"
                                                                 value={taxes.find(t => t.name === name)?.rate || ''}
                                                                 onChange={(e) => {
                                                                     const val = parseFloat(e.target.value) || 0;
                                                                     const newTaxes = [...taxes];
                                                                     const idx = newTaxes.findIndex(t => t.name === name);
-                                                                    if (idx !== -1) newTaxes[idx] = { ...newTaxes[idx], rate: val };
-                                                                    else newTaxes.push({ id: db.generateId('TAX'), work_id: currentWork?.id, name, rate: val, value: 0 });
+
+                                                                    if (idx !== -1) {
+                                                                        newTaxes[idx] = { ...newTaxes[idx], rate: val };
+                                                                    } else {
+                                                                        newTaxes.push({
+                                                                            id: db.generateId('TAX'),
+                                                                            work_id: currentWork?.id,
+                                                                            name,
+                                                                            rate: val,
+                                                                            value: 0
+                                                                        });
+                                                                    }
+
                                                                     setTaxes(newTaxes);
                                                                 }}
                                                             />
-                                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 text-sm font-bold">%</span>
+                                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-bold">%</span>
                                                         </div>
+
                                                         <div className="text-[10px] font-black text-green-600 dark:text-green-400 text-right">
-                                                            R$ {taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                            R$ {taxValue.toLocaleString('pt-BR', {
+                                                                minimumFractionDigits: 2,
+                                                                maximumFractionDigits: 2
+                                                            })}
                                                         </div>
                                                     </div>
                                                 );
@@ -1676,42 +1509,24 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         )}
 
                         {activeTab === 'resumo' && (
-                            <div className="max-w-4xl mx-auto space-y-8 pb-12 animate-in slide-in-from-bottom-4">
+                            <div className="max-w-4xl mx-auto space-y-8 pb-12">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-                                    {(() => {
-                                        const cardStyles: Record<string, any> = {
-                                            emerald: 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/40',
-                                            amber: 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/40',
-                                            slate: 'bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800',
-                                            green: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/40',
-                                        };
-
-                                        return [
-                                            { label: 'Materiais', value: calculations.totalMaterial, icon: Truck, color: 'emerald', desc: 'Insumos e Materiais' },
-                                            { label: 'Mão de Obra', value: calculations.totalLabor, icon: HardHat, color: 'amber', desc: 'Equipes e Diárias' },
-                                            { label: 'Indiretos', value: calculations.totalIndirect, icon: Archive, color: 'slate', desc: 'Custos Adicionais' },
-                                            { label: 'Impostos', value: calculations.totalTaxes, icon: Percent, color: 'green', desc: 'Taxas e BDI' },
-                                        ].map((item) => {
-                                            const styles = cardStyles[item.color].split(' ');
-                                            const bgColor = styles[0] + ' ' + styles[1];
-                                            const borderColor = styles[2] + ' ' + styles[3];
-                                            const textColor = styles[4] + ' ' + styles[5];
-                                            const iconBg = styles[6] + ' ' + styles[7];
-
-                                            return (
-                                                <div key={item.label} className={`${bgColor} p-6 rounded-2xl border ${borderColor} shadow-sm transition-all hover:shadow-md hover:-translate-y-1 duration-300`}>
-                                                    <div className="flex justify-between items-start mb-2">
-                                                        <span className={`text-[10px] font-bold ${textColor} uppercase tracking-widest`}>{item.label}</span>
-                                                        <div className={`${iconBg} p-1.5 rounded-lg`}>
-                                                            <item.icon size={16} className={textColor} />
-                                                        </div>
-                                                    </div>
-                                                    <span className="text-2xl font-black text-slate-800 dark:text-slate-100 whitespace-nowrap">R$ {item.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                                    <p className={`text-[9px] ${textColor} opacity-60 mt-1 font-bold uppercase`}>{item.desc}</p>
-                                                </div>
-                                            );
-                                        });
-                                    })()}
+                                    {[
+                                        { label: 'Materiais', value: calculations.totalMaterial, icon: Truck },
+                                        { label: 'Mão de Obra', value: calculations.totalLabor, icon: HardHat },
+                                        { label: 'Indiretos', value: calculations.totalIndirect, icon: Archive },
+                                        { label: 'Impostos', value: calculations.totalTaxes, icon: Percent }
+                                    ].map((item) => (
+                                        <div key={item.label} className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{item.label}</span>
+                                                <item.icon size={16} className="text-slate-400" />
+                                            </div>
+                                            <span className="text-2xl font-black text-slate-800 dark:text-slate-100 whitespace-nowrap">
+                                                R$ {item.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                            </span>
+                                        </div>
+                                    ))}
                                 </div>
 
                                 <div className="flex justify-end gap-3">
@@ -1725,35 +1540,30 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             });
                                             setShowPreview(true);
                                         }}
-                                        className="relative overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 px-8 py-5 rounded-3xl flex items-center gap-6 hover:bg-slate-50 transition-all shadow-xl group hover:shadow-green-500/10 active:translate-y-1"
+                                        className="relative overflow-hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 px-8 py-5 rounded-3xl flex items-center gap-6 hover:bg-slate-50 transition-all shadow-xl"
                                     >
-                                        <div className="absolute top-0 left-0 w-1 h-full bg-green-600 group-hover:w-2 transition-all"></div>
-                                        <div className="bg-green-100 dark:bg-green-900/40 p-3 rounded-2xl group-hover:scale-110 transition-transform duration-500">
+                                        <div className="bg-green-100 dark:bg-green-900/40 p-3 rounded-2xl">
                                             <Eye size={28} className="text-green-600 dark:text-green-400" />
                                         </div>
                                         <div className="text-left">
-                                            <span className="block text-slate-800 dark:text-slate-100 font-black text-lg tracking-tight">Relatório Executivo</span>
-                                            <span className="text-[10px] text-slate-400 uppercase tracking-widest font-bold flex items-center gap-1.5">
-                                                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                                            <span className="block text-slate-800 dark:text-slate-100 font-black text-lg tracking-tight">
+                                                Relatório Executivo
+                                            </span>
+                                            <span className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">
                                                 Gerar PDF de Execução
                                             </span>
                                         </div>
                                     </button>
                                 </div>
 
-                                <div className="bg-slate-900 dark:bg-slate-950 p-8 rounded-3xl border border-white/10 flex flex-col md:flex-row justify-between items-center shadow-2xl relative overflow-hidden group">
-                                    <div className="absolute top-0 right-0 w-64 h-64 bg-green-500/10 rounded-full -mr-32 -mt-32 blur-3xl group-hover:bg-green-500/20 transition-all duration-700"></div>
-
+                                <div className="bg-slate-900 dark:bg-slate-950 p-8 rounded-3xl border border-white/10 flex flex-col md:flex-row justify-between items-center shadow-2xl">
                                     <div className="relative z-10 text-center md:text-left mb-6 md:mb-0">
                                         <p className="text-green-400 text-xs font-bold uppercase tracking-[0.3em] mb-2 flex items-center justify-center md:justify-start gap-2">
                                             <Calculator size={14} /> Custo Executado Total
                                         </p>
-                                        <div className="flex items-baseline gap-2">
-                                            <span className="text-4xl md:text-5xl font-black text-white tracking-tighter">
-                                                R$ {calculations.totalGeneral.toFixed(2)}
-                                            </span>
-                                        </div>
-                                        <p className="text-slate-500 text-[10px] mt-2 font-medium uppercase tracking-widest">Inclui todos os custos diretos, indiretos e impostos realizados</p>
+                                        <span className="text-4xl md:text-5xl font-black text-white tracking-tighter">
+                                            R$ {calculations.totalGeneral.toFixed(2)}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -1772,51 +1582,6 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             )}
         </div>
     );
-
-    // Funções de geração de relatórios
-    function generateMaterialsReportHtml(): string {
-        if (!currentWork || materials.length === 0) return '';
-        return buildExecutionReportHtml(
-            currentWork,
-            customers,
-            [],
-            materials,
-            [],
-            [],
-            [],
-            {
-                totalMaterial: calculations.totalMaterial,
-                totalLabor: 0,
-                totalIndirect: 0,
-                totalTax: 0,
-                totalGeneral: calculations.totalMaterial
-            },
-            company,
-            EXECUTION_THEME
-        );
-    }
-
-    function generateFullReportHtml(): string {
-        if (!currentWork) return '';
-        return buildExecutionReportHtml(
-            currentWork,
-            customers,
-            services,
-            materials,
-            labor,
-            indirects,
-            taxes,
-            {
-                totalMaterial: calculations.totalMaterial,
-                totalLabor: calculations.totalLabor,
-                totalIndirect: calculations.totalIndirect,
-                totalTax: calculations.totalTaxes,
-                totalGeneral: calculations.totalGeneral
-            },
-            company,
-            EXECUTION_THEME
-        );
-    }
 };
 
 export default WorksManager;

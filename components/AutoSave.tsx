@@ -2,20 +2,27 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Check, RefreshCw, AlertCircle } from 'lucide-react';
 import { useGlobalAutoSave } from './AutoSaveContext';
 
+type LocalAutoSaveStatus = 'idle' | 'saving' | 'saved' | 'error';
+
 interface AutoSaveProps<T> {
+  id: string;
   data: T;
   onSave: (data: T) => Promise<any>;
   delay?: number;
+  successDuration?: number;
 }
 
 export const AutoSave = <T,>({
+  id,
   data,
   onSave,
   delay = 2000,
+  successDuration = 3000,
 }: AutoSaveProps<T>) => {
-  const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [status, setStatus] = useState<LocalAutoSaveStatus>('idle');
   const [error, setError] = useState<string | null>(null);
-  const { setGlobalStatus } = useGlobalAutoSave();
+
+  const { beginSave, finishSave, failSave, clearSave } = useGlobalAutoSave();
 
   const firstRender = useRef(true);
   const isMounted = useRef(true);
@@ -34,8 +41,10 @@ export const AutoSave = <T,>({
       if (resetStatusTimer.current) {
         clearTimeout(resetStatusTimer.current);
       }
+
+      clearSave(id);
     };
-  }, []);
+  }, [id, clearSave]);
 
   useEffect(() => {
     if (firstRender.current) {
@@ -52,7 +61,6 @@ export const AutoSave = <T,>({
     }
 
     setStatus('idle');
-    setGlobalStatus('idle');
     setError(null);
 
     const currentVersion = ++saveVersion.current;
@@ -61,30 +69,32 @@ export const AutoSave = <T,>({
       if (!isMounted.current) return;
 
       setStatus('saving');
-      setGlobalStatus('saving');
       setError(null);
+      beginSave(id);
 
       try {
         await onSave(data);
 
-        // Só atualiza a UI se este for o save mais recente
         if (!isMounted.current || currentVersion !== saveVersion.current) return;
 
         setStatus('saved');
-        setGlobalStatus('saved');
+        finishSave(id);
 
         resetStatusTimer.current = setTimeout(() => {
           if (!isMounted.current || currentVersion !== saveVersion.current) return;
+
           setStatus('idle');
-          setGlobalStatus('idle');
-        }, 3000);
+          clearSave(id);
+        }, successDuration);
       } catch (err: any) {
         if (!isMounted.current || currentVersion !== saveVersion.current) return;
 
+        const message = err?.message || 'Erro ao sincronizar';
+
         console.error('AutoSave Error:', err);
         setStatus('error');
-        setGlobalStatus('error', err?.message || 'Erro ao sincronizar');
-        setError(err?.message || 'Erro ao sincronizar');
+        setError(message);
+        failSave(id, message);
       }
     }, delay);
 
@@ -93,7 +103,7 @@ export const AutoSave = <T,>({
         clearTimeout(debounceTimer.current);
       }
     };
-  }, [data, onSave, delay]);
+  }, [id, data, onSave, delay, successDuration, beginSave, finishSave, failSave, clearSave]);
 
   if (status === 'idle') return null;
 
