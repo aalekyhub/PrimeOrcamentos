@@ -679,7 +679,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         <div className="grow">
                             <p className="font-bold text-slate-800 dark:text-slate-100 uppercase text-sm">{m.material_name}</p>
                             <p className="text-[10px] text-slate-500 uppercase">
-                                {m.quantity} {m.unit} x R$ {m.unit_cost.toFixed(2)} /un
+                                {m.quantity} {m.unit} x R$ {m.unit_cost.toFixed(2)}
                             </p>
                         </div>
                     </div>
@@ -767,7 +767,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                         <div className="grow">
                             <p className="font-bold text-slate-800 dark:text-slate-100 uppercase text-sm">{l.role}</p>
                             <p className="text-[10px] text-slate-500 uppercase">
-                                {l.quantity} {l.unit || 'un'} x R$ {l.unit_cost.toFixed(2)} /un
+                                {l.quantity} {l.unit || 'un'} x R$ {l.unit_cost.toFixed(2)}
                             </p>
                         </div>
                     </div>
