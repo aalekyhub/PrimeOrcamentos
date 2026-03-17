@@ -669,25 +669,23 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-green-400 dark:hover:border-green-500 shadow-sm transition-all rounded-xl"
             renderView={(m) => (
                 <>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 grow">
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-green-600 focus:ring-green-500"
-                                checked={materialSelect.selectedIds.includes(m.id)}
-                                onChange={() => materialSelect.toggleSelect(m.id)}
-                            />
-                            <span className="font-bold text-slate-800 dark:text-slate-100 uppercase text-sm block sm:hidden">{m.material_name}</span>
-                        </div>
-                        <div className="grow flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
-                            <span className="font-bold text-slate-800 dark:text-slate-100 uppercase text-sm hidden sm:block">{m.material_name}</span>
-                            <div className="flex gap-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                                <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">{m.quantity} {m.unit}</span>
-                                <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">R$ {m.unit_cost.toFixed(2)} /un</span>
-                            </div>
+                    <div className="flex items-center gap-2 grow">
+                        <input
+                            type="checkbox"
+                            checked={materialSelect.selectedIds.includes(m.id)}
+                            onChange={() => materialSelect.toggleSelect(m.id)}
+                            className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-green-600 focus:ring-green-500"
+                        />
+                        <div className="grow">
+                            <p className="font-bold text-slate-800 dark:text-slate-100 uppercase text-sm">{m.material_name}</p>
+                            <p className="text-[10px] text-slate-500 uppercase">
+                                {m.quantity} {m.unit} x R$ {m.unit_cost.toFixed(2)} /un
+                            </p>
                         </div>
                     </div>
-                    <span className="font-black text-slate-700 dark:text-slate-200">R$ {m.total_cost.toFixed(2)}</span>
+                    <div className="w-24 text-right mr-4 font-black text-slate-700 dark:text-slate-200">
+                        R$ {m.total_cost.toFixed(2)}
+                    </div>
                 </>
             )}
             renderEdit={(data, update) => (
@@ -759,25 +757,23 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-amber-400 dark:hover:border-amber-500 shadow-sm transition-all rounded-xl"
             renderView={(l) => (
                 <>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 grow">
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-amber-600 focus:ring-amber-500"
-                                checked={laborSelect.selectedIds.includes(l.id)}
-                                onChange={() => laborSelect.toggleSelect(l.id)}
-                            />
-                            <span className="font-bold text-slate-800 dark:text-slate-100 uppercase text-sm block sm:hidden">{l.role}</span>
-                        </div>
-                        <div className="grow flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
-                            <span className="font-bold text-slate-800 dark:text-slate-100 uppercase text-sm hidden sm:block">{l.role}</span>
-                            <div className="flex gap-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                                <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">{l.quantity} {l.unit || 'un'}</span>
-                                <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">R$ {l.unit_cost.toFixed(2)}</span>
-                            </div>
+                    <div className="flex items-center gap-2 grow">
+                        <input
+                            type="checkbox"
+                            checked={laborSelect.selectedIds.includes(l.id)}
+                            onChange={() => laborSelect.toggleSelect(l.id)}
+                            className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-amber-600 focus:ring-amber-500"
+                        />
+                        <div className="grow">
+                            <p className="font-bold text-slate-800 dark:text-slate-100 uppercase text-sm">{l.role}</p>
+                            <p className="text-[10px] text-slate-500 uppercase">
+                                {l.quantity} {l.unit || 'un'} x R$ {l.unit_cost.toFixed(2)} /un
+                            </p>
                         </div>
                     </div>
-                    <span className="font-black text-slate-700 dark:text-slate-200">R$ {l.total_cost.toFixed(2)}</span>
+                    <div className="w-24 text-right mr-4 font-black text-slate-700 dark:text-slate-200">
+                        R$ {l.total_cost.toFixed(2)}
+                    </div>
                 </>
             )}
             renderEdit={(data, update) => (
@@ -847,21 +843,20 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
             className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-500 shadow-sm transition-all rounded-xl"
             renderView={(i) => (
                 <>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 grow">
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-600 focus:ring-slate-500"
-                                checked={indirectSelect.selectedIds.includes(i.id)}
-                                onChange={() => indirectSelect.toggleSelect(i.id)}
-                            />
-                            <span className="font-bold text-slate-800 dark:text-slate-100 uppercase text-sm block sm:hidden">{i.name}</span>
-                        </div>
-                        <div className="grow flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
-                            <span className="font-bold text-slate-800 dark:text-slate-100 uppercase text-sm hidden sm:block">{i.name}</span>
+                    <div className="flex items-center gap-2 grow">
+                        <input
+                            type="checkbox"
+                            checked={indirectSelect.selectedIds.includes(i.id)}
+                            onChange={() => indirectSelect.toggleSelect(i.id)}
+                            className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-600 focus:ring-slate-500"
+                        />
+                        <div className="grow">
+                            <p className="font-bold text-slate-800 dark:text-slate-100 uppercase text-sm">{i.name}</p>
                         </div>
                     </div>
-                    <span className="font-black text-slate-700 dark:text-slate-200">R$ {i.value.toFixed(2)}</span>
+                    <div className="w-24 text-right mr-4 font-black text-slate-700 dark:text-slate-200">
+                        R$ {i.value.toFixed(2)}
+                    </div>
                 </>
             )}
             renderEdit={(data, update) => (
@@ -1006,7 +1001,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     <button
                                         type="button"
                                         onClick={() => importPlanItems(currentWork.plan_id!, currentWork.id)}
-                                        className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-slate-200 transition-all border border-slate-200 dark:border-slate-700"
+                                        className="whitespace-nowrap px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-slate-200 transition-all border border-slate-200 dark:border-slate-700"
                                         title="Importar itens novos do planejamento"
                                     >
                                         <ArrowRight className="rotate-180" size={16} /> Importar Plan.
@@ -1029,7 +1024,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                             notify('Erro ao sincronizar dados.', 'error');
                                         }
                                     }}
-                                    className="px-4 py-2 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-blue-200 transition-all border border-blue-200 dark:border-blue-800"
+                                    className="whitespace-nowrap px-4 py-2 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-blue-200 transition-all border border-blue-200 dark:border-blue-800"
                                 >
                                     <ArrowRight className="rotate-180" size={16} /> Sincronizar Nuvem
                                 </button>
@@ -1037,7 +1032,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                     type="button"
                                     onClick={handleSave}
                                     disabled={loading}
-                                    className="px-4 py-2 bg-green-600 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-green-700 shadow-md shadow-green-900/20 disabled:opacity-50"
+                                    className="whitespace-nowrap px-4 py-2 bg-green-600 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-green-700 shadow-md shadow-green-900/20 disabled:opacity-50"
                                 >
                                     <Save size={16} /> {loading ? 'Salvando...' : 'Salvar'}
                                 </button>
@@ -1437,15 +1432,15 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId, onBack }) =>
                                         className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-green-400 dark:hover:border-green-500 shadow-sm transition-all rounded-xl"
                                         renderView={(s) => (
                                             <>
-                                                <div className="grow flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
-                                                    <span className="font-bold text-slate-800 dark:text-slate-100 uppercase text-sm">{s.description}</span>
-                                                    <div className="flex gap-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                                                        <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">{s.quantity} {s.unit}</span>
-                                                        <span className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded">Mat: R$ {s.unit_material_cost}</span>
-                                                        <span className="bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded">MO: R$ {s.unit_labor_cost}</span>
-                                                    </div>
+                                                <div className="grow">
+                                                    <p className="font-bold text-slate-800 dark:text-slate-100 uppercase text-sm">{s.description}</p>
+                                                    <p className="text-[10px] text-slate-500 uppercase">
+                                                        {s.quantity} {s.unit} - Mat: R$ {s.unit_material_cost.toFixed(2)} | MO: R$ {s.unit_labor_cost.toFixed(2)}
+                                                    </p>
                                                 </div>
-                                                <span className="font-black text-slate-700 dark:text-slate-200">R$ {s.total_cost.toFixed(2)}</span>
+                                                <div className="w-24 text-right mr-4 font-black text-slate-700 dark:text-slate-200">
+                                                    R$ {s.total_cost.toFixed(2)}
+                                                </div>
                                             </>
                                         )}
                                         renderEdit={(data, update) => (
