@@ -66,9 +66,25 @@ export const ResourcesTab: React.FC<ResourcesTabProps> = ({
     const [selectedIndirects, setSelectedIndirects] = useState<string[]>([]);
     const { notify } = useNotify();
 
-    const matDnD = useDragAndDrop<PlannedMaterial>();
-    const labDnD = useDragAndDrop<PlannedLabor>();
-    const indDnD = useDragAndDrop<PlannedIndirect>();
+    const matDnD = useDragAndDrop<PlannedMaterial>((newOrder) => {
+        onUpdateMaterials(newOrder);
+        // Persist immediately: save all materials for this plan
+        const allMats = db.load('serviflow_plan_materials', []) as PlannedMaterial[];
+        const others = allMats.filter(m => m.plan_id !== planId);
+        db.save('serviflow_plan_materials', [...others, ...newOrder]);
+    });
+    const labDnD = useDragAndDrop<PlannedLabor>((newOrder) => {
+        onUpdateLabor(newOrder);
+        const allLab = db.load('serviflow_plan_labor', []) as PlannedLabor[];
+        const others = allLab.filter(l => l.plan_id !== planId);
+        db.save('serviflow_plan_labor', [...others, ...newOrder]);
+    });
+    const indDnD = useDragAndDrop<PlannedIndirect>((newOrder) => {
+        onUpdateIndirects(newOrder);
+        const allInd = db.load('serviflow_plan_indirects', []) as PlannedIndirect[];
+        const others = allInd.filter(i => i.plan_id !== planId);
+        db.save('serviflow_plan_indirects', [...others, ...newOrder]);
+    });
 
     const loadDefaultTaxes = () => {
         const defaults = [

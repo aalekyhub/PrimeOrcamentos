@@ -1,7 +1,9 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 
-export const useDragAndDrop = <T extends { id: string }>() => {
+export const useDragAndDrop = <T extends { id: string }>(onOrderChange?: (items: T[]) => void) => {
     const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+    // Keep a ref to the latest reordered list so handleDragEnd can persist it
+    const latestItemsRef = useRef<T[] | null>(null);
 
     const handleDragStart = useCallback((index: number) => {
         setDraggedIndex(index);
@@ -15,6 +17,7 @@ export const useDragAndDrop = <T extends { id: string }>() => {
                 const [draggedItem] = newItems.splice(draggedIndex, 1);
                 newItems.splice(index, 0, draggedItem);
                 setItems(newItems);
+                latestItemsRef.current = newItems;
                 setDraggedIndex(index);
             }
         },
@@ -23,7 +26,12 @@ export const useDragAndDrop = <T extends { id: string }>() => {
 
     const handleDragEnd = useCallback(() => {
         setDraggedIndex(null);
-    }, []);
+        // Persist the new order immediately after drop
+        if (onOrderChange && latestItemsRef.current) {
+            onOrderChange(latestItemsRef.current);
+            latestItemsRef.current = null;
+        }
+    }, [onOrderChange]);
 
     const moveItem = useCallback(
         (items: T[], setItems: (items: T[]) => void, index: number, direction: 'up' | 'down') => {
@@ -33,8 +41,12 @@ export const useDragAndDrop = <T extends { id: string }>() => {
             const newItems = [...items];
             [newItems[index], newItems[newIndex]] = [newItems[newIndex], newItems[index]];
             setItems(newItems);
+            // Persist immediately when using arrow buttons too
+            if (onOrderChange) {
+                onOrderChange(newItems);
+            }
         },
-        []
+        [onOrderChange]
     );
 
     return {

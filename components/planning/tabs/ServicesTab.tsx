@@ -4,6 +4,7 @@ import { PlannedService } from '../types';
 import { EditableServiceRow } from '../rows/EditableServiceRow';
 import { AddServiceForm } from '../forms/AddServiceForm';
 import { useDragAndDrop } from '../hooks/useDragAndDrop';
+import { db } from '../../../services/db';
 
 interface ServicesTabProps {
     services: PlannedService[];
@@ -26,11 +27,18 @@ export const ServicesTab: React.FC<ServicesTabProps> = ({
 }) => {
     const [selectedServices, setSelectedServices] = React.useState<string[]>([]);
     const { draggedIndex, handleDragStart, handleDragOver, handleDragEnd, moveItem } =
-        useDragAndDrop<PlannedService>();
+        useDragAndDrop<PlannedService>((newOrder) => {
+            onReorderServices(newOrder);
+            // Persist immediately
+            const allSvcs = db.load('serviflow_plan_services', []) as PlannedService[];
+            const others = allSvcs.filter(s => s.plan_id !== planId);
+            db.save('serviflow_plan_services', [...others, ...newOrder]);
+        });
 
     const handleMove = (index: number, direction: 'up' | 'down') => {
         moveItem(services, onReorderServices, index, direction);
     };
+
 
     const handleDeleteSelected = () => {
         if (selectedServices.length === 0) return;
