@@ -53,8 +53,6 @@ export const EditableLaborRow: React.FC<EditableLaborRowProps> = ({
 
     return (
         <div
-            draggable={!isEditing}
-            onDragStart={() => onDragStart(index)}
             onDragOver={(e) => onDragOver(e, index)}
             onDragEnd={onDragEnd}
             onKeyDown={(e) => {
@@ -126,7 +124,11 @@ export const EditableLaborRow: React.FC<EditableLaborRowProps> = ({
                             onChange={(e) => onSelect(labor.id, e.target.checked)}
                             className="w-4 h-4 rounded border-slate-300 text-blue-600"
                         />
-                        <div className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 shrink-0">
+                        <div
+                            draggable
+                            onDragStart={() => onDragStart(index)}
+                            className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 shrink-0"
+                        >
                             <GripVertical size={16} />
                         </div>
                         <div className="grow">

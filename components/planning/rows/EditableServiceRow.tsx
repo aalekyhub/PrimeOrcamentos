@@ -64,8 +64,6 @@ export const EditableServiceRow: React.FC<EditableServiceRowProps> = ({
 
     return (
         <div
-            draggable={!isEditing}
-            onDragStart={() => onDragStart(index)}
             onDragOver={(e) => onDragOver(e, index)}
             onDragEnd={onDragEnd}
             onKeyDown={(e) => {
@@ -152,7 +150,11 @@ export const EditableServiceRow: React.FC<EditableServiceRowProps> = ({
                             onChange={(e) => onSelect(service.id, e.target.checked)}
                             className="w-4 h-4 rounded border-slate-300 text-blue-600"
                         />
-                        <div className="cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 shrink-0">
+                        <div
+                            draggable
+                            onDragStart={() => onDragStart(index)}
+                            className="cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 shrink-0"
+                        >
                             <GripVertical size={18} />
                         </div>
                         <div className="grow">
