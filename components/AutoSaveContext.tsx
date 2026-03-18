@@ -1,4 +1,13 @@
-import React, { createContext, useContext, useMemo, useState, useCallback, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+  useCallback,
+  ReactNode,
+  useEffect,
+  useRef,
+} from 'react';
 
 export type AutoSaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
@@ -6,15 +15,16 @@ interface SaveEntry {
   isSaving: boolean;
   error: string | null;
   lastSuccessAt: number | null;
-  startedAt?: number | null;
+  startedAt: number | null;
+  version: number;
 }
 
 interface AutoSaveContextType {
   status: AutoSaveStatus;
   error: string | null;
-  beginSave: (id: string) => void;
-  finishSave: (id: string) => void;
-  failSave: (id: string, error?: string | null) => void;
+  beginSave: (id: string) => number;
+  finishSave: (id: string, version?: number) => void;
+  failSave: (id: string, error?: string | null, version?: number) => void;
   clearSave: (id: string) => void;
 }
 
@@ -22,44 +32,78 @@ const AutoSaveContext = createContext<AutoSaveContextType | undefined>(undefined
 
 export const AutoSaveProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [entries, setEntries] = useState<Record<string, SaveEntry>>({});
+  const entriesRef = useRef(entries);
+
+  useEffect(() => {
+    entriesRef.current = entries;
+  }, [entries]);
 
   const beginSave = useCallback((id: string) => {
-    setEntries(prev => ({
+    const version = Date.now() + Math.floor(Math.random() * 1000);
+
+    setEntries((prev) => ({
       ...prev,
       [id]: {
-        ...(prev[id] || { error: null, lastSuccessAt: null }),
+        ...(prev[id] || {
+          error: null,
+          lastSuccessAt: null,
+        }),
         isSaving: true,
         error: null,
         startedAt: Date.now(),
+        version,
       },
     }));
+
+    return version;
   }, []);
 
-  const finishSave = useCallback((id: string) => {
-    setEntries(prev => ({
-      ...prev,
-      [id]: {
-        ...(prev[id] || { error: null, lastSuccessAt: null }),
-        isSaving: false,
-        error: null,
-        lastSuccessAt: Date.now(),
-      },
-    }));
+  const finishSave = useCallback((id: string, version?: number) => {
+    setEntries((prev) => {
+      const current = prev[id];
+      if (!current) return prev;
+
+      if (version !== undefined && current.version !== version) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        [id]: {
+          ...current,
+          isSaving: false,
+          error: null,
+          lastSuccessAt: Date.now(),
+          startedAt: null,
+        },
+      };
+    });
   }, []);
 
-  const failSave = useCallback((id: string, error: string | null = null) => {
-    setEntries(prev => ({
-      ...prev,
-      [id]: {
-        ...(prev[id] || { lastSuccessAt: null }),
-        isSaving: false,
-        error: error || 'Erro ao salvar',
-      },
-    }));
+  const failSave = useCallback((id: string, error: string | null = null, version?: number) => {
+    setEntries((prev) => {
+      const current = prev[id];
+      if (!current) return prev;
+
+      if (version !== undefined && current.version !== version) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        [id]: {
+          ...current,
+          isSaving: false,
+          error: error || 'Erro ao salvar',
+          startedAt: null,
+        },
+      };
+    });
   }, []);
 
   const clearSave = useCallback((id: string) => {
-    setEntries(prev => {
+    setEntries((prev) => {
+      if (!(id in prev)) return prev;
       const copy = { ...prev };
       delete copy[id];
       return copy;
@@ -70,24 +114,27 @@ export const AutoSaveProvider: React.FC<{ children: ReactNode }> = ({ children }
     const allEntries = Object.entries(entries);
     const all = allEntries.map(([id, entry]) => ({ id, ...(entry as SaveEntry) }));
 
-    const savingCount = all.filter(e => e.isSaving).length;
-    
-    // Diagnóstico: se houver saves travados no console
-    if (savingCount > 0) {
-      console.log(`[AutoSaveContext] Ativo: ${savingCount} itens(s) salvando...`, 
-        all.filter(e => e.isSaving).map(e => e.id));
-    }
+    const savingItems = all.filter((e) => e.isSaving);
+    const savingCount = savingItems.length;
 
     if (savingCount > 0) {
+      console.log(
+        `[AutoSaveContext] Ativo: ${savingCount} item(ns) salvando...`,
+        savingItems.map((e) => e.id)
+      );
       return { status: 'saving' as AutoSaveStatus, error: null };
     }
 
-    const errored = all.find(e => e.error);
+    const errored = all.find((e) => e.error);
     if (errored) {
       return { status: 'error' as AutoSaveStatus, error: errored.error };
     }
 
-    const hasRecentSuccess = all.some(e => e.lastSuccessAt && Date.now() - e.lastSuccessAt < 3000);
+    const now = Date.now();
+    const hasRecentSuccess = all.some(
+      (e) => e.lastSuccessAt && now - e.lastSuccessAt < 3000
+    );
+
     if (hasRecentSuccess) {
       return { status: 'saved' as AutoSaveStatus, error: null };
     }
@@ -95,28 +142,39 @@ export const AutoSaveProvider: React.FC<{ children: ReactNode }> = ({ children }
     return { status: 'idle' as AutoSaveStatus, error: null };
   }, [entries]);
 
-  // Efeito de limpeza de "zumbis" (failsafe secundário)
-  React.useEffect(() => {
+  useEffect(() => {
     const interval = setInterval(() => {
       const now = Date.now();
+      const currentEntries = entriesRef.current;
       let changed = false;
-      const newEntries = { ...entries };
+      const nextEntries: Record<string, SaveEntry> = { ...currentEntries };
 
-      Object.entries(entries).forEach(([id, entry]) => {
-        const e = entry as SaveEntry;
-        // Se estiver salvando há mais de 60 segundos (pode ser o primeiro save, então usamos startedAt)
-        if (e.isSaving && e.startedAt && (now - e.startedAt > 60000)) {
-           console.warn(`[AutoSaveContext] Forçando limpeza de save travado (60s+): ${id}`);
-           newEntries[id] = { ...e, isSaving: false, error: 'Timeout de rede excedido' };
-           changed = true;
+      Object.entries(currentEntries).forEach(([id, entry]) => {
+        if (
+          entry.isSaving &&
+          entry.startedAt &&
+          now - entry.startedAt > 60000
+        ) {
+          console.warn(`[AutoSaveContext] Forçando limpeza de save travado (60s+): ${id}`);
+
+          nextEntries[id] = {
+            ...entry,
+            isSaving: false,
+            error: 'Timeout de rede excedido',
+            startedAt: null,
+          };
+
+          changed = true;
         }
       });
 
-      if (changed) setEntries(newEntries);
+      if (changed) {
+        setEntries(nextEntries);
+      }
     }, 15000);
 
     return () => clearInterval(interval);
-  }, [entries]);
+  }, []);
 
   return (
     <AutoSaveContext.Provider
@@ -136,15 +194,17 @@ export const AutoSaveProvider: React.FC<{ children: ReactNode }> = ({ children }
 
 export const useGlobalAutoSave = () => {
   const context = useContext(AutoSaveContext);
+
   if (!context) {
     return {
       status: 'idle' as AutoSaveStatus,
       error: null,
-      beginSave: () => { },
+      beginSave: () => 0,
       finishSave: () => { },
       failSave: () => { },
       clearSave: () => { },
     };
   }
+
   return context;
 };
