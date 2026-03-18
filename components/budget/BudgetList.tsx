@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Search, CheckCircle, Copy, Pencil, Printer, FileDown, Trash2, ScrollText } from 'lucide-react';
+import { Plus, Search, CheckCircle, Copy, Printer, FileDown, Trash2, ScrollText } from 'lucide-react';
 import { ServiceOrder, OrderStatus } from '../../types';
 
 interface BudgetListProps {
@@ -72,7 +72,7 @@ const BudgetList: React.FC<BudgetListProps> = ({
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                         {budgets.map(budget => (
-                            <tr key={budget.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 group transition-all">
+                            <tr key={budget.id} onClick={() => onEdit(budget)} className="hover:bg-blue-50/60 dark:hover:bg-slate-800/50 group transition-all cursor-pointer">
                                 <td className="px-8 py-5 text-xs font-mono font-black text-blue-600 whitespace-nowrap">
                                     <div className="flex items-center gap-2">
                                         {budget.id}
@@ -84,23 +84,20 @@ const BudgetList: React.FC<BudgetListProps> = ({
                                 <td className="px-8 py-5 text-sm font-black text-slate-900 dark:text-white whitespace-nowrap">R$ {budget.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                 <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     {budget.status !== OrderStatus.APPROVED && (
-                                        <button onClick={() => onApprove(budget)} className="p-2 text-slate-400 hover:text-emerald-600 transition-colors" title="Aprovar">
+                                        <button onClick={(e) => { e.stopPropagation(); onApprove(budget); }} className="p-2 text-slate-400 hover:text-emerald-600 transition-colors" title="Aprovar">
                                             <CheckCircle className="w-4 h-4" />
                                         </button>
                                     )}
-                                    <button onClick={() => onDuplicate(budget)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Duplicar">
+                                    <button onClick={(e) => { e.stopPropagation(); onDuplicate(budget); }} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Duplicar">
                                         <Copy className="w-4 h-4" />
                                     </button>
-                                    <button onClick={() => onEdit(budget)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Editar">
-                                        <Pencil className="w-4 h-4" />
-                                    </button>
-                                    <button onClick={() => onPrint(budget)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Imprimir">
+                                    <button onClick={(e) => { e.stopPropagation(); onPrint(budget); }} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Imprimir">
                                         <Printer className="w-4 h-4" />
                                     </button>
-                                    <button onClick={() => onGenerateContract(budget)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Gerar Contrato">
+                                    <button onClick={(e) => { e.stopPropagation(); onGenerateContract(budget); }} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Gerar Contrato">
                                         <ScrollText className="w-4 h-4" />
                                     </button>
-                                    <button onClick={() => onDelete(budget)} className="p-2 text-rose-300 hover:text-rose-600 transition-colors" title="Excluir">
+                                    <button onClick={(e) => { e.stopPropagation(); onDelete(budget); }} className="p-2 text-rose-300 hover:text-rose-600 transition-colors" title="Excluir">
                                         <Trash2 className="w-4 h-4" />
                                     </button>
                                 </td>
