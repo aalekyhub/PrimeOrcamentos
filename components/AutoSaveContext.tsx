@@ -32,7 +32,7 @@ const AutoSaveContext = createContext<AutoSaveContextType | undefined>(undefined
 
 export const AutoSaveProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [entries, setEntries] = useState<Record<string, SaveEntry>>({});
-  const entriesRef = useRef(entries);
+  const entriesRef = useRef<Record<string, SaveEntry>>({});
 
   useEffect(() => {
     entriesRef.current = entries;
@@ -47,6 +47,9 @@ export const AutoSaveProvider: React.FC<{ children: ReactNode }> = ({ children }
         ...(prev[id] || {
           error: null,
           lastSuccessAt: null,
+          startedAt: null,
+          version,
+          isSaving: false,
         }),
         isSaving: true,
         error: null,
@@ -111,8 +114,10 @@ export const AutoSaveProvider: React.FC<{ children: ReactNode }> = ({ children }
   }, []);
 
   const derived = useMemo(() => {
-    const allEntries = Object.entries(entries);
-    const all = allEntries.map(([id, entry]) => ({ id, ...(entry as SaveEntry) }));
+    const all = Object.entries(entries).map(([id, entry]) => ({
+      id,
+      ...entry,
+    }));
 
     const savingItems = all.filter((e) => e.isSaving);
     const savingCount = savingItems.length;
@@ -132,7 +137,7 @@ export const AutoSaveProvider: React.FC<{ children: ReactNode }> = ({ children }
 
     const now = Date.now();
     const hasRecentSuccess = all.some(
-      (e) => e.lastSuccessAt && now - e.lastSuccessAt < 3000
+      (e) => e.lastSuccessAt !== null && now - e.lastSuccessAt < 3000
     );
 
     if (hasRecentSuccess) {
@@ -147,14 +152,11 @@ export const AutoSaveProvider: React.FC<{ children: ReactNode }> = ({ children }
       const now = Date.now();
       const currentEntries = entriesRef.current;
       let changed = false;
+
       const nextEntries: Record<string, SaveEntry> = { ...currentEntries };
 
-      Object.entries(currentEntries).forEach(([id, entry]) => {
-        if (
-          entry.isSaving &&
-          entry.startedAt &&
-          now - entry.startedAt > 60000
-        ) {
+      (Object.entries(currentEntries) as [string, SaveEntry][]).forEach(([id, entry]) => {
+        if (entry.isSaving && entry.startedAt && now - entry.startedAt > 60000) {
           console.warn(`[AutoSaveContext] Forçando limpeza de save travado (60s+): ${id}`);
 
           nextEntries[id] = {
