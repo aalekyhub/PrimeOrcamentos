@@ -68,10 +68,20 @@ export const EditableServiceRow: React.FC<EditableServiceRowProps> = ({
             onDragStart={() => onDragStart(index)}
             onDragOver={(e) => onDragOver(e, index)}
             onDragEnd={onDragEnd}
+            onKeyDown={(e) => {
+                if (!isEditing) return;
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleSave();
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    handleCancel();
+                }
+            }}
             className={`bg-white dark:bg-slate-900/50 p-4 rounded-xl border transition-all flex justify-between items-center group hover:border-blue-300 dark:hover:border-blue-500 ${isDragged
                 ? 'opacity-50 bg-blue-50 dark:bg-blue-900/20 border-blue-200 shadow-inner'
                 : 'border-slate-200 dark:border-slate-800 shadow-sm'
-                }`}
+                } ${isEditing ? 'ring-2 ring-blue-400/30' : ''}`}
         >
             {isEditing ? (
                 <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 items-center">

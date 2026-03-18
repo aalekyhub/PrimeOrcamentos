@@ -219,15 +219,27 @@ function EditableRow<T extends { id: string }>({
     className = ''
 }: EditableRowProps<T>) {
     return (
-        <div className={`p-3 rounded-lg border transition-all group ${className}`}>
+        <div 
+            className={`p-3 rounded-lg border transition-all group ${className} ${isEditing ? 'ring-2 ring-green-400/30' : ''}`}
+            onKeyDown={(e) => {
+                if (!isEditing) return;
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    onSave();
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    onCancel();
+                }
+            }}
+        >
             {isEditing ? (
                 <div className="flex-1">
                     {renderEdit(editData, onUpdateField)}
                     <div className="flex justify-end gap-2 mt-2">
-                        <button onClick={onSave} className="text-green-600 p-1 hover:bg-green-50 rounded">
+                        <button onClick={onSave} className="text-green-600 p-1 hover:bg-green-50 rounded" title="Salvar (Enter)">
                             <Check size={16} />
                         </button>
-                        <button onClick={onCancel} className="text-red-600 p-1 hover:bg-red-50 rounded">
+                        <button onClick={onCancel} className="text-red-600 p-1 hover:bg-red-50 rounded" title="Cancelar (Esc)">
                             <X size={16} />
                         </button>
                     </div>
