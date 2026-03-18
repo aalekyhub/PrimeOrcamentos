@@ -28,6 +28,7 @@ export const AutoSave = <T,>({
   const isMounted = useRef(true);
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const resetStatusTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastSavedData = useRef<string>(JSON.stringify(data));
   const saveVersion = useRef(0);
 
   useEffect(() => {
@@ -47,8 +48,16 @@ export const AutoSave = <T,>({
   }, [id, clearSave]);
 
   useEffect(() => {
+    const dataString = JSON.stringify(data);
+
     if (firstRender.current) {
       firstRender.current = false;
+      lastSavedData.current = dataString;
+      return;
+    }
+
+    // Se os dados forem idênticos ao que acabamos de salvar/carregar, ignore
+    if (dataString === lastSavedData.current) {
       return;
     }
 
@@ -77,6 +86,7 @@ export const AutoSave = <T,>({
 
         if (!isMounted.current || currentVersion !== saveVersion.current) return;
 
+        lastSavedData.current = dataString;
         setStatus('saved');
         finishSave(id);
 
