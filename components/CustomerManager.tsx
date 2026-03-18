@@ -282,6 +282,20 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
               </div>
             </div>
 
+            {personType === 'PJ' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className={labelClass}>Contato</label>
+                  <input type="text" placeholder="Nome do responsável" className={inputClass} value={newCustomer.contact || ''} onChange={e => setNewCustomer({ ...newCustomer, contact: e.target.value })} />
+                </div>
+                <div>
+                  <label className={labelClass}>Inscrição Estadual</label>
+                  <input type="text" placeholder="000.000.000.000" className={inputClass} value={newCustomer.stateRegistration || ''} onChange={e => setNewCustomer({ ...newCustomer, stateRegistration: e.target.value })} />
+                </div>
+              </div>
+            )}
+
+
             <div className="flex justify-between items-center pt-4">
               <div className="flex-1">
                 {editingCustomerId && (

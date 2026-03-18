@@ -50,6 +50,8 @@ export interface Customer {
   type: PersonType;
   name: string;
   tradeName?: string;
+  contact?: string;           // Nome do contato (PJ)
+  stateRegistration?: string; // Inscrição Estadual (PJ)
   email: string;
   phone: string;
   whatsapp: string;
