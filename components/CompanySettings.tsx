@@ -8,6 +8,7 @@ import {
 import { CompanyProfile, MeasurementUnit } from '../types';
 import { db } from '../services/db';
 import { useNotify } from './ToastProvider';
+import { AutoSave } from './AutoSave';
 
 interface Props {
   company: CompanyProfile;
@@ -17,7 +18,6 @@ interface Props {
 const CompanySettings: React.FC<Props> = ({ company, setCompany }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const { notify } = useNotify();
 
   const [newUnitLabel, setNewUnitLabel] = useState('');
@@ -113,27 +113,28 @@ const CompanySettings: React.FC<Props> = ({ company, setCompany }) => {
     setNewUnitLabel(''); setNewUnitValue('');
   };
 
-  const handleSave = async () => {
-    setSaveStatus('saving');
-    const result = await db.save('serviflow_company', company);
+  const handleSave = async (data: CompanyProfile) => {
+    const result = await db.save('serviflow_company', data);
 
-    if (result?.success) {
-      setSaveStatus('saved');
-      notify("Configurações salvas e sincronizadas!");
-      setTimeout(() => setSaveStatus('idle'), 3000);
-    } else {
-      setSaveStatus('idle');
-      notify("Salvo localmente. Erro ao sincronizar.", "warning");
+    if (!result?.success) {
+      throw new Error("Erro ao sincronizar com a nuvem");
     }
+    return result;
   };
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
         <div>
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Configurações da Empresa</h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm">Personalize os dados e garanta a segurança das suas informações.</p>
         </div>
+
+        <AutoSave
+          id="company-settings"
+          data={company}
+          onSave={handleSave}
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -238,11 +239,9 @@ const CompanySettings: React.FC<Props> = ({ company, setCompany }) => {
             </div>
 
             <div className="flex justify-end pt-4">
-              <button onClick={handleSave} disabled={saveStatus !== 'idle'} className={`px-10 py-4 rounded-2xl font-bold flex items-center gap-2 transition-all shadow-xl ${saveStatus === 'saved' ? 'bg-emerald-600 text-white shadow-emerald-900/20' : 'bg-slate-900 dark:bg-blue-600 text-white hover:bg-slate-800 dark:hover:bg-blue-700 shadow-blue-900/20'}`}>
-                {saveStatus === 'idle' && <><Save className="w-5 h-5" /> Salvar Alterações</>}
-                {saveStatus === 'saving' && <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> Salvando...</>}
-                {saveStatus === 'saved' && <><CheckCircle2 className="w-5 h-5" /> Dados Salvos!</>}
-              </button>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                As alterações são salvas automaticamente
+              </p>
             </div>
           </div>
         </div>

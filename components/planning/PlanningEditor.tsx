@@ -7,7 +7,11 @@ import {
     Save,
     ArrowRight,
     PieChart,
+    RefreshCw,
+    Check,
+    AlertCircle
 } from 'lucide-react';
+import { AutoSave } from '../AutoSave';
 import { useNotify } from '../ToastProvider';
 import { db } from '../../services/db';
 import { DataTab } from './tabs/DataTab';
@@ -105,6 +109,7 @@ interface PlanningEditorProps {
     onDeleteMultipleLabor?: (ids: string[]) => void;
     onDeleteMultipleIndirects?: (ids: string[]) => void;
     onSave: () => void;
+    onAutoSave: (total: number) => Promise<void>;
     onGenerateBudget: () => void;
     onBack: () => void;
     embeddedMode: boolean;
@@ -186,6 +191,7 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
     onDeleteMultipleLabor,
     onDeleteMultipleIndirects,
     onSave,
+    onAutoSave,
     onGenerateBudget,
     onBack,
     embeddedMode,
@@ -194,6 +200,20 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
     const [activeTab, setActiveTab] = useState<MainTab>('dados');
     const [resourceTab, setResourceTab] = useState<ResourceTab>('material');
     const { notify } = useNotify();
+
+    const handleAutoSave = React.useCallback(async () => {
+        await onAutoSave(calculations.totalGeneral);
+    }, [onAutoSave, calculations.totalGeneral]);
+
+    const autoSavePayload = React.useMemo(() => ({
+        currentPlan,
+        services,
+        materials,
+        labor,
+        indirects,
+        taxes,
+        totalGeneral: calculations.totalGeneral
+    }), [currentPlan, services, materials, labor, indirects, taxes, calculations.totalGeneral]);
 
     if (!currentPlan) return null;
 
@@ -299,37 +319,22 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
                     </div>
 
                     <div className="flex gap-2">
-                        <button
-                            type="button"
-                            onClick={async () => {
-                                notify('Sincronizando com a nuvem...', 'info');
-                                try {
-                                    const uploadRes = await db.forceUploadAll();
-                                    const syncRes = await db.syncFromCloud();
-                                    if (syncRes && !Object.keys(syncRes.errors || {}).length) {
-                                        notify('Sincronização concluída com sucesso!', 'success');
-                                        window.dispatchEvent(new CustomEvent('db-sync-complete'));
-                                    } else {
-                                        notify('Sincronização concluída com alguns avisos.', 'warning');
-                                    }
-                                } catch (err) {
-                                    notify('Erro ao sincronizar dados.', 'error');
-                                }
-                            }}
-                            className="px-4 py-2 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-blue-200 transition-all border border-blue-200 dark:border-blue-800"
-                        >
-                            <ArrowRight className="rotate-180" size={16} />
-                            Sincronizar
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <AutoSave
+                                id={`plan-${currentPlan.id}`}
+                                data={autoSavePayload}
+                                onSave={handleAutoSave}
+                            />
 
-                        <button
-                            type="button"
-                            onClick={onSave}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-blue-700 shadow-md shadow-blue-900/20"
-                        >
-                            <Save size={16} />
-                            Salvar
-                        </button>
+                            <button
+                                type="button"
+                                onClick={onSave}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-blue-700 shadow-md shadow-blue-900/20"
+                            >
+                                <Save size={16} />
+                                Salvar
+                            </button>
+                        </div>
                     </div>
                 </div>
 

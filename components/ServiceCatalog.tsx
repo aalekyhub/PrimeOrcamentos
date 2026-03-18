@@ -5,6 +5,7 @@ import { CatalogService, CompanyProfile } from '../types';
 import { useNotify } from './ToastProvider';
 import { checkDuplicateService } from '../services/validation';
 import { db } from '../services/db';
+import { AutoSave } from './AutoSave';
 import SinapiImporterInsumos from './sinapi/SinapiImporterInsumos';
 import SinapiImporterComposicoes from './sinapi/SinapiImporterComposicoes';
 import SinapiImporterAnalitico from './sinapi/SinapiImporterAnalitico';
@@ -35,6 +36,19 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
     unit: 'un',
     category: 'Geral'
   });
+
+  const handleAutoSave = async (data: Partial<CatalogService>) => {
+    if (!editingService || !data.name || data.basePrice === undefined) return;
+
+    const serviceResult: CatalogService = {
+      ...editingService,
+      ...data as CatalogService
+    };
+    const newList = services.map(s => s.id === editingService.id ? serviceResult : s);
+
+    setServices(newList);
+    await db.save('serviflow_catalog', newList, serviceResult);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -298,17 +312,28 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
               </div>
             </div>
 
-            <div className="flex gap-4 mt-10">
-              <button
-                type="button"
-                onClick={() => { setShowForm(false); setEditingService(null); }}
-                className="flex-1 px-6 py-4 rounded-2xl font-black uppercase text-xs text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
-              >
-                Descartar
-              </button>
-              <button type="submit" className="flex-[2] bg-indigo-600 text-white px-6 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-indigo-700 transition-all shadow-md shadow-indigo-950/20">
-                {editingService ? 'Salvar Mudanças' : 'Confirmar e Adicionar'}
-              </button>
+            <div className="flex items-center justify-between gap-4 mt-10">
+              <div className="flex-1">
+                {editingService && (
+                  <AutoSave
+                    id={`catalog-${editingService.id}`}
+                    data={formData}
+                    onSave={handleAutoSave}
+                  />
+                )}
+              </div>
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  onClick={() => { setShowForm(false); setEditingService(null); }}
+                  className="px-6 py-4 rounded-2xl font-black uppercase text-xs text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+                >
+                  Descartar
+                </button>
+                <button type="submit" className="bg-indigo-600 text-white px-6 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-indigo-700 transition-all shadow-md shadow-indigo-950/20">
+                  {editingService ? 'Salvar Mudanças' : 'Confirmar e Adicionar'}
+                </button>
+              </div>
             </div>
           </form>
         </div>

@@ -17,7 +17,7 @@ export const AutoSave = <T,>({
   data,
   onSave,
   delay = 2000,
-  successDuration = 3000,
+  successDuration = 5000,
 }: AutoSaveProps<T>) => {
   const [status, setStatus] = useState<LocalAutoSaveStatus>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -108,24 +108,27 @@ export const AutoSave = <T,>({
   if (status === 'idle') return null;
 
   return (
-    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider transition-all animate-in fade-in duration-300">
+    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-[10px] font-black uppercase tracking-widest transition-all duration-500 animate-in fade-in zoom-in-95 ${status === 'saving' ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400' :
+        status === 'saved' ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400' :
+          'bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400'
+      }`}>
       {status === 'saving' && (
-        <div className="flex items-center gap-1.5 text-blue-500">
+        <>
           <RefreshCw size={12} className="animate-spin" />
-          <span>Sincronizando...</span>
-        </div>
+          <span className="animate-pulse">Sincronizando...</span>
+        </>
       )}
 
       {status === 'saved' && (
-        <div className="flex items-center gap-1.5 text-emerald-500">
-          <Check size={12} />
+        <>
+          <Check size={12} className="shrink-0" />
           <span>Alterações salvas</span>
-        </div>
+        </>
       )}
 
       {status === 'error' && (
         <div
-          className="flex items-center gap-1.5 text-rose-500"
+          className="flex items-center gap-1.5"
           title={error || ''}
         >
           <AlertCircle size={12} />

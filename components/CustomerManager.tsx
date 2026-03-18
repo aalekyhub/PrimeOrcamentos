@@ -5,6 +5,7 @@ import { Customer, PersonType, ServiceOrder } from '../types';
 import { useNotify } from './ToastProvider';
 import { checkDuplicateCustomer } from '../services/validation';
 import { db } from '../services/db';
+import { AutoSave } from './AutoSave';
 
 interface Props {
   customers: Customer[];
@@ -83,6 +84,21 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
     } finally {
       setLoadingApi(false);
     }
+  };
+
+  const handleAutoSave = async (data: Partial<Customer>) => {
+    if (!editingCustomerId || !data.name || !data.document) return;
+
+    const customerData: Customer = {
+      ...(data as Customer),
+      id: editingCustomerId,
+      type: personType,
+      createdAt: data.createdAt || new Date().toISOString().split('T')[0]
+    };
+
+    const newList = customers.map(c => c.id === editingCustomerId ? customerData : c);
+    setCustomers(newList);
+    await db.save('serviflow_customers', newList, customerData);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -266,9 +282,18 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
               </div>
             </div>
 
-            <div className="flex justify-end pt-4">
+            <div className="flex justify-between items-center pt-4">
+              <div className="flex-1">
+                {editingCustomerId && (
+                  <AutoSave
+                    id={`customer-${editingCustomerId}`}
+                    data={newCustomer}
+                    onSave={handleAutoSave}
+                  />
+                )}
+              </div>
               <button type="submit" className="bg-blue-600 text-white px-12 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-xl shadow-blue-900/20 hover:scale-[1.02] active:scale-95 transition-all">
-                Salvar Cliente
+                {editingCustomerId ? 'Salvar Alterações' : 'Salvar Cliente'}
               </button>
             </div>
           </form>

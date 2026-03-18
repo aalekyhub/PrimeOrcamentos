@@ -102,7 +102,7 @@ export const usePlanning = (customers: Customer[], embeddedPlanId?: string | nul
     }, [activePlanId, loadPlans, loadPlanDetails]);
 
     const savePlan = useCallback(
-        async (totalGeneral: number) => {
+        async (totalGeneral: number, showNotify: boolean = true) => {
             if (!currentPlan) return;
             setLoading(true);
 
@@ -143,7 +143,7 @@ export const usePlanning = (customers: Customer[], embeddedPlanId?: string | nul
             await saveItems('serviflow_plan_taxes', taxes, 'plan_id');
 
             setPlans(updatedPlans);
-            notify('Planejamento salvo com sucesso!', 'success');
+            if (showNotify) notify('Planejamento salvo com sucesso!', 'success');
             setLoading(false);
         },
         [currentPlan, services, materials, labor, indirects, taxes, notify]

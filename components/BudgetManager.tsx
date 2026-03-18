@@ -24,6 +24,7 @@ import BudgetSummarySidebar from './budget/BudgetSummarySidebar';
 import ReportPreview from './ReportPreview';
 import { generateBudgetReportHtml } from '../services/budgetPdfService';
 import { getContractHtml } from '../services/contractPdfService';
+import { AutoSave } from './AutoSave';
 // DocumentPreview and BudgetDocument are replaced by the unified system
 
 interface Props {
@@ -381,7 +382,16 @@ const BudgetManager: React.FC<Props> = ({
     orders,
     setOrders,
     notify
-  ]);
+  ], [isSaving, taxRate, customers, selectedCustomerId, items.length, buildBudgetFromForm, editingBudgetId, orders, setOrders, notify]);
+
+  const handleAutoSave = async () => {
+    const data = buildBudgetFromForm();
+    if (!data || !editingBudgetId) return;
+
+    const newList = orders.map(o => (o.id === editingBudgetId ? data : o));
+    setOrders(newList);
+    await db.save('serviflow_orders', newList, data);
+  };
 
   const handlePreviewDraft = useCallback(() => {
     const budget = buildBudgetFromForm();
@@ -508,7 +518,24 @@ const BudgetManager: React.FC<Props> = ({
                   <p className="text-[9px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-[0.2em]">Configuração de Documento Comercial</p>
                 </div>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-6">
+                {editingBudgetId && (
+                  <AutoSave
+                    id={`budget-${editingBudgetId}`}
+                    data={{
+                      selectedCustomerId,
+                      proposalTitle,
+                      items,
+                      descriptionBlocks,
+                      taxRate,
+                      bdiRate,
+                      paymentTerms,
+                      deliveryTime,
+                      paymentEntryPercent
+                    }}
+                    onSave={handleAutoSave}
+                  />
+                )}
                 {!editingBudgetId && (
                   <button onClick={() => setShowImportModal(true)} className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 px-4 py-2 rounded-xl text-[10px] font-black uppercase flex items-center gap-2 transition-all">
                     <Database className="w-4 h-4" /> Importar de Existente
