@@ -171,12 +171,10 @@ const AppContent: React.FC = () => {
   }, []);
 
   const handleManualSync = useCallback(async () => {
-    if (syncInFlightRef.current || isSyncing) return;
+    // Usamos apenas o ref como guarda para evitar re-criação da função quando isSyncing muda
+    if (syncInFlightRef.current) return;
 
-    if (!db.isConnected()) {
-      notify('Conexão com a nuvem não configurada no Vercel.', 'error');
-      return;
-    }
+    if (!db.isConnected()) return;
 
     syncInFlightRef.current = true;
     setIsSyncing(true);
@@ -185,17 +183,12 @@ const AppContent: React.FC = () => {
       console.log('[Sync] Iniciando sincronização manual...');
       const syncResponse = await db.syncFromCloud();
 
-      if (!syncResponse) {
-        notify('Falha crítica ao conectar com a nuvem.', 'error');
-        return;
-      }
+      if (!syncResponse) return;
 
       const { results: cloudData, errors: cloudErrors } = syncResponse;
 
       if (Object.keys(cloudErrors || {}).length > 0) {
         console.warn('[Sync Partial Failure]', cloudErrors);
-        const failedTables = Object.keys(cloudErrors).join(', ');
-        notify(`Atenção: falha ao baixar tabelas: ${failedTables}.`, 'warning');
       }
 
       if (cloudData) {
@@ -272,7 +265,7 @@ const AppContent: React.FC = () => {
       syncInFlightRef.current = false;
       setIsSyncing(false);
     }
-  }, [isSyncing, notify]);
+  }, [notify]);
 
   useEffect(() => {
     let isMounted = true;
