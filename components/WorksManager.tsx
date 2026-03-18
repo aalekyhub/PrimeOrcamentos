@@ -191,6 +191,7 @@ const useMultiSelect = <T extends { id: string }>() => {
 // ==================== COMPONENTES REUTILIZÁVEIS ====================
 
 interface EditableRowProps<T> {
+    key?: React.Key;
     item: T;
     isEditing: boolean;
     editData: Partial<T>;

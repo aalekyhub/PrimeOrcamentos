@@ -65,7 +65,7 @@ export const AutoSaveProvider: React.FC<{ children: ReactNode }> = ({ children }
   }, []);
 
   const derived = useMemo(() => {
-    const all = Object.values(entries);
+    const all = Object.values(entries) as SaveEntry[];
 
     const savingCount = all.filter(e => e.isSaving).length;
     if (savingCount > 0) {
