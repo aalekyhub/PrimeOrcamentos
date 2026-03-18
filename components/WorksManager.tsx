@@ -1204,6 +1204,148 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId }) => {
                                 </button>
                             ))}
                         </div>
+
+                        {/* Sticky sub-tabs + formulário (igual ao PlanningEditor) */}
+                        <div className="bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800 px-6 py-4">
+                            <div className="max-w-4xl mx-auto">
+                                {activeTab === 'recursos' && (
+                                    <>
+                                        <div className="flex gap-1.5 mb-4 justify-center">
+                                            {[
+                                                { id: 'material', label: 'Materiais' },
+                                                { id: 'mo', label: 'Mão de Obra' },
+                                                { id: 'indireto', label: 'Indiretos' },
+                                                { id: 'impostos', label: 'Impostos' },
+                                            ].map(r => (
+                                                <button
+                                                    key={r.id}
+                                                    type="button"
+                                                    onClick={() => setResourceTab(r.id as any)}
+                                                    className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all uppercase tracking-wider ${resourceTab === r.id
+                                                        ? 'bg-green-600 text-white shadow-md'
+                                                        : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-green-50'
+                                                    }`}
+                                                >
+                                                    {r.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        {resourceTab === 'material' && (
+                                            <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
+                                                <div className="md:col-span-5">
+                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Insumo/Material</label>
+                                                    <input type="text" placeholder="Ex: Cimento CP-II" value={newMaterial.name} onChange={e => setNewMaterial(p => ({ ...p, name: e.target.value }))}
+                                                        className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-green-500" />
+                                                </div>
+                                                <div className="md:col-span-2">
+                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Qtd</label>
+                                                    <input type="number" placeholder="0" value={newMaterial.qty} onChange={e => setNewMaterial(p => ({ ...p, qty: e.target.value }))}
+                                                        className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
+                                                </div>
+                                                <div className="md:col-span-1">
+                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Un</label>
+                                                    <input type="text" value={newMaterial.unit} onChange={e => setNewMaterial(p => ({ ...p, unit: e.target.value }))}
+                                                        className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
+                                                </div>
+                                                <div className="md:col-span-2">
+                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Valor Unit.</label>
+                                                    <input type="number" placeholder="0" value={newMaterial.cost} onChange={e => setNewMaterial(p => ({ ...p, cost: e.target.value }))}
+                                                        className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
+                                                </div>
+                                                <div className="md:col-span-2">
+                                                    <button onClick={() => {
+                                                        if (!newMaterial.name) return;
+                                                        const qty = parseFloat(newMaterial.qty) || 0;
+                                                        const cost = parseFloat(newMaterial.cost) || 0;
+                                                        materialManager.addItem({ material_name: newMaterial.name.toUpperCase(), unit: newMaterial.unit || 'un', quantity: qty, unit_cost: cost, total_cost: qty * cost });
+                                                        setNewMaterial({ name: '', qty: '', unit: 'un', cost: '' });
+                                                        notify('Material adicionado', 'success');
+                                                    }} className="w-full bg-green-600 text-white py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-1 hover:bg-green-700 transition-all shadow-md">
+                                                        <Plus size={14} /> Adicionar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {resourceTab === 'mo' && (
+                                            <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
+                                                <div className="md:col-span-5">
+                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Função/Cargo</label>
+                                                    <input type="text" placeholder="Ex: Pedreiro" value={newLabor.role} onChange={e => setNewLabor(p => ({ ...p, role: e.target.value }))}
+                                                        className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-green-500" />
+                                                </div>
+                                                <div className="md:col-span-2">
+                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Qtd</label>
+                                                    <input type="number" placeholder="0" value={newLabor.qty} onChange={e => setNewLabor(p => ({ ...p, qty: e.target.value }))}
+                                                        className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
+                                                </div>
+                                                <div className="md:col-span-1">
+                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Un</label>
+                                                    <input type="text" value={newLabor.unit} onChange={e => setNewLabor(p => ({ ...p, unit: e.target.value }))}
+                                                        className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
+                                                </div>
+                                                <div className="md:col-span-2">
+                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Valor Unit.</label>
+                                                    <input type="number" placeholder="0" value={newLabor.cost} onChange={e => setNewLabor(p => ({ ...p, cost: e.target.value }))}
+                                                        className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
+                                                </div>
+                                                <div className="md:col-span-2">
+                                                    <button onClick={() => {
+                                                        if (!newLabor.role) return;
+                                                        const qty = parseFloat(newLabor.qty) || 0;
+                                                        const cost = parseFloat(newLabor.cost) || 0;
+                                                        laborManager.addItem({ role: newLabor.role.toUpperCase(), cost_type: newLabor.type as any, unit: newLabor.unit || 'un', quantity: qty, unit_cost: cost, total_cost: qty * cost });
+                                                        setNewLabor({ role: '', type: 'Diária', qty: '', unit: 'un', cost: '' });
+                                                        notify('Mão de obra adicionada', 'success');
+                                                    }} className="w-full bg-green-600 text-white py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-1 hover:bg-green-700 transition-all shadow-md">
+                                                        <Plus size={14} /> Adicionar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {resourceTab === 'indireto' && (
+                                            <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
+                                                <div className="md:col-span-7">
+                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Descrição</label>
+                                                    <input type="text" placeholder="Ex: Transporte de material" value={newIndirect.name} onChange={e => setNewIndirect(p => ({ ...p, name: e.target.value }))}
+                                                        className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-green-500" />
+                                                </div>
+                                                <div className="md:col-span-3">
+                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Valor (R$)</label>
+                                                    <input type="number" placeholder="0" value={newIndirect.value} onChange={e => setNewIndirect(p => ({ ...p, value: e.target.value }))}
+                                                        className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
+                                                </div>
+                                                <div className="md:col-span-2">
+                                                    <button onClick={() => {
+                                                        if (!newIndirect.name) return;
+                                                        const value = parseFloat(newIndirect.value) || 0;
+                                                        indirectManager.addItem({ name: newIndirect.name.toUpperCase(), value });
+                                                        setNewIndirect({ name: '', value: '' });
+                                                        notify('Custo indireto adicionado', 'success');
+                                                    }} className="w-full bg-green-600 text-white py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-1 hover:bg-green-700 transition-all shadow-md">
+                                                        <Plus size={14} /> Adicionar
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {resourceTab === 'impostos' && (
+                                            <div className="flex justify-center">
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Defina as alíquotas abaixo</p>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                                {activeTab === 'resumo' && (
+                                    <div className="flex justify-center">
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Resumo Geral Financeiro</p>
+                                    </div>
+                                )}
+                                {activeTab === 'dados' && (
+                                    <div className="flex justify-center">
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Edite os dados básicos da obra</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
 
                     <div className="p-8 flex-1 bg-slate-50/50 dark:bg-slate-900/50 overflow-auto">
@@ -1376,69 +1518,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId }) => {
                         {activeTab === 'recursos' && (
                             <div className="max-w-4xl mx-auto space-y-6">
 
-                                {/* Sub-tabs: igual ao planejamento */}
-                                <div className="flex gap-1 bg-white dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                                    {[
-                                        { id: 'material', label: 'Materiais' },
-                                        { id: 'mo', label: 'Mão de Obra' },
-                                        { id: 'indireto', label: 'Indiretos' },
-                                        { id: 'impostos', label: 'Impostos' },
-                                    ].map(tab => (
-                                        <button
-                                            key={tab.id}
-                                            type="button"
-                                            onClick={() => setResourceTab(tab.id as any)}
-                                            className={`flex-1 px-4 py-2 text-xs font-black uppercase tracking-widest rounded-xl transition-all ${resourceTab === tab.id
-                                                ? 'bg-green-600 text-white shadow-md shadow-green-900/20'
-                                                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                                            }`}
-                                        >
-                                            {tab.label}
-                                        </button>
-                                    ))}
-                                </div>
-
                                 {resourceTab === 'material' && (
                                     <div className="space-y-4">
-                                        {/* Formulário de adição */}
-                                        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                                            <p className="text-[9px] font-black text-green-600 uppercase tracking-widest mb-3">Adicionar Material</p>
-                                            <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
-                                                <div className="md:col-span-5">
-                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Insumo/Material</label>
-                                                    <input type="text" placeholder="Ex: Cimento CP-II" value={newMaterial.name} onChange={e => setNewMaterial(p => ({ ...p, name: e.target.value }))}
-                                                        className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-green-500" />
-                                                </div>
-                                                <div className="md:col-span-2">
-                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Qtd</label>
-                                                    <input type="number" value={newMaterial.qty} onChange={e => setNewMaterial(p => ({ ...p, qty: e.target.value }))}
-                                                        className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
-                                                </div>
-                                                <div className="md:col-span-1">
-                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Un</label>
-                                                    <input type="text" value={newMaterial.unit} onChange={e => setNewMaterial(p => ({ ...p, unit: e.target.value }))}
-                                                        className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
-                                                </div>
-                                                <div className="md:col-span-2">
-                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Valor Unit.</label>
-                                                    <input type="number" value={newMaterial.cost} onChange={e => setNewMaterial(p => ({ ...p, cost: e.target.value }))}
-                                                        className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
-                                                </div>
-                                                <div className="md:col-span-2">
-                                                    <button onClick={() => {
-                                                        if (!newMaterial.name) return;
-                                                        const qty = parseFloat(newMaterial.qty) || 0;
-                                                        const cost = parseFloat(newMaterial.cost) || 0;
-                                                        materialManager.addItem({ material_name: newMaterial.name.toUpperCase(), unit: newMaterial.unit || 'un', quantity: qty, unit_cost: cost, total_cost: qty * cost });
-                                                        setNewMaterial({ name: '', qty: '', unit: 'un', cost: '' });
-                                                        notify('Material adicionado', 'success');
-                                                    }} className="w-full bg-green-600 text-white py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-1 hover:bg-green-700 transition-all shadow-md">
-                                                        <Plus size={14} /> Adicionar
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-
                                         <div className="flex justify-between items-center">
                                             <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-tighter text-lg">Insumos e Materiais</h3>
                                             {materials.length > 0 && (
@@ -1469,45 +1550,6 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId }) => {
 
                                 {resourceTab === 'mo' && (
                                     <div className="space-y-4">
-                                        {/* Formulário de adição MO */}
-                                        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                                            <p className="text-[9px] font-black text-green-600 uppercase tracking-widest mb-3">Adicionar Mão de Obra</p>
-                                            <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
-                                                <div className="md:col-span-5">
-                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Função/Cargo</label>
-                                                    <input type="text" placeholder="Ex: Pedreiro" value={newLabor.role} onChange={e => setNewLabor(p => ({ ...p, role: e.target.value }))}
-                                                        className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-green-500" />
-                                                </div>
-                                                <div className="md:col-span-2">
-                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Qtd</label>
-                                                    <input type="number" value={newLabor.qty} onChange={e => setNewLabor(p => ({ ...p, qty: e.target.value }))}
-                                                        className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
-                                                </div>
-                                                <div className="md:col-span-1">
-                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Un</label>
-                                                    <input type="text" value={newLabor.unit} onChange={e => setNewLabor(p => ({ ...p, unit: e.target.value }))}
-                                                        className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
-                                                </div>
-                                                <div className="md:col-span-2">
-                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Valor Unit.</label>
-                                                    <input type="number" value={newLabor.cost} onChange={e => setNewLabor(p => ({ ...p, cost: e.target.value }))}
-                                                        className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
-                                                </div>
-                                                <div className="md:col-span-2">
-                                                    <button onClick={() => {
-                                                        if (!newLabor.role) return;
-                                                        const qty = parseFloat(newLabor.qty) || 0;
-                                                        const cost = parseFloat(newLabor.cost) || 0;
-                                                        laborManager.addItem({ role: newLabor.role.toUpperCase(), cost_type: newLabor.type as any, unit: newLabor.unit || 'un', quantity: qty, unit_cost: cost, total_cost: qty * cost });
-                                                        setNewLabor({ role: '', type: 'Diária', qty: '', unit: 'un', cost: '' });
-                                                        notify('Mão de obra adicionada', 'success');
-                                                    }} className="w-full bg-green-600 text-white py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-1 hover:bg-green-700 transition-all shadow-md">
-                                                        <Plus size={14} /> Adicionar
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-
                                         <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-tighter text-lg">Mão de Obra</h3>
                                         {labor.length > 0 && (
                                             <SelectionBar count={laborSelect.selectedIds.length} total={labor.length} onToggleAll={() => laborSelect.toggleAll(labor)}
@@ -1529,34 +1571,6 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId }) => {
 
                                 {resourceTab === 'indireto' && (
                                     <div className="space-y-4">
-                                        {/* Formulário de adição Indiretos */}
-                                        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                                            <p className="text-[9px] font-black text-green-600 uppercase tracking-widest mb-3">Adicionar Custo Indireto</p>
-                                            <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
-                                                <div className="md:col-span-7">
-                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Descrição</label>
-                                                    <input type="text" placeholder="Ex: Transporte de material" value={newIndirect.name} onChange={e => setNewIndirect(p => ({ ...p, name: e.target.value }))}
-                                                        className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-green-500" />
-                                                </div>
-                                                <div className="md:col-span-3">
-                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Valor (R$)</label>
-                                                    <input type="number" value={newIndirect.value} onChange={e => setNewIndirect(p => ({ ...p, value: e.target.value }))}
-                                                        className="w-full p-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
-                                                </div>
-                                                <div className="md:col-span-2">
-                                                    <button onClick={() => {
-                                                        if (!newIndirect.name) return;
-                                                        const value = parseFloat(newIndirect.value) || 0;
-                                                        indirectManager.addItem({ name: newIndirect.name.toUpperCase(), value });
-                                                        setNewIndirect({ name: '', value: '' });
-                                                        notify('Custo indireto adicionado', 'success');
-                                                    }} className="w-full bg-green-600 text-white py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-1 hover:bg-green-700 transition-all shadow-md">
-                                                        <Plus size={14} /> Adicionar
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-
                                         <h3 className="font-bold text-slate-800 dark:text-slate-100 uppercase tracking-tighter text-lg">Custos Indiretos</h3>
                                         {indirects.length > 0 && (
                                             <SelectionBar count={indirectSelect.selectedIds.length} total={indirects.length} onToggleAll={() => indirectSelect.toggleAll(indirects)}
