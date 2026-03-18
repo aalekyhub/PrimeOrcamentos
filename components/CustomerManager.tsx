@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { UserPlus, Search, Trash2, Pencil, X, Loader2, RefreshCw } from 'lucide-react';
+import { UserPlus, Search, Trash2, X, Loader2, RefreshCw } from 'lucide-react';
 import { Customer, PersonType, ServiceOrder } from '../types';
 import { useNotify } from './ToastProvider';
 import { checkDuplicateCustomer } from '../services/validation';
@@ -337,7 +337,7 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
             </thead>
             <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
               {filtered.map(c => (
-                <tr key={c.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 group transition-colors">
+                <tr key={c.id} onClick={() => { setEditingCustomerId(c.id); setNewCustomer(c); setPersonType(c.type); setShowForm(true); }} className="hover:bg-blue-50/60 dark:hover:bg-slate-800/50 group transition-colors cursor-pointer">
                   <td className="px-8 py-6 pl-10">
                     <p className="text-sm font-black text-slate-900 dark:text-white uppercase mb-1">{c.name}</p>
                     <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold tracking-wide">{c.document}</p>
@@ -346,8 +346,8 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
                     {c.city && c.state ? `${c.city} - ${c.state}` : <span className="text-slate-300 dark:text-slate-600 italic">Localização n/d</span>}
                   </td>
                   <td className="px-8 py-6 pr-10 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => { setEditingCustomerId(c.id); setNewCustomer(c); setPersonType(c.type); setShowForm(true); }} className="p-2 text-slate-400 dark:text-slate-600 hover:text-blue-600 dark:hover:text-blue-400 transition-colors" title="Editar"><Pencil className="w-4 h-4" /></button>
-                    <button onClick={async () => {
+                    <button onClick={async (e) => {
+                      e.stopPropagation();
                       if (confirm("Deseja realmente excluir este cliente? Esta ação também removerá os dados da nuvem.")) {
                         setCustomers(p => p.filter(x => x.id !== c.id));
                         const result = await db.remove('serviflow_customers', c.id);
