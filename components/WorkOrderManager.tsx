@@ -1,7 +1,7 @@
-﻿// html2pdf is no longer used
+// html2pdf is no longer used
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
-    Plus, Search, X, Trash2, Pencil, Printer, Save, FileDown,
+    Plus, Search, X, Trash2, Printer, Save, FileDown,
     UserPlus, HardHat, Eraser, FileText, ScrollText, Wallet,
     Type, Image as ImageIcon, Zap, Upload, CheckCircle
 } from 'lucide-react';
@@ -228,28 +228,28 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                         {activeOrders.map(order => (
-                            <tr key={order.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 group transition-all">
+                            <tr key={order.id} onClick={() => {
+                                setEditingOrderId(order.id);
+                                setSelectedCustomerId(order.customerId);
+                                setItems(order.costItems || []);
+                                setOsTitle(order.description);
+                                setDiagnosis(order.serviceDescription || '');
+                                setDeliveryDate(order.dueDate);
+                                setDescriptionBlocks(order.descriptionBlocks || []);
+                                setPaymentTerms(order.paymentTerms || '');
+                                setDeliveryTime(order.deliveryTime || '');
+                                const calculatedTotal = order.items?.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0) || 0;
+                                const finalPrice = order.contractPrice || order.totalAmount || calculatedTotal || 0;
+                                setContractPrice(Math.round(finalPrice * 100) / 100);
+                                setShowForm(true);
+                            }} className="hover:bg-blue-50/60 dark:hover:bg-slate-800/50 group transition-all cursor-pointer">
                                 <td className="px-8 py-5 text-xs font-mono font-black text-blue-600 dark:text-blue-400">{order.id}</td>
                                 <td className="px-8 py-5 text-sm font-black uppercase text-slate-900 dark:text-white">{order.customerName}</td>
                                 <td className="px-8 py-5 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase">{order.description || 'N/A'} - {order.serviceDescription || ''}</td>
                                 <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onClick={() => handlePreviewOS(order)} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Imprimir OS"><Printer className="w-4 h-4" /></button>
-                                    <button onClick={() => {
-                                        setEditingOrderId(order.id);
-                                        setSelectedCustomerId(order.customerId);
-                                        setItems(order.costItems || []);
-                                        setOsTitle(order.description);
-                                        setDiagnosis(order.serviceDescription || '');
-                                        setDeliveryDate(order.dueDate);
-                                        setDescriptionBlocks(order.descriptionBlocks || []);
-                                        setPaymentTerms(order.paymentTerms || '');
-                                        setDeliveryTime(order.deliveryTime || '');
-                                        const calculatedTotal = order.items?.reduce((acc, i) => acc + (i.unitPrice * i.quantity), 0) || 0;
-                                        const finalPrice = order.contractPrice || order.totalAmount || calculatedTotal || 0;
-                                        setContractPrice(Math.round(finalPrice * 100) / 100);
-                                        setShowForm(true);
-                                    }} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Editar Obra"><Pencil className="w-4 h-4" /></button>
-                                    <button onClick={async () => {
+                                    <button onClick={(e) => { e.stopPropagation(); handlePreviewOS(order); }} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Imprimir OS"><Printer className="w-4 h-4" /></button>
+                                    <button onClick={async (e) => {
+                                        e.stopPropagation();
                                         if (confirm("Excluir esta OS de Obra?")) {
                                             const idToDelete = order.id;
                                             setOrders(p => p.filter(x => x.id !== idToDelete));

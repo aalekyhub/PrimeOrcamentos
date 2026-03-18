@@ -1,7 +1,7 @@
-﻿
+
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
-  Plus, Search, X, Trash2, Pencil, Printer, Save,
+  Plus, Search, X, Trash2, Printer, Save,
   UserPlus, Wrench, Eraser, FileText, ScrollText,
   Type, Image as ImageIcon, Zap, Upload, FileDown
 } from 'lucide-react';
@@ -228,18 +228,18 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
             {activeOrders.map(order => (
-              <tr key={order.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 group transition-all">
+              <tr key={order.id} onClick={() => {
+                setEditingOrderId(order.id);
+                // ... other setters ...
+                setShowForm(true);
+              }} className="hover:bg-blue-50/60 dark:hover:bg-slate-800/30 group transition-all cursor-pointer">
                 <td className="px-8 py-5 text-xs font-mono font-black text-blue-600 dark:text-blue-400">{order.id}</td>
                 <td className="px-8 py-5 text-sm font-black uppercase text-slate-900 dark:text-white">{order.customerName}</td>
                 <td className="px-8 py-5 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase">{order.equipmentBrand || 'N/A'} {order.equipmentModel}</td>
                 <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => handlePreviewOS(order)} className="p-2 text-slate-400 dark:text-slate-600 hover:text-slate-900 dark:hover:text-white transition-colors" title="Visualizar/Imprimir OS"><Printer className="w-4 h-4" /></button>
-                  <button onClick={() => {
-                    setEditingOrderId(order.id);
-                    // ... other setters ...
-                    setShowForm(true);
-                  }} className="p-2 text-slate-400 dark:text-slate-600 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><Pencil className="w-4 h-4" /></button>
-                  <button onClick={async () => {
+                  <button onClick={(e) => { e.stopPropagation(); handlePreviewOS(order); }} className="p-2 text-slate-400 dark:text-slate-600 hover:text-slate-900 dark:hover:text-white transition-colors" title="Visualizar/Imprimir OS"><Printer className="w-4 h-4" /></button>
+                  <button onClick={async (e) => {
+                    e.stopPropagation();
                     // ... delete logic ...
                   }} className="p-2 text-rose-300 dark:text-rose-900/40 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"><Trash2 className="w-4 h-4" /></button>
                 </td>
