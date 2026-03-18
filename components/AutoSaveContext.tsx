@@ -19,6 +19,10 @@ interface SaveEntry {
   version: number;
 }
 
+interface DerivedSaveEntry extends SaveEntry {
+  id: string;
+}
+
 interface AutoSaveContextType {
   status: AutoSaveStatus;
   error: string | null;
@@ -45,11 +49,11 @@ export const AutoSaveProvider: React.FC<{ children: ReactNode }> = ({ children }
       ...prev,
       [id]: {
         ...(prev[id] || {
+          isSaving: false,
           error: null,
           lastSuccessAt: null,
           startedAt: null,
           version,
-          isSaving: false,
         }),
         isSaving: true,
         error: null,
@@ -114,10 +118,15 @@ export const AutoSaveProvider: React.FC<{ children: ReactNode }> = ({ children }
   }, []);
 
   const derived = useMemo(() => {
-    const all = Object.entries(entries).map(([id, entry]) => ({
-      id,
-      ...entry,
-    }));
+    const all: DerivedSaveEntry[] = (Object.entries(entries) as [string, SaveEntry][])
+      .map(([id, entry]) => ({
+        id,
+        isSaving: entry.isSaving,
+        error: entry.error,
+        lastSuccessAt: entry.lastSuccessAt,
+        startedAt: entry.startedAt,
+        version: entry.version,
+      }));
 
     const savingItems = all.filter((e) => e.isSaving);
     const savingCount = savingItems.length;
@@ -155,20 +164,22 @@ export const AutoSaveProvider: React.FC<{ children: ReactNode }> = ({ children }
 
       const nextEntries: Record<string, SaveEntry> = { ...currentEntries };
 
-      (Object.entries(currentEntries) as [string, SaveEntry][]).forEach(([id, entry]) => {
-        if (entry.isSaving && entry.startedAt && now - entry.startedAt > 60000) {
-          console.warn(`[AutoSaveContext] Forçando limpeza de save travado (60s+): ${id}`);
+      (Object.entries(currentEntries) as [string, SaveEntry][])
+        .forEach(([id, entry]) => {
+          if (entry.isSaving && entry.startedAt && now - entry.startedAt > 60000) {
+            console.warn(`[AutoSaveContext] Forçando limpeza de save travado (60s+): ${id}`);
 
-          nextEntries[id] = {
-            ...entry,
-            isSaving: false,
-            error: 'Timeout de rede excedido',
-            startedAt: null,
-          };
+            nextEntries[id] = {
+              isSaving: false,
+              error: 'Timeout de rede excedido',
+              lastSuccessAt: entry.lastSuccessAt,
+              startedAt: null,
+              version: entry.version,
+            };
 
-          changed = true;
-        }
-      });
+            changed = true;
+          }
+        });
 
       if (changed) {
         setEntries(nextEntries);
