@@ -118,11 +118,18 @@ type TabId =
 const AppContent: React.FC = () => {
   const { notify } = useNotify();
 
+  const notifyRef = useRef(notify);
+  const syncInFlightRef = useRef(false);
+  const hasBootedRef = useRef(false);
+
+  useEffect(() => {
+    notifyRef.current = notify;
+  }, [notify]);
+
   const [activeTab, setActiveTab] = useState<TabId>('dashboard');
   const [openTabs, setOpenTabs] = useState<TabId[]>(['dashboard']);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
-  const syncInFlightRef = useRef(false);
 
   const [darkMode, setDarkMode] = useState<boolean>(() => db.load(STORAGE_KEYS.DARK_MODE, false));
 
@@ -171,9 +178,7 @@ const AppContent: React.FC = () => {
   }, []);
 
   const handleManualSync = useCallback(async () => {
-    // Usamos apenas o ref como guarda para evitar re-criação da função quando isSyncing muda
     if (syncInFlightRef.current) return;
-
     if (!db.isConnected()) return;
 
     syncInFlightRef.current = true;
@@ -255,22 +260,25 @@ const AppContent: React.FC = () => {
           }
         }
 
-        notify('Sincronização concluída com sucesso!', 'success');
+        notifyRef.current('Sincronização concluída com sucesso!', 'success');
         window.dispatchEvent(new CustomEvent('db-sync-complete'));
       }
     } catch (e: any) {
       console.error('[Sync Error Detail]', e);
-      notify(`Erro de sincronização: ${e?.message || 'Erro desconhecido'}.`, 'error');
+      notifyRef.current(`Erro de sincronização: ${e?.message || 'Erro desconhecido'}.`, 'error');
     } finally {
       syncInFlightRef.current = false;
       setIsSyncing(false);
     }
-  }, [notify]);
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
 
     const boot = async () => {
+      if (hasBootedRef.current) return;
+      hasBootedRef.current = true;
+
       await initPromise;
 
       if (!isMounted) return;
@@ -514,8 +522,7 @@ const AppContent: React.FC = () => {
         >
           <div className="flex items-center gap-4">
             <button
-              className={`lg:hidden p-2 rounded-xl ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'
-                }`}
+              className={`lg:hidden p-2 rounded-xl ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'}`}
               onClick={() => setSidebarOpen(true)}
             >
               <Menu className={`w-6 h-6 ${darkMode ? 'text-slate-300' : 'text-slate-600'}`} />
