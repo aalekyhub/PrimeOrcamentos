@@ -4,25 +4,28 @@ import { openDB, IDBPDatabase } from 'idb';
 const SUPABASE_URL = (import.meta as any).env?.VITE_SUPABASE_URL?.trim() || '';
 const SUPABASE_ANON_KEY = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY?.trim() || '';
 
-const supabase = (SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL.startsWith('http'))
-  ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-  : null;
+const supabase =
+  SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL.startsWith('http')
+    ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    : null;
 
 const DB_NAME = 'PrimeOrcamentosDB';
 const DB_VERSION = 1;
 const STORE_NAME = 'keyvalue';
+const TOMBSTONES_KEY = 'serviflow_tombstones';
 
 let _dbPromise: Promise<IDBPDatabase> | null = null;
 let _cache: Record<string, any> = {};
 let _tombstones: Set<string> = new Set();
 let _realtimeChannel: any = null;
+let _isApplyingRemoteUpdate = false;
 
 const SMALL_KEYS = [
   'serviflow_session',
   'serviflow_dark_mode',
   'serviflow_company',
   'serviflow_tombstones',
-  'serviflow_users'
+  'serviflow_users',
 ];
 
 const TOMBSTONE_KEYS = new Set([
@@ -31,26 +34,62 @@ const TOMBSTONE_KEYS = new Set([
   'serviflow_works',
   'serviflow_customers',
   'serviflow_transactions',
-  'serviflow_loans'
+  'serviflow_loans',
 ]);
 
 const CLOUD_TABLES = [
-  'customers', 'catalog', 'orders', 'transactions', 'users', 'loans', 'company',
-  'plans', 'plan_services', 'plan_materials', 'plan_labor', 'plan_indirects', 'plan_taxes',
-  'works', 'work_services', 'work_materials', 'work_labor', 'work_indirects', 'work_taxes'
-];
+  'customers',
+  'catalog',
+  'orders',
+  'transactions',
+  'users',
+  'loans',
+  'company',
+  'plans',
+  'plan_services',
+  'plan_materials',
+  'plan_labor',
+  'plan_indirects',
+  'plan_taxes',
+  'works',
+  'work_services',
+  'work_materials',
+  'work_labor',
+  'work_indirects',
+  'work_taxes',
+] as const;
 
 const REALTIME_TABLES = [
-  'orders', 'plans', 'works',
-  'plan_services', 'plan_materials', 'plan_labor', 'plan_indirects', 'plan_taxes',
-  'work_services', 'work_materials', 'work_labor', 'work_indirects', 'work_taxes'
-];
+  'orders',
+  'plans',
+  'works',
+  'plan_services',
+  'plan_materials',
+  'plan_labor',
+  'plan_indirects',
+  'plan_taxes',
+  'work_services',
+  'work_materials',
+  'work_labor',
+  'work_indirects',
+  'work_taxes',
+] as const;
 
 const getStorageKeyFromTable = (table: string) => `serviflow_${table}`;
 
+const safeStringify = (value: any) => {
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return '';
+  }
+};
+
+const isEqual = (a: any, b: any) => safeStringify(a) === safeStringify(b);
+
 const persistTombstones = () => {
   try {
-    localStorage.setItem('serviflow_tombstones', JSON.stringify(Array.from(_tombstones)));
+    localStorage.setItem(TOMBSTONES_KEY, JSON.stringify(Array.from(_tombstones)));
   } catch (err) {
     console.warn('[Tombstones] Falha ao salvar tombstones no localStorage.', err);
   }
@@ -74,6 +113,19 @@ const applyTombstonesToCache = () => {
   });
 };
 
+const getDB = () => {
+  if (!_dbPromise) {
+    _dbPromise = openDB(DB_NAME, DB_VERSION, {
+      upgrade(db) {
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          db.createObjectStore(STORE_NAME);
+        }
+      },
+    });
+  }
+  return _dbPromise;
+};
+
 const persistKeyLocally = async (key: string, data: any) => {
   try {
     const idb = await getDB();
@@ -82,7 +134,7 @@ const persistKeyLocally = async (key: string, data: any) => {
     if (SMALL_KEYS.includes(key) || key.length < 50) {
       try {
         localStorage.setItem(key, JSON.stringify(data));
-      } catch (lsError) {
+      } catch {
         console.warn(`[LocalStorage Quota] Falha ao espelhar ${key}, mas salvo no IDB.`);
       }
     }
@@ -91,22 +143,42 @@ const persistKeyLocally = async (key: string, data: any) => {
   }
 };
 
+const persistArrayKey = async (key: string) => {
+  if (!Array.isArray(_cache[key])) return;
+  await persistKeyLocally(key, _cache[key]);
+};
+
+const setCacheValue = async (key: string, data: any) => {
+  const sanitized = filterDeletedItems(data);
+
+  if (isEqual(_cache[key], sanitized)) {
+    return false;
+  }
+
+  _cache[key] = sanitized;
+  await persistKeyLocally(key, sanitized);
+  return true;
+};
+
 const registerRemoteDeletion = async (tableName: string, recordId: string) => {
   if (!supabase) return;
 
   try {
-    const { error } = await supabase
-      .from('deleted_records')
-      .insert({
-        table_name: tableName,
-        record_id: recordId
-      });
+    const { error } = await supabase.from('deleted_records').insert({
+      table_name: tableName,
+      record_id: recordId,
+    });
 
     if (error) {
-      console.error(`[Deleted Records] Erro ao registrar exclusão de ${tableName}/${recordId}: ${error.message}`);
+      console.error(
+        `[Deleted Records] Erro ao registrar exclusão de ${tableName}/${recordId}: ${error.message}`
+      );
     }
   } catch (err) {
-    console.error(`[Deleted Records] Falha crítica ao registrar exclusão de ${tableName}/${recordId}:`, err);
+    console.error(
+      `[Deleted Records] Falha crítica ao registrar exclusão de ${tableName}/${recordId}:`,
+      err
+    );
   }
 };
 
@@ -124,56 +196,85 @@ const syncDeletedRecordsFromCloud = async () => {
     }
 
     const deletedRows = data || [];
+    let anyChange = false;
 
-    for (const row of deletedRows) {
-      const storageKey = getStorageKeyFromTable(row.table_name);
-      _tombstones.add(row.record_id);
+    _isApplyingRemoteUpdate = true;
 
-      if (Array.isArray(_cache[storageKey])) {
-        _cache[storageKey] = _cache[storageKey].filter((item: any) => item?.id !== row.record_id);
+    try {
+      for (const row of deletedRows) {
+        const storageKey = getStorageKeyFromTable(row.table_name);
+        const beforeHas = _tombstones.has(row.record_id);
+
+        _tombstones.add(row.record_id);
+
+        if (!beforeHas) {
+          anyChange = true;
+        }
+
+        if (Array.isArray(_cache[storageKey])) {
+          const filtered = _cache[storageKey].filter((item: any) => item?.id !== row.record_id);
+
+          if (!isEqual(filtered, _cache[storageKey])) {
+            _cache[storageKey] = filtered;
+            anyChange = true;
+            await persistKeyLocally(storageKey, filtered);
+          }
+        }
       }
+    } finally {
+      _isApplyingRemoteUpdate = false;
     }
 
-    persistTombstones();
-
-    for (const key of Object.keys(_cache)) {
-      await persistKeyLocally(key, _cache[key]);
+    if (anyChange) {
+      persistTombstones();
     }
   } catch (err) {
     console.error('[Deleted Records] Falha crítica ao sincronizar exclusões:', err);
   }
 };
 
-const persistArrayKey = async (key: string) => {
-  if (!Array.isArray(_cache[key])) return;
-  await persistKeyLocally(key, _cache[key]);
-};
-
 const upsertIntoCacheArray = async (key: string, row: any) => {
   if (!row?.id) return;
   if (_tombstones.has(row.id)) return;
 
-  const current = Array.isArray(_cache[key]) ? [..._cache[key]] : [];
-  const index = current.findIndex((item: any) => item?.id === row.id);
+  _isApplyingRemoteUpdate = true;
 
-  if (index >= 0) {
-    current[index] = row;
-  } else {
-    current.push(row);
+  try {
+    const current = Array.isArray(_cache[key]) ? [..._cache[key]] : [];
+    const index = current.findIndex((item: any) => item?.id === row.id);
+
+    if (index >= 0) {
+      if (isEqual(current[index], row)) return;
+      current[index] = row;
+    } else {
+      current.push(row);
+    }
+
+    const sanitized = filterDeletedItems(current);
+
+    if (isEqual(_cache[key], sanitized)) return;
+
+    _cache[key] = sanitized;
+    await persistArrayKey(key);
+  } finally {
+    _isApplyingRemoteUpdate = false;
   }
-
-  _cache[key] = filterDeletedItems(current);
-  await persistArrayKey(key);
 };
 
 const removeFromCacheArray = async (key: string, id: string) => {
-  if (!Array.isArray(_cache[key])) {
-    _cache[key] = [];
-  } else {
-    _cache[key] = _cache[key].filter((item: any) => item?.id !== id);
-  }
+  _isApplyingRemoteUpdate = true;
 
-  await persistArrayKey(key);
+  try {
+    const current = Array.isArray(_cache[key]) ? _cache[key] : [];
+    const next = current.filter((item: any) => item?.id !== id);
+
+    if (isEqual(current, next)) return;
+
+    _cache[key] = next;
+    await persistArrayKey(key);
+  } finally {
+    _isApplyingRemoteUpdate = false;
+  }
 };
 
 const handleRemoteDeletion = async (tableName: string, recordId: string) => {
@@ -218,33 +319,15 @@ const bindRealtimeForTable = (channel: any, tableName: string) => {
     );
 };
 
-// Helper to get the DB instance
-const getDB = () => {
-  if (!_dbPromise) {
-    _dbPromise = openDB(DB_NAME, DB_VERSION, {
-      upgrade(db) {
-        if (!db.objectStoreNames.contains(STORE_NAME)) {
-          db.createObjectStore(STORE_NAME);
-        }
-      },
-    });
-  }
-  return _dbPromise;
-};
-
-// Initialize cache from IDB and LocalStorage (migration)
 const initCache = async () => {
   const db = await getDB();
-  const [keys, values] = await Promise.all([
-    db.getAllKeys(STORE_NAME),
-    db.getAll(STORE_NAME)
-  ]);
+  const [keys, values] = await Promise.all([db.getAllKeys(STORE_NAME), db.getAll(STORE_NAME)]);
 
   keys.forEach((key, index) => {
     _cache[key as string] = values[index];
   });
 
-  const savedTombstones = localStorage.getItem('serviflow_tombstones');
+  const savedTombstones = localStorage.getItem(TOMBSTONES_KEY);
   if (savedTombstones) {
     try {
       _tombstones = new Set(JSON.parse(savedTombstones));
@@ -254,27 +337,30 @@ const initCache = async () => {
   }
 
   const localStorageKeys = Object.keys(localStorage);
-  const migratableKeys = localStorageKeys.filter(k => k.startsWith('serviflow_'));
+  const migratableKeys = localStorageKeys.filter((k) => k.startsWith('serviflow_'));
 
   if (migratableKeys.length > 0) {
-    console.log(`[Migration] Encontradas ${migratableKeys.length} chaves no LocalStorage. Migrando para IDB...`);
+    console.log(
+      `[Migration] Encontradas ${migratableKeys.length} chaves no LocalStorage. Migrando para IDB...`
+    );
+
     for (const key of migratableKeys) {
       const isMissingInIDB = _cache[key] === undefined;
 
-      if (isMissingInIDB) {
-        const value = localStorage.getItem(key);
-        if (value) {
-          try {
-            const parsed = JSON.parse(value);
-            if (parsed && (!Array.isArray(parsed) || parsed.length > 0)) {
-              _cache[key] = parsed;
-              await db.put(STORE_NAME, parsed, key);
-              console.log(`[Migration] Dados migrados do LocalStorage para: ${key}`);
-            }
-          } catch {
-            console.warn(`[Migration] Erro ao migrar chave ${key}`);
-          }
+      if (!isMissingInIDB) continue;
+
+      const value = localStorage.getItem(key);
+      if (!value) continue;
+
+      try {
+        const parsed = JSON.parse(value);
+        if (parsed && (!Array.isArray(parsed) || parsed.length > 0)) {
+          _cache[key] = parsed;
+          await db.put(STORE_NAME, parsed, key);
+          console.log(`[Migration] Dados migrados do LocalStorage para: ${key}`);
         }
+      } catch {
+        console.warn(`[Migration] Erro ao migrar chave ${key}`);
       }
     }
   }
@@ -288,7 +374,6 @@ const initCache = async () => {
   await syncDeletedRecordsFromCloud();
 };
 
-// Pre-initialize and export the promise so we can await it if needed
 export const initPromise = initCache().catch(console.error);
 
 export const startRealtimeSync = async () => {
@@ -347,6 +432,10 @@ export const stopRealtimeSync = async () => {
 export const db = {
   isConnected: () => !!supabase,
 
+  isApplyingRemoteUpdate() {
+    return _isApplyingRemoteUpdate;
+  },
+
   generateId(prefix: string) {
     const random = Math.floor(1000 + Math.random() * 9000);
     return `${prefix}-${random}`;
@@ -356,45 +445,56 @@ export const db = {
     const sanitizedData = filterDeletedItems(data);
     const sanitizedSingleItem = Array.isArray(singleItem)
       ? filterDeletedItems(singleItem)
-      : (isItemDeleted(singleItem) ? null : singleItem);
+      : isItemDeleted(singleItem)
+        ? null
+        : singleItem;
 
-    _cache[key] = sanitizedData;
+    const localChanged = await setCacheValue(key, sanitizedData);
 
-    await persistKeyLocally(key, sanitizedData);
-
-    if (supabase && !skipCloud) {
-      const tableName = key.replace('serviflow_', '');
-      try {
-        const rawPayload = sanitizedSingleItem
-          ? (Array.isArray(sanitizedSingleItem) ? sanitizedSingleItem : [sanitizedSingleItem])
-          : (Array.isArray(sanitizedData) ? sanitizedData : [sanitizedData]);
-
-        const payload = rawPayload.filter((item: any) => {
-          if (!item) return false;
-          if (!item.id) return true;
-          return !_tombstones.has(item.id);
-        });
-
-        if (payload.length > 0) {
-          console.log(`[Sync Cloud] Salvando ${payload.length} itens em ${tableName}...`);
-          const conflictKey = tableName === 'users' ? 'email' : 'id';
-          const { error } = await supabase
-            .from(tableName)
-            .upsert(payload, { onConflict: conflictKey });
-
-          if (error) {
-            console.error(`[Supabase Error] Tabela: ${tableName}. Erro: ${error.message}`);
-            return { success: false, error: error.message };
-          }
-          console.log(`[Sync Cloud] ${tableName} atualizado com sucesso.`);
-        }
-      } catch (err) {
-        console.error(`[Sync Error] Falha crítica no Supabase para ${tableName}:`, err);
-        return { success: false, error: (err as any).message };
-      }
+    if (!supabase || skipCloud || _isApplyingRemoteUpdate) {
+      return { success: true, skippedCloud: true, localChanged };
     }
 
-    return { success: true };
+    const tableName = key.replace('serviflow_', '');
+
+    try {
+      const rawPayload = sanitizedSingleItem
+        ? Array.isArray(sanitizedSingleItem)
+          ? sanitizedSingleItem
+          : [sanitizedSingleItem]
+        : Array.isArray(sanitizedData)
+          ? sanitizedData
+          : [sanitizedData];
+
+      const payload = rawPayload.filter((item: any) => {
+        if (!item) return false;
+        if (!item.id) return true;
+        return !_tombstones.has(item.id);
+      });
+
+      if (payload.length === 0) {
+        return { success: true, skippedCloud: true, localChanged };
+      }
+
+      console.log(`[Sync Cloud] Salvando ${payload.length} itens em ${tableName}...`);
+
+      const conflictKey = tableName === 'users' ? 'email' : 'id';
+
+      const { error } = await supabase.from(tableName).upsert(payload, {
+        onConflict: conflictKey,
+      });
+
+      if (error) {
+        console.error(`[Supabase Error] Tabela: ${tableName}. Erro: ${error.message}`);
+        return { success: false, error: error.message };
+      }
+
+      console.log(`[Sync Cloud] ${tableName} atualizado com sucesso.`);
+      return { success: true, localChanged };
+    } catch (err) {
+      console.error(`[Sync Error] Falha crítica no Supabase para ${tableName}:`, err);
+      return { success: false, error: (err as any)?.message || 'Erro desconhecido' };
+    }
   },
 
   async saveLocal(key: string, data: any) {
@@ -412,7 +512,7 @@ export const db = {
     try {
       const data = JSON.parse(saved);
       const sanitized = filterDeletedItems(data);
-      return (sanitized === null || sanitized === undefined) ? defaultValue : sanitized;
+      return sanitized === null || sanitized === undefined ? defaultValue : sanitized;
     } catch {
       return defaultValue;
     }
@@ -421,8 +521,8 @@ export const db = {
   async syncFromCloud() {
     if (!supabase) return null;
 
-    const results: any = {};
-    const errors: any = {};
+    const results: Record<string, any> = {};
+    const errors: Record<string, any> = {};
 
     try {
       await syncDeletedRecordsFromCloud();
@@ -438,24 +538,29 @@ export const db = {
 
       const responses = await Promise.all(fetchPromises);
 
-      for (const response of responses) {
-        if ('error' in response) {
-          errors[response.table] = response.error;
-          continue;
+      _isApplyingRemoteUpdate = true;
+
+      try {
+        for (const response of responses) {
+          if ('error' in response) {
+            errors[response.table] = response.error;
+            continue;
+          }
+
+          const storageKey = getStorageKeyFromTable(response.table);
+          const sanitizedData = filterDeletedItems(response.data);
+
+          results[response.table] = sanitizedData;
+          await setCacheValue(storageKey, sanitizedData);
         }
-
-        const storageKey = getStorageKeyFromTable(response.table);
-        const sanitizedData = filterDeletedItems(response.data);
-        results[response.table] = sanitizedData;
-
-        _cache[storageKey] = sanitizedData;
-        await persistKeyLocally(storageKey, sanitizedData);
+      } finally {
+        _isApplyingRemoteUpdate = false;
       }
 
       return { results, errors };
     } catch (err) {
       console.error('[Cloud Sync] Erro ao baixar dados:', err);
-      return { results: {}, errors: { global: (err as any).message } };
+      return { results: {}, errors: { global: (err as any)?.message || 'Erro desconhecido' } };
     }
   },
 
@@ -468,46 +573,31 @@ export const db = {
     }
 
     if (Array.isArray(_cache[key])) {
-      _cache[key] = _cache[key].filter((item: any) => item.id !== id);
+      const next = _cache[key].filter((item: any) => item.id !== id);
+      await setCacheValue(key, next);
+    }
+
+    if (!supabase) {
+      return { success: true };
     }
 
     try {
-      const idb = await getDB();
-      if (Array.isArray(_cache[key])) {
-        await idb.put(STORE_NAME, _cache[key], key);
-        localStorage.setItem(key, JSON.stringify(_cache[key]));
-      } else {
-        await idb.delete(STORE_NAME, key);
-        localStorage.removeItem(key);
+      const { error } = await supabase.from(tableName).delete().eq('id', id);
+
+      if (error) {
+        console.error(`[Supabase Delete Error] Tabela: ${tableName}. Erro: ${error.message}`);
+        return { success: false, error };
       }
-    } catch (e) {
-      console.error(`[Storage Delete Error] ${e}`);
-    }
 
-    if (supabase) {
-      try {
-        const { error } = await supabase
-          .from(tableName)
-          .delete()
-          .eq('id', id);
-
-        if (error) {
-          console.error(`[Supabase Delete Error] Tabela: ${tableName}. Erro: ${error.message}`);
-          return { success: false, error };
-        }
-
-        if (TOMBSTONE_KEYS.has(key)) {
-          await registerRemoteDeletion(tableName, id);
-        }
-
-        return { success: true };
-      } catch (err) {
-        console.error(`[Delete Error] Falha crítica ao remover do Supabase:`, err);
-        return { success: false, error: err };
+      if (TOMBSTONE_KEYS.has(key)) {
+        await registerRemoteDeletion(tableName, id);
       }
-    }
 
-    return { success: true };
+      return { success: true };
+    } catch (err) {
+      console.error(`[Delete Error] Falha crítica ao remover do Supabase:`, err);
+      return { success: false, error: err };
+    }
   },
 
   async deleteByCondition(key: string, column: string, value: any) {
@@ -521,32 +611,14 @@ export const db = {
 
     if (Array.isArray(_cache[key])) {
       const initialLength = _cache[key].length;
-      _cache[key] = _cache[key].filter((item: any) => item[column] !== value);
-      deletedCount = initialLength - _cache[key].length;
-    }
-
-    try {
-      const idb = await getDB();
-      if (Array.isArray(_cache[key])) {
-        await idb.put(STORE_NAME, _cache[key], key);
-        localStorage.setItem(key, JSON.stringify(_cache[key]));
-      } else {
-        await idb.delete(STORE_NAME, key);
-        localStorage.removeItem(key);
-      }
-    } catch (e) {
-      console.error(`[Storage Delete Error] ${e}`);
-      if (Array.isArray(_cache[key])) {
-        localStorage.setItem(key, JSON.stringify(_cache[key]));
-      }
+      const next = _cache[key].filter((item: any) => item[column] !== value);
+      deletedCount = initialLength - next.length;
+      await setCacheValue(key, next);
     }
 
     if (supabase) {
       try {
-        const { error } = await supabase
-          .from(tableName)
-          .delete()
-          .eq(column, value);
+        const { error } = await supabase.from(tableName).delete().eq(column, value);
 
         if (error) {
           if (
@@ -576,34 +648,50 @@ export const db = {
     if (!supabase) return { success: false, error: 'Sem conexão com Supabase' };
 
     const keys = [
-      'serviflow_customers', 'serviflow_catalog', 'serviflow_orders',
-      'serviflow_transactions', 'serviflow_loans', 'serviflow_users',
-      'serviflow_company', 'serviflow_plans', 'serviflow_works',
-      'serviflow_plan_services', 'serviflow_plan_materials', 'serviflow_plan_labor', 'serviflow_plan_indirects', 'serviflow_plan_taxes',
-      'serviflow_work_services', 'serviflow_work_materials', 'serviflow_work_labor', 'serviflow_work_indirects', 'serviflow_work_taxes'
+      'serviflow_customers',
+      'serviflow_catalog',
+      'serviflow_orders',
+      'serviflow_transactions',
+      'serviflow_loans',
+      'serviflow_users',
+      'serviflow_company',
+      'serviflow_plans',
+      'serviflow_works',
+      'serviflow_plan_services',
+      'serviflow_plan_materials',
+      'serviflow_plan_labor',
+      'serviflow_plan_indirects',
+      'serviflow_plan_taxes',
+      'serviflow_work_services',
+      'serviflow_work_materials',
+      'serviflow_work_labor',
+      'serviflow_work_indirects',
+      'serviflow_work_taxes',
     ];
+
     let totalItems = 0;
     const errors: string[] = [];
 
     for (const key of keys) {
       const data = this.load(key, []);
+
       if (Array.isArray(data) && data.length > 0) {
         console.log(`[Force Upload] Enviando ${data.length} itens de ${key}...`);
         const res = await this.save(key, data);
+
         if (res.success) {
           totalItems += data.length;
         } else {
           errors.push(`${key}: ${res.error}`);
         }
       } else if (!Array.isArray(data) && data && Object.keys(data).length > 0) {
-        // Itens únicos como company
         const res = await this.save(key, data);
         if (res.success) totalItems++;
       }
     }
 
     if (errors.length > 0) {
-      console.error("[Force Upload] Erros parciais:", errors);
+      console.error('[Force Upload] Erros parciais:', errors);
     }
 
     return { success: errors.length === 0, totalItems, errors };
@@ -623,7 +711,7 @@ export const db = {
     await idb.clear(STORE_NAME);
     _cache = {};
     _tombstones = new Set();
-    localStorage.removeItem('serviflow_tombstones');
+    localStorage.removeItem(TOMBSTONES_KEY);
     return { success: true };
-  }
+  },
 };
