@@ -6,6 +6,7 @@ interface SaveEntry {
   isSaving: boolean;
   error: string | null;
   lastSuccessAt: number | null;
+  startedAt?: number | null;
 }
 
 interface AutoSaveContextType {
@@ -29,6 +30,7 @@ export const AutoSaveProvider: React.FC<{ children: ReactNode }> = ({ children }
         ...(prev[id] || { error: null, lastSuccessAt: null }),
         isSaving: true,
         error: null,
+        startedAt: Date.now(),
       },
     }));
   }, []);
@@ -65,9 +67,17 @@ export const AutoSaveProvider: React.FC<{ children: ReactNode }> = ({ children }
   }, []);
 
   const derived = useMemo(() => {
-    const all = Object.values(entries) as SaveEntry[];
+    const allEntries = Object.entries(entries);
+    const all = allEntries.map(([id, entry]) => ({ id, ...(entry as SaveEntry) }));
 
     const savingCount = all.filter(e => e.isSaving).length;
+    
+    // Diagnóstico: se houver saves travados no console
+    if (savingCount > 0) {
+      console.log(`[AutoSaveContext] Ativo: ${savingCount} itens(s) salvando...`, 
+        all.filter(e => e.isSaving).map(e => e.id));
+    }
+
     if (savingCount > 0) {
       return { status: 'saving' as AutoSaveStatus, error: null };
     }
@@ -83,6 +93,29 @@ export const AutoSaveProvider: React.FC<{ children: ReactNode }> = ({ children }
     }
 
     return { status: 'idle' as AutoSaveStatus, error: null };
+  }, [entries]);
+
+  // Efeito de limpeza de "zumbis" (failsafe secundário)
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      const now = Date.now();
+      let changed = false;
+      const newEntries = { ...entries };
+
+      Object.entries(entries).forEach(([id, entry]) => {
+        const e = entry as SaveEntry;
+        // Se estiver salvando há mais de 60 segundos (pode ser o primeiro save, então usamos startedAt)
+        if (e.isSaving && e.startedAt && (now - e.startedAt > 60000)) {
+           console.warn(`[AutoSaveContext] Forçando limpeza de save travado (60s+): ${id}`);
+           newEntries[id] = { ...e, isSaving: false, error: 'Timeout de rede excedido' };
+           changed = true;
+        }
+      });
+
+      if (changed) setEntries(newEntries);
+    }, 15000);
+
+    return () => clearInterval(interval);
   }, [entries]);
 
   return (

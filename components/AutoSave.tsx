@@ -81,8 +81,14 @@ export const AutoSave = <T,>({
       setError(null);
       beginSave(id);
 
+      // Timeout de segurança: 30 segundos
+      const savePromise = onSave(data);
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Timeout na sincronização (30s)')), 30000)
+      );
+
       try {
-        await onSave(data);
+        await Promise.race([savePromise, timeoutPromise]);
 
         if (!isMounted.current || currentVersion !== saveVersion.current) return;
 
@@ -97,11 +103,15 @@ export const AutoSave = <T,>({
           clearSave(id);
         }, successDuration);
       } catch (err: any) {
-        if (!isMounted.current || currentVersion !== saveVersion.current) return;
+        if (!isMounted.current || currentVersion !== saveVersion.current) {
+          // Mesmo se for uma versão antiga, se falhou, limpamos o global para não travar
+          clearSave(id);
+          return;
+        }
 
         const message = err?.message || 'Erro ao sincronizar';
 
-        console.error('AutoSave Error:', err);
+        console.error(`AutoSave Error [${id}]:`, err);
         setStatus('error');
         setError(message);
         failSave(id, message);
