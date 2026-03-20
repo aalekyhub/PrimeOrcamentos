@@ -21,7 +21,7 @@ export const SummaryTab: React.FC<SummaryTabProps> = ({
                     { label: 'Materiais', value: calculations.totalMaterial, icon: Truck, color: 'emerald', desc: 'Insumos e Materiais' },
                     { label: 'Mão de Obra', value: calculations.totalLabor, icon: HardHat, color: 'amber', desc: 'Equipes e Diárias' },
                     { label: 'Indiretos', value: calculations.totalIndirect, icon: Archive, color: 'slate', desc: 'Custos Adicionais' },
-                    { label: 'BDI', value: calculations.bdiValue, icon: TrendingUp, color: 'violet', desc: 'Bonificação e Despesas' },
+                    { label: 'BDI', value: calculations.bdiValue, icon: TrendingUp, color: 'violet', desc: 'BDI' },
                     { label: 'Impostos', value: calculations.otherTaxesValue, icon: Percent, color: 'blue', desc: 'Taxas sobre Faturamento' },
                 ].map((item) => (
                     <div key={item.label} className={`bg-${item.color}-50 dark:bg-${item.color}-900/20 p-5 rounded-2xl border border-${item.color}-200 dark:border-${item.color}-800 shadow-sm transition-all hover:shadow-md`}>
