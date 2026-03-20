@@ -221,7 +221,7 @@ function EditableRow<T extends { id: string }>({
     className = ''
 }: EditableRowProps<T>) {
     return (
-        <div 
+        <div
             className={`p-3 rounded-lg border transition-all group ${className} ${isEditing ? 'ring-2 ring-green-400/30' : ''}`}
             onKeyDown={(e) => {
                 if (!isEditing) return;
@@ -1068,8 +1068,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId }) => {
                                     </div>
 
                                     <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${work.status === 'Concluída'
-                                            ? 'bg-emerald-100 text-emerald-700'
-                                            : 'bg-green-100 text-green-700'
+                                        ? 'bg-emerald-100 text-emerald-700'
+                                        : 'bg-green-100 text-green-700'
                                         }`}>
                                         {work.status}
                                     </span>
@@ -1198,8 +1198,8 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId }) => {
                                     type="button"
                                     onClick={() => setActiveTab(tab.id as any)}
                                     className={`px-6 py-4 text-sm font-bold flex items-center gap-2 border-b-2 transition-colors whitespace-nowrap ${activeTab === tab.id
-                                            ? 'border-green-600 text-green-600 dark:text-green-400'
-                                            : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                                        ? 'border-green-600 text-green-600 dark:text-green-400'
+                                        : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                                         }`}
                                 >
                                     <tab.icon size={16} /> {tab.label}
@@ -1226,7 +1226,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId }) => {
                                                     className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all uppercase tracking-wider ${resourceTab === r.id
                                                         ? 'bg-green-600 text-white shadow-md'
                                                         : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-green-50'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     {r.label}
                                                 </button>
@@ -1657,7 +1657,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId }) => {
                                         { label: 'Materiais', value: calculations.totalMaterial, icon: Truck, color: 'emerald', desc: 'Insumos e Materiais' },
                                         { label: 'Mão de Obra', value: calculations.totalLabor, icon: HardHat, color: 'amber', desc: 'Equipes e Diárias' },
                                         { label: 'Indiretos', value: calculations.totalIndirect, icon: Archive, color: 'slate', desc: 'Custos Adicionais' },
-                                        { label: 'BDI', value: calculations.bdiValue, icon: TrendingUp, color: 'violet', desc: 'Bonificação e Despesas' },
+                                        { label: 'BDI', value: calculations.bdiValue, icon: TrendingUp, color: 'violet', desc: 'BDI' },
                                         { label: 'Impostos', value: calculations.otherTaxesValue ?? (calculations.totalTaxes - calculations.bdiValue), icon: Percent, color: 'blue', desc: 'Taxas sobre Faturamento' },
                                     ].map((item) => (
                                         <div key={item.label} className={`bg-${item.color}-50 dark:bg-${item.color}-900/20 p-5 rounded-2xl border border-${item.color}-200 dark:border-${item.color}-800 shadow-sm transition-all hover:shadow-md`}>
