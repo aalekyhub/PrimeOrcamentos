@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import {
     Building2, Truck, HardHat, FileText,
     Plus, Trash2, Save, ArrowRight, Calculator,
-    PieChart, Calendar, Pencil, Check, X, Percent, Eye, Archive, Copy
+    PieChart, Calendar, Pencil, Check, X, Percent, Eye, Archive, Copy, TrendingUp
 } from 'lucide-react';
 import { useNotify } from './ToastProvider';
 import { db } from '../services/db';
@@ -81,6 +81,7 @@ const useWorkCalculations = (
     }, [otherTaxes, totalGeneral]);
 
     const totalCharges = useMemo(() => totalGeneral - totalDirect, [totalGeneral, totalDirect]);
+    const otherTaxesValue = useMemo(() => totalCharges - bdiValue, [totalCharges, bdiValue]);
 
     return {
         totalMaterial,
@@ -90,6 +91,7 @@ const useWorkCalculations = (
         totalGeneral,
         totalTaxes: totalCharges,
         bdiValue,
+        otherTaxesValue,
         individualTaxValues
     };
 };
@@ -1649,22 +1651,26 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId }) => {
                         )}
 
                         {activeTab === 'resumo' && (
-                            <div className="max-w-4xl mx-auto space-y-8 pb-12">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                            <div className="max-w-5xl mx-auto space-y-8 pb-12">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
                                     {[
-                                        { label: 'Materiais', value: calculations.totalMaterial, icon: Truck },
-                                        { label: 'Mão de Obra', value: calculations.totalLabor, icon: HardHat },
-                                        { label: 'Indiretos', value: calculations.totalIndirect, icon: Archive },
-                                        { label: 'Impostos', value: calculations.totalTaxes, icon: Percent }
+                                        { label: 'Materiais', value: calculations.totalMaterial, icon: Truck, color: 'emerald', desc: 'Insumos e Materiais' },
+                                        { label: 'Mão de Obra', value: calculations.totalLabor, icon: HardHat, color: 'amber', desc: 'Equipes e Diárias' },
+                                        { label: 'Indiretos', value: calculations.totalIndirect, icon: Archive, color: 'slate', desc: 'Custos Adicionais' },
+                                        { label: 'BDI', value: calculations.bdiValue, icon: TrendingUp, color: 'violet', desc: 'Bonificação e Despesas' },
+                                        { label: 'Impostos', value: calculations.otherTaxesValue ?? (calculations.totalTaxes - calculations.bdiValue), icon: Percent, color: 'blue', desc: 'Taxas sobre Faturamento' },
                                     ].map((item) => (
-                                        <div key={item.label} className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                                        <div key={item.label} className={`bg-${item.color}-50 dark:bg-${item.color}-900/20 p-5 rounded-2xl border border-${item.color}-200 dark:border-${item.color}-800 shadow-sm transition-all hover:shadow-md`}>
                                             <div className="flex justify-between items-start mb-2">
-                                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{item.label}</span>
-                                                <item.icon size={16} className="text-slate-400" />
+                                                <span className={`text-[10px] font-bold text-${item.color}-600 dark:text-${item.color}-400 uppercase tracking-widest`}>{item.label}</span>
+                                                <div className={`bg-${item.color}-100 dark:bg-${item.color}-900/40 p-1.5 rounded-lg`}>
+                                                    <item.icon size={16} className={`text-${item.color}-600 dark:text-${item.color}-400`} />
+                                                </div>
                                             </div>
-                                            <span className="text-2xl font-black text-slate-800 dark:text-slate-100 whitespace-nowrap">
+                                            <span className="text-xl font-black text-slate-800 dark:text-slate-100 whitespace-nowrap">
                                                 R$ {item.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                             </span>
+                                            <p className={`text-[9px] text-${item.color}-600/60 dark:text-${item.color}-400/60 mt-1 font-bold uppercase`}>{item.desc}</p>
                                         </div>
                                     ))}
                                 </div>

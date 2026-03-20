@@ -61,6 +61,9 @@ export const useCalculations = (
 
     const totalTaxes = useMemo(() => totalGeneral - totalDirect, [totalGeneral, totalDirect]);
 
+    // Valor apenas dos impostos (sem BDI)
+    const otherTaxesValue = useMemo(() => totalTaxes - bdiValue, [totalTaxes, bdiValue]);
+
     // Calcular valores individuais dos impostos
     const individualTaxValues = useMemo(() => {
         return otherTaxes.map(t => ({
@@ -76,6 +79,7 @@ export const useCalculations = (
         totalIndirect,
         totalDirect,
         bdiValue,
+        otherTaxesValue,
         desiredLiquid,
         taxFactor,
         totalGeneral,

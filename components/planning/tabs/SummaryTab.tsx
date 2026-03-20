@@ -1,5 +1,5 @@
 import React from 'react';
-import { PieChart, Truck, HardHat, Archive, Percent, Eye, Calculator } from 'lucide-react';
+import { PieChart, Truck, HardHat, Archive, Percent, Eye, Calculator, TrendingUp } from 'lucide-react';
 
 interface SummaryTabProps {
     calculations: any;
@@ -15,22 +15,23 @@ export const SummaryTab: React.FC<SummaryTabProps> = ({
     hasGenerateBudget,
 }) => {
     return (
-        <div className="max-w-4xl mx-auto space-y-8 pb-12">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="max-w-5xl mx-auto space-y-8 pb-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
                 {[
                     { label: 'Materiais', value: calculations.totalMaterial, icon: Truck, color: 'emerald', desc: 'Insumos e Materiais' },
                     { label: 'Mão de Obra', value: calculations.totalLabor, icon: HardHat, color: 'amber', desc: 'Equipes e Diárias' },
                     { label: 'Indiretos', value: calculations.totalIndirect, icon: Archive, color: 'slate', desc: 'Custos Adicionais' },
-                    { label: 'Impostos', value: calculations.totalTaxes, icon: Percent, color: 'blue', desc: 'Taxas e BDI' },
+                    { label: 'BDI', value: calculations.bdiValue, icon: TrendingUp, color: 'violet', desc: 'Bonificação e Despesas' },
+                    { label: 'Impostos', value: calculations.otherTaxesValue, icon: Percent, color: 'blue', desc: 'Taxas sobre Faturamento' },
                 ].map((item) => (
-                    <div key={item.label} className={`bg-${item.color}-50 dark:bg-${item.color}-900/20 p-6 rounded-2xl border border-${item.color}-200 dark:border-${item.color}-800 shadow-sm transition-all hover:shadow-md`}>
+                    <div key={item.label} className={`bg-${item.color}-50 dark:bg-${item.color}-900/20 p-5 rounded-2xl border border-${item.color}-200 dark:border-${item.color}-800 shadow-sm transition-all hover:shadow-md`}>
                         <div className="flex justify-between items-start mb-2">
                             <span className={`text-[10px] font-bold text-${item.color}-600 dark:text-${item.color}-400 uppercase tracking-widest`}>{item.label}</span>
                             <div className={`bg-${item.color}-100 dark:bg-${item.color}-900/40 p-1.5 rounded-lg`}>
                                 <item.icon size={16} className={`text-${item.color}-600 dark:text-${item.color}-400`} />
                             </div>
                         </div>
-                        <span className="text-2xl font-black text-slate-800 dark:text-slate-100 whitespace-nowrap">R$ {item.value.toFixed(2)}</span>
+                        <span className="text-xl font-black text-slate-800 dark:text-slate-100 whitespace-nowrap">R$ {item.value.toFixed(2)}</span>
                         <p className={`text-[9px] text-${item.color}-600/60 dark:text-${item.color}-400/60 mt-1 font-bold uppercase`}>{item.desc}</p>
                     </div>
                 ))}
