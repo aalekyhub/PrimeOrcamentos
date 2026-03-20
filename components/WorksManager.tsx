@@ -1658,7 +1658,7 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId }) => {
                                         { label: 'Mão de Obra', value: calculations.totalLabor, icon: HardHat, color: 'amber', desc: 'Equipes e Diárias' },
                                         { label: 'Indiretos', value: calculations.totalIndirect, icon: Archive, color: 'slate', desc: 'Custos Adicionais' },
                                         { label: 'BDI', value: calculations.bdiValue, icon: TrendingUp, color: 'violet', desc: 'BDI' },
-                                        { label: 'Impostos', value: calculations.otherTaxesValue ?? (calculations.totalTaxes - calculations.bdiValue), icon: Percent, color: 'blue', desc: 'Taxas sobre Faturamento' },
+                                        { label: 'Impostos', value: calculations.otherTaxesValue ?? (calculations.totalTaxes - calculations.bdiValue), icon: Percent, color: 'blue', desc: 'IMPOSTOS' },
                                     ].map((item) => (
                                         <div key={item.label} className={`bg-${item.color}-50 dark:bg-${item.color}-900/20 p-5 rounded-2xl border border-${item.color}-200 dark:border-${item.color}-800 shadow-sm transition-all hover:shadow-md`}>
                                             <div className="flex justify-between items-start mb-2">
