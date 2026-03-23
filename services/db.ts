@@ -19,6 +19,14 @@ let _cache: Record<string, any> = {};
 let _tombstones: Set<string> = new Set();
 let _realtimeChannel: any = null;
 let _isApplyingRemoteUpdate = false;
+let _syncTimeout: ReturnType<typeof setTimeout> | null = null;
+
+const notifySyncComplete = () => {
+  if (_syncTimeout) clearTimeout(_syncTimeout);
+  _syncTimeout = setTimeout(() => {
+    window.dispatchEvent(new CustomEvent('db-sync-complete'));
+  }, 100);
+};
 
 const SMALL_KEYS = [
   'serviflow_session',
@@ -256,6 +264,7 @@ const upsertIntoCacheArray = async (key: string, row: any) => {
 
     _cache[key] = sanitized;
     await persistArrayKey(key);
+    notifySyncComplete();
   } finally {
     _isApplyingRemoteUpdate = false;
   }
@@ -272,6 +281,7 @@ const removeFromCacheArray = async (key: string, id: string) => {
 
     _cache[key] = next;
     await persistArrayKey(key);
+    notifySyncComplete();
   } finally {
     _isApplyingRemoteUpdate = false;
   }
@@ -490,6 +500,7 @@ export const db = {
       }
 
       console.log(`[Sync Cloud] ${tableName} atualizado com sucesso.`);
+      notifySyncComplete();
       return { success: true, localChanged };
     } catch (err) {
       console.error(`[Sync Error] Falha crítica no Supabase para ${tableName}:`, err);
@@ -553,6 +564,7 @@ export const db = {
           results[response.table] = sanitizedData;
           await setCacheValue(storageKey, sanitizedData);
         }
+        notifySyncComplete();
       } finally {
         _isApplyingRemoteUpdate = false;
       }

@@ -17,6 +17,7 @@ import { buildExecutionReportHtml, EXECUTION_THEME } from '../services/reportPdf
 
 interface Props {
     customers: Customer[];
+    company: any;
     embeddedPlanId?: string | null;
     onBack?: () => void;
 }
@@ -312,7 +313,7 @@ const SelectionBar: React.FC<SelectionBarProps> = ({
 
 // ==================== COMPONENTE PRINCIPAL ====================
 
-const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId }) => {
+const WorksManager: React.FC<Props> = ({ customers, company, embeddedPlanId }) => {
     const [works, setWorks] = useState<WorkHeader[]>([]);
     const [activeWorkId, setActiveWorkId] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
@@ -322,7 +323,6 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId }) => {
     const [labor, setLabor] = useState<WorkLabor[]>([]);
     const [indirects, setIndirects] = useState<WorkIndirect[]>([]);
     const [taxes, setTaxes] = useState<WorkTax[]>([]);
-    const [company, setCompany] = useState<Partial<CompanyProfile>>({});
     const [activeTab, setActiveTab] = useState<'dados' | 'servicos' | 'recursos' | 'resumo'>('dados');
     const [resourceTab, setResourceTab] = useState<'material' | 'mo' | 'indireto' | 'impostos'>('material');
     const [showPreview, setShowPreview] = useState(false);
@@ -543,8 +543,6 @@ const WorksManager: React.FC<Props> = ({ customers, embeddedPlanId }) => {
 
     useEffect(() => {
         loadWorks();
-        const storedCompany = db.load('serviflow_company', {});
-        setCompany(storedCompany);
     }, [loadWorks]);
 
     useEffect(() => {

@@ -261,7 +261,6 @@ const AppContent: React.FC = () => {
         }
 
         notifyRef.current('Sincronização concluída com sucesso!', 'success');
-        window.dispatchEvent(new CustomEvent('db-sync-complete'));
       }
     } catch (e: any) {
       console.error('[Sync Error Detail]', e);
@@ -272,8 +271,24 @@ const AppContent: React.FC = () => {
     }
   }, []);
 
-  useEffect(() => {
-    let isMounted = true;
+    useEffect(() => {
+        const handleSync = () => {
+            console.log('[App] Refreshing state after sync event...');
+            setCustomers(db.load(STORAGE_KEYS.CUSTOMERS, []));
+            setCatalog(db.load(STORAGE_KEYS.CATALOG, []));
+            setOrders(db.load(STORAGE_KEYS.ORDERS, []));
+            setTransactions(db.load(STORAGE_KEYS.TRANSACTIONS, []));
+            setUsers(db.load(STORAGE_KEYS.USERS, INITIAL_USERS));
+            setLoans(db.load(STORAGE_KEYS.LOANS, []));
+            setCompany(db.load(STORAGE_KEYS.COMPANY, INITIAL_COMPANY));
+        };
+
+        window.addEventListener('db-sync-complete', handleSync);
+        return () => window.removeEventListener('db-sync-complete', handleSync);
+    }, []);
+
+    useEffect(() => {
+        let isMounted = true;
 
     const boot = async () => {
       if (hasBootedRef.current) return;
@@ -743,7 +758,7 @@ const AppContent: React.FC = () => {
                   )}
 
                   {item.id === 'construction' && (
-                    <UnifiedWorksManager customers={customers} onGenerateBudget={handleGenerateBudget} />
+                    <UnifiedWorksManager customers={customers} company={company} onGenerateBudget={handleGenerateBudget} />
                   )}
 
                   {item.id === 'search' && (

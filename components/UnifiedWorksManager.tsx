@@ -9,30 +9,40 @@ import { PlanningHeader, Customer } from '../types';
 import PlanningManager from './planning/PlanningManager';
 import WorksManager from './WorksManager';
 import { useNotify } from './ToastProvider';
-
 interface Props {
     customers: Customer[];
+    company: any;
     onGenerateBudget?: (plan: any, services: any[], totalMaterial: number, totalLabor: number, totalIndirect: number, bdiRate: number, taxRate: number) => void;
 }
 
-const UnifiedWorksManager: React.FC<Props> = ({ customers, onGenerateBudget }) => {
+const UnifiedWorksManager: React.FC<Props> = ({ customers, company: propsCompany, onGenerateBudget }) => {
     const [view, setView] = useState<'list' | 'detail'>('list');
     const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
     const [activeModule, setActiveModule] = useState<'planning' | 'execution'>('planning');
     const { notify } = useNotify();
 
     const [plans, setPlans] = useState<PlanningHeader[]>([]);
+    const [company, setCompany] = useState<any>(propsCompany);
     const [searchTerm, setSearchTerm] = useState('');
     const [layout, setLayout] = useState<'grid' | 'list'>('list');
 
     useEffect(() => {
         loadPlans();
+        loadCompany();
 
         // Listen for cloud sync completion to refresh list
-        const handleSync = () => loadPlans();
+        const handleSync = () => {
+            loadPlans();
+            loadCompany();
+        };
         window.addEventListener('db-sync-complete', handleSync);
         return () => window.removeEventListener('db-sync-complete', handleSync);
     }, []);
+
+    const loadCompany = () => {
+        const loaded = db.load('serviflow_company', null);
+        if (loaded) setCompany(loaded);
+    };
 
     const loadPlans = () => {
         const allPlans = db.load('serviflow_plans', []) as PlanningHeader[];
@@ -219,6 +229,7 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, onGenerateBudget }) =
                         <div className="h-full">
                             <PlanningManager
                                 customers={customers}
+                                company={company}
                                 embeddedPlanId={selectedPlanId}
                                 onBack={handleBack} // This might be redundant if we hide the internal back button
                                 onPlanCreated={(newPlan) => {
@@ -232,6 +243,7 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, onGenerateBudget }) =
                         <div className="h-full">
                             <WorksManager
                                 customers={customers}
+                                company={company}
                                 embeddedPlanId={selectedPlanId}
                                 onBack={handleBack}
                             />

@@ -12,6 +12,7 @@ import { buildPlanningReportHtml, PLANNING_THEME } from '../../services/planning
 
 interface Props {
     customers: Customer[];
+    company: any;
     onGenerateBudget?: (
         plan: any,
         services: any[],
@@ -28,6 +29,7 @@ interface Props {
 
 const PlanningManager: React.FC<Props> = ({
     customers,
+    company,
     onGenerateBudget,
     embeddedPlanId,
     onBack,
@@ -35,20 +37,6 @@ const PlanningManager: React.FC<Props> = ({
 }) => {
     const [showPreview, setShowPreview] = useState(false);
 
-    const company = React.useMemo(() => {
-        const loaded = db.load('serviflow_company', {
-            name: 'PRIME SERVIÇOS E MANUTENÇÃO LTDA',
-            cnpj: '12.345.678/0001-90',
-            logoSize: 70,
-        });
-        return {
-            name: loaded?.name || 'PRIME SERVIÇOS E MANUTENÇÃO LTDA',
-            cnpj: loaded?.cnpj || '',
-            phone: loaded?.phone || '',
-            logo: loaded?.logo || '',
-            logoSize: toNumber(loaded?.logoSize) || 70,
-        };
-    }, []);
 
     const planning = usePlanning(customers, embeddedPlanId);
 
