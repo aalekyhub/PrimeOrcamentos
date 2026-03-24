@@ -101,14 +101,6 @@ const BudgetItemsEditor: React.FC<BudgetItemsEditorProps> = ({
                 {items.map((item, index) => (
                     <div
                         key={item.id}
-                        draggable
-                        onDragStart={(e) => {
-                            if ((e.target as HTMLElement).tagName === 'INPUT') {
-                                e.preventDefault();
-                                return;
-                            }
-                            setDraggedItemIndex(index);
-                        }}
                         onDragOver={(e) => {
                             e.preventDefault();
                             if (draggedItemIndex !== null && draggedItemIndex !== index) {
@@ -124,7 +116,11 @@ const BudgetItemsEditor: React.FC<BudgetItemsEditorProps> = ({
                         className={`flex justify-between items-center p-2.5 rounded-lg border group gap-2 transition-all ${draggedItemIndex === index ? 'opacity-50 bg-blue-50 dark:bg-blue-900/20 border-blue-200' : 'bg-white dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 hover:border-blue-200 cursor-default'}`}
                     >
                         <div className="flex items-center gap-2 grow">
-                            <div className="cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 shrink-0">
+                            <div 
+                                draggable
+                                onDragStart={() => setDraggedItemIndex(index)}
+                                className="cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 shrink-0"
+                            >
                                 <GripVertical size={14} />
                             </div>
                             <div className="grow">

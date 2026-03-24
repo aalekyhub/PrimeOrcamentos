@@ -633,15 +633,6 @@ const BudgetManager: React.FC<Props> = ({
                       {items.map((item, index) => (
                         <div
                           key={item.id}
-                          draggable
-                          onDragStart={(e) => {
-                            if ((e.target as HTMLElement).tagName === 'INPUT' || (e.target as HTMLElement).tagName === 'TEXTAREA') {
-                              e.preventDefault();
-                              return;
-                            }
-                            setDraggedItemIndex(index);
-                            setDragOverItemIndex(index);
-                          }}
                           onDragEnter={() => setDragOverItemIndex(index)}
                           onDragOver={(e) => e.preventDefault()}
                           onDrop={(e) => {
@@ -657,9 +648,16 @@ const BudgetManager: React.FC<Props> = ({
                           className={`flex justify-between items-center p-2.5 rounded-lg border group gap-2 transition-all ${dragOverItemIndex === index ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200' : 'bg-white dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 hover:border-blue-200 cursor-default'}`}
                         >
                           <div className="flex items-center gap-2 grow">
-                            <div className="cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 shrink-0">
-                              <GripVertical size={14} />
-                            </div>
+                            <div
+                               draggable
+                               onDragStart={() => {
+                                 setDraggedItemIndex(index);
+                                 setDragOverItemIndex(index);
+                               }}
+                               className="cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 shrink-0"
+                             >
+                               <GripVertical size={14} />
+                             </div>
                             <div className="grow">
                               <textarea
                                 className="w-full bg-transparent text-[10px] font-black text-slate-900 dark:text-slate-100 uppercase mb-1 outline-none focus:bg-slate-50 dark:focus:bg-slate-800/50 rounded p-1 -ml-1 transition-all resize-none break-words leading-tight"
