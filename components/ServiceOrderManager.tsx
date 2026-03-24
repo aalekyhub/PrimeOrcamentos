@@ -342,8 +342,8 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                           onChange={e => setCurrentDesc(e.target.value)}
                         />
                       </div>
-                      <div className="md:col-span-2"><label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Valor Unit.</label><input type="number" className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} /></div>
-                      <div className="md:col-span-2"><label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Quantidade</label><input type="number" className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} /></div>
+                      <div className="md:col-span-2"><label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Valor Unit.</label><input type="number" className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 h-[42px] text-xs font-bold text-slate-900 dark:text-slate-100 outline-none" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} /></div>
+                      <div className="md:col-span-2"><label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Quantidade</label><input type="number" className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 h-[42px] text-xs font-bold text-slate-900 dark:text-slate-100 outline-none" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} /></div>
                       <div className="md:col-span-2"><button onClick={handleAddItem} className="bg-blue-600 text-white w-full h-[42px] rounded-xl flex items-center justify-center hover:bg-blue-700 transition-colors shadow-lg shadow-blue-900/20"><Plus className="w-5 h-5" /></button></div>
                     </div>
                     <div className="space-y-1.5">
@@ -365,13 +365,13 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                                 <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500">VALOR:</span>
                                 <input type="number" className="w-20 bg-transparent text-[9px] font-black text-slate-700 dark:text-slate-300 outline-none" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', Number(e.target.value))} />
                               </div>
+                              <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 rounded px-2 py-1 border border-slate-100 dark:border-slate-800 ml-auto group-hover:border-blue-200 transition-colors">
+                                <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500">TOTAL:</span>
+                                <input type="number" className="w-24 bg-transparent text-[11px] font-black text-blue-600 dark:text-blue-400 outline-none text-right" value={Number((item.unitPrice * item.quantity).toFixed(2))} onChange={e => updateItemTotal(item.id, Number(e.target.value))} />
+                              </div>
                             </div>
                           </div>
                           <div className="flex items-center gap-3 shrink-0">
-                            <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 rounded px-2 py-1 border border-slate-100 dark:border-slate-800">
-                              <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500">TOTAL:</span>
-                              <input type="number" className="w-24 bg-transparent text-[11px] font-black text-blue-600 dark:text-blue-400 outline-none text-right" value={Number((item.unitPrice * item.quantity).toFixed(2))} onChange={e => updateItemTotal(item.id, Number(e.target.value))} />
-                            </div>
                             <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="text-slate-300 dark:text-slate-700 hover:text-rose-500 dark:hover:text-rose-400 transition-colors"><Trash2 className="w-4 h-4" /></button>
                           </div>
                         </div>

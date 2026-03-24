@@ -614,15 +614,15 @@ const BudgetManager: React.FC<Props> = ({
                       </div>
                       <div className="w-24">
                         <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 block text-center">Unit</label>
-                        <input type="text" className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-xs font-black text-center outline-none uppercase text-slate-900 dark:text-slate-100" value={currentUnit} onChange={e => setCurrentUnit(e.target.value)} />
+                        <input type="text" className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 h-[58px] text-xs font-black text-center outline-none uppercase text-slate-900 dark:text-slate-100" value={currentUnit} onChange={e => setCurrentUnit(e.target.value)} />
                       </div>
                       <div className="w-24">
                         <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 block text-center">Qtd</label>
-                        <input type="number" min={1} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100" value={currentQty} onChange={e => setCurrentQty(Math.max(0, Number(e.target.value)))} />
+                        <input type="number" min={1} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 h-[58px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100" value={currentQty} onChange={e => setCurrentQty(Math.max(0, Number(e.target.value)))} />
                       </div>
                       <div className="w-32">
                         <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 block ml-1">Preço (R$)</label>
-                        <input type="number" min={0} step="0.01" className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-xs font-black outline-none text-slate-900 dark:text-slate-100" value={currentPrice} onChange={e => setCurrentPrice(Math.max(0, Number(e.target.value)))} />
+                        <input type="number" min={0} step="0.01" className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 h-[58px] text-xs font-black outline-none text-slate-900 dark:text-slate-100" value={currentPrice} onChange={e => setCurrentPrice(Math.max(0, Number(e.target.value)))} />
                       </div>
                       <div className="md:col-span-1">
                         <button onClick={handleAddItem} className="bg-blue-600 text-white w-full h-[58px] rounded-xl flex items-center justify-center hover:scale-105 transition-all shadow-md shadow-blue-950/30"><Plus className="w-6 h-6" /></button>
@@ -674,14 +674,14 @@ const BudgetManager: React.FC<Props> = ({
                                   <span className="text-[8px] font-bold text-slate-400">VALOR:</span>
                                   <input type="number" min={0} step="0.01" className="w-20 bg-transparent text-[9px] font-black text-slate-700 dark:text-slate-200 outline-none" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', Math.max(0, Number(e.target.value)))} />
                                 </div>
+                                <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 rounded px-2 py-1 border border-slate-100 dark:border-slate-700 ml-auto group-hover:border-blue-200 transition-colors">
+                                  <span className="text-[8px] font-bold text-slate-400">TOTAL:</span>
+                                  <input type="number" min={0} step="0.01" className="w-24 bg-transparent text-[11px] font-black text-blue-600 dark:text-blue-400 outline-none text-right" value={Number((safeNumber(item.unitPrice) * safeNumber(item.quantity)).toFixed(2))} onChange={e => updateItemTotal(item.id, Math.max(0, Number(e.target.value)))} />
+                                </div>
                               </div>
                             </div>
                           </div>
                           <div className="flex items-center gap-3 shrink-0">
-                            <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 rounded px-2 py-1 border border-slate-100 dark:border-slate-700">
-                              <span className="text-[8px] font-bold text-slate-400">TOTAL:</span>
-                              <input type="number" min={0} step="0.01" className="w-24 bg-transparent text-[11px] font-black text-blue-600 dark:text-blue-400 outline-none text-right" value={Number((safeNumber(item.unitPrice) * safeNumber(item.quantity)).toFixed(2))} onChange={e => updateItemTotal(item.id, Math.max(0, Number(e.target.value)))} />
-                            </div>
                             <div className="flex flex-col gap-0">
                               <button onClick={() => moveItem(index, 'up')} disabled={index === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronUp className="w-3 h-3" /></button>
                               <button onClick={() => moveItem(index, 'down')} disabled={index === items.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronDown className="w-3 h-3" /></button>
