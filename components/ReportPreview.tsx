@@ -150,6 +150,8 @@ const ReportPreview: React.FC<Props> = ({
                     margin-top: 15px !important;
                     margin-bottom: 5px !important;
                     line-height: 1.2 !important;
+                    break-after: avoid !important;
+                    page-break-after: avoid !important;
                 }
 
                 .pdf-page-content ul {
@@ -270,6 +272,8 @@ const ReportPreview: React.FC<Props> = ({
                         margin-top: 15px !important;
                         margin-bottom: 5px !important;
                         line-height: 1.2 !important;
+                        break-after: avoid !important;
+                        page-break-after: avoid !important;
                     }
 
                     .pdf-page-content ul {
