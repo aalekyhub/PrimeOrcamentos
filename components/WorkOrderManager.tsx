@@ -271,7 +271,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                             <div className="flex items-center gap-4">
                                 <div className="bg-slate-900 dark:bg-slate-800 p-2.5 rounded-xl text-white shadow-xl shadow-slate-200 dark:shadow-none"><HardHat className="w-5 h-5" /></div>
                                 <div>
-                                    <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-0.5">{editingOrderId ? `Editando Obra ${editingOrderId} ` : 'Nova OS de Obra'}</h3>
+                                    <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-0.5">{editingOrderId ? `Editando Obra ${editingOrderId}` : 'Nova OS de Obra'}</h3>
                                     <div className="flex items-center gap-2">
                                         <span className="text-[10px] font-black uppercase tracking-widest bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-md">Construção Civil</span>
                                     </div>
@@ -285,62 +285,119 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                 <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
-                                            <div className="flex justify-between items-center mb-2"><label className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest ml-1">Cliente</label><button onClick={() => setShowFullClientForm(true)} className="text-blue-600 dark:text-blue-400 text-[9px] font-black uppercase flex items-center gap-1 hover:underline"><UserPlus className="w-3 h-3" /> Novo</button></div>
-                                            <select className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500 transition-all custom-select" value={selectedCustomerId} onChange={e => setSelectedCustomerId(e.target.value)}><option value="">Selecione...</option>{customers.map(c => <option key={c.id} value={c.id} className="dark:bg-slate-900">{c.name}</option>)}</select>
+                                            <div className="flex justify-between items-center mb-2">
+                                                <label className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest ml-1">Cliente</label>
+                                                <button onClick={() => setShowFullClientForm(true)} className="text-blue-600 dark:text-blue-400 text-[9px] font-black uppercase flex items-center gap-1 hover:underline"><UserPlus className="w-3 h-3" /> Novo</button>
+                                            </div>
+                                            <select className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500 transition-all custom-select" value={selectedCustomerId} onChange={e => setSelectedCustomerId(e.target.value)}>
+                                                <option value="">Selecione...</option>
+                                                {customers.map(c => <option key={c.id} value={c.id} className="dark:bg-slate-900">{c.name}</option>)}
+                                            </select>
                                         </div>
-                                        <div><label className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-2 block ml-1">Valor Fechado do Contrato (Receita)</label><input type="number" placeholder="R$ 0,00" step="0.01" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500" value={contractPrice} onChange={e => setContractPrice(Number(e.target.value))} /></div>
-                                        <div className="md:col-span-2"><label className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-2 block ml-1">Título da Obra</label><input type="text" placeholder="Ex: Reforma da Cozinha" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500" value={osTitle} onChange={e => setOsTitle(e.target.value)} /></div>
+                                        <div>
+                                            <label className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-2 block ml-1">Título da Obra</label>
+                                            <input type="text" placeholder="Ex: Reforma da Cozinha" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500" value={osTitle} onChange={e => setOsTitle(e.target.value)} />
+                                        </div>
                                     </div>
                                 </div>
 
                                 <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm">
-                                    <div>
-                                        <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Observações Técnicas e Escopo Detalhado</label>
-                                        <RichTextEditor
-                                            value={diagnosis}
-                                            onChange={setDiagnosis}
-                                            placeholder="Descreva os serviços a serem executados por extenso..."
-                                        />
+                                    <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Observações Técnicas e Escopo Detalhado</label>
+                                    <RichTextEditor value={diagnosis} onChange={setDiagnosis} placeholder="Descreva os serviços a serem executados por extenso..." />
+                                </div>
+
+                                <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
+                                    <div className="flex justify-between items-center mb-4"><h4 className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b dark:border-slate-800 pb-2 grow mr-4">Peças e Serviços</h4></div>
+                                    <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
+                                        <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
+                                            <div className="md:col-span-6">
+                                                <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Descrição do Item</label>
+                                                <textarea
+                                                    placeholder="Descreva o item ou serviço..."
+                                                    className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none resize-none h-[42px]"
+                                                    value={currentDesc}
+                                                    onChange={e => setCurrentDesc(e.target.value)}
+                                                />
+                                            </div>
+                                            <div className="md:col-span-2"><label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Valor Unit.</label><input type="number" className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} /></div>
+                                            <div className="md:col-span-2"><label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Quantidade</label><input type="number" className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} /></div>
+                                            <div className="md:col-span-2"><button onClick={handleAddItem} className="bg-blue-600 text-white w-full h-[42px] rounded-xl flex items-center justify-center hover:bg-blue-700 transition-colors shadow-lg shadow-blue-900/20"><Plus className="w-5 h-5" /></button></div>
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            {items.map(item => (
+                                                <div key={item.id} className="flex justify-between items-center p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm gap-2">
+                                                    <div className="grow">
+                                                        <textarea
+                                                            className="w-full bg-transparent text-[10px] font-black text-slate-900 dark:text-slate-100 uppercase mb-1 outline-none focus:bg-slate-50 dark:focus:bg-slate-800/50 rounded p-1 -ml-1 transition-all resize-none break-words leading-tight"
+                                                            value={item.description}
+                                                            onChange={e => updateItem(item.id, 'description', e.target.value)}
+                                                            rows={Math.max(1, Math.min(4, Math.ceil(item.description.length / 50)))}
+                                                        />
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 rounded px-2 py-1 border border-slate-100 dark:border-slate-800">
+                                                                <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500">QTD:</span>
+                                                                <input type="number" className="w-12 bg-transparent text-[9px] font-black text-slate-700 dark:text-slate-300 outline-none" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', Number(e.target.value))} />
+                                                            </div>
+                                                            <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 rounded px-2 py-1 border border-slate-100 dark:border-slate-800">
+                                                                <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500">VALOR:</span>
+                                                                <input type="number" className="w-20 bg-transparent text-[9px] font-black text-slate-700 dark:text-slate-300 outline-none" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', Number(e.target.value))} />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-3 shrink-0">
+                                                        <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 rounded px-2 py-1 border border-slate-100 dark:border-slate-800">
+                                                            <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500">TOTAL:</span>
+                                                            <input type="number" className="w-24 bg-transparent text-[11px] font-black text-blue-600 dark:text-blue-400 outline-none text-right" value={Number((item.unitPrice * item.quantity).toFixed(2))} onChange={e => updateItemTotal(item.id, Number(e.target.value))} />
+                                                        </div>
+                                                        <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="text-slate-300 dark:text-slate-700 hover:text-rose-500 dark:hover:text-rose-400 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
 
                                 <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
-                                    <div className="flex justify-between items-center">
+                                    <div className="flex justify-between items-center mb-2">
                                         <h4 className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b dark:border-slate-800 pb-2 grow mr-6">FOTOS E ANEXOS DA OBRA</h4>
                                     </div>
                                     {descriptionBlocks.length === 0 && (
                                         <div className="bg-slate-50 dark:bg-slate-800/50 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[2rem] p-8 flex flex-col items-center justify-center gap-4 group hover:border-blue-400 transition-colors cursor-pointer" onClick={addTextBlock}>
                                             <div className="flex gap-4">
-                                                <button onClick={(e) => { e.stopPropagation(); addTextBlock(); }} className="bg-blue-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-blue-900/20 hover:scale-105 transition-all"><Type className="w-4 h-4" /> + Iniciar com Texto</button>
-                                                <button onClick={(e) => { e.stopPropagation(); addImageBlock(); }} className="bg-emerald-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-emerald-900/20 hover:scale-105 transition-all"><ImageIcon className="w-4 h-4" /> + Iniciar com Imagem</button>
+                                                <button onClick={(e) => { e.stopPropagation(); addTextBlock(); }} className="bg-blue-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-blue-900/20 hover:scale-105 transition-all"><Type className="w-4 h-4" /> + Texto</button>
+                                                <button onClick={(e) => { e.stopPropagation(); addImageBlock(); }} className="bg-emerald-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-emerald-900/20 hover:scale-105 transition-all"><ImageIcon className="w-4 h-4" /> + Imagem</button>
                                             </div>
-                                            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-widest mt-2 animate-pulse">Comece a montar o relatório da obra acima</p>
                                         </div>
                                     )}
                                     {descriptionBlocks.map((block) => (
-                                        <div key={block.id} className="relative group">
+                                        <div key={block.id} className="relative group p-2 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
                                             {block.type === 'text' && (
-                                                <div className="flex-1">
-                                                    <RichTextEditor
-                                                        id={block.id}
-                                                        value={block.content}
-                                                        onChange={(content) => updateBlockContent(block.id, content)}
-                                                        onAddText={addTextBlock}
-                                                        onAddImage={addImageBlock}
-                                                        placeholder="Detalhes da foto ou texto..."
-                                                    />
-                                                </div>
+                                                <RichTextEditor
+                                                    id={block.id}
+                                                    value={block.content}
+                                                    onChange={(content) => updateBlockContent(block.id, content)}
+                                                    onAddText={addTextBlock}
+                                                    onAddImage={addImageBlock}
+                                                    placeholder="Detalhes da foto ou texto..."
+                                                />
                                             )}
                                             {block.type === 'image' && (
-                                                <div className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl p-6 flex flex-col items-center justify-center gap-2">
+                                                <div className="w-full flex flex-col items-center justify-center gap-2">
                                                     {block.content ? (
-                                                        <div className="relative max-w-[200px]"><img src={block.content} className="w-full h-auto rounded-lg shadow-lg" /><button onClick={() => updateBlockContent(block.id, '')} className="absolute -top-2 -right-2 bg-rose-500 text-white p-1.5 rounded-full shadow-lg"><Trash2 className="w-3 h-3" /></button></div>
+                                                        <div className="relative max-w-[400px]">
+                                                            <img src={block.content} className="w-full h-auto rounded-lg shadow-lg" />
+                                                            <button onClick={() => updateBlockContent(block.id, '')} className="absolute -top-2 -right-2 bg-rose-500 text-white p-1.5 rounded-full shadow-lg"><Trash2 className="w-3 h-3" /></button>
+                                                        </div>
                                                     ) : (
-                                                        <label className="cursor-pointer flex flex-col items-center gap-1"><Upload className="w-5 h-5 text-blue-500" /><span className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase">Subir Foto</span><input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(block.id, e)} /></label>
+                                                        <label className="cursor-pointer flex flex-col items-center gap-1 p-8 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl w-full">
+                                                            <Upload className="w-8 h-8 text-blue-500" />
+                                                            <span className="text-[10px] font-black text-slate-400 uppercase">Subir Foto</span>
+                                                            <input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(block.id, e)} />
+                                                        </label>
                                                     )}
                                                 </div>
                                             )}
-                                            <button onClick={() => setDescriptionBlocks(descriptionBlocks.filter(b => b.id !== block.id))} className="absolute -top-2 -right-2 bg-slate-200 text-slate-500 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><X className="w-3 h-3" /></button>
+                                            <button onClick={() => setDescriptionBlocks(descriptionBlocks.filter(b => b.id !== block.id))} className="absolute -top-2 -right-2 bg-white dark:bg-slate-700 text-rose-500 p-1 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"><X className="w-4 h-4" /></button>
                                         </div>
                                     ))}
                                 </div>
@@ -348,8 +405,9 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
                             <div className="w-full lg:w-[380px] bg-slate-50 dark:bg-slate-950 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-slate-800 p-8 flex flex-col shrink-0 relative overflow-hidden h-auto lg:h-full">
                                 <div className="mb-6 p-6 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl shadow-sm text-center relative overflow-hidden">
-                                    <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">Valor do Contrato</p>
+                                    <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">Valor Total Fechado</p>
                                     <div className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter mb-1 whitespace-nowrap">R$ {contractPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                                    <p className="text-[8px] text-slate-400">Total Receita do Contrato</p>
                                 </div>
 
                                 <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-4 mb-6">
@@ -358,14 +416,15 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                         <span className="text-sm font-black text-slate-900 dark:text-white">{items.length}</span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase">Custo Estimado</span>
-                                        <span className="text-sm font-black text-slate-900 dark:text-white">R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                        <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Subtotal de Custos</span>
+                                        <span className="text-lg font-black text-slate-900 dark:text-white">R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                                     </div>
                                 </div>
 
                                 <div className="mt-auto">
                                     <button onClick={handleSaveOS} disabled={isSaving} className={`w-full ${isSaving ? 'bg-slate-800 cursor-not-allowed' : 'bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-700'} text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-slate-200 dark:shadow-none hover:shadow-2xl transition-all flex items-center justify-center gap-3`}>
-                                        <Save className={`w-4 h-4 ${isSaving ? 'animate-pulse' : ''} `} /> {isSaving ? 'Processando...' : 'Salvar Obra'}
+                                        <Save className={`w-4 h-4 ${isSaving ? 'animate-pulse' : ''} `} />
+                                        {isSaving ? 'Processando...' : 'Salvar Obra'}
                                     </button>
                                 </div>
                             </div>

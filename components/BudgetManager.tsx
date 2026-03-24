@@ -605,7 +605,12 @@ const BudgetManager: React.FC<Props> = ({
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
                       <div className="md:col-span-6">
                         <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 block ml-1">Descrição</label>
-                        <input type="text" className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none placeholder:text-slate-500" value={currentDesc} onChange={e => setCurrentDesc(e.target.value)} />
+                        <textarea
+                          placeholder="Ex: Reforma Geral de Ar-Condicionado"
+                          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none placeholder:text-slate-500 resize-none h-[58px]"
+                          value={currentDesc}
+                          onChange={e => setCurrentDesc(e.target.value)}
+                        />
                       </div>
                       <div className="w-24">
                         <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 block text-center">Unit</label>
@@ -652,7 +657,12 @@ const BudgetManager: React.FC<Props> = ({
                               <GripVertical size={14} />
                             </div>
                             <div className="grow">
-                              <p className="text-[10px] font-black text-slate-900 dark:text-slate-100 uppercase mb-1">{item.description}</p>
+                              <textarea
+                                className="w-full bg-transparent text-[10px] font-black text-slate-900 dark:text-slate-100 uppercase mb-1 outline-none focus:bg-slate-50 dark:focus:bg-slate-800/50 rounded p-1 -ml-1 transition-all resize-none break-words leading-tight"
+                                value={item.description}
+                                onChange={e => updateItem(item.id, 'description', e.target.value)}
+                                rows={Math.max(1, Math.min(4, Math.ceil(item.description.length / 50)))}
+                              />
                               <div className="flex items-center gap-2">
                                 <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 rounded px-2 py-1 border border-slate-100 dark:border-slate-700">
                                   <span className="text-[8px] font-bold text-slate-400">QTD:</span>

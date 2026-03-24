@@ -333,7 +333,15 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                   <div className="flex justify-between items-center mb-4"><h4 className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b dark:border-slate-800 pb-2 grow mr-4">Peças e Serviços</h4></div>
                   <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
-                      <div className="md:col-span-6"><label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Descrição do Item</label><input type="text" className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none" value={currentDesc} onChange={e => setCurrentDesc(e.target.value)} /></div>
+                      <div className="md:col-span-6">
+                        <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Descrição do Item</label>
+                        <textarea
+                          placeholder="Descreva o item ou serviço..."
+                          className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none resize-none h-[42px]"
+                          value={currentDesc}
+                          onChange={e => setCurrentDesc(e.target.value)}
+                        />
+                      </div>
                       <div className="md:col-span-2"><label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Valor Unit.</label><input type="number" className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} /></div>
                       <div className="md:col-span-2"><label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Quantidade</label><input type="number" className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} /></div>
                       <div className="md:col-span-2"><button onClick={handleAddItem} className="bg-blue-600 text-white w-full h-[42px] rounded-xl flex items-center justify-center hover:bg-blue-700 transition-colors shadow-lg shadow-blue-900/20"><Plus className="w-5 h-5" /></button></div>
@@ -342,7 +350,12 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                       {items.map(item => (
                         <div key={item.id} className="flex justify-between items-center p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm gap-2">
                           <div className="grow">
-                            <p className="text-[10px] font-black text-slate-900 dark:text-slate-100 uppercase mb-1">{item.description}</p>
+                            <textarea
+                              className="w-full bg-transparent text-[10px] font-black text-slate-900 dark:text-slate-100 uppercase mb-1 outline-none focus:bg-slate-50 dark:focus:bg-slate-800/50 rounded p-1 -ml-1 transition-all resize-none break-words leading-tight"
+                              value={item.description}
+                              onChange={e => updateItem(item.id, 'description', e.target.value)}
+                              rows={Math.max(1, Math.min(4, Math.ceil(item.description.length / 50)))}
+                            />
                             <div className="flex items-center gap-2">
                               <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 rounded px-2 py-1 border border-slate-100 dark:border-slate-800">
                                 <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500">QTD:</span>
