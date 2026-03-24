@@ -602,7 +602,7 @@ const BudgetManager: React.FC<Props> = ({
                       </select>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-[1fr_80px_80px_110px_56px] gap-2 items-end">
+                    <div className="grid grid-cols-1 md:grid-cols-[1fr_80px_80px_110px_56px] gap-2 items-start">
                       <div className="min-w-0">
                         <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center ml-1">Descrição</label>
                         <textarea
