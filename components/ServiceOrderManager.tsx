@@ -337,21 +337,22 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                         <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center ml-1">Descrição do Item</label>
                         <textarea
                           placeholder="Descreva o item ou serviço..."
-                          className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none resize-none h-[58px]"
+                          className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl py-2 px-4 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none resize-none h-[44px]"
                           value={currentDesc}
                           onChange={e => setCurrentDesc(e.target.value)}
                         />
                       </div>
                       <div className="text-center">
                         <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Valor Unit.</label>
-                        <input type="number" className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 h-[58px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} />
+                        <input type="number" className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 h-[44px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} />
                       </div>
                       <div className="text-center">
                         <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Qtd</label>
-                        <input type="number" className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 h-[58px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} />
+                        <input type="number" className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 h-[44px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} />
                       </div>
                       <div>
-                        <button onClick={handleAddItem} className="bg-blue-600 text-white w-full h-[58px] rounded-xl flex items-center justify-center hover:bg-blue-700 hover:scale-105 transition-all shadow-lg shadow-blue-900/20"><Plus className="w-5 h-5" /></button>
+                        <label className="mb-1.5 h-4 block"></label>
+                        <button onClick={handleAddItem} className="bg-blue-600 text-white w-full h-[44px] rounded-xl flex items-center justify-center hover:bg-blue-700 hover:scale-105 transition-all shadow-lg shadow-blue-900/20"><Plus className="w-5 h-5" /></button>
                       </div>
                     </div>
                     <div className="space-y-1.5">
