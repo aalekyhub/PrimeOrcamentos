@@ -326,23 +326,23 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                         <div className="space-y-1.5">
                                             {items.map(item => (
                                                 <div key={item.id} className="flex justify-between items-center p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm gap-2">
-                                                    <div className="grow">
+                                                    <div className="grow flex flex-col gap-1.5">
                                                         <textarea
-                                                            className="w-full bg-transparent text-[10px] font-black text-slate-900 dark:text-slate-100 uppercase mb-1 outline-none focus:bg-slate-50 dark:focus:bg-slate-800/50 rounded p-1 -ml-1 transition-all resize-none break-words leading-tight"
+                                                            className="w-full bg-transparent text-[10px] font-black text-slate-900 dark:text-slate-100 uppercase outline-none focus:bg-slate-50 dark:focus:bg-slate-800/50 rounded p-1 -ml-1 transition-all resize-none break-words leading-tight"
                                                             value={item.description}
                                                             onChange={e => updateItem(item.id, 'description', e.target.value)}
                                                             rows={Math.max(1, Math.min(4, Math.ceil(item.description.length / 50)))}
                                                         />
                                                         <div className="flex items-center gap-2">
-                                                            <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 rounded px-2 py-1 border border-slate-100 dark:border-slate-800">
+                                                            <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 rounded px-2.5 h-[30px] border border-slate-100 dark:border-slate-800">
                                                                 <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500">QTD:</span>
                                                                 <input type="number" className="w-12 bg-transparent text-[9px] font-black text-slate-700 dark:text-slate-300 outline-none" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', Number(e.target.value))} />
                                                             </div>
-                                                            <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 rounded px-2 py-1 border border-slate-100 dark:border-slate-800">
+                                                            <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 rounded px-2.5 h-[30px] border border-slate-100 dark:border-slate-800">
                                                                 <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500">VALOR:</span>
                                                                 <input type="number" className="w-20 bg-transparent text-[9px] font-black text-slate-700 dark:text-slate-300 outline-none" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', Number(e.target.value))} />
                                                             </div>
-                                                            <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 rounded px-2 py-1 border border-slate-100 dark:border-slate-800 ml-auto group-hover:border-blue-200 transition-colors">
+                                                            <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 rounded px-2.5 h-[30px] border border-slate-100 dark:border-slate-800 ml-auto group-hover:border-blue-200 transition-colors">
                                                                 <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500">TOTAL:</span>
                                                                 <input type="number" className="w-24 bg-transparent text-[11px] font-black text-blue-600 dark:text-blue-400 outline-none text-right" value={Number((item.unitPrice * item.quantity).toFixed(2))} onChange={e => updateItemTotal(item.id, Number(e.target.value))} />
                                                             </div>
