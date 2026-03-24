@@ -102,7 +102,13 @@ const BudgetItemsEditor: React.FC<BudgetItemsEditorProps> = ({
                     <div
                         key={item.id}
                         draggable
-                        onDragStart={() => setDraggedItemIndex(index)}
+                        onDragStart={(e) => {
+                            if ((e.target as HTMLElement).tagName === 'INPUT') {
+                                e.preventDefault();
+                                return;
+                            }
+                            setDraggedItemIndex(index);
+                        }}
                         onDragOver={(e) => {
                             e.preventDefault();
                             if (draggedItemIndex !== null && draggedItemIndex !== index) {

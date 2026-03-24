@@ -634,7 +634,11 @@ const BudgetManager: React.FC<Props> = ({
                         <div
                           key={item.id}
                           draggable
-                          onDragStart={() => {
+                          onDragStart={(e) => {
+                            if ((e.target as HTMLElement).tagName === 'INPUT' || (e.target as HTMLElement).tagName === 'TEXTAREA') {
+                              e.preventDefault();
+                              return;
+                            }
                             setDraggedItemIndex(index);
                             setDragOverItemIndex(index);
                           }}
