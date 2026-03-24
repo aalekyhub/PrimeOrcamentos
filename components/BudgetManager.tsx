@@ -602,9 +602,9 @@ const BudgetManager: React.FC<Props> = ({
                       </select>
                     </div>
 
-                    <div className="flex flex-col md:flex-row gap-2 items-end">
-                      <div className="flex-1 min-w-[300px]">
-                        <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 block ml-1">Descrição</label>
+                    <div className="grid grid-cols-1 md:grid-cols-[1fr_80px_80px_110px_56px] gap-2 items-end">
+                      <div className="min-w-0">
+                        <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center ml-1">Descrição</label>
                         <textarea
                           placeholder="Ex: Reforma Geral de Ar-Condicionado"
                           className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none placeholder:text-slate-500 resize-none h-[58px]"
@@ -612,19 +612,19 @@ const BudgetManager: React.FC<Props> = ({
                           onChange={e => setCurrentDesc(e.target.value)}
                         />
                       </div>
-                      <div className="w-20 flex-none text-center">
-                        <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 block">Unit</label>
+                      <div className="text-center">
+                        <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Unit</label>
                         <input type="text" className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl h-[58px] text-xs font-black text-center outline-none uppercase text-slate-900 dark:text-slate-100" value={currentUnit} onChange={e => setCurrentUnit(e.target.value)} />
                       </div>
-                      <div className="w-20 flex-none text-center">
-                        <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 block">Qtd</label>
+                      <div className="text-center">
+                        <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Qtd</label>
                         <input type="number" min={1} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl h-[58px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100" value={currentQty} onChange={e => setCurrentQty(Math.max(0, Number(e.target.value)))} />
                       </div>
-                      <div className="w-28 flex-none text-center">
-                        <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 block">Preço</label>
+                      <div className="text-center">
+                        <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Preço</label>
                         <input type="number" min={0} step="0.01" className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl h-[58px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100 placeholder:text-slate-500" value={currentPrice} onChange={e => setCurrentPrice(Math.max(0, Number(e.target.value)))} />
                       </div>
-                      <div className="w-14 flex-none">
+                      <div>
                         <button onClick={handleAddItem} className="bg-blue-600 text-white w-full h-[58px] rounded-xl flex items-center justify-center hover:scale-105 transition-all shadow-md shadow-blue-950/30"><Plus className="w-6 h-6" /></button>
                       </div>
                     </div>
