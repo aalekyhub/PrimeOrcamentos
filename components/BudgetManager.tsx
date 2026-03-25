@@ -646,48 +646,50 @@ const BudgetManager: React.FC<Props> = ({
                             setDraggedItemIndex(null);
                             setDragOverItemIndex(null);
                           }}
-                          className={`flex justify-between items-center p-2.5 rounded-lg border group gap-2 transition-all ${dragOverItemIndex === index ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200' : 'bg-white dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 hover:border-blue-200 cursor-default'}`}
+                          className={`grid grid-cols-[20px_1fr_80px_80px_110px_110px_32px] items-center p-2 rounded-lg border group gap-2 transition-all ${dragOverItemIndex === index ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200' : 'bg-white dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 hover:border-blue-200 cursor-default'}`}
                         >
-                          <div className="flex items-center gap-2 grow">
-                            <div
-                               draggable
-                               onDragStart={() => {
-                                 setDraggedItemIndex(index);
-                                 setDragOverItemIndex(index);
-                               }}
-                               className="cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 shrink-0"
-                             >
-                               <GripVertical size={14} />
-                             </div>
-                            <div className="grow flex flex-col gap-1.5">
-                              <textarea
-                                className="w-full bg-transparent text-[10px] font-black text-slate-900 dark:text-slate-100 uppercase outline-none focus:bg-slate-50 dark:focus:bg-slate-800/50 rounded p-1 -ml-1 transition-all resize-none break-words leading-tight"
-                                value={item.description}
-                                onChange={e => updateItem(item.id, 'description', e.target.value)}
-                                rows={Math.max(1, Math.min(4, Math.ceil(item.description.length / 50)))}
-                              />
-                              <div className="flex items-center gap-2">
-                                <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 rounded px-2.5 h-[30px] border border-slate-100 dark:border-slate-700">
-                                  <span className="text-[8px] font-bold text-slate-400">QTD:</span>
-                                  <input type="number" min={1} className="w-12 bg-transparent text-[9px] font-black text-slate-700 dark:text-slate-200 outline-none" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', Math.max(1, Number(e.target.value)))} />
-                                </div>
-                                <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 rounded px-2.5 h-[30px] border border-slate-100 dark:border-slate-700">
-                                  <span className="text-[8px] font-bold text-slate-400">VALOR:</span>
-                                  <input type="number" min={0} step="0.01" className="w-20 bg-transparent text-[9px] font-black text-slate-700 dark:text-slate-200 outline-none" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', Math.max(0, Number(e.target.value)))} />
-                                </div>
-                                <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 rounded px-2.5 h-[30px] border border-slate-100 dark:border-slate-700 ml-auto group-hover:border-blue-200 transition-colors">
-                                  <span className="text-[8px] font-bold text-slate-400">TOTAL:</span>
-                                  <input type="number" min={0} step="0.01" className="w-24 bg-transparent text-[11px] font-black text-blue-600 dark:text-blue-400 outline-none text-right" value={Number((safeNumber(item.unitPrice) * safeNumber(item.quantity)).toFixed(2))} onChange={e => updateItemTotal(item.id, Math.max(0, Number(e.target.value)))} />
-                                </div>
-                              </div>
+                          <div
+                            draggable
+                            onDragStart={() => {
+                              setDraggedItemIndex(index);
+                              setDragOverItemIndex(index);
+                            }}
+                            className="cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 shrink-0 flex items-center justify-center"
+                          >
+                            <GripVertical size={14} />
+                          </div>
+
+                          <div className="min-w-0">
+                            <textarea
+                              className="w-full bg-transparent text-[10px] font-black text-slate-900 dark:text-slate-100 uppercase outline-none focus:bg-slate-50 dark:focus:bg-slate-800/50 rounded px-1 transition-all resize-none break-words leading-tight h-[32px] py-1.5"
+                              value={item.description}
+                              onChange={e => updateItem(item.id, 'description', e.target.value)}
+                              rows={1}
+                            />
+                          </div>
+
+                          <div className="text-center">
+                            <input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-transparent focus:border-slate-200 dark:focus:border-slate-700 rounded h-[32px] text-[10px] font-bold text-center outline-none uppercase text-slate-900 dark:text-slate-100" value={item.unit} onChange={e => updateItem(item.id, 'unit', e.target.value)} />
+                          </div>
+
+                          <div className="text-center">
+                            <input type="number" min={1} className="w-full bg-slate-50 dark:bg-slate-800 border border-transparent focus:border-slate-200 dark:focus:border-slate-700 rounded h-[32px] text-[10px] font-bold text-center outline-none text-slate-900 dark:text-slate-100" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', Math.max(1, Number(e.target.value)))} />
+                          </div>
+
+                          <div className="text-center">
+                            <input type="number" min={0} step="0.01" className="w-full bg-slate-50 dark:bg-slate-800 border border-transparent focus:border-slate-200 dark:focus:border-slate-700 rounded h-[32px] text-[10px] font-bold text-center outline-none text-slate-900 dark:text-slate-100" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', Math.max(0, Number(e.target.value)))} />
+                          </div>
+
+                          <div className="text-right">
+                            <div className="bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100/50 dark:border-blue-900/20 rounded h-[32px] flex items-center justify-end px-2 text-[11px] font-black text-blue-600 dark:text-blue-400">
+                              {Number((safeNumber(item.unitPrice) * safeNumber(item.quantity)).toFixed(2)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                             </div>
                           </div>
-                          <div className="flex items-center gap-3 shrink-0">
-                            <div className="flex flex-col gap-0">
-                              <button onClick={() => moveItem(index, 'up')} disabled={index === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronUp className="w-3 h-3" /></button>
-                              <button onClick={() => moveItem(index, 'down')} disabled={index === items.length - 1} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronDown className="w-3 h-3" /></button>
-                            </div>
-                            <button onClick={() => setItems(prev => prev.filter(i => i.id !== item.id))} className="text-rose-300 hover:text-rose-600"><Trash2 className="w-3.5 h-3.5" /></button>
+
+                          <div className="flex justify-center">
+                            <button onClick={() => updateItem(item.id, 'delete', true)} className="text-slate-300 dark:text-slate-700 hover:text-rose-500 transition-colors">
+                              <Trash2 size={14} />
+                            </button>
                           </div>
                         </div>
                       ))}

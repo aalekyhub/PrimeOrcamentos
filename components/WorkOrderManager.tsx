@@ -3,7 +3,8 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
     Plus, Search, X, Trash2, Printer, Save, FileDown,
     UserPlus, HardHat, Eraser, FileText, ScrollText, Wallet,
-    Type, Image as ImageIcon, Zap, Upload, CheckCircle
+    Type, Image as ImageIcon, Zap, Upload, CheckCircle,
+    GripVertical
 } from 'lucide-react';
 import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock, Transaction } from '../types';
 import { useNotify } from './ToastProvider';
@@ -334,31 +335,38 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                         </div>
                                         <div className="space-y-1.5">
                                             {items.map(item => (
-                                                <div key={item.id} className="flex justify-between items-center p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm gap-2">
-                                                    <div className="grow flex flex-col gap-1.5">
+                                                <div key={item.id} className="grid grid-cols-[20px_1fr_110px_80px_110px_32px] items-center p-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm gap-2 transition-all">
+                                                    <div className="text-slate-300 dark:text-slate-600 shrink-0 flex items-center justify-center">
+                                                        <GripVertical size={14} />
+                                                    </div>
+
+                                                    <div className="min-w-0">
                                                         <textarea
-                                                            className="w-full bg-transparent text-[10px] font-black text-slate-900 dark:text-slate-100 uppercase outline-none focus:bg-slate-50 dark:focus:bg-slate-800/50 rounded p-1 -ml-1 transition-all resize-none break-words leading-tight"
+                                                            className="w-full bg-transparent text-[10px] font-black text-slate-900 dark:text-slate-100 uppercase outline-none focus:bg-slate-50 dark:focus:bg-slate-800/50 rounded px-1 transition-all resize-none break-words leading-tight h-[32px] py-1.5"
                                                             value={item.description}
                                                             onChange={e => updateItem(item.id, 'description', e.target.value)}
-                                                            rows={Math.max(1, Math.min(4, Math.ceil(item.description.length / 50)))}
+                                                            rows={1}
                                                         />
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 rounded px-2.5 h-[30px] border border-slate-100 dark:border-slate-800">
-                                                                <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500">QTD:</span>
-                                                                <input type="number" className="w-12 bg-transparent text-[9px] font-black text-slate-700 dark:text-slate-300 outline-none" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', Number(e.target.value))} />
-                                                            </div>
-                                                            <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 rounded px-2.5 h-[30px] border border-slate-100 dark:border-slate-800">
-                                                                <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500">VALOR:</span>
-                                                                <input type="number" className="w-20 bg-transparent text-[9px] font-black text-slate-700 dark:text-slate-300 outline-none" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', Number(e.target.value))} />
-                                                            </div>
-                                                            <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 rounded px-2.5 h-[30px] border border-slate-100 dark:border-slate-800 ml-auto group-hover:border-blue-200 transition-colors">
-                                                                <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500">TOTAL:</span>
-                                                                <input type="number" className="w-24 bg-transparent text-[11px] font-black text-blue-600 dark:text-blue-400 outline-none text-right" value={Number((item.unitPrice * item.quantity).toFixed(2))} onChange={e => updateItemTotal(item.id, Number(e.target.value))} />
-                                                            </div>
+                                                    </div>
+
+                                                    <div className="text-center">
+                                                        <input type="number" className="w-full bg-slate-50 dark:bg-slate-800 border border-transparent focus:border-slate-200 dark:focus:border-slate-700 rounded h-[32px] text-[10px] font-bold text-center outline-none text-slate-900 dark:text-slate-100" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', Number(e.target.value))} />
+                                                    </div>
+
+                                                    <div className="text-center">
+                                                        <input type="number" className="w-full bg-slate-50 dark:bg-slate-800 border border-transparent focus:border-slate-200 dark:focus:border-slate-700 rounded h-[32px] text-[10px] font-bold text-center outline-none text-slate-900 dark:text-slate-100" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', Number(e.target.value))} />
+                                                    </div>
+
+                                                    <div className="text-right">
+                                                        <div className="bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100/50 dark:border-blue-900/20 rounded h-[32px] flex items-center justify-end px-2 text-[11px] font-black text-blue-600 dark:text-blue-400">
+                                                            {(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-center gap-3 shrink-0">
-                                                        <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="text-slate-300 dark:text-slate-700 hover:text-rose-500 dark:hover:text-rose-400 transition-colors"><Trash2 className="w-4 h-4" /></button>
+
+                                                    <div className="flex justify-center">
+                                                        <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="text-slate-300 dark:text-slate-700 hover:text-rose-500 transition-colors">
+                                                            <Trash2 size={14} />
+                                                        </button>
                                                     </div>
                                                 </div>
                                             ))}
