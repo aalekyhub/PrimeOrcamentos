@@ -31,10 +31,10 @@ export const PlanningList: React.FC<PlanningListProps> = ({ plans, onCreatePlan,
                     <div
                         key={plan.id}
                         onClick={() => onSelectPlan(plan.id)}
-                        className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 hover:shadow-md transition-all cursor-pointer group relative overflow-hidden"
+                        className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-4 hover:shadow-md transition-all cursor-pointer group relative overflow-hidden"
                     >
                         <div className="absolute top-0 left-0 w-1.5 h-full bg-blue-500 group-hover:bg-blue-600 transition-colors"></div>
-                        <div className="flex justify-between items-start mb-4 pl-2">
+                        <div className="flex justify-between items-start mb-2.5 pl-2">
                             <div className="flex-1 min-w-0 pr-2">
                                 <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg group-hover:text-blue-700 transition-colors truncate uppercase">{plan.name}</h3>
                                 <p className="text-sm text-slate-500 font-medium truncate">{plan.client_name || 'Cliente não informado'}</p>
@@ -45,7 +45,7 @@ export const PlanningList: React.FC<PlanningListProps> = ({ plans, onCreatePlan,
                             </span>
                         </div>
 
-                        <div className="pl-2 space-y-2 mb-6">
+                        <div className="pl-2 space-y-2 mb-3">
                             <div className="flex items-center text-xs text-slate-500">
                                 <Calendar size={14} className="mr-2 opacity-50" />
                                 Criado em {new Date(plan.created_at).toLocaleDateString()}
@@ -56,7 +56,7 @@ export const PlanningList: React.FC<PlanningListProps> = ({ plans, onCreatePlan,
                             </div>
                         </div>
 
-                        <div className="pl-2 border-t border-slate-100 dark:border-slate-800 pt-4 flex justify-between items-center">
+                        <div className="pl-2 border-t border-slate-100 dark:border-slate-800 pt-3 flex justify-between items-center">
                             <div className="flex flex-col">
                                 <span className="text-[10px] font-bold text-slate-400 uppercase">Custo Estimado</span>
                                 <span className="font-black text-slate-700 dark:text-slate-200">

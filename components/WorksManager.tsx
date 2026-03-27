@@ -1051,11 +1051,11 @@ const WorksManager: React.FC<Props> = ({ customers, company, embeddedPlanId }) =
                                     setCurrentWork(work);
                                     loadWorkDetails(work.id);
                                 }}
-                                className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 hover:shadow-md transition-all cursor-pointer group relative overflow-hidden"
+                                className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-4 hover:shadow-md transition-all cursor-pointer group relative overflow-hidden"
                             >
                                 <div className="absolute top-0 left-0 w-1.5 h-full bg-green-500 group-hover:bg-green-600 transition-colors" />
 
-                                <div className="flex justify-between items-start mb-4 pl-2">
+                                <div className="flex justify-between items-start mb-2.5 pl-2">
                                     <div className="flex-1 min-w-0 pr-2">
                                         <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg group-hover:text-green-700 transition-colors truncate uppercase">
                                             {work.name}
@@ -1073,7 +1073,7 @@ const WorksManager: React.FC<Props> = ({ customers, company, embeddedPlanId }) =
                                     </span>
                                 </div>
 
-                                <div className="pl-2 space-y-2 mb-6">
+                                <div className="pl-2 space-y-2 mb-3">
                                     <div className="flex items-center text-xs text-slate-500">
                                         <Calendar size={14} className="mr-2 opacity-50" />
                                         Iniciada em {new Date(work.start_date).toLocaleDateString()}
@@ -1084,7 +1084,7 @@ const WorksManager: React.FC<Props> = ({ customers, company, embeddedPlanId }) =
                                     </div>
                                 </div>
 
-                                <div className="pl-2 border-t border-slate-100 dark:border-slate-800 pt-4 flex justify-between items-center">
+                                <div className="pl-2 border-t border-slate-100 dark:border-slate-800 pt-3 flex justify-between items-center">
                                     <div className="flex gap-2">
                                         <button
                                             onClick={(e) => {
@@ -1658,10 +1658,10 @@ const WorksManager: React.FC<Props> = ({ customers, company, embeddedPlanId }) =
                                         { label: 'BDI', value: calculations.bdiValue, icon: TrendingUp, color: 'violet', desc: 'BDI' },
                                         { label: 'Impostos', value: calculations.otherTaxesValue ?? (calculations.totalTaxes - calculations.bdiValue), icon: Percent, color: 'blue', desc: 'IMPOSTOS' },
                                     ].map((item) => (
-                                        <div key={item.label} className={`bg-${item.color}-50 dark:bg-${item.color}-900/20 p-5 rounded-2xl border border-${item.color}-200 dark:border-${item.color}-800 shadow-sm transition-all hover:shadow-md`}>
-                                            <div className="flex justify-between items-start mb-2">
+                                        <div key={item.label} className={`bg-${item.color}-50 dark:bg-${item.color}-900/20 p-4 rounded-2xl border border-${item.color}-200 dark:border-${item.color}-800 shadow-sm transition-all hover:shadow-md`}>
+                                            <div className="flex justify-between items-start mb-1.5">
                                                 <span className={`text-[10px] font-bold text-${item.color}-600 dark:text-${item.color}-400 uppercase tracking-widest`}>{item.label}</span>
-                                                <div className={`bg-${item.color}-100 dark:bg-${item.color}-900/40 p-1.5 rounded-lg`}>
+                                                <div className={`bg-${item.color}-100 dark:bg-${item.color}-900/40 p-1 rounded-lg`}>
                                                     <item.icon size={16} className={`text-${item.color}-600 dark:text-${item.color}-400`} />
                                                 </div>
                                             </div>

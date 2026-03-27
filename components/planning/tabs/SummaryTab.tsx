@@ -24,10 +24,10 @@ export const SummaryTab = React.memo(({
                     { label: 'BDI', value: calculations.bdiValue, icon: TrendingUp, color: 'violet', desc: 'BDI' },
                     { label: 'Impostos', value: calculations.otherTaxesValue, icon: Percent, color: 'blue', desc: 'Taxas sobre Faturamento' },
                 ].map((item) => (
-                    <div key={item.label} className={`bg-${item.color}-50 dark:bg-${item.color}-900/20 p-5 rounded-2xl border border-${item.color}-200 dark:border-${item.color}-800 shadow-sm transition-all hover:shadow-md`}>
-                        <div className="flex justify-between items-start mb-2">
+                    <div key={item.label} className={`bg-${item.color}-50 dark:bg-${item.color}-900/20 p-4 rounded-2xl border border-${item.color}-200 dark:border-${item.color}-800 shadow-sm transition-all hover:shadow-md`}>
+                        <div className="flex justify-between items-start mb-1.5">
                             <span className={`text-[10px] font-bold text-${item.color}-600 dark:text-${item.color}-400 uppercase tracking-widest`}>{item.label}</span>
-                            <div className={`bg-${item.color}-100 dark:bg-${item.color}-900/40 p-1.5 rounded-lg`}>
+                            <div className={`bg-${item.color}-100 dark:bg-${item.color}-900/40 p-1 rounded-lg`}>
                                 <item.icon size={16} className={`text-${item.color}-600 dark:text-${item.color}-400`} />
                             </div>
                         </div>
