@@ -37,7 +37,7 @@ interface ResourcesTabProps {
     setActiveResTab: (tab: ResourceTab) => void;
 }
 
-export const ResourcesTab: React.FC<ResourcesTabProps> = ({
+export const ResourcesTab = React.memo(({
     planId,
     materials,
     labor,
@@ -60,7 +60,7 @@ export const ResourcesTab: React.FC<ResourcesTabProps> = ({
     onDeleteMultipleIndirects,
     activeResTab,
     setActiveResTab,
-}) => {
+}: ResourcesTabProps) => {
     const [selectedMaterials, setSelectedMaterials] = useState<string[]>([]);
     const [selectedLabor, setSelectedLabor] = useState<string[]>([]);
     const [selectedIndirects, setSelectedIndirects] = useState<string[]>([]);
@@ -433,4 +433,4 @@ export const ResourcesTab: React.FC<ResourcesTabProps> = ({
             </div>
         </div>
     );
-};
+});

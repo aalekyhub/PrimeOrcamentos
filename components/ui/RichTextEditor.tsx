@@ -168,4 +168,4 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeh
   );
 };
 
-export default RichTextEditor;
+export default React.memo(RichTextEditor);

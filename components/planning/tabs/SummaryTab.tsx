@@ -8,12 +8,12 @@ interface SummaryTabProps {
     hasGenerateBudget: boolean;
 }
 
-export const SummaryTab: React.FC<SummaryTabProps> = ({
+export const SummaryTab = React.memo(({
     calculations,
     onGenerateBudget,
     onPreviewReport,
     hasGenerateBudget,
-}) => {
+}: SummaryTabProps) => {
     return (
         <div className="max-w-5xl mx-auto space-y-8 pb-12">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
@@ -77,4 +77,4 @@ export const SummaryTab: React.FC<SummaryTabProps> = ({
             </div>
         </div>
     );
-};
+});

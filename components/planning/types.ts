@@ -17,6 +17,7 @@ export interface PlanningHeader {
     status: 'Planejamento' | 'Em Andamento' | 'Concluído' | 'Cancelado';
     created_at: string;
     total_real_cost?: number;
+    annex_image?: string;
 }
 
 export interface PlannedService {

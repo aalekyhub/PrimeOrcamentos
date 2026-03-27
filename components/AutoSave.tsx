@@ -16,7 +16,7 @@ export const AutoSave = <T,>({
   id,
   data,
   onSave,
-  delay = 2000,
+  delay = 4000,
   successDuration = 5000,
 }: AutoSaveProps<T>) => {
   const [status, setStatus] = useState<LocalAutoSaveStatus>('idle');
@@ -82,7 +82,7 @@ export const AutoSave = <T,>({
       resetStatusTimer.current = null;
     }
 
-    setStatus('idle');
+    if (status !== 'idle') setStatus('idle');
     setError(null);
 
     const currentVersion = ++saveVersion.current;

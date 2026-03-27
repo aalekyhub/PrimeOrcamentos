@@ -16,7 +16,7 @@ interface ServicesTabProps {
     planId: string;
 }
 
-export const ServicesTab: React.FC<ServicesTabProps> = ({
+export const ServicesTab = React.memo(({
     services,
     onAddService,
     onUpdateService,
@@ -24,7 +24,7 @@ export const ServicesTab: React.FC<ServicesTabProps> = ({
     onDeleteMultipleServices,
     onReorderServices,
     planId,
-}) => {
+}: ServicesTabProps) => {
     const [selectedServices, setSelectedServices] = React.useState<string[]>([]);
     const { draggedIndex, handleDragStart, handleDragOver, handleDragEnd, moveItem } =
         useDragAndDrop<PlannedService>((newOrder) => {
@@ -129,4 +129,4 @@ export const ServicesTab: React.FC<ServicesTabProps> = ({
             </div>
         </div>
     );
-};
+});

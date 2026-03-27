@@ -101,4 +101,4 @@ const BudgetDescriptionEditor: React.FC<BudgetDescriptionEditorProps> = ({ block
     );
 };
 
-export default BudgetDescriptionEditor;
+export default React.memo(BudgetDescriptionEditor);

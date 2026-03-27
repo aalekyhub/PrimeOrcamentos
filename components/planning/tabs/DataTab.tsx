@@ -7,7 +7,7 @@ interface DataTabProps {
     onUpdatePlan: (plan: PlanningHeader) => void;
 }
 
-export const DataTab: React.FC<DataTabProps> = ({ plan, customers, onUpdatePlan }) => {
+export const DataTab = React.memo(({ plan, customers, onUpdatePlan }: DataTabProps) => {
     return (
         <div className="max-w-2xl mx-auto space-y-8 animate-in slide-in-from-bottom-4">
             <div className="grid grid-cols-2 gap-6">
@@ -128,4 +128,4 @@ export const DataTab: React.FC<DataTabProps> = ({ plan, customers, onUpdatePlan 
             </div>
         </div>
     );
-};
+});
