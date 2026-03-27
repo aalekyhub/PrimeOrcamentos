@@ -77,6 +77,8 @@ export const buildPlanningReportHtml = (
         totalLabor: number;
         totalIndirect: number;
         totalTax: number;
+        bdiValue?: number;
+        otherTaxesValue?: number;
         totalGeneral: number;
     },
     company: {
@@ -230,28 +232,34 @@ export const buildPlanningReportHtml = (
 
                 <table style="width:100%; border-collapse:collapse; table-layout:fixed; margin:0 0 20px 0;">
                     <tr>
-                        <td style="width:25%; padding-right:5px; vertical-align:top;">
+                        <td style="width:20%; padding-right:5px; vertical-align:top;">
                             <div style="background:#ecfdf5; border-bottom:2px solid #10b981; border-radius:6px; padding:12px; height:100%;">
                                 <span style="font-size:8px; font-weight:700; color:#059669; text-transform:uppercase;">Materiais</span>
                                 <span style="font-size:16px; font-weight:800; color:#064e3b; display:block; margin-top:4px;">R$ ${formatMoney(calculations.totalMaterial)}</span>
                             </div>
                         </td>
-                        <td style="width:25%; padding:0 5px; vertical-align:top;">
+                        <td style="width:20%; padding:0 5px; vertical-align:top;">
                             <div style="background:#fffbeb; border-bottom:2px solid #f59e0b; border-radius:6px; padding:12px; height:100%;">
                                 <span style="font-size:8px; font-weight:700; color:#d97706; text-transform:uppercase;">Mão de Obra</span>
                                 <span style="font-size:16px; font-weight:800; color:#78350f; display:block; margin-top:4px;">R$ ${formatMoney(calculations.totalLabor)}</span>
                             </div>
                         </td>
-                        <td style="width:25%; padding:0 5px; vertical-align:top;">
+                        <td style="width:20%; padding:0 5px; vertical-align:top;">
                             <div style="background:#f8fafc; border-bottom:2px solid #64748b; border-radius:6px; padding:12px; height:100%;">
                                 <span style="font-size:8px; font-weight:700; color:#475569; text-transform:uppercase;">Custos Indiretos</span>
                                 <span style="font-size:16px; font-weight:800; color:#0f172a; display:block; margin-top:4px;">R$ ${formatMoney(calculations.totalIndirect)}</span>
                             </div>
                         </td>
-                        <td style="width:25%; padding-left:5px; vertical-align:top;">
+                        <td style="width:20%; padding:0 5px; vertical-align:top;">
+                            <div style="background:#f5f3ff; border-bottom:2px solid #7c3aed; border-radius:6px; padding:12px; height:100%;">
+                                <span style="font-size:8px; font-weight:700; color:#7c3aed; text-transform:uppercase;">BDI</span>
+                                <span style="font-size:16px; font-weight:800; color:#4c1d95; display:block; margin-top:4px;">R$ ${formatMoney(calculations.bdiValue || 0)}</span>
+                            </div>
+                        </td>
+                        <td style="width:20%; padding-left:5px; vertical-align:top;">
                             <div style="background:${theme.lightBg}; border-bottom:2px solid ${theme.primaryColor}; border-radius:6px; padding:12px; height:100%;">
                                 <span style="font-size:8px; font-weight:700; color:${theme.primaryColor}; text-transform:uppercase;">Impostos</span>
-                                <span style="font-size:16px; font-weight:800; color:${theme.secondaryColor}; display:block; margin-top:4px;">R$ ${formatMoney(calculations.totalTax)}</span>
+                                <span style="font-size:16px; font-weight:800; color:${theme.secondaryColor}; display:block; margin-top:4px;">R$ ${formatMoney(calculations.otherTaxesValue ?? (calculations.totalTax - (calculations.bdiValue || 0)))}</span>
                             </div>
                         </td>
                     </tr>

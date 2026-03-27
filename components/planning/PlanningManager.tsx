@@ -154,6 +154,8 @@ const PlanningManager: React.FC<Props> = ({
                             totalLabor: calculations.totalLabor,
                             totalIndirect: calculations.totalIndirect,
                             totalTax: calculations.totalTaxes,
+                            bdiValue: calculations.bdiValue,
+                            otherTaxesValue: calculations.otherTaxesValue,
                             totalGeneral: calculations.totalGeneral
                         },
                         company,
