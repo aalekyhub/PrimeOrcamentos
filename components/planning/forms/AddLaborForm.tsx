@@ -11,8 +11,8 @@ export const AddLaborForm: React.FC<AddLaborFormProps> = ({ onAdd, planId }) => 
     const [role, setRole] = useState('');
     const [type, setType] = useState<'Diária' | 'Hora' | 'Empreitada'>('Diária');
     const [unit, setUnit] = useState('');
-    const [qty, setQty] = useState(0);
-    const [cost, setCost] = useState(0);
+    const [qty, setQty] = useState('');
+    const [cost, setCost] = useState('');
     const { notify } = useNotify();
 
     const handleSubmit = () => {
@@ -21,19 +21,29 @@ export const AddLaborForm: React.FC<AddLaborFormProps> = ({ onAdd, planId }) => 
             return;
         }
 
+        const numericQty = parseFloat(qty) || 0;
+        const numericCost = parseFloat(cost) || 0;
+
         onAdd({
             role: role.toUpperCase(),
             cost_type: type,
-            unit: unit.toUpperCase(),
-            quantity: qty,
-            unit_cost: cost,
+            unit: (unit || 'un').toUpperCase(),
+            quantity: numericQty,
+            unit_cost: numericCost,
             charges_percent: 0,
         });
 
         setRole('');
         setUnit('');
-        setQty(0);
-        setCost(0);
+        setQty('');
+        setCost('');
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleSubmit();
+        }
     };
 
     return (
@@ -48,6 +58,7 @@ export const AddLaborForm: React.FC<AddLaborFormProps> = ({ onAdd, planId }) => 
                         type="text"
                         value={role}
                         onChange={(e) => setRole(e.target.value)}
+                        onKeyDown={handleKeyDown}
                         className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100"
                         placeholder="Ex: Pedreiro"
                     />
@@ -57,7 +68,8 @@ export const AddLaborForm: React.FC<AddLaborFormProps> = ({ onAdd, planId }) => 
                     <input
                         type="number"
                         value={qty}
-                        onChange={(e) => setQty(parseFloat(e.target.value) || 0)}
+                        onChange={(e) => setQty(e.target.value)}
+                        onKeyDown={handleKeyDown}
                         className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100"
                         placeholder="0"
                     />
@@ -68,6 +80,7 @@ export const AddLaborForm: React.FC<AddLaborFormProps> = ({ onAdd, planId }) => 
                         type="text"
                         value={unit}
                         onChange={(e) => setUnit(e.target.value)}
+                        onKeyDown={handleKeyDown}
                         className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100"
                         placeholder="un"
                     />
@@ -77,13 +90,15 @@ export const AddLaborForm: React.FC<AddLaborFormProps> = ({ onAdd, planId }) => 
                     <input
                         type="number"
                         value={cost}
-                        onChange={(e) => setCost(parseFloat(e.target.value) || 0)}
+                        onChange={(e) => setCost(e.target.value)}
+                        onKeyDown={handleKeyDown}
                         className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100"
                         placeholder="0.00"
                     />
                 </div>
                 <div className="md:col-span-2">
                     <button
+                        type="button"
                         onClick={handleSubmit}
                         className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-bold text-xs h-9 flex items-center justify-center gap-1 shadow-md shadow-blue-950/20"
                     >

@@ -10,9 +10,9 @@ interface AddServiceFormProps {
 export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onAdd, planId }) => {
     const [desc, setDesc] = useState('');
     const [unit, setUnit] = useState('');
-    const [qty, setQty] = useState(0);
-    const [matCost, setMatCost] = useState(0);
-    const [labCost, setLabCost] = useState(0);
+    const [qty, setQty] = useState('');
+    const [matCost, setMatCost] = useState('');
+    const [labCost, setLabCost] = useState('');
     const { notify } = useNotify();
 
     const handleSubmit = () => {
@@ -21,21 +21,32 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onAdd, planId })
             return;
         }
 
+        const numericQty = parseFloat(qty) || 0;
+        const numericMat = parseFloat(matCost) || 0;
+        const numericLab = parseFloat(labCost) || 0;
+
         onAdd({
             description: desc.toUpperCase(),
-            unit,
-            quantity: qty,
-            unit_material_cost: matCost,
-            unit_labor_cost: labCost,
+            unit: (unit || 'un').toUpperCase(),
+            quantity: numericQty,
+            unit_material_cost: numericMat,
+            unit_labor_cost: numericLab,
             unit_indirect_cost: 0,
         });
 
         // Reset form
         setDesc('');
         setUnit('');
-        setQty(0);
-        setMatCost(0);
-        setLabCost(0);
+        setQty('');
+        setMatCost('');
+        setLabCost('');
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleSubmit();
+        }
     };
 
     return (
@@ -52,6 +63,7 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onAdd, planId })
                         type="text"
                         value={desc}
                         onChange={(e) => setDesc(e.target.value)}
+                        onKeyDown={handleKeyDown}
                         className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100"
                         placeholder="Ex: Pintura de Parede"
                     />
@@ -63,7 +75,8 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onAdd, planId })
                     <input
                         type="number"
                         value={qty}
-                        onChange={(e) => setQty(parseFloat(e.target.value) || 0)}
+                        onChange={(e) => setQty(e.target.value)}
+                        onKeyDown={handleKeyDown}
                         className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100"
                         placeholder="0"
                     />
@@ -76,6 +89,7 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onAdd, planId })
                         type="text"
                         value={unit}
                         onChange={(e) => setUnit(e.target.value)}
+                        onKeyDown={handleKeyDown}
                         className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100"
                         placeholder="m²"
                     />
@@ -87,7 +101,8 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onAdd, planId })
                     <input
                         type="number"
                         value={matCost}
-                        onChange={(e) => setMatCost(parseFloat(e.target.value) || 0)}
+                        onChange={(e) => setMatCost(e.target.value)}
+                        onKeyDown={handleKeyDown}
                         className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100"
                         placeholder="0.00"
                     />
@@ -99,13 +114,15 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onAdd, planId })
                     <input
                         type="number"
                         value={labCost}
-                        onChange={(e) => setLabCost(parseFloat(e.target.value) || 0)}
+                        onChange={(e) => setLabCost(e.target.value)}
+                        onKeyDown={handleKeyDown}
                         className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-900 dark:text-slate-100"
                         placeholder="0.00"
                     />
                 </div>
                 <div className="md:col-span-2">
                     <button
+                        type="button"
                         onClick={handleSubmit}
                         className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-bold text-xs h-9 flex items-center justify-center gap-1 shadow-md shadow-blue-950/20"
                     >

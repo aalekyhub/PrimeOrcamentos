@@ -1254,10 +1254,11 @@ const WorksManager: React.FC<Props> = ({ customers, company, embeddedPlanId }) =
                                                 <div className="md:col-span-2">
                                                     <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Valor Unit.</label>
                                                     <input type="number" placeholder="0" value={newMaterial.cost} onChange={e => setNewMaterial(p => ({ ...p, cost: e.target.value }))}
+                                                        onKeyDown={(e) => e.key === 'Enter' && document.getElementById('add-material-btn')?.click()}
                                                         className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
                                                 </div>
                                                 <div className="md:col-span-2">
-                                                    <button onClick={() => {
+                                                    <button id="add-material-btn" type="button" onClick={() => {
                                                         if (!newMaterial.name) return;
                                                         const qty = parseFloat(newMaterial.qty) || 0;
                                                         const cost = parseFloat(newMaterial.cost) || 0;
@@ -1275,25 +1276,29 @@ const WorksManager: React.FC<Props> = ({ customers, company, embeddedPlanId }) =
                                                 <div className="md:col-span-5">
                                                     <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Função/Cargo</label>
                                                     <input type="text" placeholder="Ex: Pedreiro" value={newLabor.role} onChange={e => setNewLabor(p => ({ ...p, role: e.target.value }))}
+                                                        onKeyDown={(e) => e.key === 'Enter' && document.getElementById('add-labor-btn')?.click()}
                                                         className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-green-500" />
                                                 </div>
                                                 <div className="md:col-span-2">
                                                     <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Qtd</label>
                                                     <input type="number" placeholder="0" value={newLabor.qty} onChange={e => setNewLabor(p => ({ ...p, qty: e.target.value }))}
+                                                        onKeyDown={(e) => e.key === 'Enter' && document.getElementById('add-labor-btn')?.click()}
                                                         className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
                                                 </div>
                                                 <div className="md:col-span-1">
                                                     <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Un</label>
                                                     <input type="text" value={newLabor.unit} onChange={e => setNewLabor(p => ({ ...p, unit: e.target.value }))}
+                                                        onKeyDown={(e) => e.key === 'Enter' && document.getElementById('add-labor-btn')?.click()}
                                                         className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
                                                 </div>
                                                 <div className="md:col-span-2">
                                                     <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Valor Unit.</label>
                                                     <input type="number" placeholder="0" value={newLabor.cost} onChange={e => setNewLabor(p => ({ ...p, cost: e.target.value }))}
+                                                        onKeyDown={(e) => e.key === 'Enter' && document.getElementById('add-labor-btn')?.click()}
                                                         className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
                                                 </div>
                                                 <div className="md:col-span-2">
-                                                    <button onClick={() => {
+                                                    <button id="add-labor-btn" type="button" onClick={() => {
                                                         if (!newLabor.role) return;
                                                         const qty = parseFloat(newLabor.qty) || 0;
                                                         const cost = parseFloat(newLabor.cost) || 0;
@@ -1311,15 +1316,17 @@ const WorksManager: React.FC<Props> = ({ customers, company, embeddedPlanId }) =
                                                 <div className="md:col-span-7">
                                                     <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Descrição</label>
                                                     <input type="text" placeholder="Ex: Transporte de material" value={newIndirect.name} onChange={e => setNewIndirect(p => ({ ...p, name: e.target.value }))}
+                                                        onKeyDown={(e) => e.key === 'Enter' && document.getElementById('add-indirect-btn')?.click()}
                                                         className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-green-500" />
                                                 </div>
                                                 <div className="md:col-span-3">
                                                     <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Valor (R$)</label>
                                                     <input type="number" placeholder="0" value={newIndirect.value} onChange={e => setNewIndirect(p => ({ ...p, value: e.target.value }))}
+                                                        onKeyDown={(e) => e.key === 'Enter' && document.getElementById('add-indirect-btn')?.click()}
                                                         className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
                                                 </div>
                                                 <div className="md:col-span-2">
-                                                    <button onClick={() => {
+                                                    <button id="add-indirect-btn" type="button" onClick={() => {
                                                         if (!newIndirect.name) return;
                                                         const value = parseFloat(newIndirect.value) || 0;
                                                         indirectManager.addItem({ name: newIndirect.name.toUpperCase(), value });

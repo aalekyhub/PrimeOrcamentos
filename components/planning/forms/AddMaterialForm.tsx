@@ -10,8 +10,8 @@ interface AddMaterialFormProps {
 export const AddMaterialForm: React.FC<AddMaterialFormProps> = ({ onAdd, planId }) => {
     const [name, setName] = useState('');
     const [unit, setUnit] = useState('');
-    const [qty, setQty] = useState(0);
-    const [cost, setCost] = useState(0);
+    const [qty, setQty] = useState('');
+    const [cost, setCost] = useState('');
     const { notify } = useNotify();
 
     const handleSubmit = () => {
@@ -20,17 +20,27 @@ export const AddMaterialForm: React.FC<AddMaterialFormProps> = ({ onAdd, planId 
             return;
         }
 
+        const numericQty = parseFloat(qty) || 0;
+        const numericCost = parseFloat(cost) || 0;
+
         onAdd({
             material_name: name.toUpperCase(),
-            unit: unit.toUpperCase(),
-            quantity: qty,
-            unit_cost: cost,
+            unit: (unit || 'un').toUpperCase(),
+            quantity: numericQty,
+            unit_cost: numericCost,
         });
 
         setName('');
         setUnit('');
-        setQty(0);
-        setCost(0);
+        setQty('');
+        setCost('');
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            handleSubmit();
+        }
     };
 
     return (
@@ -45,6 +55,7 @@ export const AddMaterialForm: React.FC<AddMaterialFormProps> = ({ onAdd, planId 
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
+                        onKeyDown={handleKeyDown}
                         className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100"
                         placeholder="Ex: Cimento CP-II"
                     />
@@ -54,7 +65,8 @@ export const AddMaterialForm: React.FC<AddMaterialFormProps> = ({ onAdd, planId 
                     <input
                         type="number"
                         value={qty}
-                        onChange={(e) => setQty(parseFloat(e.target.value) || 0)}
+                        onChange={(e) => setQty(e.target.value)}
+                        onKeyDown={handleKeyDown}
                         className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100"
                         placeholder="0"
                     />
@@ -65,6 +77,7 @@ export const AddMaterialForm: React.FC<AddMaterialFormProps> = ({ onAdd, planId 
                         type="text"
                         value={unit}
                         onChange={(e) => setUnit(e.target.value)}
+                        onKeyDown={handleKeyDown}
                         className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100"
                         placeholder="un"
                     />
@@ -74,13 +87,15 @@ export const AddMaterialForm: React.FC<AddMaterialFormProps> = ({ onAdd, planId 
                     <input
                         type="number"
                         value={cost}
-                        onChange={(e) => setCost(parseFloat(e.target.value) || 0)}
+                        onChange={(e) => setCost(e.target.value)}
+                        onKeyDown={handleKeyDown}
                         className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100"
                         placeholder="0.00"
                     />
                 </div>
                 <div className="md:col-span-2">
                     <button
+                        type="button"
                         onClick={handleSubmit}
                         className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-bold text-xs h-9 flex items-center justify-center gap-1 shadow-md shadow-blue-950/20"
                     >

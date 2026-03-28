@@ -217,71 +217,52 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
 
     if (!currentPlan) return null;
 
-    const handleAddService = (serviceData: NewServiceInput) => {
-        const quantity = toNumber(serviceData.quantity);
-        const unitMaterial = toNumber(serviceData.unit_material_cost);
-        const unitLabor = toNumber(serviceData.unit_labor_cost);
-        const unitIndirect = toNumber(serviceData.unit_indirect_cost);
-
-        const newService: PlannedService = {
-            id: db.generateId('SVC'),
-            plan_id: currentPlan.id,
-            ...serviceData,
-            quantity,
-            unit_material_cost: unitMaterial,
-            unit_labor_cost: unitLabor,
-            unit_indirect_cost: unitIndirect,
-            total_cost: quantity * (unitMaterial + unitLabor + unitIndirect),
-        } as PlannedService;
-
-        onUpdateServices([...services, newService]);
+    const handleAddService = (newServ: Omit<PlannedService, 'id' | 'plan_id'>) => {
+        const item = {
+            ...newServ,
+            id: db.generateId('SERV'),
+            plan_id: currentPlan.id
+        };
+        const nextServices = [...services, item];
+        onUpdateServices(nextServices);
+        db.saveLocal('serviflow_plan_services', nextServices);
     };
 
-    const handleAddMaterial = (materialData: NewMaterialInput) => {
-        const quantity = toNumber(materialData.quantity);
-        const unitCost = toNumber(materialData.unit_cost);
-
-        const newMaterial: PlannedMaterial = {
+    const handleAddMaterial = (newMat: Omit<PlannedMaterial, 'id' | 'plan_id'>) => {
+        const item = {
+            ...newMat,
             id: db.generateId('MAT'),
-            plan_id: currentPlan.id,
-            ...materialData,
-            quantity,
-            unit_cost: unitCost,
-            total_cost: quantity * unitCost,
-        } as PlannedMaterial;
-
-        onUpdateMaterials([...materials, newMaterial]);
+            plan_id: currentPlan.id
+        };
+        const nextMaterials = [...materials, item];
+        onUpdateMaterials(nextMaterials);
+        db.saveLocal('serviflow_plan_materials', nextMaterials);
     };
 
-    const handleAddLabor = (laborData: NewLaborInput) => {
-        const quantity = toNumber(laborData.quantity);
-        const unitCost = toNumber(laborData.unit_cost);
-
-        const newLabor: PlannedLabor = {
-            id: db.generateId('LBR'),
-            plan_id: currentPlan.id,
-            ...laborData,
-            quantity,
-            unit_cost: unitCost,
-            total_cost: quantity * unitCost,
-        } as PlannedLabor;
-
-        onUpdateLabor([...labor, newLabor]);
+    const handleAddLabor = (newLabor: Omit<PlannedLabor, 'id' | 'plan_id'>) => {
+        const item = {
+            ...newLabor,
+            id: db.generateId('LAB'),
+            plan_id: currentPlan.id
+        };
+        const nextLabor = [...labor, item];
+        onUpdateLabor(nextLabor);
+        db.saveLocal('serviflow_plan_labor', nextLabor);
     };
 
-    const handleAddIndirect = (indirectData: NewIndirectInput) => {
-        const newIndirect: PlannedIndirect = {
+    const handleAddIndirect = (newInd: Omit<PlannedIndirect, 'id' | 'plan_id'>) => {
+        const item = {
+            ...newInd,
             id: db.generateId('IND'),
-            plan_id: currentPlan.id,
-            ...indirectData,
-            value: toNumber(indirectData.value),
-        } as PlannedIndirect;
-
-        onUpdateIndirects([...indirects, newIndirect]);
+            plan_id: currentPlan.id
+        };
+        const nextIndirects = [...indirects, item];
+        onUpdateIndirects(nextIndirects);
+        db.saveLocal('serviflow_plan_indirects', nextIndirects);
     };
 
     const handleAddTax = (taxData: NewTaxInput) => {
-        const newTax: PlanTax = {
+        const item = {
             id: db.generateId('TAX'),
             plan_id: currentPlan.id,
             ...taxData,
@@ -289,7 +270,9 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
             value: toNumber(taxData.value),
         } as PlanTax;
 
-        onUpdateTaxes([...taxes, newTax]);
+        const nextTaxes = [...taxes, item];
+        onUpdateTaxes(nextTaxes);
+        db.saveLocal('serviflow_plan_taxes', nextTaxes);
     };
 
     return (
