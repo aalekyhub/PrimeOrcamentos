@@ -227,7 +227,7 @@ const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
                             {bdiRate > 0 && (
                                 <div className="bg-white/10 px-6 py-3 rounded-2xl border border-white/20 animate-in zoom-in duration-300">
                                     <p className="text-indigo-200 text-[10px] font-black uppercase tracking-widest mb-1 flex items-center gap-2">
-                                        Venda com BDI ({bdiRate.toFixed(2)}%)
+                                        Venda com BDI {((bdiRate || 0)).toFixed(2)}%
                                         <button onClick={() => setBdiRate(0)} className="hover:text-white transition-colors" title="Remover BDI">
                                             <X className="w-3 h-3" />
                                         </button>
@@ -277,7 +277,7 @@ const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
                                         <td className="px-8 py-4 text-right text-[11px] font-black group-hover:bg-indigo-50/50 transition-all cursor-pointer min-w-[120px]"
                                             onClick={() => {
                                                 setEditingItemId(item.codigo_item);
-                                                setEditValue(item.custo_unitario.toFixed(2));
+                                                setEditValue((item.custo_unitario || 0).toFixed(2));
                                             }}
                                         >
                                             {editingItemId === item.codigo_item ? (
@@ -293,7 +293,7 @@ const SinapiSearchAnalitico: React.FC<Props> = ({ onCopyComposition }) => {
                                                     }}
                                                     onBlur={() => {
                                                         const cleaned = editValue.trim();
-                                                        if (cleaned && cleaned !== item.custo_unitario.toFixed(2)) {
+                                                        if (cleaned && cleaned !== (item.custo_unitario || 0).toFixed(2)) {
                                                             handleUpdatePrice(item);
                                                         } else {
                                                             setEditingItemId(null);

@@ -140,7 +140,7 @@ const BudgetItemsEditor: React.FC<BudgetItemsEditorProps> = ({
                         <div className="flex items-center gap-3 shrink-0">
                             <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 rounded px-2 py-1 border border-slate-100 dark:border-slate-700">
                                 <span className="text-[8px] font-bold text-slate-400">TOTAL:</span>
-                                <input type="number" className="w-24 bg-transparent text-[11px] font-black text-blue-600 dark:text-blue-400 outline-none text-right" value={Number((item.unitPrice * item.quantity).toFixed(2))} onChange={e => updateItemTotal(item.id, Number(e.target.value))} />
+                                <input type="number" className="w-24 bg-transparent text-[11px] font-black text-blue-600 dark:text-blue-400 outline-none text-right" value={Number(((item.unitPrice || 0) * (item.quantity || 0)).toFixed(2))} onChange={e => updateItemTotal(item.id, Number(e.target.value))} />
                             </div>
                             <div className="flex flex-col gap-0">
                                 <button onClick={() => moveItem(items.indexOf(item), 'up')} disabled={items.indexOf(item) === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronUp className="w-3 h-3" /></button>

@@ -1717,7 +1717,7 @@ const WorksManager: React.FC<Props> = ({ customers, company, embeddedPlanId }) =
                                             <Calculator size={14} /> Custo Executado Total
                                         </p>
                                         <span className="text-4xl md:text-5xl font-black text-white tracking-tighter">
-                                            R$ {calculations.totalGeneral.toFixed(2)}
+                                            R$ {(calculations.totalGeneral || 0).toFixed(2)}
                                         </span>
                                     </div>
                                 </div>

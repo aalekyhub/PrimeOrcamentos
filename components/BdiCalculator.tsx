@@ -132,7 +132,7 @@ const BdiCalculator: React.FC<Props> = ({ initialConfig, onSave }) => {
                         </p>
                         <div className="flex items-baseline gap-2">
                             <span className="text-4xl font-black text-indigo-600 tracking-tighter">
-                                BDI = {totalBdi.toFixed(2)}%
+                                BDI = {(totalBdi || 0).toFixed(2)}%
                             </span>
                         </div>
                     </div>

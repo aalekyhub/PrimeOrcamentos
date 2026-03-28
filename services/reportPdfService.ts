@@ -410,7 +410,7 @@ export const buildExecutionReportHtml = (
                 .map((t) => `
                                     <tr style="border-bottom:1px solid #f1f5f9; page-break-inside: avoid; break-inside: avoid;">
                                         <td style="padding:10px 8px; font-size:11px; font-weight:600;">${escapeHtml(t.name)}</td>
-                                        <td style="padding:10px 8px; font-size:11px; text-align:center;">${t.rate > 0 ? `${t.rate.toFixed(2)}%` : '-'}</td>
+                                        <td style="padding:10px 8px; font-size:11px; text-align:center;">${(t.rate || 0) > 0 ? `${(t.rate || 0).toFixed(2)}%` : '-'}</td>
                                         <td style="padding:10px 8px; font-size:11px; text-align:right; font-weight:700;">R$ ${formatMoney(t.calculatedValue)}</td>
                                     </tr>`)
                 .join('')}

@@ -95,7 +95,7 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
   const handleSinapiCopy = (result: AnaliticoResult) => {
     setFormData({
       name: result.composicao?.descricao || (result.itens.length > 0 ? result.itens[0].descricao_item : ''),
-      description: `Ref. SINAPI (BOM Calc): ${result.composicao?.codigo || 'N/A'}. Custo Analítico Base: R$ ${result.total.toFixed(2)}`,
+      description: `Ref. SINAPI (BOM Calc): ${result.composicao?.codigo || 'N/A'}. Custo Analítico Base: R$ ${(result.total || 0).toFixed(2)}`,
       basePrice: result.total,
       unit: result.composicao?.unidade || 'un',
       category: 'SINAPI (Analítico)'
