@@ -103,9 +103,6 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, company: propsCompany
 
             loadPlans();
             notify("Projeto e todos os seus itens foram excluídos permanentemente.", "success");
-
-            // Force reload to ensure all ghost fallbacks are cleared
-            setTimeout(() => window.location.reload(), 1000);
         } catch (error: any) {
             console.error(error);
             notify("Erro ao excluir projeto: " + (error.message || "Falha na conexão"), "error");
@@ -368,6 +365,7 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, company: propsCompany
                                         <td className="px-6 py-5">
                                             <div className="flex items-center justify-end gap-1">
                                                 <button
+                                                    type="button"
                                                     onClick={(e) => handleDuplicatePlan(plan.id, e)}
                                                     className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
                                                     title="Duplicar"
@@ -375,6 +373,7 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, company: propsCompany
                                                     <Copy size={16} />
                                                 </button>
                                                 <button
+                                                    type="button"
                                                     onClick={(e) => handleDeletePlan(plan.id, e)}
                                                     className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                                                     title="Excluir"
@@ -421,6 +420,7 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, company: propsCompany
                                     </span>
                                     <div className="flex gap-1">
                                         <button
+                                            type="button"
                                             onClick={(e) => handleDuplicatePlan(plan.id, e)}
                                             className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
                                             title="Duplicar Projeto"
@@ -428,6 +428,7 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, company: propsCompany
                                             <Copy size={16} />
                                         </button>
                                         <button
+                                            type="button"
                                             onClick={(e) => handleDeletePlan(plan.id, e)}
                                             className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
                                             title="Excluir Projeto"

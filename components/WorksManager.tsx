@@ -1089,6 +1089,7 @@ const WorksManager: React.FC<Props> = ({ customers, company, embeddedPlanId }) =
                                 <div className="pl-2 border-t border-slate-100 dark:border-slate-800 pt-3 flex justify-between items-center">
                                     <div className="flex gap-2">
                                         <button
+                                            type="button"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 handleDuplicateWork(work.id);
@@ -1100,6 +1101,7 @@ const WorksManager: React.FC<Props> = ({ customers, company, embeddedPlanId }) =
                                         </button>
 
                                         <button
+                                            type="button"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 handleDeleteWork(work.id);
