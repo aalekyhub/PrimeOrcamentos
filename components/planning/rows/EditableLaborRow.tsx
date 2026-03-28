@@ -133,13 +133,13 @@ export const EditableLaborRow: React.FC<EditableLaborRowProps> = ({
                         </div>
                         <div className="grow">
                             <p className="font-bold text-slate-800 dark:text-slate-100">{labor.role}</p>
-                            <p className="text-[10px] text-slate-500">
-                                {labor.quantity} {labor.unit} x R$ {labor.unit_cost.toFixed(2)}
+                            <p className="text-[10px] text-amber-600 dark:text-amber-400 font-medium uppercase tracking-wider mb-1">
+                                {labor.quantity} {labor.unit} x R$ {(labor.unit_cost || 0).toFixed(2)}
                             </p>
                         </div>
                     </div>
                     <div className="w-24 text-right mr-4 font-bold text-slate-800 dark:text-slate-100">
-                        R$ {labor.total_cost.toFixed(2)}
+                        R$ {(labor.total_cost || 0).toFixed(2)}
                     </div>
                     <div className="flex gap-1">
                         <button onClick={() => onMove(index, 'up')} disabled={isFirst} className="text-slate-300 hover:text-blue-500 disabled:opacity-0">

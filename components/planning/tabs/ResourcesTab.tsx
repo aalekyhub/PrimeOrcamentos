@@ -200,7 +200,7 @@ export const ResourcesTab = React.memo(({
                             <div className="flex justify-end p-4 bg-blue-50/50 rounded-xl border border-blue-100 mt-4">
                                 <div className="flex items-center gap-2">
                                     <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Total Materiais</span>
-                                    <span className="text-xl font-black text-blue-700">R$ {calculations.totalMaterial.toFixed(2)}</span>
+                                    <span className="text-xl font-black text-blue-700">R$ {(calculations.totalMaterial || 0).toFixed(2)}</span>
                                 </div>
                             </div>
                         )}
@@ -290,7 +290,7 @@ export const ResourcesTab = React.memo(({
                             <div className="flex justify-end p-4 bg-amber-50/50 rounded-xl border border-amber-100 mt-4">
                                 <div className="flex items-center gap-2">
                                     <span className="text-[10px] font-bold text-amber-600 uppercase tracking-widest">Total Mão de Obra</span>
-                                    <span className="text-xl font-black text-amber-700">R$ {calculations.totalLabor.toFixed(2)}</span>
+                                    <span className="text-xl font-black text-amber-700">R$ {(calculations.totalLabor || 0).toFixed(2)}</span>
                                 </div>
                             </div>
                         )}
@@ -380,7 +380,7 @@ export const ResourcesTab = React.memo(({
                             <div className="flex justify-end p-4 bg-slate-100/50 rounded-xl border border-slate-200 mt-4">
                                 <div className="flex items-center gap-2">
                                     <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Total Indiretos</span>
-                                    <span className="text-xl font-black text-slate-700">R$ {calculations.totalIndirect.toFixed(2)}</span>
+                                    <span className="text-xl font-black text-slate-700">R$ {(calculations.totalIndirect || 0).toFixed(2)}</span>
                                 </div>
                             </div>
                         )}

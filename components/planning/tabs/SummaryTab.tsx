@@ -31,7 +31,7 @@ export const SummaryTab = React.memo(({
                                 <item.icon size={16} className={`text-${item.color}-600 dark:text-${item.color}-400`} />
                             </div>
                         </div>
-                        <span className="text-xl font-black text-slate-800 dark:text-slate-100 whitespace-nowrap">R$ {item.value.toFixed(2)}</span>
+                        <span className="text-xl font-black text-slate-800 dark:text-slate-100 whitespace-nowrap">R$ {(item.value || 0).toFixed(2)}</span>
                         <p className={`text-[9px] text-${item.color}-600/60 dark:text-${item.color}-400/60 mt-1 font-bold uppercase`}>{item.desc}</p>
                     </div>
                 ))}
@@ -61,7 +61,7 @@ export const SummaryTab = React.memo(({
                     </p>
                     <div className="flex items-baseline gap-2">
                         <span className="text-4xl md:text-5xl font-black text-white tracking-tighter">
-                            R$ {calculations.totalGeneral.toFixed(2)}
+                            R$ {(calculations.totalGeneral || 0).toFixed(2)}
                         </span>
                     </div>
                     <p className="text-slate-500 text-[10px] mt-2 font-medium uppercase tracking-widest">Inclui todos os custos diretos, indiretos e bdi calculados</p>

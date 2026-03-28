@@ -160,14 +160,14 @@ export const EditableServiceRow: React.FC<EditableServiceRowProps> = ({
                         <div className="grow">
                             <p className="font-bold text-slate-800 dark:text-slate-100">{service.description}</p>
                             <p className="text-xs text-slate-500 dark:text-slate-400">
-                                {service.quantity} {service.unit} x (Mat: {service.unit_material_cost.toFixed(2)} + MO:{' '}
-                                {service.unit_labor_cost.toFixed(2)})
+                                {service.quantity} {service.unit} x (Mat: {(service.unit_material_cost || 0).toFixed(2)} + MO:{' '}
+                                {(service.unit_labor_cost || 0).toFixed(2)})
                             </p>
                         </div>
                     </div>
                     <div className="w-32 text-right mr-4 shrink-0">
                         <p className="text-sm font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap">
-                            R$ {service.total_cost.toFixed(2)}
+                            R$ {(service.total_cost || 0).toFixed(2)}
                         </p>
                     </div>
                     <div className="flex gap-1 shrink-0">

@@ -822,12 +822,12 @@ const WorksManager: React.FC<Props> = ({ customers, company, embeddedPlanId }) =
                         <div className="grow">
                             <p className="font-bold text-slate-800 dark:text-slate-100 uppercase text-sm">{m.material_name}</p>
                             <p className="text-[10px] text-slate-500 uppercase">
-                                {m.quantity} {m.unit} x R$ {m.unit_cost.toFixed(2)}
+                                {m.quantity} {m.unit} x R$ {(m.unit_cost || 0).toFixed(2)}
                             </p>
                         </div>
                     </div>
                     <div className="w-24 text-right mr-4 font-black text-slate-700 dark:text-slate-200">
-                        R$ {m.total_cost.toFixed(2)}
+                        R$ {(m.total_cost || 0).toFixed(2)}
                     </div>
                 </>
             )}
@@ -908,12 +908,12 @@ const WorksManager: React.FC<Props> = ({ customers, company, embeddedPlanId }) =
                         <div className="grow">
                             <p className="font-bold text-slate-800 dark:text-slate-100 uppercase text-sm">{l.role}</p>
                             <p className="text-[10px] text-slate-500 uppercase">
-                                {l.quantity} {l.unit || 'un'} x R$ {l.unit_cost.toFixed(2)}
+                                {l.quantity} {l.unit || 'un'} x R$ {(l.unit_cost || 0).toFixed(2)}
                             </p>
                         </div>
                     </div>
                     <div className="w-24 text-right mr-4 font-black text-slate-700 dark:text-slate-200">
-                        R$ {l.total_cost.toFixed(2)}
+                        R$ {(l.total_cost || 0).toFixed(2)}
                     </div>
                 </>
             )}
@@ -989,7 +989,7 @@ const WorksManager: React.FC<Props> = ({ customers, company, embeddedPlanId }) =
                         </div>
                     </div>
                     <div className="w-24 text-right mr-4 font-black text-slate-700 dark:text-slate-200">
-                        R$ {i.value.toFixed(2)}
+                        R$ {(i.value || 0).toFixed(2)}
                     </div>
                 </>
             )}
@@ -1455,11 +1455,11 @@ const WorksManager: React.FC<Props> = ({ customers, company, embeddedPlanId }) =
                                                 <div className="grow">
                                                     <p className="font-bold text-slate-800 dark:text-slate-100 uppercase text-sm">{s.description}</p>
                                                     <p className="text-[10px] text-slate-500 uppercase">
-                                                        {s.quantity} {s.unit} - Mat: R$ {s.unit_material_cost.toFixed(2)} | MO: R$ {s.unit_labor_cost.toFixed(2)} | Ind: R$ {s.unit_indirect_cost.toFixed(2)}
+                                                        {s.quantity} {s.unit} - Mat: R$ {(s.unit_material_cost || 0).toFixed(2)} | MO: R$ {(s.unit_labor_cost || 0).toFixed(2)} | Ind: R$ {(s.unit_indirect_cost || 0).toFixed(2)}
                                                     </p>
                                                 </div>
                                                 <div className="w-24 text-right mr-4 font-black text-slate-700 dark:text-slate-200">
-                                                    R$ {s.total_cost.toFixed(2)}
+                                                    R$ {(s.total_cost || 0).toFixed(2)}
                                                 </div>
                                             </>
                                         )}
@@ -1552,7 +1552,7 @@ const WorksManager: React.FC<Props> = ({ customers, company, embeddedPlanId }) =
                                             <div className="flex justify-end p-4 bg-green-50/50 rounded-xl border border-green-100 mt-4">
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-[10px] font-bold text-green-600 uppercase tracking-widest">Total Materiais</span>
-                                                    <span className="text-xl font-black text-green-700">R$ {calculations.totalMaterial.toFixed(2)}</span>
+                                                    <span className="text-xl font-black text-green-700">R$ {(calculations.totalMaterial || 0).toFixed(2)}</span>
                                                 </div>
                                             </div>
                                         )}
@@ -1573,7 +1573,7 @@ const WorksManager: React.FC<Props> = ({ customers, company, embeddedPlanId }) =
                                             <div className="flex justify-end p-4 bg-amber-50/50 rounded-xl border border-amber-100 mt-4">
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-[10px] font-bold text-amber-600 uppercase tracking-widest">Total Mão de Obra</span>
-                                                    <span className="text-xl font-black text-amber-700">R$ {calculations.totalLabor.toFixed(2)}</span>
+                                                    <span className="text-xl font-black text-amber-700">R$ {(calculations.totalLabor || 0).toFixed(2)}</span>
                                                 </div>
                                             </div>
                                         )}
@@ -1594,7 +1594,7 @@ const WorksManager: React.FC<Props> = ({ customers, company, embeddedPlanId }) =
                                             <div className="flex justify-end p-4 bg-slate-100/50 rounded-xl border border-slate-200 mt-4">
                                                 <div className="flex items-center gap-2">
                                                     <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Total Indiretos</span>
-                                                    <span className="text-xl font-black text-slate-700">R$ {calculations.totalIndirect.toFixed(2)}</span>
+                                                    <span className="text-xl font-black text-slate-700">R$ {(calculations.totalIndirect || 0).toFixed(2)}</span>
                                                 </div>
                                             </div>
                                         )}

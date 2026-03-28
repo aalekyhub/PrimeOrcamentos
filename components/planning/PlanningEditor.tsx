@@ -217,37 +217,40 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
 
     if (!currentPlan) return null;
 
-    const handleAddService = (newServ: Omit<PlannedService, 'id' | 'plan_id'>) => {
+    const handleAddLabor = (newLabor: Omit<PlannedLabor, 'id' | 'plan_id' | 'total_cost'>) => {
         const item = {
-            ...newServ,
-            id: db.generateId('SERV'),
-            plan_id: currentPlan.id
-        };
-        const nextServices = [...services, item];
-        onUpdateServices(nextServices);
-        db.saveLocal('serviflow_plan_services', nextServices);
+            ...newLabor,
+            id: db.generateId('LAB'),
+            plan_id: currentPlan.id,
+            total_cost: (newLabor.quantity || 0) * (newLabor.unit_cost || 0)
+        } as PlannedLabor;
+        const nextLabor = [...labor, item];
+        onUpdateLabor(nextLabor);
+        db.saveLocal('serviflow_plan_labor', nextLabor);
     };
 
-    const handleAddMaterial = (newMat: Omit<PlannedMaterial, 'id' | 'plan_id'>) => {
+    const handleAddMaterial = (newMat: Omit<PlannedMaterial, 'id' | 'plan_id' | 'total_cost'>) => {
         const item = {
             ...newMat,
             id: db.generateId('MAT'),
-            plan_id: currentPlan.id
-        };
+            plan_id: currentPlan.id,
+            total_cost: (newMat.quantity || 0) * (newMat.unit_cost || 0)
+        } as PlannedMaterial;
         const nextMaterials = [...materials, item];
         onUpdateMaterials(nextMaterials);
         db.saveLocal('serviflow_plan_materials', nextMaterials);
     };
 
-    const handleAddLabor = (newLabor: Omit<PlannedLabor, 'id' | 'plan_id'>) => {
+    const handleAddService = (newServ: Omit<PlannedService, 'id' | 'plan_id' | 'total_cost'>) => {
         const item = {
-            ...newLabor,
-            id: db.generateId('LAB'),
-            plan_id: currentPlan.id
-        };
-        const nextLabor = [...labor, item];
-        onUpdateLabor(nextLabor);
-        db.saveLocal('serviflow_plan_labor', nextLabor);
+            ...newServ,
+            id: db.generateId('SERV'),
+            plan_id: currentPlan.id,
+            total_cost: (newServ.quantity || 0) * ((newServ.unit_material_cost || 0) + (newServ.unit_labor_cost || 0) + (newServ.unit_indirect_cost || 0))
+        } as PlannedService;
+        const nextServices = [...services, item];
+        onUpdateServices(nextServices);
+        db.saveLocal('serviflow_plan_services', nextServices);
     };
 
     const handleAddIndirect = (newInd: Omit<PlannedIndirect, 'id' | 'plan_id'>) => {

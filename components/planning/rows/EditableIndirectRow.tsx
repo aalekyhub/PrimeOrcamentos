@@ -132,7 +132,7 @@ export const EditableIndirectRow: React.FC<EditableIndirectRowProps> = ({
                         </div>
                     </div>
                     <div className="w-24 text-right mr-4 font-bold text-slate-800 dark:text-slate-100">
-                        R$ {indirect.value.toFixed(2)}
+                        R$ {(indirect.value || 0).toFixed(2)}
                     </div>
                     <div className="flex gap-1">
                         <button onClick={() => onMove(index, 'up')} disabled={isFirst} className="text-slate-300 hover:text-blue-500 disabled:opacity-0">
