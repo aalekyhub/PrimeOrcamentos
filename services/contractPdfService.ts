@@ -120,12 +120,10 @@ export const getContractHtml = (order: ServiceOrder, customer: any, company: Com
         <div style="margin-bottom: 3.5mm;">
             <div style="break-inside: avoid; page-break-inside: avoid;">
               <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 3mm 0; padding-top: 2mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">CLÁUSULA 4ª – DAS OBRIGAÇÕES DA CONTRATADA</h4>
-              <ul style="list-style-type: none; padding-left: 0; margin: 3mm 0 0 0; font-size:14px; color:#475569; line-height:1.6;">
-                  <li>4.1. Executar os serviços conforme escopo contratado e normas técnicas aplicáveis.</li>
-                  <li>4.2. Responsabilizar-se por seus empregados quanto a encargos trabalhistas, previdenciários e fiscais.</li>
-                  <li>4.3. Manter regularidade fiscal durante a execução do contrato.</li>
-                  <li>4.4. Responder por danos causados ao imóvel decorrentes de culpa comprovada.</li>
-              </ul>
+              <p style="font-size:14px; color:#475569; line-height:1.6; margin: 3mm 0 2mm 0;">4.1. Executar os serviços conforme escopo contratado e normas técnicas aplicáveis.</p>
+              <p style="font-size:14px; color:#475569; line-height:1.6; margin: 2mm 0 2mm 0;">4.2. Responsabilizar-se por seus empregados quanto a encargos trabalhistas, previdenciários e fiscais.</p>
+              <p style="font-size:14px; color:#475569; line-height:1.6; margin: 2mm 0 2mm 0;">4.3. Manter regularidade fiscal durante a execução do contrato.</p>
+              <p style="font-size:14px; color:#475569; line-height:1.6; margin: 2mm 0 0 0;">4.4. Responder por danos causados ao imóvel decorrentes de culpa comprovada.</p>
             </div>
         </div>
 
@@ -133,11 +131,9 @@ export const getContractHtml = (order: ServiceOrder, customer: any, company: Com
         <div style="margin-bottom: 3.5mm;">
             <div style="break-inside: avoid; page-break-inside: avoid;">
               <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 3mm 0; padding-top: 2mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">CLÁUSULA 5ª – DAS OBRIGAÇÕES DO CONTRATANTE</h4>
-              <ul style="list-style-type: none; padding-left: 0; margin: 3mm 0 0 0; font-size:14px; color:#475569; line-height:1.6;">
-                  <li>5.1. Garantir acesso ao local da obra.</li>
-                  <li>5.2. Efetuar os pagamentos conforme pactuado.</li>
-                  <li>5.3. Providenciar autorizações condominiais, quando exigidas.</li>
-              </ul>
+              <p style="font-size:14px; color:#475569; line-height:1.6; margin: 3mm 0 2mm 0;">5.1. Garantir acesso ao local da obra.</p>
+              <p style="font-size:14px; color:#475569; line-height:1.6; margin: 2mm 0 2mm 0;">5.2. Efetuar os pagamentos conforme pactuado.</p>
+              <p style="font-size:14px; color:#475569; line-height:1.6; margin: 2mm 0 0 0;">5.3. Providenciar autorizações condominiais, quando exigidas.</p>
             </div>
         </div>
 
