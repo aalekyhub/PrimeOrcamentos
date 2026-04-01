@@ -81,10 +81,10 @@ const BudgetSummarySidebar: React.FC<BudgetSummarySidebarProps> = ({
 
             <div className="mt-auto space-y-3 relative z-10">
                 <div className="grid grid-cols-1 gap-2">
-                    <button onClick={onPrint} className="bg-slate-800 hover:bg-slate-700 text-white p-4 rounded-xl font-black uppercase text-[8px] flex flex-row items-center justify-center gap-2 transition-all border border-slate-700 group w-full">
-                        <Printer className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" /> IMPRIMIR ORÇAMENTO
+                    <button onClick={onPrint} className="bg-slate-800 hover:bg-slate-700 text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[11px] flex flex-row items-center justify-center gap-2 transition-all border border-slate-700 group w-full shadow-md shadow-blue-950/20">
+                        <Printer className="w-5 h-5 text-blue-400 group-hover:scale-110 transition-transform" /> IMPRIMIR ORÇAMENTO
                     </button>
-                    <button onClick={onSave} className="col-span-2 bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[11px] shadow-md shadow-blue-950/20 transition-all flex items-center justify-center gap-2">
+                    <button onClick={onSave} className="bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[11px] shadow-md shadow-blue-950/20 transition-all flex items-center justify-center gap-2">
                         <Save className="w-5 h-5" /> REGISTRAR
                     </button>
                     <button onClick={onGenerateContract} className="bg-slate-800 hover:bg-slate-700 text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[11px] shadow-md shadow-blue-950/20 transition-all flex items-center justify-center gap-2 border border-slate-700">
