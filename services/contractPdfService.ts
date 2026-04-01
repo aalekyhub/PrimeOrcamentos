@@ -32,7 +32,7 @@ export const getContractHtml = (order: ServiceOrder, customer: any, company: Com
                                         CONTRATO DE PRESTAÇÃO DE SERVIÇOS
                                     </p>
                                     <p style="font-size: 9px; color: #000; font-weight: 700; line-height: 1.2;">
-                                        ${escapeHtml(company.cnpj || "")}${company.cnpj && company.phone ? ' ' : ''}${escapeHtml(company.phone || "")}
+                                        ${escapeHtml(company.cnpj || "")}${company.cnpj && company.phone ? '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' : ''}${escapeHtml(company.phone || "")}
                                     </p>
                                     ${company.address ? `
                                     <p style="margin: 1px 0 0 0; font-size: 8.5px; color: #000; font-weight: 600; text-transform: uppercase;">
