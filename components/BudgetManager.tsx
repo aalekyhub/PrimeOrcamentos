@@ -226,7 +226,7 @@ const BudgetManager: React.FC<Props> = ({
       customerId: customer.id,
       customerName: customer.name,
       customerEmail: customer.email,
-      description: proposalTitle || 'REFORMA DE PINTURA',
+      description: (proposalTitle || 'REFORMA DE PINTURA').toUpperCase(),
       status: existingBudget?.status || OrderStatus.PENDING,
       items,
       descriptionBlocks,
@@ -497,7 +497,7 @@ const BudgetManager: React.FC<Props> = ({
 
       {previewContract && (
         <ReportPreview
-          title={`CONTRATO - ${previewContract.id} - ${previewContract.description}`}
+          title={`CONTRATO - ${previewContract.id} - ${(previewContract.description || '').toUpperCase()}`}
           htmlContent={getContractHtml(
             previewContract,
             customers.find(c => c.id === previewContract.customerId) || {
@@ -511,7 +511,7 @@ const BudgetManager: React.FC<Props> = ({
             },
             company
           )}
-          filename={`CONTRATO - ${previewContract.id} - ${previewContract.description}`}
+          filename={`CONTRATO - ${previewContract.id} - ${(previewContract.description || '').toUpperCase()}`}
           onClose={() => setPreviewContract(null)}
         />
       )}
