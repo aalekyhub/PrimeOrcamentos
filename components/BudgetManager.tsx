@@ -402,6 +402,15 @@ const BudgetManager: React.FC<Props> = ({
     setPreviewBudget(budget);
   }, [buildBudgetFromForm, notify]);
 
+  const handleGenerateContractDraft = useCallback(() => {
+    const budget = buildBudgetFromForm();
+    if (!budget) {
+      notify('Preencha os dados (cliente e itens) para gerar o contrato.', 'error');
+      return;
+    }
+    setPreviewContract(budget);
+  }, [buildBudgetFromForm, notify]);
+
   const loadBudgetToForm = useCallback((budget: ServiceOrder, isClone = false) => {
     setShowImportModal(false);
     resetForm();
@@ -733,6 +742,7 @@ const BudgetManager: React.FC<Props> = ({
                 onShowPayment={() => setShowPaymentModal(true)}
                 onPrint={handlePreviewDraft}
                 onSave={handleSave}
+                onGenerateContract={handleGenerateContractDraft}
               />
             </div>
           </div>

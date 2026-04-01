@@ -1,5 +1,5 @@
 import React from 'react';
-import { Zap, Printer, FileDown, Save } from 'lucide-react';
+import { Zap, Printer, FileDown, Save, ScrollText } from 'lucide-react';
 
 interface BudgetSummarySidebarProps {
     bdiRate: number | string;
@@ -15,12 +15,13 @@ interface BudgetSummarySidebarProps {
     onShowPayment: () => void;
     onPrint: () => void;
     onSave: () => void;
+    onGenerateContract: () => void;
 }
 
 const BudgetSummarySidebar: React.FC<BudgetSummarySidebarProps> = ({
     bdiRate, setBdiRate, taxRate, setTaxRate, subtotal, totalAmount,
     paymentTerms, setPaymentTerms, deliveryTime, setDeliveryTime,
-    onShowPayment, onPrint, onSave
+    onShowPayment, onPrint, onSave, onGenerateContract
 }) => {
     const bdiNum = Number(bdiRate) || 0;
     const taxNum = Number(taxRate) || 0;
@@ -85,6 +86,9 @@ const BudgetSummarySidebar: React.FC<BudgetSummarySidebarProps> = ({
                     </button>
                     <button onClick={onSave} className="col-span-2 bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[11px] shadow-md shadow-blue-950/20 transition-all flex items-center justify-center gap-2">
                         <Save className="w-5 h-5" /> REGISTRAR
+                    </button>
+                    <button onClick={onGenerateContract} className="bg-slate-800 hover:bg-slate-700 text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[11px] shadow-md shadow-blue-950/20 transition-all flex items-center justify-center gap-2 border border-slate-700">
+                        <ScrollText className="w-5 h-5 text-blue-400" /> GERAR CONTRATO
                     </button>
                 </div>
             </div>
