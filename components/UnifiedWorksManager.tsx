@@ -131,7 +131,8 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, company: propsCompany
                 { table: 'serviflow_plan_services', idPrefix: 'PSVC' },
                 { table: 'serviflow_plan_materials', idPrefix: 'PMAT' },
                 { table: 'serviflow_plan_labor', idPrefix: 'PLAB' },
-                { table: 'serviflow_plan_indirects', idPrefix: 'PIND' }
+                { table: 'serviflow_plan_indirects', idPrefix: 'PIND' },
+                { table: 'serviflow_plan_taxes', idPrefix: 'TAX' }
             ];
 
             for (const map of mapping) {
@@ -143,7 +144,7 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, company: propsCompany
                     plan_id: newPlanId
                 }));
                 // Using full list here since it's multiple new items, but still better than nothing
-                await db.save(map.table, [...allItems, ...newItems]);
+                await db.save(map.table, [...allItems, ...newItems], newItems);
             }
 
             await db.save('serviflow_plans', [newPlan, ...allPlans], newPlan);
@@ -156,7 +157,12 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, company: propsCompany
     };
 
     const getBudgetedTotal = (plan: PlanningHeader) => {
-        // Fallback: Manually sum items using Gross Up if header is 0
+        // 1. Prefer stored header value if available
+        if (plan.total_real_cost && plan.total_real_cost > 0) {
+            return plan.total_real_cost;
+        }
+
+        // 2. Fallback: Manually sum items using Gross Up if header is absent or 0
         const svcs = (db.load('serviflow_plan_services', []) as any[]).filter(s => s.plan_id === plan.id);
         const mats = (db.load('serviflow_plan_materials', []) as any[]).filter(m => m.plan_id === plan.id);
         const labs = (db.load('serviflow_plan_labor', []) as any[]).filter(l => l.plan_id === plan.id);

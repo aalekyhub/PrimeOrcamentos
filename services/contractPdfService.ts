@@ -32,7 +32,7 @@ export const getContractHtml = (order: ServiceOrder, customer: any, company: Com
                                         CONTRATO DE PRESTAÇÃO DE SERVIÇOS
                                     </p>
                                     <p style="font-size: 9px; color: #000; font-weight: 700; line-height: 1.2;">
-                                        ${escapeHtml(company.cnpj || "")}${company.cnpj && company.phone ? ' | ' : ''}${escapeHtml(company.phone || "")}
+                                        ${escapeHtml(company.cnpj || "")}
                                     </p>
                                     ${company.address ? `
                                     <p style="margin: 1px 0 0 0; font-size: 8.5px; color: #000; font-weight: 600; text-transform: uppercase;">
@@ -60,8 +60,8 @@ export const getContractHtml = (order: ServiceOrder, customer: any, company: Com
           <div style="background:#f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #dbeafe;">
             <h4 style="font-size:10px; font-weight:900; color:#3b82f6; text-transform:uppercase; letter-spacing:1px; margin:0 0 2mm 0;">CONTRATADA</h4>
             <p style="font-size:14px; font-weight:900; color:#0f172a; text-transform:uppercase; margin:0;">${escapeHtml(company.name)}</p>
-            <p style="font-size:11px; font-weight:600; color:#64748b; margin:1mm 0 0 0;">${escapeHtml(company.address || "")}</p>
-            <p style="font-size:11px; font-weight:600; color:#64748b; margin:0;">${escapeHtml(company.email || "")}</p>
+            <p style="font-size:11px; font-weight:600; color:#64748b; margin:1mm 0 0 0;">CNPJ: ${escapeHtml(company.cnpj || "")}</p>
+            <p style="font-size:11px; font-weight:600; color:#64748b; margin:0;">${escapeHtml(company.address || "")}</p>
           </div>
           <div style="background:#f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #dbeafe;">
             <h4 style="font-size:10px; font-weight:900; color:#3b82f6; text-transform:uppercase; letter-spacing:1px; margin:0 0 2mm 0;">CONTRATANTE</h4>
