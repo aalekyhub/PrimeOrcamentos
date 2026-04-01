@@ -8,7 +8,6 @@ import {
 import { CompanyProfile, MeasurementUnit } from '../types';
 import { db } from '../services/db';
 import { useNotify } from './ToastProvider';
-import { AutoSave } from './AutoSave';
 
 interface Props {
   company: CompanyProfile;
@@ -130,11 +129,9 @@ const CompanySettings: React.FC<Props> = ({ company, setCompany }) => {
           <p className="text-slate-500 dark:text-slate-400 text-sm">Personalize os dados e garanta a segurança das suas informações.</p>
         </div>
 
-        <AutoSave
-          id="company-settings"
-          data={company}
-          onSave={handleSave}
-        />
+        <button onClick={() => handleSave(company).then(() => notify("Configurações salvas com sucesso!"))} className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-blue-900/20 transition-all active:scale-95">
+          <Save className="w-5 h-5" /> Salvar Configurações
+        </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -240,7 +237,7 @@ const CompanySettings: React.FC<Props> = ({ company, setCompany }) => {
 
             <div className="flex justify-end pt-4">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                As alterações são salvas automaticamente
+                Lembre-se de salvar suas alterações
               </p>
             </div>
           </div>

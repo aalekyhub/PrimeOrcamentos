@@ -37,7 +37,7 @@ import UserManager from './components/UserManager';
 import Login from './components/Login';
 
 import { ToastProvider, useNotify } from './components/ToastProvider';
-import { AutoSaveProvider, useGlobalAutoSave } from './components/AutoSaveContext';
+
 
 import {
   ServiceOrder,
@@ -581,7 +581,7 @@ const AppContent: React.FC = () => {
                 </span>
               </button>
 
-              <GlobalAutoSaveStatus />
+
             </div>
           </div>
 
@@ -800,42 +800,7 @@ const AppContent: React.FC = () => {
   );
 };
 
-const GlobalAutoSaveStatus: React.FC = () => {
-  const { status, error } = useGlobalAutoSave();
 
-  if (status === 'idle') return null;
-
-  return (
-    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 animate-in fade-in zoom-in duration-300">
-      {status === 'saving' && (
-        <>
-          <RefreshCw className="w-3 h-3 text-blue-500 animate-spin" />
-          <span className="text-[8px] font-bold text-blue-500 uppercase tracking-tighter">
-            Salvando...
-          </span>
-        </>
-      )}
-
-      {status === 'saved' && (
-        <>
-          <Check className="w-3 h-3 text-emerald-500" />
-          <span className="text-[8px] font-bold text-emerald-600 uppercase tracking-tighter">
-            Salvo
-          </span>
-        </>
-      )}
-
-      {status === 'error' && (
-        <div className="flex items-center gap-1" title={error || ''}>
-          <AlertCircle className="w-3 h-3 text-rose-500" />
-          <span className="text-[8px] font-bold text-rose-500 uppercase tracking-tighter">
-            Erro
-          </span>
-        </div>
-      )}
-    </div>
-  );
-};
 
 const App: React.FC = () => {
   const [isReady, setIsReady] = useState(false);
@@ -864,9 +829,7 @@ const App: React.FC = () => {
 
   return (
     <ToastProvider>
-      <AutoSaveProvider>
-        <AppContent />
-      </AutoSaveProvider>
+      <AppContent />
     </ToastProvider>
   );
 };

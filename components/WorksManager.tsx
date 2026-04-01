@@ -7,7 +7,6 @@ import {
 import { useNotify } from './ToastProvider';
 import { db } from '../services/db';
 import ReportPreview from './ReportPreview';
-import { AutoSave } from './AutoSave';
 import {
     WorkHeader, WorkService, WorkMaterial,
     WorkLabor, WorkIndirect, Customer,
@@ -629,18 +628,9 @@ const WorksManager: React.FC<Props> = ({ customers, company, embeddedPlanId }) =
         await persistWork(true);
     }, [persistWork]);
 
-    const handleAutoSave = useCallback(async (_payload: any) => {
-        await persistWork(false);
-    }, [persistWork]);
 
-    const autoSavePayload = useMemo(() => ({
-        currentWork,
-        services,
-        materials,
-        labor,
-        indirects,
-        taxes
-    }), [currentWork, services, materials, labor, indirects, taxes]);
+
+
 
     const handleCreateNewWork = useCallback(async () => {
         const newWork: WorkHeader = {
@@ -1170,12 +1160,6 @@ const WorksManager: React.FC<Props> = ({ customers, company, embeddedPlanId }) =
                                 )}
 
                                 <div className="flex items-center gap-2">
-                                    <AutoSave
-                                        id={`work-${currentWork?.id || 'new'}`}
-                                        data={autoSavePayload}
-                                        onSave={handleAutoSave}
-                                    />
-
                                     <button
                                         type="button"
                                         onClick={handleManualSave}

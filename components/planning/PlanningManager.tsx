@@ -127,7 +127,6 @@ const PlanningManager: React.FC<Props> = ({
                         planning.deleteMultipleItems('serviflow_plan_indirects', ids, planning.indirects, planning.setIndirects, () => { }, 'custo indireto')
                     }
                     onSave={handleSave}
-                    onAutoSave={(total: number) => planning.savePlan(total, false)}
                     onGenerateBudget={handleGenerateBudget}
                     onBack={() => {
                         planning.clearActivePlan();

@@ -11,7 +11,6 @@ import {
     Check,
     AlertCircle
 } from 'lucide-react';
-import { AutoSave } from '../AutoSave';
 import { useNotify } from '../ToastProvider';
 import { db } from '../../services/db';
 import { DataTab } from './tabs/DataTab';
@@ -109,7 +108,6 @@ interface PlanningEditorProps {
     onDeleteMultipleLabor?: (ids: string[]) => void;
     onDeleteMultipleIndirects?: (ids: string[]) => void;
     onSave: () => void;
-    onAutoSave: (total: number) => Promise<void>;
     onGenerateBudget: () => void;
     onBack: () => void;
     embeddedMode: boolean;
@@ -191,7 +189,6 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
     onDeleteMultipleLabor,
     onDeleteMultipleIndirects,
     onSave,
-    onAutoSave,
     onGenerateBudget,
     onBack,
     embeddedMode,
@@ -201,19 +198,7 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
     const [resourceTab, setResourceTab] = useState<ResourceTab>('material');
     const { notify } = useNotify();
 
-    const handleAutoSave = React.useCallback(async () => {
-        await onAutoSave(calculations.totalGeneral);
-    }, [onAutoSave, calculations.totalGeneral]);
 
-    const autoSavePayload = React.useMemo(() => ({
-        currentPlan,
-        services,
-        materials,
-        labor,
-        indirects,
-        taxes,
-        totalGeneral: calculations.totalGeneral
-    }), [currentPlan, services, materials, labor, indirects, taxes, calculations.totalGeneral]);
 
     if (!currentPlan) return null;
 
@@ -306,12 +291,6 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
 
                     <div className="flex gap-2">
                         <div className="flex items-center gap-2">
-                            <AutoSave
-                                id={`plan-${currentPlan.id}`}
-                                data={autoSavePayload}
-                                onSave={handleAutoSave}
-                            />
-
                             <button
                                 type="button"
                                 onClick={onSave}

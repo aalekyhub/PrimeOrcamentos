@@ -5,7 +5,6 @@ import { CatalogService, CompanyProfile } from '../types';
 import { useNotify } from './ToastProvider';
 import { checkDuplicateService } from '../services/validation';
 import { db } from '../services/db';
-import { AutoSave } from './AutoSave';
 import SinapiImporterInsumos from './sinapi/SinapiImporterInsumos';
 import SinapiImporterComposicoes from './sinapi/SinapiImporterComposicoes';
 import SinapiImporterAnalitico from './sinapi/SinapiImporterAnalitico';
@@ -37,18 +36,7 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
     category: 'Geral'
   });
 
-  const handleAutoSave = async (data: Partial<CatalogService>) => {
-    if (!editingService || !data.name || data.basePrice === undefined) return;
 
-    const serviceResult: CatalogService = {
-      ...editingService,
-      ...data as CatalogService
-    };
-    const newList = services.map(s => s.id === editingService.id ? serviceResult : s);
-
-    setServices(newList);
-    await db.save('serviflow_catalog', newList, serviceResult);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -314,13 +302,6 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
 
             <div className="flex items-center justify-between gap-4 mt-10">
               <div className="flex-1">
-                {editingService && (
-                  <AutoSave
-                    id={`catalog-${editingService.id}`}
-                    data={formData}
-                    onSave={handleAutoSave}
-                  />
-                )}
               </div>
               <div className="flex gap-4">
                 <button
