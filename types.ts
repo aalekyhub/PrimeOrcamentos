@@ -128,7 +128,7 @@ export interface Transaction {
   id: string;
   date: string;
   amount: number;
-  type: 'RECEITA' | 'DESPESA';
+  type: 'RECEITA' | 'DESPESA' | 'EMPRESTIMO_SOCIO';
   category: string;
   description: string;
   relatedOrderId?: string;

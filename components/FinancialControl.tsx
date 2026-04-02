@@ -59,10 +59,10 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
   const today = new Date().toISOString().split('T')[0];
   const realizedTransactions = transactions.filter(t => t.date <= today);
 
-  const totalIncome = realizedTransactions.filter(t => t.type === 'RECEITA').reduce((s, t) => s + t.amount, 0);
+  const totalIncome = realizedTransactions.filter(t => t.type === 'RECEITA' || t.type === 'EMPRESTIMO_SOCIO').reduce((s, t) => s + t.amount, 0);
   const totalExpense = realizedTransactions.filter(t => t.type === 'DESPESA').reduce((s, t) => s + t.amount, 0);
 
-  const projectedIncome = transactions.filter(t => t.type === 'RECEITA').reduce((s, t) => s + t.amount, 0);
+  const projectedIncome = transactions.filter(t => t.type === 'RECEITA' || t.type === 'EMPRESTIMO_SOCIO').reduce((s, t) => s + t.amount, 0);
   const projectedExpense = transactions.filter(t => t.type === 'DESPESA').reduce((s, t) => s + t.amount, 0);
   const projectedBalance = projectedIncome - projectedExpense;
 
@@ -75,7 +75,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
       amount: Number(formData.amount),
       category: formData.category || 'Geral',
       date: formData.date || new Date().toISOString().split('T')[0],
-      type: formData.type as 'RECEITA' | 'DESPESA',
+      type: formData.type as 'RECEITA' | 'DESPESA' | 'EMPRESTIMO_SOCIO',
       description: formData.description || '',
       isRecurring: formData.isRecurring,
       frequency: formData.frequency,
@@ -306,11 +306,13 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
               .map(t => (
                 <div key={t.id} className="group py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-all rounded-2xl px-4 -mx-4">
                   <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${t.type === 'RECEITA' ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400'}`}>
-                      {t.type === 'RECEITA' ? <ArrowUpRight className="w-5 h-5" /> : <ArrowDownLeft className="w-5 h-5" />}
-                    </div>
-                    <div>
-                      <p className="text-sm font-black text-slate-900 dark:text-white leading-tight uppercase">{t.category}</p>
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${t.type === 'RECEITA' || t.type === 'EMPRESTIMO_SOCIO' ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400'}`}>
+                    {t.type === 'RECEITA' || t.type === 'EMPRESTIMO_SOCIO' ? <ArrowUpRight className="w-5 h-5" /> : <ArrowDownLeft className="w-5 h-5" />}
+                  </div>
+                  <div>
+                    <p className="text-sm font-black text-slate-900 dark:text-white leading-tight uppercase">
+                      {t.category} {t.type === 'EMPRESTIMO_SOCIO' && <span className="ml-1 text-[8px] bg-slate-100 text-slate-500 px-1 rounded">SÓCIO</span>}
+                    </p>
                       <div className="flex items-center gap-2 mt-1">
                         <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">{t.date.split('-').reverse().join('/')}</p>
                         {t.date > today && (
@@ -372,8 +374,8 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
                   </div>
                   <div className="flex items-center justify-between md:justify-end gap-8">
                     <div className="text-right">
-                      <p className={`text-sm font-black ${t.type === 'RECEITA' ? 'text-emerald-600' : 'text-rose-600'} whitespace-nowrap`}>
-                        {t.type === 'RECEITA' ? '+' : '-'} R$ {t.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      <p className={`text-sm font-black ${t.type === 'RECEITA' || t.type === 'EMPRESTIMO_SOCIO' ? 'text-emerald-600' : 'text-rose-600'} whitespace-nowrap`}>
+                        {t.type === 'RECEITA' || t.type === 'EMPRESTIMO_SOCIO' ? '+' : '-'} R$ {t.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </p>
                       <p className="text-[9px] text-slate-300 font-bold uppercase mt-0.5">{t.id}</p>
                     </div>
@@ -447,6 +449,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
                   value={formData.type} onChange={e => setFormData({ ...formData, type: e.target.value as any })}>
                   <option value="RECEITA">Receita (+)</option>
                   <option value="DESPESA">Despesa (-)</option>
+                  <option value="EMPRESTIMO_SOCIO">Empréstimo Sócio (+)</option>
                 </select>
               </div>
               <div>
