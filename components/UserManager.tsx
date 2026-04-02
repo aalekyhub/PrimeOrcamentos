@@ -8,6 +8,7 @@ import { useNotify } from './ToastProvider';
 interface Props {
   users: UserAccount[];
   setUsers: React.Dispatch<React.SetStateAction<UserAccount[]>>;
+  currentUser: UserAccount;
 }
 
 const MODULES = [
@@ -22,7 +23,8 @@ const MODULES = [
   { id: 'settings', label: 'Configurações Empresa' },
 ];
 
-const UserManager: React.FC<Props> = ({ users, setUsers }) => {
+const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
+  const isAdmin = currentUser.role === 'admin';
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState<UserAccount | null>(null);
   const { notify } = useNotify();
@@ -73,6 +75,10 @@ const UserManager: React.FC<Props> = ({ users, setUsers }) => {
 
   const handleSaveUser = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isAdmin) {
+      notify("Apenas administradores podem gerenciar usuários.", "error");
+      return;
+    }
     if (!formData.name || !formData.email || !formData.password) return;
 
     // Garante que dashboard sempre esteja presente
@@ -116,6 +122,10 @@ const UserManager: React.FC<Props> = ({ users, setUsers }) => {
   };
 
   const removeUser = async (id: string) => {
+    if (!isAdmin) {
+      notify("Apenas administradores podem gerenciar usuários.", "error");
+      return;
+    }
     if (id === 'USR-001') {
       notify("Não é possível remover o administrador mestre.", "error");
       return;
@@ -135,13 +145,24 @@ const UserManager: React.FC<Props> = ({ users, setUsers }) => {
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Usuários e Acessos</h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm">Controle quem pode acessar o ServiFlow Pro e quais módulos.</p>
         </div>
-        <button
-          onClick={handleOpenCreate}
-          className="bg-blue-600 text-white px-6 py-2 rounded-xl flex items-center gap-2 font-bold shadow-lg shadow-blue-900/20 hover:bg-blue-700 transition-all"
-        >
-          <UserPlus className="w-5 h-5" /> Adicionar Usuário
-        </button>
+        {isAdmin && (
+          <button
+            onClick={handleOpenCreate}
+            className="bg-blue-600 text-white px-6 py-2 rounded-xl flex items-center gap-2 font-bold shadow-lg shadow-blue-900/20 hover:bg-blue-700 transition-all"
+          >
+            <UserPlus className="w-5 h-5" /> Adicionar Usuário
+          </button>
+        )}
       </div>
+
+      {!isAdmin && (
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 rounded-2xl flex items-center gap-3">
+          <Shield className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+          <p className="text-xs font-bold text-amber-700 dark:text-amber-300">
+            Atenção: Apenas administradores podem criar, editar ou excluir usuários. Seus privilégios atuais são de Operador.
+          </p>
+        </div>
+      )}
 
       {showForm && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -286,22 +307,26 @@ const UserManager: React.FC<Props> = ({ users, setUsers }) => {
                     <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">{user.createdAt}</span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => handleOpenEdit(user)}
-                        className="p-2 text-slate-300 dark:text-slate-600 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl transition-all"
-                        title="Editar Usuário"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => removeUser(user.id)}
-                        className="p-2 text-slate-300 dark:text-slate-600 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-xl transition-all"
-                        title="Remover Usuário"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+                    {isAdmin ? (
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleOpenEdit(user)}
+                          className="p-2 text-slate-300 dark:text-slate-600 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl transition-all"
+                          title="Editar Usuário"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => removeUser(user.id)}
+                          className="p-2 text-slate-300 dark:text-slate-600 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/30 rounded-xl transition-all"
+                          title="Remover Usuário"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">Somente Leitura</span>
+                    )}
                   </td>
                 </tr>
               ))}

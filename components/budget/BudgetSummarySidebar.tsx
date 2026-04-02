@@ -16,12 +16,15 @@ interface BudgetSummarySidebarProps {
     onPrint: () => void;
     onSave: () => void;
     onGenerateContract: () => void;
+    isAdmin?: boolean;
+    isEditing?: boolean;
 }
 
 const BudgetSummarySidebar: React.FC<BudgetSummarySidebarProps> = ({
     bdiRate, setBdiRate, taxRate, setTaxRate, subtotal, totalAmount,
     paymentTerms, setPaymentTerms, deliveryTime, setDeliveryTime,
-    onShowPayment, onPrint, onSave, onGenerateContract
+    onShowPayment, onPrint, onSave, onGenerateContract,
+    isAdmin = true, isEditing = false
 }) => {
     const bdiNum = Number(bdiRate) || 0;
     const taxNum = Number(taxRate) || 0;
@@ -61,21 +64,28 @@ const BudgetSummarySidebar: React.FC<BudgetSummarySidebarProps> = ({
                 <div className="flex justify-between items-baseline border-b border-slate-800 pb-4">
                     <span style={{ fontSize: '32px', fontWeight: '800', color: '#60a5fa', letterSpacing: '-0.05em', lineHeight: '1.2', paddingBottom: '4px', whiteSpace: 'nowrap' }}>R$ {totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
+                {!isAdmin && isEditing && (
+                    <div className="mt-4 p-2 bg-rose-500/10 border border-rose-500/20 rounded-lg">
+                        <p className="text-[8px] font-black text-rose-400 uppercase tracking-widest text-center">Modo Somente Leitura</p>
+                    </div>
+                )}
             </div>
 
             <div className="space-y-4 relative z-10">
                 <div>
                     <div className="flex justify-between items-center mb-2">
                         <label className="text-[8px] font-bold text-slate-400 uppercase tracking-widest block">Pagamento</label>
-                        <button onClick={onShowPayment} className="text-[8px] font-black text-emerald-400 hover:text-emerald-300 uppercase tracking-widest flex items-center gap-1 transition-colors">
-                            <Zap className="w-3 h-3" /> Gerar
-                        </button>
+                        {(!isEditing || isAdmin) && (
+                            <button onClick={onShowPayment} className="text-[8px] font-black text-emerald-400 hover:text-emerald-300 uppercase tracking-widest flex items-center gap-1 transition-colors">
+                                <Zap className="w-3 h-3" /> Gerar
+                            </button>
+                        )}
                     </div>
-                    <textarea className="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-3 text-[9px] font-bold text-slate-200 outline-none h-20 focus:ring-1 focus:ring-blue-500 leading-relaxed shadow-inner" value={paymentTerms} onChange={e => setPaymentTerms(e.target.value)} />
+                    <textarea className="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-3 text-[9px] font-bold text-slate-200 outline-none h-20 focus:ring-1 focus:ring-blue-500 leading-relaxed shadow-inner" value={paymentTerms} onChange={e => setPaymentTerms(e.target.value)} disabled={isEditing && !isAdmin} />
                 </div>
                 <div>
                     <label className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Prazo Entrega</label>
-                    <input type="text" className="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-3 text-[9px] font-bold text-slate-200 outline-none focus:ring-1 focus:ring-blue-500 shadow-inner" value={deliveryTime} onChange={e => setDeliveryTime(e.target.value)} />
+                    <input type="text" className="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-3 text-[9px] font-bold text-slate-200 outline-none focus:ring-1 focus:ring-blue-500 shadow-inner" value={deliveryTime} onChange={e => setDeliveryTime(e.target.value)} disabled={isEditing && !isAdmin} />
                 </div>
             </div>
 
@@ -84,9 +94,11 @@ const BudgetSummarySidebar: React.FC<BudgetSummarySidebarProps> = ({
                     <button onClick={onPrint} className="bg-slate-800 hover:bg-slate-700 text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[11px] flex flex-row items-center justify-center gap-2 transition-all border border-slate-700 group w-full shadow-md shadow-blue-950/20">
                         <Printer className="w-5 h-5 text-blue-400 group-hover:scale-110 transition-transform" /> IMPRIMIR ORÇAMENTO
                     </button>
-                    <button onClick={onSave} className="bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[11px] shadow-md shadow-blue-950/20 transition-all flex items-center justify-center gap-2">
-                        <Save className="w-5 h-5" /> REGISTRAR
-                    </button>
+                    {(!isEditing || isAdmin) && (
+                        <button onClick={onSave} className="bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[11px] shadow-md shadow-blue-950/20 transition-all flex items-center justify-center gap-2">
+                            <Save className="w-5 h-5" /> REGISTRAR
+                        </button>
+                    )}
                     <button onClick={onGenerateContract} className="bg-slate-800 hover:bg-slate-700 text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[11px] shadow-md shadow-blue-950/20 transition-all flex items-center justify-center gap-2 border border-slate-700">
                         <ScrollText className="w-5 h-5 text-blue-400" /> GERAR CONTRATO
                     </button>

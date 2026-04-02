@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { UserPlus, Search, Trash2, X, Loader2, RefreshCw } from 'lucide-react';
-import { Customer, PersonType, ServiceOrder } from '../types';
+import { Customer, PersonType, ServiceOrder, UserAccount } from '../types';
 import { useNotify } from './ToastProvider';
 import { checkDuplicateCustomer } from '../services/validation';
 import { db } from '../services/db';
@@ -13,9 +13,11 @@ interface Props {
   defaultOpenForm?: boolean;
   onSuccess?: (customer: Customer) => void;
   onCancel?: () => void;
+  currentUser: UserAccount;
 }
 
-const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, defaultOpenForm = false, onSuccess, onCancel }) => {
+const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, currentUser, defaultOpenForm = false, onSuccess, onCancel }) => {
+  const isAdmin = currentUser?.role === 'admin';
   const [showForm, setShowForm] = useState(defaultOpenForm);
   const [searchTerm, setSearchTerm] = useState('');
   const [personType, setPersonType] = useState<PersonType>('PF');
@@ -89,6 +91,10 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (editingCustomerId && !isAdmin) {
+      notify("Você não tem permissão para editar clientes salvos.", "error");
+      return;
+    }
     if (!newCustomer.name || !newCustomer.document) return;
 
     // Utiliza o serviço centralizado para verificar duplicidade
@@ -170,7 +176,8 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className={labelClass}>{personType === 'PF' ? 'CPF' : 'CNPJ (Auto-preenchimento)'}</label>
-                <input type="text" placeholder={personType === 'PF' ? "000.000.000-00" : "00.000.000/0000-00"} className={inputClass} value={newCustomer.document}
+                <input type="text" placeholder={personType === 'PF' ? "000.000.000-00" : "00.000.000/0000-00"} className={`${inputClass} ${(editingCustomerId && !isAdmin) ? 'opacity-70 grayscale-[0.5]' : ''}`} value={newCustomer.document}
+                  disabled={editingCustomerId && !isAdmin}
                   onChange={e => {
                     let val = e.target.value;
                     // Remove tudo que não é dígito
@@ -217,14 +224,15 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
               </div>
               <div className="md:col-span-2">
                 <label className={labelClass}>Nome / Razão Social</label>
-                <input type="text" className={inputClass} value={newCustomer.name} onChange={e => setNewCustomer({ ...newCustomer, name: e.target.value })} required />
+                <input type="text" className={`${inputClass} ${(editingCustomerId && !isAdmin) ? 'opacity-70' : ''}`} value={newCustomer.name} onChange={e => setNewCustomer({ ...newCustomer, name: e.target.value })} disabled={editingCustomerId && !isAdmin} required />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
               <div className="md:col-span-3">
                 <label className={labelClass}>CEP (Auto-preenchimento)</label>
-                <input type="text" placeholder="00000-000" className={inputClass} value={newCustomer.cep}
+                <input type="text" placeholder="00000-000" className={`${inputClass} ${(editingCustomerId && !isAdmin) ? 'opacity-70' : ''}`} value={newCustomer.cep}
+                  disabled={editingCustomerId && !isAdmin}
                   onChange={e => {
                     const val = e.target.value;
                     setNewCustomer({ ...newCustomer, cep: val });
@@ -233,27 +241,27 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
               </div>
               <div className="md:col-span-6">
                 <label className={labelClass}>Rua / Logradouro</label>
-                <input type="text" className={inputClass} value={newCustomer.address} onChange={e => setNewCustomer({ ...newCustomer, address: e.target.value })} />
+                <input type="text" className={`${inputClass} ${(editingCustomerId && !isAdmin) ? 'opacity-70' : ''}`} value={newCustomer.address} onChange={e => setNewCustomer({ ...newCustomer, address: e.target.value })} disabled={editingCustomerId && !isAdmin} />
               </div>
               <div className="md:col-span-3">
                 <label className={labelClass}>Número</label>
-                <input type="text" className={inputClass} value={newCustomer.number} onChange={e => setNewCustomer({ ...newCustomer, number: e.target.value })} />
+                <input type="text" className={`${inputClass} ${(editingCustomerId && !isAdmin) ? 'opacity-70' : ''}`} value={newCustomer.number} onChange={e => setNewCustomer({ ...newCustomer, number: e.target.value })} disabled={editingCustomerId && !isAdmin} />
               </div>
               <div className="md:col-span-4">
                 <label className={labelClass}>Bairro</label>
-                <input type="text" className={inputClass} value={newCustomer.neighborhood} onChange={e => setNewCustomer({ ...newCustomer, neighborhood: e.target.value })} />
+                <input type="text" className={`${inputClass} ${(editingCustomerId && !isAdmin) ? 'opacity-70' : ''}`} value={newCustomer.neighborhood} onChange={e => setNewCustomer({ ...newCustomer, neighborhood: e.target.value })} disabled={editingCustomerId && !isAdmin} />
               </div>
               <div className="md:col-span-4">
                 <label className={labelClass}>Cidade</label>
-                <input type="text" className={inputClass} value={newCustomer.city} onChange={e => setNewCustomer({ ...newCustomer, city: e.target.value })} />
+                <input type="text" className={`${inputClass} ${(editingCustomerId && !isAdmin) ? 'opacity-70' : ''}`} value={newCustomer.city} onChange={e => setNewCustomer({ ...newCustomer, city: e.target.value })} disabled={editingCustomerId && !isAdmin} />
               </div>
               <div className="md:col-span-2">
                 <label className={labelClass}>UF</label>
-                <input type="text" maxLength={2} className={`${inputClass} text-center uppercase`} value={newCustomer.state} onChange={e => setNewCustomer({ ...newCustomer, state: e.target.value })} />
+                <input type="text" maxLength={2} className={`${inputClass} text-center uppercase ${(editingCustomerId && !isAdmin) ? 'opacity-70' : ''}`} value={newCustomer.state} onChange={e => setNewCustomer({ ...newCustomer, state: e.target.value })} disabled={editingCustomerId && !isAdmin} />
               </div>
               <div className="md:col-span-2">
                 <label className={labelClass}>Comp.</label>
-                <input type="text" className={inputClass} value={newCustomer.complement} onChange={e => setNewCustomer({ ...newCustomer, complement: e.target.value })} />
+                <input type="text" className={`${inputClass} ${(editingCustomerId && !isAdmin) ? 'opacity-70' : ''}`} value={newCustomer.complement} onChange={e => setNewCustomer({ ...newCustomer, complement: e.target.value })} disabled={editingCustomerId && !isAdmin} />
               </div>
             </div>
 
@@ -284,10 +292,21 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
 
             <div className="flex justify-between items-center pt-4">
               <div className="flex-1">
+                {(editingCustomerId && !isAdmin) && (
+                  <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-4 py-2 rounded-lg border border-rose-100 w-fit">
+                    Modo Visualização: Apenas administradores podem alterar
+                  </p>
+                )}
               </div>
-              <button type="submit" className="bg-blue-600 text-white px-12 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-xl shadow-blue-900/20 hover:scale-[1.02] active:scale-95 transition-all">
-                {editingCustomerId ? 'Salvar Alterações' : 'Salvar Cliente'}
-              </button>
+              {(isAdmin || !editingCustomerId) ? (
+                <button type="submit" className="bg-blue-600 text-white px-12 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-xl shadow-blue-900/20 hover:scale-[1.02] active:scale-95 transition-all">
+                  {editingCustomerId ? 'Salvar Alterações' : 'Salvar Cliente'}
+                </button>
+              ) : (
+                <button type="button" onClick={() => { setShowForm(false); if (onCancel) onCancel(); }} className="bg-slate-200 text-slate-500 px-12 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-slate-300 transition-all">
+                  Fechar Visualização
+                </button>
+              )}
             </div>
           </form>
         </div>
@@ -305,6 +324,11 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
                 onChange={e => setSearchTerm(e.target.value)}
               />
             </div>
+            {!isAdmin && (
+              <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 rounded-lg border border-amber-100 dark:border-amber-800">
+                Somente Leitura: Administrativo necessário para editar ou excluir
+              </p>
+            )}
           </div>
           <table className="w-full text-left border-collapse">
             <thead>
@@ -316,24 +340,38 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, def
             </thead>
             <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
               {filtered.map(c => (
-                <tr key={c.id} onClick={() => { setEditingCustomerId(c.id); setNewCustomer(c); setPersonType(c.type); setShowForm(true); }} className="hover:bg-blue-50/60 dark:hover:bg-slate-800/50 group transition-colors cursor-pointer">
+                <tr key={c.id} onClick={() => {
+                  if (!isAdmin) {
+                    notify("Somente administradores podem editar clientes salvos.", "warning");
+                    return;
+                  }
+                  setEditingCustomerId(c.id);
+                  setNewCustomer(c);
+                  setPersonType(c.type);
+                  setShowForm(true);
+                }} className={`group transition-colors cursor-pointer ${isAdmin ? 'hover:bg-blue-50/60 dark:hover:bg-slate-800/50' : 'hover:bg-slate-50 dark:hover:bg-slate-800/30'}`}>
                   <td className="px-8 py-6 pl-10">
-                    <p className="text-sm font-black text-slate-900 dark:text-white uppercase mb-1">{c.name}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-black text-slate-900 dark:text-white uppercase mb-1">{c.name}</p>
+                      {!isAdmin && <span className="text-[8px] font-black text-slate-400 border border-slate-200 px-1 rounded">BLOQUEADO</span>}
+                    </div>
                     <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold tracking-wide">{c.document}</p>
                   </td>
                   <td className="px-8 py-6 text-xs text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wide">
                     {c.city && c.state ? `${c.city} - ${c.state}` : <span className="text-slate-300 dark:text-slate-600 italic">Localização n/d</span>}
                   </td>
                   <td className="px-8 py-6 pr-10 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={async (e) => {
-                      e.stopPropagation();
-                      if (confirm("Deseja realmente excluir este cliente? Esta ação também removerá os dados da nuvem.")) {
-                        setCustomers(p => p.filter(x => x.id !== c.id));
-                        const result = await db.remove('serviflow_customers', c.id);
-                        if (result?.success) notify("Cliente removido da nuvem.");
-                        else notify("Removido localmente. Erro na nuvem.", "warning");
-                      }
-                    }} className="p-2 text-slate-400 hover:text-rose-500 transition-colors" title="Excluir"><Trash2 className="w-4 h-4" /></button>
+                    {isAdmin && (
+                      <button onClick={async (e) => {
+                        e.stopPropagation();
+                        if (confirm("Deseja realmente excluir este cliente? Esta ação também removerá os dados da nuvem.")) {
+                          setCustomers(p => p.filter(x => x.id !== c.id));
+                          const result = await db.remove('serviflow_customers', c.id);
+                          if (result?.success) notify("Cliente removido da nuvem.");
+                          else notify("Removido localmente. Erro na nuvem.", "warning");
+                        }
+                      }} className="p-2 text-slate-400 hover:text-rose-500 transition-colors" title="Excluir"><Trash2 className="w-4 h-4" /></button>
+                    )}
                   </td>
                 </tr>
               ))}

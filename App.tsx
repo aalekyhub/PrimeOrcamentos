@@ -710,11 +710,11 @@ const AppContent: React.FC = () => {
                   )}
 
                   {item.id === 'customers' && (
-                    <CustomerManager customers={customers} setCustomers={setCustomers} orders={orders} />
+                    <CustomerManager customers={customers} setCustomers={setCustomers} orders={orders} currentUser={currentUser} />
                   )}
 
                   {item.id === 'catalog' && (
-                    <ServiceCatalog services={catalog} setServices={setCatalog} company={company} />
+                    <ServiceCatalog services={catalog} setServices={setCatalog} company={company} currentUser={currentUser} />
                   )}
 
                   {item.id === 'budgets' && (
@@ -728,6 +728,7 @@ const AppContent: React.FC = () => {
                       company={company}
                       prefilledData={prefilledBudgetData}
                       onPrefilledDataConsumed={() => setPrefilledBudgetData(null)}
+                      currentUser={currentUser}
                     />
                   )}
 
@@ -740,6 +741,7 @@ const AppContent: React.FC = () => {
                       catalogServices={catalog}
                       setCatalogServices={setCatalog}
                       company={company}
+                      currentUser={currentUser}
                     />
                   )}
 
@@ -754,11 +756,12 @@ const AppContent: React.FC = () => {
                       company={company}
                       transactions={transactions}
                       setTransactions={setTransactions}
+                      currentUser={currentUser}
                     />
                   )}
 
                   {item.id === 'construction' && (
-                    <UnifiedWorksManager customers={customers} company={company} onGenerateBudget={handleGenerateBudget} />
+                    <UnifiedWorksManager customers={customers} company={company} onGenerateBudget={handleGenerateBudget} currentUser={currentUser} />
                   )}
 
                   {item.id === 'search' && (
@@ -770,6 +773,7 @@ const AppContent: React.FC = () => {
                       catalogServices={catalog}
                       setCatalogServices={setCatalog}
                       isLoading={isSyncing}
+                      currentUser={currentUser}
                     />
                   )}
 
@@ -784,11 +788,11 @@ const AppContent: React.FC = () => {
                   )}
 
                   {item.id === 'users' && (
-                    <UserManager users={users} setUsers={setUsers} />
+                    <UserManager users={users} setUsers={setUsers} currentUser={currentUser} />
                   )}
 
                   {item.id === 'settings' && (
-                    <CompanySettings company={company} setCompany={setCompany} />
+                    <CompanySettings company={company} setCompany={setCompany} currentUser={currentUser} />
                   )}
                 </div>
               );

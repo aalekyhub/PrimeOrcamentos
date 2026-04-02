@@ -6,7 +6,7 @@ import {
     Type, Image as ImageIcon, Zap, Upload, CheckCircle,
     GripVertical
 } from 'lucide-react';
-import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock, Transaction } from '../types';
+import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock, Transaction, UserAccount } from '../types';
 import { useNotify } from './ToastProvider';
 import CustomerManager from './CustomerManager';
 import { db } from '../services/db';
@@ -31,9 +31,11 @@ interface Props {
     company: CompanyProfile;
     transactions: Transaction[];
     setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>;
+    currentUser: UserAccount;
 }
 
-const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCustomers, company, transactions, setTransactions }) => {
+const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCustomers, company, transactions, setTransactions, currentUser }) => {
+    const isAdmin = currentUser?.role === 'admin';
     const [searchTerm, setSearchTerm] = useState('');
     const [showForm, setShowForm] = useState(false);
     const [showFullClientForm, setShowFullClientForm] = useState(false);
@@ -126,6 +128,10 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     };
 
     const handleSaveOS = async () => {
+        if (editingOrderId && !isAdmin) {
+            notify("Você não tem permissão para alterar ordens de serviço salvas.", "error");
+            return;
+        }
         if (isSaving) return;
         const customer = customers.find(c => c.id === selectedCustomerId);
         if (!customer) { notify("Selecione um cliente", "error"); return; }
@@ -251,6 +257,10 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                     <button onClick={(e) => { e.stopPropagation(); handlePreviewOS(order); }} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Imprimir OS"><Printer className="w-4 h-4" /></button>
                                     <button onClick={async (e) => {
                                         e.stopPropagation();
+                                        if (!isAdmin) {
+                                            notify("Somente administradores podem excluir ordens de serviço.", "error");
+                                            return;
+                                        }
                                         if (confirm("Excluir esta OS de Obra?")) {
                                             const idToDelete = order.id;
                                             setOrders(p => p.filter(x => x.id !== idToDelete));
@@ -275,6 +285,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                     <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-0.5">{editingOrderId ? `Editando Obra ${editingOrderId}` : 'Nova OS de Obra'}</h3>
                                     <div className="flex items-center gap-2">
                                         <span className="text-[10px] font-black uppercase tracking-widest bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-md">Construção Civil</span>
+                                        {editingOrderId && !isAdmin && <span className="text-[10px] font-black uppercase tracking-widest text-rose-500 border-l pl-2 dark:border-slate-800">BLOQUEADO</span>}
                                     </div>
                                 </div>
                             </div>
@@ -288,23 +299,25 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                         <div>
                                             <div className="flex justify-between items-center mb-2">
                                                 <label className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest ml-1">Cliente</label>
-                                                <button onClick={() => setShowFullClientForm(true)} className="text-blue-600 dark:text-blue-400 text-[9px] font-black uppercase flex items-center gap-1 hover:underline"><UserPlus className="w-3 h-3" /> Novo</button>
+                                                {(!editingOrderId || isAdmin) && (
+                                                    <button onClick={() => setShowFullClientForm(true)} className="text-blue-600 dark:text-blue-400 text-[9px] font-black uppercase flex items-center gap-1 hover:underline"><UserPlus className="w-3 h-3" /> Novo</button>
+                                                )}
                                             </div>
-                                            <select className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500 transition-all custom-select" value={selectedCustomerId} onChange={e => setSelectedCustomerId(e.target.value)}>
+                                            <select className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500 transition-all custom-select" value={selectedCustomerId} onChange={e => setSelectedCustomerId(e.target.value)} disabled={editingOrderId !== null && !isAdmin}>
                                                 <option value="">Selecione...</option>
                                                 {customers.map(c => <option key={c.id} value={c.id} className="dark:bg-slate-900">{c.name}</option>)}
                                             </select>
                                         </div>
                                         <div>
                                             <label className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-2 block ml-1">Título da Obra</label>
-                                            <input type="text" placeholder="Ex: Reforma da Cozinha" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500" value={osTitle} onChange={e => setOsTitle(e.target.value)} />
+                                            <input type="text" placeholder="Ex: Reforma da Cozinha" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500" value={osTitle} onChange={e => setOsTitle(e.target.value)} disabled={editingOrderId !== null && !isAdmin} />
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm">
                                     <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Observações Técnicas e Escopo Detalhado</label>
-                                    <RichTextEditor value={diagnosis} onChange={setDiagnosis} placeholder="Descreva os serviços a serem executados por extenso..." />
+                                    <RichTextEditor value={diagnosis} onChange={setDiagnosis} placeholder="Descreva os serviços a serem executados por extenso..." disabled={editingOrderId !== null && !isAdmin} />
                                 </div>
 
                                 <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
@@ -326,11 +339,11 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                             </div>
                                             <div className="text-center">
                                                 <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Quantidade</label>
-                                                <input type="number" className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 h-[44px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} />
+                                                <input type="number" className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 h-[44px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} disabled={editingOrderId !== null && !isAdmin} />
                                             </div>
                                             <div>
                                                 <label className="mb-1.5 h-4 block"></label>
-                                                <button onClick={handleAddItem} className="bg-blue-600 text-white w-full h-[44px] rounded-xl flex items-center justify-center hover:bg-blue-700 hover:scale-105 transition-all shadow-lg shadow-blue-900/20"><Plus className="w-5 h-5" /></button>
+                                                <button onClick={handleAddItem} className="bg-blue-600 text-white w-full h-[44px] rounded-xl flex items-center justify-center hover:bg-blue-700 hover:scale-105 transition-all shadow-lg shadow-blue-900/20" disabled={editingOrderId !== null && !isAdmin}><Plus className="w-5 h-5" /></button>
                                             </div>
                                         </div>
                                         <div className="space-y-1.5">
@@ -345,6 +358,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                             className="w-full bg-transparent text-[10px] font-black text-slate-900 dark:text-slate-100 uppercase outline-none focus:bg-slate-50 dark:focus:bg-slate-800/50 rounded px-1 transition-all resize-none break-words leading-tight h-[32px] py-1.5"
                                                             value={item.description}
                                                             onChange={e => updateItem(item.id, 'description', e.target.value)}
+                                                            disabled={editingOrderId !== null && !isAdmin}
                                                             rows={1}
                                                         />
                                                     </div>
@@ -364,7 +378,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                     </div>
 
                                                     <div className="flex justify-center">
-                                                        <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="text-slate-300 dark:text-slate-700 hover:text-rose-500 transition-colors">
+                                                        <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className={`transition-colors ${editingOrderId !== null && !isAdmin ? 'text-slate-100 dark:text-slate-900 cursor-not-allowed' : 'text-slate-300 dark:text-slate-700 hover:text-rose-500'}`} disabled={editingOrderId !== null && !isAdmin}>
                                                             <Trash2 size={14} />
                                                         </button>
                                                     </div>
@@ -378,7 +392,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                     <div className="flex justify-between items-center mb-2">
                                         <h4 className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b dark:border-slate-800 pb-2 grow mr-6">FOTOS E ANEXOS DA OBRA</h4>
                                     </div>
-                                    {descriptionBlocks.length === 0 && (
+                                    {descriptionBlocks.length === 0 && (!editingOrderId || isAdmin) && (
                                         <div className="bg-slate-50 dark:bg-slate-800/50 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[2rem] p-8 flex flex-col items-center justify-center gap-4 group hover:border-blue-400 transition-colors cursor-pointer" onClick={addTextBlock}>
                                             <div className="flex gap-4">
                                                 <button onClick={(e) => { e.stopPropagation(); addTextBlock(); }} className="bg-blue-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-blue-900/20 hover:scale-105 transition-all"><Type className="w-4 h-4" /> + Texto</button>
@@ -396,6 +410,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                     onAddText={addTextBlock}
                                                     onAddImage={addImageBlock}
                                                     placeholder="Detalhes da foto ou texto..."
+                                                    disabled={editingOrderId !== null && !isAdmin}
                                                 />
                                             )}
                                             {block.type === 'image' && (
@@ -406,10 +421,10 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                             <button onClick={() => updateBlockContent(block.id, '')} className="absolute -top-2 -right-2 bg-rose-500 text-white p-1.5 rounded-full shadow-lg"><Trash2 className="w-3 h-3" /></button>
                                                         </div>
                                                     ) : (
-                                                        <label className="cursor-pointer flex flex-col items-center gap-1 p-8 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl w-full">
+                                                        <label className={`flex flex-col items-center justify-center gap-2 p-8 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl w-full ${editingOrderId !== null && !isAdmin ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}>
                                                             <Upload className="w-8 h-8 text-blue-500" />
                                                             <span className="text-[10px] font-black text-slate-400 uppercase">Subir Foto</span>
-                                                            <input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(block.id, e)} />
+                                                            <input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(block.id, e)} disabled={editingOrderId !== null && !isAdmin} />
                                                         </label>
                                                     )}
                                                 </div>
@@ -439,10 +454,12 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                 </div>
 
                                 <div className="mt-auto">
-                                    <button onClick={handleSaveOS} disabled={isSaving} className={`w-full ${isSaving ? 'bg-slate-800 cursor-not-allowed' : 'bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-700'} text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-slate-200 dark:shadow-none hover:shadow-2xl transition-all flex items-center justify-center gap-3`}>
-                                        <Save className={`w-4 h-4 ${isSaving ? 'animate-pulse' : ''} `} />
-                                        {isSaving ? 'Processando...' : 'Salvar Obra'}
-                                    </button>
+                                    {(!editingOrderId || isAdmin) && (
+                                        <button onClick={handleSaveOS} disabled={isSaving} className={`w-full ${isSaving ? 'bg-slate-800 cursor-not-allowed' : 'bg-slate-900 hover:bg-slate-800 dark:bg-blue-600 dark:hover:bg-blue-700'} text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-slate-200 dark:shadow-none hover:shadow-2xl transition-all flex items-center justify-center gap-3`}>
+                                            <Save className={`w-4 h-4 ${isSaving ? 'animate-pulse' : ''} `} />
+                                            {isSaving ? 'Processando...' : 'Salvar Obra'}
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </div>

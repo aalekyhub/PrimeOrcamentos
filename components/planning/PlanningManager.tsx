@@ -4,6 +4,7 @@ import { useCalculations } from './hooks/useCalculations';
 import { PlanningList } from './PlanningList';
 import { PlanningEditor } from './PlanningEditor';
 import { Customer } from './types';
+import { UserAccount } from '../../types';
 import { db } from '../../services/db';
 import { toNumber } from '../../services/formatUtils';
 import ReportPreview from '../ReportPreview';
@@ -25,6 +26,7 @@ interface Props {
     embeddedPlanId?: string | null;
     onBack?: () => void;
     onPlanCreated?: (plan: any) => void;
+    currentUser: UserAccount;
 }
 
 const PlanningManager: React.FC<Props> = ({
@@ -34,6 +36,7 @@ const PlanningManager: React.FC<Props> = ({
     embeddedPlanId,
     onBack,
     onPlanCreated,
+    currentUser,
 }) => {
     const [showPreview, setShowPreview] = useState(false);
 
@@ -68,6 +71,12 @@ const PlanningManager: React.FC<Props> = ({
     };
 
     const handleSave = async () => {
+        const isAdmin = currentUser?.role === 'admin';
+        const isNew = embeddedPlanId === 'new' || !embeddedPlanId;
+        if (!isAdmin && !isNew) {
+            alert("Você não tem permissão para alterar projetos salvos.");
+            return;
+        }
         await planning.savePlan(calculations.totalGeneral);
     };
 
@@ -134,6 +143,7 @@ const PlanningManager: React.FC<Props> = ({
                     }}
                     embeddedMode={!!embeddedPlanId}
                     onShowPreview={() => setShowPreview(true)}
+                    currentUser={currentUser}
                 />
             )}
 

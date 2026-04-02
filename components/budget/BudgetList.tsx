@@ -11,6 +11,7 @@ interface BudgetListProps {
     onPrint: (budget: ServiceOrder) => void;
     onGenerateContract: (budget: ServiceOrder) => void;
     onDelete: (budget: ServiceOrder) => void;
+    isAdmin?: boolean;
 }
 
 const BudgetList: React.FC<BudgetListProps> = ({
@@ -21,7 +22,8 @@ const BudgetList: React.FC<BudgetListProps> = ({
     onEdit,
     onPrint,
     onGenerateContract,
-    onDelete
+    onDelete,
+    isAdmin = true
 }) => {
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -57,6 +59,14 @@ const BudgetList: React.FC<BudgetListProps> = ({
                         onChange={e => setSearchTerm(e.target.value)}
                     />
                 </div>
+                {!isAdmin && (
+                    <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl flex items-center gap-3">
+                        <ScrollText className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                        <p className="text-[10px] font-black text-amber-700 dark:text-amber-300 uppercase tracking-widest leading-relaxed">
+                            Apenas Administradores podem alterar ou excluir orçamentos salvos. Você está em modo de visualização restringida.
+                        </p>
+                    </div>
+                )}
             </div>
 
             <div className="bg-white dark:bg-slate-900/50 rounded-[2rem] border dark:border-slate-800 overflow-hidden shadow-sm overflow-x-auto">
@@ -83,7 +93,7 @@ const BudgetList: React.FC<BudgetListProps> = ({
                                 <td className="px-8 py-5 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase">{budget.description}</td>
                                 <td className="px-8 py-5 text-sm font-black text-slate-900 dark:text-white whitespace-nowrap">R$ {budget.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                                 <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {budget.status !== OrderStatus.APPROVED && (
+                                    {isAdmin && budget.status !== OrderStatus.APPROVED && (
                                         <button onClick={(e) => { e.stopPropagation(); onApprove(budget); }} className="p-2 text-slate-400 hover:text-emerald-600 transition-colors" title="Aprovar">
                                             <CheckCircle className="w-4 h-4" />
                                         </button>
@@ -97,9 +107,11 @@ const BudgetList: React.FC<BudgetListProps> = ({
                                     <button onClick={(e) => { e.stopPropagation(); onGenerateContract(budget); }} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Gerar Contrato">
                                         <ScrollText className="w-4 h-4" />
                                     </button>
-                                    <button onClick={(e) => { e.stopPropagation(); onDelete(budget); }} className="p-2 text-rose-300 hover:text-rose-600 transition-colors" title="Excluir">
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
+                                    {isAdmin && (
+                                        <button onClick={(e) => { e.stopPropagation(); onDelete(budget); }} className="p-2 text-rose-300 hover:text-rose-600 transition-colors" title="Excluir">
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    )}
                                 </td>
                             </tr>
                         ))}

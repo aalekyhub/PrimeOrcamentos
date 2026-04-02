@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Plus, Search, Trash2, Pencil, Briefcase, DollarSign, Tag, X, Scale, Database, Calculator, Upload, Filter, List } from 'lucide-react';
-import { CatalogService, CompanyProfile } from '../types';
+import { CatalogService, CompanyProfile, UserAccount } from '../types';
 import { useNotify } from './ToastProvider';
 import { checkDuplicateService } from '../services/validation';
 import { db } from '../services/db';
@@ -18,9 +18,11 @@ interface Props {
   company: CompanyProfile;
   defaultOpenForm?: boolean;
   onSuccess?: (service: CatalogService) => void;
+  currentUser: UserAccount;
 }
 
-const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defaultOpenForm = false, onSuccess }) => {
+const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, currentUser, defaultOpenForm = false, onSuccess }) => {
+  const isAdmin = currentUser?.role === 'admin';
   const [showForm, setShowForm] = useState(defaultOpenForm);
   const [activeTab, setActiveTab] = useState<'catalog' | 'sinapi' | 'bdi'>('catalog');
   const [sinapiView, setSinapiView] = useState<'search' | 'import'>('search');
@@ -40,6 +42,10 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (editingService && !isAdmin) {
+      notify("Você não tem permissão para editar itens de catálogo.", "error");
+      return;
+    }
     if (!formData.name || formData.basePrice === undefined) return;
 
     const duplicate = checkDuplicateService(formData.name || '', services, editingService?.id);
@@ -139,6 +145,11 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
                 onChange={e => setSearchTerm(e.target.value)}
               />
             </div>
+            {!isAdmin && (
+              <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest bg-indigo-50 dark:bg-indigo-900/20 px-3 py-1.5 rounded-lg border border-indigo-100 dark:border-indigo-800">
+                Somente Leitura: Administrativo necessário para editar ou excluir
+              </p>
+            )}
             <button
               onClick={() => {
                 setEditingService(null);
@@ -180,16 +191,20 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
                       R$ {service.basePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </td>
                     <td className="px-8 py-5 pr-10 text-right">
-                      <div className="flex justify-end gap-2">
-                        <button onClick={() => { setEditingService(service); setFormData(service); setShowForm(true); }} className="p-2 text-slate-400 hover:text-indigo-600 transition-colors"><Pencil className="w-4 h-4" /></button>
-                        <button onClick={async () => {
-                          if (confirm("Excluir item do catálogo?")) {
-                            setServices(services.filter(s => s.id !== service.id));
-                            await db.remove('serviflow_catalog', service.id);
-                            notify("Item removido.");
-                          }
-                        }} className="p-2 text-slate-400 hover:text-rose-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
-                      </div>
+                      {isAdmin ? (
+                        <div className="flex justify-end gap-2">
+                          <button onClick={() => { setEditingService(service); setFormData(service); setShowForm(true); }} className="p-2 text-slate-400 hover:text-indigo-600 transition-colors"><Pencil className="w-4 h-4" /></button>
+                          <button onClick={async () => {
+                            if (confirm("Excluir item do catálogo?")) {
+                              setServices(services.filter(s => s.id !== service.id));
+                              await db.remove('serviflow_catalog', service.id);
+                              notify("Item removido.");
+                            }
+                          }} className="p-2 text-slate-400 hover:text-rose-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
+                        </div>
+                      ) : (
+                        <span className="text-[10px] font-black text-slate-400 uppercase">Privado</span>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -210,13 +225,15 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
               >
                 Consultar Analítico
               </button>
-              <button
-                onClick={() => setSinapiView('import')}
-                className={`px-8 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${sinapiView === 'import' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-950/30' : 'text-slate-400'
-                  }`}
-              >
-                Gerenciar Tabelas
-              </button>
+              {isAdmin && (
+                <button
+                  onClick={() => setSinapiView('import')}
+                  className={`px-8 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${sinapiView === 'import' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-950/30' : 'text-slate-400'
+                    }`}
+                >
+                  Gerenciar Tabelas
+                </button>
+              )}
             </div>
           </div>
 
@@ -256,10 +273,11 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
                 <label className="block text-[11px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-2 ml-1">Descrição do Serviço/Material</label>
                 <input
                   type="text"
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-sm font-bold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                  className={`w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-sm font-bold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none transition-all ${editingService && !isAdmin ? 'opacity-70' : ''}`}
                   value={formData.name}
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
                   placeholder="Ex: Alvenaria de tijolo, Pintura..."
+                  disabled={editingService && !isAdmin}
                   required
                 />
               </div>
@@ -270,9 +288,10 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
                   <input
                     type="number"
                     step="0.0001"
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-sm font-bold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none"
+                    className={`w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-sm font-bold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none ${editingService && !isAdmin ? 'opacity-70' : ''}`}
                     value={formData.basePrice}
                     onChange={e => setFormData({ ...formData, basePrice: Number(e.target.value) })}
+                    disabled={editingService && !isAdmin}
                     required
                   />
                 </div>
@@ -280,10 +299,11 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
                   <label className="block text-[11px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-2 ml-1">Medida</label>
                   <input
                     type="text"
-                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-sm font-bold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none uppercase"
+                    className={`w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-sm font-bold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none uppercase ${editingService && !isAdmin ? 'opacity-70' : ''}`}
                     value={formData.unit}
                     onChange={e => setFormData({ ...formData, unit: e.target.value })}
                     placeholder="UND, M2, M3..."
+                    disabled={editingService && !isAdmin}
                     required
                   />
                 </div>
@@ -302,6 +322,11 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
 
             <div className="flex items-center justify-between gap-4 mt-10">
               <div className="flex-1">
+                {(editingService && !isAdmin) && (
+                  <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-4 py-2 rounded-lg border border-rose-100 w-fit">
+                    Apenas Consulta
+                  </p>
+                )}
               </div>
               <div className="flex gap-4">
                 <button
@@ -309,11 +334,13 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, defau
                   onClick={() => { setShowForm(false); setEditingService(null); }}
                   className="px-6 py-4 rounded-2xl font-black uppercase text-xs text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
                 >
-                  Descartar
+                  { (editingService && !isAdmin) ? 'Fechar' : 'Descartar' }
                 </button>
-                <button type="submit" className="bg-indigo-600 text-white px-6 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-indigo-700 transition-all shadow-md shadow-indigo-950/20">
-                  {editingService ? 'Salvar Mudanças' : 'Confirmar e Adicionar'}
-                </button>
+                { (isAdmin || !editingService) && (
+                  <button type="submit" className="bg-indigo-600 text-white px-6 py-4 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-indigo-700 transition-all shadow-md shadow-indigo-950/20">
+                    {editingService ? 'Salvar Mudanças' : 'Confirmar e Adicionar'}
+                  </button>
+                )}
               </div>
             </div>
           </form>

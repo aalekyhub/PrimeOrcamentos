@@ -5,7 +5,7 @@ import {
     Trash2, Copy, LayoutGrid, List as ListIcon
 } from 'lucide-react';
 import { db } from '../services/db';
-import { PlanningHeader, Customer } from '../types';
+import { PlanningHeader, Customer, UserAccount } from '../types';
 import PlanningManager from './planning/PlanningManager';
 import WorksManager from './WorksManager';
 import { useNotify } from './ToastProvider';
@@ -13,9 +13,11 @@ interface Props {
     customers: Customer[];
     company: any;
     onGenerateBudget?: (plan: any, services: any[], totalMaterial: number, totalLabor: number, totalIndirect: number, bdiRate: number, taxRate: number) => void;
+    currentUser: UserAccount;
 }
 
-const UnifiedWorksManager: React.FC<Props> = ({ customers, company: propsCompany, onGenerateBudget }) => {
+const UnifiedWorksManager: React.FC<Props> = ({ customers, company: propsCompany, onGenerateBudget, currentUser }) => {
+    const isAdmin = currentUser?.role === 'admin';
     const [view, setView] = useState<'list' | 'detail'>('list');
     const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
     const [activeModule, setActiveModule] = useState<'planning' | 'execution'>('planning');
@@ -63,6 +65,10 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, company: propsCompany
 
     const handleDeletePlan = async (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
+        if (!isAdmin) {
+            notify("Somente administradores podem excluir projetos.", "error");
+            return;
+        }
         if (!confirm('Deseja excluir permanentemente este planejamento e todos os dados de execução vinculados?')) return;
 
         try {
@@ -111,6 +117,10 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, company: propsCompany
 
     const handleDuplicatePlan = async (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
+        if (!isAdmin) {
+            notify("Somente administradores podem duplicar projetos.", "error");
+            return;
+        }
         if (!confirm('Deseja criar uma cópia deste planejamento?')) return;
 
         try {
@@ -240,6 +250,7 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, company: propsCompany
                                     loadPlans(); // Refresh the list
                                 }}
                                 onGenerateBudget={onGenerateBudget}
+                                currentUser={currentUser}
                             />
                         </div>
                     ) : (
@@ -249,6 +260,7 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, company: propsCompany
                                 company={company}
                                 embeddedPlanId={selectedPlanId}
                                 onBack={handleBack}
+                                currentUser={currentUser}
                             />
                         </div>
                     )}
@@ -353,6 +365,7 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, company: propsCompany
                                                 <div className="flex items-center gap-2 mt-0.5">
                                                     <div className={`w-1.5 h-1.5 rounded-full ${plan.status === 'Concluído' ? 'bg-emerald-500' : 'bg-blue-500'}`}></div>
                                                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">{plan.status}</span>
+                                                    {!isAdmin && <span className="text-[8px] font-black text-rose-500 uppercase tracking-tighter ml-2 bg-rose-50 px-1 rounded">BLOQUEADO</span>}
                                                 </div>
                                             </div>
                                         </td>

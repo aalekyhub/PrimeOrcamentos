@@ -10,7 +10,7 @@ import ReportPreview from './ReportPreview';
 import {
     WorkHeader, WorkService, WorkMaterial,
     WorkLabor, WorkIndirect, Customer,
-    PlannedService, WorkTax, CompanyProfile
+    PlannedService, WorkTax, CompanyProfile, UserAccount
 } from '../types';
 import { buildExecutionReportHtml, EXECUTION_THEME } from '../services/reportPdfService';
 
@@ -19,6 +19,7 @@ interface Props {
     company: any;
     embeddedPlanId?: string | null;
     onBack?: () => void;
+    currentUser: UserAccount;
 }
 
 // ==================== HOOKS PERSONALIZADOS ====================
@@ -312,7 +313,8 @@ const SelectionBar: React.FC<SelectionBarProps> = ({
 
 // ==================== COMPONENTE PRINCIPAL ====================
 
-const WorksManager: React.FC<Props> = ({ customers, company, embeddedPlanId }) => {
+const WorksManager: React.FC<Props> = ({ customers, company, embeddedPlanId, onBack, currentUser }) => {
+    const isAdmin = currentUser?.role === 'admin';
     const [works, setWorks] = useState<WorkHeader[]>([]);
     const [activeWorkId, setActiveWorkId] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
@@ -625,8 +627,12 @@ const WorksManager: React.FC<Props> = ({ customers, company, embeddedPlanId }) =
     ]);
 
     const handleManualSave = useCallback(async () => {
+        if (!isAdmin) {
+            notify('Somente administradores podem salvar alterações em obras existentes.', 'error');
+            return;
+        }
         await persistWork(true);
-    }, [persistWork]);
+    }, [persistWork, isAdmin, notify]);
 
 
 
@@ -653,6 +659,10 @@ const WorksManager: React.FC<Props> = ({ customers, company, embeddedPlanId }) =
     }, [clearCurrentLists]);
 
     const handleDuplicateWork = useCallback(async (id: string) => {
+        if (!isAdmin) {
+            notify('Somente administradores podem duplicar obras.', 'error');
+            return;
+        }
         if (!confirm('Deseja criar uma cópia desta obra?')) return;
 
         try {
@@ -702,6 +712,10 @@ const WorksManager: React.FC<Props> = ({ customers, company, embeddedPlanId }) =
     }, [notify]);
 
     const handleDeleteWork = useCallback(async (id: string) => {
+        if (!isAdmin) {
+            notify('Somente administradores podem excluir obras.', 'error');
+            return;
+        }
         if (!confirm('Excluir PERMANENTEMENTE esta obra e todos os seus dados?')) return;
 
         try {

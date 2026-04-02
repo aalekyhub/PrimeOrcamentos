@@ -28,6 +28,7 @@ import {
     MainTab,
     ResourceTab,
 } from './types';
+import { UserAccount } from '../../types';
 import { AddServiceForm } from './forms/AddServiceForm';
 import { AddMaterialForm } from './forms/AddMaterialForm';
 import { AddLaborForm } from './forms/AddLaborForm';
@@ -112,6 +113,7 @@ interface PlanningEditorProps {
     onBack: () => void;
     embeddedMode: boolean;
     onShowPreview: () => void;
+    currentUser: UserAccount;
 }
 
 // Helpers
@@ -193,10 +195,14 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
     onBack,
     embeddedMode,
     onShowPreview,
+    currentUser,
 }) => {
     const [activeTab, setActiveTab] = useState<MainTab>('dados');
     const [resourceTab, setResourceTab] = useState<ResourceTab>('material');
     const { notify } = useNotify();
+
+    const isAdmin = currentUser?.role === 'admin';
+    const isNew = currentPlan?.id === 'new' || currentPlan?.id?.startsWith('TEMP');
 
 
 
@@ -291,14 +297,21 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
 
                     <div className="flex gap-2">
                         <div className="flex items-center gap-2">
-                            <button
-                                type="button"
-                                onClick={onSave}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-blue-700 shadow-md shadow-blue-900/20"
-                            >
-                                <Save size={16} />
-                                Salvar
-                            </button>
+                            {(isAdmin || isNew) ? (
+                                <button
+                                    type="button"
+                                    onClick={onSave}
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 text-sm font-bold hover:bg-blue-700 shadow-md shadow-blue-900/20"
+                                >
+                                    <Save size={16} />
+                                    Salvar
+                                </button>
+                            ) : (
+                                <div className="px-4 py-2 bg-rose-50 text-rose-500 rounded-lg flex items-center gap-2 text-xs font-black uppercase border border-rose-200">
+                                    <AlertCircle size={14} />
+                                    Somente Leitura
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -328,7 +341,7 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
                 {/* Sticky Add Forms based on Tab */}
                 <div className="bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800 px-6 py-4">
                     <div className="max-w-4xl mx-auto">
-                        {activeTab === 'servicos' && (
+                        {activeTab === 'servicos' && (isAdmin || isNew) && (
                             <AddServiceForm onAdd={handleAddService} planId={currentPlan.id} />
                         )}
                         {activeTab === 'recursos' && (
@@ -353,13 +366,13 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
                                         </button>
                                     ))}
                                 </div>
-                                {resourceTab === 'material' && (
+                                {resourceTab === 'material' && (isAdmin || isNew) && (
                                     <AddMaterialForm planId={currentPlan.id} onAdd={handleAddMaterial} />
                                 )}
-                                {resourceTab === 'mo' && (
+                                {resourceTab === 'mo' && (isAdmin || isNew) && (
                                     <AddLaborForm planId={currentPlan.id} onAdd={handleAddLabor} />
                                 )}
-                                {resourceTab === 'indireto' && (
+                                {resourceTab === 'indireto' && (isAdmin || isNew) && (
                                     <AddIndirectForm planId={currentPlan.id} onAdd={handleAddIndirect} />
                                 )}
                                 {resourceTab === 'impostos' && (

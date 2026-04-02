@@ -13,7 +13,7 @@ import {
   GripVertical,
   ScrollText
 } from 'lucide-react';
-import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock } from '../types';
+import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock, UserAccount } from '../types';
 import { useNotify } from './ToastProvider';
 import CustomerManager from './CustomerManager';
 import ServiceCatalog from './ServiceCatalog';
@@ -36,6 +36,7 @@ interface Props {
   company: CompanyProfile;
   prefilledData: any;
   onPrefilledDataConsumed: () => void;
+  currentUser: UserAccount;
 }
 
 const DEFAULT_PAYMENT_TERMS = '50% à vista, 25% com 30 dias, 25% restante na conclusão';
@@ -57,8 +58,10 @@ const BudgetManager: React.FC<Props> = ({
   setCatalogServices,
   company,
   prefilledData,
-  onPrefilledDataConsumed
+  onPrefilledDataConsumed,
+  currentUser
 }) => {
+  const isAdmin = currentUser?.role === 'admin';
   const [showForm, setShowForm] = useState(false);
   const [showFullClientForm, setShowFullClientForm] = useState(false);
   const [showFullServiceForm, setShowFullServiceForm] = useState(false);
@@ -330,6 +333,10 @@ const BudgetManager: React.FC<Props> = ({
   }, []);
 
   const handleSave = useCallback(async () => {
+    if (editingBudgetId && !isAdmin) {
+      notify("Você não tem permissão para alterar orçamentos salvos.", "error");
+      return;
+    }
     if (isSaving) return;
 
     if (safeNumber(taxRate) >= 100) {
@@ -351,6 +358,11 @@ const BudgetManager: React.FC<Props> = ({
     const data = buildBudgetFromForm();
     if (!data) {
       notify('Não foi possível montar o orçamento.', 'error');
+      return;
+    }
+
+    if (editingBudgetId && !isAdmin) {
+      notify('Somente administradores podem salvar alterações em orçamentos existentes.', 'error');
       return;
     }
 
@@ -433,6 +445,10 @@ const BudgetManager: React.FC<Props> = ({
   }, [notify, resetForm]);
 
   const handleApproveBudget = useCallback(async (budget: ServiceOrder) => {
+    if (!isAdmin) {
+      notify("Somente administradores podem aprovar orçamentos.", "error");
+      return;
+    }
     if (!window.confirm('Deseja APROVAR este orçamento? Ele será convertido em Ordem de Serviço.')) return;
 
     const updatedBudget = { ...budget, status: OrderStatus.APPROVED };
@@ -448,6 +464,10 @@ const BudgetManager: React.FC<Props> = ({
   }, [orders, setOrders, notify]);
 
   const handleDeleteBudget = useCallback(async (budget: ServiceOrder) => {
+    if (!isAdmin) {
+      notify("Somente administradores podem excluir orçamentos.", "error");
+      return;
+    }
     if (!window.confirm('Deseja excluir este orçamento? Esta ação também removerá os dados da nuvem.')) return;
 
     const idToDelete = budget.id;
@@ -484,6 +504,7 @@ const BudgetManager: React.FC<Props> = ({
           onPrint={handlePreviewBudget}
           onGenerateContract={handleGenerateContract}
           onDelete={handleDeleteBudget}
+          isAdmin={isAdmin}
         />
       )}
 
@@ -541,18 +562,20 @@ const BudgetManager: React.FC<Props> = ({
                     <div>
                       <div className="flex justify-between items-center mb-2">
                         <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase ml-1">Cliente</label>
-                        <button onClick={() => setShowFullClientForm(true)} className="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase flex items-center gap-1 hover:underline">
-                          <UserPlus className="w-3 h-3" /> Cadastrar Cliente
-                        </button>
+                        {(!editingBudgetId || isAdmin) && (
+                          <button onClick={() => setShowFullClientForm(true)} className="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase flex items-center gap-1 hover:underline">
+                            <UserPlus className="w-3 h-3" /> Cadastrar Cliente
+                          </button>
+                        )}
                       </div>
-                      <select className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none" value={selectedCustomerId} onChange={e => setSelectedCustomerId(e.target.value)}>
+                      <select className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none" value={selectedCustomerId} onChange={e => setSelectedCustomerId(e.target.value)} disabled={editingBudgetId !== null && !isAdmin}>
                         <option value="">Selecione o cliente...</option>
                         {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                       </select>
                     </div>
                     <div>
                       <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-2 block ml-1">Título da Proposta</label>
-                      <input type="text" placeholder="Ex: Reforma Geral de Ar-Condicionado" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none placeholder:text-slate-500" value={proposalTitle} onChange={e => setProposalTitle(e.target.value)} />
+                      <input type="text" placeholder="Ex: Reforma Geral de Ar-Condicionado" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none placeholder:text-slate-500" value={proposalTitle} onChange={e => setProposalTitle(e.target.value)} disabled={editingBudgetId !== null && !isAdmin} />
                     </div>
                   </div>
                 </div>
@@ -562,7 +585,9 @@ const BudgetManager: React.FC<Props> = ({
                 <div className="bg-white dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
                   <div className="flex justify-between items-center">
                     <h4 className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b dark:border-slate-800 pb-2 grow mr-6">ITENS DO ORÇAMENTO</h4>
-                    <button onClick={() => setShowFullServiceForm(true)} className="text-blue-600 dark:text-blue-400 text-[8px] font-black uppercase flex items-center gap-1 hover:underline tracking-widest"><Package className="w-3 h-3" /> CATÁLOGO</button>
+                    {(!editingBudgetId || isAdmin) && (
+                      <button onClick={() => setShowFullServiceForm(true)} className="text-blue-600 dark:text-blue-400 text-[8px] font-black uppercase flex items-center gap-1 hover:underline tracking-widest"><Package className="w-3 h-3" /> CATÁLOGO</button>
+                    )}
                   </div>
 
                   <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700 space-y-4">
@@ -581,6 +606,7 @@ const BudgetManager: React.FC<Props> = ({
                             setCurrentUnit(s.unit || 'un');
                           }
                         }}
+                        disabled={editingBudgetId !== null && !isAdmin}
                       >
                         <option value="">Selecione para preencher...</option>
                         {catalogServices.map(s => (
@@ -596,26 +622,27 @@ const BudgetManager: React.FC<Props> = ({
                         <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center ml-1">Descrição</label>
                         <textarea
                           placeholder="Ex: Reforma Geral de Ar-Condicionado"
-                          className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl py-2 px-4 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none placeholder:text-slate-500 resize-none h-[44px]"
+                          className={`w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl py-2 px-4 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none placeholder:text-slate-500 resize-none h-[44px] ${editingBudgetId !== null && !isAdmin ? 'opacity-70' : ''}`}
                           value={currentDesc}
                           onChange={e => setCurrentDesc(e.target.value)}
+                          disabled={editingBudgetId !== null && !isAdmin}
                         />
                       </div>
                       <div className="text-center">
                         <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Unit</label>
-                        <input type="text" className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl h-[44px] text-xs font-black text-center outline-none uppercase text-slate-900 dark:text-slate-100" value={currentUnit} onChange={e => setCurrentUnit(e.target.value)} />
+                        <input type="text" className={`w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl h-[44px] text-xs font-black text-center outline-none uppercase text-slate-900 dark:text-slate-100 ${editingBudgetId !== null && !isAdmin ? 'opacity-70' : ''}`} value={currentUnit} onChange={e => setCurrentUnit(e.target.value)} disabled={editingBudgetId !== null && !isAdmin} />
                       </div>
                       <div className="text-center">
                         <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Qtd</label>
-                        <input type="number" min={1} className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl h-[44px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100" value={currentQty} onChange={e => setCurrentQty(Math.max(0, Number(e.target.value)))} />
+                        <input type="number" min={1} className={`w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl h-[44px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100 ${editingBudgetId !== null && !isAdmin ? 'opacity-70' : ''}`} value={currentQty} onChange={e => setCurrentQty(Math.max(0, Number(e.target.value)))} disabled={editingBudgetId !== null && !isAdmin} />
                       </div>
                       <div className="text-center">
                         <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Preço</label>
-                        <input type="number" min={0} step="0.01" className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl h-[44px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100 placeholder:text-slate-500" value={currentPrice} onChange={e => setCurrentPrice(Math.max(0, Number(e.target.value)))} />
+                        <input type="number" min={0} step="0.01" className={`w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl h-[44px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100 placeholder:text-slate-500 ${editingBudgetId !== null && !isAdmin ? 'opacity-70' : ''}`} value={currentPrice} onChange={e => setCurrentPrice(Math.max(0, Number(e.target.value)))} disabled={editingBudgetId !== null && !isAdmin} />
                       </div>
                       <div>
                         <label className="mb-1.5 h-4 block"></label>
-                        <button onClick={handleAddItem} className="bg-blue-600 text-white w-full h-[44px] rounded-xl flex items-center justify-center hover:scale-105 transition-all shadow-md shadow-blue-950/30"><Plus className="w-6 h-6" /></button>
+                        <button onClick={handleAddItem} className="bg-blue-600 text-white w-full h-[44px] rounded-xl flex items-center justify-center hover:scale-105 transition-all shadow-md shadow-blue-950/30" disabled={editingBudgetId !== null && !isAdmin}><Plus className="w-6 h-6" /></button>
                       </div>
                     </div>
 
@@ -653,6 +680,7 @@ const BudgetManager: React.FC<Props> = ({
                               className="w-full bg-transparent text-[10px] font-black text-slate-900 dark:text-slate-100 uppercase outline-none focus:bg-slate-50 dark:focus:bg-slate-800/50 rounded px-1 transition-all resize-none break-words leading-tight h-[32px] py-1.5"
                               value={item.description}
                               onChange={e => updateItem(item.id, 'description', e.target.value)}
+                              disabled={editingBudgetId !== null && !isAdmin}
                               rows={1}
                             />
                           </div>
@@ -676,7 +704,7 @@ const BudgetManager: React.FC<Props> = ({
                           </div>
 
                           <div className="flex justify-center">
-                            <button onClick={() => updateItem(item.id, 'delete', true)} className="text-slate-300 dark:text-slate-700 hover:text-rose-500 transition-colors">
+                            <button onClick={() => updateItem(item.id, 'delete', true)} className={`transition-colors ${editingBudgetId !== null && !isAdmin ? 'text-slate-100 dark:text-slate-900 cursor-not-allowed' : 'text-slate-300 dark:text-slate-700 hover:text-rose-500'}`} disabled={editingBudgetId !== null && !isAdmin}>
                               <Trash2 size={14} />
                             </button>
                           </div>
@@ -723,6 +751,8 @@ const BudgetManager: React.FC<Props> = ({
                 onPrint={handlePreviewDraft}
                 onSave={handleSave}
                 onGenerateContract={handleGenerateContractDraft}
+                isAdmin={isAdmin}
+                isEditing={editingBudgetId !== null}
               />
             </div>
           </div>

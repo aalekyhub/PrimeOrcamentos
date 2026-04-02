@@ -7,7 +7,7 @@ import {
   GripVertical
 } from 'lucide-react';
 import RichTextEditor from './ui/RichTextEditor';
-import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock } from '../types';
+import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock, UserAccount } from '../types';
 import { useNotify } from './ToastProvider';
 import CustomerManager from './CustomerManager';
 import ServiceCatalog from './ServiceCatalog';
@@ -26,9 +26,11 @@ interface Props {
   catalogServices: CatalogService[];
   setCatalogServices: React.Dispatch<React.SetStateAction<CatalogService[]>>;
   company: CompanyProfile;
+  currentUser: UserAccount;
 }
 
-const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCustomers, catalogServices, company }) => {
+const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCustomers, catalogServices, company, currentUser }) => {
+  const isAdmin = currentUser?.role === 'admin';
   const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [showFullClientForm, setShowFullClientForm] = useState(false);
@@ -104,6 +106,10 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
   };
 
   const handleSaveOS = async () => {
+    if (editingOrderId && !isAdmin) {
+      notify("Você não tem permissão para alterar ordens de serviço salvas.", "error");
+      return;
+    }
     if (isSaving) return;
     const customer = customers.find(c => c.id === selectedCustomerId);
     if (!customer) { notify("Selecione um cliente", "error"); return; }
@@ -142,6 +148,22 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
       if (result?.success) { notify(editingOrderId ? "O.S. atualizada e sincronizada!" : "Ordem de Serviço registrada e sincronizada!"); setEditingOrderId(null); setShowForm(false); }
       else { notify("Salvo localmente. Erro ao sincronizar (veja o console)", "warning"); setEditingOrderId(null); setShowForm(false); }
     } finally { setIsSaving(false); }
+  };
+
+  const handleDeleteOS = async (orderId: string) => {
+    if (!isAdmin) {
+      notify("Somente administradores podem excluir ordens de serviço.", "error");
+      return;
+    }
+    if (confirm("Deseja realmente excluir esta Ordem de Serviço? Esta ação também removerá os dados da nuvem.")) {
+      setOrders(prev => prev.filter(o => o.id !== orderId));
+      const result = await db.remove('serviflow_orders', orderId);
+      if (result?.success) {
+        notify("O.S. removida da nuvem.");
+      } else {
+        notify("Removida localmente. Erro na nuvem.", "warning");
+      }
+    }
   };
   // Unified OS Preview
   const handlePreviewOS = (order: ServiceOrder) => {
@@ -239,9 +261,9 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                 <td className="px-8 py-5 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase">{order.equipmentBrand || 'N/A'} {order.equipmentModel}</td>
                 <td className="px-8 py-5 text-right flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button onClick={(e) => { e.stopPropagation(); handlePreviewOS(order); }} className="p-2 text-slate-400 dark:text-slate-600 hover:text-slate-900 dark:hover:text-white transition-colors" title="Visualizar/Imprimir OS"><Printer className="w-4 h-4" /></button>
-                  <button onClick={async (e) => {
+                  <button onClick={(e) => {
                     e.stopPropagation();
-                    // ... delete logic ...
+                    handleDeleteOS(order.id);
                   }} className="p-2 text-rose-300 dark:text-rose-900/40 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"><Trash2 className="w-4 h-4" /></button>
                 </td>
               </tr>
@@ -259,6 +281,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                   <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-0.5">{editingOrderId ? `Editando O.S. ${editingOrderId}` : 'Nova Ordem de Serviço'}</h3>
                   <div className="flex items-center gap-2">
                     <span className="text-[10px] font-black uppercase tracking-widest bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-md">Manutenção</span>
+                    {editingOrderId && !isAdmin && <span className="text-[10px] font-black uppercase tracking-widest text-rose-500 border-l pl-2 dark:border-slate-800">BLOQUEADO</span>}
                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">{new Date().toLocaleDateString('pt-BR')}</span>
                   </div>
                 </div>
@@ -270,34 +293,41 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                 <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <div className="flex justify-between items-center mb-2"><label className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest ml-1">Cliente Solicitante</label><button onClick={() => setShowFullClientForm(true)} className="text-blue-600 dark:text-blue-400 text-[9px] font-black uppercase flex items-center gap-1 hover:underline"><UserPlus className="w-3 h-3" /> Novo</button></div>
-                      <select className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500 transition-all custom-select" value={selectedCustomerId} onChange={e => setSelectedCustomerId(e.target.value)}><option value="">Selecione...</option>{customers.map(c => <option key={c.id} value={c.id} className="dark:bg-slate-900">{c.name}</option>)}</select>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest ml-1">Cliente Solicitante</label>
+                        {(!editingOrderId || isAdmin) && (
+                          <button onClick={() => setShowFullClientForm(true)} className="text-blue-600 dark:text-blue-400 text-[9px] font-black uppercase flex items-center gap-1 hover:underline">
+                            <UserPlus className="w-3 h-3" /> Novo
+                          </button>
+                        )}
+                      </div>
+                      <select className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500 transition-all custom-select" value={selectedCustomerId} onChange={e => setSelectedCustomerId(e.target.value)} disabled={editingOrderId !== null && !isAdmin}><option value="">Selecione...</option>{customers.map(c => <option key={c.id} value={c.id} className="dark:bg-slate-900">{c.name}</option>)}</select>
                     </div>
-                    <div><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-2 block ml-1">Título da O.S.</label><input type="text" placeholder="Ex: Manutenção de Notebook" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400" value={osTitle} onChange={e => setOsTitle(e.target.value)} /></div>
+                    <div><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-2 block ml-1">Título da O.S.</label><input type="text" placeholder="Ex: Manutenção de Notebook" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400" value={osTitle} onChange={e => setOsTitle(e.target.value)} disabled={editingOrderId !== null && !isAdmin} /></div>
                   </div>
                 </div>
 
                 <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm">
                   <h4 className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b dark:border-slate-800 pb-2 mb-4">Dados do Equipamento</h4>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-                    <div><label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Marca/Fabricante</label><input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500" value={brand} onChange={e => setBrand(e.target.value)} /></div>
-                    <div><label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Modelo</label><input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500" value={model} onChange={e => setModel(e.target.value)} /></div>
-                    <div><label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Nº Série / Patrimônio</label><input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500" value={serial} onChange={e => setSerial(e.target.value)} /></div>
+                    <div><label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Marca/Fabricante</label><input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500" value={brand} onChange={e => setBrand(e.target.value)} disabled={editingOrderId !== null && !isAdmin} /></div>
+                    <div><label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Modelo</label><input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500" value={model} onChange={e => setModel(e.target.value)} disabled={editingOrderId !== null && !isAdmin} /></div>
+                    <div><label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Nº Série / Patrimônio</label><input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500" value={serial} onChange={e => setSerial(e.target.value)} disabled={editingOrderId !== null && !isAdmin} /></div>
                   </div>
-                  <div><label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Laudo Técnico / Diagnóstico</label><RichTextEditor id="diagnosis-editor" value={diagnosis} onChange={setDiagnosis} placeholder="Descreva o problema ou serviço realizado..." /></div>
+                  <div><label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Laudo Técnico / Diagnóstico</label><RichTextEditor id="diagnosis-editor" value={diagnosis} onChange={setDiagnosis} placeholder="Descreva o problema ou serviço realizado..." disabled={editingOrderId !== null && !isAdmin} /></div>
 
                   <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
                     <div className="flex justify-between items-center">
                       <h4 className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b dark:border-slate-800 pb-2 grow mr-6">FOTOS E ANEXOS DO SERVIÇO</h4>
                     </div>
                     <div className="space-y-3">
-                      {descriptionBlocks.length === 0 && (
+                      {descriptionBlocks.length === 0 && (!editingOrderId || isAdmin) && (
                         <div className="bg-slate-50 dark:bg-slate-800/50 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-[2rem] p-8 flex flex-col items-center justify-center gap-4 group hover:border-blue-400 transition-colors cursor-pointer" onClick={addTextBlock}>
                           <div className="flex gap-4">
                             <button onClick={(e) => { e.stopPropagation(); addTextBlock(); }} className="bg-blue-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-blue-900/20 hover:scale-105 transition-all"><Type className="w-4 h-4" /> + Iniciar com Texto</button>
                             <button onClick={(e) => { e.stopPropagation(); addImageBlock(); }} className="bg-emerald-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-emerald-900/20 hover:scale-105 transition-all"><ImageIcon className="w-4 h-4" /> + Iniciar com Imagem</button>
                           </div>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 animate-pulse">Comece a montar o relatório fotogrÃ¡fico acima</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 animate-pulse">Comece a montar o relatório fotográfico acima</p>
                         </div>
                       )}
                       {descriptionBlocks.map((block) => (
@@ -311,6 +341,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                                 onAddText={addTextBlock}
                                 onAddImage={addImageBlock}
                                 placeholder="Detalhes da foto ou texto..."
+                                disabled={editingOrderId !== null && !isAdmin}
                               />
                             </div>
                           )}
@@ -319,7 +350,11 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                               {block.content ? (
                                 <div className="relative max-w-[200px]"><img src={block.content} className="w-full h-auto rounded-lg shadow-lg" /><button onClick={() => updateBlockContent(block.id, '')} className="absolute -top-2 -right-2 bg-rose-500 text-white p-1.5 rounded-full"><Trash2 className="w-3 h-3" /></button></div>
                               ) : (
-                                <label className="cursor-pointer flex flex-col items-center gap-1"><Upload className="w-5 h-5 text-blue-500" /><span className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase">Subir Foto</span><input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(block.id, e)} /></label>
+                                <label className={`flex flex-col items-center justify-center gap-2 ${editingOrderId !== null && !isAdmin ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}>
+                                  <Upload className="w-5 h-5 text-blue-500" />
+                                  <span className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase">Subir Foto</span>
+                                  <input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(block.id, e)} disabled={editingOrderId !== null && !isAdmin} />
+                                </label>
                               )}
                             </div>
                           )}
@@ -349,11 +384,11 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                       </div>
                       <div className="text-center">
                         <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Qtd</label>
-                        <input type="number" className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 h-[44px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} />
+                        <input type="number" className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 h-[44px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} disabled={editingOrderId !== null && !isAdmin} />
                       </div>
                       <div>
                         <label className="mb-1.5 h-4 block"></label>
-                        <button onClick={handleAddItem} className="bg-blue-600 text-white w-full h-[44px] rounded-xl flex items-center justify-center hover:bg-blue-700 hover:scale-105 transition-all shadow-lg shadow-blue-900/20"><Plus className="w-5 h-5" /></button>
+                        <button onClick={handleAddItem} className="bg-blue-600 text-white w-full h-[44px] rounded-xl flex items-center justify-center hover:bg-blue-700 hover:scale-105 transition-all shadow-lg shadow-blue-900/20" disabled={editingOrderId !== null && !isAdmin}><Plus className="w-5 h-5" /></button>
                       </div>
                     </div>
                     <div className="space-y-1.5">
@@ -368,6 +403,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                               className="w-full bg-transparent text-[10px] font-black text-slate-900 dark:text-slate-100 uppercase outline-none focus:bg-slate-50 dark:focus:bg-slate-800/50 rounded px-1 transition-all resize-none break-words leading-tight h-[32px] py-1.5"
                               value={item.description}
                               onChange={e => updateItem(item.id, 'description', e.target.value)}
+                              disabled={editingOrderId !== null && !isAdmin}
                               rows={1}
                             />
                           </div>
@@ -387,7 +423,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                           </div>
 
                           <div className="flex justify-center">
-                            <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="text-slate-300 dark:text-slate-700 hover:text-rose-500 transition-colors">
+                            <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className={`transition-colors ${editingOrderId !== null && !isAdmin ? 'text-slate-100 dark:text-slate-900 cursor-not-allowed' : 'text-slate-300 dark:text-slate-700 hover:text-rose-500'}`} disabled={editingOrderId !== null && !isAdmin}>
                               <Trash2 size={14} />
                             </button>
                           </div>
@@ -431,7 +467,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                     <button onClick={clearSignature} className="bg-rose-50 dark:bg-rose-900/30 text-rose-500 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 p-1.5 rounded-lg transition-colors" title="Limpar"><Eraser className="w-3 h-3" /></button>
                   </div>
                   <div className="grow bg-white dark:bg-slate-950 relative cursor-crosshair h-32 lg:h-auto">
-                    <canvas ref={canvasRef} width={320} height={180} className="w-full h-full touch-none" />
+                    <canvas ref={canvasRef} width={320} height={180} className={`w-full h-full touch-none ${editingOrderId !== null && !isAdmin ? 'pointer-events-none opacity-50' : ''}`} />
                     <div className="absolute bottom-2 left-0 w-full text-center pointer-events-none opacity-20"><p className="text-[8px] font-black uppercase text-slate-300 dark:text-slate-700">Área de Assinatura Digital</p></div>
                   </div>
                 </div>
@@ -455,9 +491,11 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                       osType: 'EQUIPMENT'
                     })} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-600 p-4 rounded-2xl font-black uppercase text-[10px] flex items-center justify-center gap-2 transition-all col-span-2"><Printer className="w-4 h-4" /> Visualizar Documento</button>
                   </div>
-                  <button onClick={handleSaveOS} disabled={isSaving} className={`w-full ${isSaving ? 'bg-slate-800' : 'bg-slate-900 dark:bg-blue-600 hover:bg-slate-800 dark:hover:bg-blue-500'} text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-slate-200 dark:shadow-none hover:shadow-2xl transition-all flex items-center justify-center gap-3`}>
-                    <Save className={`w-4 h-4 ${isSaving ? 'animate-pulse' : ''}`} /> {isSaving ? 'Processando...' : 'Salvar Ordem de Serviço'}
-                  </button>
+                  {(!editingOrderId || isAdmin) && (
+                    <button onClick={handleSaveOS} disabled={isSaving} className={`w-full ${isSaving ? 'bg-slate-800' : 'bg-slate-900 dark:bg-blue-600 hover:bg-slate-800 dark:hover:bg-blue-500'} text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-slate-200 dark:shadow-none hover:shadow-2xl transition-all flex items-center justify-center gap-3`}>
+                      <Save className={`w-4 h-4 ${isSaving ? 'animate-pulse' : ''}`} /> {isSaving ? 'Processando...' : 'Salvar Ordem de Serviço'}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

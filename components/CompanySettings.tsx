@@ -5,16 +5,18 @@ import {
   Type, CheckCircle2, Maximize2, ShieldCheck, Plus, Ruler, X,
   MessageCircle, Download, Database, RefreshCw, AlertTriangle
 } from 'lucide-react';
-import { CompanyProfile, MeasurementUnit } from '../types';
+import { CompanyProfile, MeasurementUnit, UserAccount } from '../types';
 import { db } from '../services/db';
 import { useNotify } from './ToastProvider';
 
 interface Props {
   company: CompanyProfile;
   setCompany: React.Dispatch<React.SetStateAction<CompanyProfile>>;
+  currentUser: UserAccount;
 }
 
-const CompanySettings: React.FC<Props> = ({ company, setCompany }) => {
+const CompanySettings: React.FC<Props> = ({ company, setCompany, currentUser }) => {
+  const isAdmin = currentUser?.role === 'admin';
   const fileInputRef = useRef<HTMLInputElement>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
   const { notify } = useNotify();
@@ -129,9 +131,15 @@ const CompanySettings: React.FC<Props> = ({ company, setCompany }) => {
           <p className="text-slate-500 dark:text-slate-400 text-sm">Personalize os dados e garanta a segurança das suas informações.</p>
         </div>
 
-        <button onClick={() => handleSave(company).then(() => notify("Configurações salvas com sucesso!"))} className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-blue-900/20 transition-all active:scale-95">
-          <Save className="w-5 h-5" /> Salvar Configurações
-        </button>
+        {isAdmin ? (
+          <button onClick={() => handleSave(company).then(() => notify("Configurações salvas com sucesso!"))} className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-blue-900/20 transition-all active:scale-95">
+            <Save className="w-5 h-5" /> Salvar Configurações
+          </button>
+        ) : (
+          <div className="bg-rose-50 text-rose-500 px-6 py-3 rounded-2xl font-black text-xs border border-rose-200 flex items-center gap-2 uppercase">
+            <ShieldCheck className="w-5 h-5" /> Somente Consulta
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -149,19 +157,19 @@ const CompanySettings: React.FC<Props> = ({ company, setCompany }) => {
               ) : (
                 <button onClick={() => fileInputRef.current?.click()} className="flex flex-col items-center gap-2 text-slate-400 hover:text-blue-500 transition-colors">
                   <Upload className="w-8 h-8" />
-                  <span className="text-[10px] font-bold uppercase">Carregar Logo</span>
+                  <span className="text-[10px] font-bold uppercase">{isAdmin ? 'Carregar Logo' : 'Logo da Empresa'}</span>
                 </button>
               )}
             </div>
-            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleLogoUpload} />
+            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleLogoUpload} disabled={!isAdmin} />
             <div className="pt-4 border-t border-slate-50 dark:border-slate-800 text-left space-y-4">
               <div className="space-y-2">
                 <div className="flex justify-between text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase"><span>Tamanho Logo</span><span>{company.logoSize}px</span></div>
-                <input type="range" min="40" max="200" step="5" className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-600" value={company.logoSize} onChange={e => setCompany({ ...company, logoSize: Number(e.target.value) })} />
+                <input type="range" min="40" max="200" step="5" className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-600 disabled:opacity-50" value={company.logoSize} onChange={e => setCompany({ ...company, logoSize: Number(e.target.value) })} disabled={!isAdmin} />
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase"><span>Tamanho Fonte</span><span>{company.nameFontSize}px</span></div>
-                <input type="range" min="16" max="48" step="1" className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-600" value={company.nameFontSize} onChange={e => setCompany({ ...company, nameFontSize: Number(e.target.value) })} />
+                <input type="range" min="16" max="48" step="1" className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-600 disabled:opacity-50" value={company.nameFontSize} onChange={e => setCompany({ ...company, nameFontSize: Number(e.target.value) })} disabled={!isAdmin} />
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase"><span>Tamanho Fonte (Descrição)</span><span>{company.descriptionFontSize || 10}px</span></div>
@@ -183,10 +191,14 @@ const CompanySettings: React.FC<Props> = ({ company, setCompany }) => {
               <button onClick={handleExportData} className="w-full bg-white/10 hover:bg-white/20 border border-white/20 text-white py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all">
                 <Download className="w-4 h-4" /> Exportar Backup (JSON)
               </button>
-              <button onClick={() => importInputRef.current?.click()} className="w-full bg-emerald-500 hover:bg-emerald-400 text-white py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all">
-                <RefreshCw className="w-4 h-4" /> Importar Backup
-              </button>
-              <input type="file" ref={importInputRef} className="hidden" accept=".json" onChange={handleImportData} />
+              {isAdmin && (
+                <>
+                  <button onClick={() => importInputRef.current?.click()} className="w-full bg-emerald-500 hover:bg-emerald-400 text-white py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all">
+                    <RefreshCw className="w-4 h-4" /> Importar Backup
+                  </button>
+                  <input type="file" ref={importInputRef} className="hidden" accept=".json" onChange={handleImportData} />
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -196,42 +208,42 @@ const CompanySettings: React.FC<Props> = ({ company, setCompany }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
                 <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-tighter">Nome da Empresa</label>
-                <input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-bold text-slate-900 dark:text-white" value={company.name} onChange={e => setCompany({ ...company, name: e.target.value })} />
+                <input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-bold text-slate-900 dark:text-white disabled:opacity-70" value={company.name} onChange={e => setCompany({ ...company, name: e.target.value })} disabled={!isAdmin} />
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-tighter">CNPJ</label>
-                <input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-slate-100" value={company.cnpj} onChange={e => setCompany({ ...company, cnpj: e.target.value })} />
+                <input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-slate-100 disabled:opacity-70" value={company.cnpj} onChange={e => setCompany({ ...company, cnpj: e.target.value })} disabled={!isAdmin} />
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-tighter">Slogan</label>
-                <input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-slate-100" value={company.tagline} onChange={e => setCompany({ ...company, tagline: e.target.value })} />
+                <input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-slate-100 disabled:opacity-70" value={company.tagline} onChange={e => setCompany({ ...company, tagline: e.target.value })} disabled={!isAdmin} />
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-tighter">E-mail</label>
-                <input type="email" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-slate-100" value={company.email} onChange={e => setCompany({ ...company, email: e.target.value })} />
+                <input type="email" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-slate-100 disabled:opacity-70" value={company.email} onChange={e => setCompany({ ...company, email: e.target.value })} disabled={!isAdmin} />
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-tighter">WhatsApp</label>
                 <div className="relative">
-                  <input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 pr-10 text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-slate-100" value={company.phone} onChange={e => setCompany({ ...company, phone: formatPhone(e.target.value) })} />
+                  <input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 pr-10 text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-slate-100 disabled:opacity-70" value={company.phone} onChange={e => setCompany({ ...company, phone: formatPhone(e.target.value) })} disabled={!isAdmin} />
                   <button onClick={openWhatsApp} className="absolute right-3 top-3 text-emerald-500"><MessageCircle className="w-5 h-5" /></button>
                 </div>
               </div>
               <div className="md:col-span-1">
                 <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-tighter">Validade da Proposta (Dias)</label>
-                <input type="number" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-bold text-slate-900 dark:text-white" value={company.defaultProposalValidity || 15} onChange={e => setCompany({ ...company, defaultProposalValidity: Number(e.target.value) })} />
+                <input type="number" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-bold text-slate-900 dark:text-white disabled:opacity-70" value={company.defaultProposalValidity || 15} onChange={e => setCompany({ ...company, defaultProposalValidity: Number(e.target.value) })} disabled={!isAdmin} />
               </div>
               <div className="md:col-span-1">
                 <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-tighter">Margem Superior PDF (mm)</label>
-                <input type="number" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-bold text-slate-900 dark:text-white" value={company.printMarginTop || 15} onChange={e => setCompany({ ...company, printMarginTop: Number(e.target.value) })} />
+                <input type="number" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-bold text-slate-900 dark:text-white disabled:opacity-70" value={company.printMarginTop || 15} onChange={e => setCompany({ ...company, printMarginTop: Number(e.target.value) })} disabled={!isAdmin} />
               </div>
               <div className="md:col-span-1">
                 <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-tighter">Margem Inferior PDF (mm)</label>
-                <input type="number" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-bold text-slate-900 dark:text-white" value={company.printMarginBottom || 15} onChange={e => setCompany({ ...company, printMarginBottom: Number(e.target.value) })} />
+                <input type="number" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-bold text-slate-900 dark:text-white disabled:opacity-70" value={company.printMarginBottom || 15} onChange={e => setCompany({ ...company, printMarginBottom: Number(e.target.value) })} disabled={!isAdmin} />
               </div>
               <div className="md:col-span-2">
                 <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-tighter">Endereço</label>
-                <input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-slate-100" value={company.address} onChange={e => setCompany({ ...company, address: e.target.value })} />
+                <input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-slate-100 disabled:opacity-70" value={company.address} onChange={e => setCompany({ ...company, address: e.target.value })} disabled={!isAdmin} />
               </div>
             </div>
 
