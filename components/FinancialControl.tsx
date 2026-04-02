@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Wallet, ArrowUpRight, ArrowDownLeft, Plus, Calendar, Tag, Trash2 } from 'lucide-react';
+import { Wallet, ArrowUpRight, ArrowDownLeft, Plus, Calendar, Tag, Trash2, Paperclip, ChevronLeft, ChevronRight, Download, Eye, FileText } from 'lucide-react';
 import { Transaction, UserAccount, RecurrenceFrequency, Loan } from '../types';
 import { useNotify } from './ToastProvider';
 import { db } from '../services/db';
@@ -33,6 +33,29 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
     startDate: new Date().toISOString().split('T')[0]
   });
 
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+
+  const months = [
+    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+  ];
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({
+          ...prev,
+          attachment: reader.result as string,
+          attachmentName: file.name
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const today = new Date().toISOString().split('T')[0];
   const realizedTransactions = transactions.filter(t => t.date <= today);
 
@@ -55,7 +78,9 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
       type: formData.type as 'RECEITA' | 'DESPESA',
       description: formData.description || '',
       isRecurring: formData.isRecurring,
-      frequency: formData.frequency
+      frequency: formData.frequency,
+      attachment: formData.attachment,
+      attachmentName: formData.attachmentName
     };
 
     const newList = [newT, ...transactions];
@@ -158,7 +183,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
         <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
           <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-2">Saldo Realizado (Hoje)</p>
           <h3 className="text-2xl font-black text-slate-900 dark:text-white whitespace-nowrap">R$ {(totalIncome - totalExpense).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
-          <p className="text-[9px] text-slate-400 mt-2 font-bold uppercase tracking-widest">
+          <p className="text-[9px] text-slate-400 mt-2 font-bold uppercase tracking-widest text-wrap">
             Projetado: <span className={`${projectedBalance >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'} whitespace-nowrap`}>R$ {projectedBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
           </p>
         </div>
@@ -188,21 +213,95 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
 
       {activeSubTab === 'historico' ? (
         <div className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-xl space-y-8 animate-in slide-in-from-top-4 duration-300">
-          <div className="flex items-center justify-between border-b dark:border-slate-700 pb-6">
+          <div className="flex flex-col md:flex-row items-center justify-between border-b dark:border-slate-700 pb-6 gap-4">
             <div>
-              <h4 className="font-black text-slate-900 dark:text-white text-lg uppercase tracking-tight">Extrato Financeiro Completo</h4>
+              <h4 className="font-black text-slate-900 dark:text-white text-lg uppercase tracking-tight">Extrato Financeiro</h4>
               <p className="text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mt-1">Todas as entradas e saídas registradas</p>
             </div>
+            
+            <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-900/50 p-1.5 rounded-2xl border border-slate-100 dark:border-slate-700">
+              <button 
+                onClick={() => {
+                  if (selectedMonth === 0) {
+                    setSelectedMonth(11);
+                    setSelectedYear(prev => prev - 1);
+                  } else {
+                    setSelectedMonth(prev => prev - 1);
+                  }
+                }}
+                className="p-2 hover:bg-white dark:hover:bg-slate-800 rounded-xl transition-all"
+              >
+                <ChevronLeft className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+              </button>
+              
+              <div className="px-4 text-center min-w-[140px]">
+                <p className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest leading-none mb-1">{months[selectedMonth]}</p>
+                <p className="text-xs font-black text-slate-900 dark:text-white">{selectedYear}</p>
+              </div>
+
+              <button 
+                onClick={() => {
+                  if (selectedMonth === 11) {
+                    setSelectedMonth(0);
+                    setSelectedYear(prev => prev + 1);
+                  } else {
+                    setSelectedMonth(prev => prev + 1);
+                  }
+                }}
+                className="p-2 hover:bg-white dark:hover:bg-slate-800 rounded-xl transition-all"
+              >
+                <ChevronRight className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+              </button>
+            </div>
+
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900/50 px-4 py-2 rounded-xl border border-slate-100 dark:border-slate-700">
                 <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase">{transactions.length} Lançamentos</span>
+                <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase">
+                  {transactions.filter(t => {
+                    const d = new Date(t.date + 'T00:00:00');
+                    return d.getMonth() === selectedMonth && d.getFullYear() === selectedYear;
+                  }).length} Lançamentos
+                </span>
               </div>
             </div>
           </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {(() => {
+              const monthlyTrans = transactions.filter(t => {
+                const [year, month] = t.date.split('-').map(Number);
+                return (month - 1) === selectedMonth && year === selectedYear;
+              });
+              const mIncome = monthlyTrans.filter(t => t.type === 'RECEITA').reduce((s, t) => s + t.amount, 0);
+              const mExpense = monthlyTrans.filter(t => t.type === 'DESPESA').reduce((s, t) => s + t.amount, 0);
+              const mResult = mIncome - mExpense;
+
+              return (
+                <>
+                  <div className="p-4 bg-emerald-50/50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30 rounded-2xl">
+                    <p className="text-[8px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Entradas no Mês</p>
+                    <p className="text-lg font-black text-emerald-700 dark:text-emerald-400">R$ {mIncome.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                  </div>
+                  <div className="p-4 bg-rose-50/50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-900/30 rounded-2xl">
+                    <p className="text-[8px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest mb-1">Saídas no Mês</p>
+                    <p className="text-lg font-black text-rose-700 dark:text-rose-400">R$ {mExpense.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                  </div>
+                  <div className={`p-4 ${mResult >= 0 ? 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/30' : 'bg-amber-50/50 dark:bg-amber-900/10 border-amber-100 dark:border-amber-900/30'} border rounded-2xl`}>
+                    <p className={`text-[8px] font-black ${mResult >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-amber-600 dark:text-amber-400'} uppercase tracking-widest mb-1`}>Resultado Mensal</p>
+                    <p className={`text-lg font-black ${mResult >= 0 ? 'text-blue-700 dark:text-blue-400' : 'text-amber-700 dark:text-amber-400'}`}>R$ {mResult.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+
           <div className="divide-y divide-slate-100 max-h-[600px] overflow-y-auto pr-2 no-scrollbar">
             {transactions
+              .filter(t => {
+                const [year, month] = t.date.split('-').map(Number);
+                return (month - 1) === selectedMonth && year === selectedYear;
+              })
               .sort((a, b) => b.date.localeCompare(a.date))
               .map(t => (
                 <div key={t.id} className="group py-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-all rounded-2xl px-4 -mx-4">
@@ -230,6 +329,23 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
                           <Tag className="w-2.5 h-2.5 text-slate-300" />
                           {t.description}
                         </p>
+                      )}
+                      
+                      {t.attachment && (
+                        <div className="mt-2 flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              const link = document.createElement('a');
+                              link.href = t.attachment!;
+                              link.download = t.attachmentName || 'anexo';
+                              link.click();
+                            }}
+                            className="flex items-center gap-1.5 px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-blue-100 transition-all border border-blue-100/50"
+                          >
+                            <Paperclip className="w-3 h-3" />
+                            {t.attachmentName || 'Ver Anexo'}
+                          </button>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -341,6 +457,37 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
                 <label className="block text-xs font-bold text-slate-500 mb-1">Observações / Notas Extras</label>
                 <input type="text" placeholder="Adicione detalhes adicionais aqui..." className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold"
                   value={formData.description || ''} onChange={e => setFormData({ ...formData, description: e.target.value })} />
+              </div>
+              <div className="lg:col-span-4">
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">Comprovante / Extrato (Opcional)</label>
+                <div className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-900/50 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl group hover:border-blue-400 transition-all relative overflow-hidden">
+                  <input 
+                    type="file" 
+                    onChange={handleFileChange}
+                    className="absolute inset-0 opacity-0 cursor-pointer z-10" 
+                    accept="image/*,.pdf,.doc,.docx"
+                  />
+                  <div className="w-12 h-12 bg-white dark:bg-slate-800 rounded-xl flex items-center justify-center shadow-sm text-slate-400 group-hover:text-blue-500 transition-colors">
+                    {formData.attachment ? <FileText className="w-6 h-6 text-emerald-500" /> : <Paperclip className="w-6 h-6" />}
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest">
+                      {formData.attachmentName || 'Clique para anexar documento'}
+                    </p>
+                    <p className="text-[9px] text-slate-400 font-bold uppercase mt-0.5">
+                      {formData.attachment ? 'Arquivo pronto para salvar' : 'Imagens, PDF ou Documentos'}
+                    </p>
+                  </div>
+                  {formData.attachment && (
+                    <button 
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, attachment: undefined, attachmentName: undefined }))}
+                      className="ml-auto relative z-20 p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
             <div className="flex justify-end pt-2">

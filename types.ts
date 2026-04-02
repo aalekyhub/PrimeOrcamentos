@@ -136,6 +136,8 @@ export interface Transaction {
   frequency?: RecurrenceFrequency;
   installments?: number; // Total installments for loans/purchases
   currentInstallment?: number; // Current installment number
+  attachment?: string; // Base64 or URL
+  attachmentName?: string;
 }
 
 export interface Loan {
