@@ -335,15 +335,36 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
                         <div className="mt-2 flex items-center gap-2">
                           <button
                             onClick={() => {
+                              const base64Data = t.attachment!;
+                              const parts = base64Data.split(';base64,');
+                              const contentType = parts[0].split(':')[1];
+                              const raw = window.atob(parts[1]);
+                              const rawLength = raw.length;
+                              const uInt8Array = new Uint8Array(rawLength);
+                              for (let i = 0; i < rawLength; ++i) {
+                                uInt8Array[i] = raw.charCodeAt(i);
+                              }
+                              const blob = new Blob([uInt8Array], { type: contentType });
+                              const url = URL.createObjectURL(blob);
+                              window.open(url, '_blank');
+                            }}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 dark:bg-blue-600 text-white rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-sm"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            Visualizar Documento
+                          </button>
+                          
+                          <button
+                            onClick={() => {
                               const link = document.createElement('a');
                               link.href = t.attachment!;
                               link.download = t.attachmentName || 'anexo';
                               link.click();
                             }}
-                            className="flex items-center gap-1.5 px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-blue-100 transition-all border border-blue-100/50"
+                            className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors"
+                            title="Baixar Arquivo"
                           >
-                            <Paperclip className="w-3 h-3" />
-                            {t.attachmentName || 'Ver Anexo'}
+                            <Download className="w-4 h-4" />
                           </button>
                         </div>
                       )}
