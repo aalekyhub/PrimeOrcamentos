@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import RichTextEditor from './ui/RichTextEditor';
 import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock, UserAccount } from '../types';
+import { roundMoney, toNumber } from '../services/formatUtils';
 import { useNotify } from './ToastProvider';
 import CustomerManager from './CustomerManager';
 import ServiceCatalog from './ServiceCatalog';
@@ -380,11 +381,11 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                       </div>
                       <div className="text-center">
                         <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Valor Unit.</label>
-                        <input type="number" className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 h-[44px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100" value={currentPrice} onChange={e => setCurrentPrice(Number(e.target.value))} />
+                        <input type="number" className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 h-[44px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100" value={currentPrice} onChange={e => setCurrentPrice(toNumber(e.target.value))} />
                       </div>
                       <div className="text-center">
                         <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Qtd</label>
-                        <input type="number" className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 h-[44px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100" value={currentQty} onChange={e => setCurrentQty(Number(e.target.value))} disabled={editingOrderId !== null && !isAdmin} />
+                        <input type="number" className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 h-[44px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100" value={currentQty} onChange={e => setCurrentQty(toNumber(e.target.value))} disabled={editingOrderId !== null && !isAdmin} />
                       </div>
                       <div>
                         <label className="mb-1.5 h-4 block"></label>
@@ -409,11 +410,11 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                           </div>
 
                           <div className="text-center">
-                            <input type="number" className="w-full bg-slate-50 dark:bg-slate-800 border border-transparent focus:border-slate-200 dark:focus:border-slate-700 rounded h-[32px] text-[10px] font-bold text-center outline-none text-slate-900 dark:text-slate-100" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', Number(e.target.value))} />
+                            <input type="number" className="w-full bg-slate-50 dark:bg-slate-800 border border-transparent focus:border-slate-200 dark:focus:border-slate-700 rounded h-[32px] text-[10px] font-bold text-center outline-none text-slate-900 dark:text-slate-100" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', toNumber(e.target.value))} />
                           </div>
 
                           <div className="text-center">
-                            <input type="number" className="w-full bg-slate-50 dark:bg-slate-800 border border-transparent focus:border-slate-200 dark:focus:border-slate-700 rounded h-[32px] text-[10px] font-bold text-center outline-none text-slate-900 dark:text-slate-100" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', Number(e.target.value))} />
+                            <input type="number" className="w-full bg-slate-50 dark:bg-slate-800 border border-transparent focus:border-slate-200 dark:focus:border-slate-700 rounded h-[32px] text-[10px] font-bold text-center outline-none text-slate-900 dark:text-slate-100" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', toNumber(e.target.value))} />
                           </div>
 
                           <div className="text-right">

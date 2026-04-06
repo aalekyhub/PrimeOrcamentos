@@ -296,9 +296,12 @@ const BudgetManager: React.FC<Props> = ({
     setSelectedCatalogId('');
   }, [currentDesc, currentPrice, currentQty, currentUnit, notify]);
 
-  const updateItem = useCallback((id: string, field: keyof ServiceItem, value: any) => {
-    const finalValue = field === 'unitPrice' ? roundMoney(Number(value)) : value;
-    
+  const updateItem = useCallback((id: string, field: keyof ServiceItem | 'delete', value: any) => {
+    if (field === 'delete') {
+      setItems(prev => prev.filter(item => item.id !== id));
+      return;
+    }
+    const finalValue = field === 'unitPrice' ? roundMoney(toNumber(value)) : value;
     setItems(prev => prev.map(item => (item.id === id ? { ...item, [field]: finalValue } : item)));
   }, []);
 
@@ -647,11 +650,11 @@ const BudgetManager: React.FC<Props> = ({
                       </div>
                       <div className="text-center">
                         <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Qtd</label>
-                        <input type="number" min={1} className={`w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl h-[44px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100 ${editingBudgetId !== null && !isAdmin ? 'opacity-70' : ''}`} value={currentQty} onChange={e => setCurrentQty(Math.max(0, Number(e.target.value)))} disabled={editingBudgetId !== null && !isAdmin} />
+                        <input type="number" min={1} className={`w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl h-[44px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100 ${editingBudgetId !== null && !isAdmin ? 'opacity-70' : ''}`} value={currentQty} onChange={e => setCurrentQty(Math.max(0, toNumber(e.target.value)))} disabled={editingBudgetId !== null && !isAdmin} />
                       </div>
                       <div className="text-center">
                         <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Preço</label>
-                        <input type="number" min={0} step="0.01" className={`w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl h-[44px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100 placeholder:text-slate-500 ${editingBudgetId !== null && !isAdmin ? 'opacity-70' : ''}`} value={currentPrice} onChange={e => { setCurrentPrice(Math.max(0, Number(e.target.value))); }} disabled={editingBudgetId !== null && !isAdmin} />
+                        <input type="number" min={0} step="0.01" className={`w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl h-[44px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100 placeholder:text-slate-500 ${editingBudgetId !== null && !isAdmin ? 'opacity-70' : ''}`} value={currentPrice} onChange={e => { setCurrentPrice(Math.max(0, toNumber(e.target.value))); }} disabled={editingBudgetId !== null && !isAdmin} />
                       </div>
                       <div>
                         <label className="mb-1.5 h-4 block"></label>
@@ -707,7 +710,7 @@ const BudgetManager: React.FC<Props> = ({
                           </div>
 
                           <div className="text-center">
-                            <input type="number" min={0} step="0.01" className="w-full bg-slate-50 dark:bg-slate-800 border border-transparent focus:border-slate-200 dark:focus:border-slate-700 rounded h-[32px] text-[10px] font-bold text-center outline-none text-slate-900 dark:text-slate-100" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', Math.max(0, Number(e.target.value)))} />
+                            <input type="number" min={0} step="0.01" className="w-full bg-slate-50 dark:bg-slate-800 border border-transparent focus:border-slate-200 dark:focus:border-slate-700 rounded h-[32px] text-[10px] font-bold text-center outline-none text-slate-900 dark:text-slate-100" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', Math.max(0, toNumber(e.target.value)))} />
                           </div>
 
                           <div className="text-right">
@@ -948,7 +951,7 @@ const PaymentTypeModal: React.FC<{
                     className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500"
                     value={percentValue}
                     onChange={e => {
-                      const val = Math.max(0, Math.min(100, Number(e.target.value)));
+                      const val = Math.max(0, Math.min(100, toNumber(e.target.value)));
                       setPercentValue(val);
                       setEntryValue(totalValue * (val / 100));
                     }}
@@ -964,7 +967,7 @@ const PaymentTypeModal: React.FC<{
                     className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500"
                     value={entryValue}
                     onChange={e => {
-                      const val = Math.max(0, Math.min(totalValue, Number(e.target.value)));
+                      const val = Math.max(0, Math.min(totalValue, toNumber(e.target.value)));
                       setEntryValue(val);
                       if (totalValue > 0) setPercentValue(Number(((val / totalValue) * 100).toFixed(1)));
                     }}
