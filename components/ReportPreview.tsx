@@ -161,15 +161,34 @@ const ReportPreview: React.FC<Props> = ({
                     padding-left: 1.25em !important;
                 }
                 .pdf-page-content ol {
-                    list-style-type: decimal !important;
+                    list-style-type: none !important;
                     margin-top: 0 !important;
                     margin-bottom: 8px !important;
-                    padding-left: 1.25em !important;
+                    padding-left: 0 !important;
+                    counter-reset: item;
+                }
+                .pdf-page-content .print-description-content ol {
+                    counter-reset: none !important;
                 }
                 .pdf-page-content li {
-                    padding-left: 0.25em !important;
-                    margin-bottom: 2px !important;
-                    line-height: 1.4 !important;
+                    display: block;
+                    position: relative;
+                    padding-left: 2.5em !important;
+                    margin-bottom: 4px !important;
+                    line-height: 1.5 !important;
+                }
+                .pdf-page-content li::before {
+                    content: counter(item) ".";
+                    counter-increment: item;
+                    position: absolute;
+                    left: 0;
+                    font-weight: 800;
+                    color: #0f172a;
+                    width: 2em;
+                    text-align: right;
+                }
+                .print-description-content {
+                    counter-reset: item;
                 }
 
                 .pdf-page-content > div > *:first-child {
@@ -283,15 +302,34 @@ const ReportPreview: React.FC<Props> = ({
                         padding-left: 1.25em !important;
                     }
                     .pdf-page-content ol {
-                        list-style-type: decimal !important;
+                        list-style-type: none !important;
                         margin-top: 0 !important;
                         margin-bottom: 8px !important;
-                        padding-left: 1.25em !important;
+                        padding-left: 0 !important;
+                        counter-reset: item;
+                    }
+                    .pdf-page-content .print-description-content ol {
+                        counter-reset: none !important;
                     }
                     .pdf-page-content li {
-                        padding-left: 0.25em !important;
-                        margin-bottom: 2px !important;
-                        line-height: 1.4 !important;
+                        display: block;
+                        position: relative;
+                        padding-left: 2.5em !important;
+                        margin-bottom: 4px !important;
+                        line-height: 1.5 !important;
+                    }
+                    .pdf-page-content li::before {
+                        content: counter(item) ".";
+                        counter-increment: item;
+                        position: absolute;
+                        left: 0;
+                        font-weight: 800;
+                        color: #0f172a;
+                        width: 2em;
+                        text-align: right;
+                    }
+                    .print-description-content {
+                        counter-reset: item;
                     }
 
                     .pdf-page-content > div > *:first-child {
