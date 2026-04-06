@@ -295,13 +295,13 @@
     padding-left: 0 !important;
 }
 
-.budget-description-container .ql-editor li {
+.budget-description-container .ql-editor ol li {
     counter-increment: budget-global-counter;
     position: relative;
     padding-left: 2.5em !important;
 }
 
-.budget-description-container .ql-editor li::before {
+.budget-description-container .ql-editor ol li::before {
     content: counter(budget-global-counter) ".";
     position: absolute;
     left: 0.5em;

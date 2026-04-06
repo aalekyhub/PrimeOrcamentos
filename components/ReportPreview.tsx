@@ -167,7 +167,7 @@ const ReportPreview: React.FC<Props> = ({
                     margin-bottom: 8px !important;
                     padding-left: 0 !important;
                 }
-                .pdf-page-content li {
+                .pdf-page-content ol li {
                     display: block;
                     position: relative;
                     padding-left: 2.5em !important;
@@ -175,7 +175,7 @@ const ReportPreview: React.FC<Props> = ({
                     line-height: 1.5 !important;
                     counter-increment: budget-global-counter;
                 }
-                .pdf-page-content li::before {
+                .pdf-page-content ol li::before {
                     content: counter(budget-global-counter) ".";
                     position: absolute;
                     left: 0;
@@ -328,7 +328,7 @@ const ReportPreview: React.FC<Props> = ({
                         margin-bottom: 8px !important;
                         padding-left: 0 !important;
                     }
-                    .pdf-page-content li {
+                    .pdf-page-content ol li {
                         display: block;
                         position: relative;
                         padding-left: 2.5em !important;
@@ -336,7 +336,7 @@ const ReportPreview: React.FC<Props> = ({
                         line-height: 1.5 !important;
                         counter-increment: budget-global-counter;
                     }
-                    .pdf-page-content li::before {
+                    .pdf-page-content ol li::before {
                         content: counter(budget-global-counter) ".";
                         position: absolute;
                         left: 0;
