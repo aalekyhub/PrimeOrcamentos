@@ -200,7 +200,7 @@ const BudgetManager: React.FC<Props> = ({
   const subtotal = useMemo(() => {
     const res = items.reduce((acc, i) => acc + safeNumber(i.unitPrice) * safeNumber(i.quantity), 0);
     console.log('[BudgetManager] Calculated Subtotal:', res, 'from items:', items);
-    return res;
+    return roundMoney(res);
   }, [items]);
 
   const totalAmount = useMemo(() => {

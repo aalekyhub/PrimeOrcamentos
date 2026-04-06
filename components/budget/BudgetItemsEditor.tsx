@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Plus, GripVertical, ChevronUp, ChevronDown, Trash2 } from 'lucide-react';
 import { ServiceItem, CatalogService } from '../../types';
 import { db } from '../../services/db';
+import { roundMoney, toNumber } from '../../services/formatUtils';
 
 interface BudgetItemsEditorProps {
     items: ServiceItem[];
@@ -29,7 +30,7 @@ const BudgetItemsEditor: React.FC<BudgetItemsEditorProps> = ({
             id: db.generateId('ITEM'),
             description: currentDesc,
             quantity: currentQty,
-            unitPrice: currentPrice,
+            unitPrice: roundMoney(currentPrice),
             unit: currentUnit
         }]);
         setCurrentDesc('');
@@ -40,13 +41,15 @@ const BudgetItemsEditor: React.FC<BudgetItemsEditorProps> = ({
     };
 
     const updateItem = (id: string, field: keyof ServiceItem, value: any) => {
-        setItems(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item));
+        const finalValue = field === 'unitPrice' ? roundMoney(toNumber(value)) : (field === 'quantity' ? toNumber(value) : value);
+        setItems(prev => prev.map(item => item.id === id ? { ...item, [field]: finalValue } : item));
     };
 
     const updateItemTotal = (id: string, newTotal: number) => {
+        const total = toNumber(newTotal);
         setItems(prev => prev.map(item => {
             if (item.id === id && item.quantity > 0) {
-                return { ...item, unitPrice: newTotal / item.quantity };
+                return { ...item, unitPrice: roundMoney(total / item.quantity) };
             }
             return item;
         }));
@@ -86,11 +89,11 @@ const BudgetItemsEditor: React.FC<BudgetItemsEditorProps> = ({
                 </div>
                 <div className="w-24">
                     <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 block text-center">Qtd</label>
-                    <input type="number" className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100" value={currentQty || ''} onChange={e => setCurrentQty(Number(e.target.value))} />
+                    <input type="number" className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100" value={currentQty || ''} onChange={e => setCurrentQty(toNumber(e.target.value))} />
                 </div>
                 <div className="w-32">
                     <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 block ml-1">Preço (R$)</label>
-                    <input type="number" className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-xs font-black outline-none text-slate-900 dark:text-slate-100" value={currentPrice || ''} onChange={e => setCurrentPrice(Number(e.target.value))} />
+                    <input type="number" className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 text-xs font-black outline-none text-slate-900 dark:text-slate-100" value={currentPrice || ''} onChange={e => setCurrentPrice(toNumber(e.target.value))} />
                 </div>
                 <div className="md:col-span-1">
                     <button onClick={handleAddItem} className="bg-blue-600 text-white w-full h-[58px] rounded-xl flex items-center justify-center hover:scale-105 transition-all shadow-md shadow-blue-950/30"><Plus className="w-6 h-6" /></button>
@@ -128,11 +131,11 @@ const BudgetItemsEditor: React.FC<BudgetItemsEditorProps> = ({
                                 <div className="flex items-center gap-2">
                                     <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 rounded px-2 py-1 border border-slate-100 dark:border-slate-700">
                                         <span className="text-[8px] font-bold text-slate-400">QTD:</span>
-                                        <input type="number" className="w-12 bg-transparent text-[9px] font-black text-slate-700 dark:text-slate-200 outline-none" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', Number(e.target.value))} />
+                                        <input type="number" className="w-12 bg-transparent text-[9px] font-black text-slate-700 dark:text-slate-200 outline-none" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', e.target.value)} />
                                     </div>
                                     <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 rounded px-2 py-1 border border-slate-100 dark:border-slate-700">
                                         <span className="text-[8px] font-bold text-slate-400">VALOR:</span>
-                                        <input type="number" className="w-20 bg-transparent text-[9px] font-black text-slate-700 dark:text-slate-200 outline-none" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', Number(e.target.value))} />
+                                        <input type="number" className="w-20 bg-transparent text-[9px] font-black text-slate-700 dark:text-slate-200 outline-none" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', e.target.value)} />
                                     </div>
                                 </div>
                             </div>
@@ -140,7 +143,7 @@ const BudgetItemsEditor: React.FC<BudgetItemsEditorProps> = ({
                         <div className="flex items-center gap-3 shrink-0">
                             <div className="flex items-center gap-1 bg-slate-50 dark:bg-slate-800 rounded px-2 py-1 border border-slate-100 dark:border-slate-700">
                                 <span className="text-[8px] font-bold text-slate-400">TOTAL:</span>
-                                <input type="number" className="w-24 bg-transparent text-[11px] font-black text-blue-600 dark:text-blue-400 outline-none text-right" value={Number(((item.unitPrice || 0) * (item.quantity || 0)).toFixed(2))} onChange={e => updateItemTotal(item.id, Number(e.target.value))} />
+                                <input type="number" className="w-24 bg-transparent text-[11px] font-black text-blue-600 dark:text-blue-400 outline-none text-right" value={roundMoney((item.unitPrice || 0) * (item.quantity || 0))} onChange={e => updateItemTotal(item.id, e.target.value)} />
                             </div>
                             <div className="flex flex-col gap-0">
                                 <button onClick={() => moveItem(items.indexOf(item), 'up')} disabled={items.indexOf(item) === 0} className="text-slate-300 hover:text-blue-500 disabled:opacity-0 transition-all"><ChevronUp className="w-3 h-3" /></button>
