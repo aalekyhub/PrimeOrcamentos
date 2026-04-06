@@ -62,6 +62,7 @@ const BudgetManager: React.FC<Props> = ({
   currentUser
 }) => {
   const isAdmin = currentUser?.role === 'admin';
+  console.log('[BudgetManager] Render check. toFixed native:', Number.prototype.toFixed.toString().includes('[native code]'));
   const [showForm, setShowForm] = useState(false);
   const [showFullClientForm, setShowFullClientForm] = useState(false);
   const [showFullServiceForm, setShowFullServiceForm] = useState(false);
@@ -297,7 +298,10 @@ const BudgetManager: React.FC<Props> = ({
   }, [currentDesc, currentPrice, currentQty, currentUnit, notify]);
 
   const updateItem = useCallback((id: string, field: keyof ServiceItem, value: any) => {
-    console.log(`[BudgetManager] Updating item ${id} field ${field} to:`, value);
+    console.log(`[BudgetManager] updateItem called for ${id}: ${field} =`, value);
+    if (field === 'unitPrice' && value === 1799.99) {
+      console.trace('[BudgetManager] TRACE: unitPrice set to 1799.99');
+    }
     setItems(prev => prev.map(item => (item.id === id ? { ...item, [field]: value } : item)));
   }, []);
 
@@ -650,7 +654,7 @@ const BudgetManager: React.FC<Props> = ({
                       </div>
                       <div className="text-center">
                         <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Preço</label>
-                        <input type="number" min={0} step="0.01" className={`w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl h-[44px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100 placeholder:text-slate-500 ${editingBudgetId !== null && !isAdmin ? 'opacity-70' : ''}`} value={currentPrice} onChange={e => setCurrentPrice(Math.max(0, Number(e.target.value)))} disabled={editingBudgetId !== null && !isAdmin} />
+                        <input type="number" min={0} step="0.01" className={`w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl h-[44px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100 placeholder:text-slate-500 ${editingBudgetId !== null && !isAdmin ? 'opacity-70' : ''}`} value={currentPrice} onChange={e => { console.log('[BudgetManager] currentPrice input:', e.target.value); setCurrentPrice(Math.max(0, Number(e.target.value))); }} disabled={editingBudgetId !== null && !isAdmin} />
                       </div>
                       <div>
                         <label className="mb-1.5 h-4 block"></label>
