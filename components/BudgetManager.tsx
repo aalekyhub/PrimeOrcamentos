@@ -371,6 +371,11 @@ const BudgetManager: React.FC<Props> = ({
       notify('Somente administradores podem salvar alterações em orçamentos existentes.', 'error');
       return;
     }
+    
+    // Stabilize ID for new budgets
+    if (!editingBudgetId) {
+      setEditingBudgetId(data.id);
+    }
 
     const newList = editingBudgetId ? orders.map(o => (o.id === editingBudgetId ? data : o)) : [data, ...orders];
     setOrders(newList);
@@ -398,8 +403,9 @@ const BudgetManager: React.FC<Props> = ({
     editingBudgetId,
     orders,
     setOrders,
+    setEditingBudgetId,
     notify
-  ], [isSaving, taxRate, customers, selectedCustomerId, items.length, buildBudgetFromForm, editingBudgetId, orders, setOrders, notify]);
+  ], [isSaving, taxRate, customers, selectedCustomerId, items.length, buildBudgetFromForm, editingBudgetId, orders, setOrders, setEditingBudgetId, notify]);
 
 
 
@@ -759,6 +765,7 @@ const BudgetManager: React.FC<Props> = ({
                 onGenerateContract={handleGenerateContractDraft}
                 isAdmin={isAdmin}
                 isEditing={editingBudgetId !== null}
+                isSaving={isSaving}
               />
             </div>
           </div>

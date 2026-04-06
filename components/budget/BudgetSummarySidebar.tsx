@@ -18,13 +18,14 @@ interface BudgetSummarySidebarProps {
     onGenerateContract: () => void;
     isAdmin?: boolean;
     isEditing?: boolean;
+    isSaving?: boolean;
 }
 
 const BudgetSummarySidebar: React.FC<BudgetSummarySidebarProps> = ({
     bdiRate, setBdiRate, taxRate, setTaxRate, subtotal, totalAmount,
     paymentTerms, setPaymentTerms, deliveryTime, setDeliveryTime,
     onShowPayment, onPrint, onSave, onGenerateContract,
-    isAdmin = true, isEditing = false
+    isAdmin = true, isEditing = false, isSaving = false
 }) => {
     const bdiNum = Number(bdiRate) || 0;
     const taxNum = Number(taxRate) || 0;
@@ -95,8 +96,21 @@ const BudgetSummarySidebar: React.FC<BudgetSummarySidebarProps> = ({
                         <Printer className="w-5 h-5 text-blue-400 group-hover:scale-110 transition-transform" /> IMPRIMIR ORÇAMENTO
                     </button>
                     {(!isEditing || isAdmin) && (
-                        <button onClick={onSave} className="bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[11px] shadow-md shadow-blue-950/20 transition-all flex items-center justify-center gap-2">
-                            <Save className="w-5 h-5" /> REGISTRAR
+                        <button 
+                            onClick={onSave} 
+                            disabled={isSaving}
+                            className={`py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[11px] shadow-md shadow-blue-950/20 transition-all flex items-center justify-center gap-2 w-full ${isSaving ? 'bg-slate-700 cursor-not-allowed opacity-80' : 'bg-blue-600 hover:bg-blue-500 text-white'}`}
+                        >
+                            {isSaving ? (
+                                <>
+                                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                                    SALVANDO...
+                                </>
+                            ) : (
+                                <>
+                                    <Save className="w-5 h-5" /> REGISTRAR
+                                </>
+                            )}
                         </button>
                     )}
                     <button onClick={onGenerateContract} className="bg-slate-800 hover:bg-slate-700 text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[11px] shadow-md shadow-blue-950/20 transition-all flex items-center justify-center gap-2 border border-slate-700">
