@@ -198,7 +198,9 @@ const BudgetManager: React.FC<Props> = ({
   }, [prefilledData, onPrefilledDataConsumed, notify, resetForm]);
 
   const subtotal = useMemo(() => {
-    return items.reduce((acc, i) => acc + safeNumber(i.unitPrice) * safeNumber(i.quantity), 0);
+    const res = items.reduce((acc, i) => acc + safeNumber(i.unitPrice) * safeNumber(i.quantity), 0);
+    console.log('[BudgetManager] Calculated Subtotal:', res, 'from items:', items);
+    return res;
   }, [items]);
 
   const totalAmount = useMemo(() => {
@@ -213,7 +215,9 @@ const BudgetManager: React.FC<Props> = ({
     const taxFactor = 1 - tax / 100;
     if (taxFactor <= 0) return subtotalWithBDI;
 
-    return subtotalWithBDI / taxFactor;
+    const res = subtotalWithBDI / taxFactor;
+    console.log('[BudgetManager] Calculated Total:', res, 'with BDI:', bdi, 'Tax:', tax);
+    return res;
   }, [subtotal, taxRate, bdiRate]);
 
   const buildBudgetFromForm = useCallback((): ServiceOrder | null => {
@@ -283,6 +287,7 @@ const BudgetManager: React.FC<Props> = ({
       type: 'Serviço'
     };
 
+    console.log('[BudgetManager] Adding item:', newItem);
     setItems(prev => [...prev, newItem]);
     setCurrentDesc('');
     setCurrentPrice(0);
@@ -292,6 +297,7 @@ const BudgetManager: React.FC<Props> = ({
   }, [currentDesc, currentPrice, currentQty, currentUnit, notify]);
 
   const updateItem = useCallback((id: string, field: keyof ServiceItem, value: any) => {
+    console.log(`[BudgetManager] Updating item ${id} field ${field} to:`, value);
     setItems(prev => prev.map(item => (item.id === id ? { ...item, [field]: value } : item)));
   }, []);
 
