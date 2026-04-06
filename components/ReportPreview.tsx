@@ -138,12 +138,12 @@ const ReportPreview: React.FC<Props> = ({
                 }
 
                 /* Tipografia do preview para ficar próxima do editor */
-                    .pdf-page-content p,
-                    .pdf-page-content .ql-editor-print p {
-                        margin-top: 0 !important;
-                        margin-bottom: 10px !important;
-                        line-height: 1.15 !important;
-                    }
+                .pdf-page-content p,
+                .pdf-page-content .ql-editor-print p {
+                    margin-top: 0 !important;
+                    margin-bottom: 10px !important;
+                    line-height: 1.15 !important;
+                }
 
                 .pdf-page-content h1, .pdf-page-content h2, .pdf-page-content h3,
                 .pdf-page-content h4, .pdf-page-content h5, .pdf-page-content h6 {
@@ -160,15 +160,12 @@ const ReportPreview: React.FC<Props> = ({
                     margin-bottom: 8px !important;
                     padding-left: 1.25em !important;
                 }
+
                 .pdf-page-content ol {
                     list-style-type: none !important;
                     margin-top: 0 !important;
                     margin-bottom: 8px !important;
                     padding-left: 0 !important;
-                    counter-reset: item;
-                }
-                .pdf-page-content .print-description-content ol {
-                    counter-reset: none !important;
                 }
                 .pdf-page-content li {
                     display: block;
@@ -176,10 +173,10 @@ const ReportPreview: React.FC<Props> = ({
                     padding-left: 2.5em !important;
                     margin-bottom: 4px !important;
                     line-height: 1.5 !important;
+                    counter-increment: budget-global-counter;
                 }
                 .pdf-page-content li::before {
-                    content: counter(item) ".";
-                    counter-increment: item;
+                    content: counter(budget-global-counter) ".";
                     position: absolute;
                     left: 0;
                     font-weight: 800;
@@ -188,8 +185,9 @@ const ReportPreview: React.FC<Props> = ({
                     text-align: right;
                 }
                 .print-description-content {
-                    counter-reset: item;
+                    counter-reset: budget-global-counter;
                 }
+
 
                 .pdf-page-content > div > *:first-child {
                     margin-top: 0 !important;
@@ -301,15 +299,34 @@ const ReportPreview: React.FC<Props> = ({
                         margin-bottom: 8px !important;
                         padding-left: 1.25em !important;
                     }
+                    .pdf-page-content p,
+                    .pdf-page-content .ql-editor-print p {
+                        margin-top: 0 !important;
+                        margin-bottom: 10px !important;
+                        line-height: 1.15 !important;
+                    }
+
+                    .pdf-page-content h1, .pdf-page-content h2, .pdf-page-content h3,
+                    .pdf-page-content h4, .pdf-page-content h5, .pdf-page-content h6 {
+                        margin-top: 15px !important;
+                        margin-bottom: 5px !important;
+                        line-height: 1.2 !important;
+                        break-after: avoid !important;
+                        page-break-after: avoid !important;
+                    }
+
+                    .pdf-page-content ul {
+                        list-style-type: disc !important;
+                        margin-top: 0 !important;
+                        margin-bottom: 8px !important;
+                        padding-left: 1.25em !important;
+                    }
+
                     .pdf-page-content ol {
                         list-style-type: none !important;
                         margin-top: 0 !important;
                         margin-bottom: 8px !important;
                         padding-left: 0 !important;
-                        counter-reset: item;
-                    }
-                    .pdf-page-content .print-description-content ol {
-                        counter-reset: none !important;
                     }
                     .pdf-page-content li {
                         display: block;
@@ -317,10 +334,10 @@ const ReportPreview: React.FC<Props> = ({
                         padding-left: 2.5em !important;
                         margin-bottom: 4px !important;
                         line-height: 1.5 !important;
+                        counter-increment: budget-global-counter;
                     }
                     .pdf-page-content li::before {
-                        content: counter(item) ".";
-                        counter-increment: item;
+                        content: counter(budget-global-counter) ".";
                         position: absolute;
                         left: 0;
                         font-weight: 800;
@@ -329,8 +346,9 @@ const ReportPreview: React.FC<Props> = ({
                         text-align: right;
                     }
                     .print-description-content {
-                        counter-reset: item;
+                        counter-reset: budget-global-counter;
                     }
+
 
                     .pdf-page-content > div > *:first-child {
                         margin-top: 0 !important;

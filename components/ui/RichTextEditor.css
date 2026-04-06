@@ -285,7 +285,31 @@
     margin-bottom: 10px !important;
 }
 
-/* Omitted: .ql-editor ol, .ql-editor ul { Usar padding padrão do Quill } */
+/* Global Sequential Numbering across blocks */
+.budget-description-container {
+    counter-reset: budget-global-counter;
+}
+
+.budget-description-container .ql-editor ol {
+    list-style-type: none !important;
+    padding-left: 0 !important;
+}
+
+.budget-description-container .ql-editor li {
+    counter-increment: budget-global-counter;
+    position: relative;
+    padding-left: 2.5em !important;
+}
+
+.budget-description-container .ql-editor li::before {
+    content: counter(budget-global-counter) ".";
+    position: absolute;
+    left: 0.5em;
+    font-weight: bold;
+    color: #3b82f6;
+    width: 1.5em;
+    text-align: right;
+}
 
 .ql-editor li {
     margin-bottom: 4px;

@@ -320,7 +320,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                     <div className="flex justify-between items-center">
                       <h4 className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b dark:border-slate-800 pb-2 grow mr-6">FOTOS E ANEXOS DO SERVIÇO</h4>
                     </div>
-                    <div className="space-y-3">
+                    <div className="space-y-3 budget-description-container">
                       {descriptionBlocks.length === 0 && (!editingOrderId || isAdmin) && (
                         <div className="bg-slate-50 dark:bg-slate-800/50 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-[2rem] p-8 flex flex-col items-center justify-center gap-4 group hover:border-blue-400 transition-colors cursor-pointer" onClick={addTextBlock}>
                           <div className="flex gap-4">

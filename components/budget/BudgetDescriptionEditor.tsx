@@ -41,7 +41,7 @@ const BudgetDescriptionEditor: React.FC<BudgetDescriptionEditorProps> = ({ block
             <div className="flex justify-between items-center">
                 <h4 className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b dark:border-slate-800 pb-2 grow mr-6">DESCRIÇÃO TÉCNICA</h4>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-3 budget-description-container">
                 {(!blocks || blocks.length === 0) && (
                     <div className="bg-slate-50 dark:bg-slate-800 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl p-8 flex flex-col items-center justify-center gap-4 group hover:border-blue-400 transition-colors cursor-pointer" onClick={addTextBlock}>
                         <div className="flex gap-4">
