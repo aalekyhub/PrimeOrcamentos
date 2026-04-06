@@ -24,6 +24,7 @@ import BudgetSummarySidebar from './budget/BudgetSummarySidebar';
 import ReportPreview from './ReportPreview';
 import { generateBudgetReportHtml } from '../services/budgetPdfService';
 import { getContractHtml } from '../services/contractPdfService';
+import { roundMoney, toNumber } from '../services/formatUtils';
 // DocumentPreview and BudgetDocument are replaced by the unified system
 
 interface Props {
@@ -45,8 +46,7 @@ const DEFAULT_DELIVERY_TIME = '15 dias úteis';
 const getTodayIsoDate = () => new Date().toISOString().split('T')[0];
 const getFutureIsoDate = (days: number) => new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 const safeNumber = (value: string | number | null | undefined) => {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : 0;
+  return toNumber(value);
 };
 
 const BudgetManager: React.FC<Props> = ({
@@ -62,7 +62,6 @@ const BudgetManager: React.FC<Props> = ({
   currentUser
 }) => {
   const isAdmin = currentUser?.role === 'admin';
-  console.log('[BudgetManager] Render check. toFixed native:', Number.prototype.toFixed.toString().includes('[native code]'));
   const [showForm, setShowForm] = useState(false);
   const [showFullClientForm, setShowFullClientForm] = useState(false);
   const [showFullServiceForm, setShowFullServiceForm] = useState(false);
@@ -151,7 +150,7 @@ const BudgetManager: React.FC<Props> = ({
           id: db.generateId('ITEM'),
           description: s.description,
           quantity: safeNumber(s.quantity) || 1,
-          unitPrice: safeNumber(s.unit_labor_cost) + safeNumber(s.unit_material_cost),
+          unitPrice: roundMoney(safeNumber(s.unit_labor_cost) + safeNumber(s.unit_material_cost)),
           unit: s.unit || 'un',
           type: 'Serviço'
         });
@@ -163,7 +162,7 @@ const BudgetManager: React.FC<Props> = ({
         id: db.generateId('ITEM'),
         description: 'TOTAL DE MATERIAIS E INSUMOS (PREVISTO)',
         quantity: 1,
-        unitPrice: safeNumber(totalMaterial),
+        unitPrice: roundMoney(safeNumber(totalMaterial)),
         unit: 'un',
         type: 'Material'
       });
@@ -174,7 +173,7 @@ const BudgetManager: React.FC<Props> = ({
         id: db.generateId('ITEM'),
         description: 'TOTAL DE MÃO DE OBRA (PREVISTO)',
         quantity: 1,
-        unitPrice: safeNumber(totalLabor),
+        unitPrice: roundMoney(safeNumber(totalLabor)),
         unit: 'un',
         type: 'Serviço'
       });
@@ -185,7 +184,7 @@ const BudgetManager: React.FC<Props> = ({
         id: db.generateId('ITEM'),
         description: 'CUSTOS INDIRETOS E OPERACIONAIS (PREVISTO)',
         quantity: 1,
-        unitPrice: safeNumber(totalIndirect),
+        unitPrice: roundMoney(safeNumber(totalIndirect)),
         unit: 'un',
         type: 'Serviço'
       });
@@ -217,8 +216,8 @@ const BudgetManager: React.FC<Props> = ({
     if (taxFactor <= 0) return subtotalWithBDI;
 
     const res = subtotalWithBDI / taxFactor;
-    console.log('[BudgetManager] Calculated Total:', res, 'with BDI:', bdi, 'Tax:', tax);
-    return res;
+    console.log('[BudgetManager] Calculated Total (Original):', res, 'with BDI:', bdi, 'Tax:', tax);
+    return roundMoney(res);
   }, [subtotal, taxRate, bdiRate]);
 
   const buildBudgetFromForm = useCallback((): ServiceOrder | null => {
@@ -283,7 +282,7 @@ const BudgetManager: React.FC<Props> = ({
       id: db.generateId('ITEM'),
       description: currentDesc.trim(),
       quantity: currentQty,
-      unitPrice: currentPrice,
+      unitPrice: roundMoney(currentPrice),
       unit: currentUnit || 'un',
       type: 'Serviço'
     };
@@ -298,11 +297,9 @@ const BudgetManager: React.FC<Props> = ({
   }, [currentDesc, currentPrice, currentQty, currentUnit, notify]);
 
   const updateItem = useCallback((id: string, field: keyof ServiceItem, value: any) => {
-    console.log(`[BudgetManager] updateItem called for ${id}: ${field} =`, value);
-    if (field === 'unitPrice' && value === 1799.99) {
-      console.trace('[BudgetManager] TRACE: unitPrice set to 1799.99');
-    }
-    setItems(prev => prev.map(item => (item.id === id ? { ...item, [field]: value } : item)));
+    const finalValue = field === 'unitPrice' ? roundMoney(Number(value)) : value;
+    
+    setItems(prev => prev.map(item => (item.id === id ? { ...item, [field]: finalValue } : item)));
   }, []);
 
   const updateItemTotal = useCallback((id: string, total: number) => {
@@ -313,7 +310,7 @@ const BudgetManager: React.FC<Props> = ({
         const quantity = safeNumber(item.quantity);
         if (quantity <= 0) return item;
 
-        return { ...item, unitPrice: total / quantity };
+        return { ...item, unitPrice: roundMoney(total / quantity) };
       })
     );
   }, []);
@@ -437,7 +434,7 @@ const BudgetManager: React.FC<Props> = ({
 
     setEditingBudgetId(isClone ? null : budget.id);
     setSelectedCustomerId(budget.customerId);
-    setItems(budget.items.map(item => ({ ...item, id: db.generateId('ITEM') })));
+    setItems(budget.items.map(item => ({ ...item, id: db.generateId('ITEM'), unitPrice: roundMoney(item.unitPrice) })));
     setProposalTitle(isClone ? `${budget.description} (CÓPIA)` : budget.description || '');
     setDescriptionBlocks(
       budget.descriptionBlocks && budget.descriptionBlocks.length > 0
@@ -618,7 +615,7 @@ const BudgetManager: React.FC<Props> = ({
                           const s = catalogServices.find(x => x.id === id);
                           if (s) {
                             setCurrentDesc(s.name);
-                            setCurrentPrice(s.basePrice);
+                            setCurrentPrice(roundMoney(s.basePrice));
                             setCurrentUnit(s.unit || 'un');
                           }
                         }}
@@ -654,7 +651,7 @@ const BudgetManager: React.FC<Props> = ({
                       </div>
                       <div className="text-center">
                         <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Preço</label>
-                        <input type="number" min={0} step="0.01" className={`w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl h-[44px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100 placeholder:text-slate-500 ${editingBudgetId !== null && !isAdmin ? 'opacity-70' : ''}`} value={currentPrice} onChange={e => { console.log('[BudgetManager] currentPrice input:', e.target.value); setCurrentPrice(Math.max(0, Number(e.target.value))); }} disabled={editingBudgetId !== null && !isAdmin} />
+                        <input type="number" min={0} step="0.01" className={`w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl h-[44px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100 placeholder:text-slate-500 ${editingBudgetId !== null && !isAdmin ? 'opacity-70' : ''}`} value={currentPrice} onChange={e => { setCurrentPrice(Math.max(0, Number(e.target.value))); }} disabled={editingBudgetId !== null && !isAdmin} />
                       </div>
                       <div>
                         <label className="mb-1.5 h-4 block"></label>
