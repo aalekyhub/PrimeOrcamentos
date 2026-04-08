@@ -69,6 +69,10 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (editingId && !isAdmin) {
+      notify("Você não tem permissão para editar lançamentos.", "error");
+      return;
+    }
     if (!formData.amount || !formData.category) return;
 
     const newT: Transaction = {
@@ -398,28 +402,30 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
                       </p>
                       <p className="text-[9px] text-slate-300 font-bold uppercase mt-0.5">{t.id}</p>
                     </div>
-                    <div className="flex items-center gap-1 group-hover:opacity-100 opacity-0 transition-opacity">
-                      <button 
-                        onClick={() => {
-                          setEditingId(t.id);
-                          setFormData({ ...t });
-                          setActiveSubTab('geral');
-                          setShowForm(true);
-                          window.scrollTo({ top: 0, behavior: 'smooth' });
-                        }} 
-                        className="p-2 text-slate-200 hover:text-blue-500 transition-colors"
-                        title="Editar Lançamento"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </button>
-                      <button 
-                        onClick={() => removeTransaction(t.id)} 
-                        className="p-2 text-slate-200 hover:text-rose-500 transition-colors"
-                        title="Excluir Lançamento"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+                    {isAdmin && (
+                      <div className="flex items-center gap-1 group-hover:opacity-100 opacity-0 transition-opacity">
+                        <button 
+                          onClick={() => {
+                            setEditingId(t.id);
+                            setFormData({ ...t });
+                            setActiveSubTab('geral');
+                            setShowForm(true);
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          }} 
+                          className="p-2 text-slate-200 hover:text-blue-500 transition-colors"
+                          title="Editar Lançamento"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => removeTransaction(t.id)} 
+                          className="p-2 text-slate-200 hover:text-rose-500 transition-colors"
+                          title="Excluir Lançamento"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
