@@ -104,6 +104,26 @@ const FinancialManager: React.FC<Props> = ({
     category?.toLowerCase().includes('aporte') || 
     category?.toLowerCase().includes('emprestimo') || 
     category?.toLowerCase().includes('empréstimo');
+
+  const allRealized = [
+    ...transactions,
+    ...accountEntries
+      .filter(e => e.status === 'PAGO' && !transactions.some(t => t.entryId === e.id))
+      .map(e => ({
+        id: e.id,
+        date: e.paymentDate || e.dueDate,
+        amount: e.amount,
+        type: (e.type === 'RECEBER' || e.type === 'INVESTIMENTO') ? 'RECEITA' : 'DESPESA' as any,
+        category: e.category,
+        description: e.description,
+        isFromEntry: true,
+        customerName: e.customerName,
+        supplierName: e.supplierName,
+        attachment: e.attachment,
+        attachmentName: e.attachmentName
+      }))
+  ].sort((a, b) => b.date.localeCompare(a.date));
+
   const isAdmin = currentUser.role === 'admin';
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, isEditing = false) => {
@@ -653,15 +673,15 @@ const FinancialManager: React.FC<Props> = ({
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
             <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
               <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Saldo Realizado</p>
-              <h3 className="text-xl font-black text-slate-900 dark:text-white">R$ {(transactions.filter(t => t.type === 'RECEITA' || isAporte(t.category)).reduce((a,c)=>a+c.amount,0) - transactions.filter(t=>t.type==='DESPESA').reduce((a,c)=>a+c.amount,0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+              <h3 className="text-xl font-black text-slate-900 dark:text-white">R$ {(allRealized.filter(t => t.type === 'RECEITA' || isAporte(t.category)).reduce((a,c)=>a+c.amount,0) - allRealized.filter(t=>t.type==='DESPESA').reduce((a,c)=>a+c.amount,0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
             </div>
             <div className="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/30 shadow-sm">
               <p className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Receitas (Vendas)</p>
-              <h3 className="text-xl font-black text-emerald-700 dark:text-emerald-400">R$ {transactions.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+              <h3 className="text-xl font-black text-emerald-700 dark:text-emerald-400">R$ {allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
             </div>
             <div className="bg-rose-50 dark:bg-rose-900/20 p-4 rounded-2xl border border-rose-100 dark:border-rose-900/30 shadow-sm">
               <p className="text-[9px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest mb-1">Despesas (Saídas)</p>
-              <h3 className="text-xl font-black text-rose-700 dark:text-rose-400">R$ {transactions.filter(t=>t.type==='DESPESA').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+              <h3 className="text-xl font-black text-rose-700 dark:text-rose-400">R$ {allRealized.filter(t=>t.type==='DESPESA').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
             </div>
             <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-2xl border border-indigo-100 dark:border-indigo-900/30 shadow-sm">
               <p className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-1">Empréstimos de Sócios</p>
@@ -669,7 +689,7 @@ const FinancialManager: React.FC<Props> = ({
             </div>
             <button 
               onClick={() => setPrintData({
-                html: buildFinancialReportHtml(transactions, accountEntries, accounts, categories, company, 'EXTRATO', 'Geral'),
+                html: buildFinancialReportHtml(allRealized as any, accountEntries, accounts, categories, company, 'EXTRATO', 'Geral'),
                 title: 'Extrato de Fluxo de Caixa',
                 filename: `EXTRATO_FINANCEIRO_${getTodayIsoDate()}`
               })}
@@ -681,13 +701,13 @@ const FinancialManager: React.FC<Props> = ({
           
           <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
               <div className="divide-y divide-slate-100 dark:divide-slate-700">
-                {transactions.length === 0 && accountEntries.filter(e => e.status === 'PAGO').length === 0 ? (
+                {allRealized.length === 0 ? (
                   <div className="py-20 text-center opacity-40">
                     <Wallet className="w-12 h-12 mx-auto mb-4" />
                     <p className="text-xs font-black uppercase tracking-widest text-slate-400">Nenhuma transação financeira registrada.</p>
                   </div>
                 ) : (
-                  transactions.map(t => {
+                  allRealized.map(t => {
                     const isContribution = isAporte(t.category);
                     return (
                       <div key={t.id} className="p-6 hover:bg-slate-50 transition-all flex items-center justify-between group">
