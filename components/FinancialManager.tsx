@@ -155,7 +155,7 @@ const FinancialManager: React.FC<Props> = ({
         amount: Number(formData.amount),
         type: 'RECEITA',
         category: formData.category || 'Aporte de Sócios',
-        description: `[EMPRÉSTIMO] ${formData.description}`,
+        description: formData.description || 'Empréstimo',
         entryId: newEntry.id
       };
       const newTransactions = [newTransaction, ...transactions];
@@ -714,7 +714,12 @@ const FinancialManager: React.FC<Props> = ({
                             </div>
                             <div className="flex items-center gap-3 text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">
                                <span>{t.date.split('-').reverse().join('/')}</span>
-                               <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 rounded text-slate-500">{t.category}</span>
+                               {!isContribution && <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 rounded text-slate-500">{t.category}</span>}
+                               {(t.customerName || t.supplierName) && (
+                                <span className="text-blue-500 px-2 bg-blue-50 rounded">
+                                  {t.customerName || t.supplierName}
+                                </span>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -892,7 +897,7 @@ const FinancialManager: React.FC<Props> = ({
                         </div>
                         <div className="flex items-center gap-3 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
                           <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {isContribution ? 'Entrada' : 'Venc.'} {entry.dueDate.split('-').reverse().join('/')}</span>
-                          <span className="flex items-center gap-1"><Tag className="w-3 h-3" /> {entry.category}</span>
+                          {!isContribution && <span className="flex items-center gap-1"><Tag className="w-3 h-3" /> {entry.category}</span>}
                           {(entry.customerName || entry.supplierName) && (
                             <span className="text-blue-500 px-2 bg-blue-50 rounded">
                               {entry.customerName || entry.supplierName}
