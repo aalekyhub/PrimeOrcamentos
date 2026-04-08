@@ -160,21 +160,23 @@ const AppContent: React.FC = () => {
     db.load(STORAGE_KEYS.COMPANY, INITIAL_COMPANY)
   );
 
-  const [financialAccounts, setFinancialAccounts] = useState<FinancialAccount[]>(() =>
-    db.load(STORAGE_KEYS.FINANCIAL_ACCOUNTS, [
+  const [financialAccounts, setFinancialAccounts] = useState<FinancialAccount[]>(() => {
+    const loaded = db.load(STORAGE_KEYS.FINANCIAL_ACCOUNTS, []);
+    return loaded.length > 0 ? loaded : [
       { id: 'ACC-001', name: 'Caixa Empresa', type: 'Caixa', initialBalance: 0, currentBalance: 0 }
-    ])
-  );
-  const [financialCategories, setFinancialCategories] = useState<FinancialCategory[]>(() =>
-    db.load(STORAGE_KEYS.FINANCIAL_CATEGORIES, [
+    ];
+  });
+  const [financialCategories, setFinancialCategories] = useState<FinancialCategory[]>(() => {
+    const loaded = db.load(STORAGE_KEYS.FINANCIAL_CATEGORIES, []);
+    return loaded.length > 0 ? loaded : [
       { id: 'CAT-001', name: 'Venda de Serviços', type: 'RECEITA' },
       { id: 'CAT-002', name: 'Aporte de Sócios', type: 'RECEITA' },
       { id: 'CAT-003', name: 'Materiais', type: 'DESPESA' },
       { id: 'CAT-004', name: 'Mão de Obra', type: 'DESPESA' },
       { id: 'CAT-005', name: 'Aluguel', type: 'DESPESA' },
       { id: 'CAT-006', name: 'Geral', type: 'DESPESA' },
-    ])
-  );
+    ];
+  });
   const [accountEntries, setAccountEntries] = useState<AccountEntry[]>(() =>
     db.load(STORAGE_KEYS.ACCOUNT_ENTRIES, [])
   );
