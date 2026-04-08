@@ -140,7 +140,9 @@ export interface Transaction {
   currentInstallment?: number; // Current installment number
   attachment?: string; // Base64 or URL
   attachmentName?: string;
-  entryId?: string; // Link to the AccountEntry that generated this transaction
+  entryId?: string; 
+  customerName?: string;
+  supplierName?: string;
 }
 
 export interface FinancialAccount {

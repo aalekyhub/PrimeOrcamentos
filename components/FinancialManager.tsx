@@ -176,7 +176,9 @@ const FinancialManager: React.FC<Props> = ({
         type: 'RECEITA',
         category: formData.category || 'Aporte de Sócios',
         description: formData.description || 'Empréstimo',
-        entryId: newEntry.id
+        entryId: newEntry.id,
+        customerName: formData.customerName,
+        supplierName: formData.supplierName
       };
       const newTransactions = [newTransaction, ...transactions];
       setTransactions(newTransactions);
@@ -950,7 +952,9 @@ const FinancialManager: React.FC<Props> = ({
                                  type: (entry.type === 'RECEBER' || entry.type === 'INVESTIMENTO') ? 'RECEITA' : 'DESPESA',
                                  category: entry.category,
                                  description: `[BAIXA] ${entry.description}`,
-                                 entryId: entry.id
+                                 entryId: entry.id,
+                                 customerName: entry.customerName,
+                                 supplierName: entry.supplierName
                                };
                                const newTransactions = [newTransaction, ...transactions];
                                setTransactions(newTransactions);
