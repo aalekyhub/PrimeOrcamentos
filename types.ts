@@ -154,10 +154,13 @@ export interface FinancialAccount {
   currentBalance: number;
 }
 
+export type CategoryNature = 'OPERACIONAL' | 'APORTE' | 'EMPRESTIMO' | 'IMPOSTO' | 'TRANSFERENCIA';
+
 export interface FinancialCategory {
   id: string;
   name: string;
   type: 'RECEITA' | 'DESPESA';
+  nature?: CategoryNature;
   icon?: string;
   color?: string;
 }
