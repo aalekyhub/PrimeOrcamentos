@@ -124,14 +124,17 @@ const FinancialManager: React.FC<Props> = ({
     e.preventDefault();
     if (!formData.amount || !formData.description) return;
 
+    const isInvestment = formData.type === 'INVESTIMENTO';
+
     const newEntry: AccountEntry = {
       id: `ENT-${Date.now()}`,
-      type: formData.type as 'PAGAR' | 'RECEBER',
-      status: 'PENDENTE',
+      type: formData.type as any,
+      status: isInvestment ? 'PAGO' : 'PENDENTE',
       amount: Number(formData.amount),
       category: formData.category || 'Geral',
       description: formData.description || '',
       dueDate: formData.dueDate || getTodayIsoDate(),
+      paymentDate: isInvestment ? getTodayIsoDate() : undefined,
       customerName: formData.customerName,
       supplierName: formData.supplierName,
       installmentNumber: 1,
@@ -142,11 +145,27 @@ const FinancialManager: React.FC<Props> = ({
 
     const newList = [newEntry, ...accountEntries];
     setAccountEntries(newList);
+
+    if (isInvestment) {
+      const newTransaction: Transaction = {
+        id: `TR-INV-${Date.now()}`,
+        date: getTodayIsoDate(),
+        amount: Number(formData.amount),
+        type: 'RECEITA',
+        category: formData.category || 'Aporte de Sócios',
+        description: `[INVESTIMENTO] ${formData.description}`,
+        entryId: newEntry.id
+      };
+      const newTransactions = [newTransaction, ...transactions];
+      setTransactions(newTransactions);
+      await db.save('serviflow_transactions', newTransactions, newTransaction);
+    }
+
     setShowEntryForm(false);
     setFormData(initialFormData);
 
     await db.save('serviflow_account_entries', newList, newEntry);
-    notify("Lançamento provisionado com sucesso!");
+    notify(isInvestment ? "Investimento registrado e caixa atualizado!" : "Lançamento provisionado com sucesso!");
   };
 
   const handleUpdateItem = async (e: React.FormEvent) => {
@@ -622,7 +641,7 @@ const FinancialManager: React.FC<Props> = ({
                 type="submit" 
                 className="bg-blue-600 text-white px-10 py-3.5 rounded-xl text-xs font-black shadow-lg hover:bg-blue-700 transition-all uppercase tracking-widest"
               >
-                Provisionar Lançamento
+                {formData.type === 'INVESTIMENTO' ? 'Registrar Investimento' : 'Provisionar Lançamento'}
               </button>
             </div>
           </form>
