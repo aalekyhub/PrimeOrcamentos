@@ -248,6 +248,7 @@ const FinancialManager: React.FC<Props> = ({
                 <div 
                   onClick={() => {
                     setFormData({ ...initialFormData, type: 'RECEITA' as any });
+                    setActiveTab('provisionado');
                     setShowEntryForm(true);
                   }}
                   className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
@@ -283,6 +284,7 @@ const FinancialManager: React.FC<Props> = ({
                 <div 
                   onClick={() => {
                     setFormData({ ...initialFormData, type: 'PAGAR' as any });
+                    setActiveTab('provisionado');
                     setShowEntryForm(true);
                   }}
                   className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm group cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
@@ -319,6 +321,7 @@ const FinancialManager: React.FC<Props> = ({
                   onClick={() => {
                     const aporteCat = categories.find(c => isAporte(c.name))?.name || 'Aporte de Sócios';
                     setFormData({ ...initialFormData, type: 'INVESTIMENTO' as any, category: aporteCat });
+                    setActiveTab('provisionado');
                     setShowEntryForm(true);
                   }}
                   className="bg-white dark:bg-slate-800 p-4 rounded-2xl border-2 border-indigo-100 dark:border-indigo-900 shadow-sm relative overflow-hidden group cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
