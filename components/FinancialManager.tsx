@@ -82,7 +82,7 @@ const FinancialManager: React.FC<Props> = ({
   const [entrySearch, setEntrySearch] = useState('');
   const [entryTypeFilter, setEntryTypeFilter] = useState<'ALL' | 'PAGAR' | 'RECEBER'>('ALL');
   
-  const [formData, setFormData] = useState<Partial<AccountEntry>>({
+  const initialFormData: Partial<AccountEntry> = {
     type: 'PAGAR',
     status: 'PENDENTE',
     dueDate: getTodayIsoDate(),
@@ -91,7 +91,9 @@ const FinancialManager: React.FC<Props> = ({
     description: '',
     attachment: undefined,
     attachmentName: undefined
-  });
+  };
+
+  const [formData, setFormData] = useState<Partial<AccountEntry>>(initialFormData);
 
   const [editingItem, setEditingItem] = useState<AccountEntry | Transaction | null>(null);
   const [viewingAttachment, setViewingAttachment] = useState<{content: string, name: string} | null>(null);
@@ -141,7 +143,7 @@ const FinancialManager: React.FC<Props> = ({
     const newList = [newEntry, ...accountEntries];
     setAccountEntries(newList);
     setShowEntryForm(false);
-    setFormData({ type: 'PAGAR', status: 'PENDENTE', dueDate: getTodayIsoDate(), amount: 0, category: 'Geral', description: '' });
+    setFormData(initialFormData);
 
     await db.save('serviflow_account_entries', newList, newEntry);
     notify("Lançamento provisionado com sucesso!");
@@ -243,7 +245,13 @@ const FinancialManager: React.FC<Props> = ({
               {/* Summary Cards Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* A Receber Card */}
-                <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group">
+                <div 
+                  onClick={() => {
+                    setFormData({ ...initialFormData, type: 'RECEITA' as any });
+                    setShowEntryForm(true);
+                  }}
+                  className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
+                >
                   <div className="flex items-start justify-between relative z-10">
                     <div>
                       <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Faturamento a Receber</p>
@@ -272,7 +280,13 @@ const FinancialManager: React.FC<Props> = ({
                 </div>
 
                 {/* A Pagar Card */}
-                <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm group">
+                <div 
+                  onClick={() => {
+                    setFormData({ ...initialFormData, type: 'PAGAR' as any });
+                    setShowEntryForm(true);
+                  }}
+                  className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm group cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
+                >
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Contas a Pagar</p>
@@ -301,7 +315,14 @@ const FinancialManager: React.FC<Props> = ({
                 </div>
 
                 {/* Investimentos / Aportes Card */}
-                <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border-2 border-indigo-100 dark:border-indigo-900 shadow-sm relative overflow-hidden group">
+                <div 
+                  onClick={() => {
+                    const aporteCat = categories.find(c => isAporte(c.name))?.name || 'Aporte de Sócios';
+                    setFormData({ ...initialFormData, type: 'INVESTIMENTO' as any, category: aporteCat });
+                    setShowEntryForm(true);
+                  }}
+                  className="bg-white dark:bg-slate-800 p-4 rounded-2xl border-2 border-indigo-100 dark:border-indigo-900 shadow-sm relative overflow-hidden group cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
+                >
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="text-[8px] font-black text-indigo-500 uppercase tracking-widest mb-0.5">Total em Aportes</p>
