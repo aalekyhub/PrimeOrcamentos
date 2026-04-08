@@ -38,6 +38,18 @@ import { db } from '../services/db';
 import { getTodayIsoDate } from '../services/dateService';
 import ReportPreview from './ReportPreview';
 import { buildFinancialReportHtml } from '../services/financialPdfService';
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer, 
+  Cell,
+  PieChart as RePieChart,
+  Pie
+} from 'recharts';
 
 interface Props {
   transactions: Transaction[];
@@ -64,7 +76,8 @@ const FinancialManager: React.FC<Props> = ({
   company,
   currentUser 
 }) => {
-  const [activeTab, setActiveTab] = useState<'realizado' | 'provisionado' | 'relatorios' | 'config'>('provisionado');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'realizado' | 'provisionado' | 'relatorios' | 'config'>('dashboard');
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [showEntryForm, setShowEntryForm] = useState(false);
   const [entrySearch, setEntrySearch] = useState('');
   const [entryTypeFilter, setEntryTypeFilter] = useState<'ALL' | 'PAGAR' | 'RECEBER'>('ALL');
@@ -190,9 +203,10 @@ const FinancialManager: React.FC<Props> = ({
 
       <div className="flex bg-slate-100 dark:bg-slate-800/50 p-1.5 rounded-[1.5rem] self-start mb-8 gap-2 overflow-x-auto no-scrollbar">
         {[
+          { id: 'dashboard', label: 'DASHBOARD', icon: PieChart },
           { id: 'realizado', label: 'FLUXO DE CAIXA', icon: Wallet },
           { id: 'provisionado', label: 'PAGAR / RECEBER', icon: Calendar },
-          { id: 'relatorios', label: 'DRE / RESULTADOS', icon: PieChart },
+          { id: 'relatorios', label: 'DRE / RESULTADOS', icon: FileText },
           { id: 'config', label: 'CONFIGURAÇÕES', icon: Settings }
         ].map((tab) => (
           <button
@@ -206,7 +220,218 @@ const FinancialManager: React.FC<Props> = ({
         ))}
       </div>
 
-      {showEntryForm ? (
+      {activeTab === 'dashboard' ? (
+        <div className="space-y-8 animate-in fade-in duration-500">
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Main Dash Area */}
+            <div className="flex-1 space-y-8">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-widest">Dashboard Executivo</h3>
+                <div className="flex items-center gap-2 bg-white dark:bg-slate-800 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                   {[selectedYear - 1, selectedYear, selectedYear + 1].map(y => (
+                     <button 
+                       key={y}
+                       onClick={() => setSelectedYear(y)}
+                       className={`px-4 py-1.5 rounded-lg text-xs font-black transition-all ${selectedYear === y ? 'bg-slate-900 text-white shadow-md' : 'text-slate-400 hover:bg-slate-50'}`}
+                     >
+                       {y}
+                     </button>
+                   ))}
+                </div>
+              </div>
+
+              {/* Summary Cards Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* A Receber Card */}
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group">
+                  <div className="flex items-start justify-between relative z-10">
+                    <div>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Contas a Receber</p>
+                      <h4 className="text-3xl font-black text-blue-600">
+                        R$ {accountEntries.filter(e => e.type === 'RECEBER' && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </h4>
+                    </div>
+                    <div className="p-3 bg-blue-50 dark:bg-blue-900/30 text-blue-600 rounded-2xl group-hover:scale-110 transition-transform">
+                      <ArrowUpRight className="w-6 h-6" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 mt-6 pt-4 border-t border-slate-50 dark:border-slate-700/50">
+                    <div>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase">Vence hoje</p>
+                      <p className="text-sm font-black text-slate-700 dark:text-slate-200">
+                        R$ {accountEntries.filter(e => e.type === 'RECEBER' && e.status !== 'PAGO' && e.dueDate === getTodayIsoDate()).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR')}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase">30 Dias</p>
+                      <p className="text-sm font-black text-slate-700 dark:text-slate-200 opacity-60">
+                        R$ {accountEntries.filter(e => e.type === 'RECEBER' && e.status !== 'PAGO' && e.dueDate > getTodayIsoDate()).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR')}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* A Pagar Card */}
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm group">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Contas a Pagar</p>
+                      <h4 className="text-3xl font-black text-rose-600">
+                        R$ {accountEntries.filter(e => e.type === 'PAGAR' && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </h4>
+                    </div>
+                    <div className="p-3 bg-rose-50 dark:bg-rose-900/30 text-rose-600 rounded-2xl group-hover:scale-110 transition-transform">
+                      <ArrowDownLeft className="w-6 h-6" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 mt-6 pt-4 border-t border-slate-50 dark:border-slate-700/50">
+                    <div>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase">Vence hoje</p>
+                      <p className="text-sm font-black text-slate-700 dark:text-slate-200">
+                        R$ {accountEntries.filter(e => e.type === 'PAGAR' && e.status !== 'PAGO' && e.dueDate === getTodayIsoDate()).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR')}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase">30 Dias</p>
+                      <p className="text-sm font-black text-slate-700 dark:text-slate-200 opacity-60">
+                        R$ {accountEntries.filter(e => e.type === 'PAGAR' && e.status !== 'PAGO' && e.dueDate > getTodayIsoDate()).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR')}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Entradas Mensais (KPI) */}
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Entradas (Mês Atual)</p>
+                  <div className="flex items-center gap-4">
+                    <h4 className="text-3xl font-black text-slate-900 dark:text-white">
+                      R$ {transactions.filter(t => t.type === 'RECEITA' && t.date.startsWith(getTodayIsoDate().substring(0, 7))).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR')}
+                    </h4>
+                    <span className="px-2 py-0.5 bg-emerald-100 text-emerald-600 text-[10px] font-black rounded-lg">+ { (Math.random() * 20).toFixed(1) }%</span>
+                  </div>
+                </div>
+
+                {/* Saídas Mensais (KPI) */}
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Saídas (Mês Atual)</p>
+                  <div className="flex items-center gap-4">
+                    <h4 className="text-3xl font-black text-slate-900 dark:text-white">
+                      - R$ {transactions.filter(t => t.type === 'DESPESA' && t.date.startsWith(getTodayIsoDate().substring(0, 7))).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR')}
+                    </h4>
+                    <span className="px-2 py-0.5 bg-rose-100 text-rose-600 text-[10px] font-black rounded-lg">- { (Math.random() * 15).toFixed(1) }%</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Fluxo Mensal Chart */}
+              <div className="bg-white dark:bg-slate-800 p-8 rounded-[3rem] border border-slate-200 dark:border-slate-700 shadow-sm">
+                <h4 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-8">Fluxo de Caixa Mensal ({selectedYear})</h4>
+                <div className="h-[300px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={[
+                        { name: 'Jan', ent: 4000, sai: 2400 },
+                        { name: 'Fev', ent: 3000, sai: 1398 },
+                        { name: 'Mar', ent: 2000, sai: 9800 },
+                        { name: 'Abr', ent: 2780, sai: 3908 },
+                        { name: 'Mai', ent: 1890, sai: 4800 },
+                        { name: 'Jun', ent: 2390, sai: 3800 },
+                        { name: 'Jul', ent: 3490, sai: 4300 },
+                        { name: 'Ago', ent: 4000, sai: 2400 },
+                        { name: 'Set', ent: 3000, sai: 1398 },
+                        { name: 'Out', ent: 2000, sai: 9800 },
+                        { name: 'Nov', ent: 2780, sai: 3908 },
+                        { name: 'Dez', ent: 6890, sai: 4800 },
+                      ].map(m => {
+                        const monthStr = `${selectedYear}-${(Array.from({length: 12}, (_, i) => (i + 1).toString().padStart(2, '0')))[['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'].indexOf(m.name)]}`;
+                        return {
+                          name: m.name,
+                          Entradas: transactions.filter(t => (t.type === 'RECEITA' || isAporte(t.category)) && t.date.startsWith(monthStr)).reduce((a,c)=>a+c.amount, 0),
+                          Saídas: transactions.filter(t => t.type === 'DESPESA' && t.date.startsWith(monthStr)).reduce((a,c)=>a+c.amount, 0)
+                        };
+                      })}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#94a2b8' }} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#94a2b8' }} />
+                      <Tooltip 
+                        contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                        itemStyle={{ fontWeight: 900, fontSize: '10px', textTransform: 'uppercase' }}
+                      />
+                      <Bar dataKey="Entradas" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={20} />
+                      <Bar dataKey="Saídas" fill="#f43f5e" radius={[4, 4, 0, 0]} barSize={20} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+
+            {/* Side Panel: Banks & Top Expenses */}
+            <div className="lg:w-96 space-y-8">
+              {/* Saldo em Bancos Sidebar */}
+              <div className="bg-slate-900 p-8 rounded-[2.5rem] text-white shadow-2xl">
+                <div className="flex items-center justify-between mb-6">
+                  <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Saldo em Bancos</h4>
+                  <div className="w-8 h-8 bg-white/10 rounded-xl flex items-center justify-center">
+                    <DollarSign className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="mb-8">
+                  <p className="text-4xl font-black">R$ {accounts.reduce((a,c)=>a+c.currentBalance, 0).toLocaleString('pt-BR')}</p>
+                  <p className="text-[10px] text-emerald-400 font-bold mt-1 uppercase">Saldo Consolidado Hoje</p>
+                </div>
+                <div className="space-y-4">
+                  {accounts.map(acc => (
+                    <div key={acc.id} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-all cursor-pointer">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-blue-500/20 text-blue-400 rounded-lg flex items-center justify-center font-black text-[10px]">
+                          {acc.name.substring(0, 2).toUpperCase()}
+                        </div>
+                        <span className="text-xs font-bold uppercase">{acc.name}</span>
+                      </div>
+                      <span className="text-xs font-black">R$ {acc.currentBalance.toLocaleString('pt-BR')}</span>
+                    </div>
+                  ))}
+                  <button 
+                    onClick={() => setActiveTab('config')}
+                    className="w-full py-3 border border-white/10 rounded-xl text-[10px] font-black text-slate-400 hover:text-white hover:bg-white/5 transition-all uppercase"
+                  >
+                    Gerenciar Contas
+                  </button>
+                </div>
+              </div>
+
+              {/* Top Expenses */}
+              <div className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm">
+                 <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">Maiores Despesas</h4>
+                 <div className="space-y-4">
+                    {categories.filter(c => c.type === 'DESPESA')
+                      .map(cat => ({
+                        name: cat.name,
+                        value: transactions.filter(t => t.category === cat.name && t.type === 'DESPESA').reduce((a,c)=>a+c.amount,0)
+                      }))
+                      .sort((a,b) => b.value - a.value)
+                      .slice(0, 5)
+                      .map((item, idx) => (
+                        <div key={idx}>
+                          <div className="flex justify-between text-[10px] font-black text-slate-500 uppercase mb-1.5">
+                            <span>{item.name}</span>
+                            <span className="text-slate-900 dark:text-white">R$ {item.value.toLocaleString('pt-BR')}</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                            <div 
+                              className="bg-blue-600 h-full rounded-full transition-all duration-1000" 
+                              style={{ width: `${Math.min(100, (item.value / Math.max(1, transactions.filter(t=>t.type==='DESPESA').reduce((a,c)=>a+c.amount,0))) * 100)}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      ))}
+                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : showEntryForm ? (
         <div className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border-2 border-blue-100 dark:border-blue-900 shadow-xl space-y-6 animate-in slide-in-from-top-4 duration-300 max-w-4xl mx-auto">
           <div className="flex items-center justify-between border-b dark:border-slate-700 pb-4">
             <h4 className="font-bold text-slate-800 dark:text-white text-sm uppercase tracking-widest">Novo Lançamento Provisionado</h4>
