@@ -124,6 +124,18 @@ const FinancialManager: React.FC<Props> = ({
       }))
   ].sort((a, b) => b.date.localeCompare(a.date));
 
+  const monthsKeys = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+  const chartData = monthsKeys.map((name, index) => {
+    const monthIso = String(index + 1).padStart(2, '0');
+    const monthPrefix = `${selectedYear}-${monthIso}`;
+    const monthEntries = allRealized.filter(t => t.date.startsWith(monthPrefix));
+    return {
+      name,
+      ent: monthEntries.filter(t => t.type === 'RECEITA').reduce((acc, t) => acc + t.amount, 0),
+      sai: monthEntries.filter(t => t.type === 'DESPESA').reduce((acc, t) => acc + t.amount, 0)
+    };
+  });
+
   const isAdmin = currentUser.role === 'admin';
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, isEditing = false) => {
@@ -413,40 +425,33 @@ const FinancialManager: React.FC<Props> = ({
               {/* Fluxo Mensal Chart */}
               <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
                 <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Fluxo de Caixa Mensal ({selectedYear})</h4>
-                <div className="h-[200px] w-full">
+                <div className="h-[250px] w-full mt-4">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={[
-                        { name: 'Jan', ent: 4000, sai: 2400 },
-                        { name: 'Fev', ent: 3000, sai: 1398 },
-                        { name: 'Mar', ent: 2000, sai: 9800 },
-                        { name: 'Abr', ent: 2780, sai: 3908 },
-                        { name: 'Mai', ent: 1890, sai: 4800 },
-                        { name: 'Jun', ent: 2390, sai: 3800 },
-                        { name: 'Jul', ent: 3490, sai: 4300 },
-                        { name: 'Ago', ent: 4000, sai: 2400 },
-                        { name: 'Set', ent: 3000, sai: 1398 },
-                        { name: 'Out', ent: 2000, sai: 9800 },
-                        { name: 'Nov', ent: 2780, sai: 3908 },
-                        { name: 'Dez', ent: 6890, sai: 4800 },
-                      ].map(m => {
-                        const monthStr = `${selectedYear}-${(Array.from({length: 12}, (_, i) => (i + 1).toString().padStart(2, '0')))[['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'].indexOf(m.name)]}`;
-                        return {
-                          name: m.name,
-                          Entradas: transactions.filter(t => (t.type === 'RECEITA' || isAporte(t.category)) && t.date.startsWith(monthStr)).reduce((a,c)=>a+c.amount, 0),
-                          Saídas: transactions.filter(t => t.type === 'DESPESA' && t.date.startsWith(monthStr)).reduce((a,c)=>a+c.amount, 0)
-                        };
-                      })}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                      <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#94a2b8' }} />
-                      <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#94a2b8' }} />
-                      <Tooltip 
-                        contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                        itemStyle={{ fontWeight: 900, fontSize: '10px', textTransform: 'uppercase' }}
+                    <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                      <XAxis 
+                        dataKey="name" 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 700 }} 
+                        dy={10}
                       />
-                      <Bar dataKey="Entradas" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={20} />
-                      <Bar dataKey="Saídas" fill="#f43f5e" radius={[4, 4, 0, 0]} barSize={20} />
+                      <YAxis 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 700 }}
+                      />
+                      <Tooltip 
+                        contentStyle={{ 
+                          borderRadius: '16px', 
+                          border: 'none', 
+                          boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+                          fontSize: '10px',
+                          fontWeight: 'bold'
+                        }} 
+                      />
+                      <Bar dataKey="ent" name="Entradas" fill="#10B981" radius={[4, 4, 0, 0]} barSize={20} />
+                      <Bar dataKey="sai" name="Saídas" fill="#F43F5E" radius={[4, 4, 0, 0]} barSize={20} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
