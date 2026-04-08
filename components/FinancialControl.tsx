@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Wallet, ArrowUpRight, ArrowDownLeft, Plus, Calendar, Tag, Trash2, Paperclip, ChevronLeft, ChevronRight, Download, Eye, FileText } from 'lucide-react';
+import { Wallet, ArrowUpRight, ArrowDownLeft, Plus, Calendar, Tag, Trash2, Paperclip, ChevronLeft, ChevronRight, Download, Eye, FileText, Pencil } from 'lucide-react';
 import { Transaction, UserAccount, RecurrenceFrequency, Loan } from '../types';
 import { useNotify } from './ToastProvider';
 import { db } from '../services/db';
@@ -16,6 +16,7 @@ interface Props {
 const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loans, setLoans, currentUser }) => {
   const [showForm, setShowForm] = useState(false);
   const [activeSubTab, setActiveSubTab] = useState<'geral' | 'recorrencia' | 'emprestimos' | 'historico'>('geral');
+  const [editingId, setEditingId] = useState<string | null>(null);
   const { notify } = useNotify();
   const isAdmin = currentUser.role === 'admin';
   const [formData, setFormData] = useState<Partial<Transaction>>({
@@ -71,7 +72,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
     if (!formData.amount || !formData.category) return;
 
     const newT: Transaction = {
-      id: `T-${Date.now()}`,
+      id: editingId || `T-${Date.now()}`,
       amount: Number(formData.amount),
       category: formData.category || 'Geral',
       date: formData.date || new Date().toISOString().split('T')[0],
@@ -83,13 +84,20 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
       attachmentName: formData.attachmentName
     };
 
-    const newList = [newT, ...transactions];
+    let newList: Transaction[];
+    if (editingId) {
+      newList = transactions.map(t => t.id === editingId ? newT : t);
+    } else {
+      newList = [newT, ...transactions];
+    }
+    
     setTransactions(newList);
     setShowForm(false);
+    setEditingId(null);
     setFormData({ type: 'RECEITA', date: new Date().toISOString().split('T')[0], isRecurring: false, frequency: 'NONE' });
 
     const result = await db.save('serviflow_transactions', newList, newT);
-    if (result?.success) notify("Transação lançada!");
+    if (result?.success) notify(editingId ? "Transação atualizada!" : "Transação lançada!");
   };
 
   const handleAddLoan = async (e: React.FormEvent) => {
@@ -154,7 +162,18 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
         </div>
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setShowForm(!showForm)}
+            onClick={() => {
+              if (showForm && editingId) {
+                setEditingId(null);
+                setFormData({ type: 'RECEITA', date: new Date().toISOString().split('T')[0], isRecurring: false, frequency: 'NONE' });
+              } else {
+                setShowForm(!showForm);
+                if (!showForm) {
+                  setEditingId(null);
+                  setFormData({ type: 'RECEITA', date: new Date().toISOString().split('T')[0], isRecurring: false, frequency: 'NONE' });
+                }
+              }
+            }}
             className="bg-slate-900 dark:bg-blue-600 text-white px-6 py-2.5 rounded-xl flex items-center gap-2 hover:bg-slate-800 dark:hover:bg-blue-700 transition-all font-bold shadow-lg shadow-slate-200 dark:shadow-none"
           >
             {showForm ? 'Cancelar' : <><Plus className="w-4 h-4" /> Novo Lançamento</>}
@@ -379,9 +398,28 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
                       </p>
                       <p className="text-[9px] text-slate-300 font-bold uppercase mt-0.5">{t.id}</p>
                     </div>
-                    <button onClick={() => removeTransaction(t.id)} className="p-2 text-slate-200 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-1 group-hover:opacity-100 opacity-0 transition-opacity">
+                      <button 
+                        onClick={() => {
+                          setEditingId(t.id);
+                          setFormData({ ...t });
+                          setActiveSubTab('geral');
+                          setShowForm(true);
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }} 
+                        className="p-2 text-slate-200 hover:text-blue-500 transition-colors"
+                        title="Editar Lançamento"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => removeTransaction(t.id)} 
+                        className="p-2 text-slate-200 hover:text-rose-500 transition-colors"
+                        title="Excluir Lançamento"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -440,7 +478,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
         ) : (
           <form onSubmit={handleAdd} className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border-2 border-blue-100 dark:border-blue-900 shadow-xl space-y-6 animate-in slide-in-from-top-4 duration-300">
             <h4 className="font-bold text-slate-800 dark:text-white text-sm border-b dark:border-slate-700 pb-4 uppercase tracking-widest">
-              {activeSubTab === 'recorrencia' ? 'Novo Item Recorrente (Fixo)' : 'Lançamento Único'}
+              {editingId ? 'Editar Lançamento' : (activeSubTab === 'recorrencia' ? 'Novo Item Recorrente (Fixo)' : 'Lançamento Único')}
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div>
@@ -516,7 +554,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
             </div>
             <div className="flex justify-end pt-2">
               <button type="submit" className="bg-blue-600 text-white px-10 py-3.5 rounded-xl text-sm font-bold shadow-lg hover:bg-blue-700 transition-all font-bold uppercase tracking-widest">
-                Efetivar Lançamento
+                {editingId ? 'Salvar Alterações' : 'Efetivar Lançamento'}
               </button>
             </div>
           </form>
