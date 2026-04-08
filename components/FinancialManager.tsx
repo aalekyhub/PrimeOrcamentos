@@ -392,7 +392,7 @@ const FinancialManager: React.FC<Props> = ({
                   <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Entradas (Mês Atual)</p>
                   <div className="flex items-center gap-4">
                     <h4 className="text-xl font-black text-slate-900 dark:text-white">
-                      R$ {allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category) && t.date.startsWith(getTodayIsoDate().substring(0, 7))).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR')}
+                      R$ {allRealized.filter(t => t.type === 'RECEITA' && t.date.startsWith(getTodayIsoDate().substring(0, 7))).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </h4>
                     <span className="px-1 py-0.5 bg-emerald-100 text-emerald-600 text-[8px] font-black rounded-lg">+ { (Math.random() * 20).toFixed(1) }%</span>
                   </div>
@@ -678,8 +678,8 @@ const FinancialManager: React.FC<Props> = ({
               <h3 className="text-xl font-black text-slate-900 dark:text-white">R$ {(allRealized.filter(t => t.type === 'RECEITA' || isAporte(t.category)).reduce((a,c)=>a+c.amount,0) - allRealized.filter(t=>t.type==='DESPESA').reduce((a,c)=>a+c.amount,0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
             </div>
             <div className="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/30 shadow-sm">
-              <p className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Receitas (Vendas)</p>
-              <h3 className="text-xl font-black text-emerald-700 dark:text-emerald-400">R$ {allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+              <p className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Entradas (Receitas)</p>
+              <h3 className="text-xl font-black text-emerald-700 dark:text-emerald-400">R$ {allRealized.filter(t => t.type === 'RECEITA').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
             </div>
             <div className="bg-rose-50 dark:bg-rose-900/20 p-4 rounded-2xl border border-rose-100 dark:border-rose-900/30 shadow-sm">
               <p className="text-[9px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest mb-1">Despesas (Saídas)</p>
