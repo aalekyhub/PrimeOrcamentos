@@ -889,7 +889,7 @@ const FinancialManager: React.FC<Props> = ({
                           </span>
                         </div>
                         <div className="flex items-center gap-3 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                          <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> Venc. {entry.dueDate.split('-').reverse().join('/')}</span>
+                          <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {isContribution ? 'Entrada' : 'Venc.'} {entry.dueDate.split('-').reverse().join('/')}</span>
                           <span className="flex items-center gap-1"><Tag className="w-3 h-3" /> {entry.category}</span>
                           {(entry.customerName || entry.supplierName) && (
                             <span className="text-blue-500 px-2 bg-blue-50 rounded">
