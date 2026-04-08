@@ -20,6 +20,12 @@ const BudgetDescriptionEditor: React.FC<BudgetDescriptionEditorProps> = ({ block
     const updateBlockContent = (id: string, content: string) =>
         setBlocks(prev => prev.map(b => b.id === id ? { ...b, content } : b));
 
+    const updateBlockTitle = (id: string, title: string) =>
+        setBlocks(prev => prev.map(b => b.id === id ? { ...b, title } : b));
+
+    const updateBlockCaption = (id: string, caption: string) =>
+        setBlocks(prev => prev.map(b => b.id === id ? { ...b, caption } : b));
+
     const removeBlock = (id: string) =>
         setBlocks(prev => prev.filter(b => b.id !== id));
 
@@ -71,21 +77,41 @@ const BudgetDescriptionEditor: React.FC<BudgetDescriptionEditorProps> = ({ block
                             </div>
                         )}
                         {block.type === 'image' && (
-                            <div className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl p-6 flex flex-col items-center justify-center gap-2">
-                                {block.content ? (
-                                    <div className="relative max-w-[200px]">
-                                        <img src={block.content} className="w-full h-auto rounded-lg shadow-lg" alt="Uploaded representation" />
-                                        <button onClick={() => updateBlockContent(block.id, '')} className="absolute -top-2 -right-2 bg-rose-500 text-white p-1.5 rounded-full">
-                                            <Trash2 className="w-3 h-3" />
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <label className="cursor-pointer flex flex-col items-center gap-1">
-                                        <Upload className="w-5 h-5 text-blue-500 dark:text-blue-400" />
-                                        <span className="text-[8px] font-black text-slate-400 uppercase">Subir Foto</span>
-                                        <input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(block.id, e)} />
-                                    </label>
-                                )}
+                            <div className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 flex flex-col items-center gap-4">
+                                <input 
+                                    type="text" 
+                                    placeholder="Título acima da foto (ex: Situação Atual)"
+                                    className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2 text-xs font-black text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500 uppercase tracking-tight"
+                                    value={block.title || ''}
+                                    onChange={(e) => updateBlockTitle(block.id, e.target.value)}
+                                />
+                                <div className="w-full flex flex-col items-center justify-center min-h-[140px] border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl p-4 gap-2 bg-white/50 dark:bg-slate-950/20">
+                                    {block.content ? (
+                                        <div className="relative max-w-[400px]">
+                                            <img src={block.content} className="w-full h-auto rounded-lg shadow-xl" alt="Uploaded representation" />
+                                            <button onClick={() => updateBlockContent(block.id, '')} className="absolute -top-2 -right-2 bg-rose-500 text-white p-2 rounded-full shadow-lg hover:bg-rose-600 transition-colors z-20">
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <label className="cursor-pointer flex flex-col items-center gap-3 py-6 w-full">
+                                            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-full border border-blue-100 dark:border-blue-900/30">
+                                                <Upload className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                                            </div>
+                                            <div className="text-center">
+                                                <span className="text-[10px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest block mb-1">Upload da Evidência Fotográfica</span>
+                                                <span className="text-[8px] text-slate-400 dark:text-slate-500 uppercase tracking-tighter">Clique para selecionar uma imagem (JPG, PNG)</span>
+                                            </div>
+                                            <input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(block.id, e)} />
+                                        </label>
+                                    )}
+                                </div>
+                                <textarea
+                                    placeholder="Legenda descritiva abaixo da foto (ex: Detalhe das fissuras na manta aluminizada)"
+                                    className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2 text-[10px] font-bold text-slate-500 dark:text-slate-400 outline-none focus:ring-2 focus:ring-blue-500 resize-none h-16 leading-relaxed"
+                                    value={block.caption || ''}
+                                    onChange={(e) => updateBlockCaption(block.id, e.target.value)}
+                                />
                             </div>
                         )}
                         <button

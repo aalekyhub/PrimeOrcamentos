@@ -124,7 +124,16 @@ export const buildBudgetDescriptionBlocksHtml = (budget: ServiceOrder, company: 
       if (block.type === 'text') {
         return `<div class="ql-editor-print" style="font-size: ${company.descriptionFontSize || 14}px; color: #334155; line-height: 1.6; text-align: justify; margin-bottom: 24px;">${block.content || ''}</div>`;
       } else if (block.type === 'image') {
-        return `<div style="margin: 24px 0; break-inside: avoid; page-break-inside: avoid; display: block; text-align: center;"><img src="${escapeHtml(block.content)}" style="width: auto; max-width: 100%; border-radius: 8px; display: block; margin: 0 auto; object-fit: contain; max-height: 250mm;"></div>`;
+        const titleHtml = block.title ? `<div style="text-align: center; margin-bottom: 8px; font-size: 11px; font-weight: 900; color: #1e293b; text-transform: uppercase; letter-spacing: 0.05em;">${escapeHtml(block.title)}</div>` : '';
+        const captionHtml = block.caption ? `<div style="text-align: center; margin-top: 8px; font-size: 10px; font-weight: 700; color: #64748b; font-style: italic;">${escapeHtml(block.caption)}</div>` : '';
+        return `
+          <div style="margin: 32px 0; break-inside: avoid; page-break-inside: avoid; display: block;">
+            ${titleHtml}
+            <div style="text-align: center;">
+              <img src="${escapeHtml(block.content)}" style="width: auto; max-width: 100%; border-radius: 8px; display: block; margin: 0 auto; object-fit: contain; max-height: 250mm; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+            </div>
+            ${captionHtml}
+          </div>`;
       } else if (block.type === 'page-break') {
         return `<div style="page-break-after: always; break-after: page; height: 0;"></div>`;
       }

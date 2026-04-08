@@ -91,6 +91,8 @@ export interface DescriptionBlock {
   id: string;
   type: 'text' | 'image' | 'page-break';
   content: string;
+  title?: string;
+  caption?: string;
 }
 
 export interface ServiceOrder {
