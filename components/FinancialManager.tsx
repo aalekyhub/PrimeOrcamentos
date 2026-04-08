@@ -392,7 +392,7 @@ const FinancialManager: React.FC<Props> = ({
                   <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Entradas (Mês Atual)</p>
                   <div className="flex items-center gap-4">
                     <h4 className="text-xl font-black text-slate-900 dark:text-white">
-                      R$ {transactions.filter(t => t.type === 'RECEITA' && t.date.startsWith(getTodayIsoDate().substring(0, 7))).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR')}
+                      R$ {allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category) && t.date.startsWith(getTodayIsoDate().substring(0, 7))).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR')}
                     </h4>
                     <span className="px-1 py-0.5 bg-emerald-100 text-emerald-600 text-[8px] font-black rounded-lg">+ { (Math.random() * 20).toFixed(1) }%</span>
                   </div>
@@ -403,7 +403,7 @@ const FinancialManager: React.FC<Props> = ({
                   <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Saídas (Mês Atual)</p>
                   <div className="flex items-center gap-4">
                     <h4 className="text-xl font-black text-slate-900 dark:text-white">
-                      - R$ {transactions.filter(t => t.type === 'DESPESA' && t.date.startsWith(getTodayIsoDate().substring(0, 7))).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR')}
+                      - R$ {allRealized.filter(t => t.type === 'DESPESA' && t.date.startsWith(getTodayIsoDate().substring(0, 7))).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR')}
                     </h4>
                     <span className="px-1 py-0.5 bg-rose-100 text-rose-600 text-[8px] font-black rounded-lg">- { (Math.random() * 15).toFixed(1) }%</span>
                   </div>
