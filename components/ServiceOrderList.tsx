@@ -4,6 +4,7 @@ import { Plus, MoreVertical, Filter, User, Calendar, CheckCircle, X, Trash2, Pac
 import { ServiceOrder, OrderStatus, Transaction, Customer, ServiceItem, CatalogService } from '../types';
 import { db } from '../services/db';
 import { useNotify } from './ToastProvider';
+import { getTodayIsoDate, addDaysToDate } from '../services/dateService';
 
 interface Props {
   orders: ServiceOrder[];
@@ -22,8 +23,8 @@ const ServiceOrderList: React.FC<Props> = ({ orders, setOrders, setTransactions,
   const [newOrder, setNewOrder] = useState<Partial<ServiceOrder>>({
     status: OrderStatus.PENDING,
     items: [],
-    createdAt: new Date().toISOString().split('T')[0],
-    dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    createdAt: getTodayIsoDate(),
+    dueDate: addDaysToDate(7),
     descriptionBlocks: [],
     paymentTerms: '',
     deliveryTime: ''
@@ -77,7 +78,7 @@ const ServiceOrderList: React.FC<Props> = ({ orders, setOrders, setTransactions,
       description: newOrder.description || 'Novo Registro',
       status: newOrder.status as OrderStatus,
       items: newOrder.items as ServiceItem[],
-      createdAt: newOrder.createdAt || new Date().toISOString().split('T')[0],
+      createdAt: newOrder.createdAt || getTodayIsoDate(),
       dueDate: newOrder.dueDate || '',
       descriptionBlocks: newOrder.descriptionBlocks || [],
       paymentTerms: newOrder.paymentTerms || '',
@@ -118,8 +119,8 @@ const ServiceOrderList: React.FC<Props> = ({ orders, setOrders, setTransactions,
     setNewOrder({
       status: OrderStatus.PENDING,
       items: [],
-      createdAt: new Date().toISOString().split('T')[0],
-      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      createdAt: getTodayIsoDate(),
+      dueDate: addDaysToDate(7),
       descriptionBlocks: [],
       paymentTerms: '',
       deliveryTime: ''
@@ -136,7 +137,7 @@ const ServiceOrderList: React.FC<Props> = ({ orders, setOrders, setTransactions,
           if (newStatus === OrderStatus.PAID && o.status !== OrderStatus.PAID) {
             const newTransaction: Transaction = {
               id: `T-${Math.random().toString(36).substr(2, 9)}`,
-              date: new Date().toISOString().split('T')[0],
+              date: getTodayIsoDate(),
               amount: o.totalAmount,
               type: 'RECEITA',
               category: 'Pagamento de O.S.',

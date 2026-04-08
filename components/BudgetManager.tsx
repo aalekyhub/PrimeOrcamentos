@@ -22,6 +22,7 @@ import BudgetList from './budget/BudgetList';
 import BudgetDescriptionEditor from './budget/BudgetDescriptionEditor';
 import BudgetSummarySidebar from './budget/BudgetSummarySidebar';
 import ReportPreview from './ReportPreview';
+import { getTodayIsoDate, addDaysToDate } from '../services/dateService';
 import { generateBudgetReportHtml } from '../services/budgetPdfService';
 import { getContractHtml } from '../services/contractPdfService';
 import { roundMoney, toNumber } from '../services/formatUtils';
@@ -43,8 +44,7 @@ interface Props {
 const DEFAULT_PAYMENT_TERMS = '50% à vista, 25% com 30 dias, 25% restante na conclusão';
 const DEFAULT_DELIVERY_TIME = '15 dias úteis';
 
-const getTodayIsoDate = () => new Date().toISOString().split('T')[0];
-const getFutureIsoDate = (days: number) => new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+const getFutureIsoDate = (days: number) => addDaysToDate(days);
 const safeNumber = (value: string | number | null | undefined) => {
   return toNumber(value);
 };

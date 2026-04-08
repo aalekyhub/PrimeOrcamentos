@@ -51,6 +51,7 @@ import {
 } from './types';
 
 import { db, initPromise, startRealtimeSync, stopRealtimeSync } from './services/db';
+import { getTodayIsoDate } from './services/dateService';
 import { APP_VERSION } from './services/version';
 
 const STORAGE_KEYS = {
@@ -332,7 +333,7 @@ const AppContent: React.FC = () => {
   }, [currentUser]);
 
   const stats = useMemo(() => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getTodayIsoDate();
 
     const realizedTransactions = transactions.filter((t) => t.date <= today);
     const projectedTransactions = transactions;

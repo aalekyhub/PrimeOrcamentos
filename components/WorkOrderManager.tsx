@@ -11,6 +11,7 @@ import { toNumber } from '../services/formatUtils';
 import { useNotify } from './ToastProvider';
 import CustomerManager from './CustomerManager';
 import { db } from '../services/db';
+import { getTodayIsoDate } from '../services/dateService';
 import { formatDocument } from '../services/validation';
 import { financeUtils } from '../services/financeUtils';
 import InfoCard from './ui/InfoCard';
@@ -53,7 +54,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     const [descriptionBlocks, setDescriptionBlocks] = useState<DescriptionBlock[]>([]);
     const [paymentTerms, setPaymentTerms] = useState('');
     const [deliveryTime, setDeliveryTime] = useState('');
-    const [deliveryDate, setDeliveryDate] = useState(new Date().toISOString().split('T')[0]);
+    const [deliveryDate, setDeliveryDate] = useState(getTodayIsoDate());
     const [contractPrice, setContractPrice] = useState<number>(0);
     const [items, setItems] = useState<ServiceItem[]>([]);
 
@@ -152,7 +153,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
             descriptionBlocks,
             paymentTerms,
             deliveryTime,
-            createdAt: existingOrder?.createdAt || new Date().toISOString().split('T')[0],
+            createdAt: existingOrder?.createdAt || getTodayIsoDate(),
             dueDate: deliveryDate,
             osType: 'WORK',
             contractPrice: contractPrice,

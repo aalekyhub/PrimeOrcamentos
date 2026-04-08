@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
 import { UserPlus, Shield, Mail, Key, Trash2, ShieldCheck, X, User, Pencil, CheckCircle2 } from 'lucide-react';
 import { UserAccount } from '../types';
 import { db } from '../services/db';
+import { getTodayIsoDate } from '../services/dateService';
 import { useNotify } from './ToastProvider';
 
 interface Props {
@@ -102,7 +102,7 @@ const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
         password: formData.password,
         role: formData.role as 'admin' | 'operador',
         permissions: finalPermissions,
-        createdAt: new Date().toISOString().split('T')[0]
+        createdAt: getTodayIsoDate()
       };
       newList = [...users, newUser];
     }

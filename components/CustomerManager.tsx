@@ -5,6 +5,7 @@ import { Customer, PersonType, ServiceOrder, UserAccount } from '../types';
 import { useNotify } from './ToastProvider';
 import { checkDuplicateCustomer } from '../services/validation';
 import { db } from '../services/db';
+import { getTodayIsoDate } from '../services/dateService';
 
 interface Props {
   customers: Customer[];
@@ -111,7 +112,7 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, cur
       ...(newCustomer as Customer),
       id: editingCustomerId || db.generateId('CLI'),
       type: personType,
-      createdAt: newCustomer.createdAt || new Date().toISOString().split('T')[0]
+      createdAt: newCustomer.createdAt || getTodayIsoDate()
     };
 
     const newList = editingCustomerId ? customers.map(c => c.id === editingCustomerId ? customerData : c) : [customerData, ...customers];

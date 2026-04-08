@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import { Target, Sparkles, Send, Loader2, DollarSign, Package, User, Users } from 'lucide-react';
 import { generateBudgetFromDescription } from '../services/geminiService';
 import { ServiceOrder, OrderStatus, ServiceItem, Customer } from '../types';
 import { db } from '../services/db';
+import { getTodayIsoDate, addDaysToDate } from '../services/dateService';
 import { useNotify } from './ToastProvider';
 
 interface Props {
@@ -48,8 +48,8 @@ const BudgetPlanner: React.FC<Props> = ({ setOrders, customers }) => {
       customerEmail: customer.email,
       description: description,
       status: OrderStatus.PENDING,
-      createdAt: new Date().toISOString().split('T')[0],
-      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      createdAt: getTodayIsoDate(),
+      dueDate: addDaysToDate(7),
       totalAmount: generatedBudget.totalAmount || 0,
       items: (generatedBudget.items || []) as ServiceItem[],
       descriptionBlocks: [],

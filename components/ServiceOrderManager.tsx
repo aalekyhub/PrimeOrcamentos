@@ -13,6 +13,7 @@ import { useNotify } from './ToastProvider';
 import CustomerManager from './CustomerManager';
 import ServiceCatalog from './ServiceCatalog';
 import { db } from '../services/db';
+import { getTodayIsoDate } from '../services/dateService';
 import ReportPreview from './ReportPreview';
 import { buildMaintenanceOsHtml } from '../services/osPdfService';
 import { compressImage } from '../services/imageUtils';
@@ -50,7 +51,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
   const [descriptionBlocks, setDescriptionBlocks] = useState<DescriptionBlock[]>([]);
   const [paymentTerms, setPaymentTerms] = useState('');
   const [deliveryTime, setDeliveryTime] = useState('');
-  const [deliveryDate, setDeliveryDate] = useState(new Date().toISOString().split('T')[0]);
+  const [deliveryDate, setDeliveryDate] = useState(getTodayIsoDate());
   const [items, setItems] = useState<ServiceItem[]>([]);
 
   const [currentDesc, setCurrentDesc] = useState('');
@@ -135,7 +136,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
       descriptionBlocks,
       paymentTerms,
       deliveryTime,
-      createdAt: existingOrder?.createdAt || new Date().toISOString().split('T')[0],
+      createdAt: existingOrder?.createdAt || getTodayIsoDate(),
       dueDate: deliveryDate,
       osType: 'EQUIPMENT'
     };
@@ -487,8 +488,8 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                       equipmentSerialNumber: serial,
                       status: OrderStatus.IN_PROGRESS,
                       items, totalAmount, signature: canvasRef.current?.toDataURL(), descriptionBlocks, paymentTerms, deliveryTime,
-                      createdAt: new Date().toISOString(),
-                      dueDate: deliveryDate || new Date().toISOString(),
+                      createdAt: getTodayIsoDate(),
+                      dueDate: deliveryDate || getTodayIsoDate(),
                       osType: 'EQUIPMENT'
                     })} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-600 p-4 rounded-2xl font-black uppercase text-[10px] flex items-center justify-center gap-2 transition-all col-span-2"><Printer className="w-4 h-4" /> Visualizar Documento</button>
                   </div>

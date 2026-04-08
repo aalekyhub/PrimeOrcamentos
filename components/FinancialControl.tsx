@@ -4,6 +4,7 @@ import { Wallet, ArrowUpRight, ArrowDownLeft, Plus, Calendar, Tag, Trash2, Paper
 import { Transaction, UserAccount, RecurrenceFrequency, Loan } from '../types';
 import { useNotify } from './ToastProvider';
 import { db } from '../services/db';
+import { getTodayIsoDate } from '../services/dateService';
 
 interface Props {
   transactions: Transaction[];
@@ -21,7 +22,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
   const isAdmin = currentUser.role === 'admin';
   const [formData, setFormData] = useState<Partial<Transaction>>({
     type: 'RECEITA',
-    date: new Date().toISOString().split('T')[0],
+    date: getTodayIsoDate(),
     isRecurring: false,
     frequency: 'NONE'
   });
@@ -31,7 +32,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
     totalAmount: 0,
     installmentsCount: 1,
     installmentValue: 0,
-    startDate: new Date().toISOString().split('T')[0]
+    startDate: getTodayIsoDate()
   });
 
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
@@ -57,7 +58,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
     }
   };
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = getTodayIsoDate();
   const realizedTransactions = transactions.filter(t => t.date <= today);
 
   const totalIncome = realizedTransactions.filter(t => t.type === 'RECEITA' || t.type === 'EMPRESTIMO_SOCIO').reduce((s, t) => s + t.amount, 0);
@@ -79,7 +80,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
       id: editingId || `T-${Date.now()}`,
       amount: Number(formData.amount),
       category: formData.category || 'Geral',
-      date: formData.date || new Date().toISOString().split('T')[0],
+      date: formData.date || getTodayIsoDate(),
       type: formData.type as 'RECEITA' | 'DESPESA' | 'EMPRESTIMO_SOCIO',
       description: formData.description || '',
       isRecurring: formData.isRecurring,
@@ -98,7 +99,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
     setTransactions(newList);
     setShowForm(false);
     setEditingId(null);
-    setFormData({ type: 'RECEITA', date: new Date().toISOString().split('T')[0], isRecurring: false, frequency: 'NONE' });
+    setFormData({ type: 'RECEITA', date: getTodayIsoDate(), isRecurring: false, frequency: 'NONE' });
 
     const result = await db.save('serviflow_transactions', newList, newT);
     if (result?.success) notify(editingId ? "Transação atualizada!" : "Transação lançada!");
@@ -124,7 +125,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
     const newList = [newLoan, ...loans];
     setLoans(newList);
     setShowForm(false);
-    setLoanFormData({ bankName: '', totalAmount: 0, installmentsCount: 1, installmentValue: 0, startDate: new Date().toISOString().split('T')[0] });
+    setLoanFormData({ bankName: '', totalAmount: 0, installmentsCount: 1, installmentValue: 0, startDate: getTodayIsoDate() });
 
     const result = await db.save('serviflow_loans', newList, newLoan);
     if (result?.success) notify("Empréstimo registrado!");
@@ -169,12 +170,12 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
             onClick={() => {
               if (showForm && editingId) {
                 setEditingId(null);
-                setFormData({ type: 'RECEITA', date: new Date().toISOString().split('T')[0], isRecurring: false, frequency: 'NONE' });
+                setFormData({ type: 'RECEITA', date: getTodayIsoDate(), isRecurring: false, frequency: 'NONE' });
               } else {
                 setShowForm(!showForm);
                 if (!showForm) {
                   setEditingId(null);
-                  setFormData({ type: 'RECEITA', date: new Date().toISOString().split('T')[0], isRecurring: false, frequency: 'NONE' });
+                  setFormData({ type: 'RECEITA', date: getTodayIsoDate(), isRecurring: false, frequency: 'NONE' });
                 }
               }
             }}
@@ -629,7 +630,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
                         id: `T-LOAN-${Date.now()}`,
                         amount: loan.installmentValue,
                         category: `Parcela: ${loan.bankName}`,
-                        date: new Date().toISOString().split('T')[0],
+                        date: getTodayIsoDate(),
                         type: 'DESPESA',
                         description: `Pagamento de parcela ${loan.installmentsPaid + 1}/${loan.installmentsCount}`
                       };

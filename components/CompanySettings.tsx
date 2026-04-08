@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { CompanyProfile, MeasurementUnit, UserAccount } from '../types';
 import { db } from '../services/db';
+import { getTodayIsoDate } from '../services/dateService';
 import { useNotify } from './ToastProvider';
 
 interface Props {
@@ -68,7 +69,7 @@ const CompanySettings: React.FC<Props> = ({ company, setCompany, currentUser }) 
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `backup_primeservicos_${new Date().toISOString().split('T')[0]}.json`;
+      link.download = `backup_primeservicos_${getTodayIsoDate()}.json`;
       link.click();
       notify("Backup gerado com sucesso!");
     } catch (err) {
