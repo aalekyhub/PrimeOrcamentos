@@ -831,6 +831,7 @@ const AppContent: React.FC = () => {
                       setAccounts={setFinancialAccounts}
                       categories={financialCategories}
                       setCategories={setFinancialCategories}
+                      company={company}
                       currentUser={currentUser}
                     />
                   )}
