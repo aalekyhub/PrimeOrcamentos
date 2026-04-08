@@ -47,7 +47,6 @@ import {
   CatalogService,
   CompanyProfile,
   UserAccount,
-  Loan,
 } from './types';
 
 import { db, initPromise, startRealtimeSync, stopRealtimeSync } from './services/db';
@@ -61,7 +60,6 @@ const STORAGE_KEYS = {
   ORDERS: 'serviflow_orders',
   TRANSACTIONS: 'serviflow_transactions',
   USERS: 'serviflow_users',
-  LOANS: 'serviflow_loans',
   SESSION: 'serviflow_session',
   DARK_MODE: 'serviflow_dark_mode',
 } as const;
@@ -155,9 +153,6 @@ const AppContent: React.FC = () => {
   const [company, setCompany] = useState<CompanyProfile>(() =>
     db.load(STORAGE_KEYS.COMPANY, INITIAL_COMPANY)
   );
-  const [loans, setLoans] = useState<Loan[]>(() =>
-    db.load(STORAGE_KEYS.LOANS, [])
-  );
   const [prefilledBudgetData, setPrefilledBudgetData] = useState<any>(null);
 
   const openTab = useCallback((tabId: TabId) => {
@@ -230,11 +225,6 @@ const AppContent: React.FC = () => {
           await db.saveLocal(STORAGE_KEYS.USERS, cloudData.users);
         }
 
-        if (Array.isArray(cloudData.loans)) {
-          setLoans(cloudData.loans);
-          await db.saveLocal(STORAGE_KEYS.LOANS, cloudData.loans);
-        }
-
         if (Array.isArray(cloudData.company) && cloudData.company.length > 0) {
           setCompany(cloudData.company[0]);
           await db.saveLocal(STORAGE_KEYS.COMPANY, cloudData.company[0]);
@@ -280,7 +270,6 @@ const AppContent: React.FC = () => {
             setOrders(db.load(STORAGE_KEYS.ORDERS, []));
             setTransactions(db.load(STORAGE_KEYS.TRANSACTIONS, []));
             setUsers(db.load(STORAGE_KEYS.USERS, INITIAL_USERS));
-            setLoans(db.load(STORAGE_KEYS.LOANS, []));
             setCompany(db.load(STORAGE_KEYS.COMPANY, INITIAL_COMPANY));
         };
 
@@ -782,8 +771,6 @@ const AppContent: React.FC = () => {
                     <FinancialControl
                       transactions={transactions}
                       setTransactions={setTransactions}
-                      loans={loans}
-                      setLoans={setLoans}
                       currentUser={currentUser}
                     />
                   )}

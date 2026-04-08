@@ -42,7 +42,6 @@ const TOMBSTONE_KEYS = new Set([
   'serviflow_works',
   'serviflow_customers',
   'serviflow_transactions',
-  'serviflow_loans',
 ]);
 
 const CLOUD_TABLES = [
@@ -51,7 +50,6 @@ const CLOUD_TABLES = [
   'orders',
   'transactions',
   'users',
-  'loans',
   'company',
   'plans',
   'plan_services',
@@ -664,7 +662,6 @@ export const db = {
       'serviflow_catalog',
       'serviflow_orders',
       'serviflow_transactions',
-      'serviflow_loans',
       'serviflow_users',
       'serviflow_company',
       'serviflow_plans',

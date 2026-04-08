@@ -140,18 +140,7 @@ export interface Transaction {
   attachmentName?: string;
 }
 
-export interface Loan {
-  id: string;
-  bankName: string;
-  totalAmount: number;
-  remainingAmount: number;
-  startDate: string;
-  installmentsCount: number;
-  installmentsPaid: number;
-  installmentValue: number;
-  interestRate?: number;
-  description: string;
-}
+
 
 // --- NEW MODULE: Work Planning ---
 

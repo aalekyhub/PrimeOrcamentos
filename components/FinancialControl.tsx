@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Wallet, ArrowUpRight, ArrowDownLeft, Plus, Calendar, Tag, Trash2, Paperclip, ChevronLeft, ChevronRight, Download, Eye, FileText, Pencil } from 'lucide-react';
-import { Transaction, UserAccount, RecurrenceFrequency, Loan } from '../types';
+import { Transaction, UserAccount, RecurrenceFrequency } from '../types';
 import { useNotify } from './ToastProvider';
 import { db } from '../services/db';
 import { getTodayIsoDate } from '../services/dateService';
@@ -9,14 +9,12 @@ import { getTodayIsoDate } from '../services/dateService';
 interface Props {
   transactions: Transaction[];
   setTransactions: React.Dispatch<React.SetStateAction<Transaction[]>>;
-  loans: Loan[];
-  setLoans: React.Dispatch<React.SetStateAction<Loan[]>>;
   currentUser: UserAccount;
 }
 
 const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loans, setLoans, currentUser }) => {
   const [showForm, setShowForm] = useState(false);
-  const [activeSubTab, setActiveSubTab] = useState<'geral' | 'recorrencia' | 'emprestimos' | 'historico'>('geral');
+  const [activeSubTab, setActiveSubTab] = useState<'geral' | 'historico'>('geral');
   const [editingId, setEditingId] = useState<string | null>(null);
   const { notify } = useNotify();
   const isAdmin = currentUser.role === 'admin';
@@ -27,13 +25,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
     frequency: 'NONE'
   });
 
-  const [loanFormData, setLoanFormData] = useState<Partial<Loan>>({
-    bankName: '',
-    totalAmount: 0,
-    installmentsCount: 1,
-    installmentValue: 0,
-    startDate: getTodayIsoDate()
-  });
+
 
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -105,31 +97,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
     if (result?.success) notify(editingId ? "Transação atualizada!" : "Transação lançada!");
   };
 
-  const handleAddLoan = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!loanFormData.bankName || !loanFormData.totalAmount || !loanFormData.installmentValue) return;
 
-    const newLoan: Loan = {
-      id: `LOAN-${Date.now()}`,
-      bankName: loanFormData.bankName!,
-      totalAmount: Number(loanFormData.totalAmount),
-      remainingAmount: Number(loanFormData.totalAmount),
-      startDate: loanFormData.startDate!,
-      installmentsCount: Number(loanFormData.installmentsCount),
-      installmentsPaid: 0,
-      installmentValue: Number(loanFormData.installmentValue),
-      interestRate: Number(loanFormData.interestRate || 0),
-      description: loanFormData.description || ''
-    };
-
-    const newList = [newLoan, ...loans];
-    setLoans(newList);
-    setShowForm(false);
-    setLoanFormData({ bankName: '', totalAmount: 0, installmentsCount: 1, installmentValue: 0, startDate: getTodayIsoDate() });
-
-    const result = await db.save('serviflow_loans', newList, newLoan);
-    if (result?.success) notify("Empréstimo registrado!");
-  };
 
   const removeTransaction = async (id: string) => {
     if (!isAdmin) {
@@ -152,11 +120,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
     .filter(t => t.isRecurring)
     .reduce((s, t) => s + t.amount, 0);
 
-  const loanInstallmentsTotal = loans
-    .filter(l => l.installmentsPaid < l.installmentsCount)
-    .reduce((s, l) => s + l.installmentValue, 0);
-
-  const projectedExpenses = totalExpense + recurringTotal + loanInstallmentsTotal;
+  const projectedExpenses = totalExpense + recurringTotal;
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -189,8 +153,6 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
       <div className="flex bg-slate-100 dark:bg-slate-800/50 p-1.5 rounded-[1.5rem] self-start mb-8 gap-2 overflow-x-auto no-scrollbar">
         {[
           { id: 'geral', label: 'LANÇAMENTOS' },
-          { id: 'recorrencia', label: 'MENSAL/RECORRENTE' },
-          { id: 'emprestimos', label: 'EMPRÉSTIMOS' },
           { id: 'historico', label: 'HISTÓRICO' }
         ].map((tab) => (
           <button
@@ -231,7 +193,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
             <Calendar className="w-4 h-4 text-white group-hover:rotate-12 transition-transform" />
           </div>
           <h3 className="text-2xl font-black text-white whitespace-nowrap">R$ {projectedExpenses.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
-          <p className="text-[9px] text-blue-200 mt-1 font-bold">Gastos atuais + Recorrência + Empréstimos</p>
+          <p className="text-[9px] text-blue-200 mt-1 font-bold">Gastos atuais + Recorrência</p>
         </div>
       </div>
 
@@ -441,51 +403,9 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
           </div>
         </div>
       ) : showForm ? (
-        activeSubTab === 'emprestimos' ? (
-          <form onSubmit={handleAddLoan} className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border-2 border-blue-100 dark:border-blue-900 shadow-xl space-y-6 animate-in slide-in-from-top-4 duration-300">
-            <h4 className="font-bold text-slate-800 dark:text-white text-sm border-b dark:border-slate-700 pb-4">Registrar Novo Empréstimo</h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Instituição / Banco</label>
-                <input type="text" className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-900 dark:text-white"
-                  required value={loanFormData.bankName} onChange={e => setLoanFormData({ ...loanFormData, bankName: e.target.value })} />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1">Valor Total (R$)</label>
-                <input type="number" step="0.01" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold"
-                  required value={loanFormData.totalAmount || ''} onChange={e => setLoanFormData({ ...loanFormData, totalAmount: Number(e.target.value) })} />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1">Valor da Parcela (R$)</label>
-                <input type="number" step="0.01" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold"
-                  required value={loanFormData.installmentValue || ''} onChange={e => setLoanFormData({ ...loanFormData, installmentValue: Number(e.target.value) })} />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1">Total de Parcelas</label>
-                <input type="number" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold"
-                  required value={loanFormData.installmentsCount} onChange={e => setLoanFormData({ ...loanFormData, installmentsCount: Number(e.target.value) })} />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1">Data de Início</label>
-                <input type="date" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold"
-                  required value={loanFormData.startDate} onChange={e => setLoanFormData({ ...loanFormData, startDate: e.target.value })} />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1">Taxa de Juros Mensal (%)</label>
-                <input type="number" step="0.01" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold"
-                  value={loanFormData.interestRate || ''} onChange={e => setLoanFormData({ ...loanFormData, interestRate: Number(e.target.value) })} />
-              </div>
-            </div>
-            <div className="flex justify-end pt-2">
-              <button type="submit" className="bg-blue-600 text-white px-10 py-3.5 rounded-xl text-sm font-bold shadow-lg hover:bg-blue-700 transition-all font-bold uppercase tracking-widest">
-                Registrar Compromisso
-              </button>
-            </div>
-          </form>
-        ) : (
-          <form onSubmit={handleAdd} className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border-2 border-blue-100 dark:border-blue-900 shadow-xl space-y-6 animate-in slide-in-from-top-4 duration-300">
+        <form onSubmit={handleAdd} className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border-2 border-blue-100 dark:border-blue-900 shadow-xl space-y-6 animate-in slide-in-from-top-4 duration-300">
             <h4 className="font-bold text-slate-800 dark:text-white text-sm border-b dark:border-slate-700 pb-4 uppercase tracking-widest">
-              {editingId ? 'Editar Lançamento' : (activeSubTab === 'recorrencia' ? 'Novo Item Recorrente (Fixo)' : 'Lançamento Único')}
+              {editingId ? 'Editar Lançamento' : 'Novo Lançamento'}
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div>
@@ -565,91 +485,6 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
               </button>
             </div>
           </form>
-        )
-      ) : activeSubTab === 'emprestimos' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {loans.map(loan => (
-            <div key={loan.id} className="bg-white dark:bg-slate-800 p-6 rounded-[2rem] border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-              <div className="flex justify-between items-start">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center font-black">
-                    $
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-black text-slate-900 dark:text-white">{loan.bankName}</h4>
-                    <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">{loan.startDate}</p>
-                  </div>
-                </div>
-                <button onClick={async () => {
-                  if (confirm("Remover este compromisso financeiro?")) {
-                    setLoans(loans.filter(l => l.id !== loan.id));
-                    await db.remove('serviflow_loans', loan.id);
-                  }
-                }} className="p-2 text-slate-300 hover:text-rose-500 transition-colors">
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex justify-between text-xs">
-                  <span className="text-slate-500 font-bold">Total Financiado</span>
-                  <span className="text-slate-900 font-black whitespace-nowrap">R$ {loan.totalAmount.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between text-xs">
-                  <span className="text-slate-500 font-bold">Valor Mensal</span>
-                  <span className="text-blue-600 font-black whitespace-nowrap">R$ {loan.installmentValue.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between text-xs">
-                  <span className="text-slate-500 font-bold">Parcelas</span>
-                  <span className="text-slate-900 font-black">{loan.installmentsPaid} / {loan.installmentsCount}</span>
-                </div>
-              </div>
-
-              <div className="pt-4 flex gap-2">
-                <button
-                  onClick={async () => {
-                    if (loan.installmentsPaid >= loan.installmentsCount) {
-                      notify("Todas as parcelas já foram pagas!", "info");
-                      return;
-                    }
-                    if (confirm(`Confirmar pagamento da parcela de R$ ${loan.installmentValue.toLocaleString()}?`)) {
-                      const updatedLoans = loans.map(l => {
-                        if (l.id === loan.id) {
-                          return {
-                            ...l,
-                            installmentsPaid: l.installmentsPaid + 1,
-                            remainingAmount: l.remainingAmount - l.installmentValue
-                          };
-                        }
-                        return l;
-                      });
-                      setLoans(updatedLoans);
-                      await db.save('serviflow_loans', updatedLoans);
-
-                      const newT: Transaction = {
-                        id: `T-LOAN-${Date.now()}`,
-                        amount: loan.installmentValue,
-                        category: `Parcela: ${loan.bankName}`,
-                        date: getTodayIsoDate(),
-                        type: 'DESPESA',
-                        description: `Pagamento de parcela ${loan.installmentsPaid + 1}/${loan.installmentsCount}`
-                      };
-                      const updatedTransactions = [newT, ...transactions];
-                      setTransactions(updatedTransactions);
-                      await db.save('serviflow_transactions', updatedTransactions);
-
-                      notify("Parcela baixada com sucesso!");
-                    }
-                  }}
-                  className="flex-1 bg-blue-50 text-blue-600 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all font-bold"
-                >
-                  Baixar Parcela
-                </button>
-              </div>
-            </div>
-          ))}
-          {loans.length === 0 && <p className="col-span-full text-center py-20 text-slate-400 font-bold italic">Nenhum empréstimo ou financiamento ativo.</p>}
-        </div>
       ) : null}
     </div>
   );
