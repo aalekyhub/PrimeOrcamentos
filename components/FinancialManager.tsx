@@ -729,9 +729,15 @@ const FinancialManager: React.FC<Props> = ({
       ) : activeTab === 'provisionado' ? (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="p-6 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
+            <div 
+              onClick={() => {
+                setFormData({ ...initialFormData, type: 'PAGAR' as any });
+                setShowEntryForm(true);
+              }}
+              className="p-6 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all group"
+            >
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center text-rose-500">
+                <div className="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center text-rose-500 group-hover:rotate-12 transition-transform">
                   <ArrowDownLeft className="w-5 h-5" />
                 </div>
                 <div>
@@ -740,9 +746,15 @@ const FinancialManager: React.FC<Props> = ({
                 </div>
               </div>
             </div>
-            <div className="p-6 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
+            <div 
+              onClick={() => {
+                setFormData({ ...initialFormData, type: 'RECEITA' as any });
+                setShowEntryForm(true);
+              }}
+              className="p-6 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all group"
+            >
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-500">
+                <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-500 group-hover:rotate-12 transition-transform">
                   <ArrowUpRight className="w-5 h-5" />
                 </div>
                 <div>
@@ -751,9 +763,16 @@ const FinancialManager: React.FC<Props> = ({
                 </div>
               </div>
             </div>
-            <div className="p-6 bg-white dark:bg-slate-800 rounded-3xl border border-indigo-100 shadow-sm">
+            <div 
+              onClick={() => {
+                const aporteCat = categories.find(c => isAporte(c.name))?.name || 'Aporte de Sócios';
+                setFormData({ ...initialFormData, type: 'INVESTIMENTO' as any, category: aporteCat });
+                setShowEntryForm(true);
+              }}
+              className="p-6 bg-white dark:bg-slate-800 rounded-3xl border border-indigo-100 shadow-sm cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all group"
+            >
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-500">
+                <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-500 group-hover:rotate-12 transition-transform">
                   <Coins className="w-5 h-5" />
                 </div>
                 <div>
