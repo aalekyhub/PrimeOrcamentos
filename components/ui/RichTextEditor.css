@@ -329,7 +329,6 @@
 .ql-editor h2,
 .ql-editor h3,
 .ql-editor h4 {
-    font-weight: 800 !important;
     color: #0f172a !important;
     margin-top: 15px !important;
     margin-bottom: 5px !important;
