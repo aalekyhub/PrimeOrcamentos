@@ -243,11 +243,11 @@ const FinancialManager: React.FC<Props> = ({
               {/* Summary Cards Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* A Receber Card */}
-                <div className="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group">
+                <div className="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group">
                   <div className="flex items-start justify-between relative z-10">
                     <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Faturamento a Receber</p>
-                      <h4 className="text-3xl font-black text-blue-600">
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Faturamento a Receber</p>
+                      <h4 className="text-2xl font-black text-blue-600">
                         R$ {accountEntries.filter(e => e.type === 'RECEBER' && !isAporte(e.category) && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </h4>
                     </div>
@@ -272,19 +272,19 @@ const FinancialManager: React.FC<Props> = ({
                 </div>
 
                 {/* A Pagar Card */}
-                <div className="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm group">
+                <div className="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm group">
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Contas a Pagar</p>
-                      <h4 className="text-3xl font-black text-rose-600">
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Contas a Pagar</p>
+                      <h4 className="text-2xl font-black text-rose-600">
                         R$ {accountEntries.filter(e => e.type === 'PAGAR' && !isAporte(e.category) && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </h4>
                     </div>
-                    <div className="p-3 bg-rose-50 dark:bg-rose-900/30 text-rose-600 rounded-2xl group-hover:scale-110 transition-transform">
-                      <ArrowDownLeft className="w-6 h-6" />
+                    <div className="p-2.5 bg-rose-50 dark:bg-rose-900/30 text-rose-600 rounded-xl group-hover:scale-110 transition-transform">
+                      <ArrowDownLeft className="w-5 h-5" />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4 mt-6 pt-4 border-t border-slate-50 dark:border-slate-700/50">
+                  <div className="grid grid-cols-2 gap-4 mt-4 pt-3 border-t border-slate-50 dark:border-slate-700/50">
                     <div>
                       <p className="text-[9px] font-bold text-slate-400 uppercase">Vence hoje</p>
                       <p className="text-sm font-black text-slate-700 dark:text-slate-200">
@@ -301,19 +301,19 @@ const FinancialManager: React.FC<Props> = ({
                 </div>
 
                 {/* Investimentos / Aportes Card */}
-                <div className="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border-2 border-indigo-100 dark:border-indigo-900 shadow-sm relative overflow-hidden group">
+                <div className="bg-white dark:bg-slate-800 p-5 rounded-3xl border-2 border-indigo-100 dark:border-indigo-900 shadow-sm relative overflow-hidden group">
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-1">Total em Aportes</p>
-                      <h4 className="text-3xl font-black text-indigo-600">
+                      <p className="text-[9px] font-black text-indigo-500 uppercase tracking-widest mb-1">Total em Aportes</p>
+                      <h4 className="text-2xl font-black text-indigo-600">
                         R$ {accountEntries.filter(e => (e.type === 'INVESTIMENTO' || isAporte(e.category)) && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </h4>
                     </div>
-                    <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 rounded-2xl group-hover:rotate-12 transition-transform">
-                      <Coins className="w-6 h-6" />
+                    <div className="p-2.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 rounded-xl group-hover:rotate-12 transition-transform">
+                      <Coins className="w-5 h-5" />
                     </div>
                   </div>
-                  <div className="mt-6 pt-4 border-t border-slate-50 dark:border-slate-700/50">
+                  <div className="mt-4 pt-3 border-t border-slate-50 dark:border-slate-700/50">
                     <p className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-2">
                        <CheckCircle2 className="w-3 h-3" /> Capital de Investimento
                     </p>
@@ -321,32 +321,32 @@ const FinancialManager: React.FC<Props> = ({
                 </div>
 
                 {/* Entradas Mensais (KPI) */}
-                <div className="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Entradas (Mês Atual)</p>
+                <div className="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Entradas (Mês Atual)</p>
                   <div className="flex items-center gap-4">
-                    <h4 className="text-3xl font-black text-slate-900 dark:text-white">
+                    <h4 className="text-2xl font-black text-slate-900 dark:text-white">
                       R$ {transactions.filter(t => t.type === 'RECEITA' && t.date.startsWith(getTodayIsoDate().substring(0, 7))).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR')}
                     </h4>
-                    <span className="px-2 py-0.5 bg-emerald-100 text-emerald-600 text-[10px] font-black rounded-lg">+ { (Math.random() * 20).toFixed(1) }%</span>
+                    <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-600 text-[9px] font-black rounded-lg">+ { (Math.random() * 20).toFixed(1) }%</span>
                   </div>
                 </div>
 
                 {/* Saídas Mensais (KPI) */}
-                <div className="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Saídas (Mês Atual)</p>
+                <div className="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Saídas (Mês Atual)</p>
                   <div className="flex items-center gap-4">
-                    <h4 className="text-3xl font-black text-slate-900 dark:text-white">
+                    <h4 className="text-2xl font-black text-slate-900 dark:text-white">
                       - R$ {transactions.filter(t => t.type === 'DESPESA' && t.date.startsWith(getTodayIsoDate().substring(0, 7))).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR')}
                     </h4>
-                    <span className="px-2 py-0.5 bg-rose-100 text-rose-600 text-[10px] font-black rounded-lg">- { (Math.random() * 15).toFixed(1) }%</span>
+                    <span className="px-1.5 py-0.5 bg-rose-100 text-rose-600 text-[9px] font-black rounded-lg">- { (Math.random() * 15).toFixed(1) }%</span>
                   </div>
                 </div>
               </div>
 
               {/* Fluxo Mensal Chart */}
-              <div className="bg-white dark:bg-slate-800 p-8 rounded-[3rem] border border-slate-200 dark:border-slate-700 shadow-sm">
-                <h4 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-8">Fluxo de Caixa Mensal ({selectedYear})</h4>
-                <div className="h-[300px] w-full">
+              <div className="bg-white dark:bg-slate-800 p-6 rounded-[2rem] border border-slate-200 dark:border-slate-700 shadow-sm">
+                <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Fluxo de Caixa Mensal ({selectedYear})</h4>
+                <div className="h-[250px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={[
@@ -387,34 +387,34 @@ const FinancialManager: React.FC<Props> = ({
             </div>
 
             {/* Side Panel: Banks & Top Expenses */}
-            <div className="lg:w-96 space-y-8">
+            <div className="lg:w-80 space-y-6">
               {/* Saldo em Bancos Sidebar */}
-              <div className="bg-slate-900 p-8 rounded-[2.5rem] text-white shadow-2xl">
-                <div className="flex items-center justify-between mb-6">
-                  <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Saldo em Bancos</h4>
-                  <div className="w-8 h-8 bg-white/10 rounded-xl flex items-center justify-center">
-                    <DollarSign className="w-4 h-4" />
+              <div className="bg-slate-900 p-6 rounded-3xl text-white shadow-2xl">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Saldo em Bancos</h4>
+                  <div className="w-7 h-7 bg-white/10 rounded-lg flex items-center justify-center">
+                    <DollarSign className="w-3.5 h-3.5" />
                   </div>
                 </div>
-                <div className="mb-8">
-                  <p className="text-4xl font-black">R$ {accounts.reduce((a,c)=>a+c.currentBalance, 0).toLocaleString('pt-BR')}</p>
-                  <p className="text-[10px] text-emerald-400 font-bold mt-1 uppercase">Saldo Consolidado Hoje</p>
+                <div className="mb-6">
+                  <p className="text-3xl font-black">R$ {accounts.reduce((a,c)=>a+c.currentBalance, 0).toLocaleString('pt-BR')}</p>
+                  <p className="text-[9px] text-emerald-400 font-bold mt-0.5 uppercase">Saldo Consolidado</p>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {accounts.map(acc => (
-                    <div key={acc.id} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-all cursor-pointer">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-blue-500/20 text-blue-400 rounded-lg flex items-center justify-center font-black text-[10px]">
+                    <div key={acc.id} className="flex items-center justify-between p-3.5 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-all cursor-pointer">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 bg-blue-500/20 text-blue-400 rounded-lg flex items-center justify-center font-black text-[9px]">
                           {acc.name.substring(0, 2).toUpperCase()}
                         </div>
-                        <span className="text-xs font-bold uppercase">{acc.name}</span>
+                        <span className="text-[11px] font-bold uppercase">{acc.name}</span>
                       </div>
-                      <span className="text-xs font-black">R$ {acc.currentBalance.toLocaleString('pt-BR')}</span>
+                      <span className="text-[11px] font-black">R$ {acc.currentBalance.toLocaleString('pt-BR')}</span>
                     </div>
                   ))}
                   <button 
                     onClick={() => setActiveTab('config')}
-                    className="w-full py-3 border border-white/10 rounded-xl text-[10px] font-black text-slate-400 hover:text-white hover:bg-white/5 transition-all uppercase"
+                    className="w-full py-2.5 border border-white/10 rounded-xl text-[9px] font-black text-slate-400 hover:text-white hover:bg-white/5 transition-all uppercase"
                   >
                     Gerenciar Contas
                   </button>
@@ -422,8 +422,8 @@ const FinancialManager: React.FC<Props> = ({
               </div>
 
               {/* Top Expenses */}
-              <div className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm">
-                 <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">Maiores Despesas</h4>
+              <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                 <h4 className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-5">Maiores Despesas</h4>
                  <div className="space-y-4">
                     {categories.filter(c => c.type === 'DESPESA')
                       .map(cat => ({
