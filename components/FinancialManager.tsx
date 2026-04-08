@@ -87,6 +87,8 @@ const FinancialManager: React.FC<Props> = ({
   const { notify } = useNotify();
   const isAdmin = currentUser.role === 'admin';
 
+  const isAporte = (category: string) => category.toLowerCase().includes('aporte');
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, isEditing = false) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -137,12 +139,10 @@ const FinancialManager: React.FC<Props> = ({
     if (!editingItem) return;
 
     if ('dueDate' in editingItem) {
-      // It's an AccountEntry
       const newList = accountEntries.map(e => e.id === editingItem.id ? (editingItem as AccountEntry) : e);
       setAccountEntries(newList);
       await db.save('serviflow_account_entries', newList, editingItem as AccountEntry);
     } else {
-      // It's a Transaction
       const newList = transactions.map(t => t.id === editingItem.id ? (editingItem as Transaction) : t);
       setTransactions(newList);
       await db.save('serviflow_transactions', newList, editingItem as Transaction);
@@ -168,8 +168,6 @@ const FinancialManager: React.FC<Props> = ({
     const matchesType = entryTypeFilter === 'ALL' || entry.type === entryTypeFilter;
     return matchesSearch && matchesType;
   });
-
-  const isAporte = (category: string) => category.toLowerCase().includes('aporte');
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
@@ -345,14 +343,14 @@ const FinancialManager: React.FC<Props> = ({
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
               <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-2">Saldo Realizado</p>
-              <h3 className="text-2xl font-black text-slate-900 dark:text-white">R$ {(transactions.filter(t => t.type === 'RECEITA' || t.type === 'EMPRESTIMO_SOCIO').reduce((a,c)=>a+c.amount,0) - transactions.filter(t=>t.type==='DESPESA').reduce((a,c)=>a+c.amount,0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+              <h3 className="text-2xl font-black text-slate-900 dark:text-white">R$ {(transactions.filter(t => t.type === 'RECEITA' || t.category.toLowerCase().includes('aporte')).reduce((a,c)=>a+c.amount,0) - transactions.filter(t=>t.type==='DESPESA').reduce((a,c)=>a+c.amount,0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
             </div>
             <div className="bg-emerald-50 dark:bg-emerald-900/20 p-6 rounded-3xl border border-emerald-100 dark:border-emerald-900/30 shadow-sm">
-              <p className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.2em] mb-2">Entradas Realizadas</p>
-              <h3 className="text-2xl font-black text-emerald-700 dark:text-emerald-400">R$ {transactions.filter(t => t.type === 'RECEITA' || t.type === 'EMPRESTIMO_SOCIO').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+              <p className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.2em] mb-2">Receitas (Vendas)</p>
+              <h3 className="text-2xl font-black text-emerald-700 dark:text-emerald-400">R$ {transactions.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
             </div>
             <div className="bg-rose-50 dark:bg-rose-900/20 p-6 rounded-3xl border border-rose-100 dark:border-rose-900/30 shadow-sm">
-              <p className="text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-[0.2em] mb-2">Saídas Realizadas</p>
+              <p className="text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-[0.2em] mb-2">Despesas (Saídas)</p>
               <h3 className="text-2xl font-black text-rose-700 dark:text-rose-400">R$ {transactions.filter(t=>t.type==='DESPESA').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
             </div>
             <div className="flex flex-col gap-2">
@@ -370,6 +368,12 @@ const FinancialManager: React.FC<Props> = ({
           </div>
           
           <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
+              <div className="divide-y divide-slate-100 dark:divide-slate-700">
+                {transactions.length === 0 ? (
+                  <div className="py-20 text-center opacity-40">
+                    <Wallet className="w-12 h-12 mx-auto mb-4" />
+                    <p className="text-xs font-black uppercase tracking-widest text-slate-400">Nenhuma transação financeira registrada.</p>
+                  </div>
                 ) : (
                   transactions.map(t => {
                     const isContribution = isAporte(t.category);
@@ -380,13 +384,13 @@ const FinancialManager: React.FC<Props> = ({
                             isContribution ? 'bg-indigo-50 text-indigo-500' :
                             t.type === 'DESPESA' ? 'bg-rose-50 text-rose-500' : 'bg-emerald-50 text-emerald-500'
                           }`}>
-                            {isContribution ? <TrendingUp className="w-5 h-5" /> : 
+                            {isContribution ? <Coins className="w-5 h-5" /> : 
                              t.type === 'DESPESA' ? <ArrowDownLeft className="w-5 h-5" /> : <ArrowUpRight className="w-5 h-5" />}
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
                               <p className="text-sm font-black text-slate-900 dark:text-white uppercase leading-none">{t.description}</p>
-                              {isContribution && <span className="bg-indigo-600 text-[8px] text-white px-1.5 py-0.5 rounded font-black uppercase tracking-widest">Aporte de Capital</span>}
+                              {isContribution && <span className="bg-indigo-600 text-[8px] text-white px-1.5 py-0.5 rounded font-black uppercase tracking-widest">Aporte / Investimento</span>}
                               {t.attachment && (
                                 <button 
                                   onClick={() => setViewingAttachment({ content: t.attachment!, name: t.attachmentName || 'Anexo' })}
@@ -418,7 +422,7 @@ const FinancialManager: React.FC<Props> = ({
                                  const newList = transactions.filter(item => item.id !== t.id);
                                  setTransactions(newList);
                                  await db.remove('serviflow_transactions', t.id);
-                                 notify("Transação excluída.");
+                                 notify("Transação removida.");
                                }}
                                className="p-2 text-slate-300 hover:text-rose-500 rounded-lg hover:bg-rose-50"
                              >
@@ -528,98 +532,83 @@ const FinancialManager: React.FC<Props> = ({
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-sm font-black text-slate-900 dark:text-white uppercase leading-none">{entry.description}</span>
-                        {entry.attachment && (
-                          <button 
-                            onClick={() => setViewingAttachment({ content: entry.attachment!, name: entry.attachmentName || 'Anexo' })}
-                            className="text-blue-400 hover:text-blue-600"
-                          >
-                            <Paperclip className="w-3.5 h-3.5" />
-                          </button>
-                        )}
+                          {entry.attachment && (
+                            <button 
+                              onClick={() => setViewingAttachment({ content: entry.attachment!, name: entry.attachmentName || 'Anexo' })}
+                              className="text-blue-400 hover:text-blue-600"
+                            >
+                              <Paperclip className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                           <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase border ${isContribution ? 'text-indigo-500 bg-indigo-50 border-indigo-100' : getStatusColor(entry.status)}`}>
                             {isContribution ? 'INVESTIMENTO' : entry.status}
                           </span>
                         </div>
-                      <div className="flex items-center gap-3 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                        <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> Venc. {entry.dueDate.split('-').reverse().join('/')}</span>
-                        <span className="flex items-center gap-1"><Tag className="w-3 h-3" /> {entry.category}</span>
-                        {(entry.customerName || entry.supplierName) && (
-                          <span className="text-blue-500 px-2 bg-blue-50 rounded">
-                            {entry.customerName || entry.supplierName}
-                          </span>
-                        )}
+                        <div className="flex items-center gap-3 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                          <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> Venc. {entry.dueDate.split('-').reverse().join('/')}</span>
+                          <span className="flex items-center gap-1"><Tag className="w-3 h-3" /> {entry.category}</span>
+                          {(entry.customerName || entry.supplierName) && (
+                            <span className="text-blue-500 px-2 bg-blue-50 rounded">
+                              {entry.customerName || entry.supplierName}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between md:justify-end gap-8">
+                      <div className="text-right">
+                        <p className={`text-xl font-black ${isContribution ? 'text-indigo-600' : entry.type === 'RECEBER' ? 'text-emerald-600' : 'text-rose-600'} leading-none`}>
+                          R$ {entry.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </p>
+                        <p className="text-[9px] text-slate-300 font-bold uppercase mt-1 tracking-tighter">{entry.id}</p>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                         {entry.status === 'PENDENTE' && (
+                           <button 
+                             onClick={async () => {
+                               if (!confirm('Deseja confirmar o pagamento/recebimento deste título?')) return;
+                               const updatedEntries = accountEntries.map(e => e.id === entry.id ? { ...e, status: 'PAGO' as any, paymentDate: getTodayIsoDate() } : e);
+                               setAccountEntries(updatedEntries);
+                               await db.save('serviflow_account_entries', updatedEntries);
+                               const newTransaction: Transaction = {
+                                 id: `TR-${Date.now()}`,
+                                 date: getTodayIsoDate(),
+                                 amount: entry.amount,
+                                 type: entry.type === 'RECEBER' ? 'RECEITA' : 'DESPESA',
+                                 category: entry.category,
+                                 description: `[BAIXA] ${entry.description}`,
+                                 entryId: entry.id
+                               };
+                               const newTransactions = [newTransaction, ...transactions];
+                               setTransactions(newTransactions);
+                               await db.save('serviflow_transactions', newTransactions, newTransaction);
+                               notify(`Lançamento liquidado com sucesso!`);
+                             }}
+                             className="p-2.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-xl transition-all"
+                             title="Dar Baixa (Receber/Pagar)"
+                           >
+                             <CheckCircle2 className="w-5 h-5" />
+                           </button>
+                         )}
+                         <button 
+                           onClick={async () => {
+                             if (!confirm('Deseja excluir este provisionamento?')) return;
+                             const newList = accountEntries.filter(e => e.id !== entry.id);
+                             setAccountEntries(newList);
+                             await db.remove('serviflow_account_entries', entry.id);
+                             notify("Provisionamento removido.");
+                           }}
+                           className="p-2.5 bg-slate-50 text-slate-300 hover:text-rose-500 rounded-xl transition-all"
+                         >
+                           <Trash2 className="w-5 h-5" />
+                         </button>
                       </div>
                     </div>
                   </div>
-
-                  <div className="flex items-center justify-between md:justify-end gap-8">
-                    <div className="text-right">
-                      <p className={`text-xl font-black ${isContribution ? 'text-indigo-600' : entry.type === 'RECEBER' ? 'text-emerald-600' : 'text-rose-600'} leading-none`}>
-                        R$ {entry.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </p>
-                      <p className="text-[9px] text-slate-300 font-bold uppercase mt-1 tracking-tighter">{entry.id}</p>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                       {entry.status === 'PENDENTE' && (
-                         <button 
-                           onClick={async () => {
-                             if (!confirm('Deseja confirmar o pagamento/recebimento deste título?')) return;
-                             
-                             // 1. Dar baixa no provisionado
-                             const updatedEntries = accountEntries.map(e => e.id === entry.id ? { ...e, status: 'PAGO' as any, paymentDate: getTodayIsoDate() } : e);
-                             setAccountEntries(updatedEntries);
-                             await db.save('serviflow_account_entries', updatedEntries);
-
-                             // 2. Gerar transação real no fluxo de caixa
-                             const newTransaction: Transaction = {
-                               id: `TR-${Date.now()}`,
-                               date: getTodayIsoDate(),
-                               amount: entry.amount,
-                               type: entry.type === 'RECEBER' ? 'RECEITA' : 'DESPESA',
-                               category: entry.category,
-                               description: `[BAIXA] ${entry.description}`,
-                               entryId: entry.id
-                             };
-
-                             const newTransactions = [newTransaction, ...transactions];
-                             setTransactions(newTransactions);
-                             await db.save('serviflow_transactions', newTransactions, newTransaction);
-                             
-                             notify(`Lançamento liquidado com sucesso!`);
-                           }}
-                           className="p-2.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-xl transition-all"
-                           title="Dar Baixa (Receber/Pagar)"
-                         >
-                           <CheckCircle2 className="w-5 h-5" />
-                         </button>
-                       )}
-                       <button 
-                         onClick={async () => {
-                           if (!confirm('Deseja excluir este provisionamento?')) return;
-                           const newList = accountEntries.filter(e => e.id !== entry.id);
-                           setAccountEntries(newList);
-                           await db.remove('serviflow_account_entries', entry.id);
-                           notify("Provisionamento removido.");
-                         }}
-                         className="p-2.5 bg-slate-50 text-slate-300 hover:text-rose-500 rounded-xl transition-all"
-                       >
-                         <Trash2 className="w-5 h-5" />
-                       </button>
-                    </div>
-                  </div>
-                </div>
                 );
               })}
-
-              {filteredEntries.length === 0 && (
-                <div className="py-20 text-center opacity-40">
-                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <AlertCircle className="w-8 h-8 text-slate-300" />
-                  </div>
-                  <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Nenhum lançamento encontrado para os filtros atuais</p>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -713,7 +702,6 @@ const FinancialManager: React.FC<Props> = ({
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          {/* Categorias Management */}
           <div className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm space-y-6">
             <div className="flex items-center justify-between">
               <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
@@ -762,30 +750,9 @@ const FinancialManager: React.FC<Props> = ({
                   </button>
                 </div>
               ))}
-              {categories.length === 0 && (
-                 <button 
-                  onClick={async () => {
-                    const defaults: FinancialCategory[] = [
-                      { id: 'CAT-001', name: 'Venda de Serviços', type: 'RECEITA' },
-                      { id: 'CAT-002', name: 'Aporte de Sócios', type: 'RECEITA' },
-                      { id: 'CAT-003', name: 'Materiais', type: 'DESPESA' },
-                      { id: 'CAT-004', name: 'Mão de Obra', type: 'DESPESA' },
-                      { id: 'CAT-005', name: 'Aluguel', type: 'DESPESA' },
-                      { id: 'CAT-006', name: 'Geral', type: 'DESPESA' },
-                    ];
-                    setCategories(defaults);
-                    await db.save('serviflow_financial_categories', defaults);
-                    notify("Categorias padrão carregadas!");
-                  }}
-                  className="w-full py-4 border-2 border-dashed border-slate-200 rounded-2xl text-xs font-black text-slate-400 hover:border-blue-300 hover:text-blue-500 transition-all uppercase"
-                >
-                  Carregar Categorias Padrão
-                </button>
-              )}
             </div>
           </div>
 
-          {/* Accounts Management */}
           <div className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm space-y-6">
             <div className="flex items-center justify-between">
               <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
@@ -841,15 +808,12 @@ const FinancialManager: React.FC<Props> = ({
                   </button>
                 </div>
               ))}
-              {accounts.length === 0 && (
-                <div className="text-center py-10 opacity-30 italic text-sm">Nenhuma conta cadastrada.</div>
-              )}
             </div>
           </div>
         </div>
       )}
 
-      {/* Viewer Modular */}
+      {/* Viewer Modal */}
       {viewingAttachment && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white dark:bg-slate-900 w-full max-w-4xl rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
@@ -882,7 +846,7 @@ const FinancialManager: React.FC<Props> = ({
         </div>
       )}
 
-      {/* Modal de Edição */}
+      {/* Edit Modal */}
       {editingItem && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-[2.5rem] p-8 shadow-2xl relative">
@@ -892,55 +856,45 @@ const FinancialManager: React.FC<Props> = ({
             <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-widest mb-8 flex items-center gap-3">
               <Pencil className="text-blue-500" /> Editar Lançamento
             </h3>
-            
             <form onSubmit={handleUpdateItem} className="space-y-6">
-               <div className="grid grid-cols-2 gap-4">
-                  <div className="col-span-2">
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Descrição</label>
-                    <input 
-                      className="w-full bg-slate-50 dark:bg-slate-900 p-4 border border-slate-100 dark:border-slate-700 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 font-bold"
-                      value={editingItem.description}
-                      onChange={e => setEditingItem({ ...editingItem, description: e.target.value })}
-                    />
-                  </div>
+               <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Valor (R$)</label>
+                    <label className="block text-xs font-black text-slate-400 uppercase mb-2">Valor (R$)</label>
                     <input 
-                      type="number"
+                      type="number" 
                       step="0.01"
-                      className="w-full bg-slate-50 dark:bg-slate-900 p-4 border border-slate-100 dark:border-slate-700 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                      className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 font-bold"
                       value={editingItem.amount}
-                      onChange={e => setEditingItem({ ...editingItem, amount: Number(e.target.value) })}
+                      onChange={e => setEditingItem({ ...editingItem, amount: Number(e.target.value) } as any)}
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Categoria</label>
+                    <label className="block text-xs font-black text-slate-400 uppercase mb-2">Categoria</label>
                     <select 
-                      className="w-full bg-slate-50 dark:bg-slate-900 p-4 border border-slate-100 dark:border-slate-700 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+                      className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 font-bold"
                       value={editingItem.category}
-                      onChange={e => setEditingItem({ ...editingItem, category: e.target.value })}
+                      onChange={e => setEditingItem({ ...editingItem, category: e.target.value } as any)}
                     >
-                      {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                      {categories.map(cat => <option key={cat.id} value={cat.name}>{cat.name}</option>)}
                     </select>
                   </div>
                </div>
-
-               <div className="flex gap-4">
-                  <div className="relative flex-1">
-                    <input 
-                      type="file" 
-                      id="edit-file-upload"
-                      className="hidden" 
-                      onChange={(e) => handleFileUpload(e, true)}
-                      accept="image/*,application/pdf"
-                    />
-                    <label 
-                      htmlFor="edit-file-upload"
-                      className={`w-full py-4 rounded-2xl border-2 border-dashed flex items-center justify-center gap-3 cursor-pointer transition-all ${editingItem.attachment ? 'bg-blue-50 border-blue-400 text-blue-600' : 'bg-slate-50 border-slate-200 text-slate-400 hover:border-blue-300'}`}
-                    >
-                      <FileUp className="w-5 h-5" />
-                      <span className="text-xs font-black uppercase">
-                        {editingItem.attachment ? 'Substituir Anexo' : 'Adicionar Anexo'}
+               <div>
+                  <label className="block text-xs font-black text-slate-400 uppercase mb-2">Descrição</label>
+                  <input 
+                    type="text" 
+                    className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 font-bold"
+                    value={editingItem.description}
+                    onChange={e => setEditingItem({ ...editingItem, description: e.target.value } as any)}
+                  />
+               </div>
+               <div className="flex items-center gap-4">
+                  <div className="flex-1">
+                    <input type="file" id="edit-file" className="hidden" onChange={(e) => handleFileUpload(e, true)} />
+                    <label htmlFor="edit-file" className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-slate-200 rounded-2xl cursor-pointer hover:border-blue-400 transition-all">
+                      <FileUp className="w-5 h-5 text-slate-400" />
+                      <span className="text-xs font-black text-slate-400 uppercase">
+                        {editingItem.attachment ? 'Alterar Anexo' : 'Adicionar Anexo'}
                       </span>
                     </label>
                   </div>
