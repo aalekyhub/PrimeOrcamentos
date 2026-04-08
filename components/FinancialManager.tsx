@@ -241,14 +241,14 @@ const FinancialManager: React.FC<Props> = ({
               </div>
 
               {/* Summary Cards Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* A Receber Card */}
                 <div className="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group">
                   <div className="flex items-start justify-between relative z-10">
                     <div>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Contas a Receber</p>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Faturamento a Receber</p>
                       <h4 className="text-3xl font-black text-blue-600">
-                        R$ {accountEntries.filter(e => e.type === 'RECEBER' && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        R$ {accountEntries.filter(e => e.type === 'RECEBER' && !isAporte(e.category) && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </h4>
                     </div>
                     <div className="p-3 bg-blue-50 dark:bg-blue-900/30 text-blue-600 rounded-2xl group-hover:scale-110 transition-transform">
@@ -259,13 +259,13 @@ const FinancialManager: React.FC<Props> = ({
                     <div>
                       <p className="text-[9px] font-bold text-slate-400 uppercase">Vence hoje</p>
                       <p className="text-sm font-black text-slate-700 dark:text-slate-200">
-                        R$ {accountEntries.filter(e => e.type === 'RECEBER' && e.status !== 'PAGO' && e.dueDate === getTodayIsoDate()).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR')}
+                        R$ {accountEntries.filter(e => e.type === 'RECEBER' && !isAporte(e.category) && e.status !== 'PAGO' && e.dueDate === getTodayIsoDate()).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR')}
                       </p>
                     </div>
                     <div>
                       <p className="text-[9px] font-bold text-slate-400 uppercase">30 Dias</p>
                       <p className="text-sm font-black text-slate-700 dark:text-slate-200 opacity-60">
-                        R$ {accountEntries.filter(e => e.type === 'RECEBER' && e.status !== 'PAGO' && e.dueDate > getTodayIsoDate()).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR')}
+                        R$ {accountEntries.filter(e => e.type === 'RECEBER' && !isAporte(e.category) && e.status !== 'PAGO' && e.dueDate > getTodayIsoDate()).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR')}
                       </p>
                     </div>
                   </div>
@@ -277,7 +277,7 @@ const FinancialManager: React.FC<Props> = ({
                     <div>
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Contas a Pagar</p>
                       <h4 className="text-3xl font-black text-rose-600">
-                        R$ {accountEntries.filter(e => e.type === 'PAGAR' && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        R$ {accountEntries.filter(e => e.type === 'PAGAR' && !isAporte(e.category) && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </h4>
                     </div>
                     <div className="p-3 bg-rose-50 dark:bg-rose-900/30 text-rose-600 rounded-2xl group-hover:scale-110 transition-transform">
@@ -288,15 +288,35 @@ const FinancialManager: React.FC<Props> = ({
                     <div>
                       <p className="text-[9px] font-bold text-slate-400 uppercase">Vence hoje</p>
                       <p className="text-sm font-black text-slate-700 dark:text-slate-200">
-                        R$ {accountEntries.filter(e => e.type === 'PAGAR' && e.status !== 'PAGO' && e.dueDate === getTodayIsoDate()).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR')}
+                        R$ {accountEntries.filter(e => e.type === 'PAGAR' && !isAporte(e.category) && e.status !== 'PAGO' && e.dueDate === getTodayIsoDate()).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR')}
                       </p>
                     </div>
                     <div>
                       <p className="text-[9px] font-bold text-slate-400 uppercase">30 Dias</p>
                       <p className="text-sm font-black text-slate-700 dark:text-slate-200 opacity-60">
-                        R$ {accountEntries.filter(e => e.type === 'PAGAR' && e.status !== 'PAGO' && e.dueDate > getTodayIsoDate()).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR')}
+                        R$ {accountEntries.filter(e => e.type === 'PAGAR' && !isAporte(e.category) && e.status !== 'PAGO' && e.dueDate > getTodayIsoDate()).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR')}
                       </p>
                     </div>
+                  </div>
+                </div>
+
+                {/* Investimentos / Aportes Card */}
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border-2 border-indigo-100 dark:border-indigo-900 shadow-sm relative overflow-hidden group">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-1">Total em Aportes</p>
+                      <h4 className="text-3xl font-black text-indigo-600">
+                        R$ {accountEntries.filter(e => isAporte(e.category) && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </h4>
+                    </div>
+                    <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 rounded-2xl group-hover:rotate-12 transition-transform">
+                      <Coins className="w-6 h-6" />
+                    </div>
+                  </div>
+                  <div className="mt-6 pt-4 border-t border-slate-50 dark:border-slate-700/50">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-2">
+                       <CheckCircle2 className="w-3 h-3" /> Capital de Investimento
+                    </p>
                   </div>
                 </div>
 
@@ -505,7 +525,16 @@ const FinancialManager: React.FC<Props> = ({
                 <select 
                   className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-900 dark:text-white"
                   value={formData.category} 
-                  onChange={e => setFormData({ ...formData, category: e.target.value })}
+                  onChange={e => {
+                    const newCat = e.target.value;
+                    const isContribution = isAporte(newCat);
+                    setFormData({ 
+                      ...formData, 
+                      category: newCat,
+                      type: isContribution ? 'RECEITA' as any : formData.type
+                    });
+                    if (isContribution) notify("Categoria de Aporte detectada: Tipo ajustado para entrada.");
+                  }}
                 >
                   {categories.map(cat => (
                     <option key={cat.id} value={cat.name}>{cat.name}</option>
@@ -664,26 +693,37 @@ const FinancialManager: React.FC<Props> = ({
         </div>
       ) : activeTab === 'provisionado' ? (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="p-6 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-500">
-                  <Clock className="w-5 h-5" />
+                <div className="w-10 h-10 bg-rose-50 rounded-xl flex items-center justify-center text-rose-500">
+                  <ArrowDownLeft className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total a Pagar</p>
-                  <p className="text-xl font-black text-slate-900 dark:text-white">R$ {accountEntries.filter(e => e.type === 'PAGAR' && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">A Pagar</p>
+                  <p className="text-xl font-black text-slate-900 dark:text-white">R$ {accountEntries.filter(e => e.type === 'PAGAR' && !isAporte(e.category) && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                 </div>
               </div>
             </div>
             <div className="p-6 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-500">
-                  <TrendingUp className="w-5 h-5" />
+                  <ArrowUpRight className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total a Receber</p>
-                  <p className="text-xl font-black text-slate-900 dark:text-white">R$ {accountEntries.filter(e => e.type === 'RECEBER' && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">A Receber</p>
+                  <p className="text-xl font-black text-slate-900 dark:text-white">R$ {accountEntries.filter(e => e.type === 'RECEBER' && !isAporte(e.category) && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                </div>
+              </div>
+            </div>
+            <div className="p-6 bg-white dark:bg-slate-800 rounded-3xl border border-indigo-100 shadow-sm">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-500">
+                  <Coins className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Investimentos</p>
+                  <p className="text-xl font-black text-indigo-600">R$ {accountEntries.filter(e => isAporte(e.category) && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                 </div>
               </div>
             </div>
@@ -694,7 +734,11 @@ const FinancialManager: React.FC<Props> = ({
                 </div>
                 <div>
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Projeção Final</p>
-                  <p className="text-xl font-black text-white">R$ {(accountEntries.filter(e => e.type === 'RECEBER' && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0) - accountEntries.filter(e => e.type === 'PAGAR' && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                  <p className="text-xl font-black text-white">R$ {(
+                    accountEntries.filter(e => (e.type === 'RECEBER' && !isAporte(e.category)) && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0) - 
+                    accountEntries.filter(e => (e.type === 'PAGAR' && !isAporte(e.category)) && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0) +
+                    accountEntries.filter(e => isAporte(e.category) && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0)
+                  ).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                 </div>
               </div>
             </div>
