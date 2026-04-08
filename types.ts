@@ -162,7 +162,7 @@ export interface FinancialCategory {
 
 export interface AccountEntry {
   id: string;
-  type: 'PAGAR' | 'RECEBER';
+  type: 'PAGAR' | 'RECEBER' | 'INVESTIMENTO';
   status: 'PENDENTE' | 'PAGO' | 'ATRASADO' | 'CANCELADO';
   amount: number;
   category: string;

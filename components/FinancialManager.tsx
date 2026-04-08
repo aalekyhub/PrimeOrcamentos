@@ -306,7 +306,7 @@ const FinancialManager: React.FC<Props> = ({
                     <div>
                       <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-1">Total em Aportes</p>
                       <h4 className="text-3xl font-black text-indigo-600">
-                        R$ {accountEntries.filter(e => isAporte(e.category) && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        R$ {accountEntries.filter(e => (e.type === 'INVESTIMENTO' || isAporte(e.category)) && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </h4>
                     </div>
                     <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 rounded-2xl group-hover:rotate-12 transition-transform">
@@ -463,21 +463,32 @@ const FinancialManager: React.FC<Props> = ({
           <form onSubmit={handleAddEntry} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase">Tipo de Conta</label>
-                <div className="grid grid-cols-2 gap-2">
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase">Tipo de Lançamento</label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, type: 'RECEITA' as any })}
-                    className={`py-3 px-4 rounded-xl text-xs font-bold border-2 transition-all ${formData.type === 'RECEITA' ? 'bg-emerald-50 border-emerald-500 text-emerald-600' : 'bg-slate-50 border-transparent text-slate-400 opacity-60'}`}
+                    className={`py-3 px-2 rounded-xl text-[10px] font-black border-2 transition-all uppercase tracking-tighter ${formData.type === 'RECEITA' ? 'bg-emerald-50 border-emerald-500 text-emerald-600' : 'bg-slate-50 border-transparent text-slate-400 opacity-60'}`}
                   >
                     A RECEBER
                   </button>
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, type: 'PAGAR' as any })}
-                    className={`py-3 px-4 rounded-xl text-xs font-bold border-2 transition-all ${formData.type === 'PAGAR' ? 'bg-rose-50 border-rose-500 text-rose-600' : 'bg-slate-50 border-transparent text-slate-400 opacity-60'}`}
+                    className={`py-3 px-2 rounded-xl text-[10px] font-black border-2 transition-all uppercase tracking-tighter ${formData.type === 'PAGAR' ? 'bg-rose-50 border-rose-500 text-rose-600' : 'bg-slate-50 border-transparent text-slate-400 opacity-60'}`}
                   >
                     A PAGAR
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const aporteCat = categories.find(c => isAporte(c.name))?.name || 'Aporte de Sócios';
+                      setFormData({ ...formData, type: 'INVESTIMENTO' as any, category: aporteCat });
+                      notify("Tipo Investimento: Categoria ajustada automaticamente.");
+                    }}
+                    className={`py-3 px-2 rounded-xl text-[10px] font-black border-2 transition-all uppercase tracking-tighter ${formData.type === 'INVESTIMENTO' ? 'bg-indigo-50 border-indigo-500 text-indigo-600' : 'bg-slate-50 border-transparent text-slate-400 opacity-60'}`}
+                  >
+                    INVESTIMENTO
                   </button>
                 </div>
               </div>
@@ -543,12 +554,12 @@ const FinancialManager: React.FC<Props> = ({
               </div>
               <div className="lg:col-span-3">
                 <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase">
-                  {formData.type === 'RECEITA' ? 'Cliente (Opcional)' : 'Fornecedor (Opcional)'}
+                  {formData.type === 'INVESTIMENTO' ? 'Sócio / Origem (Opcional)' : formData.type === 'RECEITA' ? 'Cliente (Opcional)' : 'Fornecedor (Opcional)'}
                 </label>
                 <div className="flex gap-4">
                   <input 
                     type="text" 
-                    placeholder={formData.type === 'RECEITA' ? 'Nome do Cliente...' : 'Nome do Fornecedor...'}
+                    placeholder={formData.type === 'INVESTIMENTO' ? 'Nome do Sócio ou Origem...' : formData.type === 'RECEITA' ? 'Nome do Cliente...' : 'Nome do Fornecedor...'}
                     className="flex-1 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold"
                     value={formData.type === 'RECEITA' ? (formData.customerName || '') : (formData.supplierName || '')} 
                     onChange={e => formData.type === 'RECEITA' ? setFormData({ ...formData, customerName: e.target.value }) : setFormData({ ...formData, supplierName: e.target.value })} 
@@ -723,7 +734,7 @@ const FinancialManager: React.FC<Props> = ({
                 </div>
                 <div>
                   <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Investimentos</p>
-                  <p className="text-xl font-black text-indigo-600">R$ {accountEntries.filter(e => isAporte(e.category) && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                  <p className="text-xl font-black text-indigo-600">R$ {accountEntries.filter(e => (e.type === 'INVESTIMENTO' || isAporte(e.category)) && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                 </div>
               </div>
             </div>
@@ -737,7 +748,7 @@ const FinancialManager: React.FC<Props> = ({
                   <p className="text-xl font-black text-white">R$ {(
                     accountEntries.filter(e => (e.type === 'RECEBER' && !isAporte(e.category)) && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0) - 
                     accountEntries.filter(e => (e.type === 'PAGAR' && !isAporte(e.category)) && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0) +
-                    accountEntries.filter(e => isAporte(e.category) && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0)
+                    accountEntries.filter(e => (e.type === 'INVESTIMENTO' || isAporte(e.category)) && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0)
                   ).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                 </div>
               </div>
