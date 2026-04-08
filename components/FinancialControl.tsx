@@ -175,7 +175,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
         </div>
         <div className="bg-emerald-50 dark:bg-emerald-900/20 p-6 rounded-3xl border border-emerald-100 dark:border-emerald-900/30 shadow-sm group">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.2em]">Faturamento Realizado</p>
+            <p className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.2em]">Entradas Realizadas</p>
             <ArrowUpRight className="w-4 h-4 text-emerald-600 dark:text-emerald-400 group-hover:scale-125 transition-transform" />
           </div>
           <h3 className="text-2xl font-black text-emerald-700 dark:text-emerald-400 whitespace-nowrap">R$ {totalIncome.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
@@ -259,7 +259,7 @@ const FinancialControl: React.FC<Props> = ({ transactions, setTransactions, loan
                 const [year, month] = t.date.split('-').map(Number);
                 return (month - 1) === selectedMonth && year === selectedYear;
               });
-              const mIncome = monthlyTrans.filter(t => t.type === 'RECEITA').reduce((s, t) => s + t.amount, 0);
+              const mIncome = monthlyTrans.filter(t => t.type === 'RECEITA' || t.type === 'EMPRESTIMO_SOCIO').reduce((s, t) => s + t.amount, 0);
               const mExpense = monthlyTrans.filter(t => t.type === 'DESPESA').reduce((s, t) => s + t.amount, 0);
               const mResult = mIncome - mExpense;
 
