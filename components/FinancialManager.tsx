@@ -629,31 +629,33 @@ const FinancialManager: React.FC<Props> = ({
         </div>
       ) : activeTab === 'realizado' ? (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm">
-              <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-2">Saldo Realizado</p>
-              <h3 className="text-2xl font-black text-slate-900 dark:text-white">R$ {(transactions.filter(t => t.type === 'RECEITA' || t.category.toLowerCase().includes('aporte')).reduce((a,c)=>a+c.amount,0) - transactions.filter(t=>t.type==='DESPESA').reduce((a,c)=>a+c.amount,0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+              <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Saldo Realizado</p>
+              <h3 className="text-xl font-black text-slate-900 dark:text-white">R$ {(transactions.filter(t => t.type === 'RECEITA' || isAporte(t.category)).reduce((a,c)=>a+c.amount,0) - transactions.filter(t=>t.type==='DESPESA').reduce((a,c)=>a+c.amount,0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
             </div>
-            <div className="bg-emerald-50 dark:bg-emerald-900/20 p-6 rounded-3xl border border-emerald-100 dark:border-emerald-900/30 shadow-sm">
-              <p className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.2em] mb-2">Receitas (Vendas)</p>
-              <h3 className="text-2xl font-black text-emerald-700 dark:text-emerald-400">R$ {transactions.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+            <div className="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/30 shadow-sm">
+              <p className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Receitas (Vendas)</p>
+              <h3 className="text-xl font-black text-emerald-700 dark:text-emerald-400">R$ {transactions.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
             </div>
-            <div className="bg-rose-50 dark:bg-rose-900/20 p-6 rounded-3xl border border-rose-100 dark:border-rose-900/30 shadow-sm">
-              <p className="text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-[0.2em] mb-2">Despesas (Saídas)</p>
-              <h3 className="text-2xl font-black text-rose-700 dark:text-rose-400">R$ {transactions.filter(t=>t.type==='DESPESA').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+            <div className="bg-rose-50 dark:bg-rose-900/20 p-4 rounded-2xl border border-rose-100 dark:border-rose-900/30 shadow-sm">
+              <p className="text-[9px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest mb-1">Despesas (Saídas)</p>
+              <h3 className="text-xl font-black text-rose-700 dark:text-rose-400">R$ {transactions.filter(t=>t.type==='DESPESA').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
             </div>
-            <div className="flex flex-col gap-2">
-              <button 
-                onClick={() => setPrintData({
-                  html: buildFinancialReportHtml(transactions, accountEntries, accounts, categories, company, 'EXTRATO', 'Geral'),
-                  title: 'Extrato de Fluxo de Caixa',
-                  filename: `EXTRATO_FINANCEIRO_${getTodayIsoDate()}`
-                })}
-                className="flex-1 bg-slate-900 dark:bg-slate-700 text-white rounded-2xl flex items-center justify-center gap-3 hover:bg-slate-800 transition-all text-xs font-black uppercase tracking-widest"
-              >
-                <Download className="w-4 h-4" /> Exportar Extrato
-              </button>
+            <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-2xl border border-indigo-100 dark:border-indigo-900/30 shadow-sm">
+              <p className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-1">Investimentos (Aportes)</p>
+              <h3 className="text-xl font-black text-indigo-700 dark:text-indigo-400">R$ {transactions.filter(t => isAporte(t.category)).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
             </div>
+            <button 
+              onClick={() => setPrintData({
+                html: buildFinancialReportHtml(transactions, accountEntries, accounts, categories, company, 'EXTRATO', 'Geral'),
+                title: 'Extrato de Fluxo de Caixa',
+                filename: `EXTRATO_FINANCEIRO_${getTodayIsoDate()}`
+              })}
+              className="bg-slate-900 dark:bg-slate-700 text-white rounded-2xl flex items-center justify-center gap-2 hover:bg-slate-800 transition-all text-[10px] font-black uppercase tracking-widest"
+            >
+              <Download className="w-4 h-4" /> Exportar Extrato
+            </button>
           </div>
           
           <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
@@ -899,7 +901,7 @@ const FinancialManager: React.FC<Props> = ({
                                  id: `TR-${Date.now()}`,
                                  date: getTodayIsoDate(),
                                  amount: entry.amount,
-                                 type: entry.type === 'RECEBER' ? 'RECEITA' : 'DESPESA',
+                                 type: (entry.type === 'RECEBER' || entry.type === 'INVESTIMENTO') ? 'RECEITA' : 'DESPESA',
                                  category: entry.category,
                                  description: `[BAIXA] ${entry.description}`,
                                  entryId: entry.id
