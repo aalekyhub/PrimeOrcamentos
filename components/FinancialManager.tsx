@@ -98,11 +98,13 @@ const FinancialManager: React.FC<Props> = ({
   const [editingItem, setEditingItem] = useState<AccountEntry | Transaction | null>(null);
   const [viewingAttachment, setViewingAttachment] = useState<{content: string, name: string} | null>(null);
   const [printData, setPrintData] = useState<{html: string, title: string, filename: string} | null>(null);
-
   const { notify } = useNotify();
-  const isAdmin = currentUser.role === 'admin';
 
-  const isAporte = (category: string) => category.toLowerCase().includes('aporte');
+  const isAporte = (category: string) => 
+    category?.toLowerCase().includes('aporte') || 
+    category?.toLowerCase().includes('emprestimo') || 
+    category?.toLowerCase().includes('empréstimo');
+  const isAdmin = currentUser.role === 'admin';
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, isEditing = false) => {
     const file = e.target.files?.[0];
@@ -347,9 +349,9 @@ const FinancialManager: React.FC<Props> = ({
                 >
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-[8px] font-black text-indigo-500 uppercase tracking-widest mb-0.5">Total em Empréstimos</p>
+                      <p className="text-[8px] font-black text-indigo-500 uppercase tracking-widest mb-0.5">Total Recebido (Empréstimos)</p>
                       <h4 className="text-xl font-black text-indigo-600">
-                        R$ {accountEntries.filter(e => (e.type === 'INVESTIMENTO' || isAporte(e.category)) && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        R$ {accountEntries.filter(e => (e.type === 'INVESTIMENTO' || isAporte(e.category))).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </h4>
                     </div>
                     <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 rounded-2xl group-hover:scale-110 transition-transform">
@@ -663,7 +665,7 @@ const FinancialManager: React.FC<Props> = ({
             </div>
             <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-2xl border border-indigo-100 dark:border-indigo-900/30 shadow-sm">
               <p className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-1">Empréstimos de Sócios</p>
-              <h3 className="text-xl font-black text-indigo-700 dark:text-indigo-400">R$ {transactions.filter(t => isAporte(t.category)).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+              <h3 className="text-xl font-black text-indigo-700 dark:text-indigo-400">R$ {accountEntries.filter(e => (e.type === 'INVESTIMENTO' || isAporte(e.category))).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
             </div>
             <button 
               onClick={() => setPrintData({
@@ -679,7 +681,7 @@ const FinancialManager: React.FC<Props> = ({
           
           <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
               <div className="divide-y divide-slate-100 dark:divide-slate-700">
-                {transactions.length === 0 ? (
+                {transactions.length === 0 && accountEntries.filter(e => e.status === 'PAGO').length === 0 ? (
                   <div className="py-20 text-center opacity-40">
                     <Wallet className="w-12 h-12 mx-auto mb-4" />
                     <p className="text-xs font-black uppercase tracking-widest text-slate-400">Nenhuma transação financeira registrada.</p>
@@ -797,8 +799,8 @@ const FinancialManager: React.FC<Props> = ({
                   <Coins className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Empréstimos</p>
-                  <p className="text-xl font-black text-indigo-600">R$ {accountEntries.filter(e => (e.type === 'INVESTIMENTO' || isAporte(e.category)) && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                  <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Empréstimos de Sócios</p>
+                  <p className="text-xl font-black text-indigo-600">R$ {accountEntries.filter(e => (e.type === 'INVESTIMENTO' || isAporte(e.category))).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                 </div>
               </div>
             </div>
@@ -884,8 +886,8 @@ const FinancialManager: React.FC<Props> = ({
                               <Paperclip className="w-3.5 h-3.5" />
                             </button>
                           )}
-                          <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase border ${isContribution ? 'text-indigo-500 bg-indigo-50 border-indigo-100' : getStatusColor(entry.status)}`}>
-                            {isContribution ? 'EMPRÉSTIMO' : entry.status}
+                          <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase border ${isContribution ? 'hidden' : getStatusColor(entry.status)}`}>
+                            {entry.status}
                           </span>
                         </div>
                         <div className="flex items-center gap-3 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
