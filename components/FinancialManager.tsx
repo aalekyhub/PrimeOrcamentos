@@ -153,7 +153,7 @@ const FinancialManager: React.FC<Props> = ({
         amount: Number(formData.amount),
         type: 'RECEITA',
         category: formData.category || 'Aporte de Sócios',
-        description: `[INVESTIMENTO] ${formData.description}`,
+        description: `[EMPRÉSTIMO] ${formData.description}`,
         entryId: newEntry.id
       };
       const newTransactions = [newTransaction, ...transactions];
@@ -165,7 +165,7 @@ const FinancialManager: React.FC<Props> = ({
     setFormData(initialFormData);
 
     await db.save('serviflow_account_entries', newList, newEntry);
-    notify(isInvestment ? "Investimento registrado e caixa atualizado!" : "Lançamento provisionado com sucesso!");
+    notify(isInvestment ? "Empréstimo registrado e caixa atualizado!" : "Lançamento provisionado com sucesso!");
   };
 
   const handleUpdateItem = async (e: React.FormEvent) => {
@@ -335,7 +335,7 @@ const FinancialManager: React.FC<Props> = ({
                   </div>
                 </div>
 
-                {/* Investimentos / Aportes Card */}
+                {/* Empréstimos / Aportes Card */}
                 <div 
                   onClick={() => {
                     const aporteCat = categories.find(c => isAporte(c.name))?.name || 'Aporte de Sócios';
@@ -347,19 +347,19 @@ const FinancialManager: React.FC<Props> = ({
                 >
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-[8px] font-black text-indigo-500 uppercase tracking-widest mb-0.5">Total em Aportes</p>
+                      <p className="text-[8px] font-black text-indigo-500 uppercase tracking-widest mb-0.5">Total em Empréstimos</p>
                       <h4 className="text-xl font-black text-indigo-600">
                         R$ {accountEntries.filter(e => (e.type === 'INVESTIMENTO' || isAporte(e.category)) && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </h4>
                     </div>
-                    <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 rounded-lg group-hover:rotate-12 transition-transform">
-                      <Coins className="w-4 h-4" />
+                    <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 rounded-2xl group-hover:scale-110 transition-transform">
+                       <CheckCircle2 className="w-6 h-6" />
                     </div>
                   </div>
-                  <div className="mt-3 pt-2 border-t border-slate-50 dark:border-slate-700/50">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-2">
-                       <CheckCircle2 className="w-3 h-3" /> Capital de Investimento
-                    </p>
+                  <div className="mt-6 pt-4 border-t border-slate-50 dark:border-slate-700/50">
+                    <div className="flex items-center gap-2 text-[10px] font-black text-indigo-500 uppercase">
+                       <CheckCircle2 className="w-3 h-3" /> Empréstimo de Sócios
+                    </div>
                   </div>
                 </div>
 
@@ -531,7 +531,7 @@ const FinancialManager: React.FC<Props> = ({
                     }}
                     className={`py-3 px-2 rounded-xl text-[10px] font-black border-2 transition-all uppercase tracking-tighter ${formData.type === 'INVESTIMENTO' ? 'bg-indigo-50 border-indigo-500 text-indigo-600' : 'bg-slate-50 border-transparent text-slate-400 opacity-60'}`}
                   >
-                    INVESTIMENTO
+                    EMPRÉSTIMO
                   </button>
                 </div>
               </div>
@@ -641,7 +641,7 @@ const FinancialManager: React.FC<Props> = ({
                 type="submit" 
                 className="bg-blue-600 text-white px-10 py-3.5 rounded-xl text-xs font-black shadow-lg hover:bg-blue-700 transition-all uppercase tracking-widest"
               >
-                {formData.type === 'INVESTIMENTO' ? 'Registrar Investimento' : 'Provisionar Lançamento'}
+                {formData.type === 'INVESTIMENTO' ? 'Registrar Empréstimo' : 'Provisionar Lançamento'}
               </button>
             </div>
           </form>
@@ -662,7 +662,7 @@ const FinancialManager: React.FC<Props> = ({
               <h3 className="text-xl font-black text-rose-700 dark:text-rose-400">R$ {transactions.filter(t=>t.type==='DESPESA').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
             </div>
             <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-2xl border border-indigo-100 dark:border-indigo-900/30 shadow-sm">
-              <p className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-1">Investimentos (Aportes)</p>
+              <p className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-1">Empréstimos de Sócios</p>
               <h3 className="text-xl font-black text-indigo-700 dark:text-indigo-400">R$ {transactions.filter(t => isAporte(t.category)).reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
             </div>
             <button 
@@ -700,7 +700,7 @@ const FinancialManager: React.FC<Props> = ({
                           <div>
                             <div className="flex items-center gap-2">
                               <p className="text-sm font-black text-slate-900 dark:text-white uppercase leading-none">{t.description}</p>
-                              {isContribution && <span className="bg-indigo-600 text-[8px] text-white px-1.5 py-0.5 rounded font-black uppercase tracking-widest">Aporte / Investimento</span>}
+                              {isContribution && <span className="bg-indigo-600 text-[8px] text-white px-1.5 py-0.5 rounded font-black uppercase tracking-widest">Aporte (Sócio)</span>}
                               {t.attachment && (
                                 <button 
                                   onClick={() => setViewingAttachment({ content: t.attachment!, name: t.attachmentName || 'Anexo' })}
@@ -797,7 +797,7 @@ const FinancialManager: React.FC<Props> = ({
                   <Coins className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Investimentos</p>
+                  <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Empréstimos</p>
                   <p className="text-xl font-black text-indigo-600">R$ {accountEntries.filter(e => (e.type === 'INVESTIMENTO' || isAporte(e.category)) && e.status !== 'PAGO').reduce((a,c)=>a+c.amount,0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                 </div>
               </div>
@@ -885,7 +885,7 @@ const FinancialManager: React.FC<Props> = ({
                             </button>
                           )}
                           <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase border ${isContribution ? 'text-indigo-500 bg-indigo-50 border-indigo-100' : getStatusColor(entry.status)}`}>
-                            {isContribution ? 'INVESTIMENTO' : entry.status}
+                            {isContribution ? 'EMPRÉSTIMO' : entry.status}
                           </span>
                         </div>
                         <div className="flex items-center gap-3 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
