@@ -10,6 +10,7 @@ interface BudgetListProps {
     onEdit: (budget: ServiceOrder) => void;
     onPrint: (budget: ServiceOrder) => void;
     onGenerateContract: (budget: ServiceOrder) => void;
+    onBill: (budget: ServiceOrder) => void;
     onDelete: (budget: ServiceOrder) => void;
     isAdmin?: boolean;
 }
@@ -22,6 +23,7 @@ const BudgetList: React.FC<BudgetListProps> = ({
     onEdit,
     onPrint,
     onGenerateContract,
+    onBill,
     onDelete,
     isAdmin = true
 }) => {
@@ -96,6 +98,11 @@ const BudgetList: React.FC<BudgetListProps> = ({
                                     {isAdmin && budget.status !== OrderStatus.APPROVED && (
                                         <button onClick={(e) => { e.stopPropagation(); onApprove(budget); }} className="p-2 text-slate-400 hover:text-emerald-600 transition-colors" title="Aprovar">
                                             <CheckCircle className="w-4 h-4" />
+                                        </button>
+                                    )}
+                                    {budget.status === OrderStatus.APPROVED && (
+                                        <button onClick={(e) => { e.stopPropagation(); onBill(budget); }} className="p-2 text-amber-500 hover:text-amber-600 transition-colors" title="Faturar (Gerar Contas a Receber)">
+                                            <FileDown className="w-4 h-4" />
                                         </button>
                                     )}
                                     <button onClick={(e) => { e.stopPropagation(); onDuplicate(budget); }} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Duplicar">

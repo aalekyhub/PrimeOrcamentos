@@ -5,18 +5,26 @@ import {
     Trash2, Copy, LayoutGrid, List as ListIcon
 } from 'lucide-react';
 import { db } from '../services/db';
-import { PlanningHeader, Customer, UserAccount } from '../types';
+import { PlanningHeader, Customer, UserAccount, AccountEntry } from '../types';
 import PlanningManager from './planning/PlanningManager';
 import WorksManager from './WorksManager';
 import { useNotify } from './ToastProvider';
 interface Props {
     customers: Customer[];
     company: any;
-    onGenerateBudget?: (plan: any, services: any[], totalMaterial: number, totalLabor: number, totalIndirect: number, bdiRate: number, taxRate: number) => void;
     currentUser: UserAccount;
+    accountEntries?: AccountEntry[];
+    setAccountEntries?: React.Dispatch<React.SetStateAction<AccountEntry[]>>;
 }
 
-const UnifiedWorksManager: React.FC<Props> = ({ customers, company: propsCompany, onGenerateBudget, currentUser }) => {
+const UnifiedWorksManager: React.FC<Props> = ({ 
+    customers, 
+    company: propsCompany, 
+    onGenerateBudget, 
+    currentUser,
+    accountEntries = [],
+    setAccountEntries
+}) => {
     const isAdmin = currentUser?.role === 'admin';
     const [view, setView] = useState<'list' | 'detail'>('list');
     const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
@@ -261,6 +269,8 @@ const UnifiedWorksManager: React.FC<Props> = ({ customers, company: propsCompany
                                 embeddedPlanId={selectedPlanId}
                                 onBack={handleBack}
                                 currentUser={currentUser}
+                                accountEntries={accountEntries}
+                                setAccountEntries={setAccountEntries}
                             />
                         </div>
                     )}

@@ -22,6 +22,7 @@ import BudgetList from './budget/BudgetList';
 import BudgetDescriptionEditor from './budget/BudgetDescriptionEditor';
 import BudgetSummarySidebar from './budget/BudgetSummarySidebar';
 import ReportPreview from './ReportPreview';
+import BillingModal from './budget/BillingModal';
 import { getTodayIsoDate, addDaysToDate } from '../services/dateService';
 import { generateBudgetReportHtml } from '../services/budgetPdfService';
 import { getContractHtml } from '../services/contractPdfService';
@@ -59,10 +60,13 @@ const BudgetManager: React.FC<Props> = ({
   company,
   prefilledData,
   onPrefilledDataConsumed,
-  currentUser
+  currentUser,
+  accountEntries,
+  setAccountEntries
 }) => {
   const isAdmin = currentUser?.role === 'admin';
   const [showForm, setShowForm] = useState(false);
+  const [billingOrder, setBillingOrder] = useState<ServiceOrder | null>(null);
   const [showFullClientForm, setShowFullClientForm] = useState(false);
   const [showFullServiceForm, setShowFullServiceForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -519,6 +523,7 @@ const BudgetManager: React.FC<Props> = ({
           onEdit={(budget) => loadBudgetToForm(budget)}
           onPrint={handlePreviewBudget}
           onGenerateContract={handleGenerateContract}
+          onBill={setBillingOrder}
           onDelete={handleDeleteBudget}
           isAdmin={isAdmin}
         />
@@ -774,6 +779,18 @@ const BudgetManager: React.FC<Props> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {billingOrder && (
+        <BillingModal 
+          order={billingOrder} 
+          onClose={() => setBillingOrder(null)} 
+          currentEntries={accountEntries}
+          onSuccess={(newList) => {
+            setAccountEntries(newList);
+            notify(`Orçamento faturado com sucesso!`);
+          }}
+        />
       )}
 
       {showPaymentModal && (

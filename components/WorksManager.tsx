@@ -10,7 +10,7 @@ import ReportPreview from './ReportPreview';
 import {
     WorkHeader, WorkService, WorkMaterial,
     WorkLabor, WorkIndirect, Customer,
-    PlannedService, WorkTax, CompanyProfile, UserAccount
+    PlannedService, WorkTax, CompanyProfile, UserAccount, AccountEntry
 } from '../types';
 import { buildExecutionReportHtml, EXECUTION_THEME } from '../services/reportPdfService';
 
@@ -20,6 +20,8 @@ interface Props {
     embeddedPlanId?: string | null;
     onBack?: () => void;
     currentUser: UserAccount;
+    accountEntries: AccountEntry[];
+    setAccountEntries: React.Dispatch<React.SetStateAction<AccountEntry[]>>;
 }
 
 // ==================== HOOKS PERSONALIZADOS ====================
@@ -313,7 +315,15 @@ const SelectionBar: React.FC<SelectionBarProps> = ({
 
 // ==================== COMPONENTE PRINCIPAL ====================
 
-const WorksManager: React.FC<Props> = ({ customers, company, embeddedPlanId, onBack, currentUser }) => {
+const WorksManager: React.FC<Props> = ({ 
+    customers, 
+    company, 
+    embeddedPlanId, 
+    onBack, 
+    currentUser,
+    accountEntries,
+    setAccountEntries
+}) => {
     const isAdmin = currentUser?.role === 'admin';
     const [works, setWorks] = useState<WorkHeader[]>([]);
     const [activeWorkId, setActiveWorkId] = useState<string | null>(null);
@@ -336,6 +346,34 @@ const WorksManager: React.FC<Props> = ({ customers, company, embeddedPlanId, onB
     const { notify } = useNotify();
     const creationAttemptedRef = useRef<Record<string, boolean>>({});
     const savingRef = useRef(false);
+
+    const handleBillExpense = useCallback(async (item: any, type: 'Material' | 'Mão de Obra') => {
+        if (!currentWork) return;
+        
+        const description = type === 'Material' 
+            ? `COMPRA: ${item.material_name} (OBRA: ${currentWork.name})`
+            : `PAGTO: ${item.role} (OBRA: ${currentWork.name})`;
+        
+        const amount = item.total_cost || item.value || 0;
+        
+        const entry: AccountEntry = {
+            id: `ENT-${Date.now()}`,
+            type: 'PAGAR',
+            status: 'PENDENTE',
+            amount: amount,
+            category: type === 'Material' ? 'Materiais' : 'Mão de Obra',
+            description: description,
+            dueDate: new Date().toISOString().split('T')[0],
+            customerId: currentWork.client_id,
+            customerName: currentWork.name, // Localized cost center
+            orderId: currentWork.id
+        };
+
+        const newList = [entry, ...accountEntries];
+        setAccountEntries(newList);
+        await db.save('serviflow_account_entries', newList, entry);
+        notify('Lançamento enviado para o financeiro!', 'success');
+    }, [currentWork, accountEntries, setAccountEntries, notify]);
 
     const calculations = useWorkCalculations(services, materials, labor, indirects, taxes);
 
@@ -830,9 +868,16 @@ const WorksManager: React.FC<Props> = ({ customers, company, embeddedPlanId, onB
                             </p>
                         </div>
                     </div>
-                    <div className="w-24 text-right mr-4 font-black text-slate-700 dark:text-slate-200">
+                    <div className="w-24 text-right mr-2 font-black text-slate-700 dark:text-slate-200">
                         R$ {(m.total_cost || 0).toFixed(2)}
                     </div>
+                    <button 
+                        onClick={(e) => { e.stopPropagation(); handleBillExpense(m, 'Material'); }}
+                        className="p-1.5 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg mr-2"
+                        title="Enviar para o Financeiro"
+                    >
+                        <TrendingUp size={16} />
+                    </button>
                 </>
             )}
             renderEdit={(data, update) => (
@@ -916,9 +961,16 @@ const WorksManager: React.FC<Props> = ({ customers, company, embeddedPlanId, onB
                             </p>
                         </div>
                     </div>
-                    <div className="w-24 text-right mr-4 font-black text-slate-700 dark:text-slate-200">
+                    <div className="w-24 text-right mr-2 font-black text-slate-700 dark:text-slate-200">
                         R$ {(l.total_cost || 0).toFixed(2)}
                     </div>
+                    <button 
+                        onClick={(e) => { e.stopPropagation(); handleBillExpense(l, 'Mão de Obra'); }}
+                        className="p-1.5 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg mr-2"
+                        title="Enviar para o Financeiro"
+                    >
+                        <TrendingUp size={16} />
+                    </button>
                 </>
             )}
             renderEdit={(data, update) => (

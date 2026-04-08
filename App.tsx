@@ -28,7 +28,7 @@ import UnifiedWorksManager from './components/UnifiedWorksManager';
 import BudgetManager from './components/BudgetManager';
 import ServiceOrderManager from './components/ServiceOrderManager';
 import WorkOrderManager from './components/WorkOrderManager';
-import FinancialControl from './components/FinancialControl';
+import FinancialManager from './components/FinancialManager';
 import CustomerManager from './components/CustomerManager';
 import ServiceCatalog from './components/ServiceCatalog';
 import CompanySettings from './components/CompanySettings';
@@ -47,6 +47,9 @@ import {
   CatalogService,
   CompanyProfile,
   UserAccount,
+  FinancialAccount,
+  FinancialCategory,
+  AccountEntry,
 } from './types';
 
 import { db, initPromise, startRealtimeSync, stopRealtimeSync } from './services/db';
@@ -62,6 +65,9 @@ const STORAGE_KEYS = {
   USERS: 'serviflow_users',
   SESSION: 'serviflow_session',
   DARK_MODE: 'serviflow_dark_mode',
+  FINANCIAL_ACCOUNTS: 'serviflow_financial_accounts',
+  FINANCIAL_CATEGORIES: 'serviflow_financial_categories',
+  ACCOUNT_ENTRIES: 'serviflow_account_entries',
 } as const;
 
 const INITIAL_USERS: UserAccount[] = [
@@ -109,7 +115,7 @@ type TabId =
   | 'budgets'
   | 'orders'
   | 'works'
-  | 'financials'
+  | 'financial_mgmt'
   | 'search'
   | 'users'
   | 'settings';
@@ -152,6 +158,25 @@ const AppContent: React.FC = () => {
   );
   const [company, setCompany] = useState<CompanyProfile>(() =>
     db.load(STORAGE_KEYS.COMPANY, INITIAL_COMPANY)
+  );
+
+  const [financialAccounts, setFinancialAccounts] = useState<FinancialAccount[]>(() =>
+    db.load(STORAGE_KEYS.FINANCIAL_ACCOUNTS, [
+      { id: 'ACC-001', name: 'Caixa Empresa', type: 'Caixa', initialBalance: 0, currentBalance: 0 }
+    ])
+  );
+  const [financialCategories, setFinancialCategories] = useState<FinancialCategory[]>(() =>
+    db.load(STORAGE_KEYS.FINANCIAL_CATEGORIES, [
+      { id: 'CAT-001', name: 'Venda de Serviços', type: 'RECEITA' },
+      { id: 'CAT-002', name: 'Aporte de Sócios', type: 'RECEITA' },
+      { id: 'CAT-003', name: 'Materiais', type: 'DESPESA' },
+      { id: 'CAT-004', name: 'Mão de Obra', type: 'DESPESA' },
+      { id: 'CAT-005', name: 'Aluguel', type: 'DESPESA' },
+      { id: 'CAT-006', name: 'Geral', type: 'DESPESA' },
+    ])
+  );
+  const [accountEntries, setAccountEntries] = useState<AccountEntry[]>(() =>
+    db.load(STORAGE_KEYS.ACCOUNT_ENTRIES, [])
   );
   const [prefilledBudgetData, setPrefilledBudgetData] = useState<any>(null);
 
@@ -230,6 +255,21 @@ const AppContent: React.FC = () => {
           await db.saveLocal(STORAGE_KEYS.COMPANY, cloudData.company[0]);
         }
 
+        if (Array.isArray(cloudData.financial_accounts)) {
+          setFinancialAccounts(cloudData.financial_accounts);
+          await db.saveLocal(STORAGE_KEYS.FINANCIAL_ACCOUNTS, cloudData.financial_accounts);
+        }
+
+        if (Array.isArray(cloudData.financial_categories)) {
+          setFinancialCategories(cloudData.financial_categories);
+          await db.saveLocal(STORAGE_KEYS.FINANCIAL_CATEGORIES, cloudData.financial_categories);
+        }
+
+        if (Array.isArray(cloudData.account_entries)) {
+          setAccountEntries(cloudData.account_entries);
+          await db.saveLocal(STORAGE_KEYS.ACCOUNT_ENTRIES, cloudData.account_entries);
+        }
+
         const subTables = [
           'plans',
           'plan_services',
@@ -271,6 +311,9 @@ const AppContent: React.FC = () => {
             setTransactions(db.load(STORAGE_KEYS.TRANSACTIONS, []));
             setUsers(db.load(STORAGE_KEYS.USERS, INITIAL_USERS));
             setCompany(db.load(STORAGE_KEYS.COMPANY, INITIAL_COMPANY));
+            setFinancialAccounts(db.load(STORAGE_KEYS.FINANCIAL_ACCOUNTS, []));
+            setFinancialCategories(db.load(STORAGE_KEYS.FINANCIAL_CATEGORIES, []));
+            setAccountEntries(db.load(STORAGE_KEYS.ACCOUNT_ENTRIES, []));
         };
 
         window.addEventListener('db-sync-complete', handleSync);
@@ -409,7 +452,7 @@ const AppContent: React.FC = () => {
       { id: 'budgets', label: 'Orçamentos', icon: FileText },
       { id: 'orders', label: 'O.S. Equip', icon: ClipboardList },
       { id: 'works', label: 'O.S. Obra', icon: HardHat },
-      { id: 'financials', label: 'Financeiro', icon: Wallet },
+      { id: 'financial_mgmt', label: 'Gestão Financeira', icon: Wallet },
       { id: 'search', label: 'Consultar', icon: Search },
       { id: 'users', label: 'Usuários', icon: Lock },
       { id: 'settings', label: 'Empresa', icon: Settings },
@@ -719,6 +762,8 @@ const AppContent: React.FC = () => {
                       prefilledData={prefilledBudgetData}
                       onPrefilledDataConsumed={() => setPrefilledBudgetData(null)}
                       currentUser={currentUser}
+                      accountEntries={accountEntries}
+                      setAccountEntries={setAccountEntries}
                     />
                   )}
 
@@ -751,7 +796,14 @@ const AppContent: React.FC = () => {
                   )}
 
                   {item.id === 'construction' && (
-                    <UnifiedWorksManager customers={customers} company={company} onGenerateBudget={handleGenerateBudget} currentUser={currentUser} />
+                    <UnifiedWorksManager 
+                      customers={customers} 
+                      company={company} 
+                      onGenerateBudget={handleGenerateBudget} 
+                      currentUser={currentUser}
+                      accountEntries={accountEntries}
+                      setAccountEntries={setAccountEntries}
+                    />
                   )}
 
                   {item.id === 'search' && (
@@ -767,10 +819,16 @@ const AppContent: React.FC = () => {
                     />
                   )}
 
-                  {item.id === 'financials' && (
-                    <FinancialControl
+                  {item.id === 'financial_mgmt' && (
+                    <FinancialManager
                       transactions={transactions}
                       setTransactions={setTransactions}
+                      accountEntries={accountEntries}
+                      setAccountEntries={setAccountEntries}
+                      accounts={financialAccounts}
+                      setAccounts={setFinancialAccounts}
+                      categories={financialCategories}
+                      setCategories={setFinancialCategories}
                       currentUser={currentUser}
                     />
                   )}

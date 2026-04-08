@@ -42,6 +42,9 @@ const TOMBSTONE_KEYS = new Set([
   'serviflow_works',
   'serviflow_customers',
   'serviflow_transactions',
+  'serviflow_account_entries',
+  'serviflow_financial_accounts',
+  'serviflow_financial_categories',
 ]);
 
 const CLOUD_TABLES = [
@@ -63,6 +66,9 @@ const CLOUD_TABLES = [
   'work_labor',
   'work_indirects',
   'work_taxes',
+  'financial_accounts',
+  'financial_categories',
+  'account_entries',
 ] as const;
 
 const REALTIME_TABLES = [
@@ -79,6 +85,7 @@ const REALTIME_TABLES = [
   'work_labor',
   'work_indirects',
   'work_taxes',
+  'account_entries',
 ] as const;
 
 const getStorageKeyFromTable = (table: string) => `serviflow_${table}`;

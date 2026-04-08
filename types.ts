@@ -140,6 +140,45 @@ export interface Transaction {
   currentInstallment?: number; // Current installment number
   attachment?: string; // Base64 or URL
   attachmentName?: string;
+  entryId?: string; // Link to the AccountEntry that generated this transaction
+}
+
+export interface FinancialAccount {
+  id: string;
+  name: string;
+  type: 'Corrente' | 'Poupança' | 'Caixa' | 'Investimento';
+  bankName?: string;
+  initialBalance: number;
+  currentBalance: number;
+}
+
+export interface FinancialCategory {
+  id: string;
+  name: string;
+  type: 'RECEITA' | 'DESPESA';
+  icon?: string;
+  color?: string;
+}
+
+export interface AccountEntry {
+  id: string;
+  type: 'PAGAR' | 'RECEBER';
+  status: 'PENDENTE' | 'PAGO' | 'ATRASADO' | 'CANCELADO';
+  amount: number;
+  category: string;
+  description: string;
+  dueDate: string;
+  paymentDate?: string;
+  customerId?: string; 
+  customerName?: string;
+  supplierName?: string;
+  orderId?: string; // Link to Budget/OS
+  workId?: string; // Link to Work (Center of Cost)
+  installmentNumber?: number;
+  totalInstallments?: number;
+  attachment?: string;
+  attachmentName?: string;
+  accountId?: string; // Bank account used for payment
 }
 
 
