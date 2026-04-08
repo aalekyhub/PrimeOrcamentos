@@ -1001,8 +1001,8 @@ const FinancialManager: React.FC<Props> = ({
               </h4>
               <div className="space-y-4">
                 {categories.filter(c => c.type === 'RECEITA').map(cat => {
-                  const total = transactions.filter(t => t.category === cat.name && t.type === 'RECEITA').reduce((a,c) => a + c.amount, 0);
-                  const grandTotal = transactions.filter(t => t.type === 'RECEITA').reduce((a,c) => a + c.amount, 0);
+                  const total = allRealized.filter(t => t.category === cat.name && t.type === 'RECEITA' && t.date.startsWith(selectedYear.toString())).reduce((a,c) => a + c.amount, 0);
+                  const grandTotal = allRealized.filter(t => t.type === 'RECEITA' && t.date.startsWith(selectedYear.toString())).reduce((a,c) => a + c.amount, 0);
                   const percent = grandTotal > 0 ? (total / grandTotal) * 100 : 0;
                   
                   return (
@@ -1026,8 +1026,8 @@ const FinancialManager: React.FC<Props> = ({
               </h4>
               <div className="space-y-4">
                 {categories.filter(c => c.type === 'DESPESA').map(cat => {
-                  const total = transactions.filter(t => t.category === cat.name && t.type === 'DESPESA').reduce((a,c) => a + c.amount, 0);
-                  const grandTotal = transactions.filter(t => t.type === 'DESPESA').reduce((a,c) => a + c.amount, 0);
+                  const total = allRealized.filter(t => t.category === cat.name && t.type === 'DESPESA' && t.date.startsWith(selectedYear.toString())).reduce((a,c) => a + c.amount, 0);
+                  const grandTotal = allRealized.filter(t => t.type === 'DESPESA' && t.date.startsWith(selectedYear.toString())).reduce((a,c) => a + c.amount, 0);
                   const percent = grandTotal > 0 ? (total / grandTotal) * 100 : 0;
                   
                   return (
@@ -1052,27 +1052,27 @@ const FinancialManager: React.FC<Props> = ({
               <div>
                 <p className="text-4xl font-black">
                   R$ {(
-                    transactions.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a,c) => a + c.amount, 0) - 
-                    transactions.filter(t => t.type === 'DESPESA').reduce((a,c) => a + c.amount, 0)
+                    allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category) && t.date.startsWith(selectedYear.toString())).reduce((a,c) => a + c.amount, 0) - 
+                    allRealized.filter(t => t.type === 'DESPESA' && t.date.startsWith(selectedYear.toString())).reduce((a,c) => a + c.amount, 0)
                   ).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </p>
                 <div className="flex items-center gap-4 mt-2">
                   <span className="text-xs font-bold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded">
-                    VENDAS: R$ {transactions.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a,c) => a + c.amount, 0).toLocaleString('pt-BR')}
+                    VENDAS: R$ {allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category) && t.date.startsWith(selectedYear.toString())).reduce((a,c) => a + c.amount, 0).toLocaleString('pt-BR')}
                   </span>
                   <span className="text-xs font-bold text-rose-400 bg-rose-400/10 px-2 py-0.5 rounded">
-                    DESPESAS: R$ {transactions.filter(t => t.type === 'DESPESA').reduce((a,c) => a + c.amount, 0).toLocaleString('pt-BR')}
+                    DESPESAS: R$ {allRealized.filter(t => t.type === 'DESPESA' && t.date.startsWith(selectedYear.toString())).reduce((a,c) => a + c.amount, 0).toLocaleString('pt-BR')}
                   </span>
                   <span className="text-xs font-bold text-indigo-400 bg-indigo-400/10 px-2 py-0.5 rounded">
-                    APORTES: R$ {transactions.filter(t => isAporte(t.category)).reduce((a,c) => a + c.amount, 0).toLocaleString('pt-BR')}
+                    APORTES: R$ {allRealized.filter(t => isAporte(t.category) && t.date.startsWith(selectedYear.toString())).reduce((a,c) => a + c.amount, 0).toLocaleString('pt-BR')}
                   </span>
                 </div>
               </div>
               <div className="text-right">
                 <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Margem Operacional</p>
                 <p className="text-2xl font-black">
-                  {transactions.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a,c) => a + c.amount, 0) > 0 
-                    ? (((transactions.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a,c) => a + c.amount, 0) - transactions.filter(t => t.type === 'DESPESA').reduce((a,c) => a + c.amount, 0)) / transactions.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a,c) => a + c.amount, 0)) * 100).toFixed(1)
+                  {allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category) && t.date.startsWith(selectedYear.toString())).reduce((a,c) => a + c.amount, 0) > 0 
+                    ? (((allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category) && t.date.startsWith(selectedYear.toString())).reduce((a,c) => a + c.amount, 0) - allRealized.filter(t => t.type === 'DESPESA' && t.date.startsWith(selectedYear.toString())).reduce((a,c) => a + c.amount, 0)) / allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category) && t.date.startsWith(selectedYear.toString())).reduce((a,c) => a + c.amount, 0)) * 100).toFixed(1)
                     : '0'
                   }%
                 </p>
