@@ -312,24 +312,24 @@ const FinancialManager: React.FC<Props> = ({
                     <div>
                       <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Faturamento a Receber</p>
                       <h4 className="text-xl font-black text-blue-600">
-                        R$ {accountEntries.filter(e => e.type === 'RECEBER' && !isAporte(e.category) && e.status !== 'PAGO').reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        R$ {accountEntries.filter(e => e.type === 'RECEBER' && !isAporte(e.category) && e.status !== 'PAGO').reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </h4>
                     </div>
                     <div className="p-3 bg-blue-50 dark:bg-blue-900/30 text-blue-600 rounded-2xl group-hover:scale-110 transition-transform">
                       <ArrowUpRight className="w-6 h-6" />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4 mt-6 pt-4 border-t border-slate-50 dark:border-slate-700/50">
+                  <div className="grid grid-cols-2 gap-4 mt-6 pt-4 border-t border-slate-50 dark:border-slate-700/50 min-h-[50px]">
                     <div>
                       <p className="text-[9px] font-bold text-slate-400 uppercase">Vence hoje</p>
                       <p className="text-sm font-black text-slate-700 dark:text-slate-200">
-                        R$ {accountEntries.filter(e => e.type === 'RECEBER' && !isAporte(e.category) && e.status !== 'PAGO' && e.dueDate === getTodayIsoDate()).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR')}
+                        R$ {accountEntries.filter(e => e.type === 'RECEBER' && !isAporte(e.category) && e.status !== 'PAGO' && e.dueDate === getTodayIsoDate()).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
                     </div>
                     <div>
                       <p className="text-[9px] font-bold text-slate-400 uppercase">30 Dias</p>
                       <p className="text-sm font-black text-slate-700 dark:text-slate-200 opacity-60">
-                        R$ {accountEntries.filter(e => e.type === 'RECEBER' && !isAporte(e.category) && e.status !== 'PAGO' && e.dueDate > getTodayIsoDate()).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR')}
+                        R$ {accountEntries.filter(e => e.type === 'RECEBER' && !isAporte(e.category) && e.status !== 'PAGO' && e.dueDate > getTodayIsoDate()).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
                     </div>
                   </div>
@@ -348,24 +348,24 @@ const FinancialManager: React.FC<Props> = ({
                     <div>
                       <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Contas a Pagar</p>
                       <h4 className="text-xl font-black text-rose-600">
-                        R$ {accountEntries.filter(e => e.type === 'PAGAR' && !isAporte(e.category) && e.status !== 'PAGO').reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        R$ {accountEntries.filter(e => e.type === 'PAGAR' && !isAporte(e.category) && e.status !== 'PAGO').reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </h4>
                     </div>
                     <div className="p-2 bg-rose-50 dark:bg-rose-900/30 text-rose-600 rounded-lg group-hover:scale-110 transition-transform">
                       <ArrowDownLeft className="w-4 h-4" />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-3 mt-3 pt-2 border-t border-slate-50 dark:border-slate-700/50">
+                  <div className="grid grid-cols-2 gap-3 mt-3 pt-2 border-t border-slate-50 dark:border-slate-700/50 min-h-[50px]">
                     <div>
                       <p className="text-[9px] font-bold text-slate-400 uppercase">Vence hoje</p>
                       <p className="text-sm font-black text-slate-700 dark:text-slate-200">
-                        R$ {accountEntries.filter(e => e.type === 'PAGAR' && !isAporte(e.category) && e.status !== 'PAGO' && e.dueDate === getTodayIsoDate()).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR')}
+                        R$ {accountEntries.filter(e => e.type === 'PAGAR' && !isAporte(e.category) && e.status !== 'PAGO' && e.dueDate === getTodayIsoDate()).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
                     </div>
                     <div>
                       <p className="text-[9px] font-bold text-slate-400 uppercase">30 Dias</p>
                       <p className="text-sm font-black text-slate-700 dark:text-slate-200 opacity-60">
-                        R$ {accountEntries.filter(e => e.type === 'PAGAR' && !isAporte(e.category) && e.status !== 'PAGO' && e.dueDate > getTodayIsoDate()).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR')}
+                        R$ {accountEntries.filter(e => e.type === 'PAGAR' && !isAporte(e.category) && e.status !== 'PAGO' && e.dueDate > getTodayIsoDate()).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
                     </div>
                   </div>
@@ -385,7 +385,7 @@ const FinancialManager: React.FC<Props> = ({
                     <div>
                       <p className="text-[8px] font-black text-indigo-500 uppercase tracking-widest mb-0.5">Total Recebido (Empréstimos)</p>
                       <h4 className="text-xl font-black text-indigo-600">
-                        R$ {accountEntries.filter(e => (e.type === 'INVESTIMENTO' || isAporte(e.category))).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        R$ {accountEntries.filter(e => (e.type === 'INVESTIMENTO' || isAporte(e.category))).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </h4>
                     </div>
                     <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 rounded-2xl group-hover:scale-110 transition-transform">
@@ -404,9 +404,8 @@ const FinancialManager: React.FC<Props> = ({
                   <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Entradas (Mês Atual)</p>
                   <div className="flex items-center gap-4">
                     <h4 className="text-xl font-black text-slate-900 dark:text-white">
-                      R$ {allRealized.filter(t => t.type === 'RECEITA' && t.date.startsWith(getTodayIsoDate().substring(0, 7))).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      R$ {allRealized.filter(t => t.type === 'RECEITA' && t.date.startsWith(getTodayIsoDate().substring(0, 7))).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </h4>
-                    <span className="px-1 py-0.5 bg-emerald-100 text-emerald-600 text-[8px] font-black rounded-lg">+ {(Math.random() * 20).toFixed(1)}%</span>
                   </div>
                 </div>
 
@@ -415,9 +414,8 @@ const FinancialManager: React.FC<Props> = ({
                   <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Saídas (Mês Atual)</p>
                   <div className="flex items-center gap-4">
                     <h4 className="text-xl font-black text-slate-900 dark:text-white">
-                      - R$ {allRealized.filter(t => t.type === 'DESPESA' && t.date.startsWith(getTodayIsoDate().substring(0, 7))).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR')}
+                      - R$ {allRealized.filter(t => t.type === 'DESPESA' && t.date.startsWith(getTodayIsoDate().substring(0, 7))).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </h4>
-                    <span className="px-1 py-0.5 bg-rose-100 text-rose-600 text-[8px] font-black rounded-lg">- {(Math.random() * 15).toFixed(1)}%</span>
                   </div>
                 </div>
               </div>
@@ -469,7 +467,7 @@ const FinancialManager: React.FC<Props> = ({
                   </div>
                 </div>
                 <div className="mb-5">
-                  <p className="text-2xl font-black">R$ {accounts.reduce((a, c) => a + c.currentBalance, 0).toLocaleString('pt-BR')}</p>
+                  <p className="text-2xl font-black">R$ {accounts.reduce((a, c) => a + c.currentBalance, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                   <p className="text-[8px] text-emerald-400 font-bold mt-0.5 uppercase">Saldo Consolidado</p>
                 </div>
                 <div className="space-y-2">
@@ -481,7 +479,7 @@ const FinancialManager: React.FC<Props> = ({
                         </div>
                         <span className="text-[10px] font-bold uppercase">{acc.name}</span>
                       </div>
-                      <span className="text-[10px] font-black">R$ {acc.currentBalance.toLocaleString('pt-BR')}</span>
+                      <span className="text-[10px] font-black">R$ {acc.currentBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
                   ))}
                   <button
