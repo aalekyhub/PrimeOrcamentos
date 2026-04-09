@@ -336,6 +336,25 @@ const FinancialManager: React.FC<Props> = ({
         </div>
       ) : activeTab === 'entries' ? (
         <div className="space-y-6">
+          {/* Resumo Rápido Pagar/Receber */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
+            <div className="bg-white dark:bg-slate-800 p-5 rounded-[2rem] border border-slate-200 dark:border-slate-700 shadow-sm">
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">A Receber</p>
+              <p className="text-lg font-black text-emerald-500">R$ {accountEntries.filter(e => e.type === 'RECEBER' && e.status !== 'PAGO').reduce((a,c)=>a+c.amount, 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+            </div>
+            <div className="bg-white dark:bg-slate-800 p-5 rounded-[2rem] border border-slate-200 dark:border-slate-700 shadow-sm">
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">A Pagar</p>
+              <p className="text-lg font-black text-rose-500">R$ {accountEntries.filter(e => e.type === 'PAGAR' && e.status !== 'PAGO').reduce((a,c)=>a+c.amount, 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+            </div>
+            <div className="bg-slate-900 p-5 rounded-[2rem] shadow-xl">
+              <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Saldo Previsto</p>
+              <p className="text-lg font-black text-white">R$ {(
+                accountEntries.filter(e => e.type === 'RECEBER' && e.status !== 'PAGO').reduce((a,c)=>a+c.amount, 0) - 
+                accountEntries.filter(e => e.type === 'PAGAR' && e.status !== 'PAGO').reduce((a,c)=>a+c.amount, 0)
+              ).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+            </div>
+          </div>
+
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-800 p-5 rounded-[2rem] border border-slate-200 dark:border-slate-700 mb-6">
             <div className="flex-1 relative">
               <Tag className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -366,21 +385,42 @@ const FinancialManager: React.FC<Props> = ({
           />
         </div>
       ) : activeTab === 'history' ? (
-        <TransactionsHistory 
-          transactions={allRealized} searchQuery={historySearch} setSearchQuery={setHistorySearch}
-          onDelete={async (id) => {
-            if(!confirm("Excluir registro histórico? (Isso não altera o saldo atual)")) return;
-            const newList = transactions.filter(t => t.id !== id);
-            setTransactions(newList);
-            await db.remove('serviflow_transactions', id);
-            notify("Excluído.");
-          }}
-          onViewAttachment={(t) => window.open(t.attachment, '_blank')}
-          onExport={() => setPrintData({
-            html: buildFinancialReportHtml(transactions, accountEntries, accounts, categories, company, 'EXTRATO', 'Geral'),
-            title: 'Extrato de Caixa', filename: `EXTRATO_${getTodayIsoDate()}`
-          })}
-        />
+        <div className="space-y-6">
+          {/* Resumo Rápido Fluxo Realizado */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
+            <div className="bg-white dark:bg-slate-800 p-5 rounded-[2rem] border border-slate-200 dark:border-slate-700 shadow-sm">
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Entradas</p>
+              <p className="text-lg font-black text-emerald-500">R$ {allRealized.filter(t => t.type === 'RECEITA').reduce((a,c)=>a+c.amount, 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+            </div>
+            <div className="bg-white dark:bg-slate-800 p-5 rounded-[2rem] border border-slate-200 dark:border-slate-700 shadow-sm">
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Saídas</p>
+              <p className="text-lg font-black text-rose-500">R$ {allRealized.filter(t => t.type === 'DESPESA').reduce((a,c)=>a+c.amount, 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+            </div>
+            <div className="bg-slate-900 p-5 rounded-[2rem] shadow-xl">
+              <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Saldo em Caixa</p>
+              <p className="text-lg font-black text-white">R$ {(
+                allRealized.filter(t => t.type === 'RECEITA').reduce((a,c)=>a+c.amount, 0) - 
+                allRealized.filter(t => t.type === 'DESPESA').reduce((a,c)=>a+c.amount, 0)
+              ).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+            </div>
+          </div>
+
+          <TransactionsHistory 
+            transactions={allRealized} searchQuery={historySearch} setSearchQuery={setHistorySearch}
+            onDelete={async (id) => {
+              if(!confirm("Excluir registro histórico? (Isso não altera o saldo atual)")) return;
+              const newList = transactions.filter(t => t.id !== id);
+              setTransactions(newList);
+              await db.remove('serviflow_transactions', id);
+              notify("Excluído.");
+            }}
+            onViewAttachment={(t) => window.open(t.attachment, '_blank')}
+            onExport={() => setPrintData({
+              html: buildFinancialReportHtml(transactions, accountEntries, accounts, categories, company, 'EXTRATO', 'Geral'),
+              title: 'Extrato de Caixa', filename: `EXTRATO_${getTodayIsoDate()}`
+            })}
+          />
+        </div>
       ) : activeTab === 'results' ? (
         <ResultsTab 
           categories={categories} allRealized={allRealized} 
