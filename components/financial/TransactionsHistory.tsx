@@ -28,10 +28,10 @@ const TransactionsHistory: React.FC<TransactionsHistoryProps> = ({
   setSearchQuery
 }) => {
   const filtered = transactions.filter(t => 
-    t.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    t.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    t.customerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    t.supplierName?.toLowerCase().includes(searchQuery.toLowerCase())
+    (t.description || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (t.category || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (t.customerName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (t.supplierName || "").toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (

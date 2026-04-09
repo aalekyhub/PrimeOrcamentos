@@ -367,7 +367,7 @@ const FinancialManager: React.FC<Props> = ({
         </div>
       ) : activeTab === 'history' ? (
         <TransactionsHistory 
-          transactions={transactions} searchQuery={historySearch} setSearchQuery={setHistorySearch}
+          transactions={allRealized} searchQuery={historySearch} setSearchQuery={setHistorySearch}
           onDelete={async (id) => {
             if(!confirm("Excluir registro histórico? (Isso não altera o saldo atual)")) return;
             const newList = transactions.filter(t => t.id !== id);
