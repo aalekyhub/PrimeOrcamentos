@@ -45,6 +45,7 @@ import SettlementModal from './financial/SettlementModal';
 import TransactionsHistory from './financial/TransactionsHistory';
 import ResultsTab from './financial/ResultsTab';
 import SettingsTab from './financial/SettingsTab';
+import EntryForm from './financial/EntryForm';
 
 interface Props {
   transactions: Transaction[];
@@ -82,6 +83,9 @@ const FinancialManager: React.FC<Props> = ({
   const [historySearch, setHistorySearch] = useState('');
   const [entrySearch, setEntrySearch] = useState('');
   const [entryTypeFilter, setEntryTypeFilter] = useState<'ALL' | 'PAGAR' | 'RECEBER'>('ALL');
+  const [editingItem, setEditingItem] = useState<AccountEntry | Transaction | null>(null);
+  const [viewingAttachment, setViewingAttachment] = useState<{content: string, name: string} | null>(null);
+  const [formPrefill, setFormPrefill] = useState<Partial<AccountEntry> | undefined>(undefined);
   const [printData, setPrintData] = useState<{html: string, title: string, filename: string} | null>(null);
   
   const { notify } = useNotify();
@@ -149,17 +153,6 @@ const FinancialManager: React.FC<Props> = ({
     };
   });
 
-  // Formulário Inicial
-  const initialFormData: Partial<AccountEntry> = {
-    type: 'PAGAR',
-    status: 'PENDENTE',
-    dueDate: getTodayIsoDate(),
-    amount: 0,
-    category: categories[0]?.name || 'Geral',
-    description: ''
-  };
-  const [formData, setFormData] = useState<Partial<AccountEntry>>(initialFormData);
-
   // Migração de Naturezas
   useEffect(() => {
     const needsMigration = categories.length > 0 && categories.some(c => !c.nature);
@@ -177,25 +170,36 @@ const FinancialManager: React.FC<Props> = ({
   }, [categories]);
 
   // Handlers Principais
-  const handleAddEntry = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.amount || !formData.description) return;
+  const handleCreateEntry = async (data: Partial<AccountEntry>) => {
+    if (!data.amount || !data.description) return;
 
-    const isInvestment = formData.type === 'INVESTIMENTO';
+    const isInvestment = data.type === 'INVESTIMENTO';
     const newEntry: AccountEntry = {
       id: `ENT-${Date.now()}`,
-      type: formData.type as any,
+      type: data.type as any,
       status: isInvestment ? 'PAGO' : 'PENDENTE',
-      amount: Number(formData.amount),
-      category: formData.category || 'Geral',
-      description: formData.description || '',
-      dueDate: formData.dueDate || getTodayIsoDate(),
+      amount: Number(data.amount),
+      category: data.category || 'Geral',
+      description: data.description || '',
+      dueDate: data.dueDate || getTodayIsoDate(),
       paymentDate: isInvestment ? getTodayIsoDate() : undefined,
-      customerName: formData.customerName,
-      supplierName: formData.supplierName,
-      attachment: formData.attachment,
-      attachmentName: formData.attachmentName
+      customerName: data.customerName,
+      supplierName: data.supplierName,
+      attachment: data.attachment,
+      attachmentName: data.attachmentName
     };
+
+    // Se for investimento imediato, atualizar o saldo da conta selecionada
+    if (isInvestment && data.accountId) {
+      const updatedAccounts = accounts.map(acc => {
+        if (acc.id === data.accountId) {
+          return { ...acc, currentBalance: acc.currentBalance + Number(data.amount) };
+        }
+        return acc;
+      });
+      setAccounts(updatedAccounts);
+      await db.save('serviflow_financial_accounts', updatedAccounts, null);
+    }
 
     const newList = [newEntry, ...accountEntries];
     setAccountEntries(newList);
@@ -205,10 +209,10 @@ const FinancialManager: React.FC<Props> = ({
       const newTransaction: Transaction = {
         id: `TR-INV-${Date.now()}`,
         date: getTodayIsoDate(),
-        amount: Number(formData.amount),
+        amount: Number(data.amount),
         type: 'RECEITA',
-        category: formData.category || 'Aporte de Sócios',
-        description: formData.description || 'Aporte de Capital',
+        category: data.category || 'Aporte de Sócios',
+        description: data.description || 'Aporte de Capital',
         entryId: newEntry.id
       };
       setTransactions([newTransaction, ...transactions]);
@@ -216,8 +220,17 @@ const FinancialManager: React.FC<Props> = ({
     }
 
     setShowForm(false);
-    setFormData(initialFormData);
-    notify(isInvestment ? "Aporte registrado com sucesso!" : "Lançamento provisionado!");
+    notify(isInvestment ? "Aporte registrado e saldo atualizado!" : "Lançamento provisionado!");
+  };
+
+  const handleUpdateEntry = async (updatedData: Partial<AccountEntry>) => {
+    if (!editingEntry) return;
+    const updated = { ...editingEntry, ...updatedData };
+    const newList = accountEntries.map(e => e.id === updated.id ? updated : e);
+    setAccountEntries(newList);
+    await db.save('serviflow_account_entries', newList, updated);
+    setEditingEntry(null);
+    notify("Lançamento atualizado!");
   };
 
   const filteredEntries = accountEntries.filter(e => {
@@ -281,8 +294,10 @@ const FinancialManager: React.FC<Props> = ({
                 onCardClick={(type) => {
                   if (type === 'APORTE') {
                     const cat = categories.find(c => isAporte(c.name))?.name || 'Aporte de Sócios';
-                    setFormData({ ...initialFormData, type: 'INVESTIMENTO', category: cat });
-                  } else setFormData({ ...initialFormData, type: type as any });
+                    setFormPrefill({ type: 'INVESTIMENTO', category: cat });
+                  } else {
+                    setFormPrefill({ type: type as any });
+                  }
                   setShowForm(true);
                 }}
               />
@@ -339,6 +354,7 @@ const FinancialManager: React.FC<Props> = ({
           <EntriesTable 
             entries={filteredEntries} accounts={accounts}
             onSettle={(e) => setSettlingEntry(e)}
+            onEdit={(e) => setEditingEntry(e)}
             onDelete={async (id) => {
               if(!confirm("Excluir provisão?")) return;
               const newList = accountEntries.filter(e => e.id !== id);
@@ -361,7 +377,7 @@ const FinancialManager: React.FC<Props> = ({
           }}
           onViewAttachment={(t) => window.open(t.attachment, '_blank')}
           onExport={() => setPrintData({
-            html: buildFinancialReportHtml(transactions, accountEntries, accounts, categories, company, 'REALIZADO'),
+            html: buildFinancialReportHtml(transactions, accountEntries, accounts, categories, company, 'EXTRATO', 'Geral'),
             title: 'Extrato de Caixa', filename: `EXTRATO_${getTodayIsoDate()}`
           })}
         />
@@ -376,7 +392,13 @@ const FinancialManager: React.FC<Props> = ({
           onAddAccount={async () => {
              const name = prompt("Nome da conta:"); if(!name) return;
              const balance = Number(prompt("Saldo inicial:", "0"));
-             const newAcc: FinancialAccount = { id: `ACC-${Date.now()}`, name, initialBalance: balance, currentBalance: balance };
+             const newAcc: FinancialAccount = { 
+               id: `ACC-${Date.now()}`, 
+               name, 
+               initialBalance: balance, 
+               currentBalance: balance,
+               type: 'Corrente'
+             };
              setAccounts([...accounts, newAcc]);
              await db.save('serviflow_financial_accounts', [...accounts, newAcc], newAcc);
           }}
@@ -408,96 +430,27 @@ const FinancialManager: React.FC<Props> = ({
         />
       )}
 
-      {/* Formulário de Novo Lançamento */}
+      {/* Formulários de Cadastro e Edição Mundados p/ Componente */}
       {showForm && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-white dark:bg-slate-800 w-full max-w-2xl rounded-[3rem] p-10 shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-300">
-            <button onClick={() => setShowForm(false)} className="absolute top-8 right-8 text-slate-400 hover:text-rose-500 transition-colors">
-              <X className="w-8 h-8" />
-            </button>
-            <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-[0.2em] mb-8">Novo Lançamento</h3>
-            
-            <form onSubmit={handleAddEntry} className="space-y-6">
-               <div className="grid grid-cols-2 gap-6">
-                  <div className="col-span-2">
-                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Tipo de Operação</label>
-                     <div className="grid grid-cols-3 gap-3">
-                        {['RECEITA', 'PAGAR', 'INVESTIMENTO'].map(t => (
-                          <button key={t} type="button" onClick={() => setFormData({...formData, type: t as any})} className={`py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border-2 transition-all ${formData.type === t ? 'bg-slate-900 text-white border-slate-900 shadow-xl scale-[1.02]' : 'bg-slate-50 text-slate-400 border-transparent hover:bg-slate-100'}`}>
-                            {t === 'INVESTIMENTO' ? 'Aporte' : t === 'PAGAR' ? 'Despesa' : 'Receita'}
-                          </button>
-                        ))}
-                     </div>
-                  </div>
-                  <div className="col-span-2">
-                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Descrição</label>
-                     <input type="text" required value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl text-sm font-bold border-none outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ex: Pagamento Fornecedor X" />
-                  </div>
-                  <div>
-                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Valor (R$)</label>
-                     <input type="number" step="0.01" required value={formData.amount || ''} onChange={e => setFormData({...formData, amount: Number(e.target.value)})} className="w-full bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl text-sm font-bold border-none outline-none focus:ring-2 focus:ring-blue-500" />
-                  </div>
-                  <div>
-                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Vencimento</label>
-                     <input type="date" required value={formData.dueDate} onChange={e => setFormData({...formData, dueDate: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl text-sm font-bold border-none outline-none focus:ring-2 focus:ring-blue-500" />
-                  </div>
-                  <div className="col-span-2">
-                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Categoria</label>
-                     <select value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} className="w-full bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl text-sm font-bold border-none outline-none focus:ring-2 focus:ring-blue-500 uppercase">
-                        {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
-                     </select>
-                  </div>
-               </div>
-               <button type="submit" className="w-full py-5 mt-4 bg-blue-600 text-white rounded-[2rem] font-black uppercase tracking-[0.3em] shadow-2xl hover:bg-blue-700 transition-all hover:scale-[1.02] active:scale-[0.98]">Confirmar e Gravar</button>
-            </form>
-          </div>
-        </div>
+        <EntryForm 
+          title="Novo Lançamento"
+          initialData={formPrefill}
+          categories={categories}
+          accounts={accounts}
+          onClose={() => { setShowForm(false); setFormPrefill(undefined); }}
+          onSubmit={(data, accId) => handleCreateEntry({ ...data, accountId: accId })}
+        />
       )}
 
-      {/* Modais de Fluxo */}
-      <SettlementModal 
-        entry={settlingEntry} accounts={accounts} onClose={() => setSettlingEntry(null)}
-        onConfirm={async (entryId, accountId) => {
-          const entry = accountEntries.find(e => e.id === entryId);
-          const selectedAccount = accounts.find(a => a.id === accountId);
-          if (entry && selectedAccount) {
-            const amount = entry.amount;
-            const isIncoming = entry.type === 'RECEBER' || entry.type === 'INVESTIMENTO';
-            
-            const updatedAccounts = accounts.map(acc => {
-              if (acc.id === selectedAccount.id) return { ...acc, currentBalance: isIncoming ? acc.currentBalance + amount : acc.currentBalance - amount };
-              return acc;
-            });
-            setAccounts(updatedAccounts);
-            db.save('serviflow_financial_accounts', updatedAccounts, null);
-
-            const newTransaction: Transaction = {
-              id: `TR-${Date.now()}`, date: getTodayIsoDate(), amount, 
-              type: isIncoming ? 'RECEITA' : 'DESPESA', category: entry.category,
-              description: `[BAIXA] ${entry.description}`, entryId: entry.id,
-              customerName: entry.customerName, supplierName: entry.supplierName
-            };
-            setTransactions([newTransaction, ...transactions]);
-            db.save('serviflow_transactions', [newTransaction, ...transactions], newTransaction);
-
-            const newList = accountEntries.map(e => e.id === entry.id ? { ...e, status: 'PAGO' as any, paymentDate: getTodayIsoDate(), accountId: selectedAccount.id } : e);
-            setAccountEntries(newList);
-            db.save('serviflow_account_entries', newList, { ...entry, status: 'PAGO' as any, paymentDate: getTodayIsoDate(), accountId: selectedAccount.id });
-            
-            setSettlingEntry(null);
-            notify(`Baixa concluída!`);
-          }
-        }}
-      />
-
       {editingEntry && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
-           {/* Modal de Edição (Placeholder para simplificar fragmentação) */}
-           <div className="bg-white dark:bg-slate-800 p-8 rounded-[3rem] shadow-2xl">
-              <h4 className="font-black uppercase tracking-widest text-slate-400 mb-4">Edição não disponível nesta versão modularizada</h4>
-              <button onClick={() => setEditingEntry(null)} className="px-6 py-2 bg-slate-900 text-white rounded-xl uppercase font-black text-[10px]">Fechar</button>
-           </div>
-        </div>
+        <EntryForm 
+          title="Editar Lançamento"
+          initialData={editingEntry}
+          categories={categories}
+          accounts={accounts}
+          onClose={() => setEditingEntry(null)}
+          onSubmit={(data) => handleUpdateEntry(data)}
+        />
       )}
 
       {printData && <ReportPreview html={printData.html} title={printData.title} filename={printData.filename} onClose={() => setPrintData(null)} />}

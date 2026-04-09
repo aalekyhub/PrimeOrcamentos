@@ -6,10 +6,10 @@ import {
   Trash2, 
   Paperclip,
   TrendingUp,
-  ChevronRight,
   ArrowUpRight,
   ArrowDownLeft,
-  Coins
+  Coins,
+  Pencil
 } from 'lucide-react';
 import { AccountEntry, FinancialAccount } from '../../types';
 
@@ -17,6 +17,7 @@ interface EntriesTableProps {
   entries: AccountEntry[];
   accounts: FinancialAccount[];
   onSettle: (entry: AccountEntry) => void;
+  onEdit: (entry: AccountEntry) => void;
   onDelete: (id: string) => void;
   onViewAttachment: (entry: AccountEntry) => void;
 }
@@ -25,6 +26,7 @@ const EntriesTable: React.FC<EntriesTableProps> = ({
   entries, 
   accounts, 
   onSettle, 
+  onEdit,
   onDelete, 
   onViewAttachment 
 }) => {
@@ -131,7 +133,7 @@ const EntriesTable: React.FC<EntriesTableProps> = ({
                       )}
                     </div>
                   </td>
-                  <td className="px-8 py-5">
+                  <td className="px-8 py-5 text-right">
                     <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
                        {entry.status === 'PENDENTE' && (
                          <button 
@@ -142,6 +144,13 @@ const EntriesTable: React.FC<EntriesTableProps> = ({
                            <Coins className="w-4 h-4" />
                          </button>
                        )}
+                       <button 
+                         onClick={() => onEdit(entry)}
+                         className="p-2.5 bg-blue-50 text-blue-400 hover:bg-blue-600 hover:text-white rounded-xl transition-all"
+                         title="Editar Lançamento"
+                       >
+                         <Pencil className="w-4 h-4" />
+                       </button>
                        <button 
                          onClick={() => onDelete(entry.id)}
                          className="p-2.5 bg-slate-50 text-slate-400 hover:bg-rose-600 hover:text-white rounded-xl transition-all"
