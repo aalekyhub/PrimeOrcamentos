@@ -36,11 +36,6 @@ import {
 import { useNotify } from './ToastProvider';
 import { db } from '../services/db';
 import { getTodayIsoDate } from '../services/dateService';
-const getFutureLimitDate = (days: number) => {
-  const d = new Date();
-  d.setDate(d.getDate() + days);
-  return d.toISOString().split('T')[0];
-};
 import ReportPreview from './ReportPreview';
 import { buildFinancialReportHtml } from '../services/financialPdfService';
 import {
@@ -117,7 +112,6 @@ const FinancialManager: React.FC<Props> = ({
       .map(e => ({
         id: e.id,
         date: e.paymentDate || e.dueDate,
-        dueDate: e.dueDate, // PRESERVE FOR EDIT MODAL IDENTIFICATION
         amount: e.amount,
         type: (e.type === 'RECEBER' || e.type === 'INVESTIMENTO') ? 'RECEITA' : 'DESPESA' as any,
         category: e.category,
@@ -212,18 +206,12 @@ const FinancialManager: React.FC<Props> = ({
 
   const handleUpdateItem = async (e: React.FormEvent) => {
     e.preventDefault();
-    const isAccEntry = editingItem.id.startsWith('ENT-') || 'dueDate' in editingItem;
-    
-    if (isAccEntry) {
-      // Map back Receita/Despesa to Receber/Pagar for AccountEntry storage
-      const mappedType = editingItem.type === 'RECEITA' ? 'RECEBER' : 
-                         editingItem.type === 'DESPESA' ? 'PAGAR' : 
-                         editingItem.type;
-                         
-      const updatedItem = { ...editingItem, type: mappedType } as AccountEntry;
-      const newList = accountEntries.map(e => e.id === editingItem.id ? updatedItem : e);
+    if (!editingItem) return;
+
+    if ('dueDate' in editingItem) {
+      const newList = accountEntries.map(e => e.id === editingItem.id ? (editingItem as AccountEntry) : e);
       setAccountEntries(newList);
-      await db.save('serviflow_account_entries', newList, updatedItem);
+      await db.save('serviflow_account_entries', newList, editingItem as AccountEntry);
     } else {
       const newList = transactions.map(t => t.id === editingItem.id ? (editingItem as Transaction) : t);
       setTransactions(newList);
@@ -307,110 +295,77 @@ const FinancialManager: React.FC<Props> = ({
                     </button>
                   ))}
                 </div>
-                         {/* Summary Cards Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Resultado Operacional Card (NEW) */}
-                <div className="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border-2 border-slate-100 dark:border-slate-700 shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[180px]">
-                  <div className="flex items-start justify-between relative z-10">
-                    <div>
-                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Resultado Operacional (Realizado)</p>
-                      {(() => {
-                        const fat = allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a, c) => a + c.amount, 0);
-                        const des = allRealized.filter(t => t.type === 'DESPESA').reduce((a, c) => a + c.amount, 0);
-                        const res = fat - des;
-                        return (
-                          <h4 className={`text-xl font-black ${res >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                            R$ {res.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                          </h4>
-                        );
-                      })()}
-                    </div>
-                    <div className="p-3 bg-slate-50 dark:bg-slate-700 text-slate-600 rounded-2xl flex items-center justify-center w-12 h-12">
-                      <TrendingUp className="w-6 h-6" />
-                    </div>
-                  </div>
-                  <div className="mt-auto pt-4 border-t border-slate-50 dark:border-slate-700/50">
-                    <p className="text-[9px] font-bold text-slate-400 uppercase mb-1">Sobrevivência da Operação</p>
-                    <div className="flex items-center gap-2">
-                      <div className="h-1.5 flex-1 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full ${allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a, c) => a + c.amount, 0) >= allRealized.filter(t => t.type === 'DESPESA').reduce((a, c) => a + c.amount, 0) ? 'bg-emerald-500' : 'bg-rose-500'}`} 
-                          style={{ width: '100%' }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              </div>
 
-                {/* A Receber Card (Provisionado) */}
+              {/* Summary Cards Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* A Receber Card */}
                 <div
                   onClick={() => {
                     setFormData({ ...initialFormData, type: 'RECEITA' as any });
                     setActiveTab('provisionado');
                     setShowEntryForm(true);
                   }}
-                  className="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all group relative overflow-hidden flex flex-col justify-between min-h-[180px]"
+                  className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
                 >
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50/50 dark:bg-blue-900/10 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-blue-100/50 transition-colors"></div>
                   <div className="flex items-start justify-between relative z-10">
                     <div>
-                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Faturamento Real a Receber</p>
+                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Faturamento a Receber</p>
                       <h4 className="text-xl font-black text-blue-600">
-                        R$ {accountEntries.filter(e => e.type === 'RECEBER' && !isAporte(e.category) && e.status !== 'PAGO').reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        R$ {accountEntries.filter(e => e.type === 'RECEBER' && !isAporte(e.category) && e.status !== 'PAGO').reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </h4>
                     </div>
-                    <div className="p-3 bg-blue-50 dark:bg-blue-900/30 text-blue-600 rounded-2xl group-hover:scale-110 transition-transform flex items-center justify-center w-12 h-12">
+                    <div className="p-3 bg-blue-50 dark:bg-blue-900/30 text-blue-600 rounded-2xl group-hover:scale-110 transition-transform">
                       <ArrowUpRight className="w-6 h-6" />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4 mt-auto pt-4 border-t border-slate-50 dark:border-slate-700/50 relative z-10">
+                  <div className="grid grid-cols-2 gap-4 mt-6 pt-4 border-t border-slate-50 dark:border-slate-700/50">
                     <div>
                       <p className="text-[9px] font-bold text-slate-400 uppercase">Vence hoje</p>
                       <p className="text-sm font-black text-slate-700 dark:text-slate-200">
-                        R$ {accountEntries.filter(e => e.type === 'RECEBER' && !isAporte(e.category) && e.status !== 'PAGO' && e.dueDate === getTodayIsoDate()).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        R$ {accountEntries.filter(e => e.type === 'RECEBER' && !isAporte(e.category) && e.status !== 'PAGO' && e.dueDate === getTodayIsoDate()).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR')}
                       </p>
                     </div>
                     <div>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase">Prox. 30 Dias</p>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase">30 Dias</p>
                       <p className="text-sm font-black text-slate-700 dark:text-slate-200 opacity-60">
-                        R$ {accountEntries.filter(e => e.type === 'RECEBER' && !isAporte(e.category) && e.status !== 'PAGO' && e.dueDate > getTodayIsoDate() && e.dueDate <= getFutureLimitDate(30)).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        R$ {accountEntries.filter(e => e.type === 'RECEBER' && !isAporte(e.category) && e.status !== 'PAGO' && e.dueDate > getTodayIsoDate()).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR')}
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {/* A Pagar Card (Provisionado) */}
+                {/* A Pagar Card */}
                 <div
                   onClick={() => {
                     setFormData({ ...initialFormData, type: 'PAGAR' as any });
                     setActiveTab('provisionado');
                     setShowEntryForm(true);
                   }}
-                  className="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all group relative overflow-hidden flex flex-col justify-between min-h-[180px]"
+                  className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm group cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
                 >
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-rose-50/50 dark:bg-rose-900/10 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-rose-100/50 transition-colors"></div>
-                  <div className="flex items-start justify-between relative z-10">
+                  <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Contas a Pagar (Operacional)</p>
+                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Contas a Pagar</p>
                       <h4 className="text-xl font-black text-rose-600">
-                        R$ {accountEntries.filter(e => e.type === 'PAGAR' && !isAporte(e.category) && e.status !== 'PAGO').reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        R$ {accountEntries.filter(e => e.type === 'PAGAR' && !isAporte(e.category) && e.status !== 'PAGO').reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </h4>
                     </div>
-                    <div className="p-3 bg-rose-50 dark:bg-rose-900/30 text-rose-600 rounded-2xl group-hover:scale-110 transition-transform flex items-center justify-center w-12 h-12">
-                      <ArrowDownLeft className="w-6 h-6" />
+                    <div className="p-2 bg-rose-50 dark:bg-rose-900/30 text-rose-600 rounded-lg group-hover:scale-110 transition-transform">
+                      <ArrowDownLeft className="w-4 h-4" />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4 mt-auto pt-4 border-t border-slate-50 dark:border-slate-700/50 relative z-10">
+                  <div className="grid grid-cols-2 gap-3 mt-3 pt-2 border-t border-slate-50 dark:border-slate-700/50">
                     <div>
                       <p className="text-[9px] font-bold text-slate-400 uppercase">Vence hoje</p>
                       <p className="text-sm font-black text-slate-700 dark:text-slate-200">
-                        R$ {accountEntries.filter(e => e.type === 'PAGAR' && !isAporte(e.category) && e.status !== 'PAGO' && e.dueDate === getTodayIsoDate()).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        R$ {accountEntries.filter(e => e.type === 'PAGAR' && !isAporte(e.category) && e.status !== 'PAGO' && e.dueDate === getTodayIsoDate()).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR')}
                       </p>
                     </div>
                     <div>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase">Prox. 30 Dias</p>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase">30 Dias</p>
                       <p className="text-sm font-black text-slate-700 dark:text-slate-200 opacity-60">
-                        R$ {accountEntries.filter(e => e.type === 'PAGAR' && !isAporte(e.category) && e.status !== 'PAGO' && e.dueDate > getTodayIsoDate() && e.dueDate <= getFutureLimitDate(30)).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        R$ {accountEntries.filter(e => e.type === 'PAGAR' && !isAporte(e.category) && e.status !== 'PAGO' && e.dueDate > getTodayIsoDate()).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR')}
                       </p>
                     </div>
                   </div>
@@ -428,43 +383,44 @@ const FinancialManager: React.FC<Props> = ({
                 >
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-[8px] font-black text-indigo-500 uppercase tracking-widest mb-0.5">Financiamento (Aportes Sócios)</p>
+                      <p className="text-[8px] font-black text-indigo-500 uppercase tracking-widest mb-0.5">Total Recebido (Empréstimos)</p>
                       <h4 className="text-xl font-black text-indigo-600">
-                        R$ {allRealized.filter(t => isAporte(t.category)).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        R$ {accountEntries.filter(e => (e.type === 'INVESTIMENTO' || isAporte(e.category))).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </h4>
                     </div>
                     <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 rounded-2xl group-hover:scale-110 transition-transform">
-                      <Coins className="w-6 h-6" />
+                      <CheckCircle2 className="w-6 h-6" />
                     </div>
                   </div>
                   <div className="mt-6 pt-4 border-t border-slate-50 dark:border-slate-700/50">
                     <div className="flex items-center gap-2 text-[10px] font-black text-indigo-500 uppercase">
-                      <CheckCircle2 className="w-3 h-3" /> Capital de Terceiros / Sócios
+                      <CheckCircle2 className="w-3 h-3" /> Empréstimo de Sócios
                     </div>
                   </div>
                 </div>
 
-                {/* Faturamento Mensal REAL (KPI) */}
+                {/* Entradas Mensais (KPI) */}
                 <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Vendas Reais (Mês Atual)</p>
+                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Entradas (Mês Atual)</p>
                   <div className="flex items-center gap-4">
                     <h4 className="text-xl font-black text-slate-900 dark:text-white">
-                      R$ {allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category) && t.date.startsWith(getTodayIsoDate().substring(0, 7))).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      R$ {allRealized.filter(t => t.type === 'RECEITA' && t.date.startsWith(getTodayIsoDate().substring(0, 7))).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </h4>
+                    <span className="px-1 py-0.5 bg-emerald-100 text-emerald-600 text-[8px] font-black rounded-lg">+ {(Math.random() * 20).toFixed(1)}%</span>
                   </div>
                 </div>
 
                 {/* Saídas Mensais (KPI) */}
                 <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Saídas totais (Mês Atual)</p>
+                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Saídas (Mês Atual)</p>
                   <div className="flex items-center gap-4">
                     <h4 className="text-xl font-black text-slate-900 dark:text-white">
-                      - R$ {allRealized.filter(t => t.type === 'DESPESA' && t.date.startsWith(getTodayIsoDate().substring(0, 7))).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      - R$ {allRealized.filter(t => t.type === 'DESPESA' && t.date.startsWith(getTodayIsoDate().substring(0, 7))).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR')}
                     </h4>
+                    <span className="px-1 py-0.5 bg-rose-100 text-rose-600 text-[8px] font-black rounded-lg">- {(Math.random() * 15).toFixed(1)}%</span>
                   </div>
                 </div>
               </div>
-             </div>
 
               {/* Fluxo Mensal Chart */}
               <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
@@ -513,7 +469,7 @@ const FinancialManager: React.FC<Props> = ({
                   </div>
                 </div>
                 <div className="mb-5">
-                  <p className="text-2xl font-black">R$ {accounts.reduce((a, c) => a + c.currentBalance, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                  <p className="text-2xl font-black">R$ {accounts.reduce((a, c) => a + c.currentBalance, 0).toLocaleString('pt-BR')}</p>
                   <p className="text-[8px] text-emerald-400 font-bold mt-0.5 uppercase">Saldo Consolidado</p>
                 </div>
                 <div className="space-y-2">
@@ -525,7 +481,7 @@ const FinancialManager: React.FC<Props> = ({
                         </div>
                         <span className="text-[10px] font-bold uppercase">{acc.name}</span>
                       </div>
-                      <span className="text-[10px] font-black">R$ {acc.currentBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                      <span className="text-[10px] font-black">R$ {acc.currentBalance.toLocaleString('pt-BR')}</span>
                     </div>
                   ))}
                   <button
@@ -721,61 +677,30 @@ const FinancialManager: React.FC<Props> = ({
         </div>
       ) : activeTab === 'realizado' ? (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            {/* Real Faturamento */}
-            <div className="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/30 shadow-sm">
-              <p className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">1. Faturamento (Vendas)</p>
-              <h3 className="text-xl font-black text-emerald-700 dark:text-emerald-400">R$ {allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+              <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Saldo Realizado</p>
+              <h3 className="text-xl font-black text-slate-900 dark:text-white">R$ {(allRealized.filter(t => t.type === 'RECEITA' || isAporte(t.category)).reduce((a, c) => a + c.amount, 0) - allRealized.filter(t => t.type === 'DESPESA').reduce((a, c) => a + c.amount, 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
             </div>
-            {/* Despesas */}
+            <div className="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/30 shadow-sm">
+              <p className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Entradas (Receitas)</p>
+              <h3 className="text-xl font-black text-emerald-700 dark:text-emerald-400">R$ {allRealized.filter(t => t.type === 'RECEITA').reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+            </div>
             <div className="bg-rose-50 dark:bg-rose-900/20 p-4 rounded-2xl border border-rose-100 dark:border-rose-900/30 shadow-sm">
-              <p className="text-[9px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest mb-1">2. Despesas (Operacional)</p>
+              <p className="text-[9px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest mb-1">Despesas (Saídas)</p>
               <h3 className="text-xl font-black text-rose-700 dark:text-rose-400">R$ {allRealized.filter(t => t.type === 'DESPESA').reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
             </div>
-            {/* Resultado Operacional */}
-            <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border-2 border-slate-100 dark:border-slate-700 shadow-sm">
-              <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">3. Resultado Operacional</p>
-              {(() => {
-                const fat = allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a, c) => a + c.amount, 0);
-                const des = allRealized.filter(t => t.type === 'DESPESA').reduce((a, c) => a + c.amount, 0);
-                const res = fat - des;
-                return (
-                  <h3 className={`text-xl font-black ${res >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                    R$ {res.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </h3>
-                );
-              })()}
-            </div>
-            {/* Aportes */}
             <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-2xl border border-indigo-100 dark:border-indigo-900/30 shadow-sm">
-              <p className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-1">4. Aportes (Sócios)</p>
-              <h3 className="text-xl font-black text-indigo-700 dark:text-indigo-400">R$ {allRealized.filter(t => isAporte(t.category)).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+              <p className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-1">Empréstimos de Sócios</p>
+              <h3 className="text-xl font-black text-indigo-700 dark:text-indigo-400">R$ {accountEntries.filter(e => (e.type === 'INVESTIMENTO' || isAporte(e.category))).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
             </div>
-            {/* Saldo Final */}
-            <div className="bg-slate-900 dark:bg-slate-700 p-4 rounded-2xl text-white shadow-lg">
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">5. Saldo Final de Caixa</p>
-              {(() => {
-                const fat = allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a, c) => a + c.amount, 0);
-                const des = allRealized.filter(t => t.type === 'DESPESA').reduce((a, c) => a + c.amount, 0);
-                const apor = allRealized.filter(t => isAporte(t.category)).reduce((a, c) => a + c.amount, 0);
-                const saldo = (fat - des) + apor;
-                return (
-                  <h3 className={`text-xl font-black ${saldo >= 0 ? 'text-white' : 'text-rose-400'}`}>
-                    R$ {saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </h3>
-                );
-              })()}
-            </div>
-          </div>
-
-          <div className="flex justify-end">
             <button
               onClick={() => setPrintData({
                 html: buildFinancialReportHtml(allRealized as any, accountEntries, accounts, categories, company, 'EXTRATO', 'Geral'),
                 title: 'Extrato de Fluxo de Caixa',
                 filename: `EXTRATO_FINANCEIRO_${getTodayIsoDate()}`
               })}
-              className="bg-slate-900 dark:bg-slate-700 text-white px-6 py-3 rounded-2xl flex items-center justify-center gap-2 hover:bg-slate-800 transition-all text-[10px] font-black uppercase tracking-widest shadow-md"
+              className="bg-slate-900 dark:bg-slate-700 text-white rounded-2xl flex items-center justify-center gap-2 hover:bg-slate-800 transition-all text-[10px] font-black uppercase tracking-widest"
             >
               <Download className="w-4 h-4" /> Exportar Extrato
             </button>
@@ -792,47 +717,47 @@ const FinancialManager: React.FC<Props> = ({
                 allRealized.map(t => {
                   const isContribution = isAporte(t.category);
                   return (
-                    <div key={t.id} className="p-3 hover:bg-slate-50 transition-all flex items-center justify-between group border-b dark:border-slate-700 last:border-0">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${isContribution ? 'bg-indigo-50 text-indigo-500' :
+                    <div key={t.id} className="p-6 hover:bg-slate-50 transition-all flex items-center justify-between group">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isContribution ? 'bg-indigo-50 text-indigo-500' :
                             t.type === 'DESPESA' ? 'bg-rose-50 text-rose-500' : 'bg-emerald-50 text-emerald-500'
                           }`}>
-                          {isContribution ? <Coins className="w-4 h-4" /> :
-                            t.type === 'DESPESA' ? <ArrowDownLeft className="w-4 h-4" /> : <ArrowUpRight className="w-4 h-4" />}
+                          {isContribution ? <Coins className="w-5 h-5" /> :
+                            t.type === 'DESPESA' ? <ArrowDownLeft className="w-5 h-5" /> : <ArrowUpRight className="w-5 h-5" />}
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <p className="text-[11px] font-bold text-slate-800 dark:text-white uppercase leading-tight tracking-tight">{t.description}</p>
-                            {isContribution && <span className="bg-indigo-600 text-[7px] text-white px-1 py-0.5 rounded font-black uppercase">Aporte</span>}
+                            <p className="text-sm font-black text-slate-900 dark:text-white uppercase leading-none">{t.description}</p>
+                            {isContribution && <span className="bg-indigo-600 text-[8px] text-white px-1.5 py-0.5 rounded font-black uppercase tracking-widest">Aporte (Sócio)</span>}
                             {t.attachment && (
                               <button
                                 onClick={() => setViewingAttachment({ content: t.attachment!, name: t.attachmentName || 'Anexo' })}
                                 className="text-blue-400 hover:text-blue-600"
                               >
-                                <Paperclip className="w-3 h-3" />
+                                <Paperclip className="w-3.5 h-3.5" />
                               </button>
                             )}
                           </div>
-                          <div className="flex items-center gap-2 text-[9px] text-slate-400 font-bold uppercase tracking-tight mt-0.5">
-                            <span className="opacity-80">{t.date.split('-').reverse().join('/')}</span>
-                            {!isContribution && <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-700/50 rounded text-slate-500">{t.category}</span>}
+                          <div className="flex items-center gap-3 text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">
+                            <span>{t.date.split('-').reverse().join('/')}</span>
+                            {!isContribution && <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 rounded text-slate-500">{t.category}</span>}
                             {(t.customerName || t.supplierName) && (
-                              <span className="text-blue-500 px-1.5 bg-blue-50/50 rounded">
+                              <span className="text-blue-500 px-2 bg-blue-50 rounded">
                                 {t.customerName || t.supplierName}
                               </span>
                             )}
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-6">
                         <div className="text-right">
-                          <p className={`text-[13px] font-black ${isContribution ? 'text-indigo-600' : t.type === 'DESPESA' ? 'text-rose-600' : 'text-emerald-600'}`}>
+                          <p className={`text-lg font-black ${isContribution ? 'text-indigo-600' : t.type === 'DESPESA' ? 'text-rose-600' : 'text-emerald-600'}`}>
                             {isContribution ? '+' : t.type === 'DESPESA' ? '-' : '+'} R$ {t.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                           </p>
                         </div>
-                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => setEditingItem(t)} className="p-1.5 text-slate-300 hover:text-blue-500 rounded-lg hover:bg-blue-50">
-                            <Pencil className="w-3.5 h-3.5" />
+                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => setEditingItem(t)} className="p-2 text-slate-300 hover:text-blue-500 rounded-lg hover:bg-blue-50">
+                            <Pencil className="w-4 h-4" />
                           </button>
                           <button
                             onClick={async () => {
@@ -842,9 +767,9 @@ const FinancialManager: React.FC<Props> = ({
                               await db.remove('serviflow_transactions', t.id);
                               notify("Transação removida.");
                             }}
-                            className="p-1.5 text-slate-300 hover:text-rose-500 rounded-lg hover:bg-rose-50"
+                            className="p-2 text-slate-300 hover:text-rose-500 rounded-lg hover:bg-rose-50"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </div>
@@ -972,34 +897,34 @@ const FinancialManager: React.FC<Props> = ({
               {filteredEntries.map(entry => {
                 const isContribution = isAporte(entry.category);
                 return (
-                  <div key={entry.id} className="p-3 hover:bg-slate-50 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 border-b dark:border-slate-700 last:border-0 group">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isContribution ? 'bg-indigo-50 text-indigo-500' :
+                  <div key={entry.id} className="p-6 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-all flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${isContribution ? 'bg-indigo-50 text-indigo-500' :
                           entry.type === 'RECEBER' ? 'bg-emerald-50 text-emerald-500' : 'bg-rose-50 text-rose-500'
                         }`}>
-                        {isContribution ? <Coins className="w-5 h-5" /> :
-                          entry.type === 'RECEBER' ? <ArrowUpRight className="w-5 h-5" /> : <ArrowDownLeft className="w-5 h-5" />}
+                        {isContribution ? <Coins className="w-6 h-6" /> :
+                          entry.type === 'RECEBER' ? <ArrowUpRight className="w-6 h-6" /> : <ArrowDownLeft className="w-6 h-6" />}
                       </div>
                       <div>
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <span className="text-[11px] font-bold text-slate-800 dark:text-white uppercase leading-tight tracking-tight">{entry.description}</span>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm font-black text-slate-900 dark:text-white uppercase leading-none">{entry.description}</span>
                           {entry.attachment && (
                             <button
                               onClick={() => setViewingAttachment({ content: entry.attachment!, name: entry.attachmentName || 'Anexo' })}
                               className="text-blue-400 hover:text-blue-600"
                             >
-                              <Paperclip className="w-3 h-3" />
+                              <Paperclip className="w-3.5 h-3.5" />
                             </button>
                           )}
-                          <span className={`px-1.5 py-0.5 rounded text-[7px] font-black uppercase border ${isContribution ? 'hidden' : getStatusColor(entry.status)}`}>
+                          <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase border ${isContribution ? 'hidden' : getStatusColor(entry.status)}`}>
                             {entry.status}
                           </span>
                         </div>
-                        <div className="flex items-center gap-3 text-[9px] text-slate-400 font-bold uppercase tracking-tight mt-0.5">
-                          <span className="flex items-center gap-1 opacity-80"><Calendar className="w-2.5 h-2.5" /> {isContribution ? 'Entrada' : 'Venc.'} {entry.dueDate.split('-').reverse().join('/')}</span>
-                          {!isContribution && <span className="flex items-center gap-1 opacity-80"><Tag className="w-2.5 h-2.5" /> {entry.category}</span>}
+                        <div className="flex items-center gap-3 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                          <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {isContribution ? 'Entrada' : 'Venc.'} {entry.dueDate.split('-').reverse().join('/')}</span>
+                          {!isContribution && <span className="flex items-center gap-1"><Tag className="w-3 h-3" /> {entry.category}</span>}
                           {(entry.customerName || entry.supplierName) && (
-                            <span className="text-blue-500 px-1.5 bg-blue-50/50 rounded">
+                            <span className="text-blue-500 px-2 bg-blue-50 rounded">
                               {entry.customerName || entry.supplierName}
                             </span>
                           )}
@@ -1007,15 +932,15 @@ const FinancialManager: React.FC<Props> = ({
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between md:justify-end gap-6">
+                    <div className="flex items-center justify-between md:justify-end gap-8">
                       <div className="text-right">
-                        <p className={`text-[15px] font-black ${isContribution ? 'text-indigo-600' : entry.type === 'RECEBER' ? 'text-emerald-600' : 'text-rose-600'} leading-none tracking-tight`}>
+                        <p className={`text-xl font-black ${isContribution ? 'text-indigo-600' : entry.type === 'RECEBER' ? 'text-emerald-600' : 'text-rose-600'} leading-none`}>
                           R$ {entry.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                         </p>
-                        <p className="text-[8px] text-slate-300 font-bold uppercase mt-1 tracking-tighter opacity-50 group-hover:opacity-100 transition-opacity whitespace-nowrap overflow-hidden">{entry.id}</p>
+                        <p className="text-[9px] text-slate-300 font-bold uppercase mt-1 tracking-tighter">{entry.id}</p>
                       </div>
 
-                      <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-2">
                         {entry.status === 'PENDENTE' && (
                           <button
                             onClick={async () => {
@@ -1039,10 +964,10 @@ const FinancialManager: React.FC<Props> = ({
                               await db.save('serviflow_transactions', newTransactions, newTransaction);
                               notify(`Lançamento liquidado com sucesso!`);
                             }}
-                            className="p-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-lg transition-all"
-                            title="Dar Baixa"
+                            className="p-2.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-xl transition-all"
+                            title="Dar Baixa (Receber/Pagar)"
                           >
-                            <CheckCircle2 className="w-4 h-4" />
+                            <CheckCircle2 className="w-5 h-5" />
                           </button>
                         )}
                         <button
@@ -1053,9 +978,9 @@ const FinancialManager: React.FC<Props> = ({
                             await db.remove('serviflow_account_entries', entry.id);
                             notify("Provisionamento removido.");
                           }}
-                          className="p-2 bg-slate-50 text-slate-300 hover:text-rose-500 rounded-lg transition-all"
+                          className="p-2.5 bg-slate-50 text-slate-300 hover:text-rose-500 rounded-xl transition-all"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-5 h-5" />
                         </button>
                       </div>
                     </div>
@@ -1310,40 +1235,6 @@ const FinancialManager: React.FC<Props> = ({
               <Pencil className="text-blue-500" /> Editar Lançamento
             </h3>
             <form onSubmit={handleUpdateItem} className="space-y-6">
-              <div>
-                <label className="block text-xs font-black text-slate-400 uppercase mb-2">Tipo de Lançamento</label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const isEntry = 'dueDate' in editingItem;
-                      setEditingItem({ ...editingItem, type: isEntry ? 'RECEBER' : 'RECEITA' } as any);
-                    }}
-                    className={`py-3 rounded-xl text-[10px] font-black border-2 transition-all ${
-                      (editingItem.type === 'RECEITA' || editingItem.type === 'RECEBER')
-                      ? 'bg-emerald-50 border-emerald-500 text-emerald-600'
-                      : 'bg-slate-50 border-transparent text-slate-400 opacity-60'
-                    }`}
-                  >
-                    ENTRADA / RECEITA
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const isEntry = 'dueDate' in editingItem;
-                      setEditingItem({ ...editingItem, type: isEntry ? 'PAGAR' : 'DESPESA' } as any);
-                    }}
-                    className={`py-3 rounded-xl text-[10px] font-black border-2 transition-all ${
-                      (editingItem.type === 'DESPESA' || editingItem.type === 'PAGAR')
-                      ? 'bg-rose-50 border-rose-500 text-rose-600'
-                      : 'bg-slate-50 border-transparent text-slate-400 opacity-60'
-                    }`}
-                  >
-                    SAÍDA / DESPESA
-                  </button>
-                </div>
-              </div>
-
               <div className="grid grid-cols-2 gap-6">
                 <div>
                   <label className="block text-xs font-black text-slate-400 uppercase mb-2">Valor (R$)</label>
@@ -1360,17 +1251,7 @@ const FinancialManager: React.FC<Props> = ({
                   <select
                     className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 font-bold"
                     value={editingItem.category}
-                    onChange={e => {
-                      const newCat = e.target.value;
-                      const isContr = isAporte(newCat);
-                      const isEnt = 'dueDate' in editingItem;
-                      setEditingItem({ 
-                        ...editingItem, 
-                        category: newCat,
-                        type: isContr ? (isEnt ? 'INVESTIMENTO' : 'RECEITA') : editingItem.type
-                      } as any);
-                      if (isContr) notify("Categoria de Aporte detectada: Tipo ajustado.");
-                    }}
+                    onChange={e => setEditingItem({ ...editingItem, category: e.target.value } as any)}
                   >
                     {categories.map(cat => <option key={cat.id} value={cat.name}>{cat.name}</option>)}
                   </select>
