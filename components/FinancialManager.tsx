@@ -1303,6 +1303,40 @@ const FinancialManager: React.FC<Props> = ({
               <Pencil className="text-blue-500" /> Editar Lançamento
             </h3>
             <form onSubmit={handleUpdateItem} className="space-y-6">
+              <div>
+                <label className="block text-xs font-black text-slate-400 uppercase mb-2">Tipo de Lançamento</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const isEntry = 'dueDate' in editingItem;
+                      setEditingItem({ ...editingItem, type: isEntry ? 'RECEBER' : 'RECEITA' } as any);
+                    }}
+                    className={`py-3 rounded-xl text-[10px] font-black border-2 transition-all ${
+                      (editingItem.type === 'RECEITA' || editingItem.type === 'RECEBER')
+                      ? 'bg-emerald-50 border-emerald-500 text-emerald-600'
+                      : 'bg-slate-50 border-transparent text-slate-400 opacity-60'
+                    }`}
+                  >
+                    ENTRADA / RECEITA
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const isEntry = 'dueDate' in editingItem;
+                      setEditingItem({ ...editingItem, type: isEntry ? 'PAGAR' : 'DESPESA' } as any);
+                    }}
+                    className={`py-3 rounded-xl text-[10px] font-black border-2 transition-all ${
+                      (editingItem.type === 'DESPESA' || editingItem.type === 'PAGAR')
+                      ? 'bg-rose-50 border-rose-500 text-rose-600'
+                      : 'bg-slate-50 border-transparent text-slate-400 opacity-60'
+                    }`}
+                  >
+                    SAÍDA / DESPESA
+                  </button>
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-6">
                 <div>
                   <label className="block text-xs font-black text-slate-400 uppercase mb-2">Valor (R$)</label>
@@ -1319,7 +1353,17 @@ const FinancialManager: React.FC<Props> = ({
                   <select
                     className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 font-bold"
                     value={editingItem.category}
-                    onChange={e => setEditingItem({ ...editingItem, category: e.target.value } as any)}
+                    onChange={e => {
+                      const newCat = e.target.value;
+                      const isContr = isAporte(newCat);
+                      const isEnt = 'dueDate' in editingItem;
+                      setEditingItem({ 
+                        ...editingItem, 
+                        category: newCat,
+                        type: isContr ? (isEnt ? 'INVESTIMENTO' : 'RECEITA') : editingItem.type
+                      } as any);
+                      if (isContr) notify("Categoria de Aporte detectada: Tipo ajustado.");
+                    }}
                   >
                     {categories.map(cat => <option key={cat.id} value={cat.name}>{cat.name}</option>)}
                   </select>
