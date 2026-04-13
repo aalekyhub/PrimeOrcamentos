@@ -112,6 +112,7 @@ const FinancialManager: React.FC<Props> = ({
       .map(e => ({
         id: e.id,
         date: e.paymentDate || e.dueDate,
+        dueDate: e.dueDate,
         amount: e.amount,
         type: (e.type === 'RECEBER' || e.type === 'INVESTIMENTO') ? 'RECEITA' : 'DESPESA' as any,
         category: e.category,
@@ -208,10 +209,16 @@ const FinancialManager: React.FC<Props> = ({
     e.preventDefault();
     if (!editingItem) return;
 
-    if ('dueDate' in editingItem) {
-      const newList = accountEntries.map(e => e.id === editingItem.id ? (editingItem as AccountEntry) : e);
+    const isAccEntry = editingItem.id.startsWith('ENT-') || 'dueDate' in editingItem;
+
+    if (isAccEntry) {
+      const mappedType = editingItem.type === 'RECEITA' ? 'RECEBER' : 
+                         editingItem.type === 'DESPESA' ? 'PAGAR' : 
+                         editingItem.type;
+      const updatedEntry = { ...editingItem, type: mappedType } as AccountEntry;
+      const newList = accountEntries.map(e => e.id === editingItem.id ? updatedEntry : e);
       setAccountEntries(newList);
-      await db.save('serviflow_account_entries', newList, editingItem as AccountEntry);
+      await db.save('serviflow_account_entries', newList, updatedEntry);
     } else {
       const newList = transactions.map(t => t.id === editingItem.id ? (editingItem as Transaction) : t);
       setTransactions(newList);
@@ -299,125 +306,123 @@ const FinancialManager: React.FC<Props> = ({
 
               {/* Summary Cards Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* A Receber Card */}
-                <div
-                  onClick={() => {
-                    setFormData({ ...initialFormData, type: 'RECEITA' as any });
-                    setActiveTab('provisionado');
-                    setShowEntryForm(true);
-                  }}
-                  className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
-                >
+                {/* 1. Faturamento Card */}
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group">
                   <div className="flex items-start justify-between relative z-10">
                     <div>
-                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Faturamento a Receber</p>
-                      <h4 className="text-xl font-black text-blue-600">
-                        R$ {accountEntries.filter(e => e.type === 'RECEBER' && !isAporte(e.category) && e.status !== 'PAGO').reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">1. Faturamento (Vendas)</p>
+                      <h4 className="text-xl font-black text-emerald-600">
+                        R$ {allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </h4>
                     </div>
-                    <div className="p-3 bg-blue-50 dark:bg-blue-900/30 text-blue-600 rounded-2xl group-hover:scale-110 transition-transform">
+                    <div className="p-3 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 rounded-2xl group-hover:scale-110 transition-transform">
                       <ArrowUpRight className="w-6 h-6" />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4 mt-6 pt-4 border-t border-slate-50 dark:border-slate-700/50">
-                    <div>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase">Vence hoje</p>
-                      <p className="text-sm font-black text-slate-700 dark:text-slate-200">
-                        R$ {accountEntries.filter(e => e.type === 'RECEBER' && !isAporte(e.category) && e.status !== 'PAGO' && e.dueDate === getTodayIsoDate()).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR')}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase">30 Dias</p>
-                      <p className="text-sm font-black text-slate-700 dark:text-slate-200 opacity-60">
-                        R$ {accountEntries.filter(e => e.type === 'RECEBER' && !isAporte(e.category) && e.status !== 'PAGO' && e.dueDate > getTodayIsoDate()).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR')}
-                      </p>
-                    </div>
+                  <div className="mt-6 pt-4 border-t border-slate-50 dark:border-slate-700/50">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase">Recebimento Operacional</p>
                   </div>
                 </div>
 
-                {/* A Pagar Card */}
-                <div
-                  onClick={() => {
-                    setFormData({ ...initialFormData, type: 'PAGAR' as any });
-                    setActiveTab('provisionado');
-                    setShowEntryForm(true);
-                  }}
-                  className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm group cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
-                >
-                  <div className="flex items-start justify-between">
+                {/* 2. Despesas Card */}
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group">
+                  <div className="flex items-start justify-between relative z-10">
                     <div>
-                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Contas a Pagar</p>
+                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">2. Despesas (Operacional)</p>
                       <h4 className="text-xl font-black text-rose-600">
-                        R$ {accountEntries.filter(e => e.type === 'PAGAR' && !isAporte(e.category) && e.status !== 'PAGO').reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        R$ {allRealized.filter(t => t.type === 'DESPESA').reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </h4>
                     </div>
-                    <div className="p-2 bg-rose-50 dark:bg-rose-900/30 text-rose-600 rounded-lg group-hover:scale-110 transition-transform">
-                      <ArrowDownLeft className="w-4 h-4" />
+                    <div className="p-3 bg-rose-50 dark:bg-rose-900/30 text-rose-600 rounded-2xl group-hover:scale-110 transition-transform">
+                      <ArrowDownLeft className="w-6 h-6" />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-3 mt-3 pt-2 border-t border-slate-50 dark:border-slate-700/50">
+                  <div className="mt-6 pt-4 border-t border-slate-50 dark:border-slate-700/50">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase">Saídas da Operação</p>
+                  </div>
+                </div>
+
+                {/* 3. Resultado Operacional Card */}
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border-2 border-slate-100 dark:border-slate-700 shadow-sm relative overflow-hidden flex flex-col justify-between">
+                  <div className="flex items-start justify-between relative z-10">
                     <div>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase">Vence hoje</p>
-                      <p className="text-sm font-black text-slate-700 dark:text-slate-200">
-                        R$ {accountEntries.filter(e => e.type === 'PAGAR' && !isAporte(e.category) && e.status !== 'PAGO' && e.dueDate === getTodayIsoDate()).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR')}
-                      </p>
+                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">3. Resultado Operacional</p>
+                      {(() => {
+                        const fat = allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a, c) => a + c.amount, 0);
+                        const des = allRealized.filter(t => t.type === 'DESPESA').reduce((a, c) => a + c.amount, 0);
+                        const res = fat - des;
+                        return (
+                          <h4 className={`text-xl font-black ${res >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                            R$ {res.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </h4>
+                        );
+                      })()}
                     </div>
-                    <div>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase">30 Dias</p>
-                      <p className="text-sm font-black text-slate-700 dark:text-slate-200 opacity-60">
-                        R$ {accountEntries.filter(e => e.type === 'PAGAR' && !isAporte(e.category) && e.status !== 'PAGO' && e.dueDate > getTodayIsoDate()).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR')}
-                      </p>
+                    <div className="p-3 bg-slate-50 dark:bg-slate-700 text-slate-600 rounded-2xl">
+                      <TrendingUp className="w-6 h-6" />
+                    </div>
+                  </div>
+                  <div className="mt-6 pt-4 border-t border-slate-50 dark:border-slate-700/50">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase mb-1">Sobrevivência da Operação</p>
+                    <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                      {(() => {
+                        const fat = allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a, c) => a + c.amount, 0);
+                        const des = allRealized.filter(t => t.type === 'DESPESA').reduce((a, c) => a + c.amount, 0);
+                        const perc = fat > 0 ? Math.min(100, (fat / (des || 1)) * 100) : 0;
+                        return (
+                          <div 
+                            className={`h-full transition-all duration-1000 ${perc >= 100 ? 'bg-emerald-500' : 'bg-rose-500'}`} 
+                            style={{ width: `${perc}%` }}
+                          ></div>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>
 
-                {/* Empréstimos / Aportes Card */}
-                <div
-                  onClick={() => {
-                    const aporteCat = categories.find(c => isAporte(c.name))?.name || 'Aporte de Sócios';
-                    setFormData({ ...initialFormData, type: 'INVESTIMENTO' as any, category: aporteCat });
-                    setActiveTab('provisionado');
-                    setShowEntryForm(true);
-                  }}
-                  className="bg-white dark:bg-slate-800 p-4 rounded-2xl border-2 border-indigo-100 dark:border-indigo-900 shadow-sm relative overflow-hidden group cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
-                >
-                  <div className="flex items-start justify-between">
+                {/* 4. Aportes Card */}
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group">
+                  <div className="flex items-start justify-between relative z-10">
                     <div>
-                      <p className="text-[8px] font-black text-indigo-500 uppercase tracking-widest mb-0.5">Total Recebido (Empréstimos)</p>
+                      <p className="text-[8px] font-black text-indigo-500 uppercase tracking-widest mb-0.5">4. Aportes (Sócios)</p>
                       <h4 className="text-xl font-black text-indigo-600">
-                        R$ {accountEntries.filter(e => (e.type === 'INVESTIMENTO' || isAporte(e.category))).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        R$ {allRealized.filter(t => isAporte(t.category)).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </h4>
                     </div>
                     <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 rounded-2xl group-hover:scale-110 transition-transform">
-                      <CheckCircle2 className="w-6 h-6" />
+                      <Coins className="w-6 h-6" />
                     </div>
                   </div>
                   <div className="mt-6 pt-4 border-t border-slate-50 dark:border-slate-700/50">
                     <div className="flex items-center gap-2 text-[10px] font-black text-indigo-500 uppercase">
-                      <CheckCircle2 className="w-3 h-3" /> Empréstimo de Sócios
+                      <CheckCircle2 className="w-3 h-3" /> Capital dos Sócios
                     </div>
                   </div>
                 </div>
 
-                {/* Entradas Mensais (KPI) */}
-                <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Entradas (Mês Atual)</p>
-                  <div className="flex items-center gap-4">
-                    <h4 className="text-xl font-black text-slate-900 dark:text-white">
-                      R$ {allRealized.filter(t => t.type === 'RECEITA' && t.date.startsWith(getTodayIsoDate().substring(0, 7))).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </h4>
-                    <span className="px-1 py-0.5 bg-emerald-100 text-emerald-600 text-[8px] font-black rounded-lg">+ {(Math.random() * 20).toFixed(1)}%</span>
+                {/* 5. Saldo Final Card */}
+                <div className="bg-slate-900 dark:bg-slate-700 p-6 rounded-[2.5rem] shadow-xl relative overflow-hidden flex flex-col justify-between">
+                  <div className="flex items-start justify-between relative z-10">
+                    <div>
+                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5 text-white/50">5. Saldo Final de Caixa</p>
+                      {(() => {
+                        const fat = allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a, c) => a + c.amount, 0);
+                        const des = allRealized.filter(t => t.type === 'DESPESA').reduce((a, c) => a + c.amount, 0);
+                        const apor = allRealized.filter(t => isAporte(t.category)).reduce((a, c) => a + c.amount, 0);
+                        const saldo = (fat - des) + apor;
+                        return (
+                          <h4 className={`text-xl font-black ${saldo >= 0 ? 'text-white' : 'text-rose-400'}`}>
+                            R$ {saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </h4>
+                        );
+                      })()}
+                    </div>
+                    <div className="p-3 bg-white/10 text-white rounded-2xl">
+                      <Wallet className="w-6 h-6" />
+                    </div>
                   </div>
-                </div>
-
-                {/* Saídas Mensais (KPI) */}
-                <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Saídas (Mês Atual)</p>
-                  <div className="flex items-center gap-4">
-                    <h4 className="text-xl font-black text-slate-900 dark:text-white">
-                      - R$ {allRealized.filter(t => t.type === 'DESPESA' && t.date.startsWith(getTodayIsoDate().substring(0, 7))).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR')}
-                    </h4>
-                    <span className="px-1 py-0.5 bg-rose-100 text-rose-600 text-[8px] font-black rounded-lg">- {(Math.random() * 15).toFixed(1)}%</span>
+                  <div className="mt-6 pt-4 border-t border-white/10">
+                    <p className="text-[9px] font-bold text-white/40 uppercase">Acompanhamento Profissional</p>
                   </div>
                 </div>
               </div>
@@ -677,30 +682,61 @@ const FinancialManager: React.FC<Props> = ({
         </div>
       ) : activeTab === 'realizado' ? (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-              <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Saldo Realizado</p>
-              <h3 className="text-xl font-black text-slate-900 dark:text-white">R$ {(allRealized.filter(t => t.type === 'RECEITA' || isAporte(t.category)).reduce((a, c) => a + c.amount, 0) - allRealized.filter(t => t.type === 'DESPESA').reduce((a, c) => a + c.amount, 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            {/* 1. Faturamento */}
             <div className="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/30 shadow-sm">
-              <p className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Entradas (Receitas)</p>
-              <h3 className="text-xl font-black text-emerald-700 dark:text-emerald-400">R$ {allRealized.filter(t => t.type === 'RECEITA').reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+              <p className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">1. Faturamento (Vendas)</p>
+              <h3 className="text-xl font-black text-emerald-700 dark:text-emerald-400">R$ {allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
             </div>
+            {/* 2. Despesas */}
             <div className="bg-rose-50 dark:bg-rose-900/20 p-4 rounded-2xl border border-rose-100 dark:border-rose-900/30 shadow-sm">
-              <p className="text-[9px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest mb-1">Despesas (Saídas)</p>
+              <p className="text-[9px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest mb-1">2. Despesas (Operacional)</p>
               <h3 className="text-xl font-black text-rose-700 dark:text-rose-400">R$ {allRealized.filter(t => t.type === 'DESPESA').reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
             </div>
-            <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-2xl border border-indigo-100 dark:border-indigo-900/30 shadow-sm">
-              <p className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-1">Empréstimos de Sócios</p>
-              <h3 className="text-xl font-black text-indigo-700 dark:text-indigo-400">R$ {accountEntries.filter(e => (e.type === 'INVESTIMENTO' || isAporte(e.category))).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+            {/* 3. Resultado Operacional */}
+            <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border-2 border-slate-100 dark:border-slate-700 shadow-sm">
+              <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">3. Resultado Operacional</p>
+              {(() => {
+                const fat = allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a, c) => a + c.amount, 0);
+                const des = allRealized.filter(t => t.type === 'DESPESA').reduce((a, c) => a + c.amount, 0);
+                const res = fat - des;
+                return (
+                  <h3 className={`text-xl font-black ${res >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                    R$ {res.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </h3>
+                );
+              })()}
             </div>
+            {/* 4. Aportes */}
+            <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-2xl border border-indigo-100 dark:border-indigo-900/30 shadow-sm">
+              <p className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-1">4. Aportes (Sócios)</p>
+              <h3 className="text-xl font-black text-indigo-700 dark:text-indigo-400">R$ {allRealized.filter(t => isAporte(t.category)).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+            </div>
+            {/* 5. Saldo Final */}
+            <div className="bg-slate-900 dark:bg-slate-700 p-4 rounded-2xl text-white shadow-lg flex flex-col justify-between">
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">5. Saldo Final de Caixa</p>
+              {(() => {
+                const fat = allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a, c) => a + c.amount, 0);
+                const des = allRealized.filter(t => t.type === 'DESPESA').reduce((a, c) => a + c.amount, 0);
+                const apor = allRealized.filter(t => isAporte(t.category)).reduce((a, c) => a + c.amount, 0);
+                const saldo = (fat - des) + apor;
+                return (
+                  <h3 className={`text-xl font-black ${saldo >= 0 ? 'text-white' : 'text-rose-400'}`}>
+                    R$ {saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </h3>
+                );
+              })()}
+            </div>
+          </div>
+
+          <div className="flex justify-end">
             <button
               onClick={() => setPrintData({
                 html: buildFinancialReportHtml(allRealized as any, accountEntries, accounts, categories, company, 'EXTRATO', 'Geral'),
                 title: 'Extrato de Fluxo de Caixa',
                 filename: `EXTRATO_FINANCEIRO_${getTodayIsoDate()}`
               })}
-              className="bg-slate-900 dark:bg-slate-700 text-white rounded-2xl flex items-center justify-center gap-2 hover:bg-slate-800 transition-all text-[10px] font-black uppercase tracking-widest"
+              className="bg-slate-900 dark:bg-slate-700 text-white px-6 py-3 rounded-2xl flex items-center justify-center gap-2 hover:bg-slate-800 transition-all text-[10px] font-black uppercase tracking-widest shadow-md"
             >
               <Download className="w-4 h-4" /> Exportar Extrato
             </button>
@@ -720,8 +756,7 @@ const FinancialManager: React.FC<Props> = ({
                     <div key={t.id} className="p-6 hover:bg-slate-50 transition-all flex items-center justify-between group">
                       <div className="flex items-center gap-4">
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isContribution ? 'bg-indigo-50 text-indigo-500' :
-                            t.type === 'DESPESA' ? 'bg-rose-50 text-rose-500' : 'bg-emerald-50 text-emerald-500'
-                          }`}>
+                          t.type === 'DESPESA' ? 'bg-rose-50 text-rose-500' : 'bg-emerald-50 text-emerald-500'}`}>
                           {isContribution ? <Coins className="w-5 h-5" /> :
                             t.type === 'DESPESA' ? <ArrowDownLeft className="w-5 h-5" /> : <ArrowUpRight className="w-5 h-5" />}
                         </div>
@@ -730,10 +765,7 @@ const FinancialManager: React.FC<Props> = ({
                             <p className="text-sm font-black text-slate-900 dark:text-white uppercase leading-none">{t.description}</p>
                             {isContribution && <span className="bg-indigo-600 text-[8px] text-white px-1.5 py-0.5 rounded font-black uppercase tracking-widest">Aporte (Sócio)</span>}
                             {t.attachment && (
-                              <button
-                                onClick={() => setViewingAttachment({ content: t.attachment!, name: t.attachmentName || 'Anexo' })}
-                                className="text-blue-400 hover:text-blue-600"
-                              >
+                              <button onClick={() => setViewingAttachment({ content: t.attachment!, name: t.attachmentName || 'Anexo' })} className="text-blue-400 hover:text-blue-600">
                                 <Paperclip className="w-3.5 h-3.5" />
                               </button>
                             )}
@@ -741,11 +773,7 @@ const FinancialManager: React.FC<Props> = ({
                           <div className="flex items-center gap-3 text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">
                             <span>{t.date.split('-').reverse().join('/')}</span>
                             {!isContribution && <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 rounded text-slate-500">{t.category}</span>}
-                            {(t.customerName || t.supplierName) && (
-                              <span className="text-blue-500 px-2 bg-blue-50 rounded">
-                                {t.customerName || t.supplierName}
-                              </span>
-                            )}
+                            {(t.customerName || t.supplierName) && <span className="text-blue-500 px-2 bg-blue-50 rounded">{t.customerName || t.supplierName}</span>}
                           </div>
                         </div>
                       </div>
@@ -1237,6 +1265,25 @@ const FinancialManager: React.FC<Props> = ({
             <form onSubmit={handleUpdateItem} className="space-y-6">
               <div className="grid grid-cols-2 gap-6">
                 <div>
+                  <label className="block text-xs font-black text-slate-400 uppercase mb-2">Tipo de Lançamento</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setEditingItem({ ...editingItem, type: 'RECEITA' } as any)}
+                      className={`py-3 rounded-xl text-[10px] font-black border-2 transition-all uppercase ${editingItem.type === 'RECEITA' ? 'bg-emerald-50 border-emerald-500 text-emerald-600' : 'bg-slate-50 border-transparent text-slate-400'}`}
+                    >
+                      ENTRADA
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditingItem({ ...editingItem, type: 'DESPESA' } as any)}
+                      className={`py-3 rounded-xl text-[10px] font-black border-2 transition-all uppercase ${editingItem.type === 'DESPESA' ? 'bg-rose-50 border-rose-500 text-rose-600' : 'bg-slate-50 border-transparent text-slate-400'}`}
+                    >
+                      SAÍDA
+                    </button>
+                  </div>
+                </div>
+                <div>
                   <label className="block text-xs font-black text-slate-400 uppercase mb-2">Valor (R$)</label>
                   <input
                     type="number"
@@ -1246,25 +1293,35 @@ const FinancialManager: React.FC<Props> = ({
                     onChange={e => setEditingItem({ ...editingItem, amount: Number(e.target.value) } as any)}
                   />
                 </div>
+              </div>
+              <div className="grid grid-cols-1 gap-6">
                 <div>
                   <label className="block text-xs font-black text-slate-400 uppercase mb-2">Categoria</label>
                   <select
                     className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 font-bold"
                     value={editingItem.category}
-                    onChange={e => setEditingItem({ ...editingItem, category: e.target.value } as any)}
+                    onChange={e => {
+                      const newCat = e.target.value;
+                      const isContribution = isAporte(newCat);
+                      setEditingItem({
+                        ...editingItem,
+                        category: newCat,
+                        type: isContribution ? 'RECEITA' : editingItem.type
+                      } as any);
+                    }}
                   >
                     {categories.map(cat => <option key={cat.id} value={cat.name}>{cat.name}</option>)}
                   </select>
                 </div>
-              </div>
-              <div>
-                <label className="block text-xs font-black text-slate-400 uppercase mb-2">Descrição</label>
-                <input
-                  type="text"
-                  className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 font-bold"
-                  value={editingItem.description}
-                  onChange={e => setEditingItem({ ...editingItem, description: e.target.value } as any)}
-                />
+                <div>
+                  <label className="block text-xs font-black text-slate-400 uppercase mb-2">Descrição</label>
+                  <input
+                    type="text"
+                    className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 font-bold"
+                    value={editingItem.description}
+                    onChange={e => setEditingItem({ ...editingItem, description: e.target.value } as any)}
+                  />
+                </div>
               </div>
               <div className="flex items-center gap-4">
                 <div className="flex-1">
