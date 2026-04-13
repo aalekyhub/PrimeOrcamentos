@@ -117,6 +117,7 @@ const FinancialManager: React.FC<Props> = ({
       .map(e => ({
         id: e.id,
         date: e.paymentDate || e.dueDate,
+        dueDate: e.dueDate, // PRESERVE FOR EDIT MODAL IDENTIFICATION
         amount: e.amount,
         type: (e.type === 'RECEBER' || e.type === 'INVESTIMENTO') ? 'RECEITA' : 'DESPESA' as any,
         category: e.category,
@@ -211,12 +212,18 @@ const FinancialManager: React.FC<Props> = ({
 
   const handleUpdateItem = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingItem) return;
-
-    if ('dueDate' in editingItem) {
-      const newList = accountEntries.map(e => e.id === editingItem.id ? (editingItem as AccountEntry) : e);
+    const isAccEntry = editingItem.id.startsWith('ENT-') || 'dueDate' in editingItem;
+    
+    if (isAccEntry) {
+      // Map back Receita/Despesa to Receber/Pagar for AccountEntry storage
+      const mappedType = editingItem.type === 'RECEITA' ? 'RECEBER' : 
+                         editingItem.type === 'DESPESA' ? 'PAGAR' : 
+                         editingItem.type;
+                         
+      const updatedItem = { ...editingItem, type: mappedType } as AccountEntry;
+      const newList = accountEntries.map(e => e.id === editingItem.id ? updatedItem : e);
       setAccountEntries(newList);
-      await db.save('serviflow_account_entries', newList, editingItem as AccountEntry);
+      await db.save('serviflow_account_entries', newList, updatedItem);
     } else {
       const newList = transactions.map(t => t.id === editingItem.id ? (editingItem as Transaction) : t);
       setTransactions(newList);
