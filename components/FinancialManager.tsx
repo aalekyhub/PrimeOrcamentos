@@ -622,7 +622,7 @@ const FinancialManager: React.FC<Props> = ({
                     if (isContribution) {
                       newType = 'INVESTIMENTO' as any;
                     } else if (catObj) {
-                      newType = catObj.type === 'RECEITA' ? 'RECEITA' as any : 'PAGAR' as any;
+                      newType = catObj.type === 'RECEITA' ? 'RECEBER' as any : 'PAGAR' as any;
                     }
 
                     setFormData({
@@ -1318,9 +1318,9 @@ const FinancialManager: React.FC<Props> = ({
                       
                       let newType = editingItem.type;
                       if (isContribution) {
-                        newType = 'RECEITA';
+                        newType = 'INVESTIMENTO' as any;
                       } else if (catObj) {
-                        newType = catObj.type === 'RECEITA' ? 'RECEITA' : 'DESPESA';
+                        newType = catObj.type === 'RECEITA' ? 'RECEBER' as any : 'PAGAR' as any;
                       }
 
                       setEditingItem({
