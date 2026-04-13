@@ -36,6 +36,11 @@ import {
 import { useNotify } from './ToastProvider';
 import { db } from '../services/db';
 import { getTodayIsoDate } from '../services/dateService';
+const getFutureLimitDate = (days: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toISOString().split('T')[0];
+};
 import ReportPreview from './ReportPreview';
 import { buildFinancialReportHtml } from '../services/financialPdfService';
 import {
@@ -295,31 +300,63 @@ const FinancialManager: React.FC<Props> = ({
                     </button>
                   ))}
                 </div>
-              </div>
-
-              {/* Summary Cards Grid */}
+                         {/* Summary Cards Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* A Receber Card */}
+                {/* Resultado Operacional Card (NEW) */}
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border-2 border-slate-100 dark:border-slate-700 shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[180px]">
+                  <div className="flex items-start justify-between relative z-10">
+                    <div>
+                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Resultado Operacional (Realizado)</p>
+                      {(() => {
+                        const fat = allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a, c) => a + c.amount, 0);
+                        const des = allRealized.filter(t => t.type === 'DESPESA').reduce((a, c) => a + c.amount, 0);
+                        const res = fat - des;
+                        return (
+                          <h4 className={`text-xl font-black ${res >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                            R$ {res.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </h4>
+                        );
+                      })()}
+                    </div>
+                    <div className="p-3 bg-slate-50 dark:bg-slate-700 text-slate-600 rounded-2xl flex items-center justify-center w-12 h-12">
+                      <TrendingUp className="w-6 h-6" />
+                    </div>
+                  </div>
+                  <div className="mt-auto pt-4 border-t border-slate-50 dark:border-slate-700/50">
+                    <p className="text-[9px] font-bold text-slate-400 uppercase mb-1">Sobrevivência da Operação</p>
+                    <div className="flex items-center gap-2">
+                      <div className="h-1.5 flex-1 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                        <div 
+                          className={`h-full ${allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a, c) => a + c.amount, 0) >= allRealized.filter(t => t.type === 'DESPESA').reduce((a, c) => a + c.amount, 0) ? 'bg-emerald-500' : 'bg-rose-500'}`} 
+                          style={{ width: '100%' }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* A Receber Card (Provisionado) */}
                 <div
                   onClick={() => {
                     setFormData({ ...initialFormData, type: 'RECEITA' as any });
                     setActiveTab('provisionado');
                     setShowEntryForm(true);
                   }}
-                  className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
+                  className="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all group relative overflow-hidden flex flex-col justify-between min-h-[180px]"
                 >
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50/50 dark:bg-blue-900/10 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-blue-100/50 transition-colors"></div>
                   <div className="flex items-start justify-between relative z-10">
                     <div>
-                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Faturamento a Receber</p>
+                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Faturamento Real a Receber</p>
                       <h4 className="text-xl font-black text-blue-600">
                         R$ {accountEntries.filter(e => e.type === 'RECEBER' && !isAporte(e.category) && e.status !== 'PAGO').reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </h4>
                     </div>
-                    <div className="p-3 bg-blue-50 dark:bg-blue-900/30 text-blue-600 rounded-2xl group-hover:scale-110 transition-transform">
+                    <div className="p-3 bg-blue-50 dark:bg-blue-900/30 text-blue-600 rounded-2xl group-hover:scale-110 transition-transform flex items-center justify-center w-12 h-12">
                       <ArrowUpRight className="w-6 h-6" />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4 mt-6 pt-4 border-t border-slate-50 dark:border-slate-700/50 min-h-[50px]">
+                  <div className="grid grid-cols-2 gap-4 mt-auto pt-4 border-t border-slate-50 dark:border-slate-700/50 relative z-10">
                     <div>
                       <p className="text-[9px] font-bold text-slate-400 uppercase">Vence hoje</p>
                       <p className="text-sm font-black text-slate-700 dark:text-slate-200">
@@ -327,35 +364,36 @@ const FinancialManager: React.FC<Props> = ({
                       </p>
                     </div>
                     <div>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase">30 Dias</p>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase">Prox. 30 Dias</p>
                       <p className="text-sm font-black text-slate-700 dark:text-slate-200 opacity-60">
-                        R$ {accountEntries.filter(e => e.type === 'RECEBER' && !isAporte(e.category) && e.status !== 'PAGO' && e.dueDate > getTodayIsoDate()).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        R$ {accountEntries.filter(e => e.type === 'RECEBER' && !isAporte(e.category) && e.status !== 'PAGO' && e.dueDate > getTodayIsoDate() && e.dueDate <= getFutureLimitDate(30)).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {/* A Pagar Card */}
+                {/* A Pagar Card (Provisionado) */}
                 <div
                   onClick={() => {
                     setFormData({ ...initialFormData, type: 'PAGAR' as any });
                     setActiveTab('provisionado');
                     setShowEntryForm(true);
                   }}
-                  className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm group cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all"
+                  className="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all group relative overflow-hidden flex flex-col justify-between min-h-[180px]"
                 >
-                  <div className="flex items-start justify-between">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-rose-50/50 dark:bg-rose-900/10 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-rose-100/50 transition-colors"></div>
+                  <div className="flex items-start justify-between relative z-10">
                     <div>
-                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Contas a Pagar</p>
+                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Contas a Pagar (Operacional)</p>
                       <h4 className="text-xl font-black text-rose-600">
                         R$ {accountEntries.filter(e => e.type === 'PAGAR' && !isAporte(e.category) && e.status !== 'PAGO').reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </h4>
                     </div>
-                    <div className="p-2 bg-rose-50 dark:bg-rose-900/30 text-rose-600 rounded-lg group-hover:scale-110 transition-transform">
-                      <ArrowDownLeft className="w-4 h-4" />
+                    <div className="p-3 bg-rose-50 dark:bg-rose-900/30 text-rose-600 rounded-2xl group-hover:scale-110 transition-transform flex items-center justify-center w-12 h-12">
+                      <ArrowDownLeft className="w-6 h-6" />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-3 mt-3 pt-2 border-t border-slate-50 dark:border-slate-700/50 min-h-[50px]">
+                  <div className="grid grid-cols-2 gap-4 mt-auto pt-4 border-t border-slate-50 dark:border-slate-700/50 relative z-10">
                     <div>
                       <p className="text-[9px] font-bold text-slate-400 uppercase">Vence hoje</p>
                       <p className="text-sm font-black text-slate-700 dark:text-slate-200">
@@ -363,9 +401,9 @@ const FinancialManager: React.FC<Props> = ({
                       </p>
                     </div>
                     <div>
-                      <p className="text-[9px] font-bold text-slate-400 uppercase">30 Dias</p>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase">Prox. 30 Dias</p>
                       <p className="text-sm font-black text-slate-700 dark:text-slate-200 opacity-60">
-                        R$ {accountEntries.filter(e => e.type === 'PAGAR' && !isAporte(e.category) && e.status !== 'PAGO' && e.dueDate > getTodayIsoDate()).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        R$ {accountEntries.filter(e => e.type === 'PAGAR' && !isAporte(e.category) && e.status !== 'PAGO' && e.dueDate > getTodayIsoDate() && e.dueDate <= getFutureLimitDate(30)).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
                     </div>
                   </div>
@@ -383,35 +421,35 @@ const FinancialManager: React.FC<Props> = ({
                 >
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-[8px] font-black text-indigo-500 uppercase tracking-widest mb-0.5">Total Recebido (Empréstimos)</p>
+                      <p className="text-[8px] font-black text-indigo-500 uppercase tracking-widest mb-0.5">Financiamento (Aportes Sócios)</p>
                       <h4 className="text-xl font-black text-indigo-600">
-                        R$ {accountEntries.filter(e => (e.type === 'INVESTIMENTO' || isAporte(e.category))).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        R$ {allRealized.filter(t => isAporte(t.category)).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </h4>
                     </div>
                     <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 rounded-2xl group-hover:scale-110 transition-transform">
-                      <CheckCircle2 className="w-6 h-6" />
+                      <Coins className="w-6 h-6" />
                     </div>
                   </div>
                   <div className="mt-6 pt-4 border-t border-slate-50 dark:border-slate-700/50">
                     <div className="flex items-center gap-2 text-[10px] font-black text-indigo-500 uppercase">
-                      <CheckCircle2 className="w-3 h-3" /> Empréstimo de Sócios
+                      <CheckCircle2 className="w-3 h-3" /> Capital de Terceiros / Sócios
                     </div>
                   </div>
                 </div>
 
-                {/* Entradas Mensais (KPI) */}
+                {/* Faturamento Mensal REAL (KPI) */}
                 <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Entradas (Mês Atual)</p>
+                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Vendas Reais (Mês Atual)</p>
                   <div className="flex items-center gap-4">
                     <h4 className="text-xl font-black text-slate-900 dark:text-white">
-                      R$ {allRealized.filter(t => t.type === 'RECEITA' && t.date.startsWith(getTodayIsoDate().substring(0, 7))).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      R$ {allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category) && t.date.startsWith(getTodayIsoDate().substring(0, 7))).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </h4>
                   </div>
                 </div>
 
                 {/* Saídas Mensais (KPI) */}
                 <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Saídas (Mês Atual)</p>
+                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Saídas totais (Mês Atual)</p>
                   <div className="flex items-center gap-4">
                     <h4 className="text-xl font-black text-slate-900 dark:text-white">
                       - R$ {allRealized.filter(t => t.type === 'DESPESA' && t.date.startsWith(getTodayIsoDate().substring(0, 7))).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -419,6 +457,7 @@ const FinancialManager: React.FC<Props> = ({
                   </div>
                 </div>
               </div>
+             </div>
 
               {/* Fluxo Mensal Chart */}
               <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
@@ -675,30 +714,61 @@ const FinancialManager: React.FC<Props> = ({
         </div>
       ) : activeTab === 'realizado' ? (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-              <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Saldo Realizado</p>
-              <h3 className="text-xl font-black text-slate-900 dark:text-white">R$ {(allRealized.filter(t => t.type === 'RECEITA' || isAporte(t.category)).reduce((a, c) => a + c.amount, 0) - allRealized.filter(t => t.type === 'DESPESA').reduce((a, c) => a + c.amount, 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            {/* Real Faturamento */}
             <div className="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/30 shadow-sm">
-              <p className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Entradas (Receitas)</p>
-              <h3 className="text-xl font-black text-emerald-700 dark:text-emerald-400">R$ {allRealized.filter(t => t.type === 'RECEITA').reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+              <p className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">1. Faturamento (Vendas)</p>
+              <h3 className="text-xl font-black text-emerald-700 dark:text-emerald-400">R$ {allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
             </div>
+            {/* Despesas */}
             <div className="bg-rose-50 dark:bg-rose-900/20 p-4 rounded-2xl border border-rose-100 dark:border-rose-900/30 shadow-sm">
-              <p className="text-[9px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest mb-1">Despesas (Saídas)</p>
+              <p className="text-[9px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest mb-1">2. Despesas (Operacional)</p>
               <h3 className="text-xl font-black text-rose-700 dark:text-rose-400">R$ {allRealized.filter(t => t.type === 'DESPESA').reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
             </div>
-            <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-2xl border border-indigo-100 dark:border-indigo-900/30 shadow-sm">
-              <p className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-1">Empréstimos de Sócios</p>
-              <h3 className="text-xl font-black text-indigo-700 dark:text-indigo-400">R$ {accountEntries.filter(e => (e.type === 'INVESTIMENTO' || isAporte(e.category))).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+            {/* Resultado Operacional */}
+            <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border-2 border-slate-100 dark:border-slate-700 shadow-sm">
+              <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">3. Resultado Operacional</p>
+              {(() => {
+                const fat = allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a, c) => a + c.amount, 0);
+                const des = allRealized.filter(t => t.type === 'DESPESA').reduce((a, c) => a + c.amount, 0);
+                const res = fat - des;
+                return (
+                  <h3 className={`text-xl font-black ${res >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                    R$ {res.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </h3>
+                );
+              })()}
             </div>
+            {/* Aportes */}
+            <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-2xl border border-indigo-100 dark:border-indigo-900/30 shadow-sm">
+              <p className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-1">4. Aportes (Sócios)</p>
+              <h3 className="text-xl font-black text-indigo-700 dark:text-indigo-400">R$ {allRealized.filter(t => isAporte(t.category)).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+            </div>
+            {/* Saldo Final */}
+            <div className="bg-slate-900 dark:bg-slate-700 p-4 rounded-2xl text-white shadow-lg">
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">5. Saldo Final de Caixa</p>
+              {(() => {
+                const fat = allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a, c) => a + c.amount, 0);
+                const des = allRealized.filter(t => t.type === 'DESPESA').reduce((a, c) => a + c.amount, 0);
+                const apor = allRealized.filter(t => isAporte(t.category)).reduce((a, c) => a + c.amount, 0);
+                const saldo = (fat - des) + apor;
+                return (
+                  <h3 className={`text-xl font-black ${saldo >= 0 ? 'text-white' : 'text-rose-400'}`}>
+                    R$ {saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </h3>
+                );
+              })()}
+            </div>
+          </div>
+
+          <div className="flex justify-end">
             <button
               onClick={() => setPrintData({
                 html: buildFinancialReportHtml(allRealized as any, accountEntries, accounts, categories, company, 'EXTRATO', 'Geral'),
                 title: 'Extrato de Fluxo de Caixa',
                 filename: `EXTRATO_FINANCEIRO_${getTodayIsoDate()}`
               })}
-              className="bg-slate-900 dark:bg-slate-700 text-white rounded-2xl flex items-center justify-center gap-2 hover:bg-slate-800 transition-all text-[10px] font-black uppercase tracking-widest"
+              className="bg-slate-900 dark:bg-slate-700 text-white px-6 py-3 rounded-2xl flex items-center justify-center gap-2 hover:bg-slate-800 transition-all text-[10px] font-black uppercase tracking-widest shadow-md"
             >
               <Download className="w-4 h-4" /> Exportar Extrato
             </button>
