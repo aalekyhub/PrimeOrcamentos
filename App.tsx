@@ -169,7 +169,7 @@ const AppContent: React.FC = () => {
   const [financialCategories, setFinancialCategories] = useState<FinancialCategory[]>(() => {
     const loaded = db.load(STORAGE_KEYS.FINANCIAL_CATEGORIES, []);
     return loaded.length > 0 ? loaded : [
-      { id: 'CAT-001', name: 'Venda de Serviços', type: 'RECEITA' },
+      { id: 'CAT-001', name: 'Prestação de Serviços', type: 'RECEITA' },
       { id: 'CAT-002', name: 'Aporte de Sócios', type: 'RECEITA' },
       { id: 'CAT-003', name: 'Materiais', type: 'DESPESA' },
       { id: 'CAT-004', name: 'Mão de Obra', type: 'DESPESA' },
@@ -181,6 +181,40 @@ const AppContent: React.FC = () => {
     db.load(STORAGE_KEYS.ACCOUNT_ENTRIES, [])
   );
   const [prefilledBudgetData, setPrefilledBudgetData] = useState<any>(null);
+
+  // Migration: Rename categories and entries
+  useEffect(() => {
+    const migrateData = async () => {
+      let changed = false;
+      
+      const currentCats = db.load(STORAGE_KEYS.FINANCIAL_CATEGORIES, []);
+      if (currentCats.some(c => c.name === 'Venda de Serviços')) {
+        const newCats = currentCats.map(c => c.name === 'Venda de Serviços' ? { ...c, name: 'Prestação de Serviços' } : c);
+        setFinancialCategories(newCats);
+        await db.saveLocal(STORAGE_KEYS.FINANCIAL_CATEGORIES, newCats);
+        changed = true;
+      }
+
+      const currentEntries = db.load(STORAGE_KEYS.ACCOUNT_ENTRIES, []);
+      if (currentEntries.some(e => e.category === 'Venda de Serviços')) {
+        const newEntries = currentEntries.map(e => e.category === 'Venda de Serviços' ? { ...e, category: 'Prestação de Serviços' } : e);
+        setAccountEntries(newEntries);
+        await db.saveLocal(STORAGE_KEYS.ACCOUNT_ENTRIES, newEntries);
+        changed = true;
+      }
+
+      const currentTrans = db.load(STORAGE_KEYS.TRANSACTIONS, []);
+      if (currentTrans.some(t => t.category === 'Venda de Serviços')) {
+        const newTrans = currentTrans.map(t => t.category === 'Venda de Serviços' ? { ...t, category: 'Prestação de Serviços' } : t);
+        setTransactions(newTrans);
+        await db.saveLocal(STORAGE_KEYS.TRANSACTIONS, newTrans);
+        changed = true;
+      }
+
+      if (changed) console.log('[Migration] Categorias atualizadas para Prestação de Serviços');
+    };
+    migrateData();
+  }, []);
 
   const openTab = useCallback((tabId: TabId) => {
     setOpenTabs((prev) => (prev.includes(tabId) ? prev : [...prev, tabId]));
