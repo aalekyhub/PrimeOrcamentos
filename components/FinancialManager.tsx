@@ -614,14 +614,25 @@ const FinancialManager: React.FC<Props> = ({
                   className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-900 dark:text-white"
                   value={formData.category}
                   onChange={e => {
-                    const newCat = e.target.value;
-                    const isContribution = isAporte(newCat);
+                    const newCatName = e.target.value;
+                    const catObj = categories.find(c => c.name === newCatName);
+                    const isContribution = isAporte(newCatName);
+                    
+                    let newType = formData.type;
+                    if (isContribution) {
+                      newType = 'INVESTIMENTO' as any;
+                    } else if (catObj) {
+                      newType = catObj.type === 'RECEITA' ? 'RECEITA' as any : 'PAGAR' as any;
+                    }
+
                     setFormData({
                       ...formData,
-                      category: newCat,
-                      type: isContribution ? 'RECEITA' as any : formData.type
+                      category: newCatName,
+                      type: newType
                     });
-                    if (isContribution) notify("Categoria de Aporte detectada: Tipo ajustado para entrada.");
+                    
+                    if (isContribution) notify("Categoria de Aporte: Tipo ajustado para Empréstimo.");
+                    else if (catObj) notify(`Tipo ajustado para ${catObj.type === 'RECEITA' ? 'A Receber' : 'A Pagar'} baseado na categoria.`);
                   }}
                 >
                   {categories.map(cat => (
@@ -1301,12 +1312,21 @@ const FinancialManager: React.FC<Props> = ({
                     className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 font-bold"
                     value={editingItem.category}
                     onChange={e => {
-                      const newCat = e.target.value;
-                      const isContribution = isAporte(newCat);
+                      const newCatName = e.target.value;
+                      const catObj = categories.find(c => c.name === newCatName);
+                      const isContribution = isAporte(newCatName);
+                      
+                      let newType = editingItem.type;
+                      if (isContribution) {
+                        newType = 'RECEITA';
+                      } else if (catObj) {
+                        newType = catObj.type === 'RECEITA' ? 'RECEITA' : 'DESPESA';
+                      }
+
                       setEditingItem({
                         ...editingItem,
-                        category: newCat,
-                        type: isContribution ? 'RECEITA' : editingItem.type
+                        category: newCatName,
+                        type: newType
                       } as any);
                     }}
                   >
