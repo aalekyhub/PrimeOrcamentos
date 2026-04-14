@@ -310,7 +310,7 @@ const FinancialManager: React.FC<Props> = ({
                 <div className="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group">
                   <div className="flex items-start justify-between relative z-10">
                     <div>
-                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">1. Faturamento (Vendas)</p>
+                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">1. Faturamento (Prest. Serviços)</p>
                       <h4 className="text-xl font-black text-emerald-600">
                         R$ {allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </h4>
@@ -696,7 +696,7 @@ const FinancialManager: React.FC<Props> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             {/* 1. Faturamento */}
             <div className="bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/30 shadow-sm">
-              <p className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">1. Faturamento (Vendas)</p>
+              <p className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">1. Faturamento (Prest. Serviços)</p>
               <h3 className="text-xl font-black text-emerald-700 dark:text-emerald-400">R$ {allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category)).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
             </div>
             {/* 2. Despesas */}
