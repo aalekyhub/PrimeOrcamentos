@@ -209,24 +209,33 @@ const FinancialManager: React.FC<Props> = ({
     e.preventDefault();
     if (!editingItem) return;
 
-    const isAccEntry = editingItem.id.startsWith('ENT-') || 'dueDate' in editingItem;
+    try {
+      // Use the marker isFromEntry as the primary check
+      const isAccEntry = (editingItem as any).isFromEntry === true || editingItem.id.startsWith('ENT-');
 
-    if (isAccEntry) {
-      const mappedType = editingItem.type === 'RECEITA' ? 'RECEBER' : 
-                         editingItem.type === 'DESPESA' ? 'PAGAR' : 
-                         editingItem.type;
-      const updatedEntry = { ...editingItem, type: mappedType } as AccountEntry;
-      const newList = accountEntries.map(e => e.id === editingItem.id ? updatedEntry : e);
-      setAccountEntries(newList);
-      await db.save('serviflow_account_entries', newList, updatedEntry);
-    } else {
-      const newList = transactions.map(t => t.id === editingItem.id ? (editingItem as Transaction) : t);
-      setTransactions(newList);
-      await db.save('serviflow_transactions', newList, editingItem as Transaction);
+      if (isAccEntry) {
+        // Remove virtual fields before saving to DB
+        const { isFromEntry, date, ...entryToSave } = editingItem as any;
+        
+        // Ensure type compatibility
+        if (entryToSave.type === 'RECEITA') entryToSave.type = 'RECEBER';
+        if (entryToSave.type === 'DESPESA') entryToSave.type = 'PAGAR';
+
+        const newList = accountEntries.map(e => e.id === editingItem.id ? entryToSave : e);
+        setAccountEntries(newList);
+        await db.save('serviflow_account_entries', newList, entryToSave);
+      } else {
+        const tItem = editingItem as Transaction;
+        const newList = transactions.map(t => t.id === tItem.id ? tItem : t);
+        setTransactions(newList);
+        await db.save('serviflow_transactions', newList, tItem);
+      }
+      setEditingItem(null);
+      notify("Alteração salva com sucesso!");
+    } catch (error) {
+      console.error('Erro ao salvar alteração:', error);
+      notify("Erro ao salvar alteração.", "error");
     }
-
-    setEditingItem(null);
-    notify("Alterações salvas!");
   };
 
   const getStatusColor = (status: string) => {
@@ -1274,21 +1283,27 @@ const FinancialManager: React.FC<Props> = ({
               <Pencil className="text-blue-500" /> Editar Lançamento
             </h3>
             <form onSubmit={handleUpdateItem} className="space-y-6">
-              <div className="grid grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <label className="block text-xs font-black text-slate-400 uppercase mb-2">Tipo de Lançamento</label>
+                  <label className="block text-xs font-black text-slate-400 uppercase mb-2">Tipo</label>
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       type="button"
-                      onClick={() => setEditingItem({ ...editingItem, type: 'RECEITA' } as any)}
-                      className={`py-3 rounded-xl text-[10px] font-black border-2 transition-all uppercase ${editingItem.type === 'RECEITA' ? 'bg-emerald-50 border-emerald-500 text-emerald-600' : 'bg-slate-50 border-transparent text-slate-400'}`}
+                      onClick={() => {
+                        const isAcc = (editingItem as any).isFromEntry || editingItem.id.startsWith('ENT-');
+                        setEditingItem({ ...editingItem, type: isAcc ? 'RECEBER' : 'RECEITA' } as any);
+                      }}
+                      className={`py-3 rounded-xl text-[10px] font-black border-2 transition-all uppercase ${['RECEITA', 'RECEBER'].includes(editingItem.type) ? 'bg-emerald-50 border-emerald-500 text-emerald-600' : 'bg-slate-50 border-transparent text-slate-400'}`}
                     >
                       ENTRADA
                     </button>
                     <button
                       type="button"
-                      onClick={() => setEditingItem({ ...editingItem, type: 'DESPESA' } as any)}
-                      className={`py-3 rounded-xl text-[10px] font-black border-2 transition-all uppercase ${editingItem.type === 'DESPESA' ? 'bg-rose-50 border-rose-500 text-rose-600' : 'bg-slate-50 border-transparent text-slate-400'}`}
+                      onClick={() => {
+                        const isAcc = (editingItem as any).isFromEntry || editingItem.id.startsWith('ENT-');
+                        setEditingItem({ ...editingItem, type: isAcc ? 'PAGAR' : 'DESPESA' } as any);
+                      }}
+                      className={`py-3 rounded-xl text-[10px] font-black border-2 transition-all uppercase ${['DESPESA', 'PAGAR'].includes(editingItem.type) ? 'bg-rose-50 border-rose-500 text-rose-600' : 'bg-slate-50 border-transparent text-slate-400'}`}
                     >
                       SAÍDA
                     </button>
@@ -1302,6 +1317,22 @@ const FinancialManager: React.FC<Props> = ({
                     className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 font-bold"
                     value={editingItem.amount}
                     onChange={e => setEditingItem({ ...editingItem, amount: Number(e.target.value) } as any)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-black text-slate-400 uppercase mb-2">Data</label>
+                  <input
+                    type="date"
+                    className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 font-bold text-xs"
+                    value={(editingItem as any).date || (editingItem as any).paymentDate || (editingItem as any).dueDate}
+                    onChange={e => {
+                      const isAcc = (editingItem as any).isFromEntry || editingItem.id.startsWith('ENT-');
+                      if (isAcc) {
+                        setEditingItem({ ...editingItem, paymentDate: e.target.value, date: e.target.value } as any);
+                      } else {
+                        setEditingItem({ ...editingItem, date: e.target.value } as any);
+                      }
+                    }}
                   />
                 </div>
               </div>
