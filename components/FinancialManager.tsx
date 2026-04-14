@@ -209,7 +209,9 @@ const FinancialManager: React.FC<FinancialManagerProps> = (props) => {
         <FinancialReportsTab 
           allRealized={allRealized}
           categories={categories}
+          company={company}
           selectedYear={selectedYear}
+          setPrintData={setPrintData}
         />
       ) : activeTab === 'config' ? (
         <FinancialSettingsTab 
