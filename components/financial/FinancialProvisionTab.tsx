@@ -14,7 +14,7 @@ import {
   Trash2,
   Pencil
 } from 'lucide-react';
-import { AccountEntry, Transaction, FinancialCategory, CompanyProfile } from '../../types';
+import { AccountEntry, Transaction, FinancialCategory, CompanyProfile, FinancialAccount } from '../../types';
 import { isAporte, getStatusColor } from '../../services/financialHelpers';
 import { buildFinancialReportHtml } from '../../services/financialPdfService';
 import { getTodayIsoDate } from '../../services/dateService';
@@ -39,6 +39,7 @@ interface FinancialProvisionTabProps {
   setEditingItem: (item: any) => void;
   setViewingAttachment: (viewer: any) => void;
   handleToggleStatus: (entry: AccountEntry) => Promise<void>;
+  accounts: FinancialAccount[];
 }
 
 const FinancialProvisionTab: React.FC<FinancialProvisionTabProps> = ({
@@ -58,7 +59,8 @@ const FinancialProvisionTab: React.FC<FinancialProvisionTabProps> = ({
   setPrintData,
   setEditingItem,
   setViewingAttachment,
-  handleToggleStatus
+  handleToggleStatus,
+  accounts
 }) => {
   const { notify } = useNotify();
 

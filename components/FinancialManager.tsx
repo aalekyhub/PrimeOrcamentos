@@ -203,6 +203,7 @@ const FinancialManager: React.FC<FinancialManagerProps> = (props) => {
           setEditingItem={setEditingItem}
           setViewingAttachment={setViewingAttachment}
           handleToggleStatus={handleToggleStatus}
+          accounts={accounts}
         />
       ) : activeTab === 'relatorios' ? (
         <FinancialReportsTab 
