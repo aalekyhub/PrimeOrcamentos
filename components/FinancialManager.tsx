@@ -1072,7 +1072,6 @@ const FinancialManager: React.FC<Props> = ({
                   const total = allRealized.filter(t => t.category === cat.name && t.type === 'RECEITA' && t.date.startsWith(selectedYear.toString())).reduce((a, c) => a + c.amount, 0);
                   const grandTotal = allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category) && t.date.startsWith(selectedYear.toString())).reduce((a, c) => a + c.amount, 0);
                   const percent = grandTotal > 0 ? (total / grandTotal) * 100 : 0;
-
                   return (
                     <div key={cat.id}>
                       <div className="flex justify-between text-xs font-bold mb-1 uppercase">
@@ -1097,7 +1096,6 @@ const FinancialManager: React.FC<Props> = ({
                   const total = allRealized.filter(t => t.category === cat.name && t.type === 'DESPESA' && t.date.startsWith(selectedYear.toString())).reduce((a, c) => a + c.amount, 0);
                   const grandTotal = allRealized.filter(t => t.type === 'DESPESA' && t.date.startsWith(selectedYear.toString())).reduce((a, c) => a + c.amount, 0);
                   const percent = grandTotal > 0 ? (total / grandTotal) * 100 : 0;
-
                   return (
                     <div key={cat.id}>
                       <div className="flex justify-between text-xs font-bold mb-1 uppercase">
@@ -1110,6 +1108,41 @@ const FinancialManager: React.FC<Props> = ({
                     </div>
                   );
                 })}
+              </div>
+            </div>
+          </div>
+
+          {/* Resultado do Período Summary Card */}
+          <div className="bg-slate-900 p-8 rounded-[2.5rem] text-white">
+            <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4">Resultado do Período (Entradas vs Despesas)</h4>
+            <div className="flex flex-col md:flex-row justify-between items-end gap-6">
+              <div>
+                <p className="text-4xl font-black">
+                  R$ {(
+                    allRealized.filter(t => t.type === 'RECEITA' && t.date.startsWith(selectedYear.toString())).reduce((a, c) => a + c.amount, 0) -
+                    allRealized.filter(t => t.type === 'DESPESA' && t.date.startsWith(selectedYear.toString())).reduce((a, c) => a + c.amount, 0)
+                  ).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </p>
+                <div className="flex items-center gap-4 mt-2">
+                  <span className="text-xs font-bold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded">
+                    VENDAS: R$ {allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category) && t.date.startsWith(selectedYear.toString())).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR')}
+                  </span>
+                  <span className="text-xs font-bold text-rose-400 bg-rose-400/10 px-2 py-0.5 rounded">
+                    DESPESAS: R$ {allRealized.filter(t => t.type === 'DESPESA' && t.date.startsWith(selectedYear.toString())).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR')}
+                  </span>
+                  <span className="text-xs font-bold text-indigo-400 bg-indigo-400/10 px-2 py-0.5 rounded">
+                    APORTES: R$ {allRealized.filter(t => isAporte(t.category) && t.date.startsWith(selectedYear.toString())).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR')}
+                  </span>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Índice de Sobra</p>
+                <p className="text-2xl font-black">
+                  {allRealized.filter(t => t.type === 'RECEITA' && t.date.startsWith(selectedYear.toString())).reduce((a, c) => a + c.amount, 0) > 0
+                    ? (((allRealized.filter(t => t.type === 'RECEITA' && t.date.startsWith(selectedYear.toString())).reduce((a, c) => a + c.amount, 0) - allRealized.filter(t => t.type === 'DESPESA' && t.date.startsWith(selectedYear.toString())).reduce((a, c) => a + c.amount, 0)) / allRealized.filter(t => t.type === 'RECEITA' && t.date.startsWith(selectedYear.toString())).reduce((a, c) => a + c.amount, 0)) * 100).toFixed(1)
+                    : '0'
+                  }%
+                </p>
               </div>
             </div>
           </div>
@@ -1138,8 +1171,10 @@ const FinancialManager: React.FC<Props> = ({
                       <tr key={cat.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
                         <td className="p-4 px-8 text-xs font-bold text-slate-600 dark:text-slate-300 sticky left-0 z-20 bg-white dark:bg-slate-800 border-r border-slate-100 dark:border-slate-800">{cat.name}</td>
                         {monthsKeys.map((_, i) => {
-                          const prefix = `${selectedYear}-${String(i + 1).padStart(2, '0')}`;
-                          const val = allRealized.filter(t => t.category === cat.name && t.date.startsWith(prefix) && t.type === 'RECEITA').reduce((a, c) => a + c.amount, 0);
+                          const monthIdx = i + 1;
+                          const monthFix = monthIdx < 10 ? `0${monthIdx}` : `${monthIdx}`;
+                          const realPrefix = `${selectedYear}-${monthFix}`;
+                          const val = allRealized.filter(t => t.category === cat.name && t.date.startsWith(realPrefix) && t.type === 'RECEITA').reduce((a, c) => a + c.amount, 0);
                           catTotal += val;
                           return (
                             <td key={i} className="p-4 text-xs font-bold text-slate-500 text-center">{val > 0 ? val.toLocaleString('pt-BR') : '-'}</td>
@@ -1152,7 +1187,9 @@ const FinancialManager: React.FC<Props> = ({
                   <tr className="bg-emerald-50/40 dark:bg-emerald-900/20 font-black">
                     <td className="p-4 px-6 text-xs text-emerald-700 dark:text-emerald-400 uppercase sticky left-0 z-20 bg-emerald-50 dark:bg-slate-900 border-r border-emerald-100 dark:border-emerald-900/30">Total Faturamento (A)</td>
                     {monthsKeys.map((_, i) => {
-                      const prefix = `${selectedYear}-${String(i + 1).padStart(2, '0')}`;
+                      const monthIdx = i + 1;
+                      const monthFix = monthIdx < 10 ? `0${monthIdx}` : `${monthIdx}`;
+                      const prefix = `${selectedYear}-${monthFix}`;
                       const val = allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category) && t.date.startsWith(prefix)).reduce((a, c) => a + c.amount, 0);
                       return <td key={i} className="p-4 text-xs text-center">{val.toLocaleString('pt-BR')}</td>
                     })}
@@ -1171,7 +1208,9 @@ const FinancialManager: React.FC<Props> = ({
                       <tr key={cat.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
                         <td className="p-4 px-8 text-xs font-bold text-slate-600 dark:text-slate-300 sticky left-0 z-20 bg-white dark:bg-slate-800 border-r border-slate-100 dark:border-slate-800">{cat.name}</td>
                         {monthsKeys.map((_, i) => {
-                          const prefix = `${selectedYear}-${String(i + 1).padStart(2, '0')}`;
+                          const monthIdx = i + 1;
+                          const monthFix = monthIdx < 10 ? `0${monthIdx}` : `${monthIdx}`;
+                          const prefix = `${selectedYear}-${monthFix}`;
                           const val = allRealized.filter(t => t.category === cat.name && t.date.startsWith(prefix) && t.type === 'DESPESA').reduce((a, c) => a + c.amount, 0);
                           catTotal += val;
                           return (
@@ -1185,7 +1224,9 @@ const FinancialManager: React.FC<Props> = ({
                   <tr className="bg-rose-50/40 dark:bg-rose-900/20 font-black">
                     <td className="p-4 px-6 text-xs text-rose-700 dark:text-rose-400 uppercase sticky left-0 z-20 bg-rose-50 dark:bg-slate-900 border-r border-rose-100 dark:border-rose-900/30">Total Despesas (B)</td>
                     {monthsKeys.map((_, i) => {
-                      const prefix = `${selectedYear}-${String(i + 1).padStart(2, '0')}`;
+                      const monthIdx = i + 1;
+                      const monthFix = monthIdx < 10 ? `0${monthIdx}` : `${monthIdx}`;
+                      const prefix = `${selectedYear}-${monthFix}`;
                       const val = allRealized.filter(t => t.type === 'DESPESA' && t.date.startsWith(prefix)).reduce((a, c) => a + c.amount, 0);
                       return <td key={i} className="p-4 text-xs text-center">{val.toLocaleString('pt-BR')}</td>
                     })}
@@ -1198,11 +1239,13 @@ const FinancialManager: React.FC<Props> = ({
                   <tr className="bg-slate-900 text-white font-black">
                     <td className="p-6 px-6 text-xs uppercase sticky left-0 z-20 bg-slate-900">Resultado Operacional (A - B)</td>
                     {monthsKeys.map((_, i) => {
-                      const prefix = `${selectedYear}-${String(i + 1).padStart(2, '0')}`;
+                      const monthIdx = i + 1;
+                      const monthFix = monthIdx < 10 ? `0${monthIdx}` : `${monthIdx}`;
+                      const prefix = `${selectedYear}-${monthFix}`;
                       const fat = allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category) && t.date.startsWith(prefix)).reduce((a, c) => a + c.amount, 0);
                       const des = allRealized.filter(t => t.type === 'DESPESA' && t.date.startsWith(prefix)).reduce((a, c) => a + c.amount, 0);
-                      const res = fat - des;
-                      return <td key={i} className="p-4 text-xs text-center border-l border-white/5">{res.toLocaleString('pt-BR')}</td>
+                      const result = fat - des;
+                      return <td key={i} className="p-4 text-xs text-center border-l border-white/5">{result.toLocaleString('pt-BR')}</td>
                     })}
                     <td className="p-4 text-xs text-center border-l-2 border-white/20 bg-white/10 text-emerald-400">
                       {(allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category) && t.date.startsWith(selectedYear.toString())).reduce((a, c) => a + c.amount, 0) - allRealized.filter(t => t.type === 'DESPESA' && t.date.startsWith(selectedYear.toString())).reduce((a, c) => a + c.amount, 0)).toLocaleString('pt-BR')}
@@ -1219,7 +1262,9 @@ const FinancialManager: React.FC<Props> = ({
                       <tr key={cat.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors italic">
                         <td className="p-4 px-10 text-[11px] font-bold text-slate-400 dark:text-slate-500 sticky left-0 z-20 bg-white dark:bg-slate-800 border-r border-slate-100 dark:border-slate-800">{cat.name}</td>
                         {monthsKeys.map((_, i) => {
-                          const prefix = `${selectedYear}-${String(i + 1).padStart(2, '0')}`;
+                          const monthIdx = i + 1;
+                          const monthFix = monthIdx < 10 ? `0${monthIdx}` : `${monthIdx}`;
+                          const prefix = `${selectedYear}-${monthFix}`;
                           const val = allRealized.filter(t => t.category === cat.name && t.date.startsWith(prefix)).reduce((a, c) => a + c.amount, 0);
                           catTotal += val;
                           return (
@@ -1235,7 +1280,9 @@ const FinancialManager: React.FC<Props> = ({
                   <tr className="bg-blue-600 text-white font-black">
                     <td className="p-6 px-6 text-xs uppercase sticky left-0 z-20 bg-blue-600">Saldo Final de Caixa (Líquido)</td>
                     {monthsKeys.map((_, i) => {
-                      const prefix = `${selectedYear}-${String(i + 1).padStart(2, '0')}`;
+                      const monthIdx = i + 1;
+                      const monthFix = monthIdx < 10 ? `0${monthIdx}` : `${monthIdx}`;
+                      const prefix = `${selectedYear}-${monthFix}`;
                       const fat = allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category) && t.date.startsWith(prefix)).reduce((a, c) => a + c.amount, 0);
                       const des = allRealized.filter(t => t.type === 'DESPESA' && t.date.startsWith(prefix)).reduce((a, c) => a + c.amount, 0);
                       const apor = allRealized.filter(t => isAporte(t.category) && t.date.startsWith(prefix)).reduce((a, c) => a + c.amount, 0);
