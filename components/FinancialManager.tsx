@@ -1040,16 +1040,37 @@ const FinancialManager: React.FC<Props> = ({
           </div>
         </div>
       ) : activeTab === 'relatorios' ? (
-        <div className="space-y-8">
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          {/* DRE Header */}
+          <div className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-widest flex items-center gap-3">
+                <PieChart className="text-blue-500" /> DRE Gerencial
+              </h3>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Demonstrativo de Resultados do Exercício • Ano {selectedYear}</p>
+            </div>
+            <div className="flex items-center gap-3">
+               <button 
+                 onClick={() => {
+                   notify("Gerando Relatório DRE... Em breve!");
+                 }}
+                 className="px-6 py-2.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-200 transition-all flex items-center gap-2"
+               >
+                 <Download className="w-4 h-4" /> Exportar PDF
+               </button>
+            </div>
+          </div>
+
+          {/* Distribution Charts */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-white dark:bg-slate-800 p-8 rounded-[2rem] border border-slate-200 dark:border-slate-700 shadow-sm">
               <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
                 <PieChart className="w-4 h-4" /> Distribuição de Receitas
               </h4>
               <div className="space-y-4">
-                {categories.filter(c => c.type === 'RECEITA').map(cat => {
+                {categories.filter(c => c.type === 'RECEITA' && !isAporte(c.name)).map(cat => {
                   const total = allRealized.filter(t => t.category === cat.name && t.type === 'RECEITA' && t.date.startsWith(selectedYear.toString())).reduce((a, c) => a + c.amount, 0);
-                  const grandTotal = allRealized.filter(t => t.type === 'RECEITA' && t.date.startsWith(selectedYear.toString())).reduce((a, c) => a + c.amount, 0);
+                  const grandTotal = allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category) && t.date.startsWith(selectedYear.toString())).reduce((a, c) => a + c.amount, 0);
                   const percent = grandTotal > 0 ? (total / grandTotal) * 100 : 0;
 
                   return (
@@ -1090,62 +1111,6 @@ const FinancialManager: React.FC<Props> = ({
                   );
                 })}
               </div>
-            </div>
-          </div>
-
-          <div className="bg-slate-900 p-8 rounded-[2.5rem] text-white">
-            <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-4">Resultado do Período (Entradas vs Despesas)</h4>
-            <div className="flex flex-col md:flex-row justify-between items-end gap-6">
-              <div>
-                <p className="text-4xl font-black">
-                  R$ {(
-                    allRealized.filter(t => t.type === 'RECEITA' && t.date.startsWith(selectedYear.toString())).reduce((a, c) => a + c.amount, 0) -
-                    allRealized.filter(t => t.type === 'DESPESA' && t.date.startsWith(selectedYear.toString())).reduce((a, c) => a + c.amount, 0)
-                  ).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </p>
-                <div className="flex items-center gap-4 mt-2">
-                  <span className="text-xs font-bold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded">
-                    VENDAS: R$ {allRealized.filter(t => t.type === 'RECEITA' && !isAporte(t.category) && t.date.startsWith(selectedYear.toString())).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR')}
-                  </span>
-                  <span className="text-xs font-bold text-rose-400 bg-rose-400/10 px-2 py-0.5 rounded">
-                    DESPESAS: R$ {allRealized.filter(t => t.type === 'DESPESA' && t.date.startsWith(selectedYear.toString())).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR')}
-                  </span>
-                  <span className="text-xs font-bold text-indigo-400 bg-indigo-400/10 px-2 py-0.5 rounded">
-                    APORTES: R$ {allRealized.filter(t => isAporte(t.category) && t.date.startsWith(selectedYear.toString())).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR')}
-                  </span>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Índice de Sobra</p>
-                <p className="text-2xl font-black">
-                  {allRealized.filter(t => t.type === 'RECEITA' && t.date.startsWith(selectedYear.toString())).reduce((a, c) => a + c.amount, 0) > 0
-                    ? (((allRealized.filter(t => t.type === 'RECEITA' && t.date.startsWith(selectedYear.toString())).reduce((a, c) => a + c.amount, 0) - allRealized.filter(t => t.type === 'DESPESA' && t.date.startsWith(selectedYear.toString())).reduce((a, c) => a + c.amount, 0)) / allRealized.filter(t => t.type === 'RECEITA' && t.date.startsWith(selectedYear.toString())).reduce((a, c) => a + c.amount, 0)) * 100).toFixed(1)
-                    : '0'
-                  }%
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : activeTab === 'relatorios' ? (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          {/* DRE Header */}
-          <div className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div>
-              <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-widest flex items-center gap-3">
-                <PieChart className="text-blue-500" /> DRE Gerencial
-              </h3>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Demonstrativo de Resultados do Exercício • Ano {selectedYear}</p>
-            </div>
-            <div className="flex items-center gap-3">
-               <button 
-                 onClick={() => {
-                   notify("Gerando Relatório DRE... Em breve!");
-                 }}
-                 className="px-6 py-2.5 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-200 transition-all flex items-center gap-2"
-               >
-                 <Download className="w-4 h-4" /> Exportar PDF
-               </button>
             </div>
           </div>
 
