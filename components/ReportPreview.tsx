@@ -1,6 +1,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { X, Printer, ZoomIn, ZoomOut, Maximize } from 'lucide-react';
+import { runOptimizePageBreaks } from '../services/budgetPdfService';
 
 interface Props {
     onClose: () => void;
@@ -17,6 +18,12 @@ const ReportPreview: React.FC<Props> = ({
 }) => {
     const [zoom, setZoom] = React.useState(100);
     const previewRef = React.useRef<HTMLDivElement | null>(null);
+
+    React.useEffect(() => {
+        if (previewRef.current) {
+            runOptimizePageBreaks(previewRef.current);
+        }
+    }, [htmlContent]);
 
     const safeFileName = (name?: string) => {
         const base = (name || 'RELATORIO')

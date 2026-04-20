@@ -117,7 +117,7 @@ export const buildBudgetDescriptionBlocksHtml = (budget: ServiceOrder, company: 
 
   if (budget.descriptionBlocks && budget.descriptionBlocks.length > 0) {
     html += `
-      <div style="margin-bottom: 48px;" class="print-description-content">
+      <div style="margin-bottom: 16px;" class="print-description-content">
         <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0; margin-bottom: 24px;">DESCRIÇÃO DOS SERVIÇOS</div>
         <div style="display: block;">
           ${budget.descriptionBlocks.map((block: DescriptionBlock) => {
@@ -160,7 +160,7 @@ export const buildBudgetItemsTableHtml = (budget: ServiceOrder, company: Company
 
   return `
       <!-- Items Table -->
-      <div style="margin-top: 20px; margin-bottom: 20px; page-break-before: always; break-before: page;">
+      <div style="margin-bottom: 20px;" class="force-page-break">
           <div style="font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; padding-bottom: 6px; margin-bottom: 4px;">DETALHAMENTO FINANCEIRO</div>
           <table style="width: 100%; border-collapse: collapse;">
             <thead>
