@@ -175,6 +175,7 @@ const AppContent: React.FC = () => {
       { id: 'CAT-004', name: 'Mão de Obra', type: 'DESPESA' },
       { id: 'CAT-005', name: 'Aluguel', type: 'DESPESA' },
       { id: 'CAT-006', name: 'Geral', type: 'DESPESA' },
+      { id: 'CAT-007', name: 'Imposto', type: 'DESPESA' },
     ];
   });
   const [accountEntries, setAccountEntries] = useState<AccountEntry[]>(() =>
@@ -211,7 +212,15 @@ const AppContent: React.FC = () => {
         changed = true;
       }
 
-      if (changed) console.log('[Migration] Categorias atualizadas para Prestação de Serviços');
+      const hasImposto = currentCats.some(c => c.name === 'Imposto');
+      if (!hasImposto) {
+        const newCats = [...currentCats, { id: db.generateId('CAT'), name: 'Imposto', type: 'DESPESA' }];
+        setFinancialCategories(newCats);
+        await db.saveLocal(STORAGE_KEYS.FINANCIAL_CATEGORIES, newCats);
+        changed = true;
+      }
+
+      if (changed) console.log('[Migration] Categorias atualizadas');
     };
     migrateData();
   }, []);
