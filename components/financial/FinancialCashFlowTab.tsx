@@ -135,23 +135,6 @@ const FinancialCashFlowTab: React.FC<FinancialCashFlowTabProps> = ({
                         {isContribution ? '+' : t.type === 'DESPESA' ? '-' : '+'} R$ {t.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </p>
                     </div>
-                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => setEditingItem(t)} className="p-2 text-slate-300 hover:text-blue-500 rounded-lg hover:bg-blue-50">
-                        <Pencil className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={async () => {
-                          if (!confirm("Excluir esta transação? Isso afetará o saldo da conta.")) return;
-                          const newList = transactions.filter(item => item.id !== t.id);
-                          setTransactions(newList);
-                          await db.remove('serviflow_transactions', t.id);
-                          notify("Transação removida.");
-                        }}
-                        className="p-2 text-slate-300 hover:text-rose-500 rounded-lg hover:bg-rose-50"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
                   </div>
                 </div>
               );
