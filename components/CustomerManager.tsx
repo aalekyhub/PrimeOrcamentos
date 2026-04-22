@@ -33,33 +33,64 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, cur
 
   const [newCustomer, setNewCustomer] = useState<Partial<Customer>>(initialFormState);
 
-  // Busca CNPJ
+  // Busca CNPJ com Fallback
   const lookupCNPJ = async (cnpj: string) => {
     const cleanCnpj = cnpj.replace(/\D/g, '');
     if (cleanCnpj.length !== 14) return;
 
     setLoadingApi(true);
+    
+    // Tenta primeiro BrasilAPI (Fast, no key)
     try {
-      const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cleanCnpj}`);
-      if (response.ok) {
-        const data = await response.json();
+      const resp = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cleanCnpj}`);
+      if (resp.ok) {
+        const data = await resp.json();
         setNewCustomer(prev => ({
           ...prev,
           name: data.razao_social,
-          address: `${data.logradouro}`,
-          neighborhood: data.bairro,
-          city: data.municipio,
-          state: data.uf,
-          cep: data.cep,
-          number: data.numero
+          tradeName: data.nome_fantasia || '',
+          address: data.logradouro || '',
+          neighborhood: data.bairro || '',
+          city: data.municipio || '',
+          state: data.uf || '',
+          cep: data.cep || '',
+          number: data.numero || ''
         }));
-        notify("Dados do CNPJ importados!");
+        notify("Dados importados via BrasilAPI");
+        setLoadingApi(false);
+        return;
       }
     } catch (e) {
-      notify("Erro ao buscar CNPJ", "error");
-    } finally {
-      setLoadingApi(false);
+      console.error("BrasilAPI fallback triggered", e);
     }
+
+    // Fallback: CNPJ.ws (Public API)
+    try {
+      const resp = await fetch(`https://publica.cnpj.ws/cnpj/${cleanCnpj}`);
+      if (resp.ok) {
+        const data = await resp.json();
+        const est = data.estabelecimento;
+        setNewCustomer(prev => ({
+          ...prev,
+          name: data.razao_social,
+          tradeName: data.nome_fantasia || '',
+          address: est.logradouro || '',
+          neighborhood: est.bairro || '',
+          city: est.cidade.nome || '',
+          state: est.estado.sigla || '',
+          cep: est.cep || '',
+          number: est.numero || ''
+        }));
+        notify("Dados importados via CNPJ.ws");
+        setLoadingApi(false);
+        return;
+      }
+    } catch (e) {
+      console.error("CNPJ.ws failed", e);
+    }
+
+    notify("Não foi possível buscar os dados automaticamente.", "warning");
+    setLoadingApi(false);
   };
 
   // Busca CEP
@@ -228,6 +259,15 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, cur
                 <input type="text" className={`${inputClass} ${(editingCustomerId && !isAdmin) ? 'opacity-70' : ''}`} value={newCustomer.name} onChange={e => setNewCustomer({ ...newCustomer, name: e.target.value })} disabled={editingCustomerId && !isAdmin} required />
               </div>
             </div>
+
+            {personType === 'PJ' && (
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <label className={labelClass}>Nome Fantasia</label>
+                  <input type="text" className={`${inputClass} ${(editingCustomerId && !isAdmin) ? 'opacity-70' : ''}`} value={newCustomer.tradeName || ''} onChange={e => setNewCustomer({ ...newCustomer, tradeName: e.target.value })} disabled={editingCustomerId && !isAdmin} />
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
               <div className="md:col-span-3">

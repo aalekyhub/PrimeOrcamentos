@@ -24,6 +24,7 @@ const CompanySettings: React.FC<Props> = ({ company, setCompany, currentUser }) 
 
   const [newUnitLabel, setNewUnitLabel] = useState('');
   const [newUnitValue, setNewUnitValue] = useState('');
+  const [loadingApi, setLoadingApi] = useState(false);
 
   const formatPhone = (value: string) => {
     const digits = value.replace(/\D/g, '');
@@ -113,6 +114,53 @@ const CompanySettings: React.FC<Props> = ({ company, setCompany, currentUser }) 
     }
     setCompany(prev => ({ ...prev, customUnits: [...prev.customUnits, { label: newUnitLabel, value: newUnitValue.toLowerCase() }] }));
     setNewUnitLabel(''); setNewUnitValue('');
+  };
+
+  const lookupCNPJ = async (cnpj: string) => {
+    const cleanCnpj = cnpj.replace(/\D/g, '');
+    if (cleanCnpj.length !== 14) return;
+
+    setLoadingApi(true);
+    try {
+      const resp = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cleanCnpj}`);
+      if (resp.ok) {
+        const data = await resp.json();
+        setCompany(prev => ({
+          ...prev,
+          name: data.razao_social,
+          cnpj: cnpj,
+          address: `${data.logradouro}, ${data.numero} - ${data.bairro}, ${data.municipio} - ${data.uf}`,
+        }));
+        notify("Dados da empresa importados!");
+        setLoadingApi(false);
+        return;
+      }
+    } catch (e) {
+      console.error("BrasilAPI fallback triggered", e);
+    }
+
+    // Fallback: CNPJ.ws (Public API)
+    try {
+      const resp = await fetch(`https://publica.cnpj.ws/cnpj/${cleanCnpj}`);
+      if (resp.ok) {
+        const data = await resp.json();
+        const est = data.estabelecimento;
+        setCompany(prev => ({
+          ...prev,
+          name: data.razao_social,
+          cnpj: cnpj,
+          address: `${est.logradouro}, ${est.numero} - ${est.bairro}, ${est.cidade.nome} - ${est.estado.sigla}`,
+        }));
+        notify("Dados da empresa importados via CNPJ.ws");
+        setLoadingApi(false);
+        return;
+      }
+    } catch (e) {
+      console.error("CNPJ.ws failed", e);
+    }
+
+    notify("Não foi possível buscar os dados da empresa automaticamente.", "warning");
+    setLoadingApi(false);
   };
 
   const handleSave = async (data: CompanyProfile) => {
@@ -213,7 +261,26 @@ const CompanySettings: React.FC<Props> = ({ company, setCompany, currentUser }) 
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-tighter">CNPJ</label>
-                <input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-slate-100 disabled:opacity-70" value={company.cnpj} onChange={e => setCompany({ ...company, cnpj: e.target.value })} disabled={!isAdmin} />
+                <div className="relative">
+                  <input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-slate-100 disabled:opacity-70" value={company.cnpj} onChange={e => {
+                    let val = e.target.value;
+                    val = val.replace(/\D/g, '');
+                    if (val.length > 14) val = val.slice(0, 14);
+                    // Máscara CNPJ
+                    val = val.replace(/^(\d{2})(\d)/, '$1.$2');
+                    val = val.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+                    val = val.replace(/\.(\d{3})(\d)/, '.$1/$2');
+                    val = val.replace(/(\d{4})(\d)/, '$1-$2');
+                    
+                    setCompany({ ...company, cnpj: val });
+                    if (val.replace(/\D/g, '').length === 14) lookupCNPJ(val);
+                  }} disabled={!isAdmin} />
+                  {loadingApi && (
+                    <div className="absolute right-3 top-3">
+                      <RefreshCw className="w-5 h-5 text-blue-500 animate-spin" />
+                    </div>
+                  )}
+                </div>
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-tighter">Slogan</label>
