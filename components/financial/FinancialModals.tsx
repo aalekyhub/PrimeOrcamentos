@@ -163,6 +163,24 @@ const FinancialModals: React.FC<FinancialModalsProps> = ({
                     onChange={e => setEditingItem({ ...editingItem, description: e.target.value })}
                   />
                 </div>
+                <div>
+                  <label className="block text-xs font-black text-slate-400 uppercase mb-2">
+                    {isAporte(editingItem.category) || editingItem.type === 'INVESTIMENTO' ? 'Sócio / Origem' : 
+                     editingItem.type === 'RECEITA' || editingItem.type === 'RECEBER' ? 'Cliente' : 'Fornecedor'}
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 font-bold"
+                    value={editingItem.type === 'RECEITA' || editingItem.type === 'RECEBER' ? (editingItem.customerName || '') : (editingItem.supplierName || '')}
+                    onChange={e => {
+                      if (editingItem.type === 'RECEITA' || editingItem.type === 'RECEBER') {
+                        setEditingItem({ ...editingItem, customerName: e.target.value });
+                      } else {
+                        setEditingItem({ ...editingItem, supplierName: e.target.value });
+                      }
+                    }}
+                  />
+                </div>
               </div>
               <div className="flex items-center gap-4">
                 <div className="flex-1">
