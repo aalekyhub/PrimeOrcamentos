@@ -20,6 +20,7 @@ import {
 } from 'recharts';
 import { Transaction, FinancialAccount, FinancialCategory } from '../../types';
 import { RealizedItem, selectDashboardTotals, selectChartData, selectTopExpenses, selectTotalBalance } from '../../services/financialSelectors';
+import { isAporte } from '../../services/financialHelpers';
 
 interface FinancialDashboardProps {
   allRealized: RealizedItem[];
@@ -238,7 +239,7 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
           </div>
 
           {/* Top Expenses */}
-          <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:shadow-md">
             <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-4">Maiores Despesas</h4>
             <div className="space-y-4">
               {topExpenses.map((item, idx) => (
@@ -249,12 +250,54 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                   </div>
                   <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                     <div
-                      className="bg-blue-600 h-full rounded-full transition-all duration-1000"
+                      className="bg-rose-500 h-full rounded-full transition-all duration-1000"
                       style={{ width: `${item.percent}%` }}
                     ></div>
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Partner Contributions Summary (Added) */}
+          <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-indigo-100 dark:border-indigo-900/30 shadow-sm transition-all hover:shadow-md">
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="text-[8px] font-black text-indigo-500 uppercase tracking-widest">Aportes por Sócio</h4>
+              <Coins className="w-3.5 h-3.5 text-indigo-500" />
+            </div>
+            <div className="space-y-4">
+              {(() => {
+                const partnerMap: Record<string, number> = {};
+                allRealized
+                  .filter(t => isAporte(t.category) && t.date.startsWith(selectedYear.toString()))
+                  .forEach(t => {
+                    const name = t.supplierName || 'Não Identificado';
+                    partnerMap[name] = (partnerMap[name] || 0) + t.amount;
+                  });
+                const partners = Object.entries(partnerMap).sort((a, b) => b[1] - a[1]);
+
+                if (partners.length === 0) {
+                  return <p className="text-[8px] font-bold text-slate-400 uppercase italic">Nenhum aporte este ano.</p>;
+                }
+
+                return partners.slice(0, 3).map(([name, total]) => (
+                  <div key={name} className="flex items-center justify-between group cursor-help">
+                    <div className="space-y-0.5">
+                      <p className="text-[10px] font-black text-slate-600 dark:text-slate-400 uppercase leading-tight">{name}</p>
+                      <p className="text-xs font-black text-indigo-600">R$ {total.toLocaleString('pt-BR')}</p>
+                    </div>
+                    <div className="w-8 h-8 bg-indigo-50 dark:bg-indigo-900/50 rounded-lg flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
+                      <TrendingUp className="w-4 h-4" />
+                    </div>
+                  </div>
+                ));
+              })()}
+              <button
+                onClick={() => setActiveTab('relatorios')}
+                className="w-full py-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl text-[8px] font-black text-indigo-600 hover:bg-indigo-100 transition-all uppercase tracking-widest"
+              >
+                Ver Relatório Completo
+              </button>
             </div>
           </div>
         </div>

@@ -53,6 +53,7 @@ const FinancialManager: React.FC<FinancialManagerProps> = (props) => {
     showEntryForm, setShowEntryForm,
     entrySearch, setEntrySearch,
     entryTypeFilter, setEntryTypeFilter,
+    partnerFilter, setPartnerFilter,
     formData, setFormData,
     editingItem, setEditingItem,
     viewingAttachment, setViewingAttachment,
@@ -183,6 +184,8 @@ const FinancialManager: React.FC<FinancialManagerProps> = (props) => {
           setPrintData={setPrintData}
           setEditingItem={setEditingItem}
           setViewingAttachment={setViewingAttachment}
+          partnerFilter={partnerFilter}
+          setPartnerFilter={setPartnerFilter}
         />
       ) : activeTab === 'provisionado' ? (
         <FinancialProvisionTab 

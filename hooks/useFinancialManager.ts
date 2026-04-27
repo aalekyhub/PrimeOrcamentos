@@ -42,6 +42,7 @@ export const useFinancialManager = ({
   const [showEntryForm, setShowEntryForm] = useState(false);
   const [entrySearch, setEntrySearch] = useState('');
   const [entryTypeFilter, setEntryTypeFilter] = useState<'ALL' | 'PAGAR' | 'RECEBER'>('ALL');
+  const [partnerFilter, setPartnerFilter] = useState<string>('ALL');
   
   const initialFormData: Partial<AccountEntry> = {
     type: 'PAGAR',
@@ -194,6 +195,7 @@ export const useFinancialManager = ({
     showEntryForm, setShowEntryForm,
     entrySearch, setEntrySearch,
     entryTypeFilter, setEntryTypeFilter,
+    partnerFilter, setPartnerFilter,
     formData, setFormData,
     editingItem, setEditingItem,
     viewingAttachment, setViewingAttachment,

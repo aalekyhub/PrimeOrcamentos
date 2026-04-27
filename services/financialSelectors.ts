@@ -126,3 +126,22 @@ export const selectTopExpenses = (
 export const selectTotalBalance = (accounts: FinancialAccount[]) => {
   return accounts.reduce((a, c) => a + c.currentBalance, 0);
 };
+
+/**
+ * Agrupa aportes por sócio para resumo.
+ */
+export const selectPartnerContributions = (allRealized: RealizedItem[], selectedYear: number) => {
+  const yearStr = selectedYear.toString();
+  const partnerMap: Record<string, number> = {};
+
+  allRealized
+    .filter(t => isAporte(t.category) && t.date.startsWith(yearStr))
+    .forEach(t => {
+      const name = t.supplierName || 'Outros / Não Identificado';
+      partnerMap[name] = (partnerMap[name] || 0) + t.amount;
+    });
+
+  return Object.entries(partnerMap)
+    .map(([name, total]) => ({ name, total }))
+    .sort((a, b) => b.total - a.total);
+};

@@ -7,7 +7,8 @@ import {
   Paperclip,
   Pencil,
   Trash2,
-  Coins
+  Coins,
+  Filter
 } from 'lucide-react';
 import { Transaction, AccountEntry, FinancialAccount, FinancialCategory, CompanyProfile } from '../../types';
 import { RealizedItem, selectDashboardTotals } from '../../services/financialSelectors';
@@ -29,6 +30,8 @@ interface FinancialCashFlowTabProps {
   setPrintData: (data: any) => void;
   setEditingItem: (item: any) => void;
   setViewingAttachment: (viewer: any) => void;
+  partnerFilter: string;
+  setPartnerFilter: (partner: string) => void;
 }
 
 const FinancialCashFlowTab: React.FC<FinancialCashFlowTabProps> = ({
@@ -42,10 +45,24 @@ const FinancialCashFlowTab: React.FC<FinancialCashFlowTabProps> = ({
   selectedYear,
   setPrintData,
   setEditingItem,
-  setViewingAttachment
+  setViewingAttachment,
+  partnerFilter,
+  setPartnerFilter
 }) => {
   const { notify } = useNotify();
   const totals = selectDashboardTotals(allRealized, selectedYear);
+
+  // Extract all partners that have made contributions
+  const partners = Array.from(new Set(
+    allRealized
+      .filter(t => isAporte(t.category))
+      .map(t => t.supplierName || 'Não Identificado')
+  )).sort();
+
+  const filteredRealized = allRealized.filter(t => {
+    if (partnerFilter === 'ALL') return true;
+    return (t.supplierName || 'Não Identificado') === partnerFilter;
+  });
 
   return (
     <div className="space-y-6">
@@ -81,28 +98,46 @@ const FinancialCashFlowTab: React.FC<FinancialCashFlowTabProps> = ({
         </div>
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex flex-col md:flex-row justify-between gap-4">
+        {/* Partner Filter */}
+        <div className="flex items-center gap-3 bg-white dark:bg-slate-800 p-2 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+          <div className="flex items-center gap-2 px-4 py-2 border-r border-slate-100 dark:border-slate-700">
+            <Filter className="w-4 h-4 text-blue-500" />
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Filtrar por Sócio</span>
+          </div>
+          <select 
+            className="bg-transparent text-xs font-bold text-slate-600 dark:text-slate-300 outline-none pr-4 min-w-[150px]"
+            value={partnerFilter}
+            onChange={(e) => setPartnerFilter(e.target.value)}
+          >
+            <option value="ALL">Todos os Sócios</option>
+            {partners.map(p => (
+              <option key={p} value={p}>{p}</option>
+            ))}
+          </select>
+        </div>
+
         <button
           onClick={() => setPrintData({
-            html: buildFinancialReportHtml(allRealized as any, accountEntries, accounts, categories, company, 'EXTRATO', 'Geral'),
-            title: 'Extrato de Fluxo de Caixa',
+            html: buildFinancialReportHtml(filteredRealized as any, accountEntries, accounts, categories, company, 'EXTRATO', partnerFilter === 'ALL' ? 'Geral' : partnerFilter),
+            title: `Extrato de Fluxo de Caixa ${partnerFilter !== 'ALL' ? `- ${partnerFilter}` : ''}`,
             filename: `EXTRATO_FINANCEIRO_${getTodayIsoDate()}`
           })}
           className="bg-slate-900 dark:bg-slate-700 text-white px-6 py-3 rounded-2xl flex items-center justify-center gap-2 hover:bg-slate-800 transition-all text-[10px] font-black uppercase tracking-widest shadow-md"
         >
-          <Download className="w-4 h-4" /> Exportar Extrato
+          <Download className="w-4 h-4" /> Exportar Extrato {partnerFilter !== 'ALL' ? 'Filtrado' : ''}
         </button>
       </div>
 
       <div className="bg-white dark:bg-slate-800 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
         <div className="divide-y divide-slate-100 dark:divide-slate-700">
-          {allRealized.length === 0 ? (
+          {filteredRealized.length === 0 ? (
             <div className="py-20 text-center opacity-40">
               <Wallet className="w-12 h-12 mx-auto mb-4" />
-              <p className="text-xs font-black uppercase tracking-widest text-slate-400">Nenhuma transação financeira registrada.</p>
+              <p className="text-xs font-black uppercase tracking-widest text-slate-400">Nenhuma transação encontrada com este filtro.</p>
             </div>
           ) : (
-            allRealized.map(t => {
+            filteredRealized.map(t => {
               const isContribution = isAporte(t.category);
               return (
                 <div key={t.id} className="p-6 hover:bg-slate-50 transition-all flex items-center justify-between group">

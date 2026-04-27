@@ -1,5 +1,5 @@
 import React from 'react';
-import { PieChart, Download, Filter, Info } from 'lucide-react';
+import { PieChart, Download, Filter, Info, Coins } from 'lucide-react';
 import { FinancialCategory, CompanyProfile } from '../../types';
 import { RealizedItem } from '../../services/financialSelectors';
 import { isAporte } from '../../services/financialHelpers';
@@ -134,6 +134,41 @@ const FinancialReportsTab: React.FC<FinancialReportsTabProps> = ({
               }%
             </p>
           </div>
+        </div>
+      </div>
+
+      {/* Partner Contributions Summary */}
+      <div className="bg-indigo-50/30 dark:bg-indigo-900/10 p-8 rounded-[2.5rem] border border-indigo-100 dark:border-indigo-900/30">
+        <h4 className="text-xs font-black text-indigo-500 uppercase tracking-widest mb-6 flex items-center gap-2">
+          <Info className="w-4 h-4" /> Resumo de Aportes/Empréstimos por Sócio ({selectedYear})
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {(() => {
+            const partnerMap: Record<string, number> = {};
+            allRealized
+              .filter(t => isAporte(t.category) && t.date.startsWith(selectedYear.toString()))
+              .forEach(t => {
+                const name = t.supplierName || 'Não Identificado';
+                partnerMap[name] = (partnerMap[name] || 0) + t.amount;
+              });
+            const partners = Object.entries(partnerMap).sort((a, b) => b[1] - a[1]);
+
+            if (partners.length === 0) {
+              return <p className="text-xs font-bold text-slate-400 uppercase italic col-span-full">Nenhum aporte registrado para este ano.</p>;
+            }
+
+            return partners.map(([name, total]) => (
+              <div key={name} className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-indigo-100 dark:border-indigo-900 shadow-sm flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{name}</p>
+                  <p className="text-lg font-black text-indigo-600">R$ {total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                </div>
+                <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/50 rounded-xl flex items-center justify-center text-indigo-600">
+                  <Coins className="w-5 h-5" />
+                </div>
+              </div>
+            ));
+          })()}
         </div>
       </div>
 
