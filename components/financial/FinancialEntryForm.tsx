@@ -1,6 +1,6 @@
 import React from 'react';
 import { Plus, FileUp } from 'lucide-react';
-import { AccountEntry, FinancialCategory } from '../../types';
+import { AccountEntry, FinancialCategory, Customer } from '../../types';
 import { isAporte } from '../../services/financialHelpers';
 import { useNotify } from '../ToastProvider';
 
@@ -11,6 +11,7 @@ interface FinancialEntryFormProps {
   handleAddEntry: (e: React.FormEvent) => Promise<void>;
   handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   categories: FinancialCategory[];
+  customers: Customer[];
 }
 
 const FinancialEntryForm: React.FC<FinancialEntryFormProps> = ({
@@ -19,7 +20,8 @@ const FinancialEntryForm: React.FC<FinancialEntryFormProps> = ({
   setShowEntryForm,
   handleAddEntry,
   handleFileUpload,
-  categories
+  categories,
+  customers
 }) => {
   const { notify } = useNotify();
 
@@ -142,11 +144,17 @@ const FinancialEntryForm: React.FC<FinancialEntryFormProps> = ({
             <div className="flex gap-4">
               <input
                 type="text"
+                list="customers-list"
                 placeholder={formData.type === 'INVESTIMENTO' ? 'Nome do Sócio ou Origem...' : formData.type === 'RECEITA' ? 'Nome do Cliente...' : 'Nome do Fornecedor...'}
                 className="flex-1 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold"
                 value={formData.type === 'RECEITA' ? (formData.customerName || '') : (formData.supplierName || '')}
                 onChange={e => formData.type === 'RECEITA' ? setFormData({ ...formData, customerName: e.target.value }) : setFormData({ ...formData, supplierName: e.target.value })}
               />
+              <datalist id="customers-list">
+                {customers.map(c => (
+                  <option key={c.id} value={c.name} />
+                ))}
+              </datalist>
               <div className="relative">
                 <input
                   type="file"

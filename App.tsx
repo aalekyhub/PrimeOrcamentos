@@ -876,6 +876,7 @@ const AppContent: React.FC = () => {
                       setCategories={setFinancialCategories}
                       company={company}
                       currentUser={currentUser}
+                      customers={customers}
                     />
                   )}
 

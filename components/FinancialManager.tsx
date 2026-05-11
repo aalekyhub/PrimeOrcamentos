@@ -17,7 +17,8 @@ import {
   FinancialAccount,
   FinancialCategory,
   CompanyProfile,
-  UserAccount
+  UserAccount,
+  Customer
 } from '../types';
 
 // Custom Hooks & Services
@@ -44,6 +45,7 @@ interface FinancialManagerProps {
   setCategories: React.Dispatch<React.SetStateAction<FinancialCategory[]>>;
   company: CompanyProfile;
   currentUser: UserAccount;
+  customers: Customer[];
 }
 
 const FinancialManager: React.FC<FinancialManagerProps> = (props) => {
@@ -75,7 +77,8 @@ const FinancialManager: React.FC<FinancialManagerProps> = (props) => {
     setAccounts,
     categories,
     setCategories,
-    company
+    company,
+    customers
   } = props;
 
   // Realized items consolidated
@@ -160,6 +163,7 @@ const FinancialManager: React.FC<FinancialManagerProps> = (props) => {
           handleAddEntry={handleAddEntry}
           handleFileUpload={handleFileUpload}
           categories={categories}
+          customers={customers}
         />
       ) : activeTab === 'dashboard' ? (
         <FinancialDashboard 
