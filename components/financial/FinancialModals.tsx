@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, Paperclip, Download, Pencil, FileUp } from 'lucide-react';
-import { AccountEntry, Transaction, FinancialCategory } from '../../types';
+import { AccountEntry, Transaction, FinancialCategory, Customer } from '../../types';
 import { isAporte } from '../../services/financialHelpers';
 import ReportPreview from '../ReportPreview';
 
@@ -14,6 +14,7 @@ interface FinancialModalsProps {
   handleUpdateItem: (e: React.FormEvent) => Promise<void>;
   handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>, isEditing?: boolean) => void;
   categories: FinancialCategory[];
+  customers: Customer[];
 }
 
 const FinancialModals: React.FC<FinancialModalsProps> = ({
@@ -25,7 +26,8 @@ const FinancialModals: React.FC<FinancialModalsProps> = ({
   setPrintData,
   handleUpdateItem,
   handleFileUpload,
-  categories
+  categories,
+  customers
 }) => {
   return (
     <>
@@ -170,6 +172,7 @@ const FinancialModals: React.FC<FinancialModalsProps> = ({
                   </label>
                   <input
                     type="text"
+                    list="customers-list-edit"
                     className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 font-bold"
                     value={editingItem.type === 'RECEITA' || editingItem.type === 'RECEBER' ? (editingItem.customerName || '') : (editingItem.supplierName || '')}
                     onChange={e => {
@@ -180,6 +183,11 @@ const FinancialModals: React.FC<FinancialModalsProps> = ({
                       }
                     }}
                   />
+                  <datalist id="customers-list-edit">
+                    {customers.map(c => (
+                      <option key={c.id} value={c.name} />
+                    ))}
+                  </datalist>
                 </div>
               </div>
               <div className="flex items-center gap-4">

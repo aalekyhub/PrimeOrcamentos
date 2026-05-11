@@ -240,6 +240,7 @@ const FinancialManager: React.FC<FinancialManagerProps> = (props) => {
         handleUpdateItem={handleUpdateItem}
         handleFileUpload={handleFileUpload}
         categories={categories}
+        customers={customers}
       />
     </div>
   );
