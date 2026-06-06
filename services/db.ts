@@ -66,9 +66,9 @@ const CLOUD_TABLES = [
   'work_labor',
   'work_indirects',
   'work_taxes',
-  'financial_accounts',
-  'financial_categories',
-  'account_entries',
+  'serviflow_financial_accounts',
+  'serviflow_financial_categories',
+  'serviflow_account_entries',
 ] as const;
 
 const REALTIME_TABLES = [
@@ -85,10 +85,21 @@ const REALTIME_TABLES = [
   'work_labor',
   'work_indirects',
   'work_taxes',
-  'account_entries',
+  'serviflow_account_entries',
 ] as const;
 
-const getStorageKeyFromTable = (table: string) => `serviflow_${table}`;
+const getStorageKeyFromTable = (table: string) => {
+  if (table.startsWith('serviflow_')) return table;
+  return `serviflow_${table}`;
+};
+
+const getCloudTableFromKey = (key: string) => {
+  const table = key.replace('serviflow_', '');
+  if (['financial_accounts', 'financial_categories', 'account_entries'].includes(table)) {
+    return `serviflow_${table}`;
+  }
+  return table;
+};
 
 const safeStringify = (value: any) => {
   try {
@@ -470,7 +481,7 @@ export const db = {
       return { success: true, skippedCloud: true, localChanged };
     }
 
-    const tableName = key.replace('serviflow_', '');
+    const tableName = getCloudTableFromKey(key);
 
     try {
       const rawPayload = sanitizedSingleItem
@@ -608,7 +619,7 @@ export const db = {
   },
 
   async remove(key: string, id: string) {
-    const tableName = key.replace('serviflow_', '');
+    const tableName = getCloudTableFromKey(key);
 
     if (TOMBSTONE_KEYS.has(key)) {
       _tombstones.add(id);
@@ -645,7 +656,7 @@ export const db = {
 
   async deleteByCondition(key: string, column: string, value: any) {
     let deletedCount = 0;
-    const tableName = key.replace('serviflow_', '');
+    const tableName = getCloudTableFromKey(key);
 
     if (TOMBSTONE_KEYS.has(key) && column === 'id') {
       _tombstones.add(value);
