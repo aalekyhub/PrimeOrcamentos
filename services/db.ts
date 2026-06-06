@@ -360,7 +360,7 @@ const initCache = async () => {
     );
 
     for (const key of migratableKeys) {
-      const isMissingInIDB = _cache[key] === undefined;
+      const isMissingInIDB = _cache[key] === undefined || (Array.isArray(_cache[key]) && _cache[key].length === 0);
 
       if (!isMissingInIDB) continue;
 
@@ -564,10 +564,36 @@ export const db = {
           }
 
           const storageKey = getStorageKeyFromTable(response.table);
-          const sanitizedData = filterDeletedItems(response.data);
+          const cloudItems = filterDeletedItems(response.data) || [];
+          const localItems = Array.isArray(_cache[storageKey]) ? _cache[storageKey] : [];
 
-          results[response.table] = sanitizedData;
-          await setCacheValue(storageKey, sanitizedData);
+          const cloudMap = new Map();
+          cloudItems.forEach((item: any) => {
+            if (item && item.id) cloudMap.set(item.id, item);
+          });
+
+          const mergedList: any[] = [];
+
+          localItems.forEach((localItem: any) => {
+            if (!localItem || !localItem.id) return;
+            if (_tombstones.has(localItem.id)) return;
+
+            if (cloudMap.has(localItem.id)) {
+              mergedList.push(cloudMap.get(localItem.id));
+              cloudMap.delete(localItem.id);
+            } else {
+              mergedList.push(localItem);
+            }
+          });
+
+          cloudItems.forEach((cloudItem: any) => {
+            if (cloudItem && cloudItem.id && cloudMap.has(cloudItem.id)) {
+              mergedList.push(cloudItem);
+            }
+          });
+
+          results[response.table] = mergedList;
+          await setCacheValue(storageKey, mergedList);
         }
         notifySyncComplete();
       } finally {

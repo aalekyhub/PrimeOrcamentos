@@ -41,8 +41,8 @@ const FinancialEntryForm: React.FC<FinancialEntryFormProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <button
                 type="button"
-                onClick={() => setFormData({ ...formData, type: 'RECEITA' as any })}
-                className={`py-3 px-2 rounded-xl text-[10px] font-black border-2 transition-all uppercase tracking-tighter ${formData.type === 'RECEITA' ? 'bg-emerald-50 border-emerald-500 text-emerald-600' : 'bg-slate-50 border-transparent text-slate-400 opacity-60'}`}
+                onClick={() => setFormData({ ...formData, type: 'RECEBER' as any })}
+                className={`py-3 px-2 rounded-xl text-[10px] font-black border-2 transition-all uppercase tracking-tighter ${formData.type === 'RECEBER' ? 'bg-emerald-50 border-emerald-500 text-emerald-600' : 'bg-slate-50 border-transparent text-slate-400 opacity-60'}`}
               >
                 A RECEBER
               </button>
@@ -139,16 +139,16 @@ const FinancialEntryForm: React.FC<FinancialEntryFormProps> = ({
           </div>
           <div className="lg:col-span-3">
             <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase">
-              {formData.type === 'INVESTIMENTO' ? 'Sócio / Origem (Opcional)' : formData.type === 'RECEITA' ? 'Cliente (Opcional)' : 'Fornecedor (Opcional)'}
+              {formData.type === 'INVESTIMENTO' ? 'Sócio / Origem (Opcional)' : formData.type === 'RECEBER' ? 'Cliente (Opcional)' : 'Fornecedor (Opcional)'}
             </label>
             <div className="flex gap-4">
               <input
                 type="text"
                 list="customers-list"
-                placeholder={formData.type === 'INVESTIMENTO' ? 'Nome do Sócio ou Origem...' : formData.type === 'RECEITA' ? 'Nome do Cliente...' : 'Nome do Fornecedor...'}
+                placeholder={formData.type === 'INVESTIMENTO' ? 'Nome do Sócio ou Origem...' : formData.type === 'RECEBER' ? 'Nome do Cliente...' : 'Nome do Fornecedor...'}
                 className="flex-1 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold"
-                value={formData.type === 'RECEITA' ? (formData.customerName || '') : (formData.supplierName || '')}
-                onChange={e => formData.type === 'RECEITA' ? setFormData({ ...formData, customerName: e.target.value }) : setFormData({ ...formData, supplierName: e.target.value })}
+                value={formData.type === 'RECEBER' ? (formData.customerName || '') : (formData.supplierName || '')}
+                onChange={e => formData.type === 'RECEBER' ? setFormData({ ...formData, customerName: e.target.value }) : setFormData({ ...formData, supplierName: e.target.value })}
               />
               <datalist id="customers-list">
                 {customers.map(c => (
