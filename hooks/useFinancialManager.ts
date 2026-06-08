@@ -111,7 +111,20 @@ export const useFinancialManager = ({
       const accountId = formData.accountId;
       if (accountId) {
         newEntry.accountId = accountId;
-        const updatedAccounts = accounts.map(acc => {
+        
+        const accountExists = accounts.some(acc => acc.id === accountId);
+        let updatedAccounts = [...accounts];
+        if (!accountExists && accountId === 'ACC-001') {
+          updatedAccounts.push({
+            id: 'ACC-001',
+            name: 'Caixa Empresa',
+            type: 'Caixa',
+            initialBalance: 0,
+            currentBalance: 0
+          });
+        }
+
+        updatedAccounts = updatedAccounts.map(acc => {
           if (acc.id === accountId) {
             return {
               ...acc,
@@ -189,7 +202,19 @@ export const useFinancialManager = ({
       await db.save('serviflow_account_entries', updatedEntries);
 
       // 2. Update bank account balance
-      const updatedAccounts = accounts.map(acc => {
+      const accountExists = accounts.some(acc => acc.id === accountId);
+      let updatedAccounts = [...accounts];
+      if (!accountExists && accountId === 'ACC-001') {
+        updatedAccounts.push({
+          id: 'ACC-001',
+          name: 'Caixa Empresa',
+          type: 'Caixa',
+          initialBalance: 0,
+          currentBalance: 0
+        });
+      }
+
+      updatedAccounts = updatedAccounts.map(acc => {
         if (acc.id === accountId) {
           const delta = (entry.type === 'RECEBER' || entry.type === 'INVESTIMENTO') ? entry.amount : -entry.amount;
           return {

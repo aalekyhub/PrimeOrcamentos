@@ -15,7 +15,11 @@ const SettlementModal: React.FC<SettlementModalProps> = ({
   onConfirm,
   onClose
 }) => {
-  const [selectedAccountId, setSelectedAccountId] = useState<string>(accounts[0]?.id || '');
+  const displayAccounts = accounts.length > 0 ? accounts : [
+    { id: 'ACC-001', name: 'Caixa Empresa', type: 'Caixa' as const, bankName: '', initialBalance: 0, currentBalance: 0 }
+  ];
+
+  const [selectedAccountId, setSelectedAccountId] = useState<string>(displayAccounts[0]?.id || '');
 
   if (!entry) return null;
 
@@ -41,7 +45,7 @@ const SettlementModal: React.FC<SettlementModalProps> = ({
           <div className="space-y-4 mb-8">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block px-1">Selecione a Conta Origem/Destino</label>
             <div className="grid grid-cols-1 gap-3">
-              {accounts.map(acc => (
+              {displayAccounts.map(acc => (
                 <div 
                   key={acc.id}
                   onClick={() => setSelectedAccountId(acc.id)}
