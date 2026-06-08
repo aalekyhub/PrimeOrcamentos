@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   LayoutDashboard,
   Wallet,
@@ -33,6 +33,7 @@ import FinancialReportsTab from './financial/FinancialReportsTab';
 import FinancialSettingsTab from './financial/FinancialSettingsTab';
 import FinancialEntryForm from './financial/FinancialEntryForm';
 import FinancialModals from './financial/FinancialModals';
+import SettlementModal from './financial/SettlementModal';
 
 interface FinancialManagerProps {
   transactions: Transaction[];
@@ -64,9 +65,11 @@ const FinancialManager: React.FC<FinancialManagerProps> = (props) => {
     handleFileUpload,
     handleAddEntry,
     handleUpdateItem,
-    handleToggleStatus,
+    handleConfirmSettlement,
     initialFormData
   } = useFinancialManager(props);
+
+  const [settlingEntry, setSettlingEntry] = useState<AccountEntry | null>(null);
 
   const {
     transactions,
@@ -164,6 +167,7 @@ const FinancialManager: React.FC<FinancialManagerProps> = (props) => {
           handleFileUpload={handleFileUpload}
           categories={categories}
           customers={customers}
+          accounts={accounts}
         />
       ) : activeTab === 'dashboard' ? (
         <FinancialDashboard 
@@ -209,7 +213,7 @@ const FinancialManager: React.FC<FinancialManagerProps> = (props) => {
           setPrintData={setPrintData}
           setEditingItem={setEditingItem}
           setViewingAttachment={setViewingAttachment}
-          handleToggleStatus={handleToggleStatus}
+          handleToggleStatus={setSettlingEntry as any}
           accounts={accounts}
         />
       ) : activeTab === 'relatorios' ? (
@@ -242,6 +246,19 @@ const FinancialManager: React.FC<FinancialManagerProps> = (props) => {
         categories={categories}
         customers={customers}
       />
+
+      {/* Settlement Modal */}
+      {settlingEntry && (
+        <SettlementModal
+          entry={settlingEntry}
+          accounts={accounts}
+          onConfirm={async (entryId, accountId) => {
+            await handleConfirmSettlement(entryId, accountId);
+            setSettlingEntry(null);
+          }}
+          onClose={() => setSettlingEntry(null)}
+        />
+      )}
     </div>
   );
 };

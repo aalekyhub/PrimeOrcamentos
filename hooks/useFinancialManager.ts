@@ -108,6 +108,22 @@ export const useFinancialManager = ({
     setAccountEntries(newList);
 
     if (isInvestment) {
+      const accountId = formData.accountId;
+      if (accountId) {
+        newEntry.accountId = accountId;
+        const updatedAccounts = accounts.map(acc => {
+          if (acc.id === accountId) {
+            return {
+              ...acc,
+              currentBalance: acc.currentBalance + Number(formData.amount)
+            };
+          }
+          return acc;
+        });
+        setAccounts(updatedAccounts);
+        await db.save('serviflow_financial_accounts', updatedAccounts);
+      }
+
       const newTransaction: Transaction = {
         id: `TR-INV-${Date.now()}`,
         date: getTodayIsoDate(),
@@ -160,33 +176,56 @@ export const useFinancialManager = ({
     }
   };
 
-  const handleToggleStatus = async (entry: AccountEntry) => {
-    if (!confirm('Deseja confirmar o pagamento/recebimento deste título?')) return;
-    
-    const updatedEntries = accountEntries.map(e => 
-      e.id === entry.id ? { ...e, status: 'PAGO' as any, paymentDate: getTodayIsoDate() } : e
-    );
-    setAccountEntries(updatedEntries);
-    await db.save('serviflow_account_entries', updatedEntries);
+  const handleConfirmSettlement = async (entryId: string, accountId: string) => {
+    const entry = accountEntries.find(e => e.id === entryId);
+    if (!entry) return;
 
-    const newTransaction: Transaction = {
-      id: `TR-${Date.now()}`,
-      date: getTodayIsoDate(),
-      amount: entry.amount,
-      type: (entry.type === 'RECEBER' || entry.type === 'INVESTIMENTO') ? 'RECEITA' : 'DESPESA',
-      category: entry.category,
-      description: entry.description,
-      entryId: entry.id,
-      customerName: entry.customerName,
-      supplierName: entry.supplierName,
-      attachment: entry.attachment,
-      attachmentName: entry.attachmentName
-    };
+    try {
+      // 1. Update entry
+      const updatedEntries = accountEntries.map(e => 
+        e.id === entryId ? { ...e, status: 'PAGO' as any, paymentDate: getTodayIsoDate(), accountId } : e
+      );
+      setAccountEntries(updatedEntries);
+      await db.save('serviflow_account_entries', updatedEntries);
 
-    const newTransactions = [newTransaction, ...transactions];
-    setTransactions(newTransactions);
-    await db.save('serviflow_transactions', newTransactions, newTransaction);
-    notify("Baixa realizada e caixa atualizado!");
+      // 2. Update bank account balance
+      const updatedAccounts = accounts.map(acc => {
+        if (acc.id === accountId) {
+          const delta = (entry.type === 'RECEBER' || entry.type === 'INVESTIMENTO') ? entry.amount : -entry.amount;
+          return {
+            ...acc,
+            currentBalance: acc.currentBalance + delta
+          };
+        }
+        return acc;
+      });
+      setAccounts(updatedAccounts);
+      await db.save('serviflow_financial_accounts', updatedAccounts);
+
+      // 3. Create transaction
+      const newTransaction: Transaction = {
+        id: `TR-${Date.now()}`,
+        date: getTodayIsoDate(),
+        amount: entry.amount,
+        type: (entry.type === 'RECEBER' || entry.type === 'INVESTIMENTO') ? 'RECEITA' : 'DESPESA',
+        category: entry.category,
+        description: entry.description,
+        entryId: entry.id,
+        customerName: entry.customerName,
+        supplierName: entry.supplierName,
+        attachment: entry.attachment,
+        attachmentName: entry.attachmentName
+      };
+
+      const newTransactions = [newTransaction, ...transactions];
+      setTransactions(newTransactions);
+      await db.save('serviflow_transactions', newTransactions, newTransaction);
+      
+      notify("Baixa realizada e caixa atualizado!");
+    } catch (err) {
+      console.error('Erro ao baixar título:', err);
+      notify("Erro ao realizar baixa do título.", "error");
+    }
   };
 
   return {
@@ -204,7 +243,7 @@ export const useFinancialManager = ({
     handleFileUpload,
     handleAddEntry,
     handleUpdateItem,
-    handleToggleStatus,
+    handleConfirmSettlement,
     initialFormData
   };
 };

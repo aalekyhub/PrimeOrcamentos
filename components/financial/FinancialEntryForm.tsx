@@ -1,6 +1,6 @@
 import React from 'react';
 import { Plus, FileUp } from 'lucide-react';
-import { AccountEntry, FinancialCategory, Customer } from '../../types';
+import { AccountEntry, FinancialCategory, Customer, FinancialAccount } from '../../types';
 import { isAporte } from '../../services/financialHelpers';
 import { useNotify } from '../ToastProvider';
 
@@ -12,6 +12,7 @@ interface FinancialEntryFormProps {
   handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   categories: FinancialCategory[];
   customers: Customer[];
+  accounts: FinancialAccount[];
 }
 
 const FinancialEntryForm: React.FC<FinancialEntryFormProps> = ({
@@ -21,7 +22,8 @@ const FinancialEntryForm: React.FC<FinancialEntryFormProps> = ({
   handleAddEntry,
   handleFileUpload,
   categories,
-  customers
+  customers,
+  accounts
 }) => {
   const { notify } = useNotify();
 
@@ -137,6 +139,24 @@ const FinancialEntryForm: React.FC<FinancialEntryFormProps> = ({
               ))}
             </select>
           </div>
+
+          {formData.type === 'INVESTIMENTO' && (
+            <div>
+              <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase">Conta de Destino</label>
+              <select
+                required
+                className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-900 dark:text-white"
+                value={formData.accountId || ''}
+                onChange={e => setFormData({ ...formData, accountId: e.target.value })}
+              >
+                <option value="">Selecionar Conta...</option>
+                {accounts.map(acc => (
+                  <option key={acc.id} value={acc.id}>{acc.name} (R$ {acc.currentBalance.toLocaleString('pt-BR')})</option>
+                ))}
+              </select>
+            </div>
+          )}
+
           <div className="lg:col-span-3">
             <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase">
               {formData.type === 'INVESTIMENTO' ? 'Sócio / Origem (Opcional)' : formData.type === 'RECEBER' ? 'Cliente (Opcional)' : 'Fornecedor (Opcional)'}

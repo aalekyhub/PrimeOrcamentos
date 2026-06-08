@@ -300,19 +300,19 @@ const AppContent: React.FC = () => {
           await db.saveLocal(STORAGE_KEYS.COMPANY, cloudData.company[0]);
         }
 
-        if (Array.isArray(cloudData.financial_accounts)) {
-          setFinancialAccounts(cloudData.financial_accounts);
-          await db.saveLocal(STORAGE_KEYS.FINANCIAL_ACCOUNTS, cloudData.financial_accounts);
+        if (Array.isArray(cloudData.serviflow_financial_accounts)) {
+          setFinancialAccounts(cloudData.serviflow_financial_accounts);
+          await db.saveLocal(STORAGE_KEYS.FINANCIAL_ACCOUNTS, cloudData.serviflow_financial_accounts);
         }
 
-        if (Array.isArray(cloudData.financial_categories)) {
-          setFinancialCategories(cloudData.financial_categories);
-          await db.saveLocal(STORAGE_KEYS.FINANCIAL_CATEGORIES, cloudData.financial_categories);
+        if (Array.isArray(cloudData.serviflow_financial_categories)) {
+          setFinancialCategories(cloudData.serviflow_financial_categories);
+          await db.saveLocal(STORAGE_KEYS.FINANCIAL_CATEGORIES, cloudData.serviflow_financial_categories);
         }
 
-        if (Array.isArray(cloudData.account_entries)) {
-          setAccountEntries(cloudData.account_entries);
-          await db.saveLocal(STORAGE_KEYS.ACCOUNT_ENTRIES, cloudData.account_entries);
+        if (Array.isArray(cloudData.serviflow_account_entries)) {
+          setAccountEntries(cloudData.serviflow_account_entries);
+          await db.saveLocal(STORAGE_KEYS.ACCOUNT_ENTRIES, cloudData.serviflow_account_entries);
         }
 
         const subTables = [
