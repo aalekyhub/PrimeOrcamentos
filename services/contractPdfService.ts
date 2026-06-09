@@ -113,7 +113,8 @@ export const getContractHtml = (order: ServiceOrder, customer: any, company: Com
               <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0 0 2mm 0;">3.1. Pelos serviços objeto deste contrato, o CONTRATANTE pagará à CONTRATADA o valor global de <b style="color:#0f172a; white-space: nowrap;">R$ ${formatMoney(contractValue)}</b>.</p>
             </div>
             <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:2mm 0 2mm 0;">3.2. O pagamento será realizado da seguinte forma: <b>${escapeHtml(order.paymentTerms || 'Conforme combinado')}</b>.</p>
-            <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:2mm 0 0 0;">3.3. O valor contratado corresponde a preço fechado por obra certa, não estando vinculado a horas trabalhadas ou número de funcionários.</p>
+            <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:2mm 0 2mm 0;">3.3. Os pagamentos deverão ser feitos via Pix chave <b>CNPJ (${escapeHtml(company.cnpj || '57.886.036/0001-31')})</b>.</p>
+            <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:2mm 0 0 0;">3.4. O valor contratado corresponde a preço fechado por obra certa, não estando vinculado a horas trabalhadas ou número de funcionários.</p>
         </div>
 
         <!-- CLÁUSULA 4 -->
