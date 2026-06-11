@@ -720,6 +720,9 @@ export const db = {
       'serviflow_work_labor',
       'serviflow_work_indirects',
       'serviflow_work_taxes',
+      'serviflow_financial_accounts',
+      'serviflow_financial_categories',
+      'serviflow_account_entries',
     ];
 
     let totalItems = 0;

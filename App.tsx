@@ -204,6 +204,20 @@ const AppContent: React.FC = () => {
         changed = true;
       }
 
+      // Correção de tipos legados incompatíveis no Contas a Pagar/Receber ('RECEITA' -> 'RECEBER' e 'DESPESA' -> 'PAGAR')
+      const entriesToMigrate = db.load(STORAGE_KEYS.ACCOUNT_ENTRIES, []);
+      if (entriesToMigrate.some((e: any) => e.type === 'RECEITA' || e.type === 'DESPESA')) {
+        const fixedEntries = entriesToMigrate.map((e: any) => {
+          const updated = { ...e };
+          if (e.type === 'RECEITA') updated.type = 'RECEBER';
+          if (e.type === 'DESPESA') updated.type = 'PAGAR';
+          return updated;
+        });
+        setAccountEntries(fixedEntries);
+        await db.save(STORAGE_KEYS.ACCOUNT_ENTRIES, fixedEntries);
+        changed = true;
+      }
+
       const currentTrans = db.load(STORAGE_KEYS.TRANSACTIONS, []);
       if (currentTrans.some(t => t.category === 'Venda de Serviços')) {
         const newTrans = currentTrans.map(t => t.category === 'Venda de Serviços' ? { ...t, category: 'Prestação de Serviços' } : t);

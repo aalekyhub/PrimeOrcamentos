@@ -94,7 +94,7 @@ const FinancialProvisionTab: React.FC<FinancialProvisionTabProps> = ({
         </div>
         <div
           onClick={() => {
-            setFormData({ ...initialFormData, type: 'RECEITA' as any });
+            setFormData({ ...initialFormData, type: 'RECEBER' as any });
             setShowEntryForm(true);
           }}
           className="p-6 bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-sm cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all group"
