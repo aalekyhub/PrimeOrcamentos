@@ -169,13 +169,18 @@ const AppContent: React.FC = () => {
   const [financialCategories, setFinancialCategories] = useState<FinancialCategory[]>(() => {
     const loaded = db.load(STORAGE_KEYS.FINANCIAL_CATEGORIES, []);
     return loaded.length > 0 ? loaded : [
-      { id: 'CAT-001', name: 'Prestação de Serviços', type: 'RECEITA' },
-      { id: 'CAT-002', name: 'Aporte de Sócios', type: 'RECEITA' },
-      { id: 'CAT-003', name: 'Materiais', type: 'DESPESA' },
-      { id: 'CAT-004', name: 'Mão de Obra', type: 'DESPESA' },
-      { id: 'CAT-005', name: 'Aluguel', type: 'DESPESA' },
-      { id: 'CAT-006', name: 'Geral', type: 'DESPESA' },
-      { id: 'CAT-007', name: 'Imposto', type: 'DESPESA' },
+      { id: 'CAT-001', name: 'Prestação de Serviços', type: 'RECEITA', nature: 'OPERACIONAL' },
+      { id: 'CAT-002', name: 'Aporte de Sócios', type: 'RECEITA', nature: 'APORTE' },
+      { id: 'CAT-003', name: 'Materiais', type: 'DESPESA', nature: 'OPERACIONAL' },
+      { id: 'CAT-004', name: 'Mão de Obra', type: 'DESPESA', nature: 'OPERACIONAL' },
+      { id: 'CAT-005', name: 'Aluguel', type: 'DESPESA', nature: 'OPERACIONAL' },
+      { id: 'CAT-006', name: 'Geral', type: 'DESPESA', nature: 'OPERACIONAL' },
+      { id: 'CAT-007', name: 'Imposto', type: 'DESPESA', nature: 'IMPOSTO' },
+      { id: 'CAT-008', name: 'Luz / Água / Internet', type: 'DESPESA', nature: 'OPERACIONAL' },
+      { id: 'CAT-009', name: 'Tarifas Bancárias', type: 'DESPESA', nature: 'OPERACIONAL' },
+      { id: 'CAT-010', name: 'Marketing / Anúncios', type: 'DESPESA', nature: 'OPERACIONAL' },
+      { id: 'CAT-011', name: 'Ferramentas / Equipamentos', type: 'DESPESA', nature: 'OPERACIONAL' },
+      { id: 'CAT-012', name: 'Outros', type: 'DESPESA', nature: 'OPERACIONAL' },
     ];
   });
   const [accountEntries, setAccountEntries] = useState<AccountEntry[]>(() =>
@@ -252,12 +257,47 @@ const AppContent: React.FC = () => {
         changed = true;
       }
 
-      const hasImposto = currentCats.some(c => c.name === 'Imposto');
-      if (!hasImposto) {
-        const newCats = [...currentCats, { id: db.generateId('CAT'), name: 'Imposto', type: 'DESPESA' }];
-        setFinancialCategories(newCats);
-        await db.saveLocal(STORAGE_KEYS.FINANCIAL_CATEGORIES, newCats);
+      const defaultCategories = [
+        { id: 'CAT-001', name: 'Prestação de Serviços', type: 'RECEITA', nature: 'OPERACIONAL' },
+        { id: 'CAT-002', name: 'Aporte de Sócios', type: 'RECEITA', nature: 'APORTE' },
+        { id: 'CAT-003', name: 'Materiais', type: 'DESPESA', nature: 'OPERACIONAL' },
+        { id: 'CAT-004', name: 'Mão de Obra', type: 'DESPESA', nature: 'OPERACIONAL' },
+        { id: 'CAT-005', name: 'Aluguel', type: 'DESPESA', nature: 'OPERACIONAL' },
+        { id: 'CAT-006', name: 'Geral', type: 'DESPESA', nature: 'OPERACIONAL' },
+        { id: 'CAT-007', name: 'Imposto', type: 'DESPESA', nature: 'IMPOSTO' },
+        { id: 'CAT-008', name: 'Luz / Água / Internet', type: 'DESPESA', nature: 'OPERACIONAL' },
+        { id: 'CAT-009', name: 'Tarifas Bancárias', type: 'DESPESA', nature: 'OPERACIONAL' },
+        { id: 'CAT-010', name: 'Marketing / Anúncios', type: 'DESPESA', nature: 'OPERACIONAL' },
+        { id: 'CAT-011', name: 'Ferramentas / Equipamentos', type: 'DESPESA', nature: 'OPERACIONAL' },
+        { id: 'CAT-012', name: 'Outros', type: 'DESPESA', nature: 'OPERACIONAL' },
+      ];
+
+      if (currentCats.length < 5) {
+        setFinancialCategories(defaultCategories);
+        await db.save(STORAGE_KEYS.FINANCIAL_CATEGORIES, defaultCategories);
         changed = true;
+        console.log('[Migration] Categorias financeiras padrões reiniciadas e enviadas ao Supabase.');
+      } else {
+        // Garantir que todas as padrões existam caso a lista local tenha sido mantida
+        let catsUpdated = false;
+        const newCats = [...currentCats];
+        for (const defCat of defaultCategories) {
+          if (!newCats.some(c => c.name.toLowerCase() === defCat.name.toLowerCase())) {
+            newCats.push({
+              id: db.generateId('CAT'),
+              name: defCat.name,
+              type: defCat.type,
+              nature: defCat.nature
+            });
+            catsUpdated = true;
+          }
+        }
+        if (catsUpdated) {
+          setFinancialCategories(newCats);
+          await db.save(STORAGE_KEYS.FINANCIAL_CATEGORIES, newCats);
+          changed = true;
+          console.log('[Migration] Categorias financeiras ausentes adicionadas.');
+        }
       }
 
       if (changed) console.log('[Migration] Categorias atualizadas');
