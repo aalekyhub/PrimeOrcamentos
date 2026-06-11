@@ -66,6 +66,7 @@ const FinancialManager: React.FC<FinancialManagerProps> = (props) => {
     handleAddEntry,
     handleUpdateItem,
     handleConfirmSettlement,
+    handleDeleteRealized,
     initialFormData
   } = useFinancialManager(props);
 
@@ -194,6 +195,8 @@ const FinancialManager: React.FC<FinancialManagerProps> = (props) => {
           setViewingAttachment={setViewingAttachment}
           partnerFilter={partnerFilter}
           setPartnerFilter={setPartnerFilter}
+          isAdmin={isAdmin}
+          handleDeleteRealized={handleDeleteRealized}
         />
       ) : activeTab === 'provisionado' ? (
         <FinancialProvisionTab 

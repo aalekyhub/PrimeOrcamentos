@@ -245,11 +245,77 @@ export const useFinancialManager = ({
       const newTransactions = [newTransaction, ...transactions];
       setTransactions(newTransactions);
       await db.save('serviflow_transactions', newTransactions, newTransaction);
-      
+
       notify("Baixa realizada e caixa atualizado!");
     } catch (err) {
       console.error('Erro ao baixar título:', err);
       notify("Erro ao realizar baixa do título.", "error");
+    }
+  };
+
+  const handleDeleteRealized = async (id: string) => {
+    if (!isAdmin) {
+      notify("Você não tem permissão para excluir lançamentos realizados.", "error");
+      return;
+    }
+
+    if (!confirm("Deseja realmente reverter e excluir este lançamento do fluxo de caixa? O saldo bancário correspondente será estornado e o título voltará a ser Pendente.")) {
+      return;
+    }
+
+    try {
+      const transaction = transactions.find(t => t.id === id);
+      const entryId = transaction?.entryId || id;
+      const entry = accountEntries.find(e => e.id === entryId);
+
+      const accountId = entry?.accountId;
+      if (accountId && (transaction || entry)) {
+        const amount = transaction ? transaction.amount : (entry?.amount || 0);
+        const type = transaction ? transaction.type : ((entry?.type === 'RECEBER' || entry?.type === 'INVESTIMENTO') ? 'RECEITA' : 'DESPESA');
+        
+        // Estornar saldo: se era RECEITA (somado), subtraímos (-). Se era DESPESA (subtraído), somamos (+).
+        const delta = type === 'RECEITA' ? -amount : amount;
+
+        const updatedAccounts = accounts.map(acc => {
+          if (acc.id === accountId) {
+            return {
+              ...acc,
+              currentBalance: acc.currentBalance + delta
+            };
+          }
+          return acc;
+        });
+
+        setAccounts(updatedAccounts);
+        await db.save('serviflow_financial_accounts', updatedAccounts);
+      }
+
+      if (entry) {
+        const updatedEntries = accountEntries.map(e => {
+          if (e.id === entry.id) {
+            return {
+              ...e,
+              status: 'PENDENTE' as const,
+              paymentDate: undefined,
+              accountId: undefined
+            };
+          }
+          return e;
+        });
+        setAccountEntries(updatedEntries);
+        await db.save('serviflow_account_entries', updatedEntries);
+      }
+
+      if (transaction) {
+        const updatedTrans = transactions.filter(t => t.id !== id);
+        setTransactions(updatedTrans);
+        await db.remove('serviflow_transactions', id);
+      }
+
+      notify("Lançamento realizado estornado com sucesso!");
+    } catch (err) {
+      console.error('Erro ao excluir lançamento realizado:', err);
+      notify("Erro ao excluir lançamento realizado.", "error");
     }
   };
 
@@ -269,6 +335,7 @@ export const useFinancialManager = ({
     handleAddEntry,
     handleUpdateItem,
     handleConfirmSettlement,
+    handleDeleteRealized,
     initialFormData
   };
 };

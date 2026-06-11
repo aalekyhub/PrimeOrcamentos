@@ -32,6 +32,8 @@ interface FinancialCashFlowTabProps {
   setViewingAttachment: (viewer: any) => void;
   partnerFilter: string;
   setPartnerFilter: (partner: string) => void;
+  isAdmin: boolean;
+  handleDeleteRealized: (id: string) => Promise<void>;
 }
 
 const FinancialCashFlowTab: React.FC<FinancialCashFlowTabProps> = ({
@@ -47,7 +49,9 @@ const FinancialCashFlowTab: React.FC<FinancialCashFlowTabProps> = ({
   setEditingItem,
   setViewingAttachment,
   partnerFilter,
-  setPartnerFilter
+  setPartnerFilter,
+  isAdmin,
+  handleDeleteRealized
 }) => {
   const { notify } = useNotify();
   const totals = selectDashboardTotals(allRealized, selectedYear);
@@ -166,10 +170,22 @@ const FinancialCashFlowTab: React.FC<FinancialCashFlowTabProps> = ({
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-right">
-                      <p className={`text-lg font-black ${isContribution ? 'text-indigo-600' : t.type === 'DESPESA' ? 'text-rose-600' : 'text-emerald-600'}`}>
+                      <p className={`text-lg font-black ${isContribution ? 'text-indigo-600' : t.type === 'DESPESA' ? 'text-rose-600' : 'text-emerald-600'} leading-none`}>
                         {isContribution ? '+' : t.type === 'DESPESA' ? '-' : '+'} R$ {t.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </p>
+                      <p className="text-[9px] text-slate-300 dark:text-slate-500 font-bold uppercase mt-1 tracking-tighter">{t.id}</p>
                     </div>
+                    {isAdmin && (
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleDeleteRealized(t.id)}
+                          className="p-3 bg-slate-50 dark:bg-slate-700 text-slate-400 dark:text-slate-300 rounded-2xl hover:bg-rose-600 hover:text-white transition-all shadow-sm"
+                          title="Excluir Lançamento Realizado"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               );
