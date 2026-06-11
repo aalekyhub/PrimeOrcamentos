@@ -206,8 +206,9 @@ const AppContent: React.FC = () => {
 
       // Correção de tipos legados incompatíveis no Contas a Pagar/Receber ('RECEITA' -> 'RECEBER' e 'DESPESA' -> 'PAGAR')
       const entriesToMigrate = db.load(STORAGE_KEYS.ACCOUNT_ENTRIES, []);
+      let fixedEntries = [...entriesToMigrate];
       if (entriesToMigrate.some((e: any) => e.type === 'RECEITA' || e.type === 'DESPESA')) {
-        const fixedEntries = entriesToMigrate.map((e: any) => {
+        fixedEntries = entriesToMigrate.map((e: any) => {
           const updated = { ...e };
           if (e.type === 'RECEITA') updated.type = 'RECEBER';
           if (e.type === 'DESPESA') updated.type = 'PAGAR';
@@ -219,10 +220,35 @@ const AppContent: React.FC = () => {
       }
 
       const currentTrans = db.load(STORAGE_KEYS.TRANSACTIONS, []);
-      if (currentTrans.some(t => t.category === 'Venda de Serviços')) {
-        const newTrans = currentTrans.map(t => t.category === 'Venda de Serviços' ? { ...t, category: 'Prestação de Serviços' } : t);
+      let fixedTrans = [...currentTrans];
+      let transChanged = false;
+
+      // Correção das transações vinculadas que herdaram o tipo errado na baixa ('RECEITA' como 'DESPESA')
+      const transToMigrate = currentTrans.map((t: any) => {
+        if (t.entryId) {
+          const assocEntry = fixedEntries.find((e: any) => e.id === t.entryId);
+          if (assocEntry) {
+            const correctType = (assocEntry.type === 'RECEBER' || assocEntry.type === 'INVESTIMENTO') ? 'RECEITA' : 'DESPESA';
+            if (t.type !== correctType) {
+              transChanged = true;
+              return { ...t, type: correctType };
+            }
+          }
+        }
+        return t;
+      });
+
+      if (transChanged) {
+        fixedTrans = transToMigrate;
+        setTransactions(fixedTrans);
+        await db.save(STORAGE_KEYS.TRANSACTIONS, fixedTrans);
+        changed = true;
+      }
+
+      if (fixedTrans.some(t => t.category === 'Venda de Serviços')) {
+        const newTrans = fixedTrans.map(t => t.category === 'Venda de Serviços' ? { ...t, category: 'Prestação de Serviços' } : t);
         setTransactions(newTrans);
-        await db.saveLocal(STORAGE_KEYS.TRANSACTIONS, newTrans);
+        await db.save(STORAGE_KEYS.TRANSACTIONS, newTrans);
         changed = true;
       }
 
