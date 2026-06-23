@@ -175,11 +175,67 @@ export const useFinancialManager = ({
         const newList = accountEntries.map(e => e.id === editingItem.id ? entryToSave : e);
         setAccountEntries(newList);
         await db.save('serviflow_account_entries', newList, entryToSave);
+
+        // Sync corresponding transaction in Realizado
+        const updatedTransactions = transactions.map(t => {
+          if (t.entryId === entryToSave.id) {
+            return {
+              ...t,
+              amount: entryToSave.amount,
+              type: (entryToSave.type === 'RECEBER' || entryToSave.type === 'INVESTIMENTO') ? 'RECEITA' as const : 'DESPESA' as const,
+              category: entryToSave.category,
+              description: entryToSave.description,
+              customerName: entryToSave.customerName,
+              supplierName: entryToSave.supplierName,
+              attachment: entryToSave.attachment,
+              attachmentName: entryToSave.attachmentName
+            };
+          }
+          return t;
+        });
+
+        const hasChangedTrans = JSON.stringify(transactions) !== JSON.stringify(updatedTransactions);
+        if (hasChangedTrans) {
+          setTransactions(updatedTransactions);
+          const changedTrans = updatedTransactions.find(t => t.entryId === entryToSave.id);
+          if (changedTrans) {
+            await db.save('serviflow_transactions', updatedTransactions, changedTrans);
+          }
+        }
       } else {
         const tItem = editingItem as Transaction;
         const newList = transactions.map(t => t.id === tItem.id ? tItem : t);
         setTransactions(newList);
         await db.save('serviflow_transactions', newList, tItem);
+
+        // Sync corresponding entry in Provisionado
+        if (tItem.entryId) {
+          const updatedEntries = accountEntries.map(e => {
+            if (e.id === tItem.entryId) {
+              return {
+                ...e,
+                amount: tItem.amount,
+                type: (tItem.type === 'RECEITA' || tItem.type === 'EMPRESTIMO_SOCIO') ? 'RECEBER' as const : 'PAGAR' as const,
+                category: tItem.category,
+                description: tItem.description,
+                customerName: tItem.customerName,
+                supplierName: tItem.supplierName,
+                attachment: tItem.attachment,
+                attachmentName: tItem.attachmentName
+              };
+            }
+            return e;
+          });
+
+          const hasChangedEntries = JSON.stringify(accountEntries) !== JSON.stringify(updatedEntries);
+          if (hasChangedEntries) {
+            setAccountEntries(updatedEntries);
+            const changedEntry = updatedEntries.find(e => e.id === tItem.entryId);
+            if (changedEntry) {
+              await db.save('serviflow_account_entries', updatedEntries, changedEntry);
+            }
+          }
+        }
       }
       setEditingItem(null);
       notify("Alteração salva com sucesso!");

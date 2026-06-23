@@ -64,7 +64,14 @@ const FinancialProvisionTab: React.FC<FinancialProvisionTabProps> = ({
 }) => {
   const { notify } = useNotify();
 
+  const totalBalance = accounts.reduce((a, c) => a + c.currentBalance, 0);
+  const pendingReceivables = accountEntries.filter(e => e.type === 'RECEBER' && !isAporte(e.category) && e.status !== 'PAGO').reduce((a, c) => a + c.amount, 0);
+  const pendingPayables = accountEntries.filter(e => e.type === 'PAGAR' && !isAporte(e.category) && e.status !== 'PAGO').reduce((a, c) => a + c.amount, 0);
+  const pendingInvestments = accountEntries.filter(e => (e.type === 'INVESTIMENTO' || isAporte(e.category)) && e.status !== 'PAGO').reduce((a, c) => a + c.amount, 0);
+  const finalProjection = totalBalance + pendingReceivables - pendingPayables + pendingInvestments;
+
   const filteredEntries = accountEntries.filter(entry => {
+    if (entry.status === 'PAGO') return false;
     const matchesSearch = entry.description.toLowerCase().includes(entrySearch.toLowerCase()) ||
       (entry.customerName?.toLowerCase().includes(entrySearch.toLowerCase())) ||
       (entry.supplierName?.toLowerCase().includes(entrySearch.toLowerCase()));
@@ -88,7 +95,7 @@ const FinancialProvisionTab: React.FC<FinancialProvisionTabProps> = ({
             </div>
             <div>
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">A Pagar</p>
-              <p className="text-xl font-black text-slate-900 dark:text-white">R$ {accountEntries.filter(e => e.type === 'PAGAR' && !isAporte(e.category) && e.status !== 'PAGO').reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+              <p className="text-xl font-black text-slate-900 dark:text-white">R$ {pendingPayables.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
             </div>
           </div>
         </div>
@@ -105,7 +112,7 @@ const FinancialProvisionTab: React.FC<FinancialProvisionTabProps> = ({
             </div>
             <div>
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">A Receber</p>
-              <p className="text-xl font-black text-slate-900 dark:text-white">R$ {accountEntries.filter(e => e.type === 'RECEBER' && !isAporte(e.category) && e.status !== 'PAGO').reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+              <p className="text-xl font-black text-slate-900 dark:text-white">R$ {pendingReceivables.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
             </div>
           </div>
         </div>
@@ -123,7 +130,7 @@ const FinancialProvisionTab: React.FC<FinancialProvisionTabProps> = ({
             </div>
             <div>
               <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Empréstimos de Sócios</p>
-              <p className="text-xl font-black text-indigo-600">R$ {accountEntries.filter(e => (e.type === 'INVESTIMENTO' || isAporte(e.category))).reduce((a, c) => a + c.amount, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+              <p className="text-xl font-black text-indigo-600">R$ {pendingInvestments.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
             </div>
           </div>
         </div>
@@ -134,11 +141,7 @@ const FinancialProvisionTab: React.FC<FinancialProvisionTabProps> = ({
             </div>
             <div>
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Projeção Final</p>
-              <p className="text-xl font-black text-white">R$ {(
-                accountEntries.filter(e => (e.type === 'RECEBER' && !isAporte(e.category)) && e.status !== 'PAGO').reduce((a, c) => a + c.amount, 0) -
-                accountEntries.filter(e => (e.type === 'PAGAR' && !isAporte(e.category)) && e.status !== 'PAGO').reduce((a, c) => a + c.amount, 0) +
-                accountEntries.filter(e => (e.type === 'INVESTIMENTO' || isAporte(e.category)) && e.status !== 'PAGO').reduce((a, c) => a + c.amount, 0)
-              ).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+              <p className="text-xl font-black text-white">R$ {finalProjection.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
             </div>
           </div>
         </div>

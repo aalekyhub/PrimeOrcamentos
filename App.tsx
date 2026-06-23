@@ -300,6 +300,92 @@ const AppContent: React.FC = () => {
         }
       }
 
+      // Correção de lançamentos do David e categoria das calhas
+      const davidCalhasFixFlag = localStorage.getItem('serviflow_migration_david_calhas_v1');
+      if (!davidCalhasFixFlag) {
+        let dbChanged = false;
+
+        // 1. Corrigir entries (Contas a Pagar/Receber)
+        const entriesToFix = db.load(STORAGE_KEYS.ACCOUNT_ENTRIES, []);
+        let entriesFixed = false;
+        const fixedEntries = entriesToFix.map((e: any) => {
+          const isDavid = e.description?.toUpperCase().includes('DAVID') || 
+                          e.customerName?.toUpperCase().includes('DAVID') || 
+                          e.supplierName?.toUpperCase().includes('DAVID');
+          if (isDavid && e.type === 'RECEBER') {
+            entriesFixed = true;
+            return { ...e, type: 'PAGAR' };
+          }
+          return e;
+        });
+        if (entriesFixed) {
+          setAccountEntries(fixedEntries);
+          await db.save(STORAGE_KEYS.ACCOUNT_ENTRIES, fixedEntries);
+          dbChanged = true;
+        }
+
+        // 2. Corrigir transactions (Fluxo de Caixa) e registrar diferenças bancárias
+        const transToFix = db.load(STORAGE_KEYS.TRANSACTIONS, []);
+        let transFixed = false;
+        const accountDiffs: Record<string, number> = {};
+
+        const fixedTrans = transToFix.map((t: any) => {
+          const isDavid = t.description?.toUpperCase().includes('DAVID') || 
+                          t.customerName?.toUpperCase().includes('DAVID') || 
+                          t.supplierName?.toUpperCase().includes('DAVID');
+          let updated = { ...t };
+          
+          if (isDavid && t.type === 'RECEITA') {
+            transFixed = true;
+            updated.type = 'DESPESA';
+            const assocEntry = fixedEntries.find((e: any) => e.id === t.entryId);
+            const accId = t.accountId || assocEntry?.accountId || 'ACC-001';
+            accountDiffs[accId] = (accountDiffs[accId] || 0) - (2 * t.amount);
+          }
+
+          const isCalhas = t.description?.toUpperCase().includes('CALHAS');
+          if (isCalhas && t.category?.toUpperCase() === 'GERAL') {
+            transFixed = true;
+            updated.category = 'Prestação de Serviços';
+          }
+
+          return updated;
+        });
+
+        if (transFixed) {
+          setTransactions(fixedTrans);
+          await db.save(STORAGE_KEYS.TRANSACTIONS, fixedTrans);
+          dbChanged = true;
+        }
+
+        // 3. Ajustar saldo das contas bancárias
+        if (Object.keys(accountDiffs).length > 0) {
+          const currentAccs = db.load(STORAGE_KEYS.FINANCIAL_ACCOUNTS, []);
+          let accsFixed = false;
+          const fixedAccs = currentAccs.map((acc: any) => {
+            if (accountDiffs[acc.id]) {
+              accsFixed = true;
+              return {
+                ...acc,
+                currentBalance: acc.currentBalance + accountDiffs[acc.id]
+              };
+            }
+            return acc;
+          });
+          if (accsFixed) {
+            setFinancialAccounts(fixedAccs);
+            await db.save(STORAGE_KEYS.FINANCIAL_ACCOUNTS, fixedAccs);
+            dbChanged = true;
+          }
+        }
+
+        localStorage.setItem('serviflow_migration_david_calhas_v1', 'true');
+        if (dbChanged) {
+          changed = true;
+          console.log('[Migration] Lançamentos de David e categoria de Calhas corrigidos com sucesso.');
+        }
+      }
+
       if (changed) console.log('[Migration] Categorias atualizadas');
     };
     migrateData();
