@@ -386,6 +386,53 @@ const AppContent: React.FC = () => {
         }
       }
 
+      // Recálculo e sincronização completa dos saldos bancários com base nas transações reais
+      const balanceRecalcFlag = localStorage.getItem('serviflow_migration_balance_recalc_v3');
+      if (!balanceRecalcFlag) {
+        const currentAccs = db.load(STORAGE_KEYS.FINANCIAL_ACCOUNTS, []);
+        const currentTrans = db.load(STORAGE_KEYS.TRANSACTIONS, []);
+        const currentEntries = db.load(STORAGE_KEYS.ACCOUNT_ENTRIES, []);
+
+        let accountsRecalced = false;
+        const fixedAccs = currentAccs.map((acc: any) => {
+          let calculatedBalance = acc.initialBalance || 0;
+
+          currentTrans.forEach((t: any) => {
+            const assocEntry = currentEntries.find((e: any) => e.id === t.entryId);
+            const accId = assocEntry?.accountId || 'ACC-001';
+
+            if (accId === acc.id) {
+              const isContribution = t.type === 'EMPRESTIMO_SOCIO' || 
+                                     t.category?.toLowerCase().includes('aporte') || 
+                                     t.category?.toLowerCase().includes('emprestimo') || 
+                                     t.category?.toLowerCase().includes('empréstimo');
+              
+              if (t.type === 'RECEITA' || isContribution) {
+                calculatedBalance += t.amount;
+              } else if (t.type === 'DESPESA') {
+                calculatedBalance -= t.amount;
+              }
+            }
+          });
+
+          if (acc.currentBalance !== calculatedBalance) {
+            accountsRecalced = true;
+          }
+          return {
+            ...acc,
+            currentBalance: calculatedBalance
+          };
+        });
+
+        if (accountsRecalced) {
+          setFinancialAccounts(fixedAccs);
+          await db.save(STORAGE_KEYS.FINANCIAL_ACCOUNTS, fixedAccs);
+          changed = true;
+          console.log('[Migration] Bank account balances recalculated and synchronized successfully.');
+        }
+        localStorage.setItem('serviflow_migration_balance_recalc_v3', 'true');
+      }
+
       if (changed) console.log('[Migration] Categorias atualizadas');
     };
     migrateData();
