@@ -1,0 +1,11 @@
+-- Adicionar colunas ausentes na tabela 'transactions' para compatibilidade com o frontend
+ALTER TABLE IF EXISTS transactions ADD COLUMN IF NOT EXISTS "relatedOrderId" text;
+ALTER TABLE IF EXISTS transactions ADD COLUMN IF NOT EXISTS "isRecurring" boolean;
+ALTER TABLE IF EXISTS transactions ADD COLUMN IF NOT EXISTS "frequency" text;
+ALTER TABLE IF EXISTS transactions ADD COLUMN IF NOT EXISTS "installments" integer;
+ALTER TABLE IF EXISTS transactions ADD COLUMN IF NOT EXISTS "currentInstallment" integer;
+ALTER TABLE IF EXISTS transactions ADD COLUMN IF NOT EXISTS "attachment" text;
+ALTER TABLE IF EXISTS transactions ADD COLUMN IF NOT EXISTS "attachmentName" text;
+ALTER TABLE IF EXISTS transactions ADD COLUMN IF NOT EXISTS "entryId" text;
+ALTER TABLE IF EXISTS transactions ADD COLUMN IF NOT EXISTS "customerName" text;
+ALTER TABLE IF EXISTS transactions ADD COLUMN IF NOT EXISTS "supplierName" text;

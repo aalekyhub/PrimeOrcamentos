@@ -156,8 +156,12 @@ export const useFinancialManager = ({
     setShowEntryForm(false);
     setFormData(initialFormData);
 
-    await db.save('serviflow_account_entries', newList, newEntry);
-    notify(isInvestment ? "Empréstimo registrado e caixa atualizado!" : "Lançamento provisionado com sucesso!");
+    const saveRes = await db.save('serviflow_account_entries', newList, newEntry);
+    if (saveRes && !saveRes.success) {
+      notify(`Alerta: Salvo apenas localmente. Erro na nuvem: ${saveRes.error}`, 'error');
+    } else {
+      notify(isInvestment ? "Empréstimo registrado e caixa atualizado!" : "Lançamento provisionado com sucesso!");
+    }
   };
 
   const handleUpdateItem = async (e: React.FormEvent) => {
@@ -300,9 +304,12 @@ export const useFinancialManager = ({
 
       const newTransactions = [newTransaction, ...transactions];
       setTransactions(newTransactions);
-      await db.save('serviflow_transactions', newTransactions, newTransaction);
-
-      notify("Baixa realizada e caixa atualizado!");
+      const saveRes = await db.save('serviflow_transactions', newTransactions, newTransaction);
+      if (saveRes && !saveRes.success) {
+        notify(`Alerta: Baixa salva localmente. Erro na nuvem: ${saveRes.error}`, 'error');
+      } else {
+        notify("Baixa realizada e caixa atualizado!");
+      }
     } catch (err) {
       console.error('Erro ao baixar título:', err);
       notify("Erro ao realizar baixa do título.", "error");

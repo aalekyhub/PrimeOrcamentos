@@ -473,6 +473,8 @@ const AppContent: React.FC = () => {
 
       if (Object.keys(cloudErrors || {}).length > 0) {
         console.warn('[Sync Partial Failure]', cloudErrors);
+        const failedTables = Object.keys(cloudErrors).join(', ');
+        notifyRef.current(`Alerta: As seguintes tabelas não puderam ser sincronizadas com a nuvem: ${failedTables}. Certifique-se de que elas existem no Supabase e que os scripts SQL foram executados.`, 'error');
       }
 
       if (cloudData) {
