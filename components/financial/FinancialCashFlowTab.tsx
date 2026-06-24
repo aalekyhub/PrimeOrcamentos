@@ -178,6 +178,13 @@ const FinancialCashFlowTab: React.FC<FinancialCashFlowTabProps> = ({
                     {isAdmin && (
                       <div className="flex items-center gap-2">
                         <button
+                          onClick={() => setEditingItem(t)}
+                          className="p-3 bg-slate-50 dark:bg-slate-700 text-slate-400 dark:text-slate-300 rounded-2xl hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+                          title="Editar Lançamento Realizado"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button
                           onClick={() => handleDeleteRealized(t.id)}
                           className="p-3 bg-slate-50 dark:bg-slate-700 text-slate-400 dark:text-slate-300 rounded-2xl hover:bg-rose-600 hover:text-white transition-all shadow-sm"
                           title="Excluir Lançamento Realizado"
