@@ -125,7 +125,11 @@ export const buildOsItemsTableHtml = (order: ServiceOrder, company: CompanyProfi
 
 // Modular Totals Section
 export const buildOsTotalsHtml = (order: ServiceOrder) => {
-    const { subtotal, bdiValue, taxValue, finalTotal } = financeUtils.getDetailedFinancials(order);
+    const { subtotal, bdiValue, taxValue, inssValue, finalTotal } = financeUtils.getDetailedFinancials(order);
+
+    const bdiRateNum = Number(order.bdiRate) || 0;
+    const taxRateNum = Number(order.taxRate) || 0;
+    const inssRateNum = Number(order.inssRate) || 0;
 
     return `
     <div class="avoid-break mb-10">
@@ -134,15 +138,20 @@ export const buildOsTotalsHtml = (order: ServiceOrder) => {
                 <p style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.05em;">Subtotal</p>
                 <p style="font-size: 11px; font-weight: 800; color: #334155; margin: 0;">R$ ${subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             </div>
-            ${order.bdiRate ? `
+            ${bdiRateNum > 0 && bdiValue > 0 ? `
             <div style="text-align: right;">
                 <p style="font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.05em;">BDI (${order.bdiRate}%)</p>
                 <p style="font-size: 11px; font-weight: 800; color: #059669; margin: 0;">+ R$ ${bdiValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             </div>` : ''}
-            ${order.taxRate ? `
+            ${taxRateNum > 0 && taxValue > 0 ? `
             <div style="text-align: right;">
                 <p style="font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.05em;">Impostos (${order.taxRate}%)</p>
                 <p style="font-size: 11px; font-weight: 800; color: #2563eb; margin: 0;">+ R$ ${taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            </div>` : ''}
+            ${inssRateNum > 0 && inssValue > 0 ? `
+            <div style="text-align: right;">
+                <p style="font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.05em;">Ret. INSS (${order.inssRate}%)</p>
+                <p style="font-size: 11px; font-weight: 800; color: #6366f1; margin: 0;">+ R$ ${inssValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             </div>` : ''}
         </div>
         <div style="background: #0f172a; border-radius: 12px; padding: 14px 40px; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);">

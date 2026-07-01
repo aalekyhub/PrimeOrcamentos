@@ -91,6 +91,7 @@ const BudgetManager: React.FC<Props> = ({
 
   const [taxRate, setTaxRate] = useState<string | number>(0);
   const [bdiRate, setBdiRate] = useState<string | number>(0);
+  const [inssRate, setInssRate] = useState<string | number>(0);
   const [showImportModal, setShowImportModal] = useState(false);
   const [importSearch, setImportSearch] = useState('');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -114,6 +115,7 @@ const BudgetManager: React.FC<Props> = ({
     setCurrentPrice(0);
     setTaxRate(0);
     setBdiRate(0);
+    setInssRate(0);
     setSelectedCatalogId('');
   }, []);
 
@@ -145,6 +147,7 @@ const BudgetManager: React.FC<Props> = ({
 
     if (typeof prefilledData.bdiRate === 'number') setBdiRate(prefilledData.bdiRate);
     if (typeof prefilledData.taxRate === 'number') setTaxRate(prefilledData.taxRate);
+    if (typeof prefilledData.inssRate === 'number') setInssRate(prefilledData.inssRate);
 
     const newItems: ServiceItem[] = [];
 
@@ -210,19 +213,21 @@ const BudgetManager: React.FC<Props> = ({
   const totalAmount = useMemo(() => {
     const bdi = safeNumber(bdiRate);
     const tax = safeNumber(taxRate);
+    const inss = safeNumber(inssRate);
 
     const bdiValue = subtotal * (bdi / 100);
     const subtotalWithBDI = subtotal + bdiValue;
 
-    if (tax >= 100) return subtotalWithBDI;
+    const totalTaxes = tax + inss;
+    if (totalTaxes >= 100) return subtotalWithBDI;
 
-    const taxFactor = 1 - tax / 100;
+    const taxFactor = 1 - totalTaxes / 100;
     if (taxFactor <= 0) return subtotalWithBDI;
 
     const res = subtotalWithBDI / taxFactor;
-    console.log('[BudgetManager] Calculated Total (Original):', res, 'with BDI:', bdi, 'Tax:', tax);
+    console.log('[BudgetManager] Calculated Total (Original):', res, 'with BDI:', bdi, 'Tax:', tax, 'INSS:', inss);
     return roundMoney(res);
-  }, [subtotal, taxRate, bdiRate]);
+  }, [subtotal, taxRate, bdiRate, inssRate]);
 
   const buildBudgetFromForm = useCallback((): ServiceOrder | null => {
     const customer = customers.find(c => c.id === selectedCustomerId);
@@ -246,6 +251,7 @@ const BudgetManager: React.FC<Props> = ({
       paymentEntryPercent,
       taxRate: safeNumber(taxRate),
       bdiRate: safeNumber(bdiRate),
+      inssRate: safeNumber(inssRate),
       createdAt: existingBudget?.createdAt || getTodayIsoDate(),
       dueDate: existingBudget?.dueDate || getFutureIsoDate(validityDays)
     };
@@ -263,7 +269,8 @@ const BudgetManager: React.FC<Props> = ({
     deliveryTime,
     paymentEntryPercent,
     taxRate,
-    bdiRate
+    bdiRate,
+    inssRate
   ]);
 
   const handleAddItem = useCallback(() => {
@@ -456,9 +463,11 @@ const BudgetManager: React.FC<Props> = ({
     const b: any = budget;
     const t = b.taxRate ?? b.taxrate ?? b.tax_rate ?? 0;
     const d = b.bdiRate ?? b.bdirate ?? b.bdi_rate ?? 0;
+    const i = b.inssRate ?? b.inssrate ?? b.inss_rate ?? 0;
 
     setTaxRate(t);
     setBdiRate(d);
+    setInssRate(i);
     setShowForm(true);
 
     if (isClone) notify('Orçamento clonado! Você está editando uma nova cópia.');
@@ -762,6 +771,8 @@ const BudgetManager: React.FC<Props> = ({
                 setBdiRate={setBdiRate}
                 taxRate={taxRate}
                 setTaxRate={setTaxRate}
+                inssRate={inssRate}
+                setInssRate={setInssRate}
                 subtotal={subtotal}
                 totalAmount={totalAmount}
                 paymentTerms={paymentTerms}

@@ -15,6 +15,16 @@ interface Props {
     currentUser: UserAccount;
     accountEntries?: AccountEntry[];
     setAccountEntries?: React.Dispatch<React.SetStateAction<AccountEntry[]>>;
+    onGenerateBudget?: (
+        plan: any,
+        services: any[],
+        totalMat: number,
+        totalLab: number,
+        totalInd: number,
+        bdiRate: number,
+        taxRate: number,
+        inssRate: number
+    ) => void;
 }
 
 const UnifiedWorksManager: React.FC<Props> = ({ 

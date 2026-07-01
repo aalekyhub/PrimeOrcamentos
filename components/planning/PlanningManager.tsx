@@ -21,7 +21,8 @@ interface Props {
         totalLab: number,
         totalInd: number,
         bdiRate: number,
-        taxRate: number
+        taxRate: number,
+        inssRate: number
     ) => void;
     embeddedPlanId?: string | null;
     onBack?: () => void;
@@ -54,8 +55,10 @@ const PlanningManager: React.FC<Props> = ({
     const handleGenerateBudget = () => {
         if (onGenerateBudget && planning.currentPlan) {
             const bdiTx = planning.taxes.find(t => t.name === 'BDI');
-            const otherTxs = planning.taxes.filter(t => t.name !== 'BDI');
+            const inssTx = planning.taxes.find(t => t.name === 'INSS');
+            const otherTxs = planning.taxes.filter(t => t.name !== 'BDI' && t.name !== 'INSS');
             const bdiRate = bdiTx ? bdiTx.rate : 0;
+            const inssRate = inssTx ? inssTx.rate : 0;
             const taxRate = otherTxs.reduce((acc, t) => acc + (t.rate || 0), 0);
 
             onGenerateBudget(
@@ -65,7 +68,8 @@ const PlanningManager: React.FC<Props> = ({
                 calculations.totalLabor,
                 calculations.totalIndirect,
                 bdiRate,
-                taxRate
+                taxRate,
+                inssRate
             );
         }
     };

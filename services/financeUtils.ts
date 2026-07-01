@@ -25,10 +25,18 @@ export const financeUtils = {
     },
 
     /**
-     * Calcula o custo planejado total (Subtotal + BDI + Impostos)
+     * Calcula o valor do INSS sobre o subtotal + BDI
      */
-    calculatePlannedCost: (subtotal: number, bdiValue: number, taxValue: number): number => {
-        return subtotal + bdiValue + taxValue;
+    calculateINSS: (subtotal: number, bdiValue: number, inssRate: number | undefined): number => {
+        if (!inssRate) return 0;
+        return (subtotal + bdiValue) * (inssRate / 100);
+    },
+
+    /**
+     * Calcula o custo planejado total (Subtotal + BDI + Impostos + INSS)
+     */
+    calculatePlannedCost: (subtotal: number, bdiValue: number, taxValue: number, inssValue: number): number => {
+        return subtotal + bdiValue + taxValue + inssValue;
     },
 
     /**
@@ -38,7 +46,8 @@ export const financeUtils = {
         const subtotal = financeUtils.calculateSubtotal(order.items);
         const bdiValue = financeUtils.calculateBDI(subtotal, order.bdiRate);
         const taxValue = financeUtils.calculateTaxes(subtotal, bdiValue, order.taxRate);
-        const plannedCost = financeUtils.calculatePlannedCost(subtotal, bdiValue, taxValue);
+        const inssValue = financeUtils.calculateINSS(subtotal, bdiValue, order.inssRate);
+        const plannedCost = financeUtils.calculatePlannedCost(subtotal, bdiValue, taxValue, inssValue);
 
         return order.contractPrice && order.contractPrice > 0 ? order.contractPrice : plannedCost;
     },
@@ -50,13 +59,15 @@ export const financeUtils = {
         const subtotal = financeUtils.calculateSubtotal(order.items);
         const bdiValue = financeUtils.calculateBDI(subtotal, order.bdiRate);
         const taxValue = financeUtils.calculateTaxes(subtotal, bdiValue, order.taxRate);
-        const plannedCost = financeUtils.calculatePlannedCost(subtotal, bdiValue, taxValue);
+        const inssValue = financeUtils.calculateINSS(subtotal, bdiValue, order.inssRate);
+        const plannedCost = financeUtils.calculatePlannedCost(subtotal, bdiValue, taxValue, inssValue);
         const finalTotal = order.contractPrice && order.contractPrice > 0 ? order.contractPrice : plannedCost;
 
         return {
             subtotal,
             bdiValue,
             taxValue,
+            inssValue,
             plannedCost,
             finalTotal
         };

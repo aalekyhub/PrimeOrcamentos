@@ -667,7 +667,8 @@ const AppContent: React.FC = () => {
       totalLabor: number,
       totalIndirect: number,
       bdiRate: number,
-      taxRate: number
+      taxRate: number,
+      inssRate: number
     ) => {
       setPrefilledBudgetData({
         plan,
@@ -677,6 +678,7 @@ const AppContent: React.FC = () => {
         totalIndirect,
         bdiRate,
         taxRate,
+        inssRate,
       });
 
       openTab('budgets');

@@ -771,3 +771,7 @@ export const db = {
     return { success: true };
   },
 };
+
+if (typeof window !== 'undefined') {
+  (window as any).db = db;
+}

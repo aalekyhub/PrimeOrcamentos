@@ -6,6 +6,8 @@ interface BudgetSummarySidebarProps {
     setBdiRate: (value: number | string) => void;
     taxRate: number | string;
     setTaxRate: (value: number | string) => void;
+    inssRate: number | string;
+    setInssRate: (value: number | string) => void;
     subtotal: number;
     totalAmount: number;
     paymentTerms: string;
@@ -22,28 +24,33 @@ interface BudgetSummarySidebarProps {
 }
 
 const BudgetSummarySidebar: React.FC<BudgetSummarySidebarProps> = ({
-    bdiRate, setBdiRate, taxRate, setTaxRate, subtotal, totalAmount,
+    bdiRate, setBdiRate, taxRate, setTaxRate, inssRate, setInssRate, subtotal, totalAmount,
     paymentTerms, setPaymentTerms, deliveryTime, setDeliveryTime,
     onShowPayment, onPrint, onSave, onGenerateContract,
     isAdmin = true, isEditing = false, isSaving = false
 }) => {
     const bdiNum = Number(bdiRate) || 0;
     const taxNum = Number(taxRate) || 0;
+    const inssNum = Number(inssRate) || 0;
 
     return (
         <div className="w-full lg:w-[340px] bg-[#0f172a] text-white p-6 flex flex-col space-y-6 shrink-0 shadow-2xl relative overflow-hidden h-auto lg:h-full">
             <div className="relative z-10">
                 <h4 className="text-[8px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Investimento Total</h4>
 
-                {/* Tax & BDI Inputs */}
-                <div className="grid grid-cols-2 gap-2 mb-4">
+                {/* Tax, BDI & INSS Inputs */}
+                <div className="grid grid-cols-3 gap-1.5 mb-4">
                     <div>
-                        <label className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">BDI (%)</label>
-                        <input type="number" className="w-full bg-slate-800/50 border border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-200 outline-none focus:ring-1 focus:ring-blue-500" value={bdiRate} onChange={e => setBdiRate(e.target.value)} placeholder="0%" />
+                        <label className="text-[7.5px] font-bold text-slate-400 uppercase tracking-wider mb-1 block whitespace-nowrap">BDI (%)</label>
+                        <input type="number" className="w-full bg-slate-800/50 border border-slate-700 rounded-lg p-1.5 text-xs font-bold text-slate-200 outline-none focus:ring-1 focus:ring-blue-500" value={bdiRate} onChange={e => setBdiRate(e.target.value)} placeholder="0%" />
                     </div>
                     <div>
-                        <label className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">Impostos (%)</label>
-                        <input type="number" className="w-full bg-slate-800/50 border border-slate-700 rounded-lg p-2 text-xs font-bold text-slate-200 outline-none focus:ring-1 focus:ring-blue-500" value={taxRate} onChange={e => setTaxRate(e.target.value)} placeholder="0%" />
+                        <label className="text-[7.5px] font-bold text-slate-400 uppercase tracking-wider mb-1 block whitespace-nowrap">Impostos (%)</label>
+                        <input type="number" className="w-full bg-slate-800/50 border border-slate-700 rounded-lg p-1.5 text-xs font-bold text-slate-200 outline-none focus:ring-1 focus:ring-blue-500" value={taxRate} onChange={e => setTaxRate(e.target.value)} placeholder="0%" />
+                    </div>
+                    <div>
+                        <label className="text-[7.5px] font-bold text-slate-400 uppercase tracking-wider mb-1 block whitespace-nowrap">INSS (%)</label>
+                        <input type="number" className="w-full bg-slate-800/50 border border-slate-700 rounded-lg p-1.5 text-xs font-bold text-slate-200 outline-none focus:ring-1 focus:ring-blue-500" value={inssRate} onChange={e => setInssRate(e.target.value)} placeholder="0%" />
                     </div>
                 </div>
 
@@ -53,7 +60,13 @@ const BudgetSummarySidebar: React.FC<BudgetSummarySidebarProps> = ({
                     {taxNum > 0 && (
                         <div className="flex justify-between text-blue-400">
                             <span>+ Impostos:</span>
-                            <span className="whitespace-nowrap">R$ {(totalAmount - (subtotal + (subtotal * (bdiNum / 100)))).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            <span className="whitespace-nowrap">R$ {(totalAmount * (taxNum / 100)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        </div>
+                    )}
+                    {inssNum > 0 && (
+                        <div className="flex justify-between text-indigo-400">
+                            <span>+ Ret. INSS:</span>
+                            <span className="whitespace-nowrap">R$ {(totalAmount * (inssNum / 100)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>
                     )}
                     <div className="flex justify-between text-lg font-black border-t border-slate-700 pt-2 mt-2">

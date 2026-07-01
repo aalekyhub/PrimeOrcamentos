@@ -56,3 +56,8 @@ ALTER TABLE IF EXISTS work_indirects ALTER COLUMN created_at DROP NOT NULL;
 
 -- 7. Add 'order_id' to Works if missing
 ALTER TABLE IF EXISTS works ADD COLUMN IF NOT EXISTS order_id text;
+
+-- 8. Add 'inssRate' and alternative name columns to orders table if missing
+ALTER TABLE IF EXISTS orders ADD COLUMN IF NOT EXISTS "inssRate" numeric DEFAULT 0;
+ALTER TABLE IF EXISTS orders ADD COLUMN IF NOT EXISTS inss_rate numeric DEFAULT 0;
+ALTER TABLE IF EXISTS orders ADD COLUMN IF NOT EXISTS inssrate numeric DEFAULT 0;

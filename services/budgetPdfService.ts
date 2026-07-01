@@ -187,12 +187,17 @@ export const buildBudgetTotalsHtml = (budget: ServiceOrder) => {
 
   const bdiR = Math.max(0, toNumber(budget.bdiRate));
   const taxR = Math.min(99.99, Math.max(0, toNumber(budget.taxRate)));
+  const inssR = Math.min(99.99, Math.max(0, toNumber(budget.inssRate)));
 
   const bdiV = roundMoney(subT * (bdiR / 100));
   const subTWithBDI = roundMoney(subT + bdiV);
-  const taxFactorBody = Math.max(0.0001, 1 - (taxR / 100));
+
+  const totalTaxesR = taxR + inssR;
+  const taxFactorBody = Math.max(0.0001, 1 - (totalTaxesR / 100));
   const finalT = roundMoney(subTWithBDI / taxFactorBody);
-  const taxV = roundMoney(finalT - subTWithBDI);
+
+  const taxV = roundMoney(finalT * (taxR / 100));
+  const inssV = roundMoney(finalT * (inssR / 100));
 
   return `
     <!-- Total Bar -->
@@ -203,14 +208,24 @@ export const buildBudgetTotalsHtml = (budget: ServiceOrder) => {
                  <span style="font-size: 9px; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block; letter-spacing: 0.05em; margin-bottom: 2px; line-height: 1.2;">SUBTOTAL</span>
                  <span style="font-size: 11px; font-weight: 700; color: #334155; display: block; white-space: nowrap;">R$ ${formatMoney(subT)}</span>
               </div>
+              ${bdiR > 0 ? `
               <div style="text-align: right;">
                  <span style="font-size: 8px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">BDI (${bdiR}%)</span>
                  <span style="font-size: 11px; font-weight: 700; color: #10b981; display: block; white-space: nowrap;">+ R$ ${formatMoney(bdiV)}</span>
               </div>
+              ` : ''}
+              ${taxR > 0 ? `
               <div style="text-align: right;">
                  <span style="font-size: 8px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">IMPOSTOS (${taxR}%)</span>
                  <span style="font-size: 11px; font-weight: 700; color: #3b82f6; display: block; white-space: nowrap;">+ R$ ${formatMoney(taxV)}</span>
               </div>
+              ` : ''}
+              ${inssR > 0 ? `
+              <div style="text-align: right;">
+                 <span style="font-size: 8px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">RET. INSS (${inssR}%)</span>
+                 <span style="font-size: 11px; font-weight: 700; color: #6366f1; display: block; white-space: nowrap;">+ R$ ${formatMoney(inssV)}</span>
+              </div>
+              ` : ''}
           </div>
 
           <!-- Barra de Total Final -->

@@ -115,6 +115,7 @@ export interface ServiceOrder {
   totalAmount: number;
   taxRate?: number; // Impostos (%)
   bdiRate?: number; // BDI (%)
+  inssRate?: number; // Retenção de INSS (%)
   equipmentBrand?: string;
   equipmentModel?: string;
   equipmentSerialNumber?: string;
