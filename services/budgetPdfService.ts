@@ -1,6 +1,7 @@
 // No longer using html2pdf here
 import { ServiceOrder, ServiceItem, CompanyProfile, DescriptionBlock } from '../types';
 import { escapeHtml, toNumber, roundMoney, formatMoney } from './formatUtils';
+import { financeUtils } from './financeUtils';
 
 // Helper to format dates
 const formatDate = (dateStr?: string) => {
@@ -177,27 +178,17 @@ export const buildBudgetItemsTableHtml = (budget: ServiceOrder, company: Company
 };
 
 export const buildBudgetTotalsHtml = (budget: ServiceOrder) => {
-  const subT = roundMoney(
-    budget.items.reduce((acc, item) => {
-      const up = toNumber(item.unitPrice);
-      const qty = toNumber(item.quantity);
-      return acc + (up * qty);
-    }, 0)
-  );
+  const { subtotal, bdiValue, taxValue, inssValue, finalTotal } = financeUtils.getDetailedFinancials(budget);
 
+  const subT = roundMoney(subtotal);
   const bdiR = Math.max(0, toNumber(budget.bdiRate));
-  const taxR = Math.min(99.99, Math.max(0, toNumber(budget.taxRate)));
-  const inssR = Math.min(99.99, Math.max(0, toNumber(budget.inssRate)));
+  const taxR = Math.max(0, toNumber(budget.taxRate));
+  const inssR = Math.max(0, toNumber(budget.inssRate));
 
-  const bdiV = roundMoney(subT * (bdiR / 100));
-  const subTWithBDI = roundMoney(subT + bdiV);
-
-  const totalTaxesR = taxR + inssR;
-  const taxFactorBody = Math.max(0.0001, 1 - (totalTaxesR / 100));
-  const finalT = roundMoney(subTWithBDI / taxFactorBody);
-
-  const taxV = roundMoney(finalT * (taxR / 100));
-  const inssV = roundMoney(finalT * (inssR / 100));
+  const bdiV = roundMoney(bdiValue);
+  const taxV = roundMoney(taxValue);
+  const inssV = roundMoney(inssValue);
+  const finalT = roundMoney(finalTotal);
 
   return `
     <!-- Total Bar -->

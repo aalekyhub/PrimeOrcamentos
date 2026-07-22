@@ -27,6 +27,7 @@ import { getTodayIsoDate, addDaysToDate } from '../services/dateService';
 import { generateBudgetReportHtml } from '../services/budgetPdfService';
 import { getContractHtml } from '../services/contractPdfService';
 import { roundMoney, toNumber } from '../services/formatUtils';
+import { financeUtils } from '../services/financeUtils';
 // DocumentPreview and BudgetDocument are replaced by the unified system
 
 interface Props {
@@ -206,26 +207,11 @@ const BudgetManager: React.FC<Props> = ({
 
   const subtotal = useMemo(() => {
     const res = items.reduce((acc, i) => acc + safeNumber(i.unitPrice) * safeNumber(i.quantity), 0);
-    console.log('[BudgetManager] Calculated Subtotal:', res, 'from items:', items);
     return roundMoney(res);
   }, [items]);
 
   const totalAmount = useMemo(() => {
-    const bdi = safeNumber(bdiRate);
-    const tax = safeNumber(taxRate);
-    const inss = safeNumber(inssRate);
-
-    const bdiValue = subtotal * (bdi / 100);
-    const subtotalWithBDI = subtotal + bdiValue;
-
-    const totalTaxes = tax + inss;
-    if (totalTaxes >= 100) return subtotalWithBDI;
-
-    const taxFactor = 1 - totalTaxes / 100;
-    if (taxFactor <= 0) return subtotalWithBDI;
-
-    const res = subtotalWithBDI / taxFactor;
-    console.log('[BudgetManager] Calculated Total (Original):', res, 'with BDI:', bdi, 'Tax:', tax, 'INSS:', inss);
+    const res = financeUtils.calculateGrossTotal(subtotal, safeNumber(bdiRate), safeNumber(taxRate), safeNumber(inssRate));
     return roundMoney(res);
   }, [subtotal, taxRate, bdiRate, inssRate]);
 
@@ -360,8 +346,8 @@ const BudgetManager: React.FC<Props> = ({
     }
     if (isSaving) return;
 
-    if (safeNumber(taxRate) >= 100) {
-      notify('A taxa não pode ser maior ou igual a 100%.', 'error');
+    if (safeNumber(taxRate) + safeNumber(inssRate) >= 100) {
+      notify('A soma de Impostos + INSS não pode ser maior ou igual a 100%.', 'error');
       return;
     }
 
@@ -405,6 +391,8 @@ const BudgetManager: React.FC<Props> = ({
       } else {
         notify(`Salvo localmente. Erro de sync: ${((result as any)?.error)?.message || JSON.stringify((result as any)?.error)}`, 'warning');
       }
+    } catch (err) {
+      notify(`Falha ao salvar o orçamento: ${(err as any)?.message || 'erro desconhecido'}. Os dados podem não ter sido sincronizados.`, 'error');
     } finally {
       setIsSaving(false);
     }
