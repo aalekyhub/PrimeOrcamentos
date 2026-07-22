@@ -254,12 +254,14 @@ export const useFinancialManager = ({
     if (!entry) return;
 
     try {
+      const saveResults: any[] = [];
+
       // 1. Update entry
-      const updatedEntries = accountEntries.map(e => 
+      const updatedEntries = accountEntries.map(e =>
         e.id === entryId ? { ...e, status: 'PAGO' as any, paymentDate: getTodayIsoDate(), accountId } : e
       );
       setAccountEntries(updatedEntries);
-      await db.save('serviflow_account_entries', updatedEntries);
+      saveResults.push(await db.save('serviflow_account_entries', updatedEntries));
 
       // 2. Update bank account balance
       const accountExists = accounts.some(acc => acc.id === accountId);
@@ -285,7 +287,7 @@ export const useFinancialManager = ({
         return acc;
       });
       setAccounts(updatedAccounts);
-      await db.save('serviflow_financial_accounts', updatedAccounts);
+      saveResults.push(await db.save('serviflow_financial_accounts', updatedAccounts));
 
       // 3. Create transaction
       const newTransaction: Transaction = {
@@ -304,11 +306,12 @@ export const useFinancialManager = ({
 
       const newTransactions = [newTransaction, ...transactions];
       setTransactions(newTransactions);
-      const saveRes = await db.save('serviflow_transactions', newTransactions, newTransaction);
-      if (saveRes && !saveRes.success) {
-        notify(`Alerta: Baixa salva localmente. Erro na nuvem: ${saveRes.error}`, 'error');
-      } else {
+      saveResults.push(await db.save('serviflow_transactions', newTransactions, newTransaction));
+
+      if (saveResults.every(r => r?.success)) {
         notify("Baixa realizada e caixa atualizado!");
+      } else {
+        notify("Baixa salva localmente, mas houve erro ao sincronizar com a nuvem. Confira a conexão e tente sincronizar de novo.", 'warning');
       }
     } catch (err) {
       console.error('Erro ao baixar título:', err);
@@ -330,12 +333,13 @@ export const useFinancialManager = ({
       const transaction = transactions.find(t => t.id === id);
       const entryId = transaction?.entryId || id;
       const entry = accountEntries.find(e => e.id === entryId);
+      const saveResults: any[] = [];
 
       const accountId = entry?.accountId;
       if (accountId && (transaction || entry)) {
         const amount = transaction ? transaction.amount : (entry?.amount || 0);
         const type = transaction ? transaction.type : ((entry?.type === 'RECEBER' || entry?.type === 'INVESTIMENTO') ? 'RECEITA' : 'DESPESA');
-        
+
         // Estornar saldo: se era RECEITA (somado), subtraímos (-). Se era DESPESA (subtraído), somamos (+).
         const delta = type === 'RECEITA' ? -amount : amount;
 
@@ -350,7 +354,7 @@ export const useFinancialManager = ({
         });
 
         setAccounts(updatedAccounts);
-        await db.save('serviflow_financial_accounts', updatedAccounts);
+        saveResults.push(await db.save('serviflow_financial_accounts', updatedAccounts));
       }
 
       if (entry) {
@@ -366,16 +370,20 @@ export const useFinancialManager = ({
           return e;
         });
         setAccountEntries(updatedEntries);
-        await db.save('serviflow_account_entries', updatedEntries);
+        saveResults.push(await db.save('serviflow_account_entries', updatedEntries));
       }
 
       if (transaction) {
         const updatedTrans = transactions.filter(t => t.id !== id);
         setTransactions(updatedTrans);
-        await db.remove('serviflow_transactions', id);
+        saveResults.push(await db.remove('serviflow_transactions', id));
       }
 
-      notify("Lançamento realizado estornado com sucesso!");
+      if (saveResults.every(r => r?.success)) {
+        notify("Lançamento realizado estornado com sucesso!");
+      } else {
+        notify("Estornado localmente, mas houve erro ao sincronizar com a nuvem. Confira a conexão e tente sincronizar de novo.", 'warning');
+      }
     } catch (err) {
       console.error('Erro ao excluir lançamento realizado:', err);
       notify("Erro ao excluir lançamento realizado.", "error");

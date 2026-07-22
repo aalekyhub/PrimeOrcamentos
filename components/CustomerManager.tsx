@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { UserPlus, Search, Trash2, X, Loader2, RefreshCw } from 'lucide-react';
 import { Customer, PersonType, ServiceOrder, UserAccount } from '../types';
 import { useNotify } from './ToastProvider';
-import { checkDuplicateCustomer } from '../services/validation';
+import { checkDuplicateCustomer, isValidDocument } from '../services/validation';
 import { db } from '../services/db';
 import { getTodayIsoDate } from '../services/dateService';
 
@@ -128,6 +128,16 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, cur
       return;
     }
     if (!newCustomer.name || !newCustomer.document) return;
+
+    if (!isValidDocument(newCustomer.document)) {
+      notify(`${personType === 'PF' ? 'CPF' : 'CNPJ'} inválido. Confira os números digitados.`, "error");
+      return;
+    }
+
+    if (newCustomer.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newCustomer.email.trim())) {
+      notify("E-mail inválido. Confira o endereço digitado.", "error");
+      return;
+    }
 
     // Utiliza o serviço centralizado para verificar duplicidade
     const duplicate = checkDuplicateCustomer(newCustomer.document || '', customers, editingCustomerId);
@@ -405,6 +415,11 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, cur
                     {isAdmin && (
                       <button onClick={async (e) => {
                         e.stopPropagation();
+                        const linkedOrders = orders.filter(o => o.customerId === c.id);
+                        if (linkedOrders.length > 0) {
+                          notify(`Não é possível excluir: existem ${linkedOrders.length} orçamento(s)/ordem(ns) de serviço vinculados a este cliente.`, "error");
+                          return;
+                        }
                         if (confirm("Deseja realmente excluir este cliente? Esta ação também removerá os dados da nuvem.")) {
                           setCustomers(p => p.filter(x => x.id !== c.id));
                           const result = await db.remove('serviflow_customers', c.id);
