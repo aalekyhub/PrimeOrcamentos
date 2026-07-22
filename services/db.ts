@@ -554,12 +554,25 @@ export const db = {
       await syncDeletedRecordsFromCloud();
 
       const fetchPromises = CLOUD_TABLES.map(async (table) => {
-        const { data, error } = await supabase.from(table).select('*');
-        if (error) {
-          console.error(`Erro ao baixar ${table}:`, error.message);
-          return { table, error: error.message };
+        // O Supabase limita select('*') a 1000 linhas por padrão. Sem
+        // paginação, uma tabela com mais registros que isso é truncada
+        // silenciosamente na sincronização. Aqui buscamos página por página
+        // até a nuvem devolver menos que PAGE_SIZE linhas (fim dos dados).
+        const PAGE_SIZE = 1000;
+        let allRows: any[] = [];
+        let from = 0;
+        while (true) {
+          const { data, error } = await supabase!.from(table).select('*').range(from, from + PAGE_SIZE - 1);
+          if (error) {
+            console.error(`Erro ao baixar ${table}:`, error.message);
+            return { table, error: error.message };
+          }
+          if (!data || data.length === 0) break;
+          allRows = allRows.concat(data);
+          if (data.length < PAGE_SIZE) break;
+          from += PAGE_SIZE;
         }
-        return { table, data };
+        return { table, data: allRows };
       });
 
       const responses = await Promise.all(fetchPromises);

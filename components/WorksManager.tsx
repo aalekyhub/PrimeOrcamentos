@@ -1141,6 +1141,7 @@ const WorksManager: React.FC<Props> = ({
                                     <div className="flex items-center text-xs text-slate-500">
                                         <Calendar size={14} className="mr-2 opacity-50" />
                                         Iniciada em {new Date(work.start_date).toLocaleDateString()}
+                                        {work.end_date && ` · Concluída em ${new Date(work.end_date).toLocaleDateString()}`}
                                     </div>
                                     <div className="flex items-center text-xs text-slate-500">
                                         <HardHat size={14} className="mr-2 opacity-50" />
@@ -1449,7 +1450,16 @@ const WorksManager: React.FC<Props> = ({
                                         </label>
                                         <select
                                             value={currentWork.status}
-                                            onChange={e => setCurrentWork({ ...currentWork, status: e.target.value as any })}
+                                            onChange={e => {
+                                                const newStatus = e.target.value as any;
+                                                if (newStatus === 'Concluída' && currentWork.status !== 'Concluída') {
+                                                    setCurrentWork({ ...currentWork, status: newStatus, end_date: new Date().toISOString() });
+                                                } else if (newStatus !== 'Concluída' && currentWork.status === 'Concluída') {
+                                                    setCurrentWork({ ...currentWork, status: newStatus, end_date: undefined });
+                                                } else {
+                                                    setCurrentWork({ ...currentWork, status: newStatus });
+                                                }
+                                            }}
                                             className="w-full p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-800 dark:text-slate-100"
                                         >
                                             <option value="Em Andamento">Em Andamento</option>

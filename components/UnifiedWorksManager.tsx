@@ -184,6 +184,12 @@ const UnifiedWorksManager: React.FC<Props> = ({
         }
     };
 
+    const getRealizedTotal = (plan: PlanningHeader): number => {
+        const allWorks = db.load('serviflow_works', []) as any[];
+        const linkedWorks = allWorks.filter(w => w.plan_id === plan.id);
+        return linkedWorks.reduce((sum, w) => sum + (w.total_real_cost || 0), 0);
+    };
+
     const getBudgetedTotal = (plan: PlanningHeader) => {
         // 1. Prefer stored header value if available
         if (plan.total_real_cost && plan.total_real_cost > 0) {
@@ -359,6 +365,7 @@ const UnifiedWorksManager: React.FC<Props> = ({
                                     <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Cliente / Razão Social</th>
                                     <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Descrição do Projeto</th>
                                     <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Total Orçado</th>
+                                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Realizado</th>
                                     <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Ações</th>
                                 </tr>
                             </thead>
@@ -400,6 +407,15 @@ const UnifiedWorksManager: React.FC<Props> = ({
                                             <span className="font-black text-slate-800 text-sm">
                                                 R$ {getBudgetedTotal(plan).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                             </span>
+                                        </td>
+                                        <td className="px-6 py-5 text-right whitespace-nowrap">
+                                            {getRealizedTotal(plan) > 0 ? (
+                                                <span className="font-black text-emerald-600 text-sm">
+                                                    R$ {getRealizedTotal(plan).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                </span>
+                                            ) : (
+                                                <span className="text-slate-300 text-xs font-bold uppercase">—</span>
+                                            )}
                                         </td>
                                         <td className="px-6 py-5">
                                             <div className="flex items-center justify-end gap-1">
@@ -494,7 +510,12 @@ const UnifiedWorksManager: React.FC<Props> = ({
                                     <span className="text-xs font-bold text-slate-400 uppercase">Orçado</span>
                                     <span className="font-bold text-slate-700">R$ {getBudgetedTotal(plan).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                 </div>
-                                {/* Future: Show Realized Cost here too if we link it */}
+                                {getRealizedTotal(plan) > 0 && (
+                                    <div className="flex flex-col">
+                                        <span className="text-xs font-bold text-slate-400 uppercase">Realizado</span>
+                                        <span className="font-bold text-emerald-600">R$ {getRealizedTotal(plan).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                    </div>
+                                )}
                                 <div className="flex items-center text-emerald-600 font-bold group-hover:translate-x-1 transition-transform">
                                     Abrir <ArrowRight size={16} className="ml-1" />
                                 </div>
