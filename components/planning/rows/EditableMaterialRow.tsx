@@ -84,9 +84,9 @@ export const EditableMaterialRow: React.FC<EditableMaterialRowProps> = ({
                     </div>
                     <div className="md:col-span-2">
                         <input
-                            type="number"
+                            type="number" min="0"
                             value={editQty}
-                            onChange={(e) => setEditQty(parseFloat(e.target.value) || 0)}
+                            onChange={(e) => setEditQty(Math.max(0, parseFloat(e.target.value) || 0))}
                             className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 rounded text-xs"
                         />
                     </div>
@@ -100,9 +100,9 @@ export const EditableMaterialRow: React.FC<EditableMaterialRowProps> = ({
                     </div>
                     <div className="md:col-span-3">
                         <input
-                            type="number"
+                            type="number" min="0"
                             value={editCost}
-                            onChange={(e) => setEditCost(parseFloat(e.target.value) || 0)}
+                            onChange={(e) => setEditCost(Math.max(0, parseFloat(e.target.value) || 0))}
                             className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 rounded text-xs"
                         />
                     </div>

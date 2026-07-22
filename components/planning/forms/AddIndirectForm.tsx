@@ -63,9 +63,9 @@ export const AddIndirectForm: React.FC<AddIndirectFormProps> = ({ onAdd, planId 
                 <div className="md:col-span-2">
                     <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Valor</label>
                     <input
-                        type="number"
+                        type="number" min="0"
                         value={value}
-                        onChange={(e) => setValue(parseFloat(e.target.value) || 0)}
+                        onChange={(e) => setValue(Math.max(0, parseFloat(e.target.value) || 0))}
                         className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm h-9 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-slate-700 dark:text-slate-100"
                         placeholder="0.00"
                     />

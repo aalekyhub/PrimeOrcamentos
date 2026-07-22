@@ -132,7 +132,7 @@ export const buildPlanningReportHtml = (
     });
 
     const reportIndirects = indirects.map((i: any) => ({
-        name: i.name || '',
+        name: [i.category, i.description].filter(Boolean).join(' - ') || i.name || '',
         value: toNumber(i.value)
     }));
 

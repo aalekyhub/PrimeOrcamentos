@@ -409,11 +409,12 @@ export const ResourcesTab = React.memo(({
                                         <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">{name} (%)</label>
                                         <input
                                             type="number"
+                                            min="0"
                                             step="0.01"
                                             className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded p-1 text-sm font-bold outline-none mb-1"
                                             value={taxes.find(t => t.name === name)?.rate || ''}
                                             onChange={(e) => {
-                                                const val = parseFloat(e.target.value) || 0;
+                                                const val = Math.max(0, parseFloat(e.target.value) || 0);
                                                 const newTaxes = [...taxes];
                                                 const idx = newTaxes.findIndex(t => t.name === name);
                                                 if (idx !== -1) newTaxes[idx] = { ...newTaxes[idx], rate: val };

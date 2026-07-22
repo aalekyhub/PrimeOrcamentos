@@ -94,9 +94,9 @@ export const EditableServiceRow: React.FC<EditableServiceRowProps> = ({
                     </div>
                     <div className="md:col-span-2">
                         <input
-                            type="number"
+                            type="number" min="0"
                             value={editQty}
-                            onChange={(e) => setEditQty(parseFloat(e.target.value) || 0)}
+                            onChange={(e) => setEditQty(Math.max(0, parseFloat(e.target.value) || 0))}
                             className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm text-slate-900 dark:text-slate-100"
                         />
                     </div>
@@ -110,18 +110,18 @@ export const EditableServiceRow: React.FC<EditableServiceRowProps> = ({
                     </div>
                     <div className="md:col-span-2">
                         <input
-                            type="number"
+                            type="number" min="0"
                             value={editMatCost}
-                            onChange={(e) => setEditMatCost(parseFloat(e.target.value) || 0)}
+                            onChange={(e) => setEditMatCost(Math.max(0, parseFloat(e.target.value) || 0))}
                             className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm text-slate-900 dark:text-slate-100"
                             placeholder="Mat."
                         />
                     </div>
                     <div className="md:col-span-2">
                         <input
-                            type="number"
+                            type="number" min="0"
                             value={editLabCost}
-                            onChange={(e) => setEditLabCost(parseFloat(e.target.value) || 0)}
+                            onChange={(e) => setEditLabCost(Math.max(0, parseFloat(e.target.value) || 0))}
                             className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm text-slate-900 dark:text-slate-100"
                             placeholder="M.O."
                         />

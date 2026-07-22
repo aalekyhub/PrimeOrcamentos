@@ -341,7 +341,7 @@ const WorksManager: React.FC<Props> = ({
 
     const [newMaterial, setNewMaterial] = useState({ name: '', qty: '', unit: 'un', cost: '' });
     const [newLabor, setNewLabor] = useState({ role: '', type: 'Diária', qty: '', unit: 'un', cost: '' });
-    const [newIndirect, setNewIndirect] = useState({ name: '', value: '' });
+    const [newIndirect, setNewIndirect] = useState({ category: 'Transporte', description: '', value: '' });
 
     const { notify } = useNotify();
     const creationAttemptedRef = useRef<Record<string, boolean>>({});
@@ -620,16 +620,16 @@ const WorksManager: React.FC<Props> = ({
                 ? currentLocalWorks.map(w => w.id === currentWork.id ? updatedWork : w)
                 : [updatedWork, ...currentLocalWorks];
 
-            await db.save('serviflow_works', updatedWorks, updatedWork);
+            const headerResult = await db.save('serviflow_works', updatedWorks, updatedWork);
 
             const saveItems = async (key: string, items: any[]) => {
                 const all = db.load(key, []);
                 const others = all.filter((i: any) => i.work_id !== currentWork.id);
                 const currentItems = items.map(i => ({ ...i, work_id: currentWork.id }));
-                await db.save(key, [...others, ...currentItems], currentItems);
+                return db.save(key, [...others, ...currentItems], currentItems);
             };
 
-            await Promise.all([
+            const itemResults = await Promise.all([
                 saveItems('serviflow_work_services', services),
                 saveItems('serviflow_work_materials', materials),
                 saveItems('serviflow_work_labor', labor),
@@ -639,8 +639,13 @@ const WorksManager: React.FC<Props> = ({
 
             setWorks(updatedWorks);
 
+            const allSynced = [headerResult, ...itemResults].every(r => r?.success);
             if (showToast) {
-                notify('Obra atualizada com sucesso!', 'success');
+                if (allSynced) {
+                    notify('Obra atualizada com sucesso!', 'success');
+                } else {
+                    notify('Obra salva localmente, mas houve erro ao sincronizar com a nuvem. Confira a conexão e tente sincronizar de novo.', 'warning');
+                }
             }
         } catch (error) {
             console.error('Erro ao salvar obra:', error);
@@ -894,9 +899,9 @@ const WorksManager: React.FC<Props> = ({
                     <div className="md:col-span-1">
                         <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Qtd</label>
                         <input
-                            type="number"
+                            type="number" min="0"
                             value={data.quantity || 0}
-                            onChange={e => update('quantity', (parseFloat(e.target.value) || 0) as any)}
+                            onChange={e => update('quantity', Math.max(0, parseFloat(e.target.value) || 0) as any)}
                             className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100"
                         />
                     </div>
@@ -912,9 +917,9 @@ const WorksManager: React.FC<Props> = ({
                     <div className="md:col-span-1">
                         <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Valor Unit.</label>
                         <input
-                            type="number"
+                            type="number" min="0"
                             value={data.unit_cost || 0}
-                            onChange={e => update('unit_cost', (parseFloat(e.target.value) || 0) as any)}
+                            onChange={e => update('unit_cost', Math.max(0, parseFloat(e.target.value) || 0) as any)}
                             className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100"
                         />
                     </div>
@@ -987,9 +992,9 @@ const WorksManager: React.FC<Props> = ({
                     <div>
                         <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Qtd</label>
                         <input
-                            type="number"
+                            type="number" min="0"
                             value={data.quantity || 0}
-                            onChange={e => update('quantity', (parseFloat(e.target.value) || 0) as any)}
+                            onChange={e => update('quantity', Math.max(0, parseFloat(e.target.value) || 0) as any)}
                             className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100"
                         />
                     </div>
@@ -1005,9 +1010,9 @@ const WorksManager: React.FC<Props> = ({
                     <div>
                         <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Valor Unit.</label>
                         <input
-                            type="number"
+                            type="number" min="0"
                             value={data.unit_cost || 0}
-                            onChange={e => update('unit_cost', (parseFloat(e.target.value) || 0) as any)}
+                            onChange={e => update('unit_cost', Math.max(0, parseFloat(e.target.value) || 0) as any)}
                             className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100"
                         />
                     </div>
@@ -1041,7 +1046,8 @@ const WorksManager: React.FC<Props> = ({
                             className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-600 focus:ring-slate-500"
                         />
                         <div className="grow">
-                            <p className="font-bold text-slate-800 dark:text-slate-100 uppercase text-sm">{i.name}</p>
+                            <p className="font-bold text-slate-800 dark:text-slate-100 uppercase text-sm">{i.description}</p>
+                            {i.category && <span className="text-[9px] font-black uppercase text-slate-400 bg-slate-100 dark:bg-slate-800 dark:text-slate-400 px-1.5 py-0.5 rounded">{i.category}</span>}
                         </div>
                     </div>
                     <div className="w-24 text-right mr-4 font-black text-slate-700 dark:text-slate-200">
@@ -1055,17 +1061,17 @@ const WorksManager: React.FC<Props> = ({
                         <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Descrição</label>
                         <input
                             type="text"
-                            value={data.name || ''}
-                            onChange={e => update('name', e.target.value as any)}
+                            value={data.description || ''}
+                            onChange={e => update('description', e.target.value as any)}
                             className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100"
                         />
                     </div>
                     <div className="md:col-span-2">
                         <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Valor</label>
                         <input
-                            type="number"
+                            type="number" min="0"
                             value={data.value || 0}
-                            onChange={e => update('value', (parseFloat(e.target.value) || 0) as any)}
+                            onChange={e => update('value', Math.max(0, parseFloat(e.target.value) || 0) as any)}
                             className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100"
                         />
                     </div>
@@ -1293,7 +1299,7 @@ const WorksManager: React.FC<Props> = ({
                                                 </div>
                                                 <div className="md:col-span-2">
                                                     <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Qtd</label>
-                                                    <input type="number" placeholder="0" value={newMaterial.qty} onChange={e => setNewMaterial(p => ({ ...p, qty: e.target.value }))}
+                                                    <input type="number" min="0" placeholder="0" value={newMaterial.qty} onChange={e => setNewMaterial(p => ({ ...p, qty: e.target.value }))}
                                                         className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
                                                 </div>
                                                 <div className="md:col-span-1">
@@ -1303,15 +1309,15 @@ const WorksManager: React.FC<Props> = ({
                                                 </div>
                                                 <div className="md:col-span-2">
                                                     <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Valor Unit.</label>
-                                                    <input type="number" placeholder="0" value={newMaterial.cost} onChange={e => setNewMaterial(p => ({ ...p, cost: e.target.value }))}
+                                                    <input type="number" min="0" placeholder="0" value={newMaterial.cost} onChange={e => setNewMaterial(p => ({ ...p, cost: e.target.value }))}
                                                         onKeyDown={(e) => e.key === 'Enter' && document.getElementById('add-material-btn')?.click()}
                                                         className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
                                                 </div>
                                                 <div className="md:col-span-2">
                                                     <button id="add-material-btn" type="button" onClick={() => {
                                                         if (!newMaterial.name) return;
-                                                        const qty = parseFloat(newMaterial.qty) || 0;
-                                                        const cost = parseFloat(newMaterial.cost) || 0;
+                                                        const qty = Math.max(0, parseFloat(newMaterial.qty) || 0);
+                                                        const cost = Math.max(0, parseFloat(newMaterial.cost) || 0);
                                                         materialManager.addItem({ material_name: newMaterial.name.toUpperCase(), unit: newMaterial.unit || 'un', quantity: qty, unit_cost: cost, total_cost: qty * cost });
                                                         setNewMaterial({ name: '', qty: '', unit: 'un', cost: '' });
                                                         notify('Material adicionado', 'success');
@@ -1331,7 +1337,7 @@ const WorksManager: React.FC<Props> = ({
                                                 </div>
                                                 <div className="md:col-span-2">
                                                     <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Qtd</label>
-                                                    <input type="number" placeholder="0" value={newLabor.qty} onChange={e => setNewLabor(p => ({ ...p, qty: e.target.value }))}
+                                                    <input type="number" min="0" placeholder="0" value={newLabor.qty} onChange={e => setNewLabor(p => ({ ...p, qty: e.target.value }))}
                                                         onKeyDown={(e) => e.key === 'Enter' && document.getElementById('add-labor-btn')?.click()}
                                                         className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
                                                 </div>
@@ -1343,15 +1349,15 @@ const WorksManager: React.FC<Props> = ({
                                                 </div>
                                                 <div className="md:col-span-2">
                                                     <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Valor Unit.</label>
-                                                    <input type="number" placeholder="0" value={newLabor.cost} onChange={e => setNewLabor(p => ({ ...p, cost: e.target.value }))}
+                                                    <input type="number" min="0" placeholder="0" value={newLabor.cost} onChange={e => setNewLabor(p => ({ ...p, cost: e.target.value }))}
                                                         onKeyDown={(e) => e.key === 'Enter' && document.getElementById('add-labor-btn')?.click()}
                                                         className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
                                                 </div>
                                                 <div className="md:col-span-2">
                                                     <button id="add-labor-btn" type="button" onClick={() => {
                                                         if (!newLabor.role) return;
-                                                        const qty = parseFloat(newLabor.qty) || 0;
-                                                        const cost = parseFloat(newLabor.cost) || 0;
+                                                        const qty = Math.max(0, parseFloat(newLabor.qty) || 0);
+                                                        const cost = Math.max(0, parseFloat(newLabor.cost) || 0);
                                                         laborManager.addItem({ role: newLabor.role.toUpperCase(), cost_type: newLabor.type as any, unit: newLabor.unit || 'un', quantity: qty, unit_cost: cost, total_cost: qty * cost });
                                                         setNewLabor({ role: '', type: 'Diária', qty: '', unit: 'un', cost: '' });
                                                         notify('Mão de obra adicionada', 'success');
@@ -1363,24 +1369,36 @@ const WorksManager: React.FC<Props> = ({
                                         )}
                                         {resourceTab === 'indireto' && (
                                             <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
-                                                <div className="md:col-span-7">
+                                                <div className="md:col-span-3">
+                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Categoria</label>
+                                                    <select value={newIndirect.category} onChange={e => setNewIndirect(p => ({ ...p, category: e.target.value }))}
+                                                        className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-green-500">
+                                                        <option>Transporte</option>
+                                                        <option>Alimentação</option>
+                                                        <option>EPI</option>
+                                                        <option>Equipamentos</option>
+                                                        <option>Taxas</option>
+                                                        <option>Outros</option>
+                                                    </select>
+                                                </div>
+                                                <div className="md:col-span-4">
                                                     <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Descrição</label>
-                                                    <input type="text" placeholder="Ex: Transporte de material" value={newIndirect.name} onChange={e => setNewIndirect(p => ({ ...p, name: e.target.value }))}
+                                                    <input type="text" placeholder="Ex: Transporte de material" value={newIndirect.description} onChange={e => setNewIndirect(p => ({ ...p, description: e.target.value }))}
                                                         onKeyDown={(e) => e.key === 'Enter' && document.getElementById('add-indirect-btn')?.click()}
                                                         className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-green-500" />
                                                 </div>
                                                 <div className="md:col-span-3">
                                                     <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Valor (R$)</label>
-                                                    <input type="number" placeholder="0" value={newIndirect.value} onChange={e => setNewIndirect(p => ({ ...p, value: e.target.value }))}
+                                                    <input type="number" min="0" placeholder="0" value={newIndirect.value} onChange={e => setNewIndirect(p => ({ ...p, value: e.target.value }))}
                                                         onKeyDown={(e) => e.key === 'Enter' && document.getElementById('add-indirect-btn')?.click()}
                                                         className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
                                                 </div>
                                                 <div className="md:col-span-2">
                                                     <button id="add-indirect-btn" type="button" onClick={() => {
-                                                        if (!newIndirect.name) return;
-                                                        const value = parseFloat(newIndirect.value) || 0;
-                                                        indirectManager.addItem({ name: newIndirect.name.toUpperCase(), value });
-                                                        setNewIndirect({ name: '', value: '' });
+                                                        if (!newIndirect.description) return;
+                                                        const value = Math.max(0, parseFloat(newIndirect.value) || 0);
+                                                        indirectManager.addItem({ category: newIndirect.category, description: newIndirect.description.toUpperCase(), value });
+                                                        setNewIndirect({ category: 'Transporte', description: '', value: '' });
                                                         notify('Custo indireto adicionado', 'success');
                                                     }} className="w-full bg-green-600 text-white py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-1 hover:bg-green-700 transition-all shadow-md">
                                                         <Plus size={14} /> Adicionar
@@ -1536,36 +1554,36 @@ const WorksManager: React.FC<Props> = ({
                                                 <div>
                                                     <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Qtd</label>
                                                     <input
-                                                        type="number"
+                                                        type="number" min="0"
                                                         value={data.quantity ?? 0}
-                                                        onChange={e => update('quantity', (parseFloat(e.target.value) || 0) as any)}
+                                                        onChange={e => update('quantity', Math.max(0, parseFloat(e.target.value) || 0) as any)}
                                                         className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100"
                                                     />
                                                 </div>
                                                 <div>
                                                     <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Mat</label>
                                                     <input
-                                                        type="number"
+                                                        type="number" min="0"
                                                         value={data.unit_material_cost ?? 0}
-                                                        onChange={e => update('unit_material_cost', (parseFloat(e.target.value) || 0) as any)}
+                                                        onChange={e => update('unit_material_cost', Math.max(0, parseFloat(e.target.value) || 0) as any)}
                                                         className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100"
                                                     />
                                                 </div>
                                                 <div>
                                                     <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">MO</label>
                                                     <input
-                                                        type="number"
+                                                        type="number" min="0"
                                                         value={data.unit_labor_cost ?? 0}
-                                                        onChange={e => update('unit_labor_cost', (parseFloat(e.target.value) || 0) as any)}
+                                                        onChange={e => update('unit_labor_cost', Math.max(0, parseFloat(e.target.value) || 0) as any)}
                                                         className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100"
                                                     />
                                                 </div>
                                                 <div>
                                                     <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Ind</label>
                                                     <input
-                                                        type="number"
+                                                        type="number" min="0"
                                                         value={data.unit_indirect_cost ?? 0}
-                                                        onChange={e => update('unit_indirect_cost', (parseFloat(e.target.value) || 0) as any)}
+                                                        onChange={e => update('unit_indirect_cost', Math.max(0, parseFloat(e.target.value) || 0) as any)}
                                                         className="w-full p-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-slate-100"
                                                     />
                                                 </div>
@@ -1667,12 +1685,12 @@ const WorksManager: React.FC<Props> = ({
 
                                                         <div className="relative mb-2">
                                                             <input
-                                                                type="number"
+                                                                type="number" min="0"
                                                                 step="0.01"
                                                                 className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 text-sm font-bold text-slate-700 dark:text-slate-200 pr-8"
                                                                 value={taxes.find(t => t.name === name)?.rate || ''}
                                                                 onChange={(e) => {
-                                                                    const val = parseFloat(e.target.value) || 0;
+                                                                    const val = Math.max(0, parseFloat(e.target.value) || 0);
                                                                     const newTaxes = [...taxes];
                                                                     const idx = newTaxes.findIndex(t => t.name === name);
 

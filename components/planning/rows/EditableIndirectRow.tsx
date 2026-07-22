@@ -95,9 +95,9 @@ export const EditableIndirectRow: React.FC<EditableIndirectRowProps> = ({
                     </div>
                     <div className="md:col-span-2">
                         <input
-                            type="number"
+                            type="number" min="0"
                             value={editValue}
-                            onChange={(e) => setEditValue(parseFloat(e.target.value) || 0)}
+                            onChange={(e) => setEditValue(Math.max(0, parseFloat(e.target.value) || 0))}
                             className="w-full p-2 bg-white dark:bg-slate-800 border border-slate-200 rounded text-xs px-2"
                         />
                     </div>

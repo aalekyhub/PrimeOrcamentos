@@ -21,9 +21,9 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onAdd, planId })
             return;
         }
 
-        const numericQty = parseFloat(qty) || 0;
-        const numericMat = parseFloat(matCost) || 0;
-        const numericLab = parseFloat(labCost) || 0;
+        const numericQty = Math.max(0, parseFloat(qty) || 0);
+        const numericMat = Math.max(0, parseFloat(matCost) || 0);
+        const numericLab = Math.max(0, parseFloat(labCost) || 0);
 
         onAdd({
             description: desc.toUpperCase(),
@@ -73,7 +73,7 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onAdd, planId })
                         Qtd
                     </label>
                     <input
-                        type="number"
+                        type="number" min="0"
                         value={qty}
                         onChange={(e) => setQty(e.target.value)}
                         onKeyDown={handleKeyDown}
@@ -99,7 +99,7 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onAdd, planId })
                         Unit. Mat.
                     </label>
                     <input
-                        type="number"
+                        type="number" min="0"
                         value={matCost}
                         onChange={(e) => setMatCost(e.target.value)}
                         onKeyDown={handleKeyDown}
@@ -112,7 +112,7 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onAdd, planId })
                         Unit. M.O.
                     </label>
                     <input
-                        type="number"
+                        type="number" min="0"
                         value={labCost}
                         onChange={(e) => setLabCost(e.target.value)}
                         onKeyDown={handleKeyDown}

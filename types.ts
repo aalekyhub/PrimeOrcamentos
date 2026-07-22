@@ -218,7 +218,8 @@ export interface PlannedLabor {
 export interface PlannedIndirect {
   id: string;
   plan_id?: string;
-  name: string;
+  category: string;
+  description: string;
   value: number;
 }
 
@@ -290,7 +291,8 @@ export interface WorkIndirect {
   id: string;
   work_id?: string;
   plan_indirect_id?: string;
-  name: string;
+  category: string;
+  description: string;
   value: number;
   date?: string;
 }

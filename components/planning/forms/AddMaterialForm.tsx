@@ -20,8 +20,8 @@ export const AddMaterialForm: React.FC<AddMaterialFormProps> = ({ onAdd, planId 
             return;
         }
 
-        const numericQty = parseFloat(qty) || 0;
-        const numericCost = parseFloat(cost) || 0;
+        const numericQty = Math.max(0, parseFloat(qty) || 0);
+        const numericCost = Math.max(0, parseFloat(cost) || 0);
 
         onAdd({
             material_name: name.toUpperCase(),
@@ -63,7 +63,7 @@ export const AddMaterialForm: React.FC<AddMaterialFormProps> = ({ onAdd, planId 
                 <div className="md:col-span-2">
                     <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Qtd</label>
                     <input
-                        type="number"
+                        type="number" min="0"
                         value={qty}
                         onChange={(e) => setQty(e.target.value)}
                         onKeyDown={handleKeyDown}
@@ -85,7 +85,7 @@ export const AddMaterialForm: React.FC<AddMaterialFormProps> = ({ onAdd, planId 
                 <div className="md:col-span-2">
                     <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Valor Unit.</label>
                     <input
-                        type="number"
+                        type="number" min="0"
                         value={cost}
                         onChange={(e) => setCost(e.target.value)}
                         onKeyDown={handleKeyDown}
