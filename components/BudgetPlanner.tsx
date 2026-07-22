@@ -5,6 +5,8 @@ import { ServiceOrder, OrderStatus, ServiceItem, Customer } from '../types';
 import { db } from '../services/db';
 import { getTodayIsoDate, addDaysToDate } from '../services/dateService';
 import { useNotify } from './ToastProvider';
+import { financeUtils } from '../services/financeUtils';
+import { roundMoney } from '../services/formatUtils';
 
 interface Props {
   setOrders: React.Dispatch<React.SetStateAction<ServiceOrder[]>>;
@@ -12,7 +14,7 @@ interface Props {
 }
 
 const BudgetPlanner: React.FC<Props> = ({ setOrders, customers }) => {
-  const notify = useNotify();
+  const { notify } = useNotify();
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [generatedBudget, setGeneratedBudget] = useState<Partial<ServiceOrder> | null>(null);
@@ -23,10 +25,19 @@ const BudgetPlanner: React.FC<Props> = ({ setOrders, customers }) => {
     setLoading(true);
     try {
       const budget = await generateBudgetFromDescription(description);
-      setGeneratedBudget(budget);
+      const validItems = (budget.items || []).filter(
+        (item: any) => Number(item.quantity) > 0 && Number(item.unitPrice) > 0
+      );
+
+      if (validItems.length === 0) {
+        notify('A IA não retornou itens válidos (quantidade e preço maiores que zero). Tente descrever o serviço com mais detalhes.', 'error');
+        return;
+      }
+
+      setGeneratedBudget({ ...budget, items: validItems, totalAmount: financeUtils.calculateSubtotal(validItems as ServiceItem[]) });
     } catch (e) {
       console.error(e);
-      alert("Erro ao gerar orçamento. Tente novamente.");
+      notify('Erro ao gerar orçamento. Tente novamente.', 'error');
     } finally {
       setLoading(false);
     }
@@ -37,9 +48,14 @@ const BudgetPlanner: React.FC<Props> = ({ setOrders, customers }) => {
 
     const customer = customers.find(c => c.id === selectedCustomerId);
     if (!customer) {
-      alert("Por favor, selecione um cliente cadastrado.");
+      notify('Por favor, selecione um cliente cadastrado.', 'error');
       return;
     }
+
+    const items = (generatedBudget.items || []) as ServiceItem[];
+    // Recalcula sempre a partir dos itens: nunca confiar no total que a IA
+    // devolveu pronto, para não divergir da soma real do orçamento.
+    const totalAmount = roundMoney(financeUtils.calculateSubtotal(items));
 
     const newOrder: ServiceOrder = {
       id: db.generateId('ORC-IA'),
@@ -50,8 +66,8 @@ const BudgetPlanner: React.FC<Props> = ({ setOrders, customers }) => {
       status: OrderStatus.PENDING,
       createdAt: getTodayIsoDate(),
       dueDate: addDaysToDate(7),
-      totalAmount: generatedBudget.totalAmount || 0,
-      items: (generatedBudget.items || []) as ServiceItem[],
+      totalAmount,
+      items,
       descriptionBlocks: [],
       paymentTerms: '',
       deliveryTime: ''

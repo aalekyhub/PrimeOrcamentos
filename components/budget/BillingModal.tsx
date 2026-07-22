@@ -1,9 +1,10 @@
 
 import React, { useState } from 'react';
-import { X, Calendar, DollarSign, CalendarCheck, Info } from 'lucide-react';
+import { X, Calendar, DollarSign, CalendarCheck, Info, AlertTriangle } from 'lucide-react';
 import { ServiceOrder, AccountEntry, OrderStatus } from '../../types';
 import { getTodayIsoDate, addDaysToDate } from '../../services/dateService';
 import { db } from '../../services/db';
+import { useNotify } from '../ToastProvider';
 
 interface BillingModalProps {
   order: ServiceOrder;
@@ -17,11 +18,15 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, onClose, onSuccess, 
   const [intervalDays, setIntervalDays] = useState(30);
   const [firstDueDate, setFirstDueDate] = useState(getTodayIsoDate());
   const [isGenerating, setIsGenerating] = useState(false);
+  const { notify } = useNotify();
 
   const totalAmount = order.totalAmount;
   const installmentAmount = Number((totalAmount / installments).toFixed(2));
+  const existingEntries = currentEntries.filter(e => e.orderId === order.id);
+  const alreadyBilled = existingEntries.length > 0;
 
   const handleGenerate = async () => {
+    if (isGenerating) return;
     setIsGenerating(true);
     try {
       const newEntries: AccountEntry[] = [];
@@ -48,13 +53,19 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, onClose, onSuccess, 
 
       const updatedList = [...newEntries, ...currentEntries];
       onSuccess(updatedList);
-      
+
       // Save to DB
-      await db.save('serviflow_account_entries', updatedList, newEntries);
-      
+      const result = await db.save('serviflow_account_entries', updatedList, newEntries);
+      if (result?.success) {
+        notify('Faturamento gerado e sincronizado!');
+      } else {
+        notify('Parcelas salvas localmente. Erro ao sincronizar com a nuvem.', 'warning');
+      }
+
       onClose();
     } catch (error) {
       console.error('Erro ao faturar:', error);
+      notify(`Falha ao gerar o faturamento: ${(error as any)?.message || 'erro desconhecido'}`, 'error');
     } finally {
       setIsGenerating(false);
     }
@@ -74,6 +85,14 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, onClose, onSuccess, 
         </div>
 
         <div className="p-8 space-y-6">
+          {alreadyBilled && (
+            <div className="bg-amber-50 dark:bg-amber-900/20 p-4 rounded-2xl border border-amber-200 dark:border-amber-900/30 flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+              <p className="text-[11px] font-bold text-amber-700 dark:text-amber-300 leading-relaxed">
+                Este orçamento já tem {existingEntries.length} parcela(s) lançada(s) no contas a receber. Gerar de novo vai criar lançamentos duplicados.
+              </p>
+            </div>
+          )}
           <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-3xl border border-blue-100 dark:border-blue-900/30 flex justify-between items-center">
             <div>
               <p className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-1">Valor Total</p>
@@ -136,12 +155,12 @@ const BillingModal: React.FC<BillingModalProps> = ({ order, onClose, onSuccess, 
         </div>
 
         <div className="p-8 bg-slate-50 dark:bg-slate-900 border-t dark:border-slate-800 flex flex-col gap-3">
-           <button 
+           <button
              onClick={handleGenerate}
              disabled={isGenerating}
-             className="w-full bg-blue-600 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-blue-950/20 hover:bg-blue-700 transition-all disabled:opacity-50"
+             className={`w-full text-white py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl transition-all disabled:opacity-50 ${alreadyBilled ? 'bg-amber-600 hover:bg-amber-700 shadow-amber-950/20' : 'bg-blue-600 hover:bg-blue-700 shadow-blue-950/20'}`}
            >
-             {isGenerating ? 'Gerando Parcelas...' : 'Confirmar Faturamento'}
+             {isGenerating ? 'Gerando Parcelas...' : alreadyBilled ? 'Gerar Mesmo Assim (Duplicar)' : 'Confirmar Faturamento'}
            </button>
            <button 
              onClick={onClose}

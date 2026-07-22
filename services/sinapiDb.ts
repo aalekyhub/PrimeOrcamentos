@@ -144,12 +144,12 @@ export const sinapiDb = {
         return all.filter(item => item.mes_ref === mes_ref && item.uf === uf && item.modo === modo);
     },
 
-    async searchComposicoes(query: string, filters: { uf: string; mes_ref: string; modo: string }) {
+    async _searchStore(storeName: 'sinapi_insumos' | 'sinapi_composicoes', query: string, filters: { uf: string; mes_ref: string; modo: string }) {
         const db = await this.getDb();
 
         // Otimização: Busca apenas registros que batem com o mês, UF e modo selecionados
         // usando o índice 'query' composto por [mes_ref, uf, modo]
-        const all = await db.getAllFromIndex('sinapi_composicoes', 'query', IDBKeyRange.only([filters.mes_ref, filters.uf, filters.modo]));
+        const all = await db.getAllFromIndex(storeName, 'query', IDBKeyRange.only([filters.mes_ref, filters.uf, filters.modo]));
 
         const normalizedQuery = normalizeText(query);
         const queryTerms = normalizedQuery.split(/\s+/).filter(t => t.length > 0);
@@ -164,6 +164,14 @@ export const sinapiDb = {
 
             return matchesCode || matchesDescription;
         }).slice(0, 50);
+    },
+
+    async searchComposicoes(query: string, filters: { uf: string; mes_ref: string; modo: string }): Promise<SinapiComposicaoRecord[]> {
+        return this._searchStore('sinapi_composicoes', query, filters) as Promise<SinapiComposicaoRecord[]>;
+    },
+
+    async searchInsumos(query: string, filters: { uf: string; mes_ref: string; modo: string }): Promise<SinapiInsumoRecord[]> {
+        return this._searchStore('sinapi_insumos', query, filters) as Promise<SinapiInsumoRecord[]>;
     },
 
     async getMetadata() {
