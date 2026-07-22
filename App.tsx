@@ -21,6 +21,7 @@ import {
   HardHat,
   Check,
   AlertCircle,
+  Loader2,
 } from 'lucide-react';
 
 import Dashboard from './components/Dashboard';
@@ -52,7 +53,7 @@ import {
   AccountEntry,
 } from './types';
 
-import { db, initPromise, startRealtimeSync, stopRealtimeSync } from './services/db';
+import { db, supabase, initPromise, startRealtimeSync, stopRealtimeSync } from './services/db';
 import { getTodayIsoDate } from './services/dateService';
 import { APP_VERSION } from './services/version';
 
@@ -62,37 +63,12 @@ const STORAGE_KEYS = {
   COMPANY: 'serviflow_company',
   ORDERS: 'serviflow_orders',
   TRANSACTIONS: 'serviflow_transactions',
-  USERS: 'serviflow_users',
-  SESSION: 'serviflow_session',
+  PROFILES: 'serviflow_profiles',
   DARK_MODE: 'serviflow_dark_mode',
   FINANCIAL_ACCOUNTS: 'serviflow_financial_accounts',
   FINANCIAL_CATEGORIES: 'serviflow_financial_categories',
   ACCOUNT_ENTRIES: 'serviflow_account_entries',
 } as const;
-
-const INITIAL_USERS: UserAccount[] = [
-  {
-    id: 'USR-001',
-    name: 'Admin Master',
-    email: 'admin@primeservicos.com',
-    password: 'admin',
-    role: 'admin',
-    permissions: [
-      'dashboard',
-      'customers',
-      'catalog',
-      'budgets',
-      'search',
-      'orders',
-      'financials',
-      'users',
-      'settings',
-      'construction',
-      'works',
-    ],
-    createdAt: '2024-01-01',
-  },
-];
 
 const INITIAL_COMPANY: CompanyProfile = {
   id: 'CMP-001',
@@ -126,6 +102,7 @@ const AppContent: React.FC = () => {
   const notifyRef = useRef(notify);
   const syncInFlightRef = useRef(false);
   const hasBootedRef = useRef(false);
+  const hasSyncedAfterLoginRef = useRef(false);
 
   useEffect(() => {
     notifyRef.current = notify;
@@ -138,11 +115,10 @@ const AppContent: React.FC = () => {
 
   const [darkMode, setDarkMode] = useState<boolean>(() => db.load(STORAGE_KEYS.DARK_MODE, false));
 
-  const [currentUser, setCurrentUser] = useState<UserAccount | null>(() =>
-    db.load(STORAGE_KEYS.SESSION, null)
-  );
+  const [currentUser, setCurrentUser] = useState<UserAccount | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [users, setUsers] = useState<UserAccount[]>(() =>
-    db.load(STORAGE_KEYS.USERS, INITIAL_USERS)
+    db.load(STORAGE_KEYS.PROFILES, [])
   );
   const [orders, setOrders] = useState<ServiceOrder[]>(() =>
     db.load(STORAGE_KEYS.ORDERS, [])
@@ -505,9 +481,9 @@ const AppContent: React.FC = () => {
           await db.saveLocal(STORAGE_KEYS.TRANSACTIONS, sortedTransactions);
         }
 
-        if (Array.isArray(cloudData.users)) {
-          setUsers(cloudData.users);
-          await db.saveLocal(STORAGE_KEYS.USERS, cloudData.users);
+        if (Array.isArray(cloudData.profiles)) {
+          setUsers(cloudData.profiles);
+          await db.saveLocal(STORAGE_KEYS.PROFILES, cloudData.profiles);
         }
 
         if (Array.isArray(cloudData.company) && cloudData.company.length > 0) {
@@ -569,7 +545,7 @@ const AppContent: React.FC = () => {
             setCatalog(db.load(STORAGE_KEYS.CATALOG, []));
             setOrders(db.load(STORAGE_KEYS.ORDERS, []));
             setTransactions(db.load(STORAGE_KEYS.TRANSACTIONS, []));
-            setUsers(db.load(STORAGE_KEYS.USERS, INITIAL_USERS));
+            setUsers(db.load(STORAGE_KEYS.PROFILES, []));
             setCompany(db.load(STORAGE_KEYS.COMPANY, INITIAL_COMPANY));
             setFinancialAccounts(db.load(STORAGE_KEYS.FINANCIAL_ACCOUNTS, []));
             setFinancialCategories(db.load(STORAGE_KEYS.FINANCIAL_CATEGORIES, []));
@@ -611,18 +587,81 @@ const AppContent: React.FC = () => {
     db.saveLocal(STORAGE_KEYS.DARK_MODE, darkMode);
   }, [darkMode]);
 
-  useEffect(() => {
-    if (currentUser) {
-      db.saveLocal(STORAGE_KEYS.SESSION, currentUser);
-    } else {
-      db.saveLocal(STORAGE_KEYS.SESSION, null);
-      try {
-        localStorage.removeItem(STORAGE_KEYS.SESSION);
-      } catch {
-        // noop
-      }
+  const loadProfile = useCallback(async (userId: string) => {
+    if (!supabase) return;
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (error || !data) {
+      console.error('[Auth] Perfil não encontrado para o usuário logado:', error?.message);
+      notifyRef.current('Seu acesso não foi encontrado. Contate um administrador.', 'error');
+      await supabase.auth.signOut();
+      setCurrentUser(null);
+      return;
     }
-  }, [currentUser]);
+
+    setCurrentUser({
+      id: data.id,
+      name: data.name,
+      email: data.email,
+      role: data.role,
+      permissions: data.permissions,
+      createdAt: data.created_at,
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!supabase) {
+      setAuthLoading(false);
+      return;
+    }
+
+    let isMounted = true;
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (!isMounted) return;
+      if (data.session?.user) {
+        loadProfile(data.session.user.id).finally(() => {
+          if (isMounted) setAuthLoading(false);
+        });
+      } else {
+        setAuthLoading(false);
+      }
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!isMounted) return;
+      if (session?.user) {
+        loadProfile(session.user.id);
+      } else {
+        setCurrentUser(null);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      listener.subscription.unsubscribe();
+    };
+  }, [loadProfile]);
+
+  // A sincronização inicial (boot) roda uma única vez ao abrir a página, antes
+  // do login terminar. Como as tabelas agora exigem usuário autenticado, essa
+  // sincronização inicial falha para quem ainda não logou. Este efeito busca
+  // os dados de novo assim que o login é confirmado, para a tela não ficar
+  // vazia até um refresh manual.
+  useEffect(() => {
+    if (!currentUser) {
+      hasSyncedAfterLoginRef.current = false;
+      return;
+    }
+    if (hasSyncedAfterLoginRef.current) return;
+    hasSyncedAfterLoginRef.current = true;
+    handleManualSync();
+  }, [currentUser, handleManualSync]);
 
   const stats = useMemo(() => {
     const today = getTodayIsoDate();
@@ -686,23 +725,9 @@ const AppContent: React.FC = () => {
     [openTab]
   );
 
-  const handleLogin = useCallback(
-    async (user: UserAccount) => {
-      setCurrentUser(user);
-      await db.saveLocal(STORAGE_KEYS.SESSION, user);
-    },
-    []
-  );
-
   const handleLogout = useCallback(async () => {
     if (!confirm('Encerrar sessão?')) return;
-    setCurrentUser(null);
-    await db.saveLocal(STORAGE_KEYS.SESSION, null);
-    try {
-      localStorage.removeItem(STORAGE_KEYS.SESSION);
-    } catch {
-      // noop
-    }
+    await supabase?.auth.signOut();
   }, []);
 
   const navItems = useMemo(() => {
@@ -730,11 +755,31 @@ const AppContent: React.FC = () => {
     [navItems, activeTab]
   );
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
+      </div>
+    );
+  }
+
+  if (!supabase) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+        <div className="max-w-md text-center bg-white p-8 rounded-3xl border border-slate-200 shadow-xl">
+          <AlertCircle className="w-8 h-8 text-rose-500 mx-auto mb-4" />
+          <h2 className="text-lg font-bold text-slate-900 mb-2">Configuração ausente</h2>
+          <p className="text-sm text-slate-500">
+            VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY precisam estar configurados para fazer login.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (!currentUser) {
     return (
       <Login
-        users={users}
-        onLogin={handleLogin}
         company={company}
         onSync={handleManualSync}
         isSyncing={isSyncing}

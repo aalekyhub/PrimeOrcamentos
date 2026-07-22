@@ -1,57 +1,38 @@
 
 import React, { useState } from 'react';
 import { Zap, Lock, Mail, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
-import { UserAccount, CompanyProfile } from '../types';
+import { CompanyProfile } from '../types';
 import { APP_VERSION } from '../services/version';
+import { supabase } from '../services/db';
 
 interface Props {
-  onLogin: (user: UserAccount) => void;
-  users: UserAccount[];
   company?: CompanyProfile;
   onSync: () => void;
   isSyncing: boolean;
   isConnected: boolean;
 }
 
-const Login: React.FC<Props> = ({ onLogin, users, company, onSync, isSyncing, isConnected }) => {
+const Login: React.FC<Props> = ({ company, onSync, isSyncing, isConnected }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
-    // Simulação de delay de rede
-    setTimeout(() => {
-      const dbUsers = users || [];
-      const typedEmail = email.trim().toLowerCase();
-      const typedPass = password.trim();
+    const { error: signInError } = await supabase!.auth.signInWithPassword({
+      email: email.trim().toLowerCase(),
+      password,
+    });
 
-      const user = dbUsers.find(u => {
-        const uEmail = (u.email || "").trim().toLowerCase();
-        const uPass = String(u.password || "").trim();
-        return uEmail === typedEmail && uPass === typedPass;
-      });
-
-      const foundAccount = dbUsers.find(u => (u.email || "").trim().toLowerCase() === typedEmail);
-
-      if (user) {
-        onLogin(user);
-      } else {
-        const availableEmails = dbUsers.map(u => u.email).join(', ');
-
-        if (!foundAccount) {
-          setError(`E-mail NÃO encontrado no celular. Contas disponíveis: ${availableEmails}`);
-        } else {
-          setError(`E-mail encontrado (${foundAccount.email}), mas a SENHA está incorreta.`);
-        }
-      }
-      setLoading(false);
-    }, 800);
+    if (signInError) {
+      setError('E-mail ou senha incorretos.');
+    }
+    setLoading(false);
   };
 
   return (
@@ -144,7 +125,7 @@ const Login: React.FC<Props> = ({ onLogin, users, company, onSync, isSyncing, is
               </button>
             </div>
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center justify-center gap-2">
-              Segurança Prime &copy; 2024 • {users?.length || 0} Usuários • Ver: {APP_VERSION}
+              Segurança Prime &copy; 2024 • Ver: {APP_VERSION}
             </p>
           </div>
         </div>

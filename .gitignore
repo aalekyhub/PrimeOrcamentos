@@ -32,3 +32,9 @@ thumbs.db
 .eslintcache
 .stylelintcache
 .cache/
+
+# Debug/scratch scripts (not part of the app)
+scratch/
+temp_*.js
+tsc_out*.txt
+fix_log.txt

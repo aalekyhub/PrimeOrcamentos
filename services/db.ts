@@ -4,7 +4,7 @@ import { openDB, IDBPDatabase } from 'idb';
 const SUPABASE_URL = (import.meta as any).env?.VITE_SUPABASE_URL?.trim() || '';
 const SUPABASE_ANON_KEY = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY?.trim() || '';
 
-const supabase =
+export const supabase =
   SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_URL.startsWith('http')
     ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
     : null;
@@ -33,7 +33,7 @@ const SMALL_KEYS = [
   'serviflow_dark_mode',
   'serviflow_company',
   'serviflow_tombstones',
-  'serviflow_users',
+  'serviflow_profiles',
 ];
 
 const TOMBSTONE_KEYS = new Set([
@@ -52,7 +52,7 @@ const CLOUD_TABLES = [
   'catalog',
   'orders',
   'transactions',
-  'users',
+  'profiles',
   'company',
   'plans',
   'plan_services',
@@ -463,8 +463,9 @@ export const db = {
   },
 
   generateId(prefix: string) {
-    const random = Math.floor(1000 + Math.random() * 9000);
-    return `${prefix}-${random}`;
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).slice(2, 8);
+    return `${prefix}-${timestamp}${random}`;
   },
 
   async save(key: string, data: any, singleItem?: any, skipCloud: boolean = false) {
@@ -504,10 +505,8 @@ export const db = {
 
       console.log(`[Sync Cloud] Salvando ${payload.length} itens em ${tableName}...`);
 
-      const conflictKey = tableName === 'users' ? 'email' : 'id';
-
       const { error } = await supabase.from(tableName).upsert(payload, {
-        onConflict: conflictKey,
+        onConflict: 'id',
       });
 
       if (error) {
@@ -706,7 +705,7 @@ export const db = {
       'serviflow_catalog',
       'serviflow_orders',
       'serviflow_transactions',
-      'serviflow_users',
+      'serviflow_profiles',
       'serviflow_company',
       'serviflow_plans',
       'serviflow_works',
@@ -771,7 +770,4 @@ export const db = {
     return { success: true };
   },
 };
-
-if (typeof window !== 'undefined') {
-  (window as any).db = db;
-}
+

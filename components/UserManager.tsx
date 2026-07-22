@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UserPlus, Shield, Mail, Key, Trash2, ShieldCheck, X, User, Pencil, CheckCircle2 } from 'lucide-react';
+import { UserPlus, Shield, Mail, Fingerprint, Trash2, ShieldCheck, X, User, Pencil, CheckCircle2, Info } from 'lucide-react';
 import { UserAccount } from '../types';
 import { db } from '../services/db';
 import { getTodayIsoDate } from '../services/dateService';
@@ -29,9 +29,9 @@ const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
   const [editingUser, setEditingUser] = useState<UserAccount | null>(null);
   const { notify } = useNotify();
   const [formData, setFormData] = useState<Partial<UserAccount>>({
+    id: '',
     name: '',
     email: '',
-    password: '',
     role: 'operador',
     permissions: ['dashboard', 'customers', 'budgets', 'search', 'orders']
   });
@@ -39,9 +39,9 @@ const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
   const handleOpenCreate = () => {
     setEditingUser(null);
     setFormData({
+      id: '',
       name: '',
       email: '',
-      password: '',
       role: 'operador',
       permissions: ['dashboard', 'customers', 'budgets', 'search', 'orders']
     });
@@ -51,9 +51,9 @@ const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
   const handleOpenEdit = (user: UserAccount) => {
     setEditingUser(user);
     setFormData({
+      id: user.id,
       name: user.name,
       email: user.email,
-      password: user.password,
       role: user.role,
       permissions: user.permissions || ['dashboard']
     });
@@ -79,7 +79,7 @@ const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
       notify("Apenas administradores podem gerenciar usuários.", "error");
       return;
     }
-    if (!formData.name || !formData.email || !formData.password) return;
+    if (!formData.name || !formData.email || !formData.id) return;
 
     // Garante que dashboard sempre esteja presente
     const finalPermissions = Array.from(new Set([...(formData.permissions || []), 'dashboard']));
@@ -90,16 +90,18 @@ const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
         ...u,
         name: formData.name!,
         email: formData.email!,
-        password: formData.password!,
         role: formData.role as 'admin' | 'operador',
         permissions: finalPermissions
       } : u);
     } else {
+      if (users.some(u => u.id === formData.id)) {
+        notify("Já existe um perfil vinculado a esse ID.", "error");
+        return;
+      }
       const newUser: UserAccount = {
-        id: `USR-${Date.now().toString().slice(-4)}`,
+        id: formData.id!,
         name: formData.name,
         email: formData.email,
-        password: formData.password,
         role: formData.role as 'admin' | 'operador',
         permissions: finalPermissions,
         createdAt: getTodayIsoDate()
@@ -113,9 +115,9 @@ const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
     setFormData({ role: 'operador', permissions: ['dashboard'] });
 
     // Sincroniza e avisa
-    const result = await db.save('serviflow_users', newList);
+    const result = await db.save('serviflow_profiles', newList);
     if (result?.success) {
-      notify(editingUser ? "Usuário atualizado e sincronizado!" : "Usuário criado e sincronizado!");
+      notify(editingUser ? "Usuário atualizado e sincronizado!" : "Usuário vinculado e sincronizado!");
     } else {
       notify("Salvo localmente. Erro na nuvem.", "warning");
     }
@@ -126,14 +128,14 @@ const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
       notify("Apenas administradores podem gerenciar usuários.", "error");
       return;
     }
-    if (id === 'USR-001') {
-      notify("Não é possível remover o administrador mestre.", "error");
+    if (id === currentUser.id) {
+      notify("Não é possível remover o seu próprio acesso.", "error");
       return;
     }
-    if (confirm("Deseja realmente remover o acesso deste usuário? Esta ação também removerá os dados da nuvem.")) {
+    if (confirm("Deseja realmente remover o acesso deste usuário ao sistema? Isso NÃO apaga o login dele no Supabase (Authentication > Users) — remova lá também se quiser bloquear por completo.")) {
       setUsers(prev => prev.filter(u => u.id !== id));
-      const result = await db.remove('serviflow_users', id);
-      if (result?.success) notify("Usuário removido da nuvem.");
+      const result = await db.remove('serviflow_profiles', id);
+      if (result?.success) notify("Acesso removido da nuvem.");
       else notify("Removido localmente. Erro na nuvem.", "warning");
     }
   };
@@ -160,6 +162,15 @@ const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
           <Shield className="w-5 h-5 text-amber-600 dark:text-amber-400" />
           <p className="text-xs font-bold text-amber-700 dark:text-amber-300">
             Atenção: Apenas administradores podem criar, editar ou excluir usuários. Seus privilégios atuais são de Operador.
+          </p>
+        </div>
+      )}
+
+      {isAdmin && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-4 rounded-2xl flex items-start gap-3">
+          <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
+          <p className="text-xs font-medium text-blue-700 dark:text-blue-300">
+            Para criar um login novo: 1) crie o e-mail e a senha em <strong>Supabase → Authentication → Users</strong> e copie o ID (UUID) gerado; 2) cole esse ID aqui junto com nome, papel e módulos. Remover aqui tira o acesso ao sistema imediatamente, mas não apaga o login — para bloqueio total, remova também no Supabase.
           </p>
         </div>
       )}
@@ -206,15 +217,19 @@ const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Senha de Acesso</label>
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
+                    ID do Usuário (Supabase Auth)
+                  </label>
                   <div className="relative">
-                    <Key className="absolute left-3 top-3 w-4 h-4 text-slate-300 dark:text-slate-600" />
+                    <Fingerprint className="absolute left-3 top-3 w-4 h-4 text-slate-300 dark:text-slate-600" />
                     <input
                       type="text"
                       required
-                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 pl-10 text-sm dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-slate-400 dark:placeholder:text-slate-600"
-                      value={formData.password}
-                      onChange={e => setFormData({ ...formData, password: e.target.value })}
+                      disabled={!!editingUser}
+                      placeholder="Cole o UUID criado em Authentication > Users"
+                      className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 pl-10 text-sm dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-slate-400 dark:placeholder:text-slate-600 disabled:opacity-60"
+                      value={formData.id}
+                      onChange={e => setFormData({ ...formData, id: e.target.value.trim() })}
                     />
                   </div>
                 </div>

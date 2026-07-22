@@ -20,7 +20,6 @@ export interface UserAccount {
   id: string;
   name: string;
   email: string;
-  password: string;
   role: 'admin' | 'operador';
   permissions?: string[]; // IDs das abas permitidas
   createdAt: string;
