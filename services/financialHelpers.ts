@@ -12,6 +12,15 @@ export const isAporte = (category: string | undefined): boolean => {
 };
 
 /**
+ * Retorna o status "visual" de um lançamento: PENDENTE vira ATRASADO quando o
+ * vencimento já passou. Não altera o status gravado — é só para exibição.
+ */
+export const getDisplayStatus = (entry: { status: string; dueDate: string }, todayIso: string): string => {
+  if (entry.status === 'PENDENTE' && entry.dueDate < todayIso) return 'ATRASADO';
+  return entry.status;
+};
+
+/**
  * Retorna as classes de cor de acordo com o status do lançamento.
  */
 export const getStatusColor = (status: string): string => {

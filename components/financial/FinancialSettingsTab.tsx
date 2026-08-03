@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tag, Plus, Trash2, Wallet, DollarSign } from 'lucide-react';
-import { FinancialCategory, FinancialAccount } from '../../types';
+import { FinancialCategory, FinancialAccount, AccountEntry, Transaction } from '../../types';
 import { db } from '../../services/db';
 import { useNotify } from '../ToastProvider';
 
@@ -9,13 +9,17 @@ interface FinancialSettingsTabProps {
   setCategories: React.Dispatch<React.SetStateAction<FinancialCategory[]>>;
   accounts: FinancialAccount[];
   setAccounts: React.Dispatch<React.SetStateAction<FinancialAccount[]>>;
+  accountEntries: AccountEntry[];
+  transactions: Transaction[];
 }
 
 const FinancialSettingsTab: React.FC<FinancialSettingsTabProps> = ({
   categories,
   setCategories,
   accounts,
-  setAccounts
+  setAccounts,
+  accountEntries,
+  transactions
 }) => {
   const { notify } = useNotify();
 
@@ -40,8 +44,12 @@ const FinancialSettingsTab: React.FC<FinancialSettingsTabProps> = ({
 
               const newList = [...categories, newCat];
               setCategories(newList);
-              await db.save('serviflow_financial_categories', newList, newCat);
-              notify("Categoria adicionada com sucesso!");
+              const result = await db.save('serviflow_financial_categories', newList, newCat);
+              if (result?.success) {
+                notify("Categoria adicionada com sucesso!");
+              } else {
+                notify("Salva localmente, mas houve erro ao sincronizar com a nuvem.", "warning");
+              }
             }}
             className="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all"
           >
@@ -58,10 +66,18 @@ const FinancialSettingsTab: React.FC<FinancialSettingsTabProps> = ({
               </div>
               <button
                 onClick={async () => {
+                  const inUse = accountEntries.some(e => e.category === cat.name) || transactions.some(t => t.category === cat.name);
+                  if (inUse) {
+                    notify("Não é possível excluir: existem lançamentos usando esta categoria.", "error");
+                    return;
+                  }
                   if (!confirm("Excluir esta categoria?")) return;
                   const newList = categories.filter(c => c.id !== cat.id);
                   setCategories(newList);
-                  await db.remove('serviflow_financial_categories', cat.id);
+                  const result = await db.remove('serviflow_financial_categories', cat.id);
+                  if (!result?.success) {
+                    notify("Removida localmente, mas houve erro ao sincronizar com a nuvem.", "warning");
+                  }
                 }}
                 className="opacity-0 group-hover:opacity-100 p-2 text-slate-300 hover:text-rose-500 transition-all"
               >
@@ -93,8 +109,12 @@ const FinancialSettingsTab: React.FC<FinancialSettingsTabProps> = ({
 
               const newList = [...accounts, newAcc];
               setAccounts(newList);
-              await db.save('serviflow_financial_accounts', newList, newAcc);
-              notify("Conta adicionada!");
+              const result = await db.save('serviflow_financial_accounts', newList, newAcc);
+              if (result?.success) {
+                notify("Conta adicionada!");
+              } else {
+                notify("Salva localmente, mas houve erro ao sincronizar com a nuvem.", "warning");
+              }
             }}
             className="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all"
           >
@@ -116,10 +136,18 @@ const FinancialSettingsTab: React.FC<FinancialSettingsTabProps> = ({
               </div>
               <button
                 onClick={async () => {
+                  const inUse = accountEntries.some(e => e.accountId === acc.id);
+                  if (inUse) {
+                    notify("Não é possível excluir: existem lançamentos vinculados a esta conta.", "error");
+                    return;
+                  }
                   if (!confirm("Remover esta conta?")) return;
                   const newList = accounts.filter(a => a.id !== acc.id);
                   setAccounts(newList);
-                  await db.remove('serviflow_financial_accounts', acc.id);
+                  const result = await db.remove('serviflow_financial_accounts', acc.id);
+                  if (!result?.success) {
+                    notify("Removida localmente, mas houve erro ao sincronizar com a nuvem.", "warning");
+                  }
                 }}
                 className="opacity-0 group-hover:opacity-100 p-2 text-slate-300 hover:text-rose-500 transition-all"
               >

@@ -5,7 +5,7 @@ import { AccountEntry, FinancialAccount } from '../../types';
 interface SettlementModalProps {
   entry: AccountEntry | null;
   accounts: FinancialAccount[];
-  onConfirm: (entryId: string, accountId: string) => void;
+  onConfirm: (entryId: string, accountId: string) => void | Promise<void>;
   onClose: () => void;
 }
 
@@ -20,8 +20,19 @@ const SettlementModal: React.FC<SettlementModalProps> = ({
   ];
 
   const [selectedAccountId, setSelectedAccountId] = useState<string>(displayAccounts[0]?.id || '');
+  const [isConfirming, setIsConfirming] = useState(false);
 
   if (!entry) return null;
+
+  const handleConfirmClick = async () => {
+    if (isConfirming) return;
+    setIsConfirming(true);
+    try {
+      await onConfirm(entry.id, selectedAccountId);
+    } finally {
+      setIsConfirming(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
@@ -75,12 +86,12 @@ const SettlementModal: React.FC<SettlementModalProps> = ({
           </div>
 
           <button
-            onClick={() => onConfirm(entry.id, selectedAccountId)}
-            disabled={!selectedAccountId}
+            onClick={handleConfirmClick}
+            disabled={!selectedAccountId || isConfirming}
             className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-slate-800 transition-all disabled:opacity-50"
           >
             <DollarSign className="w-5 h-5" />
-            Confirmar Pagamento
+            {isConfirming ? 'Confirmando...' : 'Confirmar Pagamento'}
           </button>
         </div>
       </div>

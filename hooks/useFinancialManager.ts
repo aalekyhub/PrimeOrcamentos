@@ -65,9 +65,17 @@ export const useFinancialManager = ({
 
   // --- Handlers ---
   
+  const MAX_ATTACHMENT_SIZE = 5 * 1024 * 1024; // 5MB
+
   const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>, isEditing = false) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (file.size > MAX_ATTACHMENT_SIZE) {
+      notify('Arquivo muito grande (máx. 5MB). Escolha um arquivo menor.', 'error');
+      e.target.value = '';
+      return;
+    }
 
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -78,14 +86,22 @@ export const useFinancialManager = ({
         setFormData(prev => ({ ...prev, attachment: base64, attachmentName: file.name }));
       }
     };
+    reader.onerror = () => {
+      notify('Erro ao ler o arquivo. Tente novamente.', 'error');
+    };
     reader.readAsDataURL(file);
-  }, [editingItem]);
+  }, [editingItem, notify]);
 
   const handleAddEntry = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.amount || !formData.description) return;
+    if (Number(formData.amount) < 0) {
+      notify("O valor não pode ser negativo.", "error");
+      return;
+    }
 
     const isInvestment = formData.type === 'INVESTIMENTO';
+    const accountId = isInvestment ? formData.accountId : undefined;
 
     const newEntry: AccountEntry = {
       id: `ENT-${Date.now()}`,
@@ -101,17 +117,17 @@ export const useFinancialManager = ({
       installmentNumber: 1,
       totalInstallments: 1,
       attachment: formData.attachment,
-      attachmentName: formData.attachmentName
+      attachmentName: formData.attachmentName,
+      accountId
     };
 
     const newList = [newEntry, ...accountEntries];
     setAccountEntries(newList);
 
+    const saveResults: any[] = [];
+
     if (isInvestment) {
-      const accountId = formData.accountId;
       if (accountId) {
-        newEntry.accountId = accountId;
-        
         const accountExists = accounts.some(acc => acc.id === accountId);
         let updatedAccounts = [...accounts];
         if (!accountExists && accountId === 'ACC-001') {
@@ -134,7 +150,7 @@ export const useFinancialManager = ({
           return acc;
         });
         setAccounts(updatedAccounts);
-        await db.save('serviflow_financial_accounts', updatedAccounts);
+        saveResults.push(await db.save('serviflow_financial_accounts', updatedAccounts));
       }
 
       const newTransaction: Transaction = {
@@ -150,25 +166,46 @@ export const useFinancialManager = ({
       };
       const newTransactions = [newTransaction, ...transactions];
       setTransactions(newTransactions);
-      await db.save('serviflow_transactions', newTransactions, newTransaction);
+      saveResults.push(await db.save('serviflow_transactions', newTransactions, newTransaction));
     }
 
     setShowEntryForm(false);
     setFormData(initialFormData);
 
-    const saveRes = await db.save('serviflow_account_entries', newList, newEntry);
-    if (saveRes && !saveRes.success) {
-      notify(`Alerta: Salvo apenas localmente. Erro na nuvem: ${saveRes.error}`, 'error');
-    } else {
+    saveResults.push(await db.save('serviflow_account_entries', newList, newEntry));
+
+    if (saveResults.every(r => r?.success)) {
       notify(isInvestment ? "Empréstimo registrado e caixa atualizado!" : "Lançamento provisionado com sucesso!");
+    } else {
+      notify("Salvo localmente, mas houve erro ao sincronizar com a nuvem. Confira a conexão e tente sincronizar de novo.", "warning");
     }
   };
+
+  // Converte um valor com sinal: tipos de crédito (entrada) somam ao saldo,
+  // tipos de débito (saída) subtraem.
+  const signedAmount = (amount: number, type: string) =>
+    (type === 'RECEBER' || type === 'RECEITA' || type === 'INVESTIMENTO' || type === 'EMPRESTIMO_SOCIO') ? amount : -amount;
 
   const handleUpdateItem = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingItem) return;
 
     try {
+      const saveResults: any[] = [];
+      let updatedAccounts: FinancialAccount[] | null = null;
+
+      // Se o item editado já estava baixado/realizado, o saldo da conta
+      // bancária precisa refletir a diferença entre o valor antigo e o novo
+      // — antes disso, editar um lançamento já pago deixava o saldo travado
+      // no valor original para sempre.
+      const applyBalanceDelta = (accountId: string | undefined, oldSigned: number, newSigned: number) => {
+        if (!accountId || oldSigned === newSigned) return;
+        const delta = newSigned - oldSigned;
+        updatedAccounts = (updatedAccounts || accounts).map(acc =>
+          acc.id === accountId ? { ...acc, currentBalance: acc.currentBalance + delta } : acc
+        );
+      };
+
       const isAccEntry = (editingItem as any).isFromEntry === true || editingItem.id.startsWith('ENT-');
 
       if (isAccEntry) {
@@ -176,9 +213,19 @@ export const useFinancialManager = ({
         if (entryToSave.type === 'RECEITA') entryToSave.type = 'RECEBER';
         if (entryToSave.type === 'DESPESA') entryToSave.type = 'PAGAR';
 
+        const oldEntry = accountEntries.find(e => e.id === editingItem.id);
+
         const newList = accountEntries.map(e => e.id === editingItem.id ? entryToSave : e);
         setAccountEntries(newList);
-        await db.save('serviflow_account_entries', newList, entryToSave);
+        saveResults.push(await db.save('serviflow_account_entries', newList, entryToSave));
+
+        if (oldEntry && oldEntry.status === 'PAGO' && entryToSave.status === 'PAGO') {
+          applyBalanceDelta(
+            entryToSave.accountId || oldEntry.accountId,
+            signedAmount(oldEntry.amount, oldEntry.type),
+            signedAmount(entryToSave.amount, entryToSave.type)
+          );
+        }
 
         // Sync corresponding transaction in Realizado
         const updatedTransactions = transactions.map(t => {
@@ -203,14 +250,25 @@ export const useFinancialManager = ({
           setTransactions(updatedTransactions);
           const changedTrans = updatedTransactions.find(t => t.entryId === entryToSave.id);
           if (changedTrans) {
-            await db.save('serviflow_transactions', updatedTransactions, changedTrans);
+            saveResults.push(await db.save('serviflow_transactions', updatedTransactions, changedTrans));
           }
         }
       } else {
         const tItem = editingItem as Transaction;
+        const oldTrans = transactions.find(t => t.id === tItem.id);
+
         const newList = transactions.map(t => t.id === tItem.id ? tItem : t);
         setTransactions(newList);
-        await db.save('serviflow_transactions', newList, tItem);
+        saveResults.push(await db.save('serviflow_transactions', newList, tItem));
+
+        if (oldTrans) {
+          const linkedEntry = tItem.entryId ? accountEntries.find(e => e.id === tItem.entryId) : undefined;
+          applyBalanceDelta(
+            linkedEntry?.accountId,
+            signedAmount(oldTrans.amount, oldTrans.type),
+            signedAmount(tItem.amount, tItem.type)
+          );
+        }
 
         // Sync corresponding entry in Provisionado
         if (tItem.entryId) {
@@ -236,13 +294,23 @@ export const useFinancialManager = ({
             setAccountEntries(updatedEntries);
             const changedEntry = updatedEntries.find(e => e.id === tItem.entryId);
             if (changedEntry) {
-              await db.save('serviflow_account_entries', updatedEntries, changedEntry);
+              saveResults.push(await db.save('serviflow_account_entries', updatedEntries, changedEntry));
             }
           }
         }
       }
+
+      if (updatedAccounts) {
+        setAccounts(updatedAccounts);
+        saveResults.push(await db.save('serviflow_financial_accounts', updatedAccounts));
+      }
+
       setEditingItem(null);
-      notify("Alteração salva com sucesso!");
+      if (saveResults.every(r => r?.success)) {
+        notify("Alteração salva com sucesso!");
+      } else {
+        notify("Salvo localmente, mas houve erro ao sincronizar com a nuvem. Confira a conexão e tente sincronizar de novo.", "warning");
+      }
     } catch (error) {
       console.error('Erro ao salvar alteração:', error);
       notify("Erro ao salvar alteração.", "error");

@@ -75,11 +75,12 @@ const FinancialEntryForm: React.FC<FinancialEntryFormProps> = ({
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">R$</span>
               <input
                 type="number"
+                min="0"
                 step="0.01"
                 required
                 className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3 pl-12 text-sm outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-900 dark:text-white"
                 value={formData.amount || ''}
-                onChange={e => setFormData({ ...formData, amount: Number(e.target.value) })}
+                onChange={e => setFormData({ ...formData, amount: Math.max(0, Number(e.target.value)) })}
               />
             </div>
           </div>

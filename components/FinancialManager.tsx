@@ -228,11 +228,13 @@ const FinancialManager: React.FC<FinancialManagerProps> = (props) => {
           setPrintData={setPrintData}
         />
       ) : activeTab === 'config' ? (
-        <FinancialSettingsTab 
+        <FinancialSettingsTab
           categories={categories}
           setCategories={setCategories}
           accounts={accounts}
           setAccounts={setAccounts}
+          accountEntries={accountEntries}
+          transactions={transactions}
         />
       ) : null}
 

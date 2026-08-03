@@ -15,7 +15,7 @@ import {
   Pencil
 } from 'lucide-react';
 import { AccountEntry, Transaction, FinancialCategory, CompanyProfile, FinancialAccount } from '../../types';
-import { isAporte, getStatusColor } from '../../services/financialHelpers';
+import { isAporte, getStatusColor, getDisplayStatus } from '../../services/financialHelpers';
 import { buildFinancialReportHtml } from '../../services/financialPdfService';
 import { getTodayIsoDate } from '../../services/dateService';
 import { db } from '../../services/db';
@@ -211,8 +211,8 @@ const FinancialProvisionTab: React.FC<FinancialProvisionTabProps> = ({
                           <Paperclip className="w-3.5 h-3.5" />
                         </button>
                       )}
-                      <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase border ${isContribution ? 'hidden' : getStatusColor(entry.status)}`}>
-                        {entry.status}
+                      <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase border ${isContribution ? 'hidden' : getStatusColor(getDisplayStatus(entry, getTodayIsoDate()))}`}>
+                        {getDisplayStatus(entry, getTodayIsoDate())}
                       </span>
                     </div>
                     <div className="flex items-center gap-3 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
@@ -252,8 +252,12 @@ const FinancialProvisionTab: React.FC<FinancialProvisionTabProps> = ({
                         if (!confirm("Remover este lançamento permanentemente?")) return;
                         const newList = accountEntries.filter(e => e.id !== entry.id);
                         setAccountEntries(newList);
-                        await db.remove('serviflow_account_entries', entry.id);
-                        notify("Lançamento removido.");
+                        const result = await db.remove('serviflow_account_entries', entry.id);
+                        if (result?.success) {
+                          notify("Lançamento removido.");
+                        } else {
+                          notify("Removido localmente, mas houve erro ao sincronizar com a nuvem.", "warning");
+                        }
                       }}
                       className="p-3 bg-slate-50 text-slate-400 rounded-2xl hover:bg-rose-600 hover:text-white transition-all shadow-sm"
                     >

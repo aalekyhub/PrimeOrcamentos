@@ -105,10 +105,11 @@ const FinancialModals: React.FC<FinancialModalsProps> = ({
                   <label className="block text-xs font-black text-slate-400 uppercase mb-2">Valor (R$)</label>
                   <input
                     type="number"
+                    min="0"
                     step="0.01"
                     className="w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 font-bold"
                     value={editingItem.amount}
-                    onChange={e => setEditingItem({ ...editingItem, amount: Number(e.target.value) })}
+                    onChange={e => setEditingItem({ ...editingItem, amount: Math.max(0, Number(e.target.value)) })}
                   />
                 </div>
                 <div>
