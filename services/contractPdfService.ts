@@ -44,7 +44,7 @@ const buildContractHeaderHtml = (
                   </table>
               </td>
               <td style="width:28%; vertical-align:top; text-align:right; padding:0;">
-                  <h2 style="font-size: 24px; font-weight: 900; color: #2563eb; margin: 0; letter-spacing: -1px; line-height: 1.1;">
+                  <h2 style="font-size: 17px; font-weight: 900; color: #2563eb; margin: 0; letter-spacing: -0.5px; line-height: 1.1;">
                       ${contractLabel}
                   </h2>
                   <p style="font-size: 10px; font-weight: 800; color: #334155; text-transform: uppercase; margin-top: 6px;">
