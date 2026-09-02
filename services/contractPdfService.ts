@@ -1,6 +1,6 @@
 // No longer using html2pdf here
 import { ServiceOrder, CompanyProfile } from '../types';
-import { escapeHtml, toNumber, formatMoney } from './formatUtils';
+import { escapeHtml, toNumber, formatMoney, valorPorExtenso } from './formatUtils';
 
 // Styles are now handled by the unified ReportPreview component.
 
@@ -121,7 +121,7 @@ export const getContractHtml = (order: ServiceOrder, customer: any, company: Com
         <div style="margin-bottom: 3.5mm;">
             <div style="break-inside: avoid; page-break-inside: avoid;">
               <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 3mm 0; padding-top: 2mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">CLÁUSULA 3ª – DO PREÇO E FORMA DE PAGAMENTO</h4>
-              <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0 0 2mm 0;">3.1. Pelos serviços objeto deste contrato, o CONTRATANTE pagará à CONTRATADA o valor global de <b style="color:#0f172a; white-space: nowrap;">R$ ${formatMoney(contractValue)}</b>.</p>
+              <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0 0 2mm 0;">3.1. Pelos serviços objeto deste contrato, o CONTRATANTE pagará à CONTRATADA o valor global de <b style="color:#0f172a;">R$ ${formatMoney(contractValue)} (${valorPorExtenso(contractValue)})</b>.</p>
             </div>
             <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:2mm 0 2mm 0;">3.2. O pagamento será realizado da seguinte forma: <b>${escapeHtml(order.paymentTerms || 'Conforme combinado')}</b>.</p>
             <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:2mm 0 2mm 0;">3.3. Os pagamentos deverão ser feitos via Pix chave <b>CNPJ (${escapeHtml(company.cnpj || '57.886.036/0001-31')})</b>.</p>
@@ -382,7 +382,7 @@ export const getMaintenanceContractHtml = (order: ServiceOrder, customer: any, c
         <div style="margin-bottom: 3.5mm;">
             <div style="break-inside: avoid; page-break-inside: avoid;">
               <h4 style="font-size:15px; font-weight:900; color:#0f172a; text-transform:uppercase; letter-spacing:1px; margin:0 0 3mm 0; padding-top: 2mm; border-bottom: 2px solid #e2e8f0; padding-bottom: 2mm;">CLÁUSULA SÉTIMA – DO PREÇO</h4>
-              <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0 0 2mm 0;">7.1. O valor mensal devido pelo CONTRATANTE à CONTRATADA, para cobertura das despesas decorrentes da execução dos serviços objeto deste contrato, incluindo tributos e demais custos previstos, será de <b style="color:#0f172a; white-space: nowrap;">R$ ${formatMoney(contractValue)}</b> mensais.</p>
+              <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:0 0 2mm 0;">7.1. O valor mensal devido pelo CONTRATANTE à CONTRATADA, para cobertura das despesas decorrentes da execução dos serviços objeto deste contrato, incluindo tributos e demais custos previstos, será de <b style="color:#0f172a;">R$ ${formatMoney(contractValue)} (${valorPorExtenso(contractValue)})</b> mensais.</p>
             </div>
             <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:2mm 0 2mm 0;">7.2. O valor estabelecido nesta cláusula corresponde exclusivamente ao escopo definido neste contrato e na proposta comercial que o integra.</p>
             <p style="font-size:14px; color:#475569; line-height:1.6; text-align:justify; margin:2mm 0 0 0;">7.3. Serviços extraordinários, peças, materiais, componentes e equipamentos não incluídos no escopo serão objeto de orçamento específico e somente poderão ser cobrados após aprovação do CONTRATANTE.</p>
