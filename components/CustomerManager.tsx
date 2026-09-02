@@ -203,8 +203,8 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, cur
       {(showForm || defaultOpenForm) && (
         <div className={defaultOpenForm ? "" : "fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 overflow-y-auto"}>
           <form onSubmit={handleSubmit} className={`bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl p-8 space-y-6 animate-in zoom-in-95 relative ${defaultOpenForm ? 'w-full' : 'w-full max-w-[900px] border border-slate-200 dark:border-slate-800'}`}>
-            {!defaultOpenForm && (
-              <button type="button" onClick={() => { setShowForm(false); if (onCancel) onCancel(); }} className="absolute right-6 top-6 p-2 text-slate-300 hover:text-slate-600 dark:hover:text-white transition-colors"><X className="w-6 h-6" /></button>
+            {(!defaultOpenForm || onCancel) && (
+              <button type="button" onClick={() => { setShowForm(false); if (onCancel) onCancel(); }} className="absolute right-6 top-6 p-2 text-slate-300 hover:text-slate-600 dark:hover:text-white transition-colors" title="Cancelar"><X className="w-6 h-6" /></button>
             )}
 
             <div className="flex justify-between items-center border-b dark:border-slate-800 pb-4">
@@ -225,7 +225,13 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, cur
                     // Remove tudo que não é dígito
                     val = val.replace(/\D/g, '');
 
-                    if (personType === 'PF') {
+                    // Detecta PF/PJ automaticamente pela quantidade de dígitos:
+                    // acima de 11 só pode ser CNPJ, então não precisa mais
+                    // selecionar manualmente o botão PF/PJ.
+                    const detectedType: PersonType = val.length > 11 ? 'PJ' : 'PF';
+                    if (detectedType !== personType) setPersonType(detectedType);
+
+                    if (detectedType === 'PF') {
                       // Máscara CPF
                       if (val.length > 11) val = val.slice(0, 11);
                       val = val.replace(/(\d{3})(\d)/, '$1.$2');
