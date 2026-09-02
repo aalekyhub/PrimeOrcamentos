@@ -271,7 +271,7 @@ export const getMaintenanceContractHtml = (order: ServiceOrder, customer: any, c
 
           <div style="background:#f8fafc; padding: 15px; border-radius: 8px; border-left: 5px solid #2563eb; margin: 15px 0; break-inside: avoid; page-break-inside: avoid;">
             <p style="font-size:14px; font-weight:800; color:#1e3a8a; text-transform:uppercase; letter-spacing:0.5px; margin:0;">${escapeHtml(scopeDescription)}</p>
-            ${order.items && order.items.length > 0 ? `<p style="font-size:12px; color:#1e3a8a; margin-top:4px;">${order.items.map((i: any) => `${toNumber(i.quantity)}x ${escapeHtml(i.description)}`).join(', ')}</p>` : ''}
+            ${order.items && order.items.length > 0 ? `<p style="font-size:12px; color:#1e3a8a; margin-top:4px;">${order.items.map((i: any) => escapeHtml(i.description)).join(', ')}</p>` : ''}
           </div>
         </div>
 
