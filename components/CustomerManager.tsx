@@ -207,17 +207,15 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, cur
               <button type="button" onClick={() => { setShowForm(false); if (onCancel) onCancel(); }} className="absolute right-6 top-6 p-2 text-slate-300 hover:text-slate-600 dark:hover:text-white transition-colors" title="Cancelar"><X className="w-6 h-6" /></button>
             )}
 
-            <div className="flex justify-between items-center border-b dark:border-slate-800 pb-4">
-              <div className="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl w-fit">
-                <button type="button" onClick={() => setPersonType('PF')} className={`px-8 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all ${personType === 'PF' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-400'}`}>PF</button>
-                <button type="button" onClick={() => setPersonType('PJ')} className={`px-8 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all ${personType === 'PJ' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-400'}`}>PJ</button>
+            {loadingApi && (
+              <div className="flex justify-end items-center border-b dark:border-slate-800 pb-4">
+                <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-[10px] font-bold"><RefreshCw className="w-3 h-3 animate-spin" /> CONSULTANDO API...</div>
               </div>
-              {loadingApi && <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-[10px] font-bold"><RefreshCw className="w-3 h-3 animate-spin" /> CONSULTANDO API...</div>}
-            </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className={labelClass}>{personType === 'PF' ? 'CPF' : 'CNPJ (Auto-preenchimento)'}</label>
+                <label className={labelClass}>CPF / CNPJ (Auto-preenchimento)</label>
                 <input type="text" placeholder={personType === 'PF' ? "000.000.000-00" : "00.000.000/0000-00"} className={`${inputClass} ${(editingCustomerId && !isAdmin) ? 'opacity-70 grayscale-[0.5]' : ''}`} value={newCustomer.document}
                   disabled={editingCustomerId && !isAdmin}
                   onChange={e => {
