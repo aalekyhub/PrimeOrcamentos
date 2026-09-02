@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Search, CheckCircle, Copy, Printer, FileDown, Trash2, ScrollText } from 'lucide-react';
+import { Plus, Search, CheckCircle, Copy, Printer, FileDown, Trash2, ScrollText, Wrench } from 'lucide-react';
 import { ServiceOrder, OrderStatus } from '../../types';
 
 interface BudgetListProps {
@@ -10,6 +10,7 @@ interface BudgetListProps {
     onEdit: (budget: ServiceOrder) => void;
     onPrint: (budget: ServiceOrder) => void;
     onGenerateContract: (budget: ServiceOrder) => void;
+    onGenerateMaintenanceContract: (budget: ServiceOrder) => void;
     onBill: (budget: ServiceOrder) => void;
     onDelete: (budget: ServiceOrder) => void;
     isAdmin?: boolean;
@@ -23,6 +24,7 @@ const BudgetList: React.FC<BudgetListProps> = ({
     onEdit,
     onPrint,
     onGenerateContract,
+    onGenerateMaintenanceContract,
     onBill,
     onDelete,
     isAdmin = true
@@ -113,6 +115,9 @@ const BudgetList: React.FC<BudgetListProps> = ({
                                     </button>
                                     <button onClick={(e) => { e.stopPropagation(); onGenerateContract(budget); }} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Gerar Contrato">
                                         <ScrollText className="w-4 h-4" />
+                                    </button>
+                                    <button onClick={(e) => { e.stopPropagation(); onGenerateMaintenanceContract(budget); }} className="p-2 text-slate-400 hover:text-slate-900 transition-colors" title="Gerar Contrato de Manutenção">
+                                        <Wrench className="w-4 h-4" />
                                     </button>
                                     {isAdmin && (
                                         <button onClick={(e) => { e.stopPropagation(); onDelete(budget); }} className="p-2 text-rose-300 hover:text-rose-600 transition-colors" title="Excluir">

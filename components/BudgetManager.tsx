@@ -25,7 +25,7 @@ import ReportPreview from './ReportPreview';
 import BillingModal from './budget/BillingModal';
 import { getTodayIsoDate, addDaysToDate } from '../services/dateService';
 import { generateBudgetReportHtml } from '../services/budgetPdfService';
-import { getContractHtml } from '../services/contractPdfService';
+import { getContractHtml, getMaintenanceContractHtml } from '../services/contractPdfService';
 import { roundMoney, toNumber } from '../services/formatUtils';
 import { financeUtils } from '../services/financeUtils';
 // DocumentPreview and BudgetDocument are replaced by the unified system
@@ -75,6 +75,7 @@ const BudgetManager: React.FC<Props> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [previewBudget, setPreviewBudget] = useState<ServiceOrder | null>(null);
   const [previewContract, setPreviewContract] = useState<ServiceOrder | null>(null);
+  const [previewMaintenanceContract, setPreviewMaintenanceContract] = useState<ServiceOrder | null>(null);
   const { notify } = useNotify();
 
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
@@ -430,6 +431,15 @@ const BudgetManager: React.FC<Props> = ({
     setPreviewContract(budget);
   }, [buildBudgetFromForm, notify]);
 
+  const handleGenerateMaintenanceContractDraft = useCallback(() => {
+    const budget = buildBudgetFromForm();
+    if (!budget) {
+      notify('Preencha os dados (cliente e itens) para gerar o contrato.', 'error');
+      return;
+    }
+    setPreviewMaintenanceContract(budget);
+  }, [buildBudgetFromForm, notify]);
+
   const loadBudgetToForm = useCallback((budget: ServiceOrder, isClone = false) => {
     setShowImportModal(false);
     resetForm();
@@ -507,6 +517,10 @@ const BudgetManager: React.FC<Props> = ({
     setPreviewContract(budget);
   };
 
+  const handleGenerateMaintenanceContract = (budget: ServiceOrder) => {
+    setPreviewMaintenanceContract(budget);
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {!showForm && (
@@ -520,6 +534,7 @@ const BudgetManager: React.FC<Props> = ({
           onEdit={(budget) => loadBudgetToForm(budget)}
           onPrint={handlePreviewBudget}
           onGenerateContract={handleGenerateContract}
+          onGenerateMaintenanceContract={handleGenerateMaintenanceContract}
           onBill={setBillingOrder}
           onDelete={handleDeleteBudget}
           isAdmin={isAdmin}
@@ -544,6 +559,27 @@ const BudgetManager: React.FC<Props> = ({
           )}
           filename={`CONTRATO - ${previewContract.id} - ${(previewContract.description || '').toUpperCase()}`}
           onClose={() => setPreviewContract(null)}
+        />
+      )}
+
+      {previewMaintenanceContract && (
+        <ReportPreview
+          title={`CONTRATO DE MANUTENÇÃO - ${previewMaintenanceContract.id} - ${(previewMaintenanceContract.description || '').toUpperCase()}`}
+          htmlContent={getMaintenanceContractHtml(
+            previewMaintenanceContract,
+            customers.find(c => c.id === previewMaintenanceContract.customerId) || {
+              name: previewMaintenanceContract.customerName,
+              document: 'N/A',
+              address: 'Endereço não informado',
+              city: '',
+              state: '',
+              cep: '',
+              number: ''
+            },
+            company
+          )}
+          filename={`CONTRATO DE MANUTENÇÃO - ${previewMaintenanceContract.id} - ${(previewMaintenanceContract.description || '').toUpperCase()}`}
+          onClose={() => setPreviewMaintenanceContract(null)}
         />
       )}
 
@@ -771,6 +807,7 @@ const BudgetManager: React.FC<Props> = ({
                 onPrint={handlePreviewDraft}
                 onSave={handleSave}
                 onGenerateContract={handleGenerateContractDraft}
+                onGenerateMaintenanceContract={handleGenerateMaintenanceContractDraft}
                 isAdmin={isAdmin}
                 isEditing={editingBudgetId !== null}
                 isSaving={isSaving}

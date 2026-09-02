@@ -1,5 +1,5 @@
 import React from 'react';
-import { Zap, Printer, FileDown, Save, ScrollText } from 'lucide-react';
+import { Zap, Printer, FileDown, Save, ScrollText, Wrench } from 'lucide-react';
 
 interface BudgetSummarySidebarProps {
     bdiRate: number | string;
@@ -18,6 +18,7 @@ interface BudgetSummarySidebarProps {
     onPrint: () => void;
     onSave: () => void;
     onGenerateContract: () => void;
+    onGenerateMaintenanceContract: () => void;
     isAdmin?: boolean;
     isEditing?: boolean;
     isSaving?: boolean;
@@ -26,7 +27,7 @@ interface BudgetSummarySidebarProps {
 const BudgetSummarySidebar: React.FC<BudgetSummarySidebarProps> = ({
     bdiRate, setBdiRate, taxRate, setTaxRate, inssRate, setInssRate, subtotal, totalAmount,
     paymentTerms, setPaymentTerms, deliveryTime, setDeliveryTime,
-    onShowPayment, onPrint, onSave, onGenerateContract,
+    onShowPayment, onPrint, onSave, onGenerateContract, onGenerateMaintenanceContract,
     isAdmin = true, isEditing = false, isSaving = false
 }) => {
     const bdiNum = Number(bdiRate) || 0;
@@ -128,6 +129,9 @@ const BudgetSummarySidebar: React.FC<BudgetSummarySidebarProps> = ({
                     )}
                     <button onClick={onGenerateContract} className="bg-slate-800 hover:bg-slate-700 text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[11px] shadow-md shadow-blue-950/20 transition-all flex items-center justify-center gap-2 border border-slate-700">
                         <ScrollText className="w-5 h-5 text-blue-400" /> GERAR CONTRATO
+                    </button>
+                    <button onClick={onGenerateMaintenanceContract} className="bg-slate-800 hover:bg-slate-700 text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[11px] shadow-md shadow-blue-950/20 transition-all flex items-center justify-center gap-2 border border-slate-700">
+                        <Wrench className="w-5 h-5 text-blue-400" /> GERAR CONTRATO DE MANUTENÇÃO
                     </button>
                 </div>
             </div>
