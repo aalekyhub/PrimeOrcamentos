@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import {
   Plus,
   Search,
@@ -324,6 +324,19 @@ const BudgetManager: React.FC<Props> = ({
     [newItems[index], newItems[newIndex]] = [newItems[newIndex], newItems[index]];
     setItems(newItems);
   }, [items]);
+
+  // Rola a lista de itens automaticamente quando o item arrastado chega perto
+  // da borda de cima/baixo — sem isso não dá para levar o último item ao topo.
+  const itemsListRef = useRef<HTMLDivElement | null>(null);
+  const autoScrollWhileDragging = useCallback((e: React.DragEvent) => {
+    const el = itemsListRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const edge = 48;
+    const speed = 14;
+    if (e.clientY < rect.top + edge) el.scrollTop -= speed;
+    else if (e.clientY > rect.bottom - edge) el.scrollTop += speed;
+  }, []);
 
   const reorderItems = useCallback((fromIndex: number, toIndex: number) => {
     if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0) return;
@@ -700,7 +713,11 @@ const BudgetManager: React.FC<Props> = ({
                       </div>
                     </div>
 
-                    <div className="space-y-1.5 max-h-40 overflow-y-auto no-scrollbar">
+                    <div
+                      ref={itemsListRef}
+                      onDragOver={(e) => { e.preventDefault(); autoScrollWhileDragging(e); }}
+                      className="space-y-1.5 max-h-72 overflow-y-auto"
+                    >
                       {items.map((item, index) => (
                         <div
                           key={item.id}
@@ -716,17 +733,40 @@ const BudgetManager: React.FC<Props> = ({
                             setDraggedItemIndex(null);
                             setDragOverItemIndex(null);
                           }}
-                          className={`grid grid-cols-[20px_1fr_80px_80px_110px_110px_32px] items-center p-2 rounded-lg border group gap-2 transition-all ${dragOverItemIndex === index ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200' : 'bg-white dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 hover:border-blue-200 cursor-default'}`}
+                          className={`grid grid-cols-[44px_1fr_80px_80px_110px_110px_32px] items-center p-2 rounded-lg border group gap-2 transition-all ${dragOverItemIndex === index ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200' : 'bg-white dark:bg-slate-900/50 border-slate-100 dark:border-slate-800 hover:border-blue-200 cursor-default'}`}
                         >
-                          <div
-                            draggable
-                            onDragStart={() => {
-                              setDraggedItemIndex(index);
-                              setDragOverItemIndex(index);
-                            }}
-                            className="cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 shrink-0 flex items-center justify-center"
-                          >
-                            <GripVertical size={14} />
+                          <div className="flex items-center justify-center gap-0.5 shrink-0">
+                            <div
+                              draggable
+                              onDragStart={() => {
+                                setDraggedItemIndex(index);
+                                setDragOverItemIndex(index);
+                              }}
+                              className="cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 flex items-center justify-center"
+                              title="Arraste para reordenar"
+                            >
+                              <GripVertical size={14} />
+                            </div>
+                            <div className="flex flex-col">
+                              <button
+                                type="button"
+                                onClick={() => moveItem(index, 'up')}
+                                disabled={index === 0 || (editingBudgetId !== null && !isAdmin)}
+                                className="text-slate-300 hover:text-blue-600 disabled:opacity-30 disabled:hover:text-slate-300 transition-colors"
+                                title="Mover para cima"
+                              >
+                                <ChevronUp size={12} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => moveItem(index, 'down')}
+                                disabled={index === items.length - 1 || (editingBudgetId !== null && !isAdmin)}
+                                className="text-slate-300 hover:text-blue-600 disabled:opacity-30 disabled:hover:text-slate-300 transition-colors"
+                                title="Mover para baixo"
+                              >
+                                <ChevronDown size={12} />
+                              </button>
+                            </div>
                           </div>
 
                           <div className="min-w-0">
