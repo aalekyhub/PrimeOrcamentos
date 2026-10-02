@@ -207,11 +207,11 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, cur
               <button type="button" onClick={() => { setShowForm(false); if (onCancel) onCancel(); }} className="absolute right-6 top-6 p-2 text-slate-300 hover:text-slate-600 dark:hover:text-white transition-colors" title="Cancelar"><X className="w-6 h-6" /></button>
             )}
 
-            {loadingApi && (
-              <div className="flex justify-end items-center border-b dark:border-slate-800 pb-4">
-                <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-[10px] font-bold"><RefreshCw className="w-3 h-3 animate-spin" /> CONSULTANDO API...</div>
+            <div className="flex justify-end items-center h-5">
+              <div className={`flex items-center gap-2 text-blue-600 dark:text-blue-400 text-[10px] font-bold transition-opacity duration-200 ${loadingApi ? 'opacity-100' : 'opacity-0'}`}>
+                <RefreshCw className="w-3 h-3 animate-spin" /> CONSULTANDO API...
               </div>
-            )}
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
@@ -274,14 +274,14 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, cur
               </div>
             </div>
 
-            {personType === 'PJ' && (
-              <div className="grid grid-cols-1 gap-4">
+            <div className={`overflow-hidden transition-all duration-300 ${personType === 'PJ' ? 'max-h-24 opacity-100' : 'max-h-0 opacity-0'}`}>
+              <div className="grid grid-cols-1 gap-4 pt-1">
                 <div>
                   <label className={labelClass}>Nome Fantasia</label>
                   <input type="text" className={`${inputClass} ${(editingCustomerId && !isAdmin) ? 'opacity-70' : ''}`} value={newCustomer.tradeName || ''} onChange={e => setNewCustomer({ ...newCustomer, tradeName: e.target.value })} disabled={editingCustomerId && !isAdmin} />
                 </div>
               </div>
-            )}
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
               <div className="md:col-span-3">
@@ -331,8 +331,8 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, cur
               </div>
             </div>
 
-            {personType === 'PJ' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className={`overflow-hidden transition-all duration-300 ${personType === 'PJ' ? 'max-h-24 opacity-100' : 'max-h-0 opacity-0'}`}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
                 <div>
                   <label className={labelClass}>Contato</label>
                   <input type="text" placeholder="Nome do responsável" className={inputClass} value={newCustomer.contact || ''} onChange={e => setNewCustomer({ ...newCustomer, contact: e.target.value })} />
@@ -342,7 +342,7 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, cur
                   <input type="text" placeholder="000.000.000.000" className={inputClass} value={newCustomer.stateRegistration || ''} onChange={e => setNewCustomer({ ...newCustomer, stateRegistration: e.target.value })} />
                 </div>
               </div>
-            )}
+            </div>
 
 
             <div className="flex justify-between items-center pt-4">
