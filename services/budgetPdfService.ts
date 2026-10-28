@@ -232,13 +232,13 @@ export const buildBudgetTermsHtml = (budget: ServiceOrder) => {
     <!-- Terms & Payment -->
     <div style="margin-bottom: 24px; break-inside: avoid;">
         <div style="display: flex; gap: 24px;">
-            <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 12px 16px; border: 1px solid #e2e8f0;">
-                <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: block;">FORMA DE PAGAMENTO</span>
-                <p style="margin: 0; font-size: 12px; font-weight: 600; color: #334155; line-height: 1.4;">${escapeHtml(budget.paymentTerms || 'A combinar')}</p>
+            <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 7px 14px; border: 1px solid #e2e8f0;">
+                <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; display: block;">FORMA DE PAGAMENTO</span>
+                <p style="margin: 0; font-size: 12px; font-weight: 600; color: #334155; line-height: 1.3;">${escapeHtml(budget.paymentTerms || 'A combinar')}</p>
             </div>
-            <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 12px 16px; border: 1px solid #e2e8f0;">
-                <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: block;">PRAZO DE ENTREGA / EXECUÇÃO</span>
-                <p style="margin: 0; font-size: 12px; font-weight: 600; color: #334155; line-height: 1.4;">${escapeHtml(budget.deliveryTime || 'A combinar')}</p>
+            <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 7px 14px; border: 1px solid #e2e8f0;">
+                <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; display: block;">PRAZO DE ENTREGA / EXECUÇÃO</span>
+                <p style="margin: 0; font-size: 12px; font-weight: 600; color: #334155; line-height: 1.3;">${escapeHtml(budget.deliveryTime || 'A combinar')}</p>
             </div>
         </div>
     </div>`;
