@@ -76,8 +76,8 @@ export const buildBudgetFooterHtml = (company: CompanyProfile) => {
   const vDays = company.defaultProposalValidity || 15;
   return `
     <div style="margin-top: 24px;">
-        <div style="border: 1px solid #e2e8f0; background: #f8fafc; border-radius: 12px; padding: 24px; break-inside: avoid; page-break-inside: avoid;">
-             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+        <div style="border: 1px solid #e2e8f0; background: #f8fafc; border-radius: 12px; padding: 12px 16px; break-inside: avoid; page-break-inside: avoid;">
+             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
                  <div style="background: #2563eb; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; font-weight: bold;">?</div>
                  <span style="font-size: 11px; font-weight: 800; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em;">TERMO DE ACEITE E AUTORIZAÇÃO PROFISSIONAL</span>
              </div>
@@ -232,13 +232,13 @@ export const buildBudgetTermsHtml = (budget: ServiceOrder) => {
     <!-- Terms & Payment -->
     <div style="margin-bottom: 24px; break-inside: avoid;">
         <div style="display: flex; gap: 24px;">
-            <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
-                <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">FORMA DE PAGAMENTO</span>
-                <p style="margin: 0; font-size: 12px; font-weight: 600; color: #334155; line-height: 1.5;">${escapeHtml(budget.paymentTerms || 'A combinar')}</p>
+            <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 12px 16px; border: 1px solid #e2e8f0;">
+                <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: block;">FORMA DE PAGAMENTO</span>
+                <p style="margin: 0; font-size: 12px; font-weight: 600; color: #334155; line-height: 1.4;">${escapeHtml(budget.paymentTerms || 'A combinar')}</p>
             </div>
-            <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0;">
-                <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block;">PRAZO DE ENTREGA / EXECUÇÃO</span>
-                <p style="margin: 0; font-size: 12px; font-weight: 600; color: #334155; line-height: 1.5;">${escapeHtml(budget.deliveryTime || 'A combinar')}</p>
+            <div style="flex: 1; background: #f8fafc; border-radius: 12px; padding: 12px 16px; border: 1px solid #e2e8f0;">
+                <span style="font-size: 10px; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; display: block;">PRAZO DE ENTREGA / EXECUÇÃO</span>
+                <p style="margin: 0; font-size: 12px; font-weight: 600; color: #334155; line-height: 1.4;">${escapeHtml(budget.deliveryTime || 'A combinar')}</p>
             </div>
         </div>
     </div>`;
