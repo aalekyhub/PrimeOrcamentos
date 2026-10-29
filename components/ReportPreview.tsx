@@ -195,6 +195,11 @@ const ReportPreview: React.FC<Props> = ({
                     counter-reset: budget-global-counter;
                 }
 
+                /* cada bloco de texto reinicia a numeração das listas no 1 */
+                .print-description-content .ql-editor-print {
+                    counter-reset: budget-global-counter;
+                }
+
 
                 .pdf-page-content > div > *:first-child {
                     margin-top: 0 !important;
@@ -353,6 +358,11 @@ const ReportPreview: React.FC<Props> = ({
                         text-align: right;
                     }
                     .print-description-content {
+                        counter-reset: budget-global-counter;
+                    }
+
+                    /* cada bloco de texto reinicia a numeração das listas no 1 */
+                    .print-description-content .ql-editor-print {
                         counter-reset: budget-global-counter;
                     }
 

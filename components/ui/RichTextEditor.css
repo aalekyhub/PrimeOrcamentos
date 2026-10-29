@@ -285,8 +285,8 @@
     margin-bottom: 10px !important;
 }
 
-/* Global Sequential Numbering across blocks */
-.budget-description-container {
+/* Numeração das listas: reinicia no 1 a cada bloco de texto (cada título/bloco tem a sua própria contagem) */
+.budget-description-container .ql-editor {
     counter-reset: budget-global-counter;
 }
 
