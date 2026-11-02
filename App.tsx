@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import React, { Suspense, useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import {
   LayoutDashboard,
   FileText,
@@ -25,18 +25,8 @@ import {
   Loader2,
 } from 'lucide-react';
 
-import Dashboard from './components/Dashboard';
-import UnifiedWorksManager from './components/UnifiedWorksManager';
-import BudgetManager from './components/BudgetManager';
-import ServiceOrderManager from './components/ServiceOrderManager';
-import WorkOrderManager from './components/WorkOrderManager';
-import FinancialManager from './components/FinancialManager';
-import CustomerManager from './components/CustomerManager';
-import ServiceCatalog from './components/ServiceCatalog';
-import CompanySettings from './components/CompanySettings';
-import BudgetSearch from './components/BudgetSearch';
-import UserManager from './components/UserManager';
 import Login from './components/Login';
+import { lazyWithReload } from './services/lazyWithReload';
 import ChangePasswordModal from './components/ChangePasswordModal';
 
 import { ToastProvider, useNotify } from './components/ToastProvider';
@@ -97,6 +87,40 @@ type TabId =
   | 'search'
   | 'users'
   | 'settings';
+
+// Cada módulo é baixado só quando a aba é aberta (ou quando o mouse passa no menu).
+const moduleLoaders = {
+  dashboard: () => import('./components/Dashboard'),
+  customers: () => import('./components/CustomerManager'),
+  catalog: () => import('./components/ServiceCatalog'),
+  construction: () => import('./components/UnifiedWorksManager'),
+  budgets: () => import('./components/BudgetManager'),
+  orders: () => import('./components/ServiceOrderManager'),
+  works: () => import('./components/WorkOrderManager'),
+  financial_mgmt: () => import('./components/FinancialManager'),
+  search: () => import('./components/BudgetSearch'),
+  users: () => import('./components/UserManager'),
+  settings: () => import('./components/CompanySettings'),
+} as const;
+
+const Dashboard = lazyWithReload(moduleLoaders.dashboard);
+const CustomerManager = lazyWithReload(moduleLoaders.customers);
+const ServiceCatalog = lazyWithReload(moduleLoaders.catalog);
+const UnifiedWorksManager = lazyWithReload(moduleLoaders.construction);
+const BudgetManager = lazyWithReload(moduleLoaders.budgets);
+const ServiceOrderManager = lazyWithReload(moduleLoaders.orders);
+const WorkOrderManager = lazyWithReload(moduleLoaders.works);
+const FinancialManager = lazyWithReload(moduleLoaders.financial_mgmt);
+const BudgetSearch = lazyWithReload(moduleLoaders.search);
+const UserManager = lazyWithReload(moduleLoaders.users);
+const CompanySettings = lazyWithReload(moduleLoaders.settings);
+
+const preloadModule = (tabId: TabId) => {
+  const loader = (moduleLoaders as Record<string, (() => Promise<unknown>) | undefined>)[tabId];
+  loader?.().catch(() => {
+    /* sem rede agora: o carregamento normal tenta de novo ao abrir a aba */
+  });
+};
 
 const AppContent: React.FC = () => {
   const { notify } = useNotify();
@@ -875,6 +899,7 @@ const AppContent: React.FC = () => {
             {navItems.map((item) => (
               <button
                 key={item.id}
+                onMouseEnter={() => preloadModule(item.id)}
                 onClick={() => {
                   openTab(item.id);
                   setSidebarOpen(false);
@@ -1092,6 +1117,13 @@ const AppContent: React.FC = () => {
 
               return (
                 <div key={item.id} className={isVisible ? 'block h-full' : 'hidden'}>
+                  <Suspense
+                    fallback={
+                      <div className="flex items-center justify-center py-32">
+                        <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
+                      </div>
+                    }
+                  >
                   {item.id === 'dashboard' && (
                     <Dashboard
                       stats={stats}
@@ -1206,6 +1238,7 @@ const AppContent: React.FC = () => {
                   {item.id === 'settings' && (
                     <CompanySettings company={company} setCompany={setCompany} currentUser={currentUser} />
                   )}
+                  </Suspense>
                 </div>
               );
             })}
