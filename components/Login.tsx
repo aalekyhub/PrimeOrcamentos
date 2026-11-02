@@ -30,7 +30,20 @@ const Login: React.FC<Props> = ({ company, onSync, isSyncing, isConnected }) => 
     });
 
     if (signInError) {
-      setError('E-mail ou senha incorretos.');
+      console.error('[Login] Falha ao entrar:', signInError);
+      const code = (signInError as any).code as string | undefined;
+      const status = (signInError as any).status as number | undefined;
+      if (code === 'invalid_credentials') {
+        setError('E-mail ou senha incorretos.');
+      } else if (code === 'email_not_confirmed') {
+        setError('E-mail ainda não confirmado no Supabase.');
+      } else if (status === 429 || code?.includes('rate_limit')) {
+        setError('Muitas tentativas seguidas. Aguarde alguns minutos e tente de novo.');
+      } else if (!status) {
+        setError('Sem conexão com o servidor. Verifique a internet e tente de novo.');
+      } else {
+        setError(`Não foi possível entrar (${code || status}): ${signInError.message}`);
+      }
     }
     setLoading(false);
   };

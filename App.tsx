@@ -20,6 +20,7 @@ import {
   Database,
   HardHat,
   Check,
+  KeyRound,
   AlertCircle,
   Loader2,
 } from 'lucide-react';
@@ -36,6 +37,7 @@ import CompanySettings from './components/CompanySettings';
 import BudgetSearch from './components/BudgetSearch';
 import UserManager from './components/UserManager';
 import Login from './components/Login';
+import ChangePasswordModal from './components/ChangePasswordModal';
 
 import { ToastProvider, useNotify } from './components/ToastProvider';
 
@@ -112,6 +114,7 @@ const AppContent: React.FC = () => {
   const [openTabs, setOpenTabs] = useState<TabId[]>(['dashboard']);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
   const [darkMode, setDarkMode] = useState<boolean>(() => db.load(STORAGE_KEYS.DARK_MODE, false));
 
@@ -855,6 +858,13 @@ const AppContent: React.FC = () => {
 
           <div className={`mt-auto pt-6 space-y-4 ${darkMode ? 'border-slate-700 border-t' : 'border-slate-100 border-t'}`}>
             <button
+              onClick={() => setShowChangePassword(true)}
+              className={`w-full flex items-center gap-4 px-5 py-3 rounded-xl transition-all font-semibold text-xs ${darkMode ? 'text-slate-300 hover:bg-slate-700' : 'text-slate-600 hover:bg-slate-50'}`}
+            >
+              <KeyRound className="w-4 h-4" /> Alterar senha
+            </button>
+
+            <button
               onClick={handleLogout}
               className="w-full flex items-center gap-4 px-5 py-3 rounded-xl text-rose-400 hover:bg-rose-500/10 transition-all font-semibold text-xs"
             >
@@ -1155,6 +1165,10 @@ const AppContent: React.FC = () => {
           </div>
         </div>
       </main>
+
+      {showChangePassword && (
+        <ChangePasswordModal email={currentUser.email} onClose={() => setShowChangePassword(false)} />
+      )}
     </div>
   );
 };
