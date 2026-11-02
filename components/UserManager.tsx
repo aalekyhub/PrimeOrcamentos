@@ -215,7 +215,7 @@ const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
 
       {showForm && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <form onSubmit={handleSaveUser} className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-3xl shadow-2xl p-8 space-y-6 animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-800">
+          <form onSubmit={handleSaveUser} className="bg-white dark:bg-slate-900 w-full max-w-3xl rounded-3xl shadow-2xl p-8 space-y-6 animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-800">
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-bold text-slate-900 dark:text-white">
                 {editingUser ? 'Editar Acesso' : 'Novo Acesso'}
@@ -312,7 +312,7 @@ const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
 
               <div className="space-y-4">
                 <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b dark:border-slate-800 pb-1">Módulos Disponíveis</h4>
-                <div className="grid grid-cols-1 gap-2 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 h-64 overflow-y-auto no-scrollbar">
+                <div className="grid grid-cols-1 gap-2 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
                   {MODULES.map(module => (
                     <button
                       key={module.id}
@@ -320,7 +320,7 @@ const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
                       disabled={module.id === 'dashboard'}
                       onClick={() => togglePermission(module.id)}
                       className={`
-                        flex items-center justify-between p-3 rounded-xl border text-left transition-all
+                        flex items-center justify-between px-3 py-2.5 rounded-xl border text-left transition-all
                         ${formData.permissions?.includes(module.id)
                           ? 'bg-blue-600 border-blue-500 text-white shadow-md'
                           : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-blue-200 dark:hover:border-blue-800'}
