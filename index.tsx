@@ -2,6 +2,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
+import './index.css';
 
 // Campos numéricos mudam de valor com a rodinha do mouse quando estão em foco
 // (ex: 550,00 virava 549,99 ao rolar a lista de itens com o cursor em cima).
