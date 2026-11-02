@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { UserPlus, Shield, Mail, Fingerprint, Trash2, ShieldCheck, X, User, Pencil, CheckCircle2, Info } from 'lucide-react';
+import { UserPlus, Shield, Mail, Fingerprint, Trash2, ShieldCheck, X, User, Pencil, CheckCircle2, Info, Lock, Eye, EyeOff } from 'lucide-react';
 import { UserAccount } from '../types';
-import { db } from '../services/db';
+import { db, supabase } from '../services/db';
 import { getTodayIsoDate } from '../services/dateService';
 import { useNotify } from './ToastProvider';
 
@@ -28,6 +28,8 @@ const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState<UserAccount | null>(null);
   const { notify } = useNotify();
+  const [newPassword, setNewPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
   const [formData, setFormData] = useState<Partial<UserAccount>>({
     id: '',
     name: '',
@@ -38,6 +40,8 @@ const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
 
   const handleOpenCreate = () => {
     setEditingUser(null);
+    setNewPassword('');
+    setShowNewPassword(false);
     setFormData({
       id: '',
       name: '',
@@ -50,6 +54,8 @@ const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
 
   const handleOpenEdit = (user: UserAccount) => {
     setEditingUser(user);
+    setNewPassword('');
+    setShowNewPassword(false);
     setFormData({
       id: user.id,
       name: user.name,
@@ -80,6 +86,33 @@ const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
       return;
     }
     if (!formData.name || !formData.email || !formData.id) return;
+
+    // Troca de senha (opcional) — feita antes de fechar a tela para o erro aparecer ao admin
+    let passwordChanged = false;
+    if (editingUser && newPassword) {
+      if (newPassword.length < 8) {
+        notify("A nova senha precisa ter pelo menos 8 caracteres.", "error");
+        return;
+      }
+      if (!supabase) {
+        notify("Sem conexão com o servidor para alterar a senha.", "error");
+        return;
+      }
+      const { error: pwError } = await supabase.rpc('admin_set_user_password', {
+        target_id: editingUser.id,
+        new_password: newPassword,
+      });
+      if (pwError) {
+        console.error('[Usuários] Falha ao alterar senha:', pwError);
+        if (pwError.code === 'PGRST202') {
+          notify("Função de troca de senha ainda não instalada no Supabase. Rode o script scripts/admin_set_password.sql.", "error");
+        } else {
+          notify(`Não foi possível alterar a senha: ${pwError.message}`, "error");
+        }
+        return;
+      }
+      passwordChanged = true;
+    }
 
     // Garante que dashboard sempre esteja presente
     const finalPermissions = Array.from(new Set([...(formData.permissions || []), 'dashboard']));
@@ -112,12 +145,17 @@ const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
     setUsers(newList);
     setShowForm(false);
     setEditingUser(null);
+    setNewPassword('');
     setFormData({ role: 'operador', permissions: ['dashboard'] });
 
     // Sincroniza e avisa
     const result = await db.save('serviflow_profiles', newList);
     if (result?.success) {
-      notify(editingUser ? "Usuário atualizado e sincronizado!" : "Usuário vinculado e sincronizado!");
+      notify(
+        passwordChanged
+          ? "Usuário atualizado e senha alterada!"
+          : editingUser ? "Usuário atualizado e sincronizado!" : "Usuário vinculado e sincronizado!"
+      );
     } else {
       notify("Salvo localmente. Erro na nuvem.", "warning");
     }
@@ -233,6 +271,32 @@ const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
                     />
                   </div>
                 </div>
+                {editingUser && (
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
+                      Nova senha (deixe em branco para não alterar)
+                    </label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 w-4 h-4 text-slate-300 dark:text-slate-600" />
+                      <input
+                        type={showNewPassword ? 'text' : 'password'}
+                        autoComplete="new-password"
+                        placeholder="Mínimo de 8 caracteres"
+                        className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-2.5 pl-10 pr-10 text-sm dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                        value={newPassword}
+                        onChange={e => setNewPassword(e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPassword(v => !v)}
+                        className="absolute right-3 top-3 text-slate-300 hover:text-slate-500"
+                        aria-label={showNewPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                      >
+                        {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+                )}
                 <div>
                   <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Nível de Permissão</label>
                   <select
