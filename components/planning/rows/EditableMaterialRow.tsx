@@ -133,7 +133,7 @@ export const EditableMaterialRow: React.FC<EditableMaterialRowProps> = ({
                         </div>
                         <div className="grow">
                             <p className="font-bold text-slate-800 dark:text-slate-100">{material.material_name}</p>
-                            <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium uppercase tracking-wider mb-1">
+                            <p className="text-[12px] text-emerald-600 dark:text-emerald-400 font-medium uppercase tracking-wider mb-1">
                                 {material.quantity} {material.unit} x R$ {(material.unit_cost || 0).toFixed(2)}
                             </p>
                         </div>

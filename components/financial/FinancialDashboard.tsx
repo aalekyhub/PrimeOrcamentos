@@ -72,7 +72,7 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
             <div className="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group">
               <div className="flex items-start justify-between relative z-10">
                 <div>
-                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">1. Faturamento (Prest. Serviços)</p>
+                  <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-0.5">1. Faturamento (Prest. Serviços)</p>
                   <h4 className="text-xl font-black text-emerald-600">
                     R$ {totals.faturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </h4>
@@ -82,7 +82,7 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                 </div>
               </div>
               <div className="mt-6 pt-4 border-t border-slate-50 dark:border-slate-700/50">
-                <p className="text-[9px] font-bold text-slate-400 uppercase">Recebimento Operacional</p>
+                <p className="text-[11px] font-bold text-slate-400 uppercase">Recebimento Operacional</p>
               </div>
             </div>
 
@@ -90,7 +90,7 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
             <div className="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group">
               <div className="flex items-start justify-between relative z-10">
                 <div>
-                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">2. Despesas (Operacional)</p>
+                  <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-0.5">2. Despesas (Operacional)</p>
                   <h4 className="text-xl font-black text-rose-600">
                     R$ {totals.despesas.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </h4>
@@ -100,7 +100,7 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                 </div>
               </div>
               <div className="mt-6 pt-4 border-t border-slate-50 dark:border-slate-700/50">
-                <p className="text-[9px] font-bold text-slate-400 uppercase">Saídas da Operação</p>
+                <p className="text-[11px] font-bold text-slate-400 uppercase">Saídas da Operação</p>
               </div>
             </div>
 
@@ -108,7 +108,7 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
             <div className="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border-2 border-slate-100 dark:border-slate-700 shadow-sm relative overflow-hidden flex flex-col justify-between">
               <div className="flex items-start justify-between relative z-10">
                 <div>
-                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">3. Resultado Operacional</p>
+                  <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-0.5">3. Resultado Operacional</p>
                   <h4 className={`text-xl font-black ${totals.resultadoOperacional >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
                     R$ {totals.resultadoOperacional.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </h4>
@@ -118,7 +118,7 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                 </div>
               </div>
               <div className="mt-6 pt-4 border-t border-slate-50 dark:border-slate-700/50">
-                <p className="text-[9px] font-bold text-slate-400 uppercase mb-1">Sobrevivência da Operação</p>
+                <p className="text-[11px] font-bold text-slate-400 uppercase mb-1">Sobrevivência da Operação</p>
                 <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                   <div 
                     className={`h-full transition-all duration-1000 ${totals.margemSeguranca >= 100 ? 'bg-emerald-500' : 'bg-rose-500'}`} 
@@ -132,7 +132,7 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
             <div className="bg-white dark:bg-slate-800 p-6 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group">
               <div className="flex items-start justify-between relative z-10">
                 <div>
-                  <p className="text-[8px] font-black text-indigo-500 uppercase tracking-widest mb-0.5">4. Aportes (Sócios)</p>
+                  <p className="text-[11px] font-black text-indigo-500 uppercase tracking-widest mb-0.5">4. Aportes (Sócios)</p>
                   <h4 className="text-xl font-black text-indigo-600">
                     R$ {totals.aportes.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </h4>
@@ -142,7 +142,7 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                 </div>
               </div>
               <div className="mt-6 pt-4 border-t border-slate-50 dark:border-slate-700/50">
-                <div className="flex items-center gap-2 text-[10px] font-black text-indigo-500 uppercase">
+                <div className="flex items-center gap-2 text-[12px] font-black text-indigo-500 uppercase">
                   <CheckCircle2 className="w-3 h-3" /> Capital dos Sócios
                 </div>
               </div>
@@ -152,7 +152,7 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
             <div className="bg-slate-900 dark:bg-slate-700 p-6 rounded-[2.5rem] shadow-xl relative overflow-hidden flex flex-col justify-between">
               <div className="flex items-start justify-between relative z-10">
                 <div>
-                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5 text-white/50">5. Saldo Final de Caixa</p>
+                  <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-0.5 text-white/50">5. Saldo Final de Caixa</p>
                   <h4 className={`text-xl font-black ${totals.saldoFinal >= 0 ? 'text-white' : 'text-rose-400'}`}>
                     R$ {totals.saldoFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </h4>
@@ -162,14 +162,14 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                 </div>
               </div>
               <div className="mt-6 pt-4 border-t border-white/10">
-                <p className="text-[9px] font-bold text-white/40 uppercase">Acompanhamento Profissional</p>
+                <p className="text-[11px] font-bold text-white/40 uppercase">Acompanhamento Profissional</p>
               </div>
             </div>
           </div>
 
           {/* Fluxo Mensal Chart */}
           <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-            <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Fluxo de Caixa Mensal ({selectedYear})</h4>
+            <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Fluxo de Caixa Mensal ({selectedYear})</h4>
             <div className="h-[250px] w-full mt-4">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
@@ -178,13 +178,13 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                     dataKey="name"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 700 }}
+                    tick={{ fill: '#94A3B8', fontSize: 12, fontWeight: 700 }}
                     dy={10}
                   />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 700 }}
+                    tick={{ fill: '#94A3B8', fontSize: 12, fontWeight: 700 }}
                   />
                   <Tooltip
                     contentStyle={{
@@ -208,30 +208,30 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
           {/* Saldo em Bancos Sidebar */}
           <div className="bg-slate-900 p-5 rounded-3xl text-white shadow-2xl">
             <div className="flex items-center justify-between mb-3">
-              <h4 className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Saldo em Bancos</h4>
+              <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Saldo em Bancos</h4>
               <div className="w-6 h-6 bg-white/10 rounded-lg flex items-center justify-center">
                 <DollarSign className="w-3 h-3" />
               </div>
             </div>
             <div className="mb-5">
               <p className="text-2xl font-black">R$ {totalInBank.toLocaleString('pt-BR')}</p>
-              <p className="text-[8px] text-emerald-400 font-bold mt-0.5 uppercase">Saldo Consolidado</p>
+              <p className="text-[11px] text-emerald-400 font-bold mt-0.5 uppercase">Saldo Consolidado</p>
             </div>
             <div className="space-y-2">
               {accounts.map(acc => (
                 <div key={acc.id} className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-all cursor-pointer">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-blue-500/20 text-blue-400 rounded-lg flex items-center justify-center font-black text-[8px]">
+                    <div className="w-6 h-6 bg-blue-500/20 text-blue-400 rounded-lg flex items-center justify-center font-black text-[11px]">
                       {acc.name.substring(0, 2).toUpperCase()}
                     </div>
-                    <span className="text-[10px] font-bold uppercase">{acc.name}</span>
+                    <span className="text-[12px] font-bold uppercase">{acc.name}</span>
                   </div>
-                  <span className="text-[10px] font-black">R$ {acc.currentBalance.toLocaleString('pt-BR')}</span>
+                  <span className="text-[12px] font-black">R$ {acc.currentBalance.toLocaleString('pt-BR')}</span>
                 </div>
               ))}
               <button
                 onClick={() => setActiveTab('config')}
-                className="w-full py-2 border border-white/10 rounded-xl text-[8px] font-black text-slate-400 hover:text-white hover:bg-white/5 transition-all uppercase"
+                className="w-full py-2 border border-white/10 rounded-xl text-[11px] font-black text-slate-400 hover:text-white hover:bg-white/5 transition-all uppercase"
               >
                 Gerenciar Contas
               </button>
@@ -240,11 +240,11 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
 
           {/* Top Expenses */}
           <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all hover:shadow-md">
-            <h4 className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-4">Maiores Despesas</h4>
+            <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-4">Maiores Despesas</h4>
             <div className="space-y-4">
               {topExpenses.map((item, idx) => (
                 <div key={idx}>
-                  <div className="flex justify-between text-[10px] font-black text-slate-500 uppercase mb-1.5">
+                  <div className="flex justify-between text-[12px] font-black text-slate-500 uppercase mb-1.5">
                     <span>{item.name}</span>
                     <span className="text-slate-900 dark:text-white">R$ {item.value.toLocaleString('pt-BR')}</span>
                   </div>
@@ -262,7 +262,7 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
           {/* Partner Contributions Summary (Added) */}
           <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-indigo-100 dark:border-indigo-900/30 shadow-sm transition-all hover:shadow-md">
             <div className="flex items-center justify-between mb-4">
-              <h4 className="text-[8px] font-black text-indigo-500 uppercase tracking-widest">Aportes por Sócio</h4>
+              <h4 className="text-[11px] font-black text-indigo-500 uppercase tracking-widest">Aportes por Sócio</h4>
               <Coins className="w-3.5 h-3.5 text-indigo-500" />
             </div>
             <div className="space-y-4">
@@ -277,13 +277,13 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
                 const partners = Object.entries(partnerMap).sort((a, b) => b[1] - a[1]);
 
                 if (partners.length === 0) {
-                  return <p className="text-[8px] font-bold text-slate-400 uppercase italic">Nenhum aporte este ano.</p>;
+                  return <p className="text-[11px] font-bold text-slate-400 uppercase italic">Nenhum aporte este ano.</p>;
                 }
 
                 return partners.slice(0, 3).map(([name, total]) => (
                   <div key={name} className="flex items-center justify-between group cursor-help">
                     <div className="space-y-0.5">
-                      <p className="text-[10px] font-black text-slate-600 dark:text-slate-400 uppercase leading-tight">{name}</p>
+                      <p className="text-[12px] font-black text-slate-600 dark:text-slate-400 uppercase leading-tight">{name}</p>
                       <p className="text-xs font-black text-indigo-600">R$ {total.toLocaleString('pt-BR')}</p>
                     </div>
                     <div className="w-8 h-8 bg-indigo-50 dark:bg-indigo-900/50 rounded-lg flex items-center justify-center text-indigo-400 group-hover:scale-110 transition-transform">
@@ -294,7 +294,7 @@ const FinancialDashboard: React.FC<FinancialDashboardProps> = ({
               })()}
               <button
                 onClick={() => setActiveTab('relatorios')}
-                className="w-full py-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl text-[8px] font-black text-indigo-600 hover:bg-indigo-100 transition-all uppercase tracking-widest"
+                className="w-full py-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl text-[11px] font-black text-indigo-600 hover:bg-indigo-100 transition-all uppercase tracking-widest"
               >
                 Ver Relatório Completo
               </button>

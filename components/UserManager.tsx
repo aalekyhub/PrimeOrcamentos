@@ -234,7 +234,7 @@ const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
-                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b dark:border-slate-800 pb-1">Credenciais</h4>
+                <h4 className="text-[12px] font-bold text-slate-400 uppercase tracking-widest border-b dark:border-slate-800 pb-1">Credenciais</h4>
                 <div>
                   <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Nome Completo</label>
                   <div className="relative">
@@ -318,7 +318,7 @@ const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
               </div>
 
               <div className="space-y-4">
-                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b dark:border-slate-800 pb-1">Módulos Disponíveis</h4>
+                <h4 className="text-[12px] font-bold text-slate-400 uppercase tracking-widest border-b dark:border-slate-800 pb-1">Módulos Disponíveis</h4>
                 <div className="grid grid-cols-1 gap-2 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
                   {MODULES.map(module => (
                     <button
@@ -339,7 +339,7 @@ const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
                     </button>
                   ))}
                 </div>
-                <p className="text-[10px] text-slate-400 dark:text-slate-500 italic">O usuário verá apenas as abas selecionadas no menu lateral.</p>
+                <p className="text-[12px] text-slate-400 dark:text-slate-500 italic">O usuário verá apenas as abas selecionadas no menu lateral.</p>
               </div>
             </div>
 
@@ -355,7 +355,7 @@ const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              <tr className="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-[12px] font-bold text-slate-400 uppercase tracking-widest">
                 <th className="px-6 py-4">Usuário / Função</th>
                 <th className="px-6 py-4">Acessos</th>
                 <th className="px-6 py-4">E-mail</th>
@@ -373,14 +373,14 @@ const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
                       </div>
                       <div>
                         <p className="text-sm font-bold text-slate-900 dark:text-white">{user.name}</p>
-                        <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{user.role}</p>
+                        <p className="text-[12px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{user.role}</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-wrap gap-1 max-w-[200px]">
                       {normalizePermissions(user.permissions || []).map(p => (
-                        <span key={p} className="text-[8px] bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded uppercase font-black">
+                        <span key={p} className="text-[11px] bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded uppercase font-black">
                           {MODULES.find(m => m.id === p)?.label || p}
                         </span>
                       ))}
@@ -411,7 +411,7 @@ const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
                         </button>
                       </div>
                     ) : (
-                      <span className="text-[10px] font-bold text-slate-400 uppercase">Somente Leitura</span>
+                      <span className="text-[12px] font-bold text-slate-400 uppercase">Somente Leitura</span>
                     )}
                   </td>
                 </tr>

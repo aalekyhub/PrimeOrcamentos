@@ -49,7 +49,7 @@ const TransactionsHistory: React.FC<TransactionsHistoryProps> = ({
         </div>
         <button 
           onClick={onExport}
-          className="bg-slate-900 dark:bg-blue-600 text-white px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-slate-800 transition-all shadow-lg"
+          className="bg-slate-900 dark:bg-blue-600 text-white px-6 py-3.5 rounded-2xl text-[12px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-slate-800 transition-all shadow-lg"
         >
           <Download className="w-4 h-4" /> Exportar Extrato
         </button>
@@ -82,7 +82,7 @@ const TransactionsHistory: React.FC<TransactionsHistoryProps> = ({
                         />
                       )}
                     </div>
-                    <div className="flex items-center gap-3 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                    <div className="flex items-center gap-3 text-[12px] text-slate-400 font-bold uppercase tracking-widest">
                        <span>{new Date(t.date).toLocaleDateString('pt-BR')}</span>
                        <span className="bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded">{t.category}</span>
                        {(t.customerName || t.supplierName) && (
@@ -99,7 +99,7 @@ const TransactionsHistory: React.FC<TransactionsHistoryProps> = ({
                     <p className={`text-xl font-black ${t.type === 'RECEITA' ? 'text-emerald-500' : 'text-rose-500'}`}>
                       {t.type === 'RECEITA' ? '+' : '-'} R$ {t.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </p>
-                    <p className="text-[9px] text-slate-300 font-bold uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity">
+                    <p className="text-[11px] text-slate-300 font-bold uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity">
                       ID: {t.id}
                     </p>
                   </div>

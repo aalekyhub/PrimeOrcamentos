@@ -76,7 +76,7 @@ const Dashboard: React.FC<DashboardProps> = ({ stats, orders, transactions, curr
               <item.icon className="w-8 h-8" />
             </div>
             <div>
-              <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-1">{item.label}</p>
+              <p className="text-[12px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-1">{item.label}</p>
               <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">{item.title}</h3>
             </div>
           </div>

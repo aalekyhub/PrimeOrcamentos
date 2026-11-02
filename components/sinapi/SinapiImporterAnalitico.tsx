@@ -70,12 +70,12 @@ const SinapiImporterAnalitico: React.FC = () => {
                 {count !== null && count > 0 && (
                     <div className="flex items-center gap-1.5 bg-blue-50 text-blue-600 px-2 py-1 rounded-lg border border-blue-100 animate-in fade-in zoom-in duration-300">
                         <CheckCircle className="w-3 h-3" />
-                        <span className="text-[10px] font-black">{count.toLocaleString()} DISPONÍVEIS</span>
+                        <span className="text-[12px] font-black">{count.toLocaleString()} DISPONÍVEIS</span>
                     </div>
                 )}
                 {count === 0 && (
                     <div className="flex items-center gap-1.5 bg-slate-50 text-slate-400 px-2 py-1 rounded-lg border border-slate-100">
-                        <span className="text-[10px] font-black uppercase">Vazio</span>
+                        <span className="text-[12px] font-black uppercase">Vazio</span>
                     </div>
                 )}
                 <button
@@ -116,18 +116,18 @@ const SinapiImporterAnalitico: React.FC = () => {
                 {isProcessing ? (
                     <div className="flex flex-col items-center">
                         <Loader2 className="w-6 h-6 text-blue-600 animate-spin mb-2" />
-                        <span className="text-[10px] font-bold text-slate-500 uppercase">Processando...</span>
+                        <span className="text-[12px] font-bold text-slate-500 uppercase">Processando...</span>
                     </div>
                 ) : (
                     <div className="flex flex-col items-center">
                         <Upload className="w-6 h-6 text-slate-300 mb-2" />
-                        <span className="text-[10px] font-bold text-slate-500 uppercase">Selecione SINAPI_Referência_...xlsx ou .csv (Aba Analítico)</span>
+                        <span className="text-[12px] font-bold text-slate-500 uppercase">Selecione SINAPI_Referência_...xlsx ou .csv (Aba Analítico)</span>
                     </div>
                 )}
                 <input type="file" accept=".xlsx,.csv" className="hidden" onChange={handleFile} disabled={isProcessing} />
             </label>
 
-            <p className="text-[9px] text-slate-400 font-medium text-center uppercase">
+            <p className="text-[11px] text-slate-400 font-medium text-center uppercase">
                 Este importador lê a aba "Analítico" do arquivo Excel ou o conteúdo completo do arquivo CSV.
             </p>
         </div>

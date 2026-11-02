@@ -88,7 +88,7 @@ const BdiCalculator: React.FC<Props> = ({ initialConfig, onSave }) => {
             <div className="p-8 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-4">
-                        <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest border-b pb-2">
+                        <h4 className="text-[12px] font-black text-slate-400 uppercase tracking-widest border-b pb-2">
                             Custos Indiretos & Riscos
                         </h4>
 
@@ -103,7 +103,7 @@ const BdiCalculator: React.FC<Props> = ({ initialConfig, onSave }) => {
                     </div>
 
                     <div className="space-y-4">
-                        <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest border-b pb-2">
+                        <h4 className="text-[12px] font-black text-slate-400 uppercase tracking-widest border-b pb-2">
                             Tributos (I)
                         </h4>
 
@@ -117,7 +117,7 @@ const BdiCalculator: React.FC<Props> = ({ initialConfig, onSave }) => {
                         <div className="mt-8 bg-slate-50 p-4 rounded-2xl border border-slate-100">
                             <div className="flex items-start gap-2">
                                 <Info className="w-4 h-4 text-slate-400 shrink-0" />
-                                <p className="text-[10px] text-slate-500 leading-tight">
+                                <p className="text-[12px] text-slate-500 leading-tight">
                                     O CPRB deve ser incluído apenas em casos de desoneração da folha.
                                 </p>
                             </div>
@@ -127,7 +127,7 @@ const BdiCalculator: React.FC<Props> = ({ initialConfig, onSave }) => {
 
                 <div className="pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-6">
                     <div className="text-center sm:text-left">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                        <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest mb-1">
                             Resultado Final
                         </p>
                         <div className="flex items-baseline gap-2">
@@ -168,7 +168,7 @@ const BdiInput: React.FC<InputProps> = ({ label, value, onChange }) => (
                 value={value}
                 onChange={e => onChange(e.target.value)}
             />
-            <span className="absolute right-3 top-1.5 text-[10px] font-bold text-slate-400">%</span>
+            <span className="absolute right-3 top-1.5 text-[12px] font-bold text-slate-400">%</span>
         </div>
     </div>
 );

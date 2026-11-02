@@ -66,12 +66,12 @@ const SinapiImporterComposicoes: React.FC = () => {
                 {count !== null && count > 0 && (
                     <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 px-2 py-1 rounded-lg border border-emerald-100 animate-in fade-in zoom-in duration-300">
                         <CheckCircle className="w-3 h-3" />
-                        <span className="text-[10px] font-black">{count.toLocaleString()} DISPONÍVEIS</span>
+                        <span className="text-[12px] font-black">{count.toLocaleString()} DISPONÍVEIS</span>
                     </div>
                 )}
                 {count === 0 && (
                     <div className="flex items-center gap-1.5 bg-slate-50 text-slate-400 px-2 py-1 rounded-lg border border-slate-100">
-                        <span className="text-[10px] font-black uppercase tracking-widest">Vazio</span>
+                        <span className="text-[12px] font-black uppercase tracking-widest">Vazio</span>
                     </div>
                 )}
                 <button
@@ -112,12 +112,12 @@ const SinapiImporterComposicoes: React.FC = () => {
                 {isProcessing ? (
                     <div className="flex flex-col items-center">
                         <Loader2 className="w-6 h-6 text-indigo-600 animate-spin mb-2" />
-                        <span className="text-[10px] font-bold text-slate-500 uppercase">Processando...</span>
+                        <span className="text-[12px] font-bold text-slate-500 uppercase">Processando...</span>
                     </div>
                 ) : (
                     <div className="flex flex-col items-center">
                         <Upload className="w-6 h-6 text-slate-300 mb-2" />
-                        <span className="text-[10px] font-bold text-slate-500 uppercase">Clique para subir XLSX ou CSV de Composições</span>
+                        <span className="text-[12px] font-bold text-slate-500 uppercase">Clique para subir XLSX ou CSV de Composições</span>
                     </div>
                 )}
                 <input type="file" accept=".xlsx,.csv" className="hidden" onChange={handleFile} disabled={isProcessing} />

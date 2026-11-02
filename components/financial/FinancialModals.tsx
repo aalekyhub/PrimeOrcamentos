@@ -85,7 +85,7 @@ const FinancialModals: React.FC<FinancialModalsProps> = ({
                         const isAcc = editingItem.isFromEntry || editingItem.id.startsWith('ENT-');
                         setEditingItem({ ...editingItem, type: isAcc ? 'RECEBER' : 'RECEITA' });
                       }}
-                      className={`py-3 rounded-xl text-[10px] font-black border-2 transition-all uppercase ${['RECEITA', 'RECEBER'].includes(editingItem.type) ? 'bg-emerald-50 border-emerald-500 text-emerald-600' : 'bg-slate-50 border-transparent text-slate-400'}`}
+                      className={`py-3 rounded-xl text-[12px] font-black border-2 transition-all uppercase ${['RECEITA', 'RECEBER'].includes(editingItem.type) ? 'bg-emerald-50 border-emerald-500 text-emerald-600' : 'bg-slate-50 border-transparent text-slate-400'}`}
                     >
                       ENTRADA
                     </button>
@@ -95,7 +95,7 @@ const FinancialModals: React.FC<FinancialModalsProps> = ({
                         const isAcc = editingItem.isFromEntry || editingItem.id.startsWith('ENT-');
                         setEditingItem({ ...editingItem, type: isAcc ? 'PAGAR' : 'DESPESA' });
                       }}
-                      className={`py-3 rounded-xl text-[10px] font-black border-2 transition-all uppercase ${['DESPESA', 'PAGAR'].includes(editingItem.type) ? 'bg-rose-50 border-rose-500 text-rose-600' : 'bg-slate-50 border-transparent text-slate-400'}`}
+                      className={`py-3 rounded-xl text-[12px] font-black border-2 transition-all uppercase ${['DESPESA', 'PAGAR'].includes(editingItem.type) ? 'bg-rose-50 border-rose-500 text-rose-600' : 'bg-slate-50 border-transparent text-slate-400'}`}
                     >
                       SAÍDA
                     </button>

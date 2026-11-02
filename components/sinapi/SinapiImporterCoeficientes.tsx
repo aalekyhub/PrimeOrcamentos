@@ -62,12 +62,12 @@ const SinapiImporterCoeficientes: React.FC = () => {
                 {isProcessing ? (
                     <div className="flex flex-col items-center">
                         <Loader2 className="w-6 h-6 text-indigo-600 animate-spin mb-2" />
-                        <span className="text-[10px] font-bold text-slate-500 uppercase">Processando...</span>
+                        <span className="text-[12px] font-bold text-slate-500 uppercase">Processando...</span>
                     </div>
                 ) : (
                     <div className="flex flex-col items-center">
                         <Upload className="w-6 h-6 text-slate-300 mb-2" />
-                        <span className="text-[10px] font-bold text-slate-500 uppercase">Clique para subir XLSX ou CSV de Coeficientes</span>
+                        <span className="text-[12px] font-bold text-slate-500 uppercase">Clique para subir XLSX ou CSV de Coeficientes</span>
                     </div>
                 )}
                 <input type="file" accept=".xlsx,.csv" className="hidden" onChange={handleFile} disabled={isProcessing} />

@@ -36,7 +36,7 @@ export const AddIndirectForm: React.FC<AddIndirectFormProps> = ({ onAdd, planId 
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                 <div className="md:col-span-3">
-                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Categoria</label>
+                    <label className="block text-[12px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Categoria</label>
                     <select
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
@@ -51,7 +51,7 @@ export const AddIndirectForm: React.FC<AddIndirectFormProps> = ({ onAdd, planId 
                     </select>
                 </div>
                 <div className="md:col-span-6">
-                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Descrição</label>
+                    <label className="block text-[12px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Descrição</label>
                     <input
                         type="text"
                         value={desc}
@@ -61,7 +61,7 @@ export const AddIndirectForm: React.FC<AddIndirectFormProps> = ({ onAdd, planId 
                     />
                 </div>
                 <div className="md:col-span-2">
-                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Valor</label>
+                    <label className="block text-[12px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Valor</label>
                     <input
                         type="number" min="0"
                         value={value}

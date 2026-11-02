@@ -194,7 +194,7 @@ const CompanySettings: React.FC<Props> = ({ company, setCompany, currentUser }) 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1 space-y-6">
           <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm text-center space-y-6">
-            <h4 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Identidade Visual</h4>
+            <h4 className="text-[12px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Identidade Visual</h4>
             <div className="relative group mx-auto w-full h-40 flex items-center justify-center bg-slate-50 dark:bg-slate-800/50 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700">
               {company.logo ? (
                 <div className="relative flex items-center justify-center p-4 w-full h-full">
@@ -206,37 +206,37 @@ const CompanySettings: React.FC<Props> = ({ company, setCompany, currentUser }) 
               ) : (
                 <button onClick={() => fileInputRef.current?.click()} className="flex flex-col items-center gap-2 text-slate-400 hover:text-blue-500 transition-colors">
                   <Upload className="w-8 h-8" />
-                  <span className="text-[10px] font-bold uppercase">{isAdmin ? 'Carregar Logo' : 'Logo da Empresa'}</span>
+                  <span className="text-[12px] font-bold uppercase">{isAdmin ? 'Carregar Logo' : 'Logo da Empresa'}</span>
                 </button>
               )}
             </div>
             <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleLogoUpload} disabled={!isAdmin} />
             <div className="pt-4 border-t border-slate-50 dark:border-slate-800 text-left space-y-4">
               <div className="space-y-2">
-                <div className="flex justify-between text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase"><span>Tamanho Logo</span><span>{company.logoSize}px</span></div>
+                <div className="flex justify-between text-[12px] font-black text-slate-400 dark:text-slate-500 uppercase"><span>Tamanho Logo</span><span>{company.logoSize}px</span></div>
                 <input type="range" min="40" max="200" step="5" className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-600 disabled:opacity-50" value={company.logoSize} onChange={e => setCompany({ ...company, logoSize: Number(e.target.value) })} disabled={!isAdmin} />
               </div>
               <div className="space-y-2">
-                <div className="flex justify-between text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase"><span>Tamanho Fonte</span><span>{company.nameFontSize}px</span></div>
+                <div className="flex justify-between text-[12px] font-black text-slate-400 dark:text-slate-500 uppercase"><span>Tamanho Fonte</span><span>{company.nameFontSize}px</span></div>
                 <input type="range" min="16" max="48" step="1" className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-600 disabled:opacity-50" value={company.nameFontSize} onChange={e => setCompany({ ...company, nameFontSize: Number(e.target.value) })} disabled={!isAdmin} />
               </div>
               <div className="space-y-2">
-                <div className="flex justify-between text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase"><span>Tamanho Fonte (Descrição)</span><span>{company.descriptionFontSize || 10}px</span></div>
+                <div className="flex justify-between text-[12px] font-black text-slate-400 dark:text-slate-500 uppercase"><span>Tamanho Fonte (Descrição)</span><span>{company.descriptionFontSize || 10}px</span></div>
                 <input type="range" min="8" max="16" step="1" className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-600" value={company.descriptionFontSize || 10} onChange={e => setCompany({ ...company, descriptionFontSize: Number(e.target.value) })} />
               </div>
               <div className="space-y-2">
-                <div className="flex justify-between text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase"><span>Tamanho Fonte (Itens)</span><span>{company.itemsFontSize || 10}px</span></div>
+                <div className="flex justify-between text-[12px] font-black text-slate-400 dark:text-slate-500 uppercase"><span>Tamanho Fonte (Itens)</span><span>{company.itemsFontSize || 10}px</span></div>
                 <input type="range" min="8" max="14" step="1" className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-600" value={company.itemsFontSize || 10} onChange={e => setCompany({ ...company, itemsFontSize: Number(e.target.value) })} />
               </div>
             </div>
           </div>
 
           <div className="bg-indigo-900 text-white p-6 rounded-3xl shadow-xl space-y-6">
-            <h4 className="text-[10px] font-black text-indigo-300 uppercase tracking-widest flex items-center gap-2 border-b border-white/10 pb-2">
+            <h4 className="text-[12px] font-black text-indigo-300 uppercase tracking-widest flex items-center gap-2 border-b border-white/10 pb-2">
               <Database className="w-4 h-4" /> Segurança de Dados
             </h4>
             <div className="space-y-3">
-              <p className="text-[10px] text-indigo-200 leading-relaxed font-medium">Seus dados estão salvos localmente. Recomendamos exportar um backup semanalmente.</p>
+              <p className="text-[12px] text-indigo-200 leading-relaxed font-medium">Seus dados estão salvos localmente. Recomendamos exportar um backup semanalmente.</p>
               <button onClick={handleExportData} className="w-full bg-white/10 hover:bg-white/20 border border-white/20 text-white py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all">
                 <Download className="w-4 h-4" /> Exportar Backup (JSON)
               </button>
@@ -316,7 +316,7 @@ const CompanySettings: React.FC<Props> = ({ company, setCompany, currentUser }) 
             </div>
 
             <div className="flex justify-end pt-4">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+              <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest">
                 Lembre-se de salvar suas alterações
               </p>
             </div>

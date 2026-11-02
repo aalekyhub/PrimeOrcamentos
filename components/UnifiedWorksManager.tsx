@@ -361,12 +361,12 @@ const UnifiedWorksManager: React.FC<Props> = ({
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="bg-slate-50 border-b border-slate-100">
-                                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Código</th>
-                                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Cliente / Razão Social</th>
-                                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Descrição do Projeto</th>
-                                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Total Orçado</th>
-                                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Realizado</th>
-                                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Ações</th>
+                                    <th className="px-6 py-4 text-[12px] font-black text-slate-400 uppercase tracking-widest">Código</th>
+                                    <th className="px-6 py-4 text-[12px] font-black text-slate-400 uppercase tracking-widest">Cliente / Razão Social</th>
+                                    <th className="px-6 py-4 text-[12px] font-black text-slate-400 uppercase tracking-widest">Descrição do Projeto</th>
+                                    <th className="px-6 py-4 text-[12px] font-black text-slate-400 uppercase tracking-widest text-right">Total Orçado</th>
+                                    <th className="px-6 py-4 text-[12px] font-black text-slate-400 uppercase tracking-widest text-right">Realizado</th>
+                                    <th className="px-6 py-4 text-[12px] font-black text-slate-400 uppercase tracking-widest text-right">Ações</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-50">
@@ -391,8 +391,8 @@ const UnifiedWorksManager: React.FC<Props> = ({
                                                 </p>
                                                 <div className="flex items-center gap-2 mt-0.5">
                                                     <div className={`w-1.5 h-1.5 rounded-full ${plan.status === 'Concluído' ? 'bg-emerald-500' : 'bg-blue-500'}`}></div>
-                                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">{plan.status}</span>
-                                                    {!isAdmin && <span className="text-[8px] font-black text-rose-500 uppercase tracking-tighter ml-2 bg-rose-50 px-1 rounded">BLOQUEADO</span>}
+                                                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-tighter">{plan.status}</span>
+                                                    {!isAdmin && <span className="text-[11px] font-black text-rose-500 uppercase tracking-tighter ml-2 bg-rose-50 px-1 rounded">BLOQUEADO</span>}
                                                 </div>
                                             </div>
                                         </td>

@@ -26,13 +26,13 @@ export const SummaryTab = React.memo(({
                 ].map((item) => (
                     <div key={item.label} className={`bg-${item.color}-50 dark:bg-${item.color}-900/20 p-4 rounded-2xl border border-${item.color}-200 dark:border-${item.color}-800 shadow-sm transition-all hover:shadow-md`}>
                         <div className="flex justify-between items-start mb-1.5">
-                            <span className={`text-[10px] font-bold text-${item.color}-600 dark:text-${item.color}-400 uppercase tracking-widest`}>{item.label}</span>
+                            <span className={`text-[12px] font-bold text-${item.color}-600 dark:text-${item.color}-400 uppercase tracking-widest`}>{item.label}</span>
                             <div className={`bg-${item.color}-100 dark:bg-${item.color}-900/40 p-1 rounded-lg`}>
                                 <item.icon size={16} className={`text-${item.color}-600 dark:text-${item.color}-400`} />
                             </div>
                         </div>
                         <span className="text-xl font-black text-slate-800 dark:text-slate-100 whitespace-nowrap">R$ {(item.value || 0).toFixed(2)}</span>
-                        <p className={`text-[9px] text-${item.color}-600/60 dark:text-${item.color}-400/60 mt-1 font-bold uppercase`}>{item.desc}</p>
+                        <p className={`text-[11px] text-${item.color}-600/60 dark:text-${item.color}-400/60 mt-1 font-bold uppercase`}>{item.desc}</p>
                     </div>
                 ))}
             </div>
@@ -47,7 +47,7 @@ export const SummaryTab = React.memo(({
                     </div>
                     <div className="text-left">
                         <span className="block text-slate-800 dark:text-slate-100 font-bold">Relatório Executivo</span>
-                        <span className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Visualizar PDF</span>
+                        <span className="text-[12px] text-slate-400 uppercase tracking-widest font-bold">Visualizar PDF</span>
                     </div>
                 </button>
             </div>
@@ -64,7 +64,7 @@ export const SummaryTab = React.memo(({
                             R$ {(calculations.totalGeneral || 0).toFixed(2)}
                         </span>
                     </div>
-                    <p className="text-slate-500 text-[10px] mt-2 font-medium uppercase tracking-widest">Inclui todos os custos diretos, indiretos e bdi calculados</p>
+                    <p className="text-slate-500 text-[12px] mt-2 font-medium uppercase tracking-widest">Inclui todos os custos diretos, indiretos e bdi calculados</p>
                 </div>
 
                 <button

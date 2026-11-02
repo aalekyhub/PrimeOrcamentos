@@ -99,7 +99,7 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
         </div>
         
         <div className="relative z-10">
-          <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-4">Resultado do Período ({selectedYear})</h4>
+          <h4 className="text-[12px] font-black text-slate-500 uppercase tracking-[0.3em] mb-4">Resultado do Período ({selectedYear})</h4>
           <div className="flex flex-col md:flex-row justify-between items-end gap-8">
             <div>
               <p className={`text-5xl font-black ${result >= 0 ? 'text-white' : 'text-rose-400'}`}>
@@ -108,20 +108,20 @@ const ResultsTab: React.FC<ResultsTabProps> = ({
               <div className="flex flex-wrap items-center gap-4 mt-6">
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
                   <ArrowUpRight className="w-3.5 h-3.5 text-emerald-400" />
-                  <span className="text-[10px] font-black uppercase text-emerald-400">Receitas: R$ {salesIn.toLocaleString('pt-BR')}</span>
+                  <span className="text-[12px] font-black uppercase text-emerald-400">Receitas: R$ {salesIn.toLocaleString('pt-BR')}</span>
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-rose-500/10 border border-rose-500/20 rounded-xl">
                   <ArrowDownLeft className="w-3.5 h-3.5 text-rose-400" />
-                  <span className="text-[10px] font-black uppercase text-rose-400">Despesas: R$ {totalOut.toLocaleString('pt-BR')}</span>
+                  <span className="text-[12px] font-black uppercase text-rose-400">Despesas: R$ {totalOut.toLocaleString('pt-BR')}</span>
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-xl">
                   <Coins className="w-3.5 h-3.5 text-indigo-400" />
-                  <span className="text-[10px] font-black uppercase text-indigo-400">Aportes: R$ {aportesIn.toLocaleString('pt-BR')}</span>
+                  <span className="text-[12px] font-black uppercase text-indigo-400">Aportes: R$ {aportesIn.toLocaleString('pt-BR')}</span>
                 </div>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 text-right">Margem / Índice de Sobra</p>
+              <p className="text-[12px] font-black text-slate-500 uppercase tracking-widest mb-1 text-right">Margem / Índice de Sobra</p>
               <div className="flex items-center justify-end gap-3 text-3xl font-black">
                  <span className={margin >= 0 ? 'text-emerald-400' : 'text-rose-400'}>{margin.toFixed(1)}%</span>
               </div>

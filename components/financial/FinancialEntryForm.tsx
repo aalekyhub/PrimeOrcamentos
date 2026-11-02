@@ -44,14 +44,14 @@ const FinancialEntryForm: React.FC<FinancialEntryFormProps> = ({
               <button
                 type="button"
                 onClick={() => setFormData({ ...formData, type: 'RECEBER' as any })}
-                className={`py-3 px-2 rounded-xl text-[10px] font-black border-2 transition-all uppercase tracking-tighter ${formData.type === 'RECEBER' ? 'bg-emerald-50 border-emerald-500 text-emerald-600' : 'bg-slate-50 border-transparent text-slate-400 opacity-60'}`}
+                className={`py-3 px-2 rounded-xl text-[12px] font-black border-2 transition-all uppercase tracking-tighter ${formData.type === 'RECEBER' ? 'bg-emerald-50 border-emerald-500 text-emerald-600' : 'bg-slate-50 border-transparent text-slate-400 opacity-60'}`}
               >
                 A RECEBER
               </button>
               <button
                 type="button"
                 onClick={() => setFormData({ ...formData, type: 'PAGAR' as any })}
-                className={`py-3 px-2 rounded-xl text-[10px] font-black border-2 transition-all uppercase tracking-tighter ${formData.type === 'PAGAR' ? 'bg-rose-50 border-rose-500 text-rose-600' : 'bg-slate-50 border-transparent text-slate-400 opacity-60'}`}
+                className={`py-3 px-2 rounded-xl text-[12px] font-black border-2 transition-all uppercase tracking-tighter ${formData.type === 'PAGAR' ? 'bg-rose-50 border-rose-500 text-rose-600' : 'bg-slate-50 border-transparent text-slate-400 opacity-60'}`}
               >
                 A PAGAR
               </button>
@@ -62,7 +62,7 @@ const FinancialEntryForm: React.FC<FinancialEntryFormProps> = ({
                   setFormData({ ...formData, type: 'INVESTIMENTO' as any, category: aporteCat });
                   notify("Tipo Investimento: Categoria ajustada automaticamente.");
                 }}
-                className={`py-3 px-2 rounded-xl text-[10px] font-black border-2 transition-all uppercase tracking-tighter ${formData.type === 'INVESTIMENTO' ? 'bg-indigo-50 border-indigo-500 text-indigo-600' : 'bg-slate-50 border-transparent text-slate-400 opacity-60'}`}
+                className={`py-3 px-2 rounded-xl text-[12px] font-black border-2 transition-all uppercase tracking-tighter ${formData.type === 'INVESTIMENTO' ? 'bg-indigo-50 border-indigo-500 text-indigo-600' : 'bg-slate-50 border-transparent text-slate-400 opacity-60'}`}
               >
                 EMPRÉSTIMO
               </button>
@@ -189,7 +189,7 @@ const FinancialEntryForm: React.FC<FinancialEntryFormProps> = ({
                   className={`h-full px-4 rounded-xl flex items-center gap-2 cursor-pointer transition-all border-2 border-dashed ${formData.attachment ? 'bg-blue-50 border-blue-400 text-blue-600' : 'bg-slate-50 border-slate-200 text-slate-400 hover:border-blue-300'}`}
                 >
                   <FileUp className="w-5 h-5" />
-                  <span className="text-[10px] font-black uppercase">
+                  <span className="text-[12px] font-black uppercase">
                     {formData.attachment ? 'Arquivo Pronto' : 'Anexo'}
                   </span>
                 </label>

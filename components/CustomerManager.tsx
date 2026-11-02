@@ -184,7 +184,7 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, cur
   );
 
   const inputClass = "w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-500 dark:placeholder:text-slate-400";
-  const labelClass = "text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase tracking-widest mb-1.5 block ml-1";
+  const labelClass = "text-[12px] font-black text-blue-700 dark:text-blue-400 uppercase tracking-widest mb-1.5 block ml-1";
 
   return (
     <div className="space-y-6">
@@ -208,7 +208,7 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, cur
             )}
 
             <div className="flex justify-end items-center h-5">
-              <div className={`flex items-center gap-2 text-blue-600 dark:text-blue-400 text-[10px] font-bold transition-opacity duration-200 ${loadingApi ? 'opacity-100' : 'opacity-0'}`}>
+              <div className={`flex items-center gap-2 text-blue-600 dark:text-blue-400 text-[12px] font-bold transition-opacity duration-200 ${loadingApi ? 'opacity-100' : 'opacity-0'}`}>
                 <RefreshCw className="w-3 h-3 animate-spin" /> CONSULTANDO API...
               </div>
             </div>
@@ -348,17 +348,17 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, cur
             <div className="flex justify-between items-center pt-4">
               <div className="flex-1">
                 {(editingCustomerId && !isAdmin) && (
-                  <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-4 py-2 rounded-lg border border-rose-100 w-fit">
+                  <p className="text-[12px] font-black text-rose-500 uppercase tracking-widest bg-rose-50 px-4 py-2 rounded-lg border border-rose-100 w-fit">
                     Modo Visualização: Apenas administradores podem alterar
                   </p>
                 )}
               </div>
               {(isAdmin || !editingCustomerId) ? (
-                <button type="submit" className="bg-blue-600 text-white px-12 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-xl shadow-blue-900/20 hover:scale-[1.02] active:scale-95 transition-all">
+                <button type="submit" className="bg-blue-600 text-white px-12 py-4 rounded-xl font-black uppercase text-[12px] tracking-widest shadow-xl shadow-blue-900/20 hover:scale-[1.02] active:scale-95 transition-all">
                   {editingCustomerId ? 'Salvar Alterações' : 'Salvar Cliente'}
                 </button>
               ) : (
-                <button type="button" onClick={() => { setShowForm(false); if (onCancel) onCancel(); }} className="bg-slate-200 text-slate-500 px-12 py-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-slate-300 transition-all">
+                <button type="button" onClick={() => { setShowForm(false); if (onCancel) onCancel(); }} className="bg-slate-200 text-slate-500 px-12 py-4 rounded-xl font-black uppercase text-[12px] tracking-widest hover:bg-slate-300 transition-all">
                   Fechar Visualização
                 </button>
               )}
@@ -380,7 +380,7 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, cur
               />
             </div>
             {!isAdmin && (
-              <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 rounded-lg border border-amber-100 dark:border-amber-800">
+              <p className="text-[12px] font-black text-amber-500 uppercase tracking-widest bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 rounded-lg border border-amber-100 dark:border-amber-800">
                 Somente Leitura: Administrativo necessário para editar ou excluir
               </p>
             )}
@@ -388,9 +388,9 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, cur
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
-                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest pl-10">Cliente</th>
-                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Localização</th>
-                <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right pr-10">Ações</th>
+                <th className="px-8 py-5 text-[12px] font-black text-slate-400 uppercase tracking-widest pl-10">Cliente</th>
+                <th className="px-8 py-5 text-[12px] font-black text-slate-400 uppercase tracking-widest">Localização</th>
+                <th className="px-8 py-5 text-[12px] font-black text-slate-400 uppercase tracking-widest text-right pr-10">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
@@ -408,9 +408,9 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, cur
                   <td className="px-8 py-6 pl-10">
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-black text-slate-900 dark:text-white uppercase mb-1">{c.name}</p>
-                      {!isAdmin && <span className="text-[8px] font-black text-slate-400 border border-slate-200 px-1 rounded">BLOQUEADO</span>}
+                      {!isAdmin && <span className="text-[11px] font-black text-slate-400 border border-slate-200 px-1 rounded">BLOQUEADO</span>}
                     </div>
-                    <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold tracking-wide">{c.document}</p>
+                    <p className="text-[12px] text-slate-400 dark:text-slate-500 font-bold tracking-wide">{c.document}</p>
                   </td>
                   <td className="px-8 py-6 text-xs text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wide">
                     {c.city && c.state ? `${c.city} - ${c.state}` : <span className="text-slate-300 dark:text-slate-600 italic">Localização n/d</span>}

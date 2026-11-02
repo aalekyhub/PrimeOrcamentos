@@ -131,7 +131,7 @@ export const ResourcesTab = React.memo(({
                                         checked={selectedMaterials.length === materials.length && materials.length > 0}
                                         onChange={(e) => setSelectedMaterials(e.target.checked ? materials.map(m => m.id) : [])}
                                     />
-                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{selectedMaterials.length} SELECIONADO(S)</span>
+                                    <span className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">{selectedMaterials.length} SELECIONADO(S)</span>
                                 </div>
                                 <div className="flex gap-2">
                                     {selectedMaterials.length > 0 && (
@@ -147,7 +147,7 @@ export const ResourcesTab = React.memo(({
                                                     }
                                                 }
                                             }}
-                                            className="flex items-center gap-1 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-[10px] font-bold hover:bg-red-100 transition-all border border-red-100 dark:border-red-800"
+                                            className="flex items-center gap-1 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-[12px] font-bold hover:bg-red-100 transition-all border border-red-100 dark:border-red-800"
                                         >
                                             <Trash2 size={12} /> Excluir Selecionados
                                         </button>
@@ -164,7 +164,7 @@ export const ResourcesTab = React.memo(({
                                                 }
                                             }
                                         }}
-                                        className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[10px] font-bold hover:bg-slate-200 transition-all border border-slate-200 dark:border-slate-700"
+                                        className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[12px] font-bold hover:bg-slate-200 transition-all border border-slate-200 dark:border-slate-700"
                                     >
                                         <Archive size={12} /> Limpar Lista
                                     </button>
@@ -199,7 +199,7 @@ export const ResourcesTab = React.memo(({
                         {materials.length > 0 && (
                             <div className="flex justify-end p-4 bg-blue-50/50 rounded-xl border border-blue-100 mt-4">
                                 <div className="flex items-center gap-2">
-                                    <span className="text-[10px] font-bold text-blue-600 uppercase tracking-widest">Total Materiais</span>
+                                    <span className="text-[12px] font-bold text-blue-600 uppercase tracking-widest">Total Materiais</span>
                                     <span className="text-xl font-black text-blue-700">R$ {(calculations.totalMaterial || 0).toFixed(2)}</span>
                                 </div>
                             </div>
@@ -221,7 +221,7 @@ export const ResourcesTab = React.memo(({
                                         checked={selectedLabor.length === labor.length && labor.length > 0}
                                         onChange={(e) => setSelectedLabor(e.target.checked ? labor.map(l => l.id) : [])}
                                     />
-                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{selectedLabor.length} SELECIONADO(S)</span>
+                                    <span className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">{selectedLabor.length} SELECIONADO(S)</span>
                                 </div>
                                 <div className="flex gap-2">
                                     {selectedLabor.length > 0 && (
@@ -237,7 +237,7 @@ export const ResourcesTab = React.memo(({
                                                     }
                                                 }
                                             }}
-                                            className="flex items-center gap-1 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-[10px] font-bold hover:bg-red-100 transition-all border border-red-100 dark:border-red-800"
+                                            className="flex items-center gap-1 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-[12px] font-bold hover:bg-red-100 transition-all border border-red-100 dark:border-red-800"
                                         >
                                             <Trash2 size={12} /> Excluir Selecionados
                                         </button>
@@ -254,7 +254,7 @@ export const ResourcesTab = React.memo(({
                                                 }
                                             }
                                         }}
-                                        className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[10px] font-bold hover:bg-slate-200 transition-all border border-slate-200 dark:border-slate-700"
+                                        className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[12px] font-bold hover:bg-slate-200 transition-all border border-slate-200 dark:border-slate-700"
                                     >
                                         <Archive size={12} /> Limpar Lista
                                     </button>
@@ -289,7 +289,7 @@ export const ResourcesTab = React.memo(({
                         {labor.length > 0 && (
                             <div className="flex justify-end p-4 bg-amber-50/50 rounded-xl border border-amber-100 mt-4">
                                 <div className="flex items-center gap-2">
-                                    <span className="text-[10px] font-bold text-amber-600 uppercase tracking-widest">Total Mão de Obra</span>
+                                    <span className="text-[12px] font-bold text-amber-600 uppercase tracking-widest">Total Mão de Obra</span>
                                     <span className="text-xl font-black text-amber-700">R$ {(calculations.totalLabor || 0).toFixed(2)}</span>
                                 </div>
                             </div>
@@ -311,7 +311,7 @@ export const ResourcesTab = React.memo(({
                                         checked={selectedIndirects.length === indirects.length && indirects.length > 0}
                                         onChange={(e) => setSelectedIndirects(e.target.checked ? indirects.map(i => i.id) : [])}
                                     />
-                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{selectedIndirects.length} SELECIONADO(S)</span>
+                                    <span className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">{selectedIndirects.length} SELECIONADO(S)</span>
                                 </div>
                                 <div className="flex gap-2">
                                     {selectedIndirects.length > 0 && (
@@ -327,7 +327,7 @@ export const ResourcesTab = React.memo(({
                                                     }
                                                 }
                                             }}
-                                            className="flex items-center gap-1 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-[10px] font-bold hover:bg-red-100 transition-all border border-red-100 dark:border-red-800"
+                                            className="flex items-center gap-1 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-[12px] font-bold hover:bg-red-100 transition-all border border-red-100 dark:border-red-800"
                                         >
                                             <Trash2 size={12} /> Excluir Selecionados
                                         </button>
@@ -344,7 +344,7 @@ export const ResourcesTab = React.memo(({
                                                 }
                                             }
                                         }}
-                                        className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[10px] font-bold hover:bg-slate-200 transition-all border border-slate-200 dark:border-slate-700"
+                                        className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[12px] font-bold hover:bg-slate-200 transition-all border border-slate-200 dark:border-slate-700"
                                     >
                                         <Archive size={12} /> Limpar Lista
                                     </button>
@@ -379,7 +379,7 @@ export const ResourcesTab = React.memo(({
                         {indirects.length > 0 && (
                             <div className="flex justify-end p-4 bg-slate-100/50 rounded-xl border border-slate-200 mt-4">
                                 <div className="flex items-center gap-2">
-                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Total Indiretos</span>
+                                    <span className="text-[12px] font-bold text-slate-500 uppercase tracking-widest">Total Indiretos</span>
                                     <span className="text-xl font-black text-slate-700">R$ {(calculations.totalIndirect || 0).toFixed(2)}</span>
                                 </div>
                             </div>
@@ -393,7 +393,7 @@ export const ResourcesTab = React.memo(({
                             <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Impostos e BDI</h4>
                             <button
                                 onClick={loadDefaultTaxes}
-                                className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded"
+                                className="text-[12px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded"
                             >
                                 Carregar Padrão
                             </button>
@@ -406,7 +406,7 @@ export const ResourcesTab = React.memo(({
 
                                 return (
                                     <div key={name} className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
-                                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">{name} (%)</label>
+                                        <label className="block text-[12px] font-bold text-slate-400 uppercase mb-1">{name} (%)</label>
                                         <input
                                             type="number"
                                             min="0"
@@ -422,7 +422,7 @@ export const ResourcesTab = React.memo(({
                                                 onUpdateTaxes(newTaxes);
                                             }}
                                         />
-                                        <div className="text-[10px] font-black text-blue-600 dark:text-blue-400 text-right">
+                                        <div className="text-[12px] font-black text-blue-600 dark:text-blue-400 text-right">
                                             R$ {taxValue.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                         </div>
                                     </div>

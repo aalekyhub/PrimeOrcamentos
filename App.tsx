@@ -917,7 +917,7 @@ const AppContent: React.FC = () => {
             </button>
 
             <div className="px-5 py-2">
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center">
+              <p className="text-[12px] text-slate-400 font-bold uppercase tracking-widest text-center">
                 Versão {APP_VERSION}
               </p>
             </div>
@@ -939,7 +939,7 @@ const AppContent: React.FC = () => {
             </button>
 
             <div className="flex items-center gap-3">
-              <h2 className="font-semibold text-slate-400 text-[10px] uppercase tracking-[0.2em]">
+              <h2 className="font-semibold text-slate-400 text-[12px] uppercase tracking-[0.2em]">
                 {currentTabLabel}
               </h2>
 
@@ -963,7 +963,7 @@ const AppContent: React.FC = () => {
                 )}
 
                 <span
-                  className={`text-[8px] font-semibold uppercase tracking-tighter ${isSyncing
+                  className={`text-[11px] font-semibold uppercase tracking-tighter ${isSyncing
                       ? 'text-blue-500'
                       : db.isConnected()
                         ? 'text-emerald-600'
@@ -996,7 +996,7 @@ const AppContent: React.FC = () => {
               <p className={darkMode ? 'text-sm font-semibold text-white' : 'text-sm font-semibold text-slate-900'}>
                 {company.name}
               </p>
-              <p className="text-[10px] text-blue-600 font-medium uppercase tracking-widest">
+              <p className="text-[12px] text-blue-600 font-medium uppercase tracking-widest">
                 {new Intl.DateTimeFormat('pt-BR', {
                   day: '2-digit',
                   month: 'short',
@@ -1051,7 +1051,7 @@ const AppContent: React.FC = () => {
                   />
 
                   <span
-                    className={`text-[11px] font-bold truncate ${isActive
+                    className={`text-[12px] font-bold truncate ${isActive
                         ? darkMode
                           ? 'text-blue-400'
                           : 'text-blue-600'

@@ -50,7 +50,7 @@ export const AddMaterialForm: React.FC<AddMaterialFormProps> = ({ onAdd, planId 
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                 <div className="md:col-span-5">
-                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Insumo/Material</label>
+                    <label className="block text-[12px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Insumo/Material</label>
                     <input
                         type="text"
                         value={name}
@@ -61,7 +61,7 @@ export const AddMaterialForm: React.FC<AddMaterialFormProps> = ({ onAdd, planId 
                     />
                 </div>
                 <div className="md:col-span-2">
-                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Qtd</label>
+                    <label className="block text-[12px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Qtd</label>
                     <input
                         type="number" min="0"
                         value={qty}
@@ -72,7 +72,7 @@ export const AddMaterialForm: React.FC<AddMaterialFormProps> = ({ onAdd, planId 
                     />
                 </div>
                 <div className="md:col-span-1">
-                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Un</label>
+                    <label className="block text-[12px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Un</label>
                     <input
                         type="text"
                         value={unit}
@@ -83,7 +83,7 @@ export const AddMaterialForm: React.FC<AddMaterialFormProps> = ({ onAdd, planId 
                     />
                 </div>
                 <div className="md:col-span-2">
-                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Valor Unit.</label>
+                    <label className="block text-[12px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">Valor Unit.</label>
                     <input
                         type="number" min="0"
                         value={cost}

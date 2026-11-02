@@ -604,17 +604,17 @@ const BudgetManager: React.FC<Props> = ({
                 <div className="bg-blue-600 p-2 rounded-xl text-white shadow-md shadow-blue-950/20"><FileText className="w-5 h-5" /></div>
                 <div>
                   <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-0.5">Elaboração de Orçamento Prime</h3>
-                  <p className="text-[9px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-[0.2em]">Configuração de Documento Comercial</p>
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-[0.2em]">Configuração de Documento Comercial</p>
                 </div>
               </div>
               <div className="flex items-center gap-6">
                 {editingBudgetId && (
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-800 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-800 text-[12px] font-black uppercase tracking-widest text-slate-400">
                     ID: {editingBudgetId}
                   </div>
                 )}
                 {!editingBudgetId && (
-                  <button onClick={() => setShowImportModal(true)} className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 px-4 py-2 rounded-xl text-[10px] font-black uppercase flex items-center gap-2 transition-all">
+                  <button onClick={() => setShowImportModal(true)} className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 px-4 py-2 rounded-xl text-[12px] font-black uppercase flex items-center gap-2 transition-all">
                     <Database className="w-4 h-4" /> Importar de Existente
                   </button>
                 )}
@@ -628,9 +628,9 @@ const BudgetManager: React.FC<Props> = ({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <div className="flex justify-between items-center mb-2">
-                        <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase ml-1">Cliente</label>
+                        <label className="text-[12px] font-black text-blue-700 dark:text-blue-400 uppercase ml-1">Cliente</label>
                         {(!editingBudgetId || isAdmin) && (
-                          <button onClick={() => setShowFullClientForm(true)} className="text-blue-600 dark:text-blue-400 text-[10px] font-black uppercase flex items-center gap-1 hover:underline">
+                          <button onClick={() => setShowFullClientForm(true)} className="text-blue-600 dark:text-blue-400 text-[12px] font-black uppercase flex items-center gap-1 hover:underline">
                             <UserPlus className="w-3 h-3" /> Cadastrar Cliente
                           </button>
                         )}
@@ -641,7 +641,7 @@ const BudgetManager: React.FC<Props> = ({
                       </select>
                     </div>
                     <div>
-                      <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-2 block ml-1">Título da Proposta</label>
+                      <label className="text-[12px] font-black text-blue-700 dark:text-blue-400 uppercase mb-2 block ml-1">Título da Proposta</label>
                       <input type="text" placeholder="Ex: Reforma Geral de Ar-Condicionado" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none placeholder:text-slate-500" value={proposalTitle} onChange={e => setProposalTitle(e.target.value)} disabled={editingBudgetId !== null && !isAdmin} />
                     </div>
                   </div>
@@ -651,17 +651,17 @@ const BudgetManager: React.FC<Props> = ({
 
                 <div className="bg-white dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
                   <div className="flex justify-between items-center">
-                    <h4 className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b dark:border-slate-800 pb-2 grow mr-6">ITENS DO ORÇAMENTO</h4>
+                    <h4 className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b dark:border-slate-800 pb-2 grow mr-6">ITENS DO ORÇAMENTO</h4>
                     {(!editingBudgetId || isAdmin) && (
-                      <button onClick={() => setShowFullServiceForm(true)} className="text-blue-600 dark:text-blue-400 text-[8px] font-black uppercase flex items-center gap-1 hover:underline tracking-widest"><Package className="w-3 h-3" /> CATÁLOGO</button>
+                      <button onClick={() => setShowFullServiceForm(true)} className="text-blue-600 dark:text-blue-400 text-[11px] font-black uppercase flex items-center gap-1 hover:underline tracking-widest"><Package className="w-3 h-3" /> CATÁLOGO</button>
                     )}
                   </div>
 
                   <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700 space-y-4">
                     <div>
-                      <label className="text-[8px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest block mb-1.5">Puxar do Catálogo</label>
+                      <label className="text-[11px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest block mb-1.5">Puxar do Catálogo</label>
                       <select
-                        className="w-full bg-white dark:bg-slate-800 border-none rounded-xl p-2.5 text-[10px] font-bold text-slate-500 dark:text-slate-400 outline-none"
+                        className="w-full bg-white dark:bg-slate-800 border-none rounded-xl p-2.5 text-[12px] font-bold text-slate-500 dark:text-slate-400 outline-none"
                         value={selectedCatalogId}
                         onChange={e => {
                           const id = e.target.value;
@@ -686,7 +686,7 @@ const BudgetManager: React.FC<Props> = ({
 
                     <div className="grid grid-cols-1 md:grid-cols-[1fr_80px_80px_110px_56px] gap-2 items-start">
                       <div className="min-w-0">
-                        <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center ml-1">Descrição</label>
+                        <label className="text-[12px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center ml-1">Descrição</label>
                         <textarea
                           placeholder="Ex: Reforma Geral de Ar-Condicionado"
                           className={`w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl py-2 px-4 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none placeholder:text-slate-500 resize-none h-[44px] ${editingBudgetId !== null && !isAdmin ? 'opacity-70' : ''}`}
@@ -696,15 +696,15 @@ const BudgetManager: React.FC<Props> = ({
                         />
                       </div>
                       <div className="text-center">
-                        <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Unit</label>
+                        <label className="text-[12px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Unit</label>
                         <input type="text" className={`w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl h-[44px] text-xs font-black text-center outline-none uppercase text-slate-900 dark:text-slate-100 ${editingBudgetId !== null && !isAdmin ? 'opacity-70' : ''}`} value={currentUnit} onChange={e => setCurrentUnit(e.target.value)} disabled={editingBudgetId !== null && !isAdmin} />
                       </div>
                       <div className="text-center">
-                        <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Qtd</label>
+                        <label className="text-[12px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Qtd</label>
                         <input type="number" min={1} className={`w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl h-[44px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100 ${editingBudgetId !== null && !isAdmin ? 'opacity-70' : ''}`} value={currentQty} onChange={e => setCurrentQty(Math.max(0, toNumber(e.target.value)))} disabled={editingBudgetId !== null && !isAdmin} />
                       </div>
                       <div className="text-center">
-                        <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Preço</label>
+                        <label className="text-[12px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Preço</label>
                         <input type="number" min={0} step="0.01" className={`w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl h-[44px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100 placeholder:text-slate-500 ${editingBudgetId !== null && !isAdmin ? 'opacity-70' : ''}`} value={currentPrice} onChange={e => { setCurrentPrice(Math.max(0, toNumber(e.target.value))); }} disabled={editingBudgetId !== null && !isAdmin} />
                       </div>
                       <div>
@@ -771,7 +771,7 @@ const BudgetManager: React.FC<Props> = ({
 
                           <div className="min-w-0">
                             <textarea
-                              className="w-full bg-transparent text-[10px] font-black text-slate-900 dark:text-slate-100 uppercase outline-none focus:bg-slate-50 dark:focus:bg-slate-800/50 rounded px-1 transition-all resize-none break-words leading-tight h-[32px] py-1.5"
+                              className="w-full bg-transparent text-[12px] font-black text-slate-900 dark:text-slate-100 uppercase outline-none focus:bg-slate-50 dark:focus:bg-slate-800/50 rounded px-1 transition-all resize-none break-words leading-tight h-[32px] py-1.5"
                               value={item.description}
                               onChange={e => updateItem(item.id, 'description', e.target.value)}
                               disabled={editingBudgetId !== null && !isAdmin}
@@ -780,19 +780,19 @@ const BudgetManager: React.FC<Props> = ({
                           </div>
 
                           <div className="text-center">
-                            <input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-transparent focus:border-slate-200 dark:focus:border-slate-700 rounded h-[32px] text-[10px] font-bold text-center outline-none uppercase text-slate-900 dark:text-slate-100" value={item.unit} onChange={e => updateItem(item.id, 'unit', e.target.value)} />
+                            <input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-transparent focus:border-slate-200 dark:focus:border-slate-700 rounded h-[32px] text-[12px] font-bold text-center outline-none uppercase text-slate-900 dark:text-slate-100" value={item.unit} onChange={e => updateItem(item.id, 'unit', e.target.value)} />
                           </div>
 
                           <div className="text-center">
-                            <input type="number" min={1} className="w-full bg-slate-50 dark:bg-slate-800 border border-transparent focus:border-slate-200 dark:focus:border-slate-700 rounded h-[32px] text-[10px] font-bold text-center outline-none text-slate-900 dark:text-slate-100" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', Math.max(1, Number(e.target.value)))} />
+                            <input type="number" min={1} className="w-full bg-slate-50 dark:bg-slate-800 border border-transparent focus:border-slate-200 dark:focus:border-slate-700 rounded h-[32px] text-[12px] font-bold text-center outline-none text-slate-900 dark:text-slate-100" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', Math.max(1, Number(e.target.value)))} />
                           </div>
 
                           <div className="text-center">
-                            <input type="number" min={0} step="0.01" className="w-full bg-slate-50 dark:bg-slate-800 border border-transparent focus:border-slate-200 dark:focus:border-slate-700 rounded h-[32px] text-[10px] font-bold text-center outline-none text-slate-900 dark:text-slate-100" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', Math.max(0, toNumber(e.target.value)))} />
+                            <input type="number" min={0} step="0.01" className="w-full bg-slate-50 dark:bg-slate-800 border border-transparent focus:border-slate-200 dark:focus:border-slate-700 rounded h-[32px] text-[12px] font-bold text-center outline-none text-slate-900 dark:text-slate-100" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', Math.max(0, toNumber(e.target.value)))} />
                           </div>
 
                           <div className="text-right">
-                            <div className="bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100/50 dark:border-blue-900/20 rounded h-[32px] flex items-center justify-end px-2 text-[11px] font-black text-blue-600 dark:text-blue-400">
+                            <div className="bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100/50 dark:border-blue-900/20 rounded h-[32px] flex items-center justify-end px-2 text-[12px] font-black text-blue-600 dark:text-blue-400">
                               {Number((safeNumber(item.unitPrice) * safeNumber(item.quantity)).toFixed(2)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                             </div>
                           </div>
@@ -809,7 +809,7 @@ const BudgetManager: React.FC<Props> = ({
                     {items.length > 0 && (
                       <div className="flex justify-end pt-2">
                         <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl px-6 py-3 flex items-center gap-4 shadow-sm">
-                          <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Subtotal dos Itens</span>
+                          <span className="text-[12px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Subtotal dos Itens</span>
                           <span className="text-lg font-black text-slate-900 dark:text-white whitespace-nowrap">R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>
                       </div>
@@ -888,7 +888,7 @@ const BudgetManager: React.FC<Props> = ({
             <div className="p-6 border-b dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
               <div>
                 <h3 className="font-black text-slate-800 dark:text-white uppercase tracking-tight">Importar Dados de Orçamento</h3>
-                <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest">Selecione um orçamento para copiar itens e descrição</p>
+                <p className="text-[12px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest">Selecione um orçamento para copiar itens e descrição</p>
               </div>
               <button onClick={() => setShowImportModal(false)}><X className="w-5 h-5 text-slate-400 hover:text-rose-500" /></button>
             </div>
@@ -928,7 +928,7 @@ const BudgetManager: React.FC<Props> = ({
                     className="w-full text-left p-4 rounded-2xl border border-slate-100 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all group flex justify-between items-center"
                   >
                     <div>
-                      <p className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-1">{budget.id}</p>
+                      <p className="text-[12px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-1">{budget.id}</p>
                       <p className="font-bold text-slate-900 dark:text-slate-100">{budget.description}</p>
                       <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{budget.customerName}</p>
                     </div>
@@ -939,7 +939,7 @@ const BudgetManager: React.FC<Props> = ({
               {orders.filter(o => o.status === OrderStatus.PENDING || o.status === OrderStatus.APPROVED).length === 0 && (
                 <div className="text-center py-12">
                   <Database className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-                  <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Nenhum orçamento disponível para importação</p>
+                  <p className="text-slate-400 font-bold uppercase text-[12px] tracking-widest">Nenhum orçamento disponível para importação</p>
                 </div>
               )}
             </div>
@@ -1026,8 +1026,8 @@ const PaymentTypeModal: React.FC<{
             <div className="grid grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700">
               <div className="col-span-2">
                 <div className="flex justify-between mb-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase">Valor Total</span>
-                  <span className="text-[10px] font-black text-slate-900 dark:text-white whitespace-nowrap">{totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                  <span className="text-[12px] font-bold text-slate-400 uppercase">Valor Total</span>
+                  <span className="text-[12px] font-black text-slate-900 dark:text-white whitespace-nowrap">{totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                 </div>
                 <div className="h-1 w-full bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                   <div className="h-full bg-blue-500" style={{ width: `${totalValue > 0 ? Math.min(100, (entryValue / totalValue) * 100) : 0}%` }}></div>
@@ -1036,7 +1036,7 @@ const PaymentTypeModal: React.FC<{
 
               <div className="grid grid-cols-2 gap-2 col-span-2">
                 <div>
-                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Entrada (%)</label>
+                  <label className="text-[12px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Entrada (%)</label>
                   <input
                     type="number"
                     min={0}
@@ -1051,7 +1051,7 @@ const PaymentTypeModal: React.FC<{
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Entrada (R$)</label>
+                  <label className="text-[12px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Entrada (R$)</label>
                   <input
                     type="number"
                     min={0}
@@ -1069,7 +1069,7 @@ const PaymentTypeModal: React.FC<{
               </div>
 
               <div className="col-span-2">
-                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Parcelas</label>
+                <label className="text-[12px] font-bold text-slate-500 dark:text-slate-400 uppercase block mb-1">Parcelas</label>
                 <div className="flex items-center gap-2">
                   <button onClick={() => setInstallments(Math.max(1, installments - 1))} className="w-8 h-8 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-700 font-bold text-slate-600 dark:text-slate-400">-</button>
                   <span className="flex-1 text-center font-black text-slate-900 dark:text-white text-lg">{installments}x</span>

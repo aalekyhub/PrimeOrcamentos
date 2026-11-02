@@ -109,20 +109,20 @@ const SinapiImporter: React.FC = () => {
 
                     <div className="grid grid-cols-2 gap-4 mb-6">
                         <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Insumos</p>
+                            <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest mb-1">Insumos</p>
                             <p className="text-2xl font-black text-slate-900">{metadata.insumosCount.toLocaleString()}</p>
                         </div>
                         <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Composições</p>
+                            <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest mb-1">Composições</p>
                             <p className="text-2xl font-black text-slate-900">{metadata.composicoesCount.toLocaleString()}</p>
                         </div>
                     </div>
 
                     <div className="space-y-2">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Datasets Ativos:</p>
+                        <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest ml-1">Datasets Ativos:</p>
                         <div className="flex flex-wrap gap-2">
                             {metadata.datasets.map(d => (
-                                <span key={d} className="bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-full text-[10px] font-black uppercase border border-indigo-100">
+                                <span key={d} className="bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-full text-[12px] font-black uppercase border border-indigo-100">
                                     {d}
                                 </span>
                             ))}
@@ -133,7 +133,7 @@ const SinapiImporter: React.FC = () => {
 
             <div className="flex items-start gap-3 p-5 bg-blue-50/50 rounded-2xl border border-blue-100">
                 <AlertCircle className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
-                <div className="text-[11px] text-blue-700 leading-relaxed font-medium">
+                <div className="text-[12px] text-blue-700 leading-relaxed font-medium">
                     <p className="font-black uppercase tracking-widest mb-1">Aviso de Privacidade</p>
                     Estes dados são armazenados localmente no seu navegador (IndexedDB) e NÃO são enviados para a nuvem. Isso garante performance e privacidade.
                 </div>

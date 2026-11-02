@@ -232,7 +232,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
             <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm overflow-x-auto">
                 <table className="w-full text-left">
-                    <thead className="bg-slate-50 dark:bg-slate-800/50 text-[10px] font-black uppercase text-slate-400 border-b dark:border-slate-800">
+                    <thead className="bg-slate-50 dark:bg-slate-800/50 text-[12px] font-black uppercase text-slate-400 border-b dark:border-slate-800">
                         <tr><th className="px-8 py-5">OS #</th><th className="px-8 py-5">CLIENTE</th><th className="px-8 py-5">OBRA / DESCRIÇÃO</th><th className="px-8 py-5 text-right">AÇÕES</th></tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -286,8 +286,8 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                 <div>
                                     <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-0.5">{editingOrderId ? `Editando Obra ${editingOrderId}` : 'Nova OS de Obra'}</h3>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-[10px] font-black uppercase tracking-widest bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-md">Construção Civil</span>
-                                        {editingOrderId && !isAdmin && <span className="text-[10px] font-black uppercase tracking-widest text-rose-500 border-l pl-2 dark:border-slate-800">BLOQUEADO</span>}
+                                        <span className="text-[12px] font-black uppercase tracking-widest bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-md">Construção Civil</span>
+                                        {editingOrderId && !isAdmin && <span className="text-[12px] font-black uppercase tracking-widest text-rose-500 border-l pl-2 dark:border-slate-800">BLOQUEADO</span>}
                                     </div>
                                 </div>
                             </div>
@@ -300,9 +300,9 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <div className="flex justify-between items-center mb-2">
-                                                <label className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest ml-1">Cliente</label>
+                                                <label className="text-[11px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest ml-1">Cliente</label>
                                                 {(!editingOrderId || isAdmin) && (
-                                                    <button onClick={() => setShowFullClientForm(true)} className="text-blue-600 dark:text-blue-400 text-[9px] font-black uppercase flex items-center gap-1 hover:underline"><UserPlus className="w-3 h-3" /> Novo</button>
+                                                    <button onClick={() => setShowFullClientForm(true)} className="text-blue-600 dark:text-blue-400 text-[11px] font-black uppercase flex items-center gap-1 hover:underline"><UserPlus className="w-3 h-3" /> Novo</button>
                                                 )}
                                             </div>
                                             <select className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500 transition-all custom-select" value={selectedCustomerId} onChange={e => setSelectedCustomerId(e.target.value)} disabled={editingOrderId !== null && !isAdmin}>
@@ -311,23 +311,23 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                             </select>
                                         </div>
                                         <div>
-                                            <label className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-2 block ml-1">Título da Obra</label>
+                                            <label className="text-[11px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-2 block ml-1">Título da Obra</label>
                                             <input type="text" placeholder="Ex: Reforma da Cozinha" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500" value={osTitle} onChange={e => setOsTitle(e.target.value)} disabled={editingOrderId !== null && !isAdmin} />
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm">
-                                    <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Observações Técnicas e Escopo Detalhado</label>
+                                    <label className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Observações Técnicas e Escopo Detalhado</label>
                                     <RichTextEditor value={diagnosis} onChange={setDiagnosis} placeholder="Descreva os serviços a serem executados por extenso..." disabled={editingOrderId !== null && !isAdmin} />
                                 </div>
 
                                 <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
-                                    <div className="flex justify-between items-center mb-4"><h4 className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b dark:border-slate-800 pb-2 grow mr-4">Peças e Serviços</h4></div>
+                                    <div className="flex justify-between items-center mb-4"><h4 className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b dark:border-slate-800 pb-2 grow mr-4">Peças e Serviços</h4></div>
                                     <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
                                         <div className="grid grid-cols-1 md:grid-cols-[1fr_110px_80px_56px] gap-2 items-start">
                                             <div className="min-w-0">
-                                                <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center ml-1">Descrição do Item</label>
+                                                <label className="text-[12px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center ml-1">Descrição do Item</label>
                                                 <textarea
                                                     placeholder="Descreva o item ou serviço..."
                                                     className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl py-2 px-4 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none resize-none h-[44px]"
@@ -336,11 +336,11 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                 />
                                             </div>
                                             <div className="text-center">
-                                                <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Valor Unit.</label>
+                                                <label className="text-[12px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Valor Unit.</label>
                                                 <input type="number" className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 h-[44px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100" value={currentPrice} onChange={e => setCurrentPrice(toNumber(e.target.value))} />
                                             </div>
                                             <div className="text-center">
-                                                <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Quantidade</label>
+                                                <label className="text-[12px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Quantidade</label>
                                                 <input type="number" className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 h-[44px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100" value={currentQty} onChange={e => setCurrentQty(toNumber(e.target.value))} disabled={editingOrderId !== null && !isAdmin} />
                                             </div>
                                             <div>
@@ -357,7 +357,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
                                                     <div className="min-w-0">
                                                         <textarea
-                                                            className="w-full bg-transparent text-[10px] font-black text-slate-900 dark:text-slate-100 uppercase outline-none focus:bg-slate-50 dark:focus:bg-slate-800/50 rounded px-1 transition-all resize-none break-words leading-tight h-[32px] py-1.5"
+                                                            className="w-full bg-transparent text-[12px] font-black text-slate-900 dark:text-slate-100 uppercase outline-none focus:bg-slate-50 dark:focus:bg-slate-800/50 rounded px-1 transition-all resize-none break-words leading-tight h-[32px] py-1.5"
                                                             value={item.description}
                                                             onChange={e => updateItem(item.id, 'description', e.target.value)}
                                                             disabled={editingOrderId !== null && !isAdmin}
@@ -366,15 +366,15 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                     </div>
 
                                                     <div className="text-center">
-                                                        <input type="number" className="w-full bg-slate-50 dark:bg-slate-800 border border-transparent focus:border-slate-200 dark:focus:border-slate-700 rounded h-[32px] text-[10px] font-bold text-center outline-none text-slate-900 dark:text-slate-100" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', toNumber(e.target.value))} />
+                                                        <input type="number" className="w-full bg-slate-50 dark:bg-slate-800 border border-transparent focus:border-slate-200 dark:focus:border-slate-700 rounded h-[32px] text-[12px] font-bold text-center outline-none text-slate-900 dark:text-slate-100" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', toNumber(e.target.value))} />
                                                     </div>
 
                                                     <div className="text-center">
-                                                        <input type="number" className="w-full bg-slate-50 dark:bg-slate-800 border border-transparent focus:border-slate-200 dark:focus:border-slate-700 rounded h-[32px] text-[10px] font-bold text-center outline-none text-slate-900 dark:text-slate-100" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', toNumber(e.target.value))} />
+                                                        <input type="number" className="w-full bg-slate-50 dark:bg-slate-800 border border-transparent focus:border-slate-200 dark:focus:border-slate-700 rounded h-[32px] text-[12px] font-bold text-center outline-none text-slate-900 dark:text-slate-100" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', toNumber(e.target.value))} />
                                                     </div>
 
                                                     <div className="text-right">
-                                                        <div className="bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100/50 dark:border-blue-900/20 rounded h-[32px] flex items-center justify-end px-2 text-[11px] font-black text-blue-600 dark:text-blue-400">
+                                                        <div className="bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100/50 dark:border-blue-900/20 rounded h-[32px] flex items-center justify-end px-2 text-[12px] font-black text-blue-600 dark:text-blue-400">
                                                             {(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                                                         </div>
                                                     </div>
@@ -392,7 +392,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
                                 <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
                                     <div className="flex justify-between items-center mb-2">
-                                        <h4 className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b dark:border-slate-800 pb-2 grow mr-6">FOTOS E ANEXOS DA OBRA</h4>
+                                        <h4 className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b dark:border-slate-800 pb-2 grow mr-6">FOTOS E ANEXOS DA OBRA</h4>
                                     </div>
                                     {descriptionBlocks.length === 0 && (!editingOrderId || isAdmin) && (
                                         <div className="bg-slate-50 dark:bg-slate-800/50 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-[2rem] p-8 flex flex-col items-center justify-center gap-4 group hover:border-blue-400 transition-colors cursor-pointer" onClick={addTextBlock}>
@@ -425,7 +425,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                                     ) : (
                                                         <label className={`flex flex-col items-center justify-center gap-2 p-8 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl w-full ${editingOrderId !== null && !isAdmin ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}>
                                                             <Upload className="w-8 h-8 text-blue-500" />
-                                                            <span className="text-[10px] font-black text-slate-400 uppercase">Subir Foto</span>
+                                                            <span className="text-[12px] font-black text-slate-400 uppercase">Subir Foto</span>
                                                             <input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(block.id, e)} disabled={editingOrderId !== null && !isAdmin} />
                                                         </label>
                                                     )}
@@ -439,18 +439,18 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
 
                             <div className="w-full lg:w-[380px] bg-slate-50 dark:bg-slate-950 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-slate-800 p-8 flex flex-col shrink-0 relative overflow-hidden h-auto lg:h-full">
                                 <div className="mb-6 p-6 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl shadow-sm text-center relative overflow-hidden">
-                                    <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">Valor Total Fechado</p>
+                                    <p className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">Valor Total Fechado</p>
                                     <div className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter mb-1 whitespace-nowrap">R$ {contractPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                                    <p className="text-[8px] text-slate-400">Total Receita do Contrato</p>
+                                    <p className="text-[11px] text-slate-400">Total Receita do Contrato</p>
                                 </div>
 
                                 <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-4 mb-6">
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase">Total de Itens</span>
+                                        <span className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase">Total de Itens</span>
                                         <span className="text-sm font-black text-slate-900 dark:text-white">{items.length}</span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Subtotal de Custos</span>
+                                        <span className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Subtotal de Custos</span>
                                         <span className="text-lg font-black text-slate-900 dark:text-white">R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                                     </div>
                                 </div>

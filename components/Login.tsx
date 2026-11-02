@@ -70,7 +70,7 @@ const Login: React.FC<Props> = ({ company, onSync, isSyncing, isConnected }) => 
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Seu E-mail</label>
+              <label className="text-[12px] font-bold text-slate-400 uppercase tracking-widest ml-1">Seu E-mail</label>
               <div className="relative">
                 <Mail className="absolute left-4 top-3.5 w-5 h-5 text-slate-300" />
                 <input
@@ -85,7 +85,7 @@ const Login: React.FC<Props> = ({ company, onSync, isSyncing, isConnected }) => 
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Sua Senha</label>
+              <label className="text-[12px] font-bold text-slate-400 uppercase tracking-widest ml-1">Sua Senha</label>
               <div className="relative">
                 <Lock className="absolute left-4 top-3.5 w-5 h-5 text-slate-300" />
                 <input
@@ -132,12 +132,12 @@ const Login: React.FC<Props> = ({ company, onSync, isSyncing, isConnected }) => 
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-all ${isSyncing ? 'bg-blue-50 border-blue-100' : isConnected ? 'bg-emerald-50 border-emerald-100 hover:bg-emerald-100' : 'bg-slate-50 border-slate-100'}`}
               >
                 <div className={`w-2 h-2 rounded-full ${isSyncing ? 'bg-blue-500 animate-pulse' : isConnected ? 'bg-emerald-500' : 'bg-slate-300'}`} />
-                <span className={`text-[10px] font-bold uppercase tracking-widest ${isSyncing ? 'text-blue-600' : isConnected ? 'text-emerald-600' : 'text-slate-400'}`}>
+                <span className={`text-[12px] font-bold uppercase tracking-widest ${isSyncing ? 'text-blue-600' : isConnected ? 'text-emerald-600' : 'text-slate-400'}`}>
                   {isSyncing ? 'Sincronizando...' : isConnected ? 'Nuvem Conectada' : 'Modo Offline'}
                 </span>
               </button>
             </div>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center justify-center gap-2">
+            <p className="text-[12px] text-slate-400 font-bold uppercase tracking-widest flex items-center justify-center gap-2">
               Segurança Prime &copy; 2024 • Ver: {APP_VERSION}
             </p>
           </div>

@@ -56,7 +56,7 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onAdd, planId })
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                 <div className="md:col-span-4">
-                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
+                    <label className="block text-[12px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
                         Descrição
                     </label>
                     <input
@@ -69,7 +69,7 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onAdd, planId })
                     />
                 </div>
                 <div className="md:col-span-1">
-                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
+                    <label className="block text-[12px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
                         Qtd
                     </label>
                     <input
@@ -82,7 +82,7 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onAdd, planId })
                     />
                 </div>
                 <div className="md:col-span-1">
-                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
+                    <label className="block text-[12px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
                         Un
                     </label>
                     <input
@@ -95,7 +95,7 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onAdd, planId })
                     />
                 </div>
                 <div className="md:col-span-2">
-                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
+                    <label className="block text-[12px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
                         Unit. Mat.
                     </label>
                     <input
@@ -108,7 +108,7 @@ export const AddServiceForm: React.FC<AddServiceFormProps> = ({ onAdd, planId })
                     />
                 </div>
                 <div className="md:col-span-2">
-                    <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
+                    <label className="block text-[12px] font-bold text-slate-500 dark:text-slate-400 uppercase mb-1">
                         Unit. M.O.
                     </label>
                     <input

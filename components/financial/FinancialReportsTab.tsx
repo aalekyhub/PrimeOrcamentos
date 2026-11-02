@@ -32,7 +32,7 @@ const FinancialReportsTab: React.FC<FinancialReportsTabProps> = ({
           <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-widest flex items-center gap-3">
             <PieChart className="text-blue-500" /> DRE Gerencial
           </h3>
-          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Demonstrativo de Resultados do Exercício • Ano {selectedYear}</p>
+          <p className="text-[12px] text-slate-400 font-bold uppercase tracking-widest mt-1">Demonstrativo de Resultados do Exercício • Ano {selectedYear}</p>
         </div>
         <div className="flex items-center gap-3">
             <button 
@@ -160,7 +160,7 @@ const FinancialReportsTab: React.FC<FinancialReportsTabProps> = ({
             return partners.map(([name, total]) => (
               <div key={name} className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-indigo-100 dark:border-indigo-900 shadow-sm flex items-center justify-between">
                 <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{name}</p>
+                  <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest mb-1">{name}</p>
                   <p className="text-lg font-black text-indigo-600">R$ {total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                 </div>
                 <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/50 rounded-xl flex items-center justify-center text-indigo-600">
@@ -178,17 +178,17 @@ const FinancialReportsTab: React.FC<FinancialReportsTabProps> = ({
           <table className="w-full text-left border-collapse min-w-[1200px]">
             <thead>
               <tr className="bg-slate-50 dark:bg-slate-900/50">
-                <th className="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest sticky left-0 z-20 bg-slate-50 dark:bg-slate-900 shadow-[2px_0_5px_rgba(0,0,0,0.05)]">Descrição / Categoria</th>
+                <th className="p-6 text-[12px] font-black text-slate-400 uppercase tracking-widest sticky left-0 z-20 bg-slate-50 dark:bg-slate-900 shadow-[2px_0_5px_rgba(0,0,0,0.05)]">Descrição / Categoria</th>
                 {monthsKeys.map(m => (
-                  <th key={m} className="p-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center border-l border-slate-100 dark:border-slate-800">{m}</th>
+                  <th key={m} className="p-4 text-[12px] font-black text-slate-400 uppercase tracking-widest text-center border-l border-slate-100 dark:border-slate-800">{m}</th>
                 ))}
-                <th className="p-4 text-[10px] font-black text-blue-500 uppercase tracking-widest text-center border-l-2 border-slate-100 dark:border-slate-800 bg-blue-50/30">Total</th>
+                <th className="p-4 text-[12px] font-black text-blue-500 uppercase tracking-widest text-center border-l-2 border-slate-100 dark:border-slate-800 bg-blue-50/30">Total</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {/* RECEITAS SECTION */}
               <tr className="bg-emerald-50/30 dark:bg-emerald-900/10">
-                <td colSpan={14} className="p-4 px-6 text-[10px] font-black text-emerald-600 uppercase tracking-widest">1. Faturamento Total (Prest. Serviços)</td>
+                <td colSpan={14} className="p-4 px-6 text-[12px] font-black text-emerald-600 uppercase tracking-widest">1. Faturamento Total (Prest. Serviços)</td>
               </tr>
               {categories.filter(c => c.type === 'RECEITA' && !isAporte(c.name)).map(cat => {
                 let catTotal = 0;
@@ -225,7 +225,7 @@ const FinancialReportsTab: React.FC<FinancialReportsTabProps> = ({
 
               {/* DESPESAS SECTION */}
               <tr className="bg-rose-50/30 dark:bg-rose-900/10">
-                <td colSpan={14} className="p-4 px-6 text-[10px] font-black text-rose-600 uppercase tracking-widest">2. Despesas Operacionais</td>
+                <td colSpan={14} className="p-4 px-6 text-[12px] font-black text-rose-600 uppercase tracking-widest">2. Despesas Operacionais</td>
               </tr>
               {categories.filter(c => c.type === 'DESPESA').map(cat => {
                 let catTotal = 0;
@@ -279,13 +279,13 @@ const FinancialReportsTab: React.FC<FinancialReportsTabProps> = ({
 
               {/* APORTES SECTION */}
               <tr className="bg-indigo-50/20 dark:bg-indigo-900/5">
-                <td colSpan={14} className="p-4 px-6 text-[10px] font-black text-indigo-500 uppercase tracking-widest italic">3. Fluxo de Capital (Aportes/Empréstimos)</td>
+                <td colSpan={14} className="p-4 px-6 text-[12px] font-black text-indigo-500 uppercase tracking-widest italic">3. Fluxo de Capital (Aportes/Empréstimos)</td>
               </tr>
               {categories.filter(c => isAporte(c.name)).map(cat => {
                 let catTotal = 0;
                 return (
                   <tr key={cat.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors italic">
-                    <td className="p-4 px-10 text-[11px] font-bold text-slate-400 dark:text-slate-500 sticky left-0 z-20 bg-white dark:bg-slate-800 border-r border-slate-100 dark:border-slate-800">{cat.name}</td>
+                    <td className="p-4 px-10 text-[12px] font-bold text-slate-400 dark:text-slate-500 sticky left-0 z-20 bg-white dark:bg-slate-800 border-r border-slate-100 dark:border-slate-800">{cat.name}</td>
                     {monthsKeys.map((_, i) => {
                       const monthIdx = i + 1;
                       const monthFix = monthIdx < 10 ? `0${monthIdx}` : `${monthIdx}`;

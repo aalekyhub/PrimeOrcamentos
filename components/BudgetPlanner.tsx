@@ -139,7 +139,7 @@ const BudgetPlanner: React.FC<Props> = ({ setOrders, customers }) => {
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-slate-900">{item.description}</p>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{item.type}</p>
+                      <p className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">{item.type}</p>
                     </div>
                   </div>
                   <div className="text-right">

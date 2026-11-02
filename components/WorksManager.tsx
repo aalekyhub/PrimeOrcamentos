@@ -290,7 +290,7 @@ const SelectionBar: React.FC<SelectionBarProps> = ({
                 checked={count === total && total > 0}
                 onChange={onToggleAll}
             />
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+            <span className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">
                 {count} SELECIONADO(S)
             </span>
         </div>
@@ -298,14 +298,14 @@ const SelectionBar: React.FC<SelectionBarProps> = ({
             {count > 0 && (
                 <button
                     onClick={onDeleteSelected}
-                    className="flex items-center gap-1 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-[10px] font-bold hover:bg-red-100 transition-all border border-red-100 dark:border-red-800"
+                    className="flex items-center gap-1 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-[12px] font-bold hover:bg-red-100 transition-all border border-red-100 dark:border-red-800"
                 >
                     <Trash2 size={12} /> Excluir Selecionados
                 </button>
             )}
             <button
                 onClick={onClearAll}
-                className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[10px] font-bold hover:bg-slate-200 transition-all border border-slate-200 dark:border-slate-700"
+                className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[12px] font-bold hover:bg-slate-200 transition-all border border-slate-200 dark:border-slate-700"
             >
                 <Archive size={12} /> Limpar Lista
             </button>
@@ -868,7 +868,7 @@ const WorksManager: React.FC<Props> = ({
                         />
                         <div className="grow">
                             <p className="font-bold text-slate-800 dark:text-slate-100 uppercase text-sm">{m.material_name}</p>
-                            <p className="text-[10px] text-slate-500 uppercase">
+                            <p className="text-[12px] text-slate-500 uppercase">
                                 {m.quantity} {m.unit} x R$ {(m.unit_cost || 0).toFixed(2)}
                             </p>
                         </div>
@@ -888,7 +888,7 @@ const WorksManager: React.FC<Props> = ({
             renderEdit={(data, update) => (
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-2 w-full">
                     <div className="md:col-span-2">
-                        <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Material</label>
+                        <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Material</label>
                         <input
                             type="text"
                             value={data.material_name || ''}
@@ -897,7 +897,7 @@ const WorksManager: React.FC<Props> = ({
                         />
                     </div>
                     <div className="md:col-span-1">
-                        <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Qtd</label>
+                        <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Qtd</label>
                         <input
                             type="number" min="0"
                             value={data.quantity || 0}
@@ -906,7 +906,7 @@ const WorksManager: React.FC<Props> = ({
                         />
                     </div>
                     <div className="md:col-span-1">
-                        <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Un</label>
+                        <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Un</label>
                         <input
                             type="text"
                             value={data.unit || ''}
@@ -915,7 +915,7 @@ const WorksManager: React.FC<Props> = ({
                         />
                     </div>
                     <div className="md:col-span-1">
-                        <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Valor Unit.</label>
+                        <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Valor Unit.</label>
                         <input
                             type="number" min="0"
                             value={data.unit_cost || 0}
@@ -961,7 +961,7 @@ const WorksManager: React.FC<Props> = ({
                         />
                         <div className="grow">
                             <p className="font-bold text-slate-800 dark:text-slate-100 uppercase text-sm">{l.role}</p>
-                            <p className="text-[10px] text-slate-500 uppercase">
+                            <p className="text-[12px] text-slate-500 uppercase">
                                 {l.quantity} {l.unit || 'un'} x R$ {(l.unit_cost || 0).toFixed(2)}
                             </p>
                         </div>
@@ -981,7 +981,7 @@ const WorksManager: React.FC<Props> = ({
             renderEdit={(data, update) => (
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-2 w-full">
                     <div className="md:col-span-2">
-                        <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Função</label>
+                        <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Função</label>
                         <input
                             type="text"
                             value={data.role || ''}
@@ -990,7 +990,7 @@ const WorksManager: React.FC<Props> = ({
                         />
                     </div>
                     <div>
-                        <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Qtd</label>
+                        <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Qtd</label>
                         <input
                             type="number" min="0"
                             value={data.quantity || 0}
@@ -999,7 +999,7 @@ const WorksManager: React.FC<Props> = ({
                         />
                     </div>
                     <div>
-                        <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Un</label>
+                        <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Un</label>
                         <input
                             type="text"
                             value={data.unit || ''}
@@ -1008,7 +1008,7 @@ const WorksManager: React.FC<Props> = ({
                         />
                     </div>
                     <div>
-                        <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Valor Unit.</label>
+                        <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Valor Unit.</label>
                         <input
                             type="number" min="0"
                             value={data.unit_cost || 0}
@@ -1047,7 +1047,7 @@ const WorksManager: React.FC<Props> = ({
                         />
                         <div className="grow">
                             <p className="font-bold text-slate-800 dark:text-slate-100 uppercase text-sm">{i.description}</p>
-                            {i.category && <span className="text-[9px] font-black uppercase text-slate-400 bg-slate-100 dark:bg-slate-800 dark:text-slate-400 px-1.5 py-0.5 rounded">{i.category}</span>}
+                            {i.category && <span className="text-[11px] font-black uppercase text-slate-400 bg-slate-100 dark:bg-slate-800 dark:text-slate-400 px-1.5 py-0.5 rounded">{i.category}</span>}
                         </div>
                     </div>
                     <div className="w-24 text-right mr-4 font-black text-slate-700 dark:text-slate-200">
@@ -1058,7 +1058,7 @@ const WorksManager: React.FC<Props> = ({
             renderEdit={(data, update) => (
                 <div className="grid grid-cols-1 md:grid-cols-6 gap-2 w-full">
                     <div className="md:col-span-4">
-                        <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Descrição</label>
+                        <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Descrição</label>
                         <input
                             type="text"
                             value={data.description || ''}
@@ -1067,7 +1067,7 @@ const WorksManager: React.FC<Props> = ({
                         />
                     </div>
                     <div className="md:col-span-2">
-                        <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Valor</label>
+                        <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Valor</label>
                         <input
                             type="number" min="0"
                             value={data.value || 0}
@@ -1129,7 +1129,7 @@ const WorksManager: React.FC<Props> = ({
                                         </p>
                                     </div>
 
-                                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${work.status === 'Concluída'
+                                    <span className={`px-2.5 py-1 rounded-full text-[12px] font-black uppercase tracking-wider ${work.status === 'Concluída'
                                         ? 'bg-emerald-100 text-emerald-700'
                                         : 'bg-green-100 text-green-700'
                                         }`}>
@@ -1282,7 +1282,7 @@ const WorksManager: React.FC<Props> = ({
                                                     key={r.id}
                                                     type="button"
                                                     onClick={() => setResourceTab(r.id as any)}
-                                                    className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all uppercase tracking-wider ${resourceTab === r.id
+                                                    className={`px-4 py-1.5 rounded-full text-[12px] font-bold transition-all uppercase tracking-wider ${resourceTab === r.id
                                                         ? 'bg-green-600 text-white shadow-md'
                                                         : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-green-50'
                                                         }`}
@@ -1294,22 +1294,22 @@ const WorksManager: React.FC<Props> = ({
                                         {resourceTab === 'material' && (
                                             <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
                                                 <div className="md:col-span-5">
-                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Insumo/Material</label>
+                                                    <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Insumo/Material</label>
                                                     <input type="text" placeholder="Ex: Cimento CP-II" value={newMaterial.name} onChange={e => setNewMaterial(p => ({ ...p, name: e.target.value }))}
                                                         className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-green-500" />
                                                 </div>
                                                 <div className="md:col-span-2">
-                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Qtd</label>
+                                                    <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Qtd</label>
                                                     <input type="number" min="0" placeholder="0" value={newMaterial.qty} onChange={e => setNewMaterial(p => ({ ...p, qty: e.target.value }))}
                                                         className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
                                                 </div>
                                                 <div className="md:col-span-1">
-                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Un</label>
+                                                    <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Un</label>
                                                     <input type="text" value={newMaterial.unit} onChange={e => setNewMaterial(p => ({ ...p, unit: e.target.value }))}
                                                         className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
                                                 </div>
                                                 <div className="md:col-span-2">
-                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Valor Unit.</label>
+                                                    <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Valor Unit.</label>
                                                     <input type="number" min="0" placeholder="0" value={newMaterial.cost} onChange={e => setNewMaterial(p => ({ ...p, cost: e.target.value }))}
                                                         onKeyDown={(e) => e.key === 'Enter' && document.getElementById('add-material-btn')?.click()}
                                                         className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
@@ -1331,25 +1331,25 @@ const WorksManager: React.FC<Props> = ({
                                         {resourceTab === 'mo' && (
                                             <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
                                                 <div className="md:col-span-5">
-                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Função/Cargo</label>
+                                                    <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Função/Cargo</label>
                                                     <input type="text" placeholder="Ex: Pedreiro" value={newLabor.role} onChange={e => setNewLabor(p => ({ ...p, role: e.target.value }))}
                                                         onKeyDown={(e) => e.key === 'Enter' && document.getElementById('add-labor-btn')?.click()}
                                                         className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-green-500" />
                                                 </div>
                                                 <div className="md:col-span-2">
-                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Qtd</label>
+                                                    <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Qtd</label>
                                                     <input type="number" min="0" placeholder="0" value={newLabor.qty} onChange={e => setNewLabor(p => ({ ...p, qty: e.target.value }))}
                                                         onKeyDown={(e) => e.key === 'Enter' && document.getElementById('add-labor-btn')?.click()}
                                                         className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
                                                 </div>
                                                 <div className="md:col-span-1">
-                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Un</label>
+                                                    <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Un</label>
                                                     <input type="text" value={newLabor.unit} onChange={e => setNewLabor(p => ({ ...p, unit: e.target.value }))}
                                                         onKeyDown={(e) => e.key === 'Enter' && document.getElementById('add-labor-btn')?.click()}
                                                         className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
                                                 </div>
                                                 <div className="md:col-span-2">
-                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Valor Unit.</label>
+                                                    <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Valor Unit.</label>
                                                     <input type="number" min="0" placeholder="0" value={newLabor.cost} onChange={e => setNewLabor(p => ({ ...p, cost: e.target.value }))}
                                                         onKeyDown={(e) => e.key === 'Enter' && document.getElementById('add-labor-btn')?.click()}
                                                         className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
@@ -1371,7 +1371,7 @@ const WorksManager: React.FC<Props> = ({
                                         {resourceTab === 'indireto' && (
                                             <div className="grid grid-cols-1 md:grid-cols-12 gap-2 items-end">
                                                 <div className="md:col-span-3">
-                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Categoria</label>
+                                                    <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Categoria</label>
                                                     <select value={newIndirect.category} onChange={e => setNewIndirect(p => ({ ...p, category: e.target.value }))}
                                                         className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-green-500">
                                                         <option>Transporte</option>
@@ -1383,13 +1383,13 @@ const WorksManager: React.FC<Props> = ({
                                                     </select>
                                                 </div>
                                                 <div className="md:col-span-4">
-                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Descrição</label>
+                                                    <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Descrição</label>
                                                     <input type="text" placeholder="Ex: Transporte de material" value={newIndirect.description} onChange={e => setNewIndirect(p => ({ ...p, description: e.target.value }))}
                                                         onKeyDown={(e) => e.key === 'Enter' && document.getElementById('add-indirect-btn')?.click()}
                                                         className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-green-500" />
                                                 </div>
                                                 <div className="md:col-span-3">
-                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Valor (R$)</label>
+                                                    <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Valor (R$)</label>
                                                     <input type="number" min="0" placeholder="0" value={newIndirect.value} onChange={e => setNewIndirect(p => ({ ...p, value: e.target.value }))}
                                                         onKeyDown={(e) => e.key === 'Enter' && document.getElementById('add-indirect-btn')?.click()}
                                                         className="w-full p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-green-500" />
@@ -1409,19 +1409,19 @@ const WorksManager: React.FC<Props> = ({
                                         )}
                                         {resourceTab === 'impostos' && (
                                             <div className="flex justify-center">
-                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Defina as alíquotas abaixo</p>
+                                                <p className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">Defina as alíquotas abaixo</p>
                                             </div>
                                         )}
                                     </>
                                 )}
                                 {activeTab === 'resumo' && (
                                     <div className="flex justify-center">
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Resumo Geral Financeiro</p>
+                                        <p className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">Resumo Geral Financeiro</p>
                                     </div>
                                 )}
                                 {activeTab === 'dados' && (
                                     <div className="flex justify-center">
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Edite os dados básicos da obra</p>
+                                        <p className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">Edite os dados básicos da obra</p>
                                     </div>
                                 )}
                             </div>
@@ -1433,7 +1433,7 @@ const WorksManager: React.FC<Props> = ({
                             <div className="max-w-2xl mx-auto space-y-8">
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="space-y-1.5">
-                                        <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">
+                                        <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">
                                             Nome da Obra
                                         </label>
                                         <input
@@ -1445,7 +1445,7 @@ const WorksManager: React.FC<Props> = ({
                                     </div>
 
                                     <div className="space-y-1.5">
-                                        <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">
+                                        <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">
                                             Status
                                         </label>
                                         <select
@@ -1470,7 +1470,7 @@ const WorksManager: React.FC<Props> = ({
                                 </div>
 
                                 <div className="space-y-1.5">
-                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">
+                                    <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">
                                         Cliente
                                     </label>
                                     <select
@@ -1489,7 +1489,7 @@ const WorksManager: React.FC<Props> = ({
                                 </div>
 
                                 <div className="space-y-1.5">
-                                    <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">
+                                    <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">
                                         Endereço da Obra
                                     </label>
                                     <input
@@ -1532,7 +1532,7 @@ const WorksManager: React.FC<Props> = ({
                                             <>
                                                 <div className="grow">
                                                     <p className="font-bold text-slate-800 dark:text-slate-100 uppercase text-sm">{s.description}</p>
-                                                    <p className="text-[10px] text-slate-500 uppercase">
+                                                    <p className="text-[12px] text-slate-500 uppercase">
                                                         {s.quantity} {s.unit} - Mat: R$ {(s.unit_material_cost || 0).toFixed(2)} | MO: R$ {(s.unit_labor_cost || 0).toFixed(2)} | Ind: R$ {(s.unit_indirect_cost || 0).toFixed(2)}
                                                     </p>
                                                 </div>
@@ -1544,7 +1544,7 @@ const WorksManager: React.FC<Props> = ({
                                         renderEdit={(data, update) => (
                                             <div className="grid grid-cols-1 md:grid-cols-7 gap-2 w-full">
                                                 <div className="md:col-span-2">
-                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Descrição</label>
+                                                    <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Descrição</label>
                                                     <input
                                                         type="text"
                                                         value={data.description || ''}
@@ -1553,7 +1553,7 @@ const WorksManager: React.FC<Props> = ({
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Un</label>
+                                                    <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Un</label>
                                                     <input
                                                         type="text"
                                                         value={data.unit || ''}
@@ -1562,7 +1562,7 @@ const WorksManager: React.FC<Props> = ({
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Qtd</label>
+                                                    <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Qtd</label>
                                                     <input
                                                         type="number" min="0"
                                                         value={data.quantity ?? 0}
@@ -1571,7 +1571,7 @@ const WorksManager: React.FC<Props> = ({
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Mat</label>
+                                                    <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Mat</label>
                                                     <input
                                                         type="number" min="0"
                                                         value={data.unit_material_cost ?? 0}
@@ -1580,7 +1580,7 @@ const WorksManager: React.FC<Props> = ({
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">MO</label>
+                                                    <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">MO</label>
                                                     <input
                                                         type="number" min="0"
                                                         value={data.unit_labor_cost ?? 0}
@@ -1589,7 +1589,7 @@ const WorksManager: React.FC<Props> = ({
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-[9px] font-bold text-slate-400 uppercase mb-1">Ind</label>
+                                                    <label className="block text-[11px] font-bold text-slate-400 uppercase mb-1">Ind</label>
                                                     <input
                                                         type="number" min="0"
                                                         value={data.unit_indirect_cost ?? 0}
@@ -1629,7 +1629,7 @@ const WorksManager: React.FC<Props> = ({
                                         {materials.length > 0 && (
                                             <div className="flex justify-end p-4 bg-green-50/50 rounded-xl border border-green-100 mt-4">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-[10px] font-bold text-green-600 uppercase tracking-widest">Total Materiais</span>
+                                                    <span className="text-[12px] font-bold text-green-600 uppercase tracking-widest">Total Materiais</span>
                                                     <span className="text-xl font-black text-green-700">R$ {(calculations.totalMaterial || 0).toFixed(2)}</span>
                                                 </div>
                                             </div>
@@ -1650,7 +1650,7 @@ const WorksManager: React.FC<Props> = ({
                                         {labor.length > 0 && (
                                             <div className="flex justify-end p-4 bg-amber-50/50 rounded-xl border border-amber-100 mt-4">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-[10px] font-bold text-amber-600 uppercase tracking-widest">Total Mão de Obra</span>
+                                                    <span className="text-[12px] font-bold text-amber-600 uppercase tracking-widest">Total Mão de Obra</span>
                                                     <span className="text-xl font-black text-amber-700">R$ {(calculations.totalLabor || 0).toFixed(2)}</span>
                                                 </div>
                                             </div>
@@ -1671,7 +1671,7 @@ const WorksManager: React.FC<Props> = ({
                                         {indirects.length > 0 && (
                                             <div className="flex justify-end p-4 bg-slate-100/50 rounded-xl border border-slate-200 mt-4">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Total Indiretos</span>
+                                                    <span className="text-[12px] font-bold text-slate-500 uppercase tracking-widest">Total Indiretos</span>
                                                     <span className="text-xl font-black text-slate-700">R$ {(calculations.totalIndirect || 0).toFixed(2)}</span>
                                                 </div>
                                             </div>
@@ -1689,7 +1689,7 @@ const WorksManager: React.FC<Props> = ({
 
                                                 return (
                                                     <div key={name} className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-700/50">
-                                                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                                                        <label className="block text-[12px] font-bold text-slate-400 uppercase tracking-widest mb-2">
                                                             {name} (%)
                                                         </label>
 
@@ -1722,7 +1722,7 @@ const WorksManager: React.FC<Props> = ({
                                                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-bold">%</span>
                                                         </div>
 
-                                                        <div className="text-[10px] font-black text-green-600 dark:text-green-400 text-right">
+                                                        <div className="text-[12px] font-black text-green-600 dark:text-green-400 text-right">
                                                             R$ {taxValue.toLocaleString('pt-BR', {
                                                                 minimumFractionDigits: 2,
                                                                 maximumFractionDigits: 2
@@ -1749,7 +1749,7 @@ const WorksManager: React.FC<Props> = ({
                                     ].map((item) => (
                                         <div key={item.label} className={`bg-${item.color}-50 dark:bg-${item.color}-900/20 p-4 rounded-2xl border border-${item.color}-200 dark:border-${item.color}-800 shadow-sm transition-all hover:shadow-md`}>
                                             <div className="flex justify-between items-start mb-1.5">
-                                                <span className={`text-[10px] font-bold text-${item.color}-600 dark:text-${item.color}-400 uppercase tracking-widest`}>{item.label}</span>
+                                                <span className={`text-[12px] font-bold text-${item.color}-600 dark:text-${item.color}-400 uppercase tracking-widest`}>{item.label}</span>
                                                 <div className={`bg-${item.color}-100 dark:bg-${item.color}-900/40 p-1 rounded-lg`}>
                                                     <item.icon size={16} className={`text-${item.color}-600 dark:text-${item.color}-400`} />
                                                 </div>
@@ -1757,7 +1757,7 @@ const WorksManager: React.FC<Props> = ({
                                             <span className="text-xl font-black text-slate-800 dark:text-slate-100 whitespace-nowrap">
                                                 R$ {item.value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                             </span>
-                                            <p className={`text-[9px] text-${item.color}-600/60 dark:text-${item.color}-400/60 mt-1 font-bold uppercase`}>{item.desc}</p>
+                                            <p className={`text-[11px] text-${item.color}-600/60 dark:text-${item.color}-400/60 mt-1 font-bold uppercase`}>{item.desc}</p>
                                         </div>
                                     ))}
                                 </div>
@@ -1782,7 +1782,7 @@ const WorksManager: React.FC<Props> = ({
                                             <span className="block text-slate-800 dark:text-slate-100 font-black text-lg tracking-tight">
                                                 Relatório Executivo
                                             </span>
-                                            <span className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">
+                                            <span className="text-[12px] text-slate-400 uppercase tracking-widest font-bold">
                                                 Gerar PDF de Execução
                                             </span>
                                         </div>

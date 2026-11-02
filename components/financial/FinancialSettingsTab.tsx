@@ -131,7 +131,7 @@ const FinancialSettingsTab: React.FC<FinancialSettingsTabProps> = ({
                 </div>
                 <div>
                   <p className="text-sm font-black text-slate-900 dark:text-white uppercase leading-none">{acc.name}</p>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Saldo: R$ {acc.currentBalance.toLocaleString('pt-BR')}</p>
+                  <p className="text-[12px] text-slate-400 font-bold uppercase tracking-widest mt-1">Saldo: R$ {acc.currentBalance.toLocaleString('pt-BR')}</p>
                 </div>
               </div>
               <button

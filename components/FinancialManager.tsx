@@ -100,7 +100,7 @@ const FinancialManager: React.FC<FinancialManagerProps> = (props) => {
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-blue-200 dark:shadow-none">
               <TrendingUp className="w-5 h-5" />
             </div>
-            <span className="text-[10px] font-black tracking-[0.3em] text-blue-600 uppercase">Gestão Financeira</span>
+            <span className="text-[12px] font-black tracking-[0.3em] text-blue-600 uppercase">Gestão Financeira</span>
           </div>
           <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight uppercase">
             Fluxo de <span className="text-blue-600">Caixa</span>
@@ -115,32 +115,32 @@ const FinancialManager: React.FC<FinancialManagerProps> = (props) => {
         <div className="flex items-center gap-3 bg-white dark:bg-slate-800 p-2 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
           <button 
             onClick={() => setActiveTab('dashboard')} 
-            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'dashboard' ? 'bg-slate-900 text-white shadow-xl' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[12px] font-black uppercase tracking-widest transition-all ${activeTab === 'dashboard' ? 'bg-slate-900 text-white shadow-xl' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
           >
             <LayoutDashboard className="w-4 h-4" /> Dashboard
           </button>
           <button 
             onClick={() => setActiveTab('realizado')} 
-            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'realizado' ? 'bg-slate-900 text-white shadow-xl' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[12px] font-black uppercase tracking-widest transition-all ${activeTab === 'realizado' ? 'bg-slate-900 text-white shadow-xl' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
           >
             <Wallet className="w-4 h-4" /> Realizado
           </button>
           <button 
             onClick={() => setActiveTab('provisionado')} 
-            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'provisionado' ? 'bg-slate-900 text-white shadow-xl' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[12px] font-black uppercase tracking-widest transition-all ${activeTab === 'provisionado' ? 'bg-slate-900 text-white shadow-xl' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
           >
             <Calendar className="w-4 h-4" /> Provisão
           </button>
           <button 
             onClick={() => setActiveTab('relatorios')} 
-            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'relatorios' ? 'bg-slate-900 text-white shadow-xl' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[12px] font-black uppercase tracking-widest transition-all ${activeTab === 'relatorios' ? 'bg-slate-900 text-white shadow-xl' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
           >
             <PieChart className="w-4 h-4" /> DRE / Resultados
           </button>
           {isAdmin && (
             <button 
               onClick={() => setActiveTab('config')} 
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'config' ? 'bg-slate-900 text-white shadow-xl' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[12px] font-black uppercase tracking-widest transition-all ${activeTab === 'config' ? 'bg-slate-900 text-white shadow-xl' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
             >
               <Settings className="w-4 h-4" />
             </button>

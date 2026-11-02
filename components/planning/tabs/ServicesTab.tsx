@@ -78,7 +78,7 @@ export const ServicesTab = React.memo(({
                             checked={selectedServices.length === services.length && services.length > 0}
                             onChange={(e) => setSelectedServices(e.target.checked ? services.map(s => s.id) : [])}
                         />
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                        <span className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">
                             {selectedServices.length} SELECIONADO(S)
                         </span>
                     </div>
@@ -86,14 +86,14 @@ export const ServicesTab = React.memo(({
                         {selectedServices.length > 0 && (
                             <button
                                 onClick={handleDeleteSelected}
-                                className="flex items-center gap-1 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-[10px] font-bold hover:bg-red-100 transition-all border border-red-100 dark:border-red-800"
+                                className="flex items-center gap-1 px-3 py-1.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-[12px] font-bold hover:bg-red-100 transition-all border border-red-100 dark:border-red-800"
                             >
                                 <Trash2 size={12} /> Excluir Selecionados
                             </button>
                         )}
                         <button
                             onClick={handleClearAll}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[10px] font-bold hover:bg-slate-200 transition-all border border-slate-200 dark:border-slate-700"
+                            className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[12px] font-bold hover:bg-slate-200 transition-all border border-slate-200 dark:border-slate-700"
                         >
                             <Archive size={12} /> Limpar Lista
                         </button>

@@ -46,7 +46,7 @@ const SettlementModal: React.FC<SettlementModalProps> = ({
           </div>
 
           <div className="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-3xl mb-8">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Resumo do Lançamento</p>
+            <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest mb-2">Resumo do Lançamento</p>
             <h4 className="text-lg font-black text-slate-900 dark:text-white mb-1">{entry.description}</h4>
             <p className={`text-2xl font-black ${entry.type === 'RECEBER' || entry.type === 'INVESTIMENTO' ? 'text-emerald-500' : 'text-rose-500'}`}>
               R$ {entry.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
@@ -54,7 +54,7 @@ const SettlementModal: React.FC<SettlementModalProps> = ({
           </div>
 
           <div className="space-y-4 mb-8">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block px-1">Selecione a Conta Origem/Destino</label>
+            <label className="text-[12px] font-black text-slate-400 uppercase tracking-widest block px-1">Selecione a Conta Origem/Destino</label>
             <div className="grid grid-cols-1 gap-3">
               {displayAccounts.map(acc => (
                 <div 
@@ -72,7 +72,7 @@ const SettlementModal: React.FC<SettlementModalProps> = ({
                     </div>
                     <div>
                       <p className="text-xs font-black text-slate-900 dark:text-white uppercase">{acc.name}</p>
-                      <p className="text-[10px] font-bold text-slate-400">Saldo: R$ {acc.currentBalance.toLocaleString('pt-BR')}</p>
+                      <p className="text-[12px] font-bold text-slate-400">Saldo: R$ {acc.currentBalance.toLocaleString('pt-BR')}</p>
                     </div>
                   </div>
                   {selectedAccountId === acc.id && (

@@ -37,25 +37,25 @@ const BudgetSummarySidebar: React.FC<BudgetSummarySidebarProps> = ({
     return (
         <div className="w-full lg:w-[340px] bg-[#0f172a] text-white p-6 flex flex-col space-y-6 shrink-0 shadow-2xl relative overflow-hidden h-auto lg:h-full">
             <div className="relative z-10">
-                <h4 className="text-[8px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Investimento Total</h4>
+                <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Investimento Total</h4>
 
                 {/* Tax, BDI & INSS Inputs */}
                 <div className="grid grid-cols-3 gap-1.5 mb-4">
                     <div>
-                        <label className="text-[7.5px] font-bold text-slate-400 uppercase tracking-wider mb-1 block whitespace-nowrap">BDI (%)</label>
+                        <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 block whitespace-nowrap">BDI (%)</label>
                         <input type="number" className="w-full bg-slate-800/50 border border-slate-700 rounded-lg p-1.5 text-xs font-bold text-slate-200 outline-none focus:ring-1 focus:ring-blue-500" value={bdiRate} onChange={e => setBdiRate(e.target.value)} placeholder="0%" />
                     </div>
                     <div>
-                        <label className="text-[7.5px] font-bold text-slate-400 uppercase tracking-wider mb-1 block whitespace-nowrap">Impostos (%)</label>
+                        <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 block whitespace-nowrap">Impostos (%)</label>
                         <input type="number" className="w-full bg-slate-800/50 border border-slate-700 rounded-lg p-1.5 text-xs font-bold text-slate-200 outline-none focus:ring-1 focus:ring-blue-500" value={taxRate} onChange={e => setTaxRate(e.target.value)} placeholder="0%" />
                     </div>
                     <div>
-                        <label className="text-[7.5px] font-bold text-slate-400 uppercase tracking-wider mb-1 block whitespace-nowrap">INSS (%)</label>
+                        <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 block whitespace-nowrap">INSS (%)</label>
                         <input type="number" className="w-full bg-slate-800/50 border border-slate-700 rounded-lg p-1.5 text-xs font-bold text-slate-200 outline-none focus:ring-1 focus:ring-blue-500" value={inssRate} onChange={e => setInssRate(e.target.value)} placeholder="0%" />
                     </div>
                 </div>
 
-                <div className="space-y-1 mb-4 text-[10px] text-slate-400">
+                <div className="space-y-1 mb-4 text-[12px] text-slate-400">
                     <div className="flex justify-between"><span>Subtotal:</span> <span className="whitespace-nowrap">R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>
                     {bdiNum > 0 && <div className="flex justify-between text-emerald-400"><span>+ BDI:</span> <span className="whitespace-nowrap">R$ {(subtotal * (bdiNum / 100)).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>}
                     {taxNum > 0 && (
@@ -81,7 +81,7 @@ const BudgetSummarySidebar: React.FC<BudgetSummarySidebarProps> = ({
                 </div>
                 {!isAdmin && isEditing && (
                     <div className="mt-4 p-2 bg-rose-500/10 border border-rose-500/20 rounded-lg">
-                        <p className="text-[8px] font-black text-rose-400 uppercase tracking-widest text-center">Modo Somente Leitura</p>
+                        <p className="text-[11px] font-black text-rose-400 uppercase tracking-widest text-center">Modo Somente Leitura</p>
                     </div>
                 )}
             </div>
@@ -89,31 +89,31 @@ const BudgetSummarySidebar: React.FC<BudgetSummarySidebarProps> = ({
             <div className="space-y-4 relative z-10">
                 <div>
                     <div className="flex justify-between items-center mb-2">
-                        <label className="text-[8px] font-bold text-slate-400 uppercase tracking-widest block">Pagamento</label>
+                        <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest block">Pagamento</label>
                         {(!isEditing || isAdmin) && (
-                            <button onClick={onShowPayment} className="text-[8px] font-black text-emerald-400 hover:text-emerald-300 uppercase tracking-widest flex items-center gap-1 transition-colors">
+                            <button onClick={onShowPayment} className="text-[11px] font-black text-emerald-400 hover:text-emerald-300 uppercase tracking-widest flex items-center gap-1 transition-colors">
                                 <Zap className="w-3 h-3" /> Gerar
                             </button>
                         )}
                     </div>
-                    <textarea className="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-3 text-[9px] font-bold text-slate-200 outline-none h-20 focus:ring-1 focus:ring-blue-500 leading-relaxed shadow-inner" value={paymentTerms} onChange={e => setPaymentTerms(e.target.value)} disabled={isEditing && !isAdmin} />
+                    <textarea className="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-3 text-[11px] font-bold text-slate-200 outline-none h-20 focus:ring-1 focus:ring-blue-500 leading-relaxed shadow-inner" value={paymentTerms} onChange={e => setPaymentTerms(e.target.value)} disabled={isEditing && !isAdmin} />
                 </div>
                 <div>
-                    <label className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Prazo Entrega</label>
-                    <input type="text" className="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-3 text-[9px] font-bold text-slate-200 outline-none focus:ring-1 focus:ring-blue-500 shadow-inner" value={deliveryTime} onChange={e => setDeliveryTime(e.target.value)} disabled={isEditing && !isAdmin} />
+                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">Prazo Entrega</label>
+                    <input type="text" className="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-3 text-[11px] font-bold text-slate-200 outline-none focus:ring-1 focus:ring-blue-500 shadow-inner" value={deliveryTime} onChange={e => setDeliveryTime(e.target.value)} disabled={isEditing && !isAdmin} />
                 </div>
             </div>
 
             <div className="mt-auto space-y-3 relative z-10">
                 <div className="grid grid-cols-1 gap-2">
-                    <button onClick={onPrint} className="bg-slate-800 hover:bg-slate-700 text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[11px] flex flex-row items-center justify-center gap-2 transition-all border border-slate-700 group w-full shadow-md shadow-blue-950/20">
+                    <button onClick={onPrint} className="bg-slate-800 hover:bg-slate-700 text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[12px] flex flex-row items-center justify-center gap-2 transition-all border border-slate-700 group w-full shadow-md shadow-blue-950/20">
                         <Printer className="w-5 h-5 text-blue-400 group-hover:scale-110 transition-transform" /> IMPRIMIR ORÇAMENTO
                     </button>
                     {(!isEditing || isAdmin) && (
                         <button 
                             onClick={onSave} 
                             disabled={isSaving}
-                            className={`py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[11px] shadow-md shadow-blue-950/20 transition-all flex items-center justify-center gap-2 w-full ${isSaving ? 'bg-slate-700 cursor-not-allowed opacity-80' : 'bg-blue-600 hover:bg-blue-500 text-white'}`}
+                            className={`py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[12px] shadow-md shadow-blue-950/20 transition-all flex items-center justify-center gap-2 w-full ${isSaving ? 'bg-slate-700 cursor-not-allowed opacity-80' : 'bg-blue-600 hover:bg-blue-500 text-white'}`}
                         >
                             {isSaving ? (
                                 <>
@@ -127,10 +127,10 @@ const BudgetSummarySidebar: React.FC<BudgetSummarySidebarProps> = ({
                             )}
                         </button>
                     )}
-                    <button onClick={onGenerateContract} className="bg-slate-800 hover:bg-slate-700 text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[11px] shadow-md shadow-blue-950/20 transition-all flex items-center justify-center gap-2 border border-slate-700">
+                    <button onClick={onGenerateContract} className="bg-slate-800 hover:bg-slate-700 text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[12px] shadow-md shadow-blue-950/20 transition-all flex items-center justify-center gap-2 border border-slate-700">
                         <ScrollText className="w-5 h-5 text-blue-400" /> GERAR CONTRATO
                     </button>
-                    <button onClick={onGenerateMaintenanceContract} className="bg-slate-800 hover:bg-slate-700 text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[11px] shadow-md shadow-blue-950/20 transition-all flex items-center justify-center gap-2 border border-slate-700">
+                    <button onClick={onGenerateMaintenanceContract} className="bg-slate-800 hover:bg-slate-700 text-white py-4 rounded-xl font-black uppercase tracking-[0.15em] text-[12px] shadow-md shadow-blue-950/20 transition-all flex items-center justify-center gap-2 border border-slate-700">
                         <Wrench className="w-5 h-5 text-blue-400" /> GERAR CONTRATO DE MANUTENÇÃO
                     </button>
                 </div>

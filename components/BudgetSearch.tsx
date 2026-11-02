@@ -53,7 +53,7 @@ const BudgetSearch: React.FC<Props> = ({ orders, setOrders, customers, company, 
           <p className="text-slate-500 dark:text-slate-400 text-sm">Localize rapidamente propostas por cliente ou período.</p>
         </div>
         {!isAdmin && (
-          <div className="bg-slate-100 dark:bg-slate-800 text-slate-500 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-slate-200 dark:border-slate-700">
+          <div className="bg-slate-100 dark:bg-slate-800 text-slate-500 px-4 py-2 rounded-xl text-[12px] font-black uppercase tracking-widest border border-slate-200 dark:border-slate-700">
             Modo de Consulta
           </div>
         )}
@@ -101,7 +101,7 @@ const BudgetSearch: React.FC<Props> = ({ orders, setOrders, customers, company, 
                       }}
                     >
                       <p className="text-xs font-bold text-slate-900 dark:text-white uppercase">{c.name}</p>
-                      <p className="text-[10px] text-slate-400 dark:text-slate-500">{c.city || 'Cidade não inf.'} - {c.phone || c.whatsapp || 'Sem contato'}</p>
+                      <p className="text-[12px] text-slate-400 dark:text-slate-500">{c.city || 'Cidade não inf.'} - {c.phone || c.whatsapp || 'Sem contato'}</p>
                     </div>
                   ))}
               </div>
@@ -125,7 +125,7 @@ const BudgetSearch: React.FC<Props> = ({ orders, setOrders, customers, company, 
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">De:</label>
+              <label className="block text-[12px] font-bold text-slate-400 uppercase mb-1">De:</label>
               <input
                 type="date"
                 className="w-full p-3 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 text-sm"
@@ -136,7 +136,7 @@ const BudgetSearch: React.FC<Props> = ({ orders, setOrders, customers, company, 
               />
             </div>
             <div>
-              <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Até:</label>
+              <label className="block text-[12px] font-bold text-slate-400 uppercase mb-1">Até:</label>
               <input
                 type="date"
                 className="w-full p-3 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-500 text-sm"
@@ -188,10 +188,10 @@ const BudgetSearch: React.FC<Props> = ({ orders, setOrders, customers, company, 
               <div className="flex items-center gap-8">
                 <div className="text-right">
                   <p className="text-sm font-black text-slate-900 dark:text-white">R$ {order.totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                  <p className={`text-[10px] font-bold uppercase tracking-widest ${order.status === OrderStatus.APPROVED ? 'text-emerald-600' : 'text-blue-600'}`}>{order.status === OrderStatus.APPROVED ? 'Orçamento Aprovado' : 'Orçamento Pendente'}</p>
+                  <p className={`text-[12px] font-bold uppercase tracking-widest ${order.status === OrderStatus.APPROVED ? 'text-emerald-600' : 'text-blue-600'}`}>{order.status === OrderStatus.APPROVED ? 'Orçamento Aprovado' : 'Orçamento Pendente'}</p>
                 </div>
                 <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <p className="text-[10px] text-blue-600 dark:text-blue-400 font-bold">Gerencie na aba Orçamentos</p>
+                  <p className="text-[12px] text-blue-600 dark:text-blue-400 font-bold">Gerencie na aba Orçamentos</p>
                   <ChevronRight className="w-5 h-5 text-slate-300 dark:text-slate-600" />
                 </div>
               </div>

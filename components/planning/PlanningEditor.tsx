@@ -357,7 +357,7 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
                                             key={r.id}
                                             type="button"
                                             onClick={() => setResourceTab(r.id as ResourceTab)}
-                                            className={`px-4 py-1.5 rounded-full text-[10px] font-bold transition-all uppercase tracking-wider ${resourceTab === r.id
+                                            className={`px-4 py-1.5 rounded-full text-[12px] font-bold transition-all uppercase tracking-wider ${resourceTab === r.id
                                                 ? 'bg-blue-600 text-white shadow-md'
                                                 : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-blue-50'
                                                 }`}
@@ -377,19 +377,19 @@ export const PlanningEditor: React.FC<PlanningEditorProps> = ({
                                 )}
                                 {resourceTab === 'impostos' && (
                                     <div className="flex justify-center">
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Defina as alíquotas abaixo</p>
+                                        <p className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">Defina as alíquotas abaixo</p>
                                     </div>
                                 )}
                             </>
                         )}
                         {activeTab === 'resumo' && (
                             <div className="flex justify-center">
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Resumo Geral Financeiro</p>
+                                <p className="text-[12px] font-bold text-slate-400 uppercase tracking-widest text-center">Resumo Geral Financeiro</p>
                             </div>
                         )}
                         {activeTab === 'dados' && (
                             <div className="flex justify-center">
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Edite os dados básicos da obra</p>
+                                <p className="text-[12px] font-bold text-slate-400 uppercase tracking-widest text-center">Edite os dados básicos da obra</p>
                             </div>
                         )}
                     </div>

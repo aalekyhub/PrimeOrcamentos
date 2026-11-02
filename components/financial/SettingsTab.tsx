@@ -34,7 +34,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
             <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-1">
               <Tag className="w-4 h-4" /> Categorias de Lançamento
             </h4>
-            <p className="text-[10px] text-slate-400 font-bold uppercase italic">Defina as naturezas do seu negócio</p>
+            <p className="text-[12px] text-slate-400 font-bold uppercase italic">Defina as naturezas do seu negócio</p>
           </div>
           <button 
             onClick={onAddCategory}
@@ -52,11 +52,11 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                 <div>
                   <span className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight">{cat.name}</span>
                   <div className="flex gap-2 mt-0.5">
-                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-tighter bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-100">
+                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-tighter bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-100">
                       {cat.type}
                     </span>
                     {cat.nature && (
-                      <span className="text-[8px] font-black text-blue-500 uppercase tracking-tighter bg-blue-50 dark:bg-blue-900/20 px-1.5 py-0.5 rounded border border-blue-100/50">
+                      <span className="text-[11px] font-black text-blue-500 uppercase tracking-tighter bg-blue-50 dark:bg-blue-900/20 px-1.5 py-0.5 rounded border border-blue-100/50">
                         {cat.nature}
                       </span>
                     )}
@@ -86,7 +86,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
               <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2 mb-1">
                 <Wallet className="w-4 h-4" /> Contas Bancárias / Caixa
               </h4>
-              <p className="text-[10px] text-slate-500 font-bold uppercase italic">Saldo consolidado e gestão de ativos</p>
+              <p className="text-[12px] text-slate-500 font-bold uppercase italic">Saldo consolidado e gestão de ativos</p>
             </div>
             <button 
               onClick={onAddAccount}
@@ -105,7 +105,7 @@ const SettingsTab: React.FC<SettingsTabProps> = ({
                   </div>
                   <div>
                     <p className="text-sm font-black uppercase tracking-widest">{acc.name}</p>
-                    <p className="text-[10px] text-slate-500 font-bold uppercase">Saldo em conta</p>
+                    <p className="text-[12px] text-slate-500 font-bold uppercase">Saldo em conta</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-6">

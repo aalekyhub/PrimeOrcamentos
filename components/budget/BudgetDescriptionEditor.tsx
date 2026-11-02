@@ -45,7 +45,7 @@ const BudgetDescriptionEditor: React.FC<BudgetDescriptionEditorProps> = ({ block
     return (
         <div className="bg-white dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm space-y-4">
             <div className="flex justify-between items-center">
-                <h4 className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b dark:border-slate-800 pb-2 grow mr-6">DESCRIÇÃO TÉCNICA</h4>
+                <h4 className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b dark:border-slate-800 pb-2 grow mr-6">DESCRIÇÃO TÉCNICA</h4>
             </div>
             <div className="space-y-3 budget-description-container">
                 {(!blocks || blocks.length === 0) && (
@@ -58,7 +58,7 @@ const BudgetDescriptionEditor: React.FC<BudgetDescriptionEditorProps> = ({ block
                                 <ImageIcon className="w-4 h-4" /> + Iniciar com Imagem
                             </button>
                         </div>
-                        <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-2 animate-pulse">Comece a montar o escopo tecnico acima</p>
+                        <p className="text-[12px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-2 animate-pulse">Comece a montar o escopo tecnico acima</p>
                     </div>
                 )}
 
@@ -99,8 +99,8 @@ const BudgetDescriptionEditor: React.FC<BudgetDescriptionEditorProps> = ({ block
                                                 <Upload className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                                             </div>
                                             <div className="text-center">
-                                                <span className="text-[10px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest block mb-1">Upload da Evidência Fotográfica</span>
-                                                <span className="text-[8px] text-slate-400 dark:text-slate-500 uppercase tracking-tighter">Clique para selecionar uma imagem (JPG, PNG)</span>
+                                                <span className="text-[12px] font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest block mb-1">Upload da Evidência Fotográfica</span>
+                                                <span className="text-[11px] text-slate-400 dark:text-slate-500 uppercase tracking-tighter">Clique para selecionar uma imagem (JPG, PNG)</span>
                                             </div>
                                             <input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(block.id, e)} />
                                         </label>
@@ -108,7 +108,7 @@ const BudgetDescriptionEditor: React.FC<BudgetDescriptionEditorProps> = ({ block
                                 </div>
                                 <textarea
                                     placeholder="Legenda descritiva abaixo da foto (ex: Detalhe das fissuras na manta aluminizada)"
-                                    className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2 text-[10px] font-bold text-slate-500 dark:text-slate-400 outline-none focus:ring-2 focus:ring-blue-500 resize-none h-16 leading-relaxed"
+                                    className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2 text-[12px] font-bold text-slate-500 dark:text-slate-400 outline-none focus:ring-2 focus:ring-blue-500 resize-none h-16 leading-relaxed"
                                     value={block.caption || ''}
                                     onChange={(e) => updateBlockCaption(block.id, e.target.value)}
                                 />

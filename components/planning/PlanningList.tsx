@@ -39,7 +39,7 @@ export const PlanningList: React.FC<PlanningListProps> = ({ plans, onCreatePlan,
                                 <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg group-hover:text-blue-700 transition-colors truncate uppercase">{plan.name}</h3>
                                 <p className="text-sm text-slate-500 font-medium truncate">{plan.client_name || 'Cliente não informado'}</p>
                             </div>
-                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${plan.status === 'Concluído' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+                            <span className={`px-2.5 py-1 rounded-full text-[12px] font-black uppercase tracking-wider ${plan.status === 'Concluído' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
                                 }`}>
                                 {plan.status}
                             </span>
@@ -58,7 +58,7 @@ export const PlanningList: React.FC<PlanningListProps> = ({ plans, onCreatePlan,
 
                         <div className="pl-2 border-t border-slate-100 dark:border-slate-800 pt-3 flex justify-between items-center">
                             <div className="flex flex-col">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase">Custo Estimado</span>
+                                <span className="text-[12px] font-bold text-slate-400 uppercase">Custo Estimado</span>
                                 <span className="font-black text-slate-700 dark:text-slate-200">
                                     R$ {(plan.total_real_cost || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                                 </span>

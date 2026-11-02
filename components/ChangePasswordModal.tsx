@@ -78,7 +78,7 @@ const ChangePasswordModal: React.FC<Props> = ({ email, onClose }) => {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
-            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Nova senha</label>
+            <label className="text-[12px] font-bold text-slate-400 uppercase tracking-widest ml-1">Nova senha</label>
             <div className="relative">
               <Lock className="absolute left-4 top-3.5 w-5 h-5 text-slate-300" />
               <input
@@ -102,7 +102,7 @@ const ChangePasswordModal: React.FC<Props> = ({ email, onClose }) => {
           </div>
 
           <div className="space-y-2">
-            <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">Repita a nova senha</label>
+            <label className="text-[12px] font-bold text-slate-400 uppercase tracking-widest ml-1">Repita a nova senha</label>
             <div className="relative">
               <Lock className="absolute left-4 top-3.5 w-5 h-5 text-slate-300" />
               <input

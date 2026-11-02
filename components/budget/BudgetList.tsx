@@ -140,7 +140,7 @@ const BudgetList: React.FC<BudgetListProps> = ({
                                 : 'bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'}`}
                         >
                             {tab.label}
-                            <span className={`text-[11px] px-1.5 py-0.5 rounded-md ${statusFilter === tab.id ? 'bg-white/20' : 'bg-slate-200/70 dark:bg-slate-700'}`}>
+                            <span className={`text-[12px] px-1.5 py-0.5 rounded-md ${statusFilter === tab.id ? 'bg-white/20' : 'bg-slate-200/70 dark:bg-slate-700'}`}>
                                 {counts[tab.id]}
                             </span>
                         </button>
@@ -149,7 +149,7 @@ const BudgetList: React.FC<BudgetListProps> = ({
                 {!isAdmin && (
                     <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl flex items-center gap-3">
                         <ScrollText className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                        <p className="text-[10px] font-black text-amber-700 dark:text-amber-300 uppercase tracking-widest leading-relaxed">
+                        <p className="text-[12px] font-black text-amber-700 dark:text-amber-300 uppercase tracking-widest leading-relaxed">
                             Apenas Administradores podem alterar ou excluir orçamentos salvos. Você está em modo de visualização restringida.
                         </p>
                     </div>
@@ -162,11 +162,11 @@ const BudgetList: React.FC<BudgetListProps> = ({
                         <div className="flex items-center justify-between gap-2">
                             <span className="text-xs font-mono font-black text-blue-600">{budget.id}</span>
                             {budget.status === OrderStatus.APPROVED ? (
-                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-bold bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">
                                     <CheckCircle className="w-3.5 h-3.5" /> Aprovado
                                 </span>
                             ) : (
-                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-bold bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
                                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> Pendente
                                 </span>
                             )}
@@ -192,7 +192,7 @@ const BudgetList: React.FC<BudgetListProps> = ({
 
             <div className="hidden md:block bg-white dark:bg-slate-900/50 rounded-[2rem] border dark:border-slate-800 overflow-hidden shadow-sm overflow-x-auto">
                 <table className="w-full text-left">
-                    <thead className="bg-slate-50 dark:bg-slate-800/50 text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 border-b dark:border-slate-800">
+                    <thead className="bg-slate-50 dark:bg-slate-800/50 text-[12px] font-black uppercase text-slate-400 dark:text-slate-500 border-b dark:border-slate-800">
                         <tr>
                             <th className="px-5 py-4">ORC</th>
                             <th className="px-5 py-4">STATUS</th>
@@ -208,11 +208,11 @@ const BudgetList: React.FC<BudgetListProps> = ({
                                 <td className="px-5 py-4 text-xs font-mono font-black text-blue-600 whitespace-nowrap">{budget.id}</td>
                                 <td className="px-5 py-4 whitespace-nowrap">
                                     {budget.status === OrderStatus.APPROVED ? (
-                                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">
+                                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-bold bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">
                                             <CheckCircle className="w-3.5 h-3.5" /> Aprovado
                                         </span>
                                     ) : (
-                                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
+                                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-bold bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
                                             <span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> Pendente
                                         </span>
                                     )}

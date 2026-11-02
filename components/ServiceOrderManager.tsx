@@ -248,7 +248,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
 
       <div className="bg-white dark:bg-slate-900 rounded-[2rem] border dark:border-slate-800 overflow-hidden shadow-sm overflow-x-auto">
         <table className="w-full text-left">
-          <thead className="bg-slate-50 dark:bg-slate-800/50 text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 border-b dark:border-slate-800">
+          <thead className="bg-slate-50 dark:bg-slate-800/50 text-[12px] font-black uppercase text-slate-400 dark:text-slate-500 border-b dark:border-slate-800">
             <tr><th className="px-8 py-5">OS #</th><th className="px-8 py-5">CLIENTE</th><th className="px-8 py-5">EQUIPAMENTO</th><th className="px-8 py-5 text-right">AÇÕES</th></tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -282,9 +282,9 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                 <div>
                   <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-0.5">{editingOrderId ? `Editando O.S. ${editingOrderId}` : 'Nova Ordem de Serviço'}</h3>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-md">Manutenção</span>
-                    {editingOrderId && !isAdmin && <span className="text-[10px] font-black uppercase tracking-widest text-rose-500 border-l pl-2 dark:border-slate-800">BLOQUEADO</span>}
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">{new Date().toLocaleDateString('pt-BR')}</span>
+                    <span className="text-[12px] font-black uppercase tracking-widest bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-md">Manutenção</span>
+                    {editingOrderId && !isAdmin && <span className="text-[12px] font-black uppercase tracking-widest text-rose-500 border-l pl-2 dark:border-slate-800">BLOQUEADO</span>}
+                    <span className="text-[12px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">{new Date().toLocaleDateString('pt-BR')}</span>
                   </div>
                 </div>
               </div>
@@ -296,31 +296,31 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <div className="flex justify-between items-center mb-2">
-                        <label className="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest ml-1">Cliente Solicitante</label>
+                        <label className="text-[11px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest ml-1">Cliente Solicitante</label>
                         {(!editingOrderId || isAdmin) && (
-                          <button onClick={() => setShowFullClientForm(true)} className="text-blue-600 dark:text-blue-400 text-[9px] font-black uppercase flex items-center gap-1 hover:underline">
+                          <button onClick={() => setShowFullClientForm(true)} className="text-blue-600 dark:text-blue-400 text-[11px] font-black uppercase flex items-center gap-1 hover:underline">
                             <UserPlus className="w-3 h-3" /> Novo
                           </button>
                         )}
                       </div>
                       <select className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500 transition-all custom-select" value={selectedCustomerId} onChange={e => setSelectedCustomerId(e.target.value)} disabled={editingOrderId !== null && !isAdmin}><option value="">Selecione...</option>{customers.map(c => <option key={c.id} value={c.id} className="dark:bg-slate-900">{c.name}</option>)}</select>
                     </div>
-                    <div><label className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-2 block ml-1">Título da O.S.</label><input type="text" placeholder="Ex: Manutenção de Notebook" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400" value={osTitle} onChange={e => setOsTitle(e.target.value)} disabled={editingOrderId !== null && !isAdmin} /></div>
+                    <div><label className="text-[11px] font-black text-blue-600 uppercase tracking-widest mb-2 block ml-1">Título da O.S.</label><input type="text" placeholder="Ex: Manutenção de Notebook" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400" value={osTitle} onChange={e => setOsTitle(e.target.value)} disabled={editingOrderId !== null && !isAdmin} /></div>
                   </div>
                 </div>
 
                 <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm">
-                  <h4 className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b dark:border-slate-800 pb-2 mb-4">Dados do Equipamento</h4>
+                  <h4 className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b dark:border-slate-800 pb-2 mb-4">Dados do Equipamento</h4>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-                    <div><label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Marca/Fabricante</label><input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500" value={brand} onChange={e => setBrand(e.target.value)} disabled={editingOrderId !== null && !isAdmin} /></div>
-                    <div><label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Modelo</label><input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500" value={model} onChange={e => setModel(e.target.value)} disabled={editingOrderId !== null && !isAdmin} /></div>
-                    <div><label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Nº Série / Patrimônio</label><input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500" value={serial} onChange={e => setSerial(e.target.value)} disabled={editingOrderId !== null && !isAdmin} /></div>
+                    <div><label className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Marca/Fabricante</label><input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500" value={brand} onChange={e => setBrand(e.target.value)} disabled={editingOrderId !== null && !isAdmin} /></div>
+                    <div><label className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Modelo</label><input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500" value={model} onChange={e => setModel(e.target.value)} disabled={editingOrderId !== null && !isAdmin} /></div>
+                    <div><label className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Nº Série / Patrimônio</label><input type="text" className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-blue-500" value={serial} onChange={e => setSerial(e.target.value)} disabled={editingOrderId !== null && !isAdmin} /></div>
                   </div>
-                  <div><label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Laudo Técnico / Diagnóstico</label><RichTextEditor id="diagnosis-editor" value={diagnosis} onChange={setDiagnosis} placeholder="Descreva o problema ou serviço realizado..." disabled={editingOrderId !== null && !isAdmin} /></div>
+                  <div><label className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 block ml-1">Laudo Técnico / Diagnóstico</label><RichTextEditor id="diagnosis-editor" value={diagnosis} onChange={setDiagnosis} placeholder="Descreva o problema ou serviço realizado..." disabled={editingOrderId !== null && !isAdmin} /></div>
 
                   <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
                     <div className="flex justify-between items-center">
-                      <h4 className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b dark:border-slate-800 pb-2 grow mr-6">FOTOS E ANEXOS DO SERVIÇO</h4>
+                      <h4 className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b dark:border-slate-800 pb-2 grow mr-6">FOTOS E ANEXOS DO SERVIÇO</h4>
                     </div>
                     <div className="space-y-3 budget-description-container">
                       {descriptionBlocks.length === 0 && (!editingOrderId || isAdmin) && (
@@ -329,7 +329,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                             <button onClick={(e) => { e.stopPropagation(); addTextBlock(); }} className="bg-blue-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-blue-900/20 hover:scale-105 transition-all"><Type className="w-4 h-4" /> + Iniciar com Texto</button>
                             <button onClick={(e) => { e.stopPropagation(); addImageBlock(); }} className="bg-emerald-600 text-white px-6 py-3 rounded-xl text-xs font-black uppercase flex items-center gap-2 shadow-lg shadow-emerald-900/20 hover:scale-105 transition-all"><ImageIcon className="w-4 h-4" /> + Iniciar com Imagem</button>
                           </div>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 animate-pulse">Comece a montar o relatório fotográfico acima</p>
+                          <p className="text-[12px] font-bold text-slate-400 uppercase tracking-widest mt-2 animate-pulse">Comece a montar o relatório fotográfico acima</p>
                         </div>
                       )}
                       {descriptionBlocks.map((block) => (
@@ -354,7 +354,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                               ) : (
                                 <label className={`flex flex-col items-center justify-center gap-2 ${editingOrderId !== null && !isAdmin ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}>
                                   <Upload className="w-5 h-5 text-blue-500" />
-                                  <span className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase">Subir Foto</span>
+                                  <span className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase">Subir Foto</span>
                                   <input type="file" className="hidden" accept="image/*" onChange={e => handleImageUpload(block.id, e)} disabled={editingOrderId !== null && !isAdmin} />
                                 </label>
                               )}
@@ -368,11 +368,11 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                 </div>
 
                 <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm">
-                  <div className="flex justify-between items-center mb-4"><h4 className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b dark:border-slate-800 pb-2 grow mr-4">Peças e Serviços</h4></div>
+                  <div className="flex justify-between items-center mb-4"><h4 className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b dark:border-slate-800 pb-2 grow mr-4">Peças e Serviços</h4></div>
                   <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
                     <div className="grid grid-cols-1 md:grid-cols-[1fr_110px_80px_56px] gap-2 items-start">
                       <div className="min-w-0">
-                        <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center ml-1">Descrição do Item</label>
+                        <label className="text-[12px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center ml-1">Descrição do Item</label>
                         <textarea
                           placeholder="Descreva o item ou serviço..."
                           className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl py-2 px-4 text-xs font-bold text-slate-900 dark:text-slate-100 outline-none resize-none h-[44px]"
@@ -381,11 +381,11 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                         />
                       </div>
                       <div className="text-center">
-                        <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Valor Unit.</label>
+                        <label className="text-[12px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Valor Unit.</label>
                         <input type="number" className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 h-[44px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100" value={currentPrice} onChange={e => setCurrentPrice(toNumber(e.target.value))} />
                       </div>
                       <div className="text-center">
-                        <label className="text-[11px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Qtd</label>
+                        <label className="text-[12px] font-black text-blue-700 dark:text-blue-400 uppercase mb-1.5 h-4 flex items-center justify-center">Qtd</label>
                         <input type="number" className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 h-[44px] text-xs font-black text-center outline-none text-slate-900 dark:text-slate-100" value={currentQty} onChange={e => setCurrentQty(toNumber(e.target.value))} disabled={editingOrderId !== null && !isAdmin} />
                       </div>
                       <div>
@@ -402,7 +402,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
 
                           <div className="min-w-0">
                             <textarea
-                              className="w-full bg-transparent text-[10px] font-black text-slate-900 dark:text-slate-100 uppercase outline-none focus:bg-slate-50 dark:focus:bg-slate-800/50 rounded px-1 transition-all resize-none break-words leading-tight h-[32px] py-1.5"
+                              className="w-full bg-transparent text-[12px] font-black text-slate-900 dark:text-slate-100 uppercase outline-none focus:bg-slate-50 dark:focus:bg-slate-800/50 rounded px-1 transition-all resize-none break-words leading-tight h-[32px] py-1.5"
                               value={item.description}
                               onChange={e => updateItem(item.id, 'description', e.target.value)}
                               disabled={editingOrderId !== null && !isAdmin}
@@ -411,15 +411,15 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                           </div>
 
                           <div className="text-center">
-                            <input type="number" className="w-full bg-slate-50 dark:bg-slate-800 border border-transparent focus:border-slate-200 dark:focus:border-slate-700 rounded h-[32px] text-[10px] font-bold text-center outline-none text-slate-900 dark:text-slate-100" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', toNumber(e.target.value))} />
+                            <input type="number" className="w-full bg-slate-50 dark:bg-slate-800 border border-transparent focus:border-slate-200 dark:focus:border-slate-700 rounded h-[32px] text-[12px] font-bold text-center outline-none text-slate-900 dark:text-slate-100" value={item.unitPrice} onChange={e => updateItem(item.id, 'unitPrice', toNumber(e.target.value))} />
                           </div>
 
                           <div className="text-center">
-                            <input type="number" className="w-full bg-slate-50 dark:bg-slate-800 border border-transparent focus:border-slate-200 dark:focus:border-slate-700 rounded h-[32px] text-[10px] font-bold text-center outline-none text-slate-900 dark:text-slate-100" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', toNumber(e.target.value))} />
+                            <input type="number" className="w-full bg-slate-50 dark:bg-slate-800 border border-transparent focus:border-slate-200 dark:focus:border-slate-700 rounded h-[32px] text-[12px] font-bold text-center outline-none text-slate-900 dark:text-slate-100" value={item.quantity} onChange={e => updateItem(item.id, 'quantity', toNumber(e.target.value))} />
                           </div>
 
                           <div className="text-right">
-                            <div className="bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100/50 dark:border-blue-900/20 rounded h-[32px] flex items-center justify-end px-2 text-[11px] font-black text-blue-600 dark:text-blue-400">
+                            <div className="bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100/50 dark:border-blue-900/20 rounded h-[32px] flex items-center justify-end px-2 text-[12px] font-black text-blue-600 dark:text-blue-400">
                               {(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                             </div>
                           </div>
@@ -436,7 +436,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                     {items.length > 0 && (
                       <div className="flex justify-end pt-2">
                         <div className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl px-6 py-3 flex items-center gap-4 shadow-sm">
-                          <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Subtotal dos Serviços</span>
+                          <span className="text-[12px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Subtotal dos Serviços</span>
                           <span className="text-lg font-black text-slate-900 dark:text-white whitespace-nowrap">R$ {totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>
                       </div>
@@ -458,19 +458,19 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
               <div className="w-full lg:w-[380px] bg-slate-50 dark:bg-slate-900/50 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-slate-800 p-8 flex flex-col shrink-0 relative overflow-hidden overflow-y-auto lg:overflow-y-hidden h-auto lg:h-full">
                 <div className="mb-8 p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm text-center relative overflow-hidden group">
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
-                  <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">Valor Total Estimado</p>
+                  <p className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">Valor Total Estimado</p>
                   <div className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter mb-1 whitespace-nowrap">R$ {totalAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-                  <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tight">Peças + Mão de Obra</p>
+                  <p className="text-[12px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tight">Peças + Mão de Obra</p>
                 </div>
 
                 <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm relative grow flex flex-col mb-4 min-h-[200px] lg:min-h-0">
                   <div className="p-3 bg-slate-50 dark:bg-slate-800/50 border-b dark:border-slate-800 flex justify-between items-center">
-                    <h4 className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-2">Assinatura do Cliente</h4>
+                    <h4 className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-2">Assinatura do Cliente</h4>
                     <button onClick={clearSignature} className="bg-rose-50 dark:bg-rose-900/30 text-rose-500 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 p-1.5 rounded-lg transition-colors" title="Limpar"><Eraser className="w-3 h-3" /></button>
                   </div>
                   <div className="grow bg-white dark:bg-slate-950 relative cursor-crosshair h-32 lg:h-auto">
                     <canvas ref={canvasRef} width={320} height={180} className={`w-full h-full touch-none ${editingOrderId !== null && !isAdmin ? 'pointer-events-none opacity-50' : ''}`} />
-                    <div className="absolute bottom-2 left-0 w-full text-center pointer-events-none opacity-20"><p className="text-[8px] font-black uppercase text-slate-300 dark:text-slate-700">Área de Assinatura Digital</p></div>
+                    <div className="absolute bottom-2 left-0 w-full text-center pointer-events-none opacity-20"><p className="text-[11px] font-black uppercase text-slate-300 dark:text-slate-700">Área de Assinatura Digital</p></div>
                   </div>
                 </div>
 
@@ -491,7 +491,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
                       createdAt: getTodayIsoDate(),
                       dueDate: deliveryDate || getTodayIsoDate(),
                       osType: 'EQUIPMENT'
-                    })} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-600 p-4 rounded-2xl font-black uppercase text-[10px] flex items-center justify-center gap-2 transition-all col-span-2"><Printer className="w-4 h-4" /> Visualizar Documento</button>
+                    })} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-600 p-4 rounded-2xl font-black uppercase text-[12px] flex items-center justify-center gap-2 transition-all col-span-2"><Printer className="w-4 h-4" /> Visualizar Documento</button>
                   </div>
                   {(!editingOrderId || isAdmin) && (
                     <button onClick={handleSaveOS} disabled={isSaving} className={`w-full ${isSaving ? 'bg-slate-800' : 'bg-slate-900 dark:bg-blue-600 hover:bg-slate-800 dark:hover:bg-blue-500'} text-white py-4 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-slate-200 dark:shadow-none hover:shadow-2xl transition-all flex items-center justify-center gap-3`}>

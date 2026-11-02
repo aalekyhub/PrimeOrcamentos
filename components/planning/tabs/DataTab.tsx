@@ -12,7 +12,7 @@ export const DataTab = React.memo(({ plan, customers, onUpdatePlan }: DataTabPro
         <div className="max-w-2xl mx-auto space-y-8 animate-in slide-in-from-bottom-4">
             <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-1.5">
-                    <label className="block text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Nome Identificador da Obra</label>
+                    <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Nome Identificador da Obra</label>
                     <input
                         type="text"
                         value={plan.name}
@@ -21,7 +21,7 @@ export const DataTab = React.memo(({ plan, customers, onUpdatePlan }: DataTabPro
                     />
                 </div>
                 <div className="space-y-1.5">
-                    <label className="block text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Status de Execução</label>
+                    <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Status de Execução</label>
                     <select
                         value={plan.status}
                         onChange={(e) => onUpdatePlan({ ...plan, status: e.target.value as any })}
@@ -36,7 +36,7 @@ export const DataTab = React.memo(({ plan, customers, onUpdatePlan }: DataTabPro
             </div>
 
             <div className="space-y-1.5">
-                <label className="block text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Cliente Vinculado</label>
+                <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Cliente Vinculado</label>
                 <select
                     value={plan.client_id}
                     onChange={(e) => onUpdatePlan({ ...plan, client_id: e.target.value, client_name: customers.find(c => c.id === e.target.value)?.name })}
@@ -48,7 +48,7 @@ export const DataTab = React.memo(({ plan, customers, onUpdatePlan }: DataTabPro
             </div>
 
             <div className="space-y-1.5">
-                <label className="block text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Endereço da Obra</label>
+                <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Endereço da Obra</label>
                 <input
                     type="text"
                     value={plan.address}
@@ -60,7 +60,7 @@ export const DataTab = React.memo(({ plan, customers, onUpdatePlan }: DataTabPro
 
             <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-1.5">
-                    <label className="block text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Tipo de Serviço</label>
+                    <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest ml-1">Tipo de Serviço</label>
                     <select
                         className="w-full p-3.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-sm text-slate-800 dark:text-slate-100 outline-none shadow-sm cursor-pointer transition-all focus:ring-2 focus:ring-blue-500/20"
                         value={plan.type}
@@ -77,13 +77,13 @@ export const DataTab = React.memo(({ plan, customers, onUpdatePlan }: DataTabPro
             <div className="space-y-3 p-6 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-sm">
                 <div className="flex justify-between items-center">
                     <div>
-                        <label className="block text-[10px] font-black text-slate-700 dark:text-slate-200 uppercase tracking-widest">Imagem de Anexo (Opcional)</label>
-                        <p className="text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase mt-0.5">Aparecerá no final do relatório PDF em uma nova página</p>
+                        <label className="block text-[12px] font-black text-slate-700 dark:text-slate-200 uppercase tracking-widest">Imagem de Anexo (Opcional)</label>
+                        <p className="text-[11px] text-slate-400 dark:text-slate-500 font-bold uppercase mt-0.5">Aparecerá no final do relatório PDF em uma nova página</p>
                     </div>
                     {plan.annex_image && (
                         <button
                             onClick={() => onUpdatePlan({ ...plan, annex_image: undefined })}
-                            className="text-[9px] font-black text-red-500 hover:text-red-600 uppercase tracking-widest"
+                            className="text-[11px] font-black text-red-500 hover:text-red-600 uppercase tracking-widest"
                         >
                             Remover
                         </button>
@@ -111,7 +111,7 @@ export const DataTab = React.memo(({ plan, customers, onUpdatePlan }: DataTabPro
                             <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /><circle cx="9" cy="9" r="2" /><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></svg>
                             </div>
-                            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest text-center">Clique para selecionar imagem <br /> ou arraste o arquivo aqui</span>
+                            <span className="text-[12px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest text-center">Clique para selecionar imagem <br /> ou arraste o arquivo aqui</span>
                         </div>
                     </div>
                 ) : (
@@ -122,7 +122,7 @@ export const DataTab = React.memo(({ plan, customers, onUpdatePlan }: DataTabPro
             </div>
 
             <div className="p-6 bg-blue-50/50 dark:bg-slate-800/50 rounded-3xl border border-blue-100 dark:border-slate-700/50">
-                <p className="text-[10px] font-bold text-blue-400 dark:text-slate-500 uppercase tracking-widest leading-relaxed">
+                <p className="text-[12px] font-bold text-blue-400 dark:text-slate-500 uppercase tracking-widest leading-relaxed">
                     Nota: Os dados preenchidos aqui são utilizados nos cabeçalhos de todos os relatórios e documentos gerados para esta obra.
                 </p>
             </div>
