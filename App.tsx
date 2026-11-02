@@ -105,6 +105,7 @@ const AppContent: React.FC = () => {
   const syncInFlightRef = useRef(false);
   const hasBootedRef = useRef(false);
   const hasSyncedAfterLoginRef = useRef(false);
+  const tabsRestoredRef = useRef(false);
 
   useEffect(() => {
     notifyRef.current = notify;
@@ -761,6 +762,46 @@ const AppContent: React.FC = () => {
     () => navItems.find((n) => n.id === activeTab)?.label || 'Painel',
     [navItems, activeTab]
   );
+
+  // Lembra as abas abertas (por usuário) para o F5 não voltar sempre ao Painel.
+  // Este efeito vem ANTES do de restauração: enquanto a restauração não terminou,
+  // ele não grava, para não sobrescrever o que estava salvo com o padrão.
+  useEffect(() => {
+    if (!currentUser || !tabsRestoredRef.current) return;
+    try {
+      localStorage.setItem(
+        `prime_tabs_v1_${currentUser.id}`,
+        JSON.stringify({ openTabs, activeTab })
+      );
+    } catch {
+      /* sem acesso ao localStorage: só não lembra */
+    }
+  }, [openTabs, activeTab, currentUser]);
+
+  useEffect(() => {
+    if (!currentUser) {
+      tabsRestoredRef.current = false;
+      setOpenTabs(['dashboard']);
+      setActiveTab('dashboard');
+      return;
+    }
+    if (tabsRestoredRef.current) return;
+    tabsRestoredRef.current = true;
+
+    try {
+      const saved = JSON.parse(localStorage.getItem(`prime_tabs_v1_${currentUser.id}`) || 'null');
+      if (!saved || !Array.isArray(saved.openTabs)) return;
+
+      const allowed = new Set<string>(navItems.map((n) => n.id));
+      const tabs = Array.from(
+        new Set<TabId>(['dashboard', ...saved.openTabs.filter((t: string) => allowed.has(t))])
+      );
+      setOpenTabs(tabs);
+      setActiveTab(tabs.includes(saved.activeTab) ? saved.activeTab : 'dashboard');
+    } catch {
+      /* dado salvo inválido: começa só com o Painel */
+    }
+  }, [currentUser?.id, navItems]);
 
   if (authLoading) {
     return (
