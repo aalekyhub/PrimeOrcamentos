@@ -749,7 +749,11 @@ const AppContent: React.FC = () => {
     ];
 
     return items.filter(
-      (item) => currentUser?.role === 'admin' || currentUser?.permissions?.includes(item.id)
+      (item) =>
+        currentUser?.role === 'admin' ||
+        currentUser?.permissions?.includes(item.id) ||
+        // perfis antigos gravaram 'financials' em vez de 'financial_mgmt'
+        (item.id === 'financial_mgmt' && currentUser?.permissions?.includes('financials'))
     );
   }, [currentUser]);
 
@@ -1055,7 +1059,9 @@ const AppContent: React.FC = () => {
                       currentUser={currentUser}
                       company={company}
                       isLoading={isSyncing && orders.length === 0 && transactions.length === 0}
-                      onNavigate={(target: TabId) => openTab(target)}
+                      onNavigate={(target: TabId) => {
+                        if (navItems.some((n) => n.id === target)) openTab(target);
+                      }}
                     />
                   )}
 

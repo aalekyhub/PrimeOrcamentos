@@ -85,8 +85,8 @@ const Dashboard: React.FC<DashboardProps> = ({ stats, orders, transactions, curr
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
         {[
-          { label: 'Receita (Total)', value: stats.totalRevenue, icon: DollarSign, color: 'blue', sub: 'Total acumulado', show: true, isCurrency: true, target: 'financials' },
-          { label: 'Lucro Líquido', value: stats.netProfit, icon: TrendingUp, color: 'orange', sub: 'Saldo em caixa', show: isAdmin, isCurrency: true, target: 'financials' },
+          { label: 'Receita (Total)', value: stats.totalRevenue, icon: DollarSign, color: 'blue', sub: 'Total acumulado', show: true, isCurrency: true, target: 'financial_mgmt' },
+          { label: 'Lucro Líquido', value: stats.netProfit, icon: TrendingUp, color: 'orange', sub: 'Saldo em caixa', show: isAdmin, isCurrency: true, target: 'financial_mgmt' },
         ].filter(s => s.show).map((stat, i) => (
           <div
             key={i}

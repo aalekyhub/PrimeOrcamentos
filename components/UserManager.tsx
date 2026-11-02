@@ -11,17 +11,24 @@ interface Props {
   currentUser: UserAccount;
 }
 
+// Os ids precisam ser iguais aos do menu lateral (navItems em App.tsx)
 const MODULES = [
-  { id: 'dashboard', label: 'Dashboard' },
+  { id: 'dashboard', label: 'Painel de Controle' },
   { id: 'customers', label: 'Clientes' },
-  { id: 'catalog', label: 'Catálogo de Serviços' },
+  { id: 'catalog', label: 'Serviços' },
+  { id: 'construction', label: 'Gestão de Obras' },
   { id: 'budgets', label: 'Orçamentos' },
-  { id: 'search', label: 'Consulta Rápida' },
-  { id: 'orders', label: 'Ordens de Serviço' },
-  { id: 'financials', label: 'Financeiro' },
-  { id: 'users', label: 'Gestão de Usuários' },
-  { id: 'settings', label: 'Configurações Empresa' },
+  { id: 'orders', label: 'O.S. Equip' },
+  { id: 'works', label: 'O.S. Obra' },
+  { id: 'financial_mgmt', label: 'Gestão Financeira' },
+  { id: 'search', label: 'Consultar' },
+  { id: 'users', label: 'Usuários' },
+  { id: 'settings', label: 'Empresa' },
 ];
+
+// Id antigo gravado em perfis já existentes -> id atual do menu
+const normalizePermissions = (perms: string[]) =>
+  Array.from(new Set(perms.map(p => (p === 'financials' ? 'financial_mgmt' : p))));
 
 const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
   const isAdmin = currentUser.role === 'admin';
@@ -61,7 +68,7 @@ const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      permissions: user.permissions || ['dashboard']
+      permissions: normalizePermissions(user.permissions || ['dashboard'])
     });
     setShowForm(true);
   };
@@ -372,7 +379,7 @@ const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-wrap gap-1 max-w-[200px]">
-                      {user.permissions?.map(p => (
+                      {normalizePermissions(user.permissions || []).map(p => (
                         <span key={p} className="text-[8px] bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded uppercase font-black">
                           {MODULES.find(m => m.id === p)?.label || p}
                         </span>
