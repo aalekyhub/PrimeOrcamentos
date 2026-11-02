@@ -10,6 +10,7 @@ import { EditableIndirectRow } from '../rows/EditableIndirectRow';
 import { useDragAndDrop } from '../hooks/useDragAndDrop';
 import { db } from '../../../services/db';
 import { useNotify } from '../../ToastProvider';
+import { useConfirm } from '../../ConfirmProvider';
 
 interface ResourcesTabProps {
     planId: string;
@@ -65,6 +66,7 @@ export const ResourcesTab = React.memo(({
     const [selectedLabor, setSelectedLabor] = useState<string[]>([]);
     const [selectedIndirects, setSelectedIndirects] = useState<string[]>([]);
     const { notify } = useNotify();
+    const confirm = useConfirm();
 
     const matDnD = useDragAndDrop<PlannedMaterial>((newOrder) => {
         onUpdateMaterials(newOrder);
@@ -136,12 +138,12 @@ export const ResourcesTab = React.memo(({
                                 <div className="flex gap-2">
                                     {selectedMaterials.length > 0 && (
                                         <button
-                                            onClick={() => {
+                                            onClick={async () => {
                                                 if (onDeleteMultipleMaterials) {
                                                     onDeleteMultipleMaterials(selectedMaterials);
                                                     setSelectedMaterials([]);
                                                 } else {
-                                                    if (confirm(`Excluir ${selectedMaterials.length} material(is) selecionado(s)?`)) {
+                                                    if (await confirm(`Excluir ${selectedMaterials.length} material(is) selecionado(s)?`)) {
                                                         selectedMaterials.forEach(id => onDeleteMaterial(id));
                                                         setSelectedMaterials([]);
                                                     }
@@ -153,12 +155,12 @@ export const ResourcesTab = React.memo(({
                                         </button>
                                     )}
                                     <button
-                                        onClick={() => {
+                                        onClick={async () => {
                                             if (onDeleteMultipleMaterials) {
                                                 onDeleteMultipleMaterials(materials.map(m => m.id));
                                                 setSelectedMaterials([]);
                                             } else {
-                                                if (confirm('Excluir TODOS os materiais deste planejamento?')) {
+                                                if (await confirm('Excluir TODOS os materiais deste planejamento?')) {
                                                     materials.forEach(m => onDeleteMaterial(m.id));
                                                     setSelectedMaterials([]);
                                                 }
@@ -226,12 +228,12 @@ export const ResourcesTab = React.memo(({
                                 <div className="flex gap-2">
                                     {selectedLabor.length > 0 && (
                                         <button
-                                            onClick={() => {
+                                            onClick={async () => {
                                                 if (onDeleteMultipleLabor) {
                                                     onDeleteMultipleLabor(selectedLabor);
                                                     setSelectedLabor([]);
                                                 } else {
-                                                    if (confirm(`Excluir ${selectedLabor.length} item(ns) de mão de obra selecionado(s)?`)) {
+                                                    if (await confirm(`Excluir ${selectedLabor.length} item(ns) de mão de obra selecionado(s)?`)) {
                                                         selectedLabor.forEach(id => onDeleteLabor(id));
                                                         setSelectedLabor([]);
                                                     }
@@ -243,12 +245,12 @@ export const ResourcesTab = React.memo(({
                                         </button>
                                     )}
                                     <button
-                                        onClick={() => {
+                                        onClick={async () => {
                                             if (onDeleteMultipleLabor) {
                                                 onDeleteMultipleLabor(labor.map(l => l.id));
                                                 setSelectedLabor([]);
                                             } else {
-                                                if (confirm('Excluir TODA a mão de obra deste planejamento?')) {
+                                                if (await confirm('Excluir TODA a mão de obra deste planejamento?')) {
                                                     labor.forEach(l => onDeleteLabor(l.id));
                                                     setSelectedLabor([]);
                                                 }
@@ -316,12 +318,12 @@ export const ResourcesTab = React.memo(({
                                 <div className="flex gap-2">
                                     {selectedIndirects.length > 0 && (
                                         <button
-                                            onClick={() => {
+                                            onClick={async () => {
                                                 if (onDeleteMultipleIndirects) {
                                                     onDeleteMultipleIndirects(selectedIndirects);
                                                     setSelectedIndirects([]);
                                                 } else {
-                                                    if (confirm(`Excluir ${selectedIndirects.length} custo(s) indireto(s) selecionado(s)?`)) {
+                                                    if (await confirm(`Excluir ${selectedIndirects.length} custo(s) indireto(s) selecionado(s)?`)) {
                                                         selectedIndirects.forEach(id => onDeleteIndirect(id));
                                                         setSelectedIndirects([]);
                                                     }
@@ -333,12 +335,12 @@ export const ResourcesTab = React.memo(({
                                         </button>
                                     )}
                                     <button
-                                        onClick={() => {
+                                        onClick={async () => {
                                             if (onDeleteMultipleIndirects) {
                                                 onDeleteMultipleIndirects(indirects.map(i => i.id));
                                                 setSelectedIndirects([]);
                                             } else {
-                                                if (confirm('Excluir TODOS os custos indiretos deste planejamento?')) {
+                                                if (await confirm('Excluir TODOS os custos indiretos deste planejamento?')) {
                                                     indirects.forEach(i => onDeleteIndirect(i.id));
                                                     setSelectedIndirects([]);
                                                 }

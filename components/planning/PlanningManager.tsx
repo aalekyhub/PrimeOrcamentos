@@ -6,6 +6,7 @@ import { PlanningEditor } from './PlanningEditor';
 import { Customer } from './types';
 import { UserAccount } from '../../types';
 import { db } from '../../services/db';
+import { useNotify } from '../ToastProvider';
 import { toNumber } from '../../services/formatUtils';
 import ReportPreview from '../ReportPreview';
 import { buildPlanningReportHtml, PLANNING_THEME } from '../../services/planningPdfService';
@@ -42,6 +43,7 @@ const PlanningManager: React.FC<Props> = ({
     const [showPreview, setShowPreview] = useState(false);
 
 
+    const { notify } = useNotify();
     const planning = usePlanning(customers, embeddedPlanId);
 
     const calculations = useCalculations(
@@ -78,7 +80,7 @@ const PlanningManager: React.FC<Props> = ({
         const isAdmin = currentUser?.role === 'admin';
         const isNew = embeddedPlanId === 'new' || !embeddedPlanId;
         if (!isAdmin && !isNew) {
-            alert("Você não tem permissão para alterar projetos salvos.");
+            notify("Você não tem permissão para alterar projetos salvos.", "error");
             return;
         }
         await planning.savePlan(calculations.totalGeneral);

@@ -3,6 +3,7 @@ import { Tag, Plus, Trash2, Wallet, DollarSign } from 'lucide-react';
 import { FinancialCategory, FinancialAccount, AccountEntry, Transaction } from '../../types';
 import { db } from '../../services/db';
 import { useNotify } from '../ToastProvider';
+import { useConfirm, usePrompt } from '../ConfirmProvider';
 
 interface FinancialSettingsTabProps {
   categories: FinancialCategory[];
@@ -22,6 +23,8 @@ const FinancialSettingsTab: React.FC<FinancialSettingsTabProps> = ({
   transactions
 }) => {
   const { notify } = useNotify();
+  const confirm = useConfirm();
+  const prompt = usePrompt();
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -32,9 +35,20 @@ const FinancialSettingsTab: React.FC<FinancialSettingsTabProps> = ({
           </h4>
           <button
             onClick={async () => {
-              const name = prompt("Nome da nova categoria:");
+              const name = (await prompt({
+                title: 'Nova categoria',
+                label: 'Nome da categoria',
+                placeholder: 'Ex: Combustível',
+              }))?.trim();
               if (!name) return;
-              const type = confirm("É uma categoria de RECEITA? (OK para Receita, Cancel para Despesa)") ? 'RECEITA' : 'DESPESA';
+              const isRevenue = await confirm({
+                title: 'Tipo da categoria',
+                message: 'Esta categoria é de RECEITA ou de DESPESA?',
+                confirmLabel: 'Receita',
+                cancelLabel: 'Despesa',
+                danger: false,
+              });
+              const type = isRevenue ? 'RECEITA' : 'DESPESA';
 
               const newCat: FinancialCategory = {
                 id: `CAT-${Date.now()}`,
@@ -71,7 +85,7 @@ const FinancialSettingsTab: React.FC<FinancialSettingsTabProps> = ({
                     notify("Não é possível excluir: existem lançamentos usando esta categoria.", "error");
                     return;
                   }
-                  if (!confirm("Excluir esta categoria?")) return;
+                  if (!(await confirm("Excluir esta categoria?"))) return;
                   const newList = categories.filter(c => c.id !== cat.id);
                   setCategories(newList);
                   const result = await db.remove('serviflow_financial_categories', cat.id);
@@ -95,9 +109,22 @@ const FinancialSettingsTab: React.FC<FinancialSettingsTabProps> = ({
           </h4>
           <button
             onClick={async () => {
-              const name = prompt("Nome da conta (ex: Banco do Brasil):");
+              const name = (await prompt({
+                title: 'Nova conta',
+                label: 'Nome da conta',
+                placeholder: 'Ex: Banco do Brasil',
+              }))?.trim();
               if (!name) return;
-              const balance = prompt("Saldo Inicial (R$):", "0");
+              const balanceText = await prompt({
+                title: 'Saldo inicial',
+                label: 'Saldo inicial (R$)',
+                defaultValue: '0',
+                inputMode: 'decimal',
+              });
+              if (balanceText === null) return;
+              const balance = balanceText.includes(',')
+                ? balanceText.replace(/\./g, '').replace(',', '.')
+                : balanceText;
 
               const newAcc: FinancialAccount = {
                 id: `ACC-${Date.now()}`,
@@ -141,7 +168,7 @@ const FinancialSettingsTab: React.FC<FinancialSettingsTabProps> = ({
                     notify("Não é possível excluir: existem lançamentos vinculados a esta conta.", "error");
                     return;
                   }
-                  if (!confirm("Remover esta conta?")) return;
+                  if (!(await confirm("Remover esta conta?"))) return;
                   const newList = accounts.filter(a => a.id !== acc.id);
                   setAccounts(newList);
                   const result = await db.remove('serviflow_financial_accounts', acc.id);

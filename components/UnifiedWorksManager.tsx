@@ -9,6 +9,7 @@ import { PlanningHeader, Customer, UserAccount, AccountEntry } from '../types';
 import PlanningManager from './planning/PlanningManager';
 import WorksManager from './WorksManager';
 import { useNotify } from './ToastProvider';
+import { useConfirm } from './ConfirmProvider';
 interface Props {
     customers: Customer[];
     company: any;
@@ -40,6 +41,7 @@ const UnifiedWorksManager: React.FC<Props> = ({
     const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
     const [activeModule, setActiveModule] = useState<'planning' | 'execution'>('planning');
     const { notify } = useNotify();
+    const confirm = useConfirm();
 
     const [plans, setPlans] = useState<PlanningHeader[]>([]);
     const [company, setCompany] = useState<any>(propsCompany);
@@ -87,7 +89,7 @@ const UnifiedWorksManager: React.FC<Props> = ({
             notify("Somente administradores podem excluir projetos.", "error");
             return;
         }
-        if (!confirm('Deseja excluir permanentemente este planejamento e todos os dados de execução vinculados?')) return;
+        if (!(await confirm('Deseja excluir permanentemente este planejamento e todos os dados de execução vinculados?'))) return;
 
         try {
             // 1. Identify linked Work Data
@@ -139,7 +141,7 @@ const UnifiedWorksManager: React.FC<Props> = ({
             notify("Somente administradores podem duplicar projetos.", "error");
             return;
         }
-        if (!confirm('Deseja criar uma cópia deste planejamento?')) return;
+        if (!(await confirm('Deseja criar uma cópia deste planejamento?'))) return;
 
         try {
             const allPlans = db.load('serviflow_plans', []) as any[];
@@ -177,10 +179,10 @@ const UnifiedWorksManager: React.FC<Props> = ({
 
             await db.save('serviflow_plans', [newPlan, ...allPlans], newPlan);
             loadPlans();
-            alert('Projeto duplicado com sucesso!');
+            notify('Projeto duplicado com sucesso!');
         } catch (error) {
             console.error(error);
-            alert('Erro ao duplicar projeto.');
+            notify('Erro ao duplicar projeto.', 'error');
         }
     };
 

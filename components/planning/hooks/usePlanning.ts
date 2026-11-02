@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { db } from '../../../services/db';
 import { useNotify } from '../../ToastProvider';
+import { useConfirm } from '../../ConfirmProvider';
 import {
     PlanningHeader,
     PlannedService,
@@ -22,6 +23,7 @@ export const usePlanning = (customers: Customer[], embeddedPlanId?: string | nul
     const [taxes, setTaxes] = useState<PlanTax[]>([]);
     const [loading, setLoading] = useState(false);
     const { notify } = useNotify();
+    const confirm = useConfirm();
 
     const creationAttemptedRef = useRef(false);
 
@@ -157,7 +159,7 @@ export const usePlanning = (customers: Customer[], embeddedPlanId?: string | nul
             setItems: (items: T[]) => void,
             itemName: string
         ) => {
-            if (!confirm(`Tem certeza que deseja excluir este ${itemName}?`)) return;
+            if (!(await confirm(`Tem certeza que deseja excluir este ${itemName}?`))) return;
 
             const updatedItems = items.filter(item => item.id !== id);
             setItems(updatedItems);
@@ -184,7 +186,7 @@ export const usePlanning = (customers: Customer[], embeddedPlanId?: string | nul
             setSelectedIds: (ids: string[]) => void,
             itemName: string
         ) => {
-            if (!confirm(`Excluir ${idsToDelete.length} ${itemName}(s) selecionado(s)?`)) return;
+            if (!(await confirm(`Excluir ${idsToDelete.length} ${itemName}(s) selecionado(s)?`))) return;
 
             const updatedItems = items.filter(item => !idsToDelete.includes(item.id));
             setItems(updatedItems);

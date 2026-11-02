@@ -20,6 +20,7 @@ import { buildFinancialReportHtml } from '../../services/financialPdfService';
 import { getTodayIsoDate } from '../../services/dateService';
 import { db } from '../../services/db';
 import { useNotify } from '../ToastProvider';
+import { useConfirm } from '../ConfirmProvider';
 
 interface FinancialProvisionTabProps {
   accountEntries: AccountEntry[];
@@ -63,6 +64,7 @@ const FinancialProvisionTab: React.FC<FinancialProvisionTabProps> = ({
   accounts
 }) => {
   const { notify } = useNotify();
+  const confirm = useConfirm();
 
   const totalBalance = accounts.reduce((a, c) => a + c.currentBalance, 0);
   const pendingReceivables = accountEntries.filter(e => e.type === 'RECEBER' && !isAporte(e.category) && e.status !== 'PAGO').reduce((a, c) => a + c.amount, 0);
@@ -249,7 +251,7 @@ const FinancialProvisionTab: React.FC<FinancialProvisionTabProps> = ({
                     </button>
                     <button
                       onClick={async () => {
-                        if (!confirm("Remover este lançamento permanentemente?")) return;
+                        if (!(await confirm("Remover este lançamento permanentemente?"))) return;
                         const newList = accountEntries.filter(e => e.id !== entry.id);
                         setAccountEntries(newList);
                         const result = await db.remove('serviflow_account_entries', entry.id);

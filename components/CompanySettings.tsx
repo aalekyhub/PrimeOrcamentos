@@ -9,6 +9,7 @@ import { CompanyProfile, MeasurementUnit, UserAccount } from '../types';
 import { db } from '../services/db';
 import { getTodayIsoDate } from '../services/dateService';
 import { useNotify } from './ToastProvider';
+import { useConfirm } from './ConfirmProvider';
 
 interface Props {
   company: CompanyProfile;
@@ -21,6 +22,7 @@ const CompanySettings: React.FC<Props> = ({ company, setCompany, currentUser }) 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
   const { notify } = useNotify();
+  const confirm = useConfirm();
 
   const [newUnitLabel, setNewUnitLabel] = useState('');
   const [newUnitValue, setNewUnitValue] = useState('');
@@ -78,11 +80,11 @@ const CompanySettings: React.FC<Props> = ({ company, setCompany, currentUser }) 
     }
   };
 
-  const handleImportData = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImportData = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!confirm("Isso irá SOBRESCREVER todos os dados atuais do sistema pelos dados do arquivo. Deseja continuar?")) {
+    if (!(await confirm("Isso irá SOBRESCREVER todos os dados atuais do sistema pelos dados do arquivo. Deseja continuar?"))) {
       e.target.value = '';
       return;
     }

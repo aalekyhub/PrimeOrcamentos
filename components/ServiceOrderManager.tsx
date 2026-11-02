@@ -10,6 +10,7 @@ import RichTextEditor from './ui/RichTextEditor';
 import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock, UserAccount } from '../types';
 import { roundMoney, toNumber } from '../services/formatUtils';
 import { useNotify } from './ToastProvider';
+import { useConfirm } from './ConfirmProvider';
 import CustomerManager from './CustomerManager';
 import ServiceCatalog from './ServiceCatalog';
 import { db } from '../services/db';
@@ -41,6 +42,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
   const [previewOS, setPreviewOS] = useState<ServiceOrder | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const { notify } = useNotify();
+  const confirm = useConfirm();
 
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
   const [osTitle, setOsTitle] = useState('Execução de Serviço');
@@ -157,7 +159,7 @@ const ServiceOrderManager: React.FC<Props> = ({ orders, setOrders, customers, se
       notify("Somente administradores podem excluir ordens de serviço.", "error");
       return;
     }
-    if (confirm("Deseja realmente excluir esta Ordem de Serviço? Esta ação também removerá os dados da nuvem.")) {
+    if (await confirm("Deseja realmente excluir esta Ordem de Serviço? Esta ação também removerá os dados da nuvem.")) {
       setOrders(prev => prev.filter(o => o.id !== orderId));
       const result = await db.remove('serviflow_orders', orderId);
       if (result?.success) {

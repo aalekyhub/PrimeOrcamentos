@@ -5,6 +5,7 @@ import {
     PieChart, Calendar, Pencil, Check, X, Percent, Eye, Archive, Copy, TrendingUp
 } from 'lucide-react';
 import { useNotify } from './ToastProvider';
+import { useConfirm } from './ConfirmProvider';
 import { db } from '../services/db';
 import ReportPreview from './ReportPreview';
 import {
@@ -105,6 +106,7 @@ const useItemManager = <T extends { id: string; work_id?: string }>(
     currentWorkId?: string
 ) => {
     const { notify } = useNotify();
+    const confirm = useConfirm();
 
     const addItem = useCallback((newItem: Omit<T, 'id' | 'work_id'>) => {
         const item = {
@@ -122,7 +124,7 @@ const useItemManager = <T extends { id: string; work_id?: string }>(
     }, [setItems]);
 
     const deleteItem = useCallback(async (id: string, confirmMessage: string) => {
-        if (!confirm(confirmMessage)) return false;
+        if (!(await confirm(confirmMessage))) return false;
         setItems(prev => prev.filter(item => item.id !== id));
         await db.remove(storageKey, id);
         notify('Item removido com sucesso', 'success');
@@ -130,7 +132,7 @@ const useItemManager = <T extends { id: string; work_id?: string }>(
     }, [storageKey, setItems, notify]);
 
     const deleteMultiple = useCallback(async (ids: string[], itemName: string) => {
-        if (!confirm(`Excluir ${ids.length} ${itemName}(s) selecionado(s)?`)) return false;
+        if (!(await confirm(`Excluir ${ids.length} ${itemName}(s) selecionado(s)?`))) return false;
         setItems(prev => prev.filter(item => !ids.includes(item.id)));
         await Promise.all(ids.map(id => db.remove(storageKey, id)));
         notify(`${ids.length} ${itemName}(s) removidos`, 'success');
@@ -138,7 +140,7 @@ const useItemManager = <T extends { id: string; work_id?: string }>(
     }, [storageKey, setItems, notify]);
 
     const clearAll = useCallback(async (confirmMessage: string) => {
-        if (!confirm(confirmMessage)) return false;
+        if (!(await confirm(confirmMessage))) return false;
         setItems([]);
         const all = db.load(storageKey, []);
         const others = all.filter((i: any) => i.work_id !== currentWorkId);
@@ -344,6 +346,7 @@ const WorksManager: React.FC<Props> = ({
     const [newIndirect, setNewIndirect] = useState({ category: 'Transporte', description: '', value: '' });
 
     const { notify } = useNotify();
+    const confirm = useConfirm();
     const creationAttemptedRef = useRef<Record<string, boolean>>({});
     const savingRef = useRef(false);
 
@@ -706,7 +709,7 @@ const WorksManager: React.FC<Props> = ({
             notify('Somente administradores podem duplicar obras.', 'error');
             return;
         }
-        if (!confirm('Deseja criar uma cópia desta obra?')) return;
+        if (!(await confirm('Deseja criar uma cópia desta obra?'))) return;
 
         try {
             setLoading(true);
@@ -759,7 +762,7 @@ const WorksManager: React.FC<Props> = ({
             notify('Somente administradores podem excluir obras.', 'error');
             return;
         }
-        if (!confirm('Excluir PERMANENTEMENTE esta obra e todos os seus dados?')) return;
+        if (!(await confirm('Excluir PERMANENTEMENTE esta obra e todos os seus dados?'))) return;
 
         try {
             setLoading(true);

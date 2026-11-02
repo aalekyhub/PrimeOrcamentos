@@ -4,6 +4,7 @@ import { Upload, CheckCircle, AlertCircle, Trash2, Database, Loader2 } from 'luc
 import { sinapiParser } from '../services/sinapiParser';
 import { sinapiDb, SinapiInsumoRecord, SinapiComposicaoRecord } from '../services/sinapiDb';
 import { useNotify } from './ToastProvider';
+import { useConfirm } from './ConfirmProvider';
 
 const SinapiImporter: React.FC = () => {
     const [isDragging, setIsDragging] = useState(false);
@@ -14,6 +15,7 @@ const SinapiImporter: React.FC = () => {
         datasets: []
     });
     const { notify } = useNotify();
+    const confirm = useConfirm();
 
     useEffect(() => {
         loadMetadata();
@@ -51,7 +53,7 @@ const SinapiImporter: React.FC = () => {
     };
 
     const handleClear = async () => {
-        if (confirm('Deseja limpar todos os dados locais do SINAPI?')) {
+        if (await confirm('Deseja limpar todos os dados locais do SINAPI?')) {
             await sinapiDb.clearData();
             await loadMetadata();
             notify('Dados do SINAPI removidos do armazenamento local.');

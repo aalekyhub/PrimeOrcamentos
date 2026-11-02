@@ -30,6 +30,7 @@ import { lazyWithReload } from './services/lazyWithReload';
 import ChangePasswordModal from './components/ChangePasswordModal';
 
 import { ToastProvider, useNotify } from './components/ToastProvider';
+import { ConfirmProvider, useConfirm } from './components/ConfirmProvider';
 
 
 import {
@@ -124,6 +125,7 @@ const preloadModule = (tabId: TabId) => {
 
 const AppContent: React.FC = () => {
   const { notify } = useNotify();
+  const confirm = useConfirm();
 
   const notifyRef = useRef(notify);
   const syncInFlightRef = useRef(false);
@@ -754,9 +756,15 @@ const AppContent: React.FC = () => {
   );
 
   const handleLogout = useCallback(async () => {
-    if (!confirm('Encerrar sessão?')) return;
+    const ok = await confirm({
+      title: 'Encerrar sessão',
+      message: 'Deseja sair do sistema?',
+      confirmLabel: 'Sair',
+      danger: false,
+    });
+    if (!ok) return;
     await supabase?.auth.signOut();
-  }, []);
+  }, [confirm]);
 
   const navItems = useMemo(() => {
     const items: Array<{ id: TabId; label: string; icon: React.ElementType }> = [
@@ -1282,7 +1290,9 @@ const App: React.FC = () => {
 
   return (
     <ToastProvider>
-      <AppContent />
+      <ConfirmProvider>
+        <AppContent />
+      </ConfirmProvider>
     </ToastProvider>
   );
 };

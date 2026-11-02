@@ -9,6 +9,7 @@ import {
 import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock, Transaction, UserAccount } from '../types';
 import { toNumber } from '../services/formatUtils';
 import { useNotify } from './ToastProvider';
+import { useConfirm } from './ConfirmProvider';
 import CustomerManager from './CustomerManager';
 import { db } from '../services/db';
 import { getTodayIsoDate } from '../services/dateService';
@@ -46,6 +47,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
     const [previewOS, setPreviewOS] = useState<ServiceOrder | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     const { notify } = useNotify();
+    const confirm = useConfirm();
     const { getOSHtml } = usePrintOS(customers, company);
 
     const [selectedCustomerId, setSelectedCustomerId] = useState('');
@@ -263,7 +265,7 @@ const WorkOrderManager: React.FC<Props> = ({ orders, setOrders, customers, setCu
                                             notify("Somente administradores podem excluir ordens de serviço.", "error");
                                             return;
                                         }
-                                        if (confirm("Excluir esta OS de Obra?")) {
+                                        if (await confirm("Excluir esta OS de Obra?")) {
                                             const idToDelete = order.id;
                                             setOrders(p => p.filter(x => x.id !== idToDelete));
                                             await db.remove('serviflow_orders', idToDelete);

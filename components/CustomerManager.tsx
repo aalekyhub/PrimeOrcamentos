@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { UserPlus, Search, Trash2, X, Loader2, RefreshCw } from 'lucide-react';
 import { Customer, PersonType, ServiceOrder, UserAccount } from '../types';
 import { useNotify } from './ToastProvider';
+import { useConfirm } from './ConfirmProvider';
 import { checkDuplicateCustomer, isValidDocument } from '../services/validation';
 import { db } from '../services/db';
 import { getTodayIsoDate } from '../services/dateService';
@@ -25,6 +26,7 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, cur
   const [editingCustomerId, setEditingCustomerId] = useState<string | null>(null);
   const [loadingApi, setLoadingApi] = useState(false);
   const { notify } = useNotify();
+  const confirm = useConfirm();
 
   const initialFormState: Partial<Customer> = {
     type: 'PF', name: '', document: '', cep: '', address: '', number: '',
@@ -424,7 +426,7 @@ const CustomerManager: React.FC<Props> = ({ customers, setCustomers, orders, cur
                           notify(`Não é possível excluir: existem ${linkedOrders.length} orçamento(s)/ordem(ns) de serviço vinculados a este cliente.`, "error");
                           return;
                         }
-                        if (confirm("Deseja realmente excluir este cliente? Esta ação também removerá os dados da nuvem.")) {
+                        if (await confirm("Deseja realmente excluir este cliente? Esta ação também removerá os dados da nuvem.")) {
                           setCustomers(p => p.filter(x => x.id !== c.id));
                           const result = await db.remove('serviflow_customers', c.id);
                           if (result?.success) notify("Cliente removido da nuvem.");

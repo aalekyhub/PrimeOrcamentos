@@ -5,6 +5,7 @@ import { EditableServiceRow } from '../rows/EditableServiceRow';
 import { AddServiceForm } from '../forms/AddServiceForm';
 import { useDragAndDrop } from '../hooks/useDragAndDrop';
 import { db } from '../../../services/db';
+import { useConfirm } from '../../ConfirmProvider';
 
 interface ServicesTabProps {
     services: PlannedService[];
@@ -26,6 +27,7 @@ export const ServicesTab = React.memo(({
     planId,
 }: ServicesTabProps) => {
     const [selectedServices, setSelectedServices] = React.useState<string[]>([]);
+    const confirm = useConfirm();
     const { draggedIndex, handleDragStart, handleDragOver, handleDragEnd, moveItem } =
         useDragAndDrop<PlannedService>((newOrder) => {
             onReorderServices(newOrder);
@@ -40,27 +42,27 @@ export const ServicesTab = React.memo(({
     };
 
 
-    const handleDeleteSelected = () => {
+    const handleDeleteSelected = async () => {
         if (selectedServices.length === 0) return;
         if (onDeleteMultipleServices) {
             onDeleteMultipleServices(selectedServices);
             setSelectedServices([]);
         } else {
             // Fallback if prop not provided (though it should be)
-            if (confirm(`Excluir ${selectedServices.length} serviço(s) selecionado(s)?`)) {
+            if (await confirm(`Excluir ${selectedServices.length} serviço(s) selecionado(s)?`)) {
                 selectedServices.forEach(id => onDeleteService(id));
                 setSelectedServices([]);
             }
         }
     };
 
-    const handleClearAll = () => {
+    const handleClearAll = async () => {
         if (services.length === 0) return;
         if (onDeleteMultipleServices) {
             onDeleteMultipleServices(services.map(s => s.id));
             setSelectedServices([]);
         } else {
-            if (confirm('Excluir TODOS os serviços deste planejamento?')) {
+            if (await confirm('Excluir TODOS os serviços deste planejamento?')) {
                 services.forEach(s => onDeleteService(s.id));
                 setSelectedServices([]);
             }

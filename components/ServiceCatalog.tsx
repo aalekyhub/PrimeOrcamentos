@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Plus, Search, Trash2, Pencil, Briefcase, DollarSign, Tag, X, Scale, Database, Calculator, Upload, Filter, List } from 'lucide-react';
 import { CatalogService, CompanyProfile, UserAccount } from '../types';
 import { useNotify } from './ToastProvider';
+import { useConfirm } from './ConfirmProvider';
 import { checkDuplicateService } from '../services/validation';
 import { db } from '../services/db';
 import SinapiImporterInsumos from './sinapi/SinapiImporterInsumos';
@@ -29,6 +30,7 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, curre
   const [searchTerm, setSearchTerm] = useState('');
   const [editingService, setEditingService] = useState<CatalogService | null>(null);
   const { notify } = useNotify();
+  const confirm = useConfirm();
 
   const [formData, setFormData] = useState<Partial<CatalogService>>({
     name: '',
@@ -195,7 +197,7 @@ const ServiceCatalog: React.FC<Props> = ({ services, setServices, company, curre
                         <div className="flex justify-end gap-2">
                           <button onClick={() => { setEditingService(service); setFormData(service); setShowForm(true); }} className="p-2 text-slate-400 hover:text-indigo-600 transition-colors"><Pencil className="w-4 h-4" /></button>
                           <button onClick={async () => {
-                            if (confirm("Excluir item do catálogo?")) {
+                            if (await confirm("Excluir item do catálogo?")) {
                               setServices(services.filter(s => s.id !== service.id));
                               await db.remove('serviflow_catalog', service.id);
                               notify("Item removido.");

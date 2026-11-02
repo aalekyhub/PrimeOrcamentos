@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { ServiceOrder, OrderStatus, Customer, ServiceItem, CatalogService, CompanyProfile, DescriptionBlock, UserAccount } from '../types';
 import { useNotify } from './ToastProvider';
+import { useConfirm } from './ConfirmProvider';
 import CustomerManager from './CustomerManager';
 import ServiceCatalog from './ServiceCatalog';
 import { db } from '../services/db';
@@ -77,6 +78,7 @@ const BudgetManager: React.FC<Props> = ({
   const [previewContract, setPreviewContract] = useState<ServiceOrder | null>(null);
   const [previewMaintenanceContract, setPreviewMaintenanceContract] = useState<ServiceOrder | null>(null);
   const { notify } = useNotify();
+  const confirm = useConfirm();
 
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
   const [proposalTitle, setProposalTitle] = useState('');
@@ -489,7 +491,7 @@ const BudgetManager: React.FC<Props> = ({
       notify("Somente administradores podem aprovar orçamentos.", "error");
       return;
     }
-    if (!window.confirm('Deseja APROVAR este orçamento? Ele será convertido em Ordem de Serviço.')) return;
+    if (!(await confirm('Deseja APROVAR este orçamento? Ele será convertido em Ordem de Serviço.'))) return;
 
     const updatedBudget = { ...budget, status: OrderStatus.APPROVED };
     const newList = orders.map(o => (o.id === budget.id ? updatedBudget : o));
@@ -508,7 +510,7 @@ const BudgetManager: React.FC<Props> = ({
       notify("Somente administradores podem excluir orçamentos.", "error");
       return;
     }
-    if (!window.confirm('Deseja excluir este orçamento? Esta ação também removerá os dados da nuvem.')) return;
+    if (!(await confirm('Deseja excluir este orçamento? Esta ação também removerá os dados da nuvem.'))) return;
 
     const idToDelete = budget.id;
     setOrders(prev => prev.filter(o => o.id !== idToDelete));

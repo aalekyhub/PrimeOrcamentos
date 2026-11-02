@@ -4,12 +4,14 @@ import { Upload, Loader2, CheckCircle, Database, Trash2 } from 'lucide-react';
 import { sinapiParsers } from '../../services/sinapiParsers';
 import { sinapiDb } from '../../services/sinapiDb';
 import { useNotify } from '../ToastProvider';
+import { useConfirm } from '../ConfirmProvider';
 
 const SinapiImporterComposicoes: React.FC = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [config, setConfig] = useState({ uf: 'DF', mes_ref: '2025/08', modo: 'SE' });
     const [count, setCount] = useState<number | null>(null);
     const { notify } = useNotify();
+    const confirm = useConfirm();
 
     const refreshCount = React.useCallback(async () => {
         try {
@@ -43,7 +45,7 @@ const SinapiImporterComposicoes: React.FC = () => {
     };
 
     const handleClear = async () => {
-        if (!confirm(`Deseja limpar os dados de COMPOSIÇÕES de ${config.uf} (${config.mes_ref})?`)) return;
+        if (!(await confirm(`Deseja limpar os dados de COMPOSIÇÕES de ${config.uf} (${config.mes_ref})?`))) return;
         setIsProcessing(true);
         try {
             await sinapiDb.clearDataset('sinapi_composicoes', config.mes_ref, config.uf, config.modo);

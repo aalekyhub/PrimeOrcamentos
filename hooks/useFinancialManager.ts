@@ -9,6 +9,7 @@ import {
 import { db } from '../services/db';
 import { getTodayIsoDate } from '../services/dateService';
 import { useNotify } from '../components/ToastProvider';
+import { useConfirm } from '../components/ConfirmProvider';
 import { isAporte } from '../services/financialHelpers';
 
 export interface UseFinancialManagerProps {
@@ -35,6 +36,7 @@ export const useFinancialManager = ({
   currentUser
 }: UseFinancialManagerProps) => {
   const { notify } = useNotify();
+  const confirm = useConfirm();
 
   // --- States ---
   const [activeTab, setActiveTab] = useState<'dashboard' | 'realizado' | 'provisionado' | 'relatorios' | 'config'>('dashboard');
@@ -393,7 +395,7 @@ export const useFinancialManager = ({
       return;
     }
 
-    if (!confirm("Deseja realmente reverter e excluir este lançamento do fluxo de caixa? O saldo bancário correspondente será estornado e o título voltará a ser Pendente.")) {
+    if (!(await confirm("Deseja realmente reverter e excluir este lançamento do fluxo de caixa? O saldo bancário correspondente será estornado e o título voltará a ser Pendente."))) {
       return;
     }
 

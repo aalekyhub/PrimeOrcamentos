@@ -4,6 +4,7 @@ import { UserAccount } from '../types';
 import { db, supabase } from '../services/db';
 import { getTodayIsoDate } from '../services/dateService';
 import { useNotify } from './ToastProvider';
+import { useConfirm } from './ConfirmProvider';
 
 interface Props {
   users: UserAccount[];
@@ -35,6 +36,7 @@ const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState<UserAccount | null>(null);
   const { notify } = useNotify();
+  const confirm = useConfirm();
   const [newPassword, setNewPassword] = useState('');
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [formData, setFormData] = useState<Partial<UserAccount>>({
@@ -177,7 +179,7 @@ const UserManager: React.FC<Props> = ({ users, setUsers, currentUser }) => {
       notify("Não é possível remover o seu próprio acesso.", "error");
       return;
     }
-    if (confirm("Deseja realmente remover o acesso deste usuário ao sistema? Isso NÃO apaga o login dele no Supabase (Authentication > Users) — remova lá também se quiser bloquear por completo.")) {
+    if (await confirm("Deseja realmente remover o acesso deste usuário ao sistema? Isso NÃO apaga o login dele no Supabase (Authentication > Users) — remova lá também se quiser bloquear por completo.")) {
       setUsers(prev => prev.filter(u => u.id !== id));
       const result = await db.remove('serviflow_profiles', id);
       if (result?.success) notify("Acesso removido da nuvem.");
