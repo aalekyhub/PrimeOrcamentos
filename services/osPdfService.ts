@@ -102,8 +102,8 @@ export const buildOsItemsTableHtml = (order: ServiceOrder, company: CompanyProfi
         <tr style="border-bottom: 1px solid #f1f5f9; break-inside: avoid; page-break-inside: avoid;">
             <td style="padding: 10px 0; font-weight: 600; text-transform: uppercase; font-size: ${itemFBase}px; color: #0f172a; width: 55%; vertical-align: top;">${escapeHtml(item.description)}</td>
             <td style="padding: 10px 0; text-align: center; color: #64748b; font-size: ${itemFBase}px; font-weight: 600; width: 10%; vertical-align: top;">${item.quantity} ${escapeHtml(item.unit || 'UN')}</td>
-            <td style="padding: 10px 0; text-align: right; color: #64748b; font-size: ${itemFBase}px; width: 17.5%; vertical-align: top; white-space: nowrap;">R$ ${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-            <td style="padding: 10px 0; text-align: right; font-weight: 700; font-size: ${itemFBase + 1}px; color: #0f172a; width: 17.5%; vertical-align: top; white-space: nowrap;">R$ ${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            <td style="padding: 10px 0; text-align: right; font-variant-numeric: tabular-nums; color: #64748b; font-size: ${itemFBase}px; width: 17.5%; vertical-align: top; white-space: nowrap;">${item.unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+            <td style="padding: 10px 0; text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; font-size: ${itemFBase + 1}px; color: #0f172a; width: 17.5%; vertical-align: top; white-space: nowrap;">${(item.unitPrice * item.quantity).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
         </tr>`).join('');
 
     return `
@@ -114,8 +114,8 @@ export const buildOsItemsTableHtml = (order: ServiceOrder, company: CompanyProfi
                 <tr style="border-bottom: 2px solid #0f172a;">
                     <th style="padding-bottom: 8px; text-align: left; font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; width: 55%;">Descrição</th>
                     <th style="padding-bottom: 8px; text-align: center; font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; width: 10%;">Qtd</th>
-                    <th style="padding-bottom: 8px; text-align: right; font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; width: 17.5%;">Unitário</th>
-                    <th style="padding-bottom: 8px; text-align: right; font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; width: 17.5%;">Total</th>
+                    <th style="padding-bottom: 8px; text-align: right; font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; width: 17.5%;">Unitário (R$)</th>
+                    <th style="padding-bottom: 8px; text-align: right; font-size: 8px; font-weight: 800; color: #94a3b8; text-transform: uppercase; width: 17.5%;">Total (R$)</th>
                 </tr>
             </thead>
             <tbody>${itemsHtml}</tbody>
