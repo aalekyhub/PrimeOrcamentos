@@ -154,7 +154,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeh
   ], []);
 
   return (
-    <div className="rich-text-editor bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm">
+    <div className="rich-text-editor bg-white dark:bg-slate-900 rounded-xl overflow-clip border border-slate-200 dark:border-slate-800 shadow-sm">
       <CustomToolbar id={toolbarId} onAddText={onAddText} onAddImage={onAddImage} />
       <ReactQuill
         theme="snow"

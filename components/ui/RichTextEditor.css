@@ -319,10 +319,9 @@
     border: none !important;
 }
 
-/* Scroll no Editor e não no Container */
+/* O texto cresce com o conteúdo: quem rola é a janela, e a barra de ferramentas (sticky) acompanha */
 .rich-text-editor .ql-editor {
-    max-height: 600px;
-    overflow-y: auto;
+    overflow-y: visible;
 }
 
 .ql-editor h1,
@@ -370,4 +369,9 @@
     top: 0;
     z-index: 50;
     background: white;
+}
+
+/* No orçamento, a área rolável tem 1.5rem de padding (p-6): compensa para a barra colar no topo */
+.budget-description-container .ql-toolbar-custom {
+    top: -1.5rem;
 }
