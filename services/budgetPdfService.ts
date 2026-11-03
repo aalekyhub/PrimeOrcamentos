@@ -152,14 +152,15 @@ export const buildBudgetDescriptionBlocksHtml = (budget: ServiceOrder, company: 
 const moneyCell = (value: number | string) => formatMoney(value);
 
 export const buildBudgetItemsTableHtml = (budget: ServiceOrder, company: CompanyProfile) => {
-  const itemFBase = company.itemsFontSize || 12;
+  // Cabeçalho e linhas da tabela usam o mesmo tamanho de fonte.
+  const itemFBase = 10;
 
   const itemsH = budget.items.map((item: ServiceItem) => `
     <tr style="border-bottom: 1px solid #e2e8f0; break-inside: avoid; page-break-inside: avoid;">
-      <td style="padding: 8px 0; font-weight: 600; text-transform: uppercase; font-size: ${itemFBase}px; color: #334155; width: 55%; vertical-align: top;">${escapeHtml(item.description)}</td>
-      <td style="padding: 8px 0; text-align: center; font-weight: 600; color: #475569; font-size: ${itemFBase}px; width: 10%; vertical-align: top;">${toNumber(item.quantity)} ${escapeHtml(item.unit || '')}</td>
+      <td style="padding: 8px 0; font-weight: 400; text-transform: uppercase; font-size: ${itemFBase}px; color: #334155; width: 55%; vertical-align: top;">${escapeHtml(item.description)}</td>
+      <td style="padding: 8px 0; text-align: center; font-weight: 400; color: #475569; font-size: ${itemFBase}px; width: 10%; vertical-align: top;">${toNumber(item.quantity)} ${escapeHtml(item.unit || '')}</td>
       <td style="padding: 8px 0; text-align: right; font-variant-numeric: tabular-nums; color: #475569; font-size: ${itemFBase}px; width: 17.5%; vertical-align: top; white-space: nowrap;">${moneyCell(item.unitPrice)}</td>
-      <td style="padding: 8px 0; text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; font-size: ${itemFBase}px; color: #0f172a; width: 17.5%; vertical-align: top; white-space: nowrap;">${moneyCell(toNumber(item.unitPrice) * toNumber(item.quantity))}</td>
+      <td style="padding: 8px 0; text-align: right; font-variant-numeric: tabular-nums; font-weight: 400; font-size: ${itemFBase}px; color: #0f172a; width: 17.5%; vertical-align: top; white-space: nowrap;">${moneyCell(toNumber(item.unitPrice) * toNumber(item.quantity))}</td>
     </tr>
   `).join('');
 
@@ -170,10 +171,10 @@ export const buildBudgetItemsTableHtml = (budget: ServiceOrder, company: Company
           <table style="width: 100%; border-collapse: collapse;">
             <thead>
                 <tr style="border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
-                    <th style="padding: 6px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: left; font-weight: 800; width: 55%; letter-spacing: 0.05em;">ITEM / DESCRIÇÃO</th>
-                    <th style="padding: 6px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: center; font-weight: 800; width: 10%; letter-spacing: 0.05em;">QTD</th>
-                    <th style="padding: 6px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: right; font-weight: 800; width: 17.5%; letter-spacing: 0.05em;">UNITÁRIO (R$)</th>
-                    <th style="padding: 6px 0; font-size: 10px; text-transform: uppercase; color: #64748b; text-align: right; font-weight: 800; width: 17.5%; letter-spacing: 0.05em;">SUBTOTAL (R$)</th>
+                    <th style="padding: 6px 0; font-size: ${itemFBase}px; text-transform: uppercase; color: #334155; text-align: left; font-weight: 700; width: 55%; letter-spacing: 0.05em;">ITEM / DESCRIÇÃO</th>
+                    <th style="padding: 6px 0; font-size: ${itemFBase}px; text-transform: uppercase; color: #334155; text-align: center; font-weight: 700; width: 10%; letter-spacing: 0.05em;">QTD</th>
+                    <th style="padding: 6px 0; font-size: ${itemFBase}px; text-transform: uppercase; color: #334155; text-align: right; font-weight: 700; width: 17.5%; letter-spacing: 0.05em;">UNITÁRIO (R$)</th>
+                    <th style="padding: 6px 0; font-size: ${itemFBase}px; text-transform: uppercase; color: #334155; text-align: right; font-weight: 700; width: 17.5%; letter-spacing: 0.05em;">SUBTOTAL (R$)</th>
                 </tr>
             </thead>
             <tbody>${itemsH}</tbody>
