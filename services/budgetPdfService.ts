@@ -147,6 +147,11 @@ export const buildBudgetDescriptionBlocksHtml = (budget: ServiceOrder, company: 
   return html;
 };
 
+// "R$" fixo à esquerda da célula e valor à direita com algarismos de mesma largura:
+// os símbolos e as vírgulas ficam em coluna, qualquer que seja o tamanho do número.
+const moneyCell = (value: number | string) =>
+  `<div style="display: flex; justify-content: space-between; gap: 8px; font-variant-numeric: tabular-nums;"><span>R$</span><span>${formatMoney(value)}</span></div>`;
+
 export const buildBudgetItemsTableHtml = (budget: ServiceOrder, company: CompanyProfile) => {
   const itemFBase = company.itemsFontSize || 12;
 
@@ -154,8 +159,8 @@ export const buildBudgetItemsTableHtml = (budget: ServiceOrder, company: Company
     <tr style="border-bottom: 1px solid #e2e8f0; break-inside: avoid; page-break-inside: avoid;">
       <td style="padding: 8px 0; font-weight: 600; text-transform: uppercase; font-size: ${itemFBase}px; color: #334155; width: 55%; vertical-align: top;">${escapeHtml(item.description)}</td>
       <td style="padding: 8px 0; text-align: center; font-weight: 600; color: #475569; font-size: ${itemFBase}px; width: 10%; vertical-align: top;">${toNumber(item.quantity)} ${escapeHtml(item.unit || '')}</td>
-      <td style="padding: 8px 0; text-align: right; color: #475569; font-size: ${itemFBase}px; width: 17.5%; vertical-align: top; white-space: nowrap;">R$ ${formatMoney(item.unitPrice)}</td>
-      <td style="padding: 8px 0; text-align: right; font-weight: 700; font-size: ${itemFBase}px; color: #0f172a; width: 17.5%; vertical-align: top; white-space: nowrap;">R$ ${formatMoney(toNumber(item.unitPrice) * toNumber(item.quantity))}</td>
+      <td style="padding: 8px 0 8px 16px; color: #475569; font-size: ${itemFBase}px; width: 17.5%; vertical-align: top; white-space: nowrap;">${moneyCell(item.unitPrice)}</td>
+      <td style="padding: 8px 0 8px 16px; font-weight: 700; font-size: ${itemFBase}px; color: #0f172a; width: 17.5%; vertical-align: top; white-space: nowrap;">${moneyCell(toNumber(item.unitPrice) * toNumber(item.quantity))}</td>
     </tr>
   `).join('');
 
