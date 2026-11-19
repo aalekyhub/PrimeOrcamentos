@@ -998,7 +998,9 @@ const PaymentTypeModal: React.FC<{
       const parcValue = installments > 0 ? remainder / installments : 0;
 
       text = `Entrada de ${currency(entryValue)} na aprovação.`;
-      if (installments > 0) {
+      if (installments === 1) {
+        text += `\nSaldo restante de ${currency(remainder)}, na conclusão dos serviços prestados.`;
+      } else if (installments > 1) {
         text += `\nSaldo restante de ${currency(remainder)} dividido em ${installments}x de ${currency(parcValue)}.`;
       }
     }
