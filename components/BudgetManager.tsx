@@ -974,7 +974,7 @@ const PaymentTypeModal: React.FC<{
   const [type, setType] = useState<'vista' | 'parcelado' | 'conclusao'>('parcelado');
   const [entryValue, setEntryValue] = useState(0);
   const [percentValue, setPercentValue] = useState(initialPercent || 30);
-  const [installments, setInstallments] = useState(3);
+  const [installments, setInstallments] = useState(1);
   const [preview, setPreview] = useState('');
 
   useEffect(() => {
