@@ -28,6 +28,7 @@ import { getTodayIsoDate, addDaysToDate } from '../services/dateService';
 import { generateBudgetReportHtml } from '../services/budgetPdfService';
 import { getContractHtml, getMaintenanceContractHtml } from '../services/contractPdfService';
 import { roundMoney, toNumber } from '../services/formatUtils';
+import { buildPaymentText, refreshPaymentText } from '../services/paymentTerms';
 import { financeUtils } from '../services/financeUtils';
 // DocumentPreview and BudgetDocument are replaced by the unified system
 
@@ -217,6 +218,16 @@ const BudgetManager: React.FC<Props> = ({
     const res = financeUtils.calculateGrossTotal(subtotal, safeNumber(bdiRate), safeNumber(taxRate), safeNumber(inssRate));
     return roundMoney(res);
   }, [subtotal, taxRate, bdiRate, inssRate]);
+
+  // Condição de pagamento gerada pelo sistema acompanha o total: se os valores mudarem
+  // depois, o texto é recalculado (texto escrito à mão não é alterado).
+  useEffect(() => {
+    const updated = refreshPaymentText(paymentTerms, totalAmount, paymentEntryPercent);
+    if (updated) {
+      setPaymentTerms(updated);
+      notify('Condição de pagamento atualizada com o novo total.');
+    }
+  }, [totalAmount, paymentTerms, paymentEntryPercent, notify]);
 
   const buildBudgetFromForm = useCallback((): ServiceOrder | null => {
     const customer = customers.find(c => c.id === selectedCustomerId);
@@ -986,25 +997,7 @@ const PaymentTypeModal: React.FC<{
   }, [totalValue, initialPercent]);
 
   useEffect(() => {
-    let text = '';
-    const currency = (val: number) => `R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
-    if (type === 'vista') {
-      text = `Pagamento à vista na aprovação do orçamento. Total: ${currency(totalValue)}.`;
-    } else if (type === 'conclusao') {
-      text = `Pagamento integral de ${currency(totalValue)} a ser realizado após entrega técnica e aprovação dos serviços.`;
-    } else {
-      const remainder = Math.max(0, totalValue - entryValue);
-      const parcValue = installments > 0 ? remainder / installments : 0;
-
-      text = `Entrada de ${currency(entryValue)} na aprovação.`;
-      if (installments === 1) {
-        text += `\nSaldo restante de ${currency(remainder)}, na conclusão dos serviços prestados.`;
-      } else if (installments > 1) {
-        text += `\nSaldo restante de ${currency(remainder)} dividido em ${installments}x de ${currency(parcValue)}.`;
-      }
-    }
-
+    const text = buildPaymentText(type, totalValue, entryValue, installments);
     setPreview(text);
   }, [type, entryValue, installments, totalValue]);
 
